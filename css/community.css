@@ -1,0 +1,110 @@
+@keyframes discord {
+    0% {height:70px; width: 100%;}
+    100% {height:300px;width: 100%;}
+}
+@keyframes discord-c {
+    0% {height:300px;width: 100%;}
+    100% {height:70px; width: 100%;}
+}
+.discord {
+    animation-name: discord-c;
+    animation-duration: 1s;
+    animation-play-state: pause;
+    float:left;
+    height:70px;
+    width:100%;
+
+}
+
+.discord:hover {
+    height:300px;
+    width:100%;
+    float:left;
+    animation-name: discord;
+    animation-duration: 1s;
+    animation-play-state: pause;
+
+}
+
+.discord:active {
+    height:300px;
+    width:100%;
+    float:left;
+    animation-name: discord;
+    animation-duration: 1s;
+    animation-play-state: pause;
+
+}
+
+
+/*Instragram*/
+
+@keyframes instagram {
+    0% {height:70px; width:10px;}
+
+}
+@keyframes instagram-c {
+    0% {height:500px;width:10px;}
+
+}
+
+
+.instagram-media {
+    animation-name: instagram-c;
+    animation-duration: 1s;
+    animation-play-state: pause;
+    float:left;
+    height:70px;
+    width:10px;
+}
+
+.instagram-media:hover {
+    height:70px;
+    width:10px;
+    float:left;
+    animation-name: instagram;
+    animation-duration: 1s;
+    animation-play-state: pause;
+}
+
+
+/* End Instragram*/
+
+p.tinynav1
+{
+}
+
+p.tinynav1:hover
+{
+    visibility: hidden;
+}
+
+.grow {
+    padding: 5px 5px 5px 20px;
+    margin: 5px 0px 5px 70px;
+    border-radius: 10px;
+    height: 70px;
+    width: calc(100% - 80px);
+    float: left;
+    /*position: relative;*/
+    transition: height 0.5s;
+    -webkit-transition: height 0.5s;
+    text-align: left;
+    overflow: hidden;
+}
+.grow:hover {
+    height: 170px;
+}
+
+.vbox{
+    list-style: none;
+}
+.vbox .text-label {
+    visibility: hidden;
+}
+.vbox:hover {
+    cursor: pointer;
+}
+.vbox:hover .text-label {
+    visibility: visible;
+}

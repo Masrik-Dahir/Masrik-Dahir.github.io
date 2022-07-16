@@ -1,0 +1,89 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: black;
+}
+
+.logo-size {
+    position: relative;
+    width: 50px;
+}
+
+.price-container {
+    width: 95vw;
+    position: relative;
+    left: 1.5vw;
+    top: 25vh;
+    overflow: hidden;
+}
+
+.price-box {
+    display: sticky;
+    position: relative;
+    width: auto;
+    height: 15rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 27rem;
+    animation: scrolling 30s linear infinite;
+}
+
+@keyframes scrolling {
+    from {
+        -moz-transform: translateX(-100%);
+        -webkit-transform: translateX(-100%);
+        transform: translateX(-100%);
+    }
+    to {
+        -moz-transform: translateX(120%);
+        -webkit-transform: translateX(120%);
+        transform: translateX(120%);
+    }
+}
+
+.negative-price {
+    color: red;
+}
+.positive-price {
+    color: green;
+}
+
+.currency-id {
+    font-size: 2rem;
+    color: rgb(255, 255, 255);
+    font-family: "Montserrat";
+}
+.price-styling {
+    color: rgb(255, 255, 255);
+    font-size: 2rem;
+    z-index: 2;
+    font-family: "Montserrat";
+}
+
+.box-styling {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.inner-box-styling {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 0rem;
+
+}
+
+.change-styling {
+    font-size: 2rem;
+    z-index: 2;
+    font-family: "Montserrat";
+}

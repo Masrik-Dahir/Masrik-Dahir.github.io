@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    background-color: #000;
+}
+
+.container {
+    background-color: rgba(0, 0, 0, 0);
+    margin: 0% 20%;
+    padding: 3rem;
+    position: relative;
+    z-index: 1;
+    width: 60%;
+}
+
+#canv {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+
+.fire {
+    margin: 50px auto;
+    width: 80%;
+    max-width: 1000px;
+    height: 200px;
+
+    background-position: center center;
+    background-size: 1000px 200px;
+    border-radius: 10px;
+    font-family: 'Akronim';
+    overflow: hidden;
+    text-align: center;
+    vertical-align: middle;
+
+}
+.fire:before {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+.Blazing {
+    display: inline-block;
+    margin: 0;
+
+    color: #00EE00;
+    font-size: 70px;
+    line-height: 50px;
+    min-width: 50px;
+    outline: none;
+    vertical-align: middle;
+
+    text-shadow:
+            0 3px 20px #063B00,
+            0 0 20px #063B00,
+            0 0 10px #CAF7B8,
+            4px -5px 6px black,
+            -4px -10px 10px black,
+            0 -10px 30px black;
+    animation: 2s Blazing infinite alternate linear;
+}
+
+@keyframes Blazing {
+    0%   { text-shadow: 0 3px 20px #063B00, 0 0 20px #063B00,
+    0 0 10px #CAF7B8,
+    0 0 0 black,
+    0 0 5px black,
+    -2px -5px 5px black,
+    4px -10px 10px black; }
+    25%   { text-shadow: 0 3px 20px #063B00, 0 0 30px #063B00,
+    0 0 20px #CAF7B8,
+    0 0 5px black,
+    -2px -5px 5px black,
+    3px -10px 10px black,
+    -4px -15px 20px black; }
+    50%   { text-shadow: 0 3px 20px #063B00, 0 0 20px #063B00,
+    0 -5px 10px #CAF7B8,
+    -2px -5px 5px black,
+    3px -10px 10px black,
+    -4px -15px 20px black,
+    2px -20px 30px #52CC00; }
+    75%   { text-shadow: 0 3px 20px #063B00, 0 0 20px #063B00,
+    0 -5px 10px #CAF7B8,
+    3px -5px 5px black,
+    -4px -10px 10px black,
+    2px -20px 30px #52CC00,
+    0px -25px 40px rgba(255,255,0,0)}
+    100%   { text-shadow: 0 3px 20px #063B00, 0 0 20px #063B00,
+    0 0 10px #CAF7B8,
+    0 0 0 black,
+    0 0 5px black,
+    -2px -5px 5px black,
+    4px -10px 10px black; }
+}

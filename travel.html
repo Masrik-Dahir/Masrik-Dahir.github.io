@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/collapsible.css">
+    <link rel="stylesheet" href="css/new.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/glowing.css">
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="js/change_image.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <script src ="https://unpkg.com/vue@next"></script>
+    <script src ="vueJs/default.js" defer></script>
+
+    <title>OpenLayers example</title>
+</head>
+<body class="w3-white" >
+<div id="app" v-cloak>
+    <div v-if="this.windowWidth >= 1200">
+        <div class="topnav">
+            <a href="index.html">Home</a>
+            <a href="work.html">Work Experience</a>
+            <a href="publication.html">Publication</a>
+            <a href="education.html">Education</a>
+            <a href="software.html">Software App</a>
+            <a href="web.html">Web App</a>
+            <a href="entrepreneurship.html">Entrepreneurship</a>
+            <a href="leadership.html">Leadership</a>
+            <a class="active" href="travel.html">Travel</a>
+        </div>
+    </div>
+    <div v-else>
+        <div class="popup" id="popup-3">
+            <div class="overlay"></div>
+            <div class="content">
+                <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                <div style="color: black">
+
+                    <div style="margin-top: 30px;">
+
+                    </div>
+                    <a href="index.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                               style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Home</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="work.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                              style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Work Experience</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="publication.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                     style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Publication</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="education.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                   style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Education</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="software.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                  style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Software App</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="web.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                             style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Web App</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="entrepreneurship.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                          style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Entrepreneurship</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="leadership.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Leadership</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="travel.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Travel</b>
+                        </h4>
+                    </div></button></a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div>
+            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir"> <bdi style=" margin-top: 5px">Menu</bdi></button>
+
+        </div>
+    </div>
+</div>
+<script>
+    function togglePopup(num){
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
+</script>
+<br>
+<div class="w3-content" style="max-width:100%; background-color: white">
+<div id="map" class="map" style="background: white"></div>
+<script src="js/map.js"></script>
+
+</div>
+<div id="footer"></div>
+</body>
+</html>

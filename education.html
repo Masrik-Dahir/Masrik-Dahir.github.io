@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/collapsible.css">
+    <link rel="stylesheet" href="css/new.css">
+    <link rel="stylesheet" href="css/if.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/glowing.css">
+
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="js/change_image.js"></script>
+    <script src="js/block.js"></script>
+    <script src="js/battery.js" defer></script>
+    <script src="js/achievement.js" defer></script>
+    <script src="js/collapsible.js" defer></script>
+    <script src="js/computer_science.js" defer></script>
+    <script src="js/mathematics.js" defer></script>
+    <script src="js/finance.js" defer></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="vueJs/default.js" defer></script>
+
+
+</head>
+
+
+<body class="w3-white">
+<div id="app" v-cloak>
+    <div v-if="this.windowWidth >= 1200">
+        <div class="topnav">
+            <a href="index.html">Home</a>
+            <a href="work.html">Work Experience</a>
+            <a href="publication.html">Publication</a>
+            <a class="active" href="education.html">Education</a>
+            <a href="software.html">Software App</a>
+            <a href="web.html">Web App</a>
+            <a href="entrepreneurship.html">Entrepreneurship</a>
+            <a href="leadership.html">Leadership</a>
+            <a href="travel.html">Travel</a>
+        </div>
+    </div>
+    <div v-else>
+        <div class="popup" id="popup-3">
+            <div class="overlay"></div>
+            <div class="content">
+                <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                <div style="color: black">
+
+                    <div style="margin-top: 30px;">
+
+                    </div>
+                    <a href="index.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Home</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="work.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Work Experience</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="publication.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Publication</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="education.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Education</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="software.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Software App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="web.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Web App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="entrepreneurship.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Entrepreneurship</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="leadership.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Leadership</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                    <a href="travel.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Travel</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+        <div>
+            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25"
+                                                                               height="20" alt="Masrik Dahir">
+                <bdi style=" margin-top: 5px">Menu</bdi>
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
+</script>
+
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%);">
+
+    <!-- The Grid -->
+    <div class="w3-row-padding">
+
+        <!-- Right Column -->
+
+        <div class="">
+
+            <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+                <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Degree</text>
+            </svg>
+
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+
+                <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
+                <div class="w3-container">
+                    <h4><b style="color: black; font-size: calc(20px + .5vw);">Bachelor of Science (Hons.)</b>
+
+                        <b class="w3-text-teal;" style="float: right; color:crimson;">
+                            <bdi style="font-size: calc(10px + .5vw);">Sep 2020 - May 2023</bdi>
+                        </b></h4>
+
+                    <ul>
+                        <a href="https://egr.vcu.edu/" target="_blank">
+                            <img src="./Images/vcu_eng.png"
+                                 style="width: 1vw; min-width: 210px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/></a>
+                    </ul>
+
+                    <ul>
+                        <li><strong>Institution:</strong> Virginia Commonwealth University</li>
+                        <li><strong>Major:</strong> Computer Science</li>
+                        <li><strong>Concentration:</strong> Cybersecurity</li>
+                    </ul>
+                    <hr>
+
+
+                </div>
+            </div>
+
+            <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+                <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Achievement</text>
+            </svg>
+
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
+
+                <div class="w3-container">
+
+
+                    <!--                    Altria Scholarship-->
+                    <button onclick="changeImage10()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image10" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Altria Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://www.altria.com/en" target="_blank">
+                            <img src="./Images/altria.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li><a href="https://www.altria.com/en" target="_blank">Altria Group, Inc.</a></li>
+                            <li>Entrepreneurship and Professional Networking Seminars</li>
+                            <li>Business Idea Pitching</li>
+                            <li><b>Scholarship Grant: </b> $3500</li>
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    iCubed Scholar-->
+                    <button onclick="changeImage()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image" style="width:39px; height:23px; margin: 1px;" src="./Images/down.jpg"
+                                 ;/> iCubed Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://icubed.vcu.edu/" target="_blank">
+                            <img src="./Images/icubed%20(1).png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li><b>Research Area:</b> iCubed Food Core</li>
+                            <li>Research Paper Publication</li>
+                            <li>Poster Presentation</li>
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    Dean List Fall 2020, Spring 2021, Fall 2021, Spring 2022 -->
+                    <button onclick="changeImage2()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+
+                            <img id="always-image2" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Dean's List </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Every Semester</bdi>
+                            </b></h4>
+                    </button>
+
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://egr.vcu.edu/about/dean/" target="_blank">
+                            <img src="./Images/vcu_eng.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li>Fall 2020, Spring 2021, Fall 2021, Spring 2022</li>
+                            <li>Receive above 3.5 GPA</li>
+                            <li>Top 10% of the Class</li>
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+                    <!--                    Honors Trivia Champion October 2020-->
+                    <button onclick="changeImage3()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image3" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Honors Trivia Champion </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">October 2020</bdi>
+                            </b></h4>
+                    </button>
+
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://honors.vcu.edu/" target="_blank">
+                            <img src="./Images/honors.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li>Hosted by Honors College</li>
+                            <li>General Science, Social Science, and Math</li>
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                  Superintendent’s Scholar July 2020 -->
+                    <button onclick="changeImage4()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image4" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Superintendent’s Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">July 2020</bdi>
+                            </b></h4>
+                    </button>
+
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://henricoschools.us/division-leadership-team/"
+                           target="_blank">
+                            <img src="./Images/henrico.jpg" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li>High School Graduation, Henrico County Public Schools</li>
+                            <li>Top 5% of Class of 2020</li>
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    Henrico County Engineering Scholar August 2020-->
+                    <button onclick="changeImage5()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image5" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Henrico County Engineering Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
+                            <img src="./Images/henrico.jpg" style="width: 1vw; min-width: 120px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li><b>Scholarship Grant: </b> $40,000</li>
+                            <li>
+                                <a href="https://thecollegecompanion.com/henrico-county-virginia-commonwealth-university-engineering-scholarship-program/"
+                                   target="_blank">Henrico County</a></li>
+                            <li><a href="https://egr.vcu.edu/admissions/scholarships/" target="_blank">Virginia
+                                Commonwealth University</a></li>
+
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    CarMax Scholar August 2020-->
+                    <button onclick="changeImage6()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image6" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> CarMax Entrepreneur Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://www.carmax.com/" target="_blank">
+                            <img src="./Images/carmax.png"
+                                 style="width: 1vw; height: 5vw;min-width: 100px;min-height: 100px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li><b>Scholarship Grant: </b> $2500</li>
+                            <li>
+                                <a href="https://www.cfrichmond.org/Partnering-with-Us/For-Nonprofits/Awards-Scholarships/Search-by-Scholarship-Criteria/Results?s=CarMax-Rick+Sharp+Entrepreneur+Scholarship"
+                                   target="_blank">CarMax</a></li>
+
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    Susanne and Sam Dibert – STEM Scholarship (Swagelok, $2500) August 2020-->
+                    <button onclick="changeImage7()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image7" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Susanne and Sam Dibert Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://www.swagelok.com/" target="_blank">
+                            <img src="./Images/swagelok.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li><b>Scholarship Grant: </b> $2500</li>
+                            <li><a href="https://www.swagelok.com/" target="_blank">Swagelok</a></li>
+
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    GRRC Award (Greater Richmond Relocation August 2020-->
+                    <button onclick="changeImage8()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image8" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> GRRC Award </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <a style="text-decoration:none" href="https://richmondrelo.org/" target="_blank">
+                            <img src="./Images/grrc.png"
+                                 style="width: 1vw; min-width: 350px;min-height: 50px;margin-left: 25px"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li><b>Scholarship Grant: </b> $2500</li>
+                            <li><a href=https://richmondrelo.org/scholarships/" target="_blank">Greater Richmond
+                                Relocation Council</a></li>
+
+                        </ul>
+                    </div>
+                    <!--                    <hr>-->
+
+
+                    <!--                    Harrison-Labouisse Memorial Scholarship (Community Foundation, $1500) August 2020-->
+                    <button onclick="changeImage9()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image9" style="width:39px; height:23px; margin: 1px;"
+                                 src="./Images/down.jpg" ;/> Harrison-Labouisse Memorial Scholar </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <!--<a style="text-decoration:none" href = "https://egr.vcu.edu/" target = "_blank">
+                            <img src="./Images/grrc.png" style="width: 15vw; margin-left: 25px" alt="Avatar"/></a>-->
+                        <ul>
+                            <li><b>Scholarship Grant: </b> $1500</li>
+                            <li>
+                                <a href=https://www.cfrichmond.org/Apply-for-a-Scholarship/View-All-Scholarships?s=Harrison-Labouisse-Mayo+Memorial+Scholarship"
+                                   target="_blank">Harrison-Labouisse Memorial</a></li>
+
+                        </ul>
+                    </div>
+                    <hr>
+                </div>
+            </div>
+
+            <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+                <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Coursework</text>
+            </svg>
+
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Computer Science</b></h4>
+
+                <div class="w3-container">
+
+                    <!--                    CMSC 401-->
+                    <button onclick="changeImageCmsc401()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc401" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Algorithm Analysis with Advanced Data Structure </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 401;</li>
+                            <li>Multiple linked lists, height-balanced trees, B-trees, hashing and graph representation;
+                                incorporating data structures into object-oriented design; analysis of various searching
+                                and sorting algorithms;
+                            </li>
+                            <li>
+                                <a href="https://github.com/Masrik-Dahir/Algorithm-Analysis-with-Advanced-Data-Structures"
+                                   target="_blank">Github</a></li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 355-->
+                    <button onclick="changeImageCmsc355()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc355" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Fundamentals Software Engineering </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 355;</li>
+                            <li>Software development methodology, write specification and design documents, and develop
+                                a prototype;
+                            </li>
+                            <li><a href="https://play.google.com/store/apps/details?id=com.masrik.automation"
+                                   target="_blank">Github (Android Application)</a></li>
+                            <li><a href="https://github.com/Masrik-Dahir/xfigx-1.0.0" target="_blank">Github (C
+                                Application)</a></li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 311-->
+                    <button onclick="changeImageCmsc311()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc311" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Computer Organization </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 311;</li>
+                            <li>Elementary digital logic design, processor and arithmetic/logic unit design, data paths,
+                                memory hierarchy, I/O devices, instruction set architecture and addressing modes;
+                            </li>
+                            <li><a href="https://github.com/Masrik-Dahir/Computer-Organization"
+                                   target="_blank">Github</a></li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 303-->
+                    <button onclick="changeImageCmsc303()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc303" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Introduction to Theory of Computation </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 303;</li>
+                            <li>Complexity classes, grammars, automata, formal languages, Turing machines,
+                                computability;
+                            </li>
+                            <li><a href="https://github.com/Masrik-Dahir/dfa" target="_blank">Github</a></li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 257-->
+                    <button onclick="changeImageCmsc257()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc257" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Computer System </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 257;</li>
+                            <li>UNIX essentials; system programming in C; machine-level representation and organization
+                                of programs/data, arrays and pointers; types, structs and unions; strings; bit/byte
+                                operations; memory management; shell programming;
+                            </li>
+                            <li><a href="https://github.com/Masrik-Dahir/Computer-System" target="_blank">Github</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 302-->
+                    <button onclick="changeImageCmsc302()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc302" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Discrete Mathematics </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 302;</li>
+                            <li>Logic and proofs, sets, functions, sequences and sums, relations, graphs, trees,
+                                induction and recursion, advanced counting technique (recurrences);
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 256-->
+                    <button onclick="changeImageCmsc256()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc256" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Data Structure and Object-Oriented Programming </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 256;</li>
+                            <li>Bridge API, object-oriented design, inheritance, polymorphism, exceptions, interfaces,
+                                linked lists, stacks, queues, binary trees, recursion, and basic searching and sorting
+                                techniques;
+                            </li>
+                            <li>
+                                <a href="https://github.com/Masrik-Dahir/Data-Structures-and-Object-Oriented-Programming"
+                                   target="_blank">Github</a></li>
+                        </ul>
+                    </div>
+
+                    <!--                    CMSC 255-->
+                    <button onclick="changeImageCmsc255()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-cmsc255" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Introduction to Programming </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 255;</li>
+                            <li>Fundamental Computing Skills, Object-oriented programming, real-life problem solving,
+                                Top-down design of algorithm, Control structures, Methods, Arrays, Basic I/O, Basic
+                                concepts of objects and classes in Java, Java classes for manipulating strings, Program
+                                testing/debugging, UML notation, Integrated development environments, IDE: IntelliJ,
+                                Eclipse JAVA, Editor: Sublime Text 3;
+                            </li>
+                            <li><a href="https://github.com/Masrik-Dahir/Introduction-to-JAVA"
+                                   target="_blank">Github</a></li>
+
+                        </ul>
+                    </div>
+
+                    <hr>
+                </div>
+            </div>
+
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Mathematics</b></h4>
+
+                <!--                    MATH 356-->
+                <div class="w3-container">
+                    <button onclick="changeImageMath356()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-math356" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Graphs and Algorithms </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2021</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>MATH 356;</li>
+                            <li>Trees, colorings and matchings; basic theorems such as the handshaking lemma and the
+                                Gallai
+                                identities; algorithms
+                                such as Dijkstra’s and Kruskal’s
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--                    MATH 310-->
+                    <button onclick="changeImageMath310()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-math310" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Linear Algebra </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>CMSC 310;</li>
+                            <li>System of Linear Equation, Vector Space, Sub Space, Kernel, Range, Dimension, Matrix
+                                operations, Determinant,
+                                Eigen vector and values, Diagonalizable Matrix, Linear Mapping
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--                    STAT 212-->
+                    <button onclick="changeImageStat212()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-stat212" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Concepts of Statistics </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>STAT 212 (Advanced Placement Exam);</li>
+                            <li>descriptive statistics, correlation and regression, probability, normal distributions, t
+                                distributions, and statistical inference
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--                    MATH 201-->
+                    <button onclick="changeImageMath201()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-math201" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Calculus with Analytical Geometry II </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2020</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>MATH 201;</li>
+                            <li>Application of differentiation and integration, Infinite Series, selected topic in
+                                analytical geometry, Basics of the
+                                Matrix, real-life application of differential and integral calculus
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!--                    MATH 200-->
+                    <button onclick="changeImageMath200()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-math200" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Calculus with Analytical Geometry I </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Fall 2019</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>MATH 200;</li>
+                            <li>Limits, Derivatives, Differentials, Antiderivatives, Definite Integrals, Continuity</li>
+                        </ul>
+                    </div>
+
+                    <!--                    MATH 151-->
+                    <button onclick="changeImageMath151()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-math151" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Precalculus Mathematics </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2019</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>MATH 151;</li>
+                            <li>Application of Algebra, Trigonometry, functions, transformations</li>
+                        </ul>
+                    </div>
+
+                    <hr>
+                </div>
+            </div>
+        </div>
+        <div class="w3-container w3-card w3-white w3-margin-bottom">
+
+
+            <h4><b style="color: black; font-size: calc(20px + .5vw);">Finance</b></h4>
+            <!--                    FIRE 305-->
+            <div class="w3-container">
+                <button onclick="changeImageFire305()" value="Change" type="button" class="collapsible">
+                    <h4 class="h4"><b style="color: black">
+                        <img id="always-image-fire305" style="width:39px; height:23px; margin: 1px; "
+                             src="./Images/down.jpg" ;/> Principle of Real Estate </b>
+                        <b class="w3-text-teal;" style="float: right; color:crimson;">
+                            <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
+                        </b></h4>
+                </button>
+                <div class="content1">
+                    <ul>
+                        <li>FIRE 305;</li>
+                        <li>principles, practices and laws that govern the real estate enterprise, including property
+                            rights, legal elements, physical aspects of location and production, brokerage, valuation,
+                            ethical dimensions, development, financing and land use
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+
+
+            <!--                </div>-->
+        </div>
+    </div>
+
+</div>
+
+<!-- End Grid -->
+</div>
+
+
+<!-- End Page Container -->
+</div>
+
+<div id="footer"></div>
+
+</body>
+</html>
