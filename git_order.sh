@@ -1,0 +1,1 @@
+git merge -s ours upstream master
