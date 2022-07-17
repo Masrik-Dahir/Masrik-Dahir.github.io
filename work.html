@@ -1,145 +1,202 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/gif/png" href="./Images/logo.png">
-  <title>Masrik Dahir</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/icons.css">
-  <link rel="stylesheet" href="css/box.css">
-  <link rel="stylesheet" href="css/default.css">
-  <link rel="stylesheet" href="css/popup.css">
-  <link rel="stylesheet" href="css/community.css">
-  <link rel="stylesheet" href="css/resize.css">
-  <link rel="stylesheet" href="css/glowing.css">
-  <link rel="stylesheet" href="css/lead.css">
-  <link rel="stylesheet" href="css/new.css">
-  <link rel="stylesheet" href="css/if.css">
-  <link rel="stylesheet" href="css/popup.css">
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/community.css">
+    <link rel="stylesheet" href="css/resize.css">
+    <link rel="stylesheet" href="css/glowing.css">
+    <link rel="stylesheet" href="css/lead.css">
+    <link rel="stylesheet" href="css/new.css">
+    <link rel="stylesheet" href="css/if.css">
+    <link rel="stylesheet" href="css/popup.css">
 
 
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="js/html.js"></script>
-  <script src="js/hourglass.js"></script>
-  <script src="js/expand_jquery.js"></script>
-  <script src="js/briefcase.js" defer></script>
-  <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="js/briefcase.js" defer></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
 
-  <script src ="https://unpkg.com/vue@next"></script>
-  <script src ="vueJs/default.js" defer></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="vueJs/default.js" defer></script>
 
-  <script src="js/achievement.js" defer></script>
-  <script src="js/collapsible.js" defer></script>
-  <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+    <script src="js/achievement.js" defer></script>
+    <script src="js/collapsible.js" defer></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
 
 </head>
 
-<body class="w3-white" >
+<body class="w3-white">
 <div id="app" v-cloak>
-<div v-if="this.windowWidth >= 1200">
-<div class="topnav">
-  <a href="index.html">Home</a>
-  <a class="active" href="work.html">Work Experience</a>
-  <a href="publication.html">Publication</a>
-  <a href="education.html">Education</a>
-  <a href="software.html">Software App</a>
-  <a href="web.html">Web App</a>
-  <a href="entrepreneurship.html">Entrepreneurship</a>
-  <a href="leadership.html">Leadership</a>
-  <a href="travel.html">Travel</a>
-</div>
-</div>
-<div v-else>
-    <div class="popup" id="popup-3">
-      <div class="overlay"></div>
-      <div class="content">
-        <div class="close-btn" onclick="togglePopup('3')">&times;</div>
-        <div style="color: black">
+    <div v-if="this.windowWidth >= 1200">
+        <div class="topnav">
+            <a href="index.html">Home</a>
+            <a class="active" href="work.html">Work Experience</a>
+            <a href="publication.html">Publication</a>
+            <a href="education.html">Education</a>
+            <a href="software.html">Software App</a>
+            <a href="web.html">Web App</a>
+            <a href="entrepreneurship.html">Entrepreneurship</a>
+            <a href="leadership.html">Leadership</a>
+            <a href="travel.html">Travel</a>
+        </div>
+    </div>
+    <div v-else>
+        <div class="popup" id="popup-3">
+            <div class="overlay"></div>
+            <div class="content">
+                <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                <div style="color: black">
 
-          <div style="margin-top: 30px;">
+                    <div style="margin-top: 30px;">
 
-          </div>
-          <a href="index.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                     style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Home</b>
-            </h4>
-          </div></button></a>
+                    </div>
+                    <a href="index.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Home</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="work.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Work Experience</b>
-            </h4>
-          </div></button></a>
+                    <a href="work.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Work Experience</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="publication.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                           style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Publication</b>
-            </h4>
-          </div></button></a>
+                    <a href="publication.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Publication</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="education.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                         style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Education</b>
-            </h4>
-          </div></button></a>
+                    <a href="education.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Education</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="software.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                        style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Software App</b>
-            </h4>
-          </div></button></a>
+                    <a href="software.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Software App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="web.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                   style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Web App</b>
-            </h4>
-          </div></button></a>
+                    <a href="web.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Web App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="entrepreneurship.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Entrepreneurship</b>
-            </h4>
-          </div></button></a>
+                    <a href="entrepreneurship.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Entrepreneurship</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="leadership.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                          style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Leadership</b>
-            </h4>
-          </div></button></a>
+                    <a href="leadership.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Leadership</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="travel.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                      style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Travel</b>
-            </h4>
-          </div></button></a>
+                    <a href="travel.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Travel</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
+                </div>
+
+            </div>
         </div>
 
-      </div>
-    </div>
+        <div>
+            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25"
+                                                                               height="20" alt="Masrik Dahir">
+                <bdi style=" margin-top: 5px">Menu</bdi>
+            </button>
 
-    <div>
-      <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir"> <bdi style=" margin-top: 5px">Menu</bdi></button>
-
+        </div>
     </div>
-  </div>
 </div>
 <script>
-  function togglePopup(num){
-    document.getElementById(`popup-${num}`).classList.toggle("active");
-  }
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
 </script>
 
 
@@ -147,237 +204,278 @@
 <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
 
 
-  <!-- The Grid -->
-  <div class="w3-row-padding">
+    <!-- The Grid -->
+    <div class="w3-row-padding">
 
-    <div class="">
+        <div class="">
 
-      <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
-        <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Work Experience</text>
+            <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+                <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Work Experience</text>
 
-      </svg>
+            </svg>
 
-      <h2 style="color: black; text-align: center"><i class="w3-xxlarge w3-text-teal;" style="color:DarkSlateGray;"></i>
-        <b>
-          <a class="btn1">
-            <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px"  src="./Images/up.jpg"; />
-          </a>
-          <a class="btn2">
-            <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px"  src="./Images/down.jpg"; />
-          </a>
-        </b>
-      </h2>
+            <h2 style="color: black; text-align: center"><i class="w3-xxlarge w3-text-teal;"
+                                                            style="color:DarkSlateGray;"></i>
+                <b>
+                    <a class="btn1">
+                        <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/up.jpg"
+                             ;/>
+                    </a>
+                    <a class="btn2">
+                        <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/down.jpg"
+                             ;/>
+                    </a>
+                </b>
+            </h2>
 
-      <!--        Virginia Department fo Election     -->
-        <div class="w3-container w3-card" style="background-color: white">
-        <h4><b style="color: black; font-size: calc(20px + .5vw);">Virginia Cyber Navigator </b>
-          <b class="color w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">May 2022 - August 2022</bdi></b></h4>
-        <ul>
-          <a href = "https://www.elections.virginia.gov/" target = "_blank">
-            <img src="./Images/dept-of-elections-logo.png" style="width: calc(1vw + 200px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-        </ul>
-        <p1>
-          <ul>
-            <li>Worked closely with Roanoke County and Virginia Department of Election </li>
-            <li>Incident Response, Access Management Policy, Business Impact Analysis</li>
-            <li>Inventory and Database Security</li>
-          </ul>
-        </p1>
-        <hr>
-      </div>
-        <br>
+            <!--        Virginia Department fo Election     -->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Virginia Cyber Navigator </b>
+                    <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">May 2022 - August 2022</bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://www.elections.virginia.gov/" target="_blank">
+                        <img src="./Images/dept-of-elections-logo.png"
+                             style="width: calc(1vw + 200px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Worked closely with Roanoke County and Virginia Department of Election</li>
+                        <li>Incident Response, Access Management Policy, Business Impact Analysis</li>
+                        <li>Inventory and Database Security</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
 
-        <!--        Capital One     -->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Business Analyst </b>
-            <b class="color w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">May 2022 - <span  style="background-color: crimson; color:white; padding: 2px">Current</span></bdi></b></h4>
-          <ul>
-            <a href = "https://www.capitalone.com/" target = "_blank">
-              <img src="./Images/capitalone.png" style="width: calc(1vw + 100px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-          </ul>
-          <p1>
-            <ul>
-              <li>Node.Js: NVM, HTTP API, Fastify, DynamoDB, NPM, Yarn;</li>
-              <li>Vue.Js: Vue CLI, database; </li>
-              <li>AWS: IAM roles, EC2 instances, S3 buckets and policy, ASGs, ALB, Lambda functions, Node API </li>
-            </ul>
-          </p1>
-          <hr>
+            <!--        Capital One     -->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Business Analyst </b>
+                    <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">May 2022 - <span
+                                style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://www.capitalone.com/" target="_blank">
+                        <img src="./Images/capitalone.png"
+                             style="width: calc(1vw + 100px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Node.Js: NVM, HTTP API, Fastify, DynamoDB, NPM, Yarn;</li>
+                        <li>Vue.Js: Vue CLI, database;</li>
+                        <li>AWS: IAM roles, EC2 instances, S3 buckets and policy, ASGs, ALB, Lambda functions, Node
+                            API
+                        </li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        Richmond Food Alliance     -->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Web Developer </b>
+                    <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Oct 2021 - Jan 2022</bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://www.richmondfoodjustice.org/" target="_blank">
+                        <img src="./Images/download-1.png"
+                             style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
+                             alt="Masrik Dahir"/></a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Organized and customized the Food Alliance Website; and</li>
+                        <li>Utilized the WordPress CMS (HTML 5, CSS 3, JavaScript, Jquery library, PHP).</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        iCubed Scolar -->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher </b>
+                    <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Aug 2021 -
+                            <span style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://cbds.vcu.edu/" target="_blank">
+                        <img src="./Images/life.png"
+                             style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
+                             alt="Masrik Dahir"/></a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Built and coded automated Rampantries (food cart at VCU Monroe Park Campus); and</li>
+                        <li>Used Raspberry pi to receive data and save it in the Cloud storage.</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        VCU School of Pharmacy-->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Web Developer&emsp;</b>
+                    <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Jun 2021 - Jan 2022</bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://pharmacy.vcu.edu/" target="_blank">
+                        <img src="./Images/sop.png"
+                             style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
+                             alt="Masrik Dahir"/></a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Manage VCU School of Pharmacy's website and multiple lab websites; and</li>
+                        <li>Utilize the Terminal 4 content management system</li>
+                        <li>Worked with Compass framework, WordPress, and cPanel</li>
+                        <li>HTML, CSS, JavaScript, PHP, JQuery, AngularJS</li>
+                        <li>Firmware troubleshoot and update</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        University of Missouri-->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);"> Research Fellow</b>
+                    <b class="w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Jun 2021 -
+                            Jul 2021
+                        </bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://engineering.missouri.edu/" target="_blank">
+                        <img src="./Images/mu.jpg"
+                             style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
+                             alt="Masrik Dahir"/></a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Developed a secured system in blockchain to process insurance claims and prevent fraudulent
+                            claims and cyber-attacks i.e. Sybil attack,
+                            50% attack, Timestamp manipulation, Malware, and Malicious code injection;
+                        </li>
+                        <li>Web Development, Angular Framework, Typescript, Hyperledger Composer. MySQL, Big Data
+                            Analysis; and
+                        </li>
+                        <li>Firebase, AWS Services, Hadoop HDFS, Blockchain Technology, Formal Verification of System,
+                            Attack Scenarios.
+                        </li>
+                        <li><a href="https://www.nsf.gov/" target="_blank">NSF</a> funded</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        Civilian Cyber-->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Cyber Security Analyst</b>
+                    <b class="w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Feb 2021 -
+                            Jun 2021
+                        </bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://civiliancyber.com/" target="_blank" style="text-decoration: none;">
+                        <img src="./Images/civiliancyber.png"
+                             style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px); "
+                             alt="Masrik Dahir"/> Civilian Cyber</a>
+                </ul>
+
+                <p1>
+                    <ul>
+                        <li>Working on Joomla, Moodle framework; Administering databases; Integrating plug-ins:
+                            Community Builder, Joomdle; and
+                        </li>
+                        <li>Developed advanced automation capable of providing feedback based on user's performance;
+                            and
+                        </li>
+                        <li>Penetration Tests.</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        SAFE Lab-->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher</b>
+                    <b class="w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Jun 2020 -
+                            <span style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
+                    </b></h4>
+                <ul>
+                    <a href="https://safe.lab.vcu.edu/" target="_blank" style="text-decoration: none;">
+                        <img src="./Images/safelab.JPG"
+                             style="width: calc(1vw + 50px); min-width: 70px; margin-left: calc(0% + -20px)"
+                             alt="Masrik Dahir"/> SAFE Lab</a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Researched in concept map files comparison and analysis using the algorithm; and</li>
+                        <li>Computer Programs: CmapTools, PyCharm; Programming Language: Python; Libraries: Nltk,
+                            Graphviz, XML, Natural Language Processing.
+                        </li>
+                        <hr>
+                        <li>Creating a Graphical User Interface (GUI) that allows the memory of a virtual machine to
+                            manipulate the memory contents (demonstrate malware intrusion), Virtual Machine
+                            Introspection; and
+                        </li>
+                        <li>Programming Language: C, Python; Libvmi library, Volatility library, GUI Libraries (i.e.,
+                            PyQT5).
+                        </li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
+            <!--        RamSec Lab-->
+            <div class="w3-container w3-card" style="background-color: white">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher</b>
+                    <b class="w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">Jan 2021 -
+                            Sep 2021
+                        </bdi>
+                    </b></h4>
+                <ul>
+                    <a href="http://www.people.vcu.edu/~cfung/lab.html" target="_blank" style="text-decoration: none;">
+                        <img src="./Images/vcu.png"
+                             style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px)"
+                             alt="Masrik Dahir"/> RamSec: Cybersecurity Lab</a>
+                </ul>
+                <p1>
+                    <ul>
+                        <li>Studying the existing models (IP Trackback Technique, Packet Market Technique, Entropy
+                            Variation, Signature-based detection, Anomaly Detection) to prevent DDoS attacks; and
+                        </li>
+                        <li>Researching the server CPU loads in Syn Flood attack using Quic and TCP packets.</li>
+                    </ul>
+                </p1>
+                <hr>
+            </div>
+            <br>
+
         </div>
         <br>
 
 
-        <!--        Capital One     -->
-        <div class="w3-container">
-          <h4><b style="color: black">Business Analyst </b>
-            <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;"> <bdi style="font-size: calc(10px + .5vw);">May 2022 - <span  style="background-color: DarkSlateGray; color:white; padding: 2px">Current</span></bdi></b></h4>
-          <ul>
-            <a href = "https://www.richmondfoodjustice.org/" target = "_blank">
-              <img src="./Images/capitalone.png" style="width: 1vw; min-width: 150px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-          </ul>
-          <p1>
-            <ul>
-              <li>Node.Js: NVM, HTTP API, Fastify, DynamoDB, NPM, Yarn;</li>
-              <li>Vue.Js: Vue CLI, database; </li>
-              <li>AWS: IAM roles, EC2 instances, S3 buckets and policy, ASGs, ALB, Lambda functions, Node API </li>
-            </ul>
-          </p1>
-          <hr>
-        </div>
+        <!-- End Grid -->
+    </div>
 
 
-        <!--        Richmond Food Alliance     -->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Web Developer </b>
-            <b class="color w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">Oct 2021 - Jan 2022</bdi></b></h4>
-          <ul>
-          <a href = "https://www.richmondfoodjustice.org/" target = "_blank">
-            <img src="./Images/download-1.png" style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-          </ul>
-          <p1>
-            <ul>
-              <li>Organized and customized the Food Alliance Website; and</li>
-              <li>Utilized the WordPress CMS (HTML 5, CSS 3, JavaScript, Jquery library, PHP).</li>
-            </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-        <!--        iCubed Scolar -->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher </b>
-            <b class="color w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">Aug 2021 -
-              <span  style="background-color: crimson; color:white; padding: 2px">Current</span> </bdi></b></h4>
-          <ul>
-            <a href = "https://cbds.vcu.edu/" target = "_blank">
-              <img src="./Images/life.png" style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-          </ul>
-          <p1>
-          <ul>
-            <li>Built and coded automated Rampantries (food cart at VCU Monroe Park Campus); and</li>
-            <li>Used Raspberry pi to receive data and save it in the Cloud storage. </li>
-          </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-        <!--        VCU School of Pharmacy-->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Web Developer&emsp;</b>
-            <b class="color w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">Jun 2021 - Jan 2022</bdi> </b></h4>
-          <ul>
-            <a href = "https://pharmacy.vcu.edu/" target = "_blank">
-              <img src="./Images/sop.png" style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-          </ul>
-          <p1>
-            <ul>
-              <li>Manage VCU School of Pharmacy's website and multiple lab websites; and </li>
-              <li>Utilize the Terminal 4 content management system</li>
-              <li>Worked with Compass framework, WordPress, and cPanel</li>
-              <li>HTML, CSS, JavaScript, PHP, JQuery, AngularJS</li>
-              <li>Firmware troubleshoot and update</li>
-            </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-        <!--        University of Missouri-->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4 ><b style="color: black; font-size: calc(20px + .5vw);"> Research Fellow</b>
-            <b class="w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">Jun 2021 -
-              Jul 2021 </bdi></b></h4>
-          <ul>
-            <a href = "https://engineering.missouri.edu/" target = "_blank">
-              <img src="./Images/mu.jpg" style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
-          </ul>
-          <p1>
-          <ul>
-            <li>Developed a secured system in blockchain to process insurance claims and prevent fraudulent claims and cyber-attacks i.e. Sybil attack,
-              50% attack, Timestamp manipulation, Malware, and Malicious code injection; </li>
-            <li>Web Development, Angular Framework, Typescript, Hyperledger Composer. MySQL, Big Data Analysis; and</li>
-            <li>Firebase, AWS Services, Hadoop HDFS, Blockchain Technology, Formal Verification of System, Attack Scenarios. </li>
-            <li><a href="https://www.nsf.gov/" target="_blank">NSF</a> funded</li>
-          </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-        <!--        Civilian Cyber-->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4 ><b style="color: black; font-size: calc(20px + .5vw);">Cyber Security Analyst</b>
-            <b class="w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">Feb 2021 -
-              Jun 2021 </bdi></b></h4>
-          <ul>
-            <a href = "https://civiliancyber.com/" target = "_blank" style="text-decoration: none;">
-              <img src="./Images/civiliancyber.png" style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px); " alt="Masrik Dahir"/> Civilian Cyber</a>
-          </ul>
-
-          <p1>
-          <ul>
-            <li>Working on Joomla, Moodle framework; Administering databases; Integrating plug-ins: Community Builder, Joomdle; and </li>
-            <li>Developed advanced automation capable of providing feedback based on user's performance; and </li>
-            <li>Penetration Tests. </li>
-          </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-        <!--        SAFE Lab-->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4 ><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher</b>
-            <b class="w3-text-teal;" style="float: right; color:crimson;"><bdi style="font-size: calc(10px + .5vw);">Jun 2020 -
-              <span  style="background-color: crimson; color:white; padding: 2px">Current</span>  </bdi></b></h4>
-          <ul>
-            <a href = "https://safe.lab.vcu.edu/" target = "_blank" style="text-decoration: none;">
-              <img src="./Images/safelab.JPG" style="width: calc(1vw + 50px); min-width: 70px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/> SAFE Lab</a>
-          </ul>
-          <p1>
-          <ul>
-            <li>Researched in concept map files comparison and analysis using the algorithm; and</li>
-            <li>Computer Programs: CmapTools, PyCharm; Programming Language: Python; Libraries: Nltk, Graphviz, XML, Natural Language Processing. </li>
-            <hr>
-            <li>Creating a Graphical User Interface (GUI) that allows the memory of a virtual machine to
-              manipulate the memory contents (demonstrate malware intrusion), Virtual Machine Introspection; and</li>
-            <li>Programming Language: C, Python; Libvmi library, Volatility library, GUI Libraries (i.e., PyQT5). </li>
-          </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-        <!--        RamSec Lab-->
-        <div class="w3-container w3-card" style="background-color: white">
-          <h4 ><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher</b>
-            <b class="w3-text-teal;" style="float: right; color:crimson;"> <bdi style="font-size: calc(10px + .5vw);">Jan 2021 -
-              Sep 2021 </bdi></b></h4>
-          <ul>
-            <a href = "http://www.people.vcu.edu/~cfung/lab.html" target = "_blank" style="text-decoration: none;">
-              <img src="./Images/vcu.png" style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px)" alt="Masrik Dahir"/> RamSec: Cybersecurity Lab</a>
-          </ul>
-          <p1>
-          <ul>
-            <li>Studying the existing models (IP Trackback Technique, Packet Market Technique, Entropy Variation, Signature-based detection, Anomaly Detection) to prevent DDoS attacks; and</li>
-            <li>Researching the server CPU loads in Syn Flood attack using Quic and TCP packets. </li>
-          </ul>
-          </p1>
-          <hr>
-        </div>
-        <br>
-
-      </div>
-      <br>
-
-
-  <!-- End Grid -->
-  </div>
-
-  
-  <!-- End Page Container -->
+    <!-- End Page Container -->
 </div>
 
 
