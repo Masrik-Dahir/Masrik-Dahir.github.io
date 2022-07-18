@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!--    Metadata imports-->
     <link rel="icon" type="image/gif/png" href="./Images/logo.png">
     <title>Masrik Dahir</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--    CSS imports-->
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -17,7 +20,7 @@
     <link rel="stylesheet" href="css/popup.css">
     <link rel="stylesheet" href="css/glowing.css">
 
-
+<!--    JS imports-->
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="js/html.js"></script>
@@ -33,12 +36,11 @@
     <script src="js/finance.js" defer></script>
     <script src='js/aesthetics.js' crossorigin='anonymous'></script>
 
+<!--    Vue JS imports-->
     <script src="https://unpkg.com/vue@next"></script>
     <script src="vueJs/default.js" defer></script>
 
-
 </head>
-
 
 <body class="w3-white">
 <div id="app" v-cloak>
@@ -207,13 +209,13 @@
     <div class="w3-row-padding">
 
         <!-- Right Column -->
-
         <div class="">
 
             <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
                 <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Degree</text>
             </svg>
 
+            <!--            Education-->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
 
                 <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
@@ -246,6 +248,7 @@
                 <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Achievement</text>
             </svg>
 
+            <!--            Achievement-->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
 
@@ -490,9 +493,9 @@
                 <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Coursework</text>
             </svg>
 
+            <!--            Coursework (Computer Science)-->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Computer Science</b></h4>
-
                 <div class="w3-container">
 
                     <!--                    CMSC 401-->
@@ -667,11 +670,12 @@
                 </div>
             </div>
 
+            <!--            Coursework (Mathematics)-->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Mathematics</b></h4>
-
-                <!--                    MATH 356-->
                 <div class="w3-container">
+
+                    <!--                    Math 365-->
                     <button onclick="changeImageMath356()" value="Change" type="button" class="collapsible">
                         <h4 class="h4"><b style="color: black">
                             <img id="always-image-math356" style="width:39px; height:23px; margin: 1px; "
@@ -782,38 +786,36 @@
                     <hr>
                 </div>
             </div>
-        </div>
-        <div class="w3-container w3-card w3-white w3-margin-bottom">
 
+            <!--            Coursework (Finance)-->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Finance</b></h4>
+                <div class="w3-container">
 
-            <h4><b style="color: black; font-size: calc(20px + .5vw);">Finance</b></h4>
-            <!--                    FIRE 305-->
-            <div class="w3-container">
-                <button onclick="changeImageFire305()" value="Change" type="button" class="collapsible">
-                    <h4 class="h4"><b style="color: black">
-                        <img id="always-image-fire305" style="width:39px; height:23px; margin: 1px; "
-                             src="./Images/down.jpg" ;/> Principle of Real Estate </b>
-                        <b class="w3-text-teal;" style="float: right; color:crimson;">
-                            <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                        </b></h4>
-                </button>
-                <div class="content1">
-                    <ul>
-                        <li>FIRE 305;</li>
-                        <li>principles, practices and laws that govern the real estate enterprise, including property
-                            rights, legal elements, physical aspects of location and production, brokerage, valuation,
-                            ethical dimensions, development, financing and land use
-                        </li>
-                    </ul>
+                    <!--                    FIRE 305-->
+                    <button onclick="changeImageFire305()" value="Change" type="button" class="collapsible">
+                        <h4 class="h4"><b style="color: black">
+                            <img id="always-image-fire305" style="width:39px; height:23px; margin: 1px; "
+                                 src="./Images/down.jpg" ;/> Principle of Real Estate </b>
+                            <b class="w3-text-teal;" style="float: right; color:crimson;">
+                                <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
+                            </b></h4>
+                    </button>
+                    <div class="content1">
+                        <ul>
+                            <li>FIRE 305;</li>
+                            <li>principles, practices and laws that govern the real estate enterprise, including property
+                                rights, legal elements, physical aspects of location and production, brokerage, valuation,
+                                ethical dimensions, development, financing and land use
+                            </li>
+                        </ul>
+                    </div>
+
+                    <hr>
                 </div>
             </div>
-            <hr>
-
-
-            <!--                </div>-->
         </div>
     </div>
-
 </div>
 
 <!-- End Grid -->
