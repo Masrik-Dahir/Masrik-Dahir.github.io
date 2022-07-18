@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/gif/png" href="./Images/logo.png">
-  <title>Masrik Dahir</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/default.css">
-  <link rel="stylesheet" href="css/if_quote.css">
-  <link rel="stylesheet" href="css/quote.css">
-  <link rel="stylesheet" href="css/popup.css">
-  <link rel="stylesheet" href="css/icons.css">
-  <link rel="stylesheet" href="css/box.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/new.css">
 
+    <!--    Metadata imports-->
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="js/html.js"></script>
-  <script src="js/hourglass.js"></script>
-  <script src="js/file.js" defer></script>
-  <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+    <!--    CSS imports-->
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/if_quote.css">
+    <link rel="stylesheet" href="css/quote.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/new.css">
 
-  <script src ="https://unpkg.com/vue@next"></script>
-  <script src ="vueJs/default.js" defer></script>
-  <script src ="vueJs/index.js" defer></script>
+    <!--    JS imports-->
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/file.js" defer></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <!--    Vue JS imports-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="vueJs/default.js" defer></script>
+    <script src="vueJs/index.js" defer></script>
 
 </head>
 
@@ -31,348 +36,460 @@
 <body class="w3-white">
 
 
-
 <!-- Page Container -->
 <div class="w3-content" style="max-width:1400px; background-color: white;">
-  <!-- The Grid -->
-  <div class="w3-row-padding" style="">
 
+    <!-- The Grid -->
+    <div class="w3-row-padding" style="">
 
+        <!-- Left Column -->
+        <header-tag class="info">
+            <div id="app2" v-cloak>
+                <div>
+                    <div class="popup" id="popup-3">
+                        <div class="overlay"></div>
+                        <div class="content">
+                            <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                            <div style="color: black">
 
+                                <div style="margin-top: 30px;">
 
-    <!-- Left Column -->
-    <header-tag class="info">
-      <div id="app2" v-cloak>
-        <div>
-          <div class="popup" id="popup-3">
-            <div class="overlay"></div>
-            <div class="content">
-              <div class="close-btn" onclick="togglePopup('3')">&times;</div>
-              <div style="color: black">
+                                </div>
+                                <style>
+                                    .glow-on-hover3 {
+                                        border-style: solid;
+                                        border-color: black;
+                                        color: #111;
+                                        background: whitesmoke;
+                                        cursor: pointer;
+                                        position: relative;
+                                        z-index: 0;
+                                        width: 100%;
+                                        border-radius: 10px;
+                                        text-align: left;
+                                    }
 
-                <div style="margin-top: 30px;">
+                                    .glow-on-hover3 h2 {
+                                        text-align: left;
+                                    }
 
+                                    .glow-on-hover3:before {
+                                        content: '';
+                                        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+                                        position: absolute;
+                                        top: -2px;
+                                        left: -2px;
+                                        background-size: 400%;
+                                        z-index: -1;
+                                        filter: blur(5px);
+                                        width: calc(100% + 4px);
+                                        height: calc(100% + 4px);
+                                        animation: glowing3 20s linear infinite;
+                                        opacity: 0;
+                                        transition: opacity .3s ease-in-out;
+                                        border-radius: 10px;
+                                    }
+
+                                    .glow-on-hover3:active {
+                                        color: black;
+                                    }
+
+                                    .glow-on-hover3:active:after {
+                                        background: transparent;
+                                    }
+
+                                    .glow-on-hover3:hover:before {
+                                        opacity: 1;
+                                    }
+
+                                    .glow-on-hover3:after {
+                                        z-index: -1;
+                                        content: '';
+                                        position: absolute;
+                                        width: 100%;
+                                        height: 100%;
+                                        background: whitesmoke;
+                                        left: 0;
+                                        top: 0;
+                                        border-radius: 10px;
+                                    }
+
+                                    @keyframes glowing3 {
+                                        0% {
+                                            background-position: 0 0;
+                                        }
+                                        50% {
+                                            background-position: 400% 0;
+                                        }
+                                        100% {
+                                            background-position: 0 0;
+                                        }
+                                    }
+                                </style>
+                                <a href="index.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px;border: red 3px solid ">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black; ">
+                                                <div class="wrapper">
+                                                </div>
+                                                Home</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="work.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Work Experience</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="publication.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Publication</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="education.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Education</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="software.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Software App</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="web.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Web App</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="entrepreneurship.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Entrepreneurship</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="leadership.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Leadership</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                                <a href="travel.html" style="text-decoration: none">
+                                    <button class="glow-on-hover3" type="button"
+                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                        <div style="" class="w3-container">
+                                            <h4><b style="color: black">
+                                                <div class="wrapper">
+                                                </div>
+                                                Travel</b>
+                                            </h4>
+                                        </div>
+                                    </button>
+                                </a>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div>
+                        <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png"
+                                                                                           width="25" height="20"
+                                                                                           alt="Masrik Dahir">
+                            <bdi style=" margin-top: 5px">Menu</bdi>
+                        </button>
+                    </div>
                 </div>
-                <style>
-                  .glow-on-hover3 {
-                    border-style: solid;
-                    border-color: black;
-                    color: #111;
-                    background: whitesmoke;
-                    cursor: pointer;
-                    position: relative;
-                    z-index: 0;
-                    width: 100%;
-                    border-radius: 10px;
-                    text-align: left;
-                  }
-                  .glow-on-hover3 h2 {
-                    text-align: left;
-                  }
-
-                  .glow-on-hover3:before {
-                    content: '';
-                    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-                    position: absolute;
-                    top: -2px;
-                    left:-2px;
-                    background-size: 400%;
-                    z-index: -1;
-                    filter: blur(5px);
-                    width: calc(100% + 4px);
-                    height: calc(100% + 4px);
-                    animation: glowing3 20s linear infinite;
-                    opacity: 0;
-                    transition: opacity .3s ease-in-out;
-                    border-radius: 10px;
-                  }
-
-                  .glow-on-hover3:active {
-                    color: black;
-                  }
-
-                  .glow-on-hover3:active:after {
-                    background: transparent;
-                  }
-
-                  .glow-on-hover3:hover:before {
-                    opacity: 1;
-                  }
-
-                  .glow-on-hover3:after {
-                    z-index: -1;
-                    content: '';
-                    position: absolute;
-                    width: 100%;
-                    height: 100%;
-                    background: whitesmoke;
-                    left: 0;
-                    top: 0;
-                    border-radius: 10px;
-                  }
-
-                  @keyframes glowing3 {
-                    0% { background-position: 0 0; }
-                    50% { background-position: 400% 0; }
-                    100% { background-position: 0 0; }
-                  }
-                </style>
-                <a href="index.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                           style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px;border: red 3px solid "><div style="" class="w3-container">
-                  <h4><b style="color: black; "><div class="wrapper">
-                  </div>Home</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="work.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                          style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Work Experience</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="publication.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                                 style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Publication</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="education.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                               style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Education</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="software.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                              style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Software App</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="web.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                         style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Web App</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="entrepreneurship.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                                      style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Entrepreneurship</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="leadership.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Leadership</b>
-                  </h4>
-                </div></button></a>
-
-                <a href="travel.html" style="text-decoration: none"><button class="glow-on-hover3" type="button"
-                                                                                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-                  <h4><b style="color: black"><div class="wrapper">
-                  </div>Travel</b>
-                  </h4>
-                </div></button></a>
-
-              </div>
-
             </div>
-          </div>
-          <div>
-            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir"> <bdi style=" margin-top: 5px">Menu</bdi></button>
-          </div>
-        </div>
-      </div>
-      <script>
-        function togglePopup(num){
-          document.getElementById(`popup-${num}`).classList.toggle("active");
-        }
-      </script>
-      <br>
-      <div class="w3-third" style="font-family: georgia,serif; margin-left: 0px">
-        <div class="w3-Azure w3-text-grey w3-card-4">
-          <div class="w3-display-container">
-            <img src="./Images/masrik_dahir_formal.jpeg" style="width:100%" alt="Masrik Dahir">
-            <div class="w3-display-bottomleft w3-container w3-text-black">
-              <h2 style="background:#ffffff;opacity: 0.7;"><div class="no_new_line">Masrik Dahir</div></h2>
-            </div>
-          </div>
-          <!--      Comment-->
-          <div class="w3-container">
-            <p style="color: black"><i class="fa fa-briefcase fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f ;"></i>Full Stack & Software Developer</p>
-            <p style="color: black"><i class="fa fa-certificate fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f;"></i>Cyber Security Analyst, Cloud Engineer</p>
-            <p style="color: black"><i class="fa fa-home fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f ;"></i>Richmond, VA</p>
-            <p style="color: black"><i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f ;"></i>dahirma@vcu.edu</p>
-            <hr>
-
-            <p class="w3-large" style="color: black"><b><i class="fa fa-asterisk fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f;"></i>Skills</b></p>
-            <h6 style="color: black">General Purpose Programming Language</h6>
-            <!--           Python-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px; " src="./Images/python.png"/>
-            <!--          Java-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/java.png"/>
-            <!--          C-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/c2.png"/>
-            <!--          C++-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/c-logo-vector.svg"/>
-            <!--          Csharp-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/csharp.png"/>
-            <!--          Nodejs-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/nodejs.png"; />
-            <!--          SageMath-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/sage.png"; />
-            <!--          Rust-->
-            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/Rust_programming_language_black_logo.svg.png"; />
-
-
-
-            <div class="w3-light-grey w3-round-xlarge w3-small">
-              <div class="w3-container w3-center w3-round-xlarge " style="width:100%; margin-left: -5px;"></div>
-            </div>
-
+            <script>
+                function togglePopup(num) {
+                    document.getElementById(`popup-${num}`).classList.toggle("active");
+                }
+            </script>
             <br>
-            <h6 style="color: black">Web Development</h6>
-            <!--          HTML-->
-            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/html.png"/>
+            <div class="w3-third" style="font-family: georgia,serif; margin-left: 0px">
+                <div class="w3-Azure w3-text-grey w3-card-4">
+                    <div class="w3-display-container">
+                        <img src="./Images/masrik_dahir_formal.jpeg" style="width:100%" alt="Masrik Dahir">
+                        <div class="w3-display-bottomleft w3-container w3-text-black">
+                            <h2 style="background:#ffffff;opacity: 0.7;">
+                                <div class="no_new_line">Masrik Dahir</div>
+                            </h2>
+                        </div>
+                    </div>
+                    <!--      Comment-->
+                    <div class="w3-container">
+                        <p style="color: black"><i class="fa fa-briefcase fa-fw w3-margin-right w3-large w3-text-teal;"
+                                                   style="color:#2f4f4f ;"></i>Full Stack & Software Developer</p>
+                        <p style="color: black"><i
+                                class="fa fa-certificate fa-fw w3-margin-right w3-large w3-text-teal;"
+                                style="color:#2f4f4f;"></i>Cyber Security Analyst, Cloud Engineer</p>
+                        <p style="color: black"><i class="fa fa-home fa-fw w3-margin-right w3-large w3-text-teal;"
+                                                   style="color:#2f4f4f ;"></i>Richmond, VA</p>
+                        <p style="color: black"><i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal;"
+                                                   style="color:#2f4f4f ;"></i>dahirma@vcu.edu</p>
+                        <hr>
 
-            <!--          CSS-->
-            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/css.png"/>
-            <!--          SQL-->
-            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/sql.png"/>
-            <!--          PHP-->
-            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/php.png"; />
-            <!--          Angular JS-->
-            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/AngularJS-Shield.svg"; />
+                        <p class="w3-large" style="color: black"><b><i
+                                class="fa fa-asterisk fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f;"></i>Skills</b>
+                        </p>
+                        <h6 style="color: black">General Purpose Programming Language</h6>
+                        <!--           Python-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px; "
+                             src="./Images/python.png"/>
+                        <!--          Java-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/java.png"/>
+                        <!--          C-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/c2.png"/>
+                        <!--          C++-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/c-logo-vector.svg"/>
+                        <!--          Csharp-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/csharp.png"/>
+                        <!--          Nodejs-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/nodejs.png" ;/>
+                        <!--          SageMath-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/sage.png" ;/>
+                        <!--          Rust-->
+                        <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/Rust_programming_language_black_logo.svg.png" ;/>
 
 
+                        <div class="w3-light-grey w3-round-xlarge w3-small">
+                            <div class="w3-container w3-center w3-round-xlarge "
+                                 style="width:100%; margin-left: -5px;"></div>
+                        </div>
+
+                        <br>
+                        <h6 style="color: black">Web Development</h6>
+                        <!--          HTML-->
+                        <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/html.png"/>
+
+                        <!--          CSS-->
+                        <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/css.png"/>
+                        <!--          SQL-->
+                        <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/sql.png"/>
+                        <!--          PHP-->
+                        <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/php.png" ;/>
+                        <!--          Angular JS-->
+                        <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"
+                             src="./Images/AngularJS-Shield.svg" ;/>
 
 
-            <div class="w3-light-grey w3-round-xlarge w3-small">
-              <div class="w3-container w3-center w3-round-xlarge" style="width:100%; margin-left: -5px; "></div>
+                        <div class="w3-light-grey w3-round-xlarge w3-small">
+                            <div class="w3-container w3-center w3-round-xlarge"
+                                 style="width:100%; margin-left: -5px; "></div>
+                        </div>
+                        <br>
+                    </div>
+                </div>
+                <br>
+
+                <!-- End Left Column -->
             </div>
-            </br>
+        </header-tag>
 
-            <br>
-
-          </div>
-        </div><br>
-
-        <!-- End Left Column -->
-      </div>
-    </header-tag>
-
-    <!-- Right Column -->
-    <div class="w3-twothird" >
-
+        <!-- End Grid -->
     </div>
+    <div id="footer" class="info"></div>
 
 
-    <!-- End Grid -->
-  </div>
-  <div id="footer" class="info"></div>
-
-
-  <!-- End Page Container -->
+    <!-- End Page Container -->
 </div>
 
 <div class="show">
 
-  <canvas id='canv'></canvas>
-  <div id="app" v-cloak>
-    <div class="container3" v-bind:style="modelStyle(`middle`)">
-      <div v-if="this.windowWidth >= 1200">
+    <canvas id='canv'></canvas>
+    <div id="app" v-cloak>
+        <div class="container3" v-bind:style="modelStyle(`middle`)">
+            <div v-if="this.windowWidth >= 1200">
 
-        <a class="active " href="index.html"><button class="glow-on-hover Blazing active" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px; border: #00EE00 3px solid" >Home</button></a>
-        <a href="work.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Work Experience</button></a>
-        <a href="publication.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Publication</button></a>
-        <a href="education.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Education</button></a>
-        <a href="software.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Software App</button></a>
-        <a href="web.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Web App</button></a>
-        <a href="entrepreneurship.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Entrepreneurship</button></a>
-        <a href="leadership.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Leadership</button></a>
-        <a href="travel.html"><button class="glow-on-hover Blazing" type="button" style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">Travel</button></a>
-  <!--      {{windowWidth}}-->
-  <!--      {{middle}}-->
-      </div>
+                <a class="active " href="index.html">
+                    <button class="glow-on-hover Blazing active" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px; border: #00EE00 3px solid">
+                        Home
+                    </button>
+                </a>
+                <a href="work.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Work Experience
+                    </button>
+                </a>
+                <a href="publication.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Publication
+                    </button>
+                </a>
+                <a href="education.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Education
+                    </button>
+                </a>
+                <a href="software.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Software App
+                    </button>
+                </a>
+                <a href="web.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Web App
+                    </button>
+                </a>
+                <a href="entrepreneurship.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Entrepreneurship
+                    </button>
+                </a>
+                <a href="leadership.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Leadership
+                    </button>
+                </a>
+                <a href="travel.html">
+                    <button class="glow-on-hover Blazing" type="button"
+                            style="font-size: 15px; width: fit-content; padding-left: 20px; padding-right: 20px; margin-top: 5px; margin-right: 5px">
+                        Travel
+                    </button>
+                </a>
+                <!--      {{windowWidth}}-->
+                <!--      {{middle}}-->
+            </div>
+
+        </div>
+
+
+        <div class="container2" v-if="this.windowWidth < 1200">
+
+            <a href="work.html">
+                <button class="glow-on-hover Blazing" type="button">Website >></button>
+            </a>
+        </div>
 
     </div>
 
-
-
-    <div class ="container2" v-if="this.windowWidth < 1200">
-
-      <a href="work.html"><button class="glow-on-hover Blazing" type="button">Website >></button></a>
+    <div class="container2">
+        <div class="stack" style="--stacks: 3;">
+            <span style="--index: 0; color: #00EE00">MASRIK&nbsp;DAHIR</span>
+            <span style="--index: 1; color: #00EE00">MASRIK&nbsp;DAHIR</span>
+            <span style="--index: 2; color: #00EE00">MASRIK&nbsp;DAHIR</span>
+        </div>
+        <span class="right Blazing" style="color: #00EE00; font-size: min(calc(20px + 0.5vw), 6rem);">Full Stack Developer, Cybersecurity Analyst</span>
     </div>
 
-  </div>
+    <script>
+        const canvas = document.getElementById('canv');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        let cols = Math.floor(window.innerWidth / 20) + 1;
+        let ypos = Array(cols).fill(0);
 
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  <div class="container2">
+        function matrix() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
 
-    <div class="stack" style="--stacks: 3;">
-      <span style="--index: 0; color: #00EE00">MASRIK&nbsp;DAHIR</span>
-      <span style="--index: 1; color: #00EE00">MASRIK&nbsp;DAHIR</span>
-      <span style="--index: 2; color: #00EE00">MASRIK&nbsp;DAHIR</span>
-    </div>
-    <span class="right Blazing" style="color: #00EE00; font-size: min(calc(20px + 0.5vw), 6rem);">Full Stack Developer, Cybersecurity Analyst</span>
-  </div>
+            if (canvas.width !== w) {
+                canvas.width = w;
+                cols = Math.floor(window.innerWidth / 20) + 1;
+                ypos = Array(cols).fill(0);
+            }
+            if (canvas.height !== h) {
+                canvas.height = h;
+            }
 
+            ctx.fillStyle = '#0001';
+            ctx.fillRect(0, 0, w, h);
 
+            ctx.fillStyle = '#0f0';
+            ctx.font = '15pt monospace';
 
+            ypos.forEach((y, ind) => {
+                const text = String.fromCharCode(Math.random() * 128);
+                const x = ind * 20;
+                ctx.fillText(text, x, y);
+                if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+                else ypos[ind] = y + 20;
+            });
+        }
 
-
-
-  <script>
-    const canvas = document.getElementById('canv');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const ctx = canvas.getContext('2d');
-    let cols = Math.floor(window.innerWidth / 20) + 1;
-    let ypos = Array(cols).fill(0);
-
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    function matrix () {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-
-      if (canvas.width !== w) {
-        canvas.width = w;
-        cols = Math.floor(window.innerWidth / 20) + 1;
-        ypos = Array(cols).fill(0);
-      }
-      if (canvas.height !== h) {
-        canvas.height = h;
-      }
-
-      ctx.fillStyle = '#0001';
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.fillStyle = '#0f0';
-      ctx.font = '15pt monospace';
-
-      ypos.forEach((y, ind) => {
-        const text = String.fromCharCode(Math.random() * 128);
-        const x = ind * 20;
-        ctx.fillText(text, x, y);
-        if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
-        else ypos[ind] = y + 20;
-      });
-    }
-    setInterval(matrix, 50);
-  </script>
+        setInterval(matrix, 50);
+    </script>
 
 </div>
 
-<!--<div id="footer"></div>-->
 </body>
 </html>
-
-<!-- New comment-->

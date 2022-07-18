@@ -1,236 +1,215 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/gif/png" href="./Images/logo.png">
-  <title>Masrik Dahir</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/icons.css">
-  <link rel="stylesheet" href="css/box.css">
-  <link rel="stylesheet" href="css/default.css">
-  <link rel="stylesheet" href="css/collapsible.css">
-  <link rel="stylesheet" href="css/new.css">
-  <link rel="stylesheet" href="css/if.css">
-  <link rel="stylesheet" href="css/popup.css">
-  <link rel="stylesheet" href="css/glowing.css">
+    <!--    Metadata imports-->
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="js/html.js"></script>
-  <script src="js/hourglass.js"></script>
-  <script src="js/expand_jquery.js"></script>
-  <script src="js/change_image.js"></script>
-  <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+    <!--    CSS imports-->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/collapsible.css">
+    <link rel="stylesheet" href="css/new.css">
+    <link rel="stylesheet" href="css/if.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/glowing.css">
 
-  <script src ="https://unpkg.com/vue@next"></script>
-  <script src ="vueJs/default.js" defer></script>
+    <!--    JS imports-->
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="js/change_image.js"></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <!--    Vue JS imports-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="vueJs/default.js" defer></script>
 
 </head>
 
 
-<body class="w3-white" >
+<body class="w3-white">
 <div id="app" v-cloak>
-  <div v-if="this.windowWidth >= 1200">
-    <div class="topnav">
-      <a href="index.html">Home</a>
-      <a href="work.html">Work Experience</a>
-      <a href="publication.html">Publication</a>
-      <a href="education.html">Education</a>
-      <a href="software.html">Software App</a>
-      <a href="web.html">Web App</a>
-      <a class="active" href="entrepreneurship.html">Entrepreneurship</a>
-      <a href="leadership.html">Leadership</a>
-      <a href="travel.html">Travel</a>
+    <div v-if="this.windowWidth >= 1200">
+        <div class="topnav">
+            <a href="index.html">Home</a>
+            <a href="work.html">Work Experience</a>
+            <a href="publication.html">Publication</a>
+            <a href="education.html">Education</a>
+            <a href="software.html">Software App</a>
+            <a href="web.html">Web App</a>
+            <a class="active" href="entrepreneurship.html">Entrepreneurship</a>
+            <a href="leadership.html">Leadership</a>
+            <a href="travel.html">Travel</a>
+        </div>
     </div>
-  </div>
-  <div v-else>
-    <div class="popup" id="popup-3">
-      <div class="overlay"></div>
-      <div class="content">
-        <div class="close-btn" onclick="togglePopup('3')">&times;</div>
-        <div style="color: black">
+    <div v-else>
+        <div class="popup" id="popup-3">
+            <div class="overlay"></div>
+            <div class="content">
+                <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                <div style="color: black">
 
-          <div style="margin-top: 30px;">
+                    <div style="margin-top: 30px;">
 
-          </div>
-          <a href="index.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                     style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Home</b>
-            </h4>
-          </div></button></a>
+                    </div>
+                    <a href="index.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Home</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="work.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Work Experience</b>
-            </h4>
-          </div></button></a>
+                    <a href="work.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Work Experience</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="publication.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                           style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Publication</b>
-            </h4>
-          </div></button></a>
+                    <a href="publication.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Publication</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="education.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                         style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Education</b>
-            </h4>
-          </div></button></a>
+                    <a href="education.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Education</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="software.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                        style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Software App</b>
-            </h4>
-          </div></button></a>
+                    <a href="software.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Software App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="web.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                   style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Web App</b>
-            </h4>
-          </div></button></a>
+                    <a href="web.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Web App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="entrepreneurship.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Entrepreneurship</b>
-            </h4>
-          </div></button></a>
+                    <a href="entrepreneurship.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Entrepreneurship</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="leadership.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                          style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Leadership</b>
-            </h4>
-          </div></button></a>
+                    <a href="leadership.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Leadership</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="travel.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                      style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Travel</b>
-            </h4>
-          </div></button></a>
+                    <a href="travel.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Travel</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
+                </div>
+
+            </div>
         </div>
 
-      </div>
+        <div>
+            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25"
+                                                                               height="20" alt="Masrik Dahir">
+                <bdi style=" margin-top: 5px">Menu</bdi>
+            </button>
+        </div>
     </div>
-
-    <div>
-      <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir"> <bdi style=" margin-top: 5px">Menu</bdi></button>
-    </div>
-  </div>
 </div>
 <script>
-  function togglePopup(num){
-    document.getElementById(`popup-${num}`).classList.toggle("active");
-  }
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
 </script>
 
 <!-- Page Container -->
 <div class="w3-content w3-margin-top" style="max-width:1400px; background-color: white">
 
-  <!-- The Grid -->
-  <div class="w3-row-padding">
+    <!-- The Grid -->
+    <div class="w3-row-padding">
 
-    <!-- Left Column -->
-<!--    <header-tag class="show_d">-->
-<!--      <div class="w3-third">-->
-
-<!--        <div class="w3-Azure w3-text-grey w3-card-4">-->
-<!--          <div class="w3-display-container">-->
-<!--            <img src="./Images/masrik_dahir_formal.jpeg" style="width:100%" alt="Masrik Dahir">-->
-<!--            <div class="w3-display-bottomleft w3-container w3-text-black">-->
-<!--              <h2 style="background:#ffffff;opacity: 0.7;"><div class="no_new_line">Masrik Dahir</div></h2>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--          &lt;!&ndash;      Comment&ndash;&gt;-->
-<!--          <div class="w3-container">-->
-<!--            <p style="color: black"><i class="fa fa-briefcase fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f ;"></i>Full Stack & Software Developer</p>-->
-<!--            <p style="color: black"><i class="fa fa-certificate fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f;"></i>Cyber Security Analyst, Cloud Engineer</p>-->
-<!--            <p style="color: black"><i class="fa fa-home fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f ;"></i>Richmond, VA</p>-->
-<!--            <p style="color: black"><i class="fa fa-envelope fa-fw w3-margin-right w3-large w3-text-teal;" style="color:#2f4f4f ;"></i>dahirma@vcu.edu</p>-->
-<!--            <hr>-->
-
-<!--            <p class="w3-large" style="color: black"><b><i class="fa fa-asterisk fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f;"></i>Skills</b></p>-->
-<!--            <h6 style="color: black">General Purpose Programming Language</h6>-->
-<!--            &lt;!&ndash;           Python&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/python.png"/>-->
-<!--            &lt;!&ndash;          Java&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/java.png"/>-->
-<!--            &lt;!&ndash;          C&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/c2.png"/>-->
-<!--            &lt;!&ndash;          C++&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/c-logo-vector.svg"/>-->
-<!--            &lt;!&ndash;          Csharp&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/csharp.png"/>-->
-<!--            &lt;!&ndash;          Nodejs&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/nodejs.png"; />-->
-<!--            &lt;!&ndash;          SageMath&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/sage.png"; />-->
-<!--            &lt;!&ndash;          Rust&ndash;&gt;-->
-<!--            <img class="box" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/Rust_programming_language_black_logo.svg.png"; />-->
-
-
-
-<!--            <div class="w3-light-grey w3-round-xlarge w3-small">-->
-<!--              <div class="w3-container w3-center w3-round-xlarge " style="width:100%; margin-left: -5px;"></div>-->
-<!--            </div>-->
-
-<!--            <br>-->
-<!--            <h6 style="color: black">Web Development</h6>-->
-<!--            &lt;!&ndash;          HTML&ndash;&gt;-->
-<!--            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/html.png"/>-->
-
-<!--            &lt;!&ndash;          CSS&ndash;&gt;-->
-<!--            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/css.png"/>-->
-<!--            &lt;!&ndash;          SQL&ndash;&gt;-->
-<!--            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px" src="./Images/sql.png"/>-->
-<!--            &lt;!&ndash;          PHP&ndash;&gt;-->
-<!--            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/php.png"; />-->
-<!--            &lt;!&ndash;          Angular JS&ndash;&gt;-->
-<!--            <img class="box2" style="float: left; width:12%; vertical-align: middle; margin: 5px"  src="./Images/AngularJS-Shield.svg"; />-->
-
-
-
-
-<!--            <div class="w3-light-grey w3-round-xlarge w3-small">-->
-<!--              <div class="w3-container w3-center w3-round-xlarge" style="width:100%; margin-left: -5px; "></div>-->
-<!--            </div>-->
-<!--            </br>-->
-
-<!--            <br>-->
-
-
-<!--          </div>-->
-<!--        </div><br>-->
-
-<!--        &lt;!&ndash; End Left Column &ndash;&gt;-->
-<!--      </div>-->
-<!--    </header-tag>-->
-    <!-- Right Column -->
-    <div class="w3-twothird" >
-
+        <!-- End Grid -->
     </div>
 
-    <!-- End Grid -->
-  </div>
-
-
-  <!-- End Page Container -->
+    <!-- End Page Container -->
 </div>
 
 <div id="footer"></div>
 
 </body>
 </html>
-
-<!-- New comment-->
