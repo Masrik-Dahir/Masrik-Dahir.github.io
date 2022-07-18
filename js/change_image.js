@@ -9,6 +9,16 @@ function changeImage() {
 
 }
 
+function changeImage_new_class() {
+    var image = document.getElementById("changeImage_new_class");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+
+}
 
 function changeImage2() {
     var image = document.getElementById("always-image2");
