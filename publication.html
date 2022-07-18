@@ -1,302 +1,444 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/gif/png" href="./Images/logo.png">
-  <title>Masrik Dahir</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="css/icons.css">
-  <link rel="stylesheet" href="css/box.css">
-  <link rel="stylesheet" href="css/default.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/new.css">
-  <link rel="stylesheet" href="css/if.css">
-  <link rel="stylesheet" href="css/popup.css">
-  <link rel="stylesheet" href="css/glowing.css">
+<!--    Metadata-->
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="js/html.js"></script>
-  <script src="js/hourglass.js"></script>
-  <script src="js/file.js" defer></script>
-  <script src='js/aesthetics.js' crossorigin='anonymous'></script>
-  <script src="js/expand_jquery.js" defer></script>
+<!--    CSS imports-->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/new.css">
+    <link rel="stylesheet" href="css/if.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/glowing.css">
 
-  <script src ="https://unpkg.com/vue@next"></script>
-  <script src ="vueJs/default.js" defer></script>
+<!--    JS imports-->
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/file.js" defer></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+    <script src="js/expand_jquery.js" defer></script>
+
+<!--    Vue JS imports-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="vueJs/default.js" defer></script>
 </head>
 
-<body class="w3-white" >
+<body class="w3-white">
 <div id="app" v-cloak>
-  <div v-if="this.windowWidth >= 1200">
-    <div class="topnav">
-      <a href="index.html">Home</a>
-      <a href="work.html">Work Experience</a>
-      <a class="active" href="publication.html">Publication</a>
-      <a href="education.html">Education</a>
-      <a href="software.html">Software App</a>
-      <a href="web.html">Web App</a>
-      <a href="entrepreneurship.html">Entrepreneurship</a>
-      <a href="leadership.html">Leadership</a>
-      <a href="travel.html">Travel</a>
+    <div v-if="this.windowWidth >= 1200">
+        <div class="topnav">
+            <a href="index.html">Home</a>
+            <a href="work.html">Work Experience</a>
+            <a class="active" href="publication.html">Publication</a>
+            <a href="education.html">Education</a>
+            <a href="software.html">Software App</a>
+            <a href="web.html">Web App</a>
+            <a href="entrepreneurship.html">Entrepreneurship</a>
+            <a href="leadership.html">Leadership</a>
+            <a href="travel.html">Travel</a>
+        </div>
     </div>
-  </div>
-  <div v-else>
-    <div class="popup" id="popup-3">
-      <div class="overlay"></div>
-      <div class="content">
-        <div class="close-btn" onclick="togglePopup('3')">&times;</div>
-        <div style="color: black">
+    <div v-else>
+        <div class="popup" id="popup-3">
+            <div class="overlay"></div>
+            <div class="content">
+                <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                <div style="color: black">
 
-          <div style="margin-top: 30px;">
+                    <div style="margin-top: 30px;">
 
-          </div>
-          <a href="index.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                     style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Home</b>
-            </h4>
-          </div></button></a>
+                    </div>
+                    <a href="index.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Home</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="work.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Work Experience</b>
-            </h4>
-          </div></button></a>
+                    <a href="work.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Work Experience</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="publication.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                           style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Publication</b>
-            </h4>
-          </div></button></a>
+                    <a href="publication.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px; border: red 3px solid">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Publication</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="education.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                         style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Education</b>
-            </h4>
-          </div></button></a>
+                    <a href="education.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Education</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="software.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                        style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Software App</b>
-            </h4>
-          </div></button></a>
+                    <a href="software.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Software App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="web.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                   style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Web App</b>
-            </h4>
-          </div></button></a>
+                    <a href="web.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Web App</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="entrepreneurship.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Entrepreneurship</b>
-            </h4>
-          </div></button></a>
+                    <a href="entrepreneurship.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Entrepreneurship</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="leadership.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                          style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Leadership</b>
-            </h4>
-          </div></button></a>
+                    <a href="leadership.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Leadership</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
-          <a href="travel.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
-                                                                      style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
-            <h4><b style="color: black"><div class="wrapper">
-            </div>Travel</b>
-            </h4>
-          </div></button></a>
+                    <a href="travel.html" style="text-decoration: none">
+                        <button class="glow-on-hover3 Blazing" type="button"
+                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                            <div style="" class="w3-container">
+                                <h4><b style="color: black">
+                                    <div class="wrapper">
+                                    </div>
+                                    Travel</b>
+                                </h4>
+                            </div>
+                        </button>
+                    </a>
 
+                </div>
+
+            </div>
         </div>
 
-      </div>
-    </div>
+        <div>
+            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25"
+                                                                               height="20" alt="Masrik Dahir">
+                <bdi style=" margin-top: 5px">Menu</bdi>
+            </button>
 
-    <div>
-      <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir"> <bdi style=" margin-top: 5px">Menu</bdi></button>
-
+        </div>
     </div>
-  </div>
 </div>
 <script>
-  function togglePopup(num){
-    document.getElementById(`popup-${num}`).classList.toggle("active");
-  }
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
 </script>
 
 <!-- Page Container -->
 <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%);">
 
-  <div class="w3-row-padding">
+    <div class="w3-row-padding">
 
-    <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
-      <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Publication</text>
-    </svg>
+        <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+            <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Publication</text>
+        </svg>
 
-    <h2 style="color: black; text-align: center"><i class="w3-xxlarge w3-text-teal;" style="color:DarkSlateGray;"></i>
-      <b>
-        <a class="btn1">
-          <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/up.jpg"
-               ;/>
-        </a>
-        <a class="btn2">
-          <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/down.jpg"
-               ;/>
-        </a>
-      </b>
-    </h2>
+        <h2 style="color: black; text-align: center"><i class="w3-xxlarge w3-text-teal;"
+                                                        style="color:DarkSlateGray;"></i>
+            <b>
+                <a class="btn1">
+                    <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/up.jpg"
+                         ;/>
+                </a>
+                <a class="btn2">
+                    <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/down.jpg"
+                         ;/>
+                </a>
+            </b>
+        </h2>
 
-    <!--        Research Paper     -->
-    <div class="w3-container w3-card" style="background-color: white">
-      <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Paper</b></h4>
-      <p1>
-        <table WIDTH="100%">
-        <tr>
-          <td WIDTH="95%"><ul><li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept
-            Maps," in <i>IEEE Access</i>, vol. 9, pp. 119564-119577, 2021, doi: <a href = "https://ieeexplore.ieee.org/document/9519627" target="_blank">10.1109/ACCESS.2021.3106509</a>.</li></ul></td>
-          <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-        </tr>
+        <!--        Research Paper     -->
+        <div class="w3-container w3-card" style="background-color: white">
+            <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Paper</b></h4>
+            <p1>
+                <table WIDTH="100%">
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool
+                                    for Concept
+                                    Maps," in <i>IEEE Access</i>, vol. 9, pp. 119564-119577, 2021, doi: <a
+                                            href="https://ieeexplore.ieee.org/document/9519627" target="_blank">10.1109/ACCESS.2021.3106509</a>.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none"
+                                          href="./pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf"
+                                          title="asd" target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
 
-          <tr>
-            <td WIDTH="95%"><ul><li><b>M. A. Dahir</b>, Naga Ramya Bhamidipati, et al. "ClaimChain: Secure Blockchain
-              Platform for Handling Insurance Claims Processing," <i> 2021 IEEE International Conference on Blockchain (Blockchain),</i> 2021, pp. 55-64, doi: <a href="https://ieeexplore.ieee.org/document/9680598" target="_blank">10.1109/Blockchain53845.2021.00019.</a></li></ul></td>
-            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/ClaimChain.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-          </tr>
-        </table>
-      </p1>
-      <hr>
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>M. A. Dahir</b>, Naga Ramya Bhamidipati, et al. "ClaimChain: Secure Blockchain
+                                    Platform for Handling Insurance Claims Processing," <i> 2021 IEEE International
+                                        Conference on Blockchain (Blockchain),</i> 2021, pp. 55-64, doi: <a
+                                            href="https://ieeexplore.ieee.org/document/9680598" target="_blank">10.1109/Blockchain53845.2021.00019.</a>
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none" href="./pdf/ClaimChain.pdf" title="asd"
+                                          target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
+                </table>
+            </p1>
+            <hr>
+        </div>
+        <br>
+
+        <!--        Research Poster     -->
+        <div class="w3-container w3-card" style="background-color: white">
+            <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Poster</b></h4>
+            <p1>
+                <table WIDTH="100%">
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Dahir M</b>, Jones J, Raison B, Rachel E, Melanie B, Brie H, Leland W, Cara C.
+                                    “Facing Food Insecurity During COVID-19: The
+                                    Emerging Case of Little Free Food Pantries,”
+                                    VCU Symposium for Undergraduate Research and Creativity, 2022.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none" href="./pdf/VCU_Health_Research.pdf"
+                                          title="Masrik Dahir" target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
+
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Masrik Dahir</b>, Hank Stafford, Roshan Neupane, Ramya Bhamidipati, Varsha
+                                    Vakkavanthula, Prasad Calyam. “ClaimChain: Secure Blockchain Platform for Handling
+                                    Insurance
+                                    Claims Processing | MU Digital Library, University of Missouri.”
+                                    <a href="https://lnkd.in/ewvaniu" target="_blank">Umsystem.edu</a>, 2021.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none" href="./pdf/NewClaimchainPoster.pdf"
+                                          title="Masrik Dahir" target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
+
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool
+                                    for Concept
+                                    Maps," VCU DURI Symposium, 2021.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none" href="./pdf/CronusPoster.pdf"
+                                          title="Masrik Dahir" target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
+                </table>
+            </p1>
+            <hr>
+        </div>
+        <br>
+
+        <!--        Software Publication     -->
+        <div class="w3-container w3-card" style="background-color: white">
+            <h4><b style="color: black; font-size: calc(20px + .5vw);">Software Publication</b></h4>
+            <p1>
+                <table WIDTH="100%">
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Masrik Dahir</b>. “Formats.” Google Play Store, 2.0.3,
+                                    <a href="https://play.google.com/store/apps/details?id=com.apps.masrik.formats"
+                                       target="_blank"> play.google.com</a>, 24 Apr. 2018.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%">
+                            <a style="text-decoration:none"
+                               href="https://play.google.com/store/apps/details?id=com.apps.masrik.formats"
+                               title="Formats" target="_blank" alt="Masrik Dahir">
+                                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;"
+                                     alt="Masrik Dahir"/></a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Masrik Dahir</b>. “Universal Calculator.” Google Play Store, 1.0.0,
+                                    <a href="https://play.google.com/store/apps/details?id=com.masrik.convertme"
+                                       target="_blank"> play.google.com</a>, 22 Nov. 2021.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%">
+                            <a style="text-decoration:none"
+                               href="https://play.google.com/store/apps/details?id=com.masrik.convertme"
+                               title="Universal Calculator" target="_blank" alt="Masrik Dahir">
+                                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;"
+                                     alt="Masrik Dahir"/></a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Masrik Dahir</b>. “Automata.” Google Play Store, 1.0.0,
+                                    <a href="https://play.google.com/store/apps/details?id=com.masrik.automation"
+                                       target="_blank"> play.google.com</a>, 11 Dec. 2021.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%">
+                            <a style="text-decoration:none"
+                               href="https://play.google.com/store/apps/details?id=com.masrik.automation"
+                               title="Automata" target="_blank" alt="Masrik Dahir">
+                                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;"
+                                     alt="Masrik Dahir"/></a>
+                        </td>
+                    </tr>
+                </table>
+            </p1>
+            <hr>
+        </div>
+        <br>
+
+        <!--        Contributing Editor     -->
+        <div class="w3-container w3-card" style="background-color: white">
+            <h4><b style="color: black; font-size: calc(20px + .5vw);">Contributing Editor</b></h4>
+            <p1>
+                <table WIDTH="100%">
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Masrik Dahir</b>, el al. “The Last Basketball Game.” <i>Hearing</i>, June 2020,
+                                    28-29.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none" href="./pdf/The%20Hearing%202019-2020.pdf"
+                                          title="asd" target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
+                </table>
+            </p1>
+            <hr>
+        </div>
+        <br>
+
+        <!--        Presentation     -->
+        <div class="w3-container w3-card" style="background-color: white">
+            <h4><b style="color: black; font-size: calc(20px + .5vw);">Forum Presentation</b></h4>
+            <p1>
+                <table WIDTH="100%">
+                    <tr>
+                        <td WIDTH="95%">
+                            <ul>
+                                <li><b>Masrik Dahir</b>, Hank Stafford. <i>ClaimChain: Secure Blockchain Platform for
+                                    Handling Insurance
+                                    Claims Processing. </i>Undergraduate Research and Creative Achievements Forum. Jul.
+                                    2021, University
+                                    of Missouri, Columbia. Presentation.
+                                </li>
+                            </ul>
+                        </td>
+                        <td WIDTH="5%"><a style="text-decoration:none" href="./pdf/ClaimChainPowerPoint.pdf" title="asd"
+                                          target="_blank" alt="Masrik Dahir">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png"
+                                 style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+                    </tr>
+                </table>
+            </p1>
+            <hr>
+        </div>
+        <br>
+
     </div>
     <br>
 
-    <!--        Research Poster     -->
-    <div class="w3-container w3-card" style="background-color: white">
-      <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Poster</b></h4>
-      <p1>
-        <table WIDTH="100%">
-          <tr>
-            <td WIDTH="95%"><ul><li><b>Dahir M</b>, Jones J, Raison B, Rachel E, Melanie B, Brie H, Leland W, Cara C. “Facing Food Insecurity During COVID-19: The
-              Emerging Case of Little Free Food Pantries,”
-              VCU Symposium for Undergraduate Research and Creativity, 2022.</li></ul></td>
-            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/VCU_Health_Research.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
-              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-          </tr>
-
-          <tr>
-            <td WIDTH="95%"><ul><li><b>Masrik Dahir</b>, Hank Stafford, Roshan Neupane, Ramya Bhamidipati, Varsha Vakkavanthula, Prasad Calyam. “ClaimChain: Secure Blockchain Platform for Handling Insurance
-              Claims Processing | MU Digital Library, University of Missouri.”
-              <a href = "https://lnkd.in/ewvaniu" target="_blank">Umsystem.edu</a>, 2021.</li></ul></td>
-            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/NewClaimchainPoster.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
-              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-          </tr>
-
-          <tr>
-            <td WIDTH="95%"><ul><li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept
-              Maps," VCU DURI Symposium, 2021.</li></ul></td>
-            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/CronusPoster.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
-              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-          </tr>
-        </table>
-      </p1>
-      <hr>
-    </div>
-    <br>
-
-    <!--        Software Publication     -->
-    <div class="w3-container w3-card" style="background-color: white">
-      <h4><b style="color: black; font-size: calc(20px + .5vw);">Software Publication</b></h4>
-      <p1>
-        <table WIDTH="100%">
-          <tr>
-            <td WIDTH="95%">
-              <ul><li><b>Masrik Dahir</b>. “Formats.” Google Play Store, 2.0.3,
-                <a href = "https://play.google.com/store/apps/details?id=com.apps.masrik.formats" target="_blank"> play.google.com</a>, 24 Apr. 2018.</li></ul>
-            </td>
-            <td WIDTH="5%">
-              <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.apps.masrik.formats" title="Formats" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
-            </td>
-          </tr>
-
-          <tr>
-            <td WIDTH="95%">
-              <ul><li><b>Masrik Dahir</b>. “Universal Calculator.” Google Play Store, 1.0.0,
-                <a href = "https://play.google.com/store/apps/details?id=com.masrik.convertme" target="_blank"> play.google.com</a>, 22 Nov. 2021.</li></ul>
-            </td>
-            <td WIDTH="5%">
-              <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.masrik.convertme" title="Universal Calculator" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
-            </td>
-          </tr>
-
-          <tr>
-            <td WIDTH="95%">
-              <ul><li><b>Masrik Dahir</b>. “Automata.” Google Play Store, 1.0.0,
-                <a href = "https://play.google.com/store/apps/details?id=com.masrik.automation" target="_blank"> play.google.com</a>, 11 Dec. 2021.</li></ul>
-            </td>
-            <td WIDTH="5%">
-              <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.masrik.automation" title="Automata" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
-            </td>
-          </tr>
-        </table>
-      </p1>
-      <hr>
-    </div>
-    <br>
-
-    <!--        Contributing Editor     -->
-    <div class="w3-container w3-card" style="background-color: white">
-      <h4><b style="color: black; font-size: calc(20px + .5vw);">Contributing Editor</b></h4>
-      <p1>
-        <table WIDTH="100%">
-          <tr>
-            <td WIDTH="95%"><ul><li><b>Masrik Dahir</b>, el al. “The Last Basketball Game.” <i>Hearing</i>, June 2020, 28-29.</li></ul></td>
-            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/The%20Hearing%202019-2020.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-          </tr>
-        </table>
-      </p1>
-      <hr>
-    </div>
-    <br>
-
-    <!--        Presentation     -->
-    <div class="w3-container w3-card" style="background-color: white">
-      <h4><b style="color: black; font-size: calc(20px + .5vw);">Forum Presentation</b></h4>
-      <p1>
-        <table WIDTH="100%">
-          <tr>
-            <td WIDTH="95%"><ul><li><b>Masrik Dahir</b>, Hank Stafford. <i>ClaimChain: Secure Blockchain Platform for Handling Insurance
-              Claims Processing. </i>Undergraduate Research and Creative Achievements Forum. Jul. 2021, University
-              of Missouri, Columbia. Presentation.</li></ul></td>
-            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/ClaimChainPowerPoint.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-          </tr>
-        </table>
-      </p1>
-      <hr>
-    </div>
-    <br>
-
-  </div>
-  <br>
-
-
-  <!-- End Page Container -->
+    <!-- End Page Container -->
 </div>
-
-
 
 <div id="footer"></div>
 
