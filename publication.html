@@ -22,6 +22,7 @@
   <script src="js/hourglass.js"></script>
   <script src="js/file.js" defer></script>
   <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+  <script src="js/expand_jquery.js" defer></script>
 
   <script src ="https://unpkg.com/vue@next"></script>
   <script src ="vueJs/default.js" defer></script>
@@ -140,185 +141,161 @@
 <!-- Page Container -->
 <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%);">
 
-  <!-- The Grid -->
   <div class="w3-row-padding">
-    <!-- Left Column -->
 
+    <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+      <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Publication & Presentation</text>
+    </svg>
 
+    <h2 style="color: black; text-align: center"><i class="w3-xxlarge w3-text-teal;" style="color:DarkSlateGray;"></i>
+      <b>
+        <a class="btn1">
+          <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/up.jpg"
+               ;/>
+        </a>
+        <a class="btn2">
+          <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/down.jpg"
+               ;/>
+        </a>
+      </b>
+    </h2>
 
-      <!-- End Left Column -->
-    <!-- Right Column -->
-    <div class="" >
-      <!--      VCU School of Pharmacy-->
-      <!-- Publication -->
-      <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%"><text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Publication</text></svg>
-
-      <div class="w3-container w3-card w3-margin-bottom">
-
-<!--        <br>-->
-        <div class="w3-container">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Paper</b> </h4>
-          <table>
-            <tr>
-              <td><ul><li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept
-                Maps," in <i>IEEE Access</i>, vol. 9, pp. 119564-119577, 2021, doi: <a href = "https://ieeexplore.ieee.org/document/9519627" target="_blank">10.1109/ACCESS.2021.3106509</a>.</li></ul></td>
-              <td><a style="text-decoration:none" href = "./pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-            </tr>
-
-            <tr>
-              <td><ul><li><b>M. A. Dahir</b>, Naga Ramya Bhamidipati, et al. "ClaimChain: Secure Blockchain
-                Platform for Handling Insurance Claims Processing," <i> 2021 IEEE International Conference on Blockchain (Blockchain),</i> 2021, pp. 55-64, doi: <a href="https://ieeexplore.ieee.org/document/9680598" target="_blank">10.1109/Blockchain53845.2021.00019.</a></li></ul></td>
-              <td><a style="text-decoration:none" href = "./pdf/ClaimChain.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-            </tr>
-
-          </table>
-
-          <hr>
-        </div>
-      </div>
-
-      <div class="w3-container w3-card w3-margin-bottom">
-        <div class="w3-container">
-      <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Poster</b> </h4>
-      <table>
+    <!--        Research Paper     -->
+    <div class="w3-container w3-card" style="background-color: white">
+      <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Paper</b></h4>
+      <p1>
+        <table WIDTH="100%">
         <tr>
-
-          <td><ul><li><b>Dahir M</b>, Jones J, Raison B, Rachel E, Melanie B, Brie H, Leland W, Cara C. “Facing Food Insecurity During COVID-19: The
-            Emerging Case of Little Free Food Pantries,”
-            VCU Symposium for Undergraduate Research and Creativity, 2022.</li></ul></td>
-          <td><a style="text-decoration:none" href = "./pdf/VCU_Health_Research.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
-            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-
-        </tr>
-        <tr>
-          <td><ul><li><b>Masrik Dahir</b>, Hank Stafford, Roshan Neupane, Ramya Bhamidipati, Varsha Vakkavanthula, Prasad Calyam. “ClaimChain: Secure Blockchain Platform for Handling Insurance
-            Claims Processing | MU Digital Library, University of Missouri.”
-            <a href = "https://lnkd.in/ewvaniu" target="_blank">Umsystem.edu</a>, 2021.</li></ul></td>
-          <td><a style="text-decoration:none" href = "./pdf/NewClaimchainPoster.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
-            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-
-        </tr>
-        <tr>
-          <td><ul><li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept
-            Maps," VCU DURI Symposium, 2021.</li></ul></td>
-          <td><a style="text-decoration:none" href = "./pdf/CronusPoster.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
+          <td WIDTH="95%"><ul><li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept
+            Maps," in <i>IEEE Access</i>, vol. 9, pp. 119564-119577, 2021, doi: <a href = "https://ieeexplore.ieee.org/document/9519627" target="_blank">10.1109/ACCESS.2021.3106509</a>.</li></ul></td>
+          <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
             <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
         </tr>
 
-      </table>
-      </div>
-      </div>
-
-      <div class="w3-container w3-card w3-margin-bottom">
-        <div class="w3-container">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Software</b> </h4>
-          <table table-layout=fixed"; overflow="hidden"; width="100%";border-collapse="collapse";>
-            <col width="100%" />
-            <col width="10%" />
-            <tr>
-              <td>
-                <ul><li><b>Masrik Dahir</b>. “Formats.” Google Play Store, 2.0.3,
-                  <a href = "https://play.google.com/store/apps/details?id=com.apps.masrik.formats" target="_blank"> play.google.com</a>, 24 Apr. 2018.</li></ul>
-              </td>
-              <td>
-                <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.apps.masrik.formats" title="Formats" target = "_blank" alt="Masrik Dahir">
-                  <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
-              </td>
-              <td>
-                <a style="text-decoration:none" href = "https://www.masrikdahir.com/formats/" title="Formats" target = "_blank" alt="Masrik Dahir">
-                  <img src="./Images/Web3.png" style="width: 1vw; min-width: 30px;" alt="Masrik Dahir"/></a>
-              </td>
-            </tr>
-          </table>
-
-          <!--          https://play.google.com/store/apps/details?id=com.masrik.convertme-->
-          <table table-layout=fixed"; overflow="hidden"; width="100%";border-collapse="collapse";>
-            <col width="100%" />
-            <col width="10%" />
-            <tr>
-              <td>
-                <ul><li><b>Masrik Dahir</b>. “Universal Calculator.” Google Play Store, 1.0.0,
-                  <a href = "https://play.google.com/store/apps/details?id=com.masrik.convertme" target="_blank"> play.google.com</a>, 22 Nov. 2021.</li></ul>
-              </td>
-              <td>
-                <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.masrik.convertme" title="Universal Calculator" target = "_blank" alt="Masrik Dahir">
-                  <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
-              </td>
-              <td>
-                <a style="text-decoration:none" href = "https://www.masrikdahir.com/universal-calculator/" title="Universal Calculator" target = "_blank" alt="Universal Calculator">
-                  <img src="./Images/Web3.png" style="width: 1vw; min-width: 30px;" alt="Masrik Dahir"/></a>
-              </td>
-            </tr>
-          </table>
-          <!--https://play.google.com/store/apps/details?id=com.masrik.automation-->
-          <table table-layout=fixed"; overflow="hidden"; width="100%";border-collapse="collapse";>
-            <col width="100%" />
-            <col width="10%" />
-            <tr>
-              <td>
-                <ul><li><b>Masrik Dahir</b>. “Automata.” Google Play Store, 1.0.0,
-                  <a href = "https://play.google.com/store/apps/details?id=com.masrik.automation" target="_blank"> play.google.com</a>, 11 Dec. 2021.</li></ul>
-              </td>
-              <td>
-                <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.masrik.automation" title="Automata" target = "_blank" alt="Masrik Dahir">
-                  <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
-              </td>
-              <td>
-                <a style="text-decoration:none" href = "https://masrikdahir.com/automata" title="Automata" target = "_blank" alt="Masrik Dahir">
-                  <img src="./Images/Web3.png" style="width: 1vw; min-width: 30px;" alt="Masrik Dahir"/></a>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <div class="w3-container w3-card w3-margin-bottom">
-        <div class="w3-container">
-          <h4><b style="color: black; font-size: calc(20px + .5vw);">Magazine</b> </h4>
-          <table table-layout=fixed"; overflow="hidden"; width="100%";border-collapse="collapse";>
-            <col width="100%" />
-            <col width="10%" />
-            </tr>
-            <tr>
-              <td><ul><li><b>Masrik Dahir</b>, el al. “The Last Basketball Game.” <i>Hearing</i>, June 2020, 28-29.</li></ul></td>
-              <td><a style="text-decoration:none" href = "./pdf/The%20Hearing%202019-2020.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- Presentation-->
-      <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%"><text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Presentation</text></svg>
-
-      <div class="w3-container w3-card-4 w3-margin-bottom" >
-
-        <h2 class= "" style="color: black; text-align: center"><i class="w3-xxlarge w3-text-teal;" style="color:DarkSlateGray;"></i></h2>
-        <div class="w3-container">
-
-          <h4 ><b style="color: black; font-size: calc(20px + .5vw);">Forum</b></h4>
-
-          <table table-layout=fixed"; overflow="hidden"; width="100%";border-collapse="collapse";>
-            <col width="100%" />
-            <col width="10%" />
-            </tr>
-            <tr>
-              <td><ul><li><b>Masrik Dahir</b>, Hank Stafford. <i>ClaimChain: Secure Blockchain Platform for Handling Insurance
-                Claims Processing. </i>Undergraduate Research and Creative Achievements Forum. Jul. 2021, University
-                of Missouri, Columbia. Presentation.</li></ul></td>
-              <td><a style="text-decoration:none" href = "./pdf/ClaimChainPowerPoint.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
-                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
-            </tr>
-          </table>
-          <hr>
-        </div>
-      </div>
+          <tr>
+            <td WIDTH="95%"><ul><li><b>M. A. Dahir</b>, Naga Ramya Bhamidipati, et al. "ClaimChain: Secure Blockchain
+              Platform for Handling Insurance Claims Processing," <i> 2021 IEEE International Conference on Blockchain (Blockchain),</i> 2021, pp. 55-64, doi: <a href="https://ieeexplore.ieee.org/document/9680598" target="_blank">10.1109/Blockchain53845.2021.00019.</a></li></ul></td>
+            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/ClaimChain.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
+              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+          </tr>
+        </table>
+      </p1>
+      <hr>
     </div>
+    <br>
 
-    <!-- End Grid -->
+    <!--        Research Poster     -->
+    <div class="w3-container w3-card" style="background-color: white">
+      <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Poster</b></h4>
+      <p1>
+        <table WIDTH="100%">
+          <tr>
+            <td WIDTH="95%"><ul><li><b>Dahir M</b>, Jones J, Raison B, Rachel E, Melanie B, Brie H, Leland W, Cara C. “Facing Food Insecurity During COVID-19: The
+              Emerging Case of Little Free Food Pantries,”
+              VCU Symposium for Undergraduate Research and Creativity, 2022.</li></ul></td>
+            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/VCU_Health_Research.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
+              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+          </tr>
+
+          <tr>
+            <td WIDTH="95%"><ul><li><b>Masrik Dahir</b>, Hank Stafford, Roshan Neupane, Ramya Bhamidipati, Varsha Vakkavanthula, Prasad Calyam. “ClaimChain: Secure Blockchain Platform for Handling Insurance
+              Claims Processing | MU Digital Library, University of Missouri.”
+              <a href = "https://lnkd.in/ewvaniu" target="_blank">Umsystem.edu</a>, 2021.</li></ul></td>
+            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/NewClaimchainPoster.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
+              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+          </tr>
+
+          <tr>
+            <td WIDTH="95%"><ul><li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept
+              Maps," VCU DURI Symposium, 2021.</li></ul></td>
+            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/CronusPoster.pdf" title="Masrik Dahir" target = "_blank" alt="Masrik Dahir">
+              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+          </tr>
+        </table>
+      </p1>
+      <hr>
+    </div>
+    <br>
+
+    <!--        Software Publication     -->
+    <div class="w3-container w3-card" style="background-color: white">
+      <h4><b style="color: black; font-size: calc(20px + .5vw);">Software Publication</b></h4>
+      <p1>
+        <table WIDTH="100%">
+          <tr>
+            <td WIDTH="95%">
+              <ul><li><b>Masrik Dahir</b>. “Formats.” Google Play Store, 2.0.3,
+                <a href = "https://play.google.com/store/apps/details?id=com.apps.masrik.formats" target="_blank"> play.google.com</a>, 24 Apr. 2018.</li></ul>
+            </td>
+            <td WIDTH="5%">
+              <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.apps.masrik.formats" title="Formats" target = "_blank" alt="Masrik Dahir">
+                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
+            </td>
+          </tr>
+
+          <tr>
+            <td WIDTH="95%">
+              <ul><li><b>Masrik Dahir</b>. “Universal Calculator.” Google Play Store, 1.0.0,
+                <a href = "https://play.google.com/store/apps/details?id=com.masrik.convertme" target="_blank"> play.google.com</a>, 22 Nov. 2021.</li></ul>
+            </td>
+            <td WIDTH="5%">
+              <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.masrik.convertme" title="Universal Calculator" target = "_blank" alt="Masrik Dahir">
+                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
+            </td>
+          </tr>
+
+          <tr>
+            <td WIDTH="95%">
+              <ul><li><b>Masrik Dahir</b>. “Automata.” Google Play Store, 1.0.0,
+                <a href = "https://play.google.com/store/apps/details?id=com.masrik.automation" target="_blank"> play.google.com</a>, 11 Dec. 2021.</li></ul>
+            </td>
+            <td WIDTH="5%">
+              <a style="text-decoration:none" href = "https://play.google.com/store/apps/details?id=com.masrik.automation" title="Automata" target = "_blank" alt="Masrik Dahir">
+                <img src="./Images/Google_Play-Icon-Logo.wine.svg" style="width: 1vw; min-width: 60px;" alt="Masrik Dahir"/></a>
+            </td>
+          </tr>
+        </table>
+      </p1>
+      <hr>
+    </div>
+    <br>
+
+    <!--        Contributing Editor     -->
+    <div class="w3-container w3-card" style="background-color: white">
+      <h4><b style="color: black; font-size: calc(20px + .5vw);">Contributing Editor</b></h4>
+      <p1>
+        <table WIDTH="100%">
+          <tr>
+            <td WIDTH="95%"><ul><li><b>Masrik Dahir</b>, el al. “The Last Basketball Game.” <i>Hearing</i>, June 2020, 28-29.</li></ul></td>
+            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/The%20Hearing%202019-2020.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
+              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+          </tr>
+        </table>
+      </p1>
+      <hr>
+    </div>
+    <br>
+
+    <!--        Presentation     -->
+    <div class="w3-container w3-card" style="background-color: white">
+      <h4><b style="color: black; font-size: calc(20px + .5vw);">Forum Presentation</b></h4>
+      <p1>
+        <table WIDTH="100%">
+          <tr>
+            <td WIDTH="95%"><ul><li><b>Masrik Dahir</b>, Hank Stafford. <i>ClaimChain: Secure Blockchain Platform for Handling Insurance
+              Claims Processing. </i>Undergraduate Research and Creative Achievements Forum. Jul. 2021, University
+              of Missouri, Columbia. Presentation.</li></ul></td>
+            <td WIDTH="5%"><a style="text-decoration:none" href = "./pdf/ClaimChainPowerPoint.pdf" title="asd" target = "_blank" alt="Masrik Dahir">
+              <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px;margin-left: 25px" alt="Masrik Dahir"/></a></td>
+          </tr>
+        </table>
+      </p1>
+      <hr>
+    </div>
+    <br>
+
   </div>
+  <br>
 
 
   <!-- End Page Container -->
