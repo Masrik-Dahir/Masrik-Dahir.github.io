@@ -6,7 +6,7 @@
 [![Laravel](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/laravel.yml/badge.svg)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/laravel.yml)
 
 [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-(https://visitor-badge.laobi.icu/badge?page_id=Masrik-Dahir.Masrik-Dahir.repo)
+(https://visitor-badge.laobi.icu/badge?page_id=Masrik-Dahir.Masrik-Dahir.repoName)
 
 The url for the website https://www.masrikdahir.com
 ![index](https://user-images.githubusercontent.com/69909265/180584063-b7bbb0a8-e145-4391-b888-a35d194a03bb.gif)
