@@ -229,11 +229,18 @@
         </h2>
 
         <!--        Virginia Department fo Election     -->
+        <bdi id="app2" v-cloak>
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Virginia Cyber Navigator </b>
-                <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                    <bdi style="font-size: calc(10px + .5vw);">May 2022 - August 2022</bdi>
-                </b></h4>
+
+                    <bdi v-if="this.windowWidth >= 1200">
+                        <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                            <bdi style="font-size: calc(10px + .5vw);">May 2022 - August 2022</bdi>
+                        </b>
+                    </bdi>
+
+            </h4>
+
             <ul>
                 <a href="https://www.elections.virginia.gov/" target="_blank">
                     <img src="./Images/dept-of-elections-logo.png"
@@ -241,6 +248,11 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi> May 2022 - August 2022</bdi>
+                        </li>
+                    </bdi>
                     <li>Worked closely with Roanoke County and Virginia Department of Election</li>
                     <li>Incident Response, Access Management Policy, Business Impact Analysis</li>
                     <li>Inventory and Database Security</li>
@@ -253,10 +265,14 @@
         <!--        Capital One     -->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Business Analyst </b>
-                <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                    <bdi style="font-size: calc(10px + .5vw);">May 2022 - <span
-                            style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
-                </b></h4>
+
+                <bdi v-if="this.windowWidth >= 1200">
+                    <b class="color w3-text-teal;" style="float: right; color:crimson;">
+                        <bdi style="font-size: calc(10px + .5vw);">May 2022 - <span
+                                style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
+                    </b>
+                </bdi>
+            </h4>
             <ul>
                 <a href="https://www.capitalone.com/" target="_blank">
                     <img src="./Images/capitalone.png"
@@ -264,6 +280,12 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">May 2022 - <span
+                                    style="background-color: black; color:white; padding: 2px">Current</span></bdi>
+                        </li>
+                    </bdi>
                     <li>Node.Js: NVM, HTTP API, Fastify, DynamoDB, NPM, Yarn;</li>
                     <li>Vue.Js: Vue CLI, database;</li>
                     <li>AWS: IAM roles, EC2 instances, S3 buckets and policy, ASGs, ALB, Lambda functions, Node
@@ -275,35 +297,15 @@
         </div>
         <br>
 
-        <!--        Richmond Food Alliance     -->
-        <!--        <div class="w3-container w3-card" style="background-color: white">-->
-        <!--            <h4><b style="color: black; font-size: calc(20px + .5vw);">Web Developer </b>-->
-        <!--                <b class="color w3-text-teal;" style="float: right; color:crimson;">-->
-        <!--                    <bdi style="font-size: calc(10px + .5vw);">Oct 2021 - Jan 2022</bdi>-->
-        <!--                </b></h4>-->
-        <!--            <ul>-->
-        <!--                <a href="https://www.richmondfoodjustice.org/" target="_blank">-->
-        <!--                    <img src="./Images/download-1.png"-->
-        <!--                         style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"-->
-        <!--                         alt="Masrik Dahir"/></a>-->
-        <!--            </ul>-->
-        <!--            <p1>-->
-        <!--                <ul>-->
-        <!--                    <li>Organized and customized the Food Alliance Website; and</li>-->
-        <!--                    <li>Utilized the WordPress CMS (HTML 5, CSS 3, JavaScript, Jquery library, PHP).</li>-->
-        <!--                </ul>-->
-        <!--            </p1>-->
-        <!--            <hr>-->
-        <!--        </div>-->
-        <!--        <br>-->
-
         <!--        iCubed Scolar -->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher </b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                    <bdi style="font-size: calc(10px + .5vw);">Aug 2021 -
-                        <span style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
-                </b></h4>
+                    <bdi style="font-size: calc(10px + .5vw);">Aug 2021 - May 2022</bdi>
+                </b>
+                    </bdi>
+            </h4>
             <ul>
 
                 <TABLE WIDTH="100%">
@@ -326,6 +328,11 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">Aug 2021 - May 2022</bdi>
+                        </li>
+                    </bdi>
                     <li>Built and coded automated Rampantries (food cart at VCU Monroe Park Campus); and</li>
                     <li>Used Raspberry pi to receive data and save it in the Cloud storage.</li>
                 </ul>
@@ -334,12 +341,15 @@
         </div>
         <br>
 
-        <!--        Att-->
+        <!--        School of Pharmacy-->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Web Developer&emsp;</b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="color w3-text-teal;" style="float: right; color:crimson;">
                     <bdi style="font-size: calc(10px + .5vw);">Jun 2021 - Jan 2022</bdi>
-                </b></h4>
+                </b>
+                </bdi>
+            </h4>
             <ul>
                 <a href="https://pharmacy.vcu.edu/" target="_blank">
                     <img src="./Images/sop.png"
@@ -348,6 +358,11 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">Jun 2021 - Jan 2022</bdi>
+                        </li>
+                    </bdi>
                     <li>Manage VCU School of Pharmacy's website and multiple lab websites; and</li>
                     <li>Utilize the Terminal 4 content management system</li>
                     <li>Worked with Compass framework, WordPress, and cPanel</li>
@@ -359,11 +374,13 @@
         </div>
         <br>
 
+        <!--             Att-->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">AT&T Summer Learning Academy Extern&emsp;</b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="color w3-text-teal;" style="float: right; color:crimson;">
                     <bdi style="font-size: calc(10px + .5vw);">May 2021 - September 2021</bdi>
-                </b></h4>
+                </b></bdi></h4>
             <ul>
                 <TABLE WIDTH="100%">
                     <TR>
@@ -385,6 +402,11 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">May 2021 - September 2021</bdi>
+                        </li>
+                    </bdi>
                     <li>5G and Edge Technology, Artificial Intelligence, Business Ethics, Cable Routing Basics, etc.
                     </li>
                     <li>Participated and contributed in live events</li>
@@ -397,11 +419,14 @@
         <!--        University of Missouri-->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);"> Research Fellow</b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="w3-text-teal;" style="float: right; color:crimson;">
                     <bdi style="font-size: calc(10px + .5vw);">Jun 2021 -
                         Jul 2021
                     </bdi>
-                </b></h4>
+                </b>
+                    </bdi>
+            </h4>
             <ul>
                 <a href="https://engineering.missouri.edu/" target="_blank">
                     <img src="./Images/mu.jpg"
@@ -410,6 +435,13 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">Jun 2021 -
+                                Jul 2021
+                            </bdi>
+                        </li>
+                    </bdi>
                     <li>Developed a secured system in blockchain to process insurance claims and prevent fraudulent
                         claims and cyber-attacks i.e. Sybil attack,
                         50% attack, Timestamp manipulation, Malware, and Malicious code injection;
@@ -430,11 +462,12 @@
         <!--        Civilian Cyber-->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Cyber Security Analyst</b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="w3-text-teal;" style="float: right; color:crimson;">
                     <bdi style="font-size: calc(10px + .5vw);">Feb 2021 -
                         Jun 2021
                     </bdi>
-                </b></h4>
+                </b></bdi></h4>
             <ul>
                 <a href="https://civiliancyber.com/" target="_blank" style="text-decoration: none;">
                     <img src="./Images/civiliancyber.png"
@@ -444,6 +477,13 @@
 
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">Feb 2021 -
+                                Jun 2021
+                            </bdi>
+                        </li>
+                    </bdi>
                     <li>Working on Joomla, Moodle framework; Administering databases; Integrating plug-ins:
                         Community Builder, Joomdle; and
                     </li>
@@ -460,10 +500,11 @@
         <!--        SAFE Lab-->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher</b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="w3-text-teal;" style="float: right; color:crimson;">
                     <bdi style="font-size: calc(10px + .5vw);">Jun 2020 -
                         <span style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
-                </b></h4>
+                </b></bdi></h4>
             <ul>
                 <a href="https://safe.lab.vcu.edu/" target="_blank" style="text-decoration: none;">
                     <img src="./Images/safelab.JPG"
@@ -472,6 +513,12 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">Jun 2020 -
+                                <span style="background-color: black; color:white; padding: 2px">Current</span></bdi>
+                        </li>
+                    </bdi>
                     <li>Researched in concept map files comparison and analysis using the algorithm; and</li>
                     <li>Computer Programs: CmapTools, PyCharm; Programming Language: Python; Libraries: Nltk,
                         Graphviz, XML, Natural Language Processing.
@@ -493,11 +540,12 @@
         <!--        RamSec Lab-->
         <div class="w3-container w3-card" style="background-color: white">
             <h4><b style="color: black; font-size: calc(20px + .5vw);">Undergrad Researcher</b>
+                <bdi v-if="this.windowWidth >= 1200">
                 <b class="w3-text-teal;" style="float: right; color:crimson;">
                     <bdi style="font-size: calc(10px + .5vw);">Jan 2021 -
                         Sep 2021
                     </bdi>
-                </b></h4>
+                </b></bdi></h4>
             <ul>
                 <a href="http://www.people.vcu.edu/~cfung/lab.html" target="_blank" style="text-decoration: none;">
                     <img src="./Images/vcu.png"
@@ -506,6 +554,13 @@
             </ul>
             <p1>
                 <ul>
+                    <bdi v-if="this.windowWidth < 1200">
+                        <li class="color w3-text-teal;" style="">
+                            <bdi style="">Jan 2021 -
+                                Sep 2021
+                            </bdi>
+                        </li>
+                    </bdi>
                     <li>Studying the existing models (IP Trackback Technique, Packet Market Technique, Entropy
                         Variation, Signature-based detection, Anomaly Detection) to prevent DDoS attacks; and
                     </li>
@@ -515,6 +570,8 @@
             <hr>
         </div>
         <br>
+
+        </bdi>
 
     </div>
     <br>
