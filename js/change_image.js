@@ -357,3 +357,14 @@ function changeImageFire305() {
     }
 
 }
+
+// Bachelor of Science, VCU
+function vcu_bachelor_of_science() {
+    var image = document.getElementById("always-image-vcu-bachelor-of-science");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+}
