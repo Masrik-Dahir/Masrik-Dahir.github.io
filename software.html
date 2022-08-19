@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
     <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/search.css">
 
     <!--    JS imports-->
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -31,6 +32,7 @@
     <!--    Vue JS imports-->
     <script src="https://unpkg.com/vue@next"></script>
     <script src="vueJs/default.js" defer></script>
+    <script src="vueJs/software.js" defer></script>
 
 </head>
 
@@ -43,7 +45,6 @@
             <a href="publication.html">Publication</a>
             <a href="education.html">Education</a>
             <a class="active" href="software.html">Software App</a>
-            <a href="web.html">Web App</a>
             <a href="entrepreneurship.html">Entrepreneurship</a>
             <a href="leadership.html">Leadership</a>
             <a href="travel.html">Travel</a>
@@ -124,19 +125,6 @@
                         </button>
                     </a>
 
-                    <a href="web.html" style="text-decoration: none">
-                        <button class="glow-on-hover3 Blazing" type="button"
-                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
-                            <div style="" class="w3-container">
-                                <h4><b style="color: black">
-                                    <div class="wrapper">
-                                    </div>
-                                    Web App</b>
-                                </h4>
-                            </div>
-                        </button>
-                    </a>
-
                     <a href="entrepreneurship.html" style="text-decoration: none">
                         <button class="glow-on-hover3 Blazing" type="button"
                                 style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
@@ -203,304 +191,98 @@
     <div class="w3-row-padding">
 
         <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
-            <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Software Application</text>
+            <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Application</text>
         </svg>
 
-        <!--            Cronus-->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="95%">
-                        <a href="https://github.com/Masrik-Dahir/Cronus" target="_blank" style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Cronus</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">Comparing and Contrasting Concept Maps, Algorithmic Grading</p>
 
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://github.com/Masrik-Dahir/Cronus" target="_blank"><i
-                                style="font-size: calc(20px + 1vw)"
-                                class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
 
-        <!--            Video Downloader-->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="90%">
-                        <a href="https://github.com/Masrik-Dahir/Downloader" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Video Downloader</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">Download any video files from a web url, convert video to audio,
-                                YouTube video downloader</p>
+        <div id="app_software">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                <div class="row" style="margin-bottom: 10px">
+                    <div class="form-control search-wrapper panel-heading col-sm-12" type="text" v-model="searchQuery" placeholder="Search">
+                        <center>
+                            <div class="search_logo">
+                            </div>
+                            <div class="search_bar">
+                                <img src="Images/Search.png" width="25"> &nbsp;&nbsp;
+                                <input class="search_searchbar" type="text" title="Search" v-model="searchQuery">
+                            </div>
+                            <div class="search_buttons">
+                            </div>
+                        </center>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <div v-if="resources.length" class="table">
+                        <div v-for="item in resultQuery">
+<!--                            <td><a v-bind:href="item.uri" target="_blank">{{item.title}} {{item.des}}</a></td>-->
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
+                                <TABLE WIDTH="100%">
+                                    <TR>
+                                        <TD WIDTH="80%">
+                                            <a v-bind:href="item.uri" target="_blank" style="text-decoration: none">
+                                                <h2><b style="color: black">
+                                                    <div class="wrapper">
+                                                    </div>
+                                                    {{item.title}}</b>
+                                                    <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
+                                                        <bdi style="font-size: calc(10px + .5vw);"></bdi>
+                                                    </b></h2>
+                                                <p style="font-size: 15px">{{item.des}}</p>
 
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://mega.nz/file/uSISSYLS#5htqGrOOXY66HbqrZLY68TVwKkfSDlcPwf79WyMu6pY"
-                           target="_blank"><i style="font-size:calc(20px + 1vw)"
-                                              class="fab fa-windows w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://github.com/Masrik-Dahir/Downloader" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
+                                            </a>
+                                        </TD>
 
-        <!--            Fraud Model-->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="95%">
-                        <a href="https://github.com/Masrik-Dahir/Fraud-Model" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Fraud Model</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">A threat modeling of attacks realizable
-                                in ClaimChain through attack trees, red flags identified by National Insurance Crime
-                                Bureau and use Machine Learning models to detect fraudulent activities with significant
-                                accuracy</p>
+                                        <!--       Windows     -->
+                                        <TD WIDTH="5%" v-if="item.uri_windows !== '' ">
+                                            <a v-bind:href="item.uri_windows" target="_blank"><i
+                                                    style="font-size: calc(20px + 1vw)"
+                                                    class="fab fa-windows w3-hover-opacity">&#160&#160</i></a>
+                                        </TD>
 
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
+                                        <!--       Mac     -->
+                                        <TD WIDTH="5%" v-if="item.uri_apple !== '' ">
+                                            <a v-bind:href="item.uri_apple" target="_blank"><i
+                                                    style="font-size: calc(20px + 1vw)"
+                                                    class="fab fa-apple w3-hover-opacity">&#160&#160</i></a>
+                                        </TD>
 
-                        <a href="https://github.com/Masrik-Dahir/Fraud-Model" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
+                                        <!--       Android     -->
+                                        <TD WIDTH="5%" v-if="item.uri_android !== '' ">
+                                            <a v-bind:href="item.uri_android" target="_blank"><i
+                                                    style="font-size: calc(20px + 1vw)"
+                                                    class="fab fa-google-play w3-hover-opacity">&#160&#160</i></a>
+                                        </TD>
 
-        <!--            DDoS Testing Tool -->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="90%">
-                        <a href="https://github.com/Masrik-Dahir/DDoS_interface" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                DDoS Penetration Testing Tool</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">A penetration testing tool to conduct DDoS attack in Application
-                                layer and Transport layer</p>
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://mega.nz/file/LHAGRKob#apm6_LpDjX1A8svDQeXTRIWElwoQlBX4Xc4DGfWlHC0"
-                           target="_blank"><i style="font-size:calc(20px + 1vw)"
-                                              class="fab fa-windows w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://github.com/Masrik-Dahir/DDoS_interface" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
+                                        <!--       Web     -->
+                                        <TD WIDTH="5%" v-if="item.uri_web !== '' ">
+                                            <a v-bind:href="item.uri_web" target="_blank"><i
+                                                    style="font-size: calc(20px + 1vw)"
+                                                    class="fa fa-space-shuttle w3-hover-opacity">&#160&#160</i></a>
+                                        </TD>
 
-        <!--            Encryption Decryption Tool-->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="90%">
-                        <a href="https://github.com/Masrik-Dahir/Encryption-decryption-interface" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Password Manager</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">Encrypt, decrypt files and folders and hash matches (md5, sha1,
-                                sha224, sha256, sha384, sha512) to check file integrity, password manager </p>
+                                        <!--       GitHub     -->
+                                        <TD WIDTH="5%" v-if="item.uri_github !== '' ">
+                                            <a v-bind:href="item.uri_github" target="_blank"><i
+                                                    style="font-size: calc(20px + 1vw)"
+                                                    class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
+                                        </TD>
 
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
 
-                        <a href="https://mega.nz/file/jTJHSAzI#oD6NmCxgvR2DtMdBKI9ghtaV1nK-sKgepvglF2lhUuI"
-                           target="_blank"><i style="font-size:calc(20px + 1vw)"
-                                              class="fab fa-windows w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                    <TD WIDTH="5%">
+                                    </TR>
+                                </TABLE>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
 
-                        <a href="https://github.com/Masrik-Dahir/Encryption-decryption-interface" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
 
-        <!--            PDF Interface             -->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="95%">
-                        <a href="https://github.com/Masrik-Dahir/Pdf_interface" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                PDF Interface</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px"></p>
-
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://github.com/Masrik-Dahir/Pdf_interface" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
-
-        <!--            Synchronizer             -->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="90%">
-                        <a href=""
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Synchronizer</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px"></p>
-
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-
-                        <a href=""><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
-
-        <!--            Formats -->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="90%">
-                        <a href="https://play.google.com/store/apps/details?id=com.apps.masrik.formats" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Formats</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">OCR, Bar code, and QR code scanner, text to speech</p>
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://play.google.com/store/apps/details?id=com.apps.masrik.formats" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-google-play w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
-
-        <!--            Automata -->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="95%">
-                        <a href="https://play.google.com/store/apps/details?id=com.masrik.automation" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Automata</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">Converts the regex to NFA, DFA, Minimum-DFA; converts CFG to LL
-                                Grammar and CNF </p>
-
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://play.google.com/store/apps/details?id=com.masrik.automation" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-google-play w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
-
-        <!--            Universal Calculator -->
-        <button class="glow-on-hover3 Blazing" type="button"
-                style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
-            <TABLE WIDTH="100%">
-                <TR>
-                    <TD WIDTH="95%">
-                        <a href="https://play.google.com/store/apps/details?id=com.masrik.convertme" target="_blank"
-                           style="text-decoration: none">
-                            <h2><b style="color: black">
-                                <div class="wrapper">
-                                </div>
-                                Universal Calculator</b>
-                                <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">
-                                    <bdi style="font-size: calc(10px + .5vw);"></bdi>
-                                </b></h2>
-                            <p style="font-size: 15px">Basic Calculator, Scientific Calculator, Bitwise Calculator
-                                (i.e., decimal, binary, hexadecimal), Unit Calculator (i.e., Any types of unit in all
-                                standards), Binary operations (i.e., 1's complement, 2's complement) </p>
-
-                        </a>
-                    </TD>
-                    <TD WIDTH="5%">
-                        <a href="https://play.google.com/store/apps/details?id=com.masrik.convertme" target="_blank"><i
-                                style="font-size:calc(20px + 1vw)" class="fab fa-google-play w3-hover-opacity">&#160&#160</i></a>
-                    </TD>
-                </TR>
-            </TABLE>
-        </button>
+<!--        -->
 
         <!-- End Grid -->
     </div>

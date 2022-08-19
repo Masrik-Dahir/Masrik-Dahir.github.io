@@ -10,7 +10,7 @@ var app = Vue.createApp({
             windowWidth: window.innerWidth,
             rand: '10px',
             color: 'red',
-            middle: (window.innerWidth - 1180)/2,
+            middle: (window.innerWidth - 960)/2,
             middle2: (window.innerWidth - 10)/2,
         }
     },
@@ -40,7 +40,7 @@ var app = Vue.createApp({
         onResize() {
             this.windowHeight = window.innerHeight;
             this.windowWidth = window.innerWidth;
-            this.middle = (window.innerWidth - 1180)/2;
+            this.middle = (window.innerWidth - 960)/2;
             this.middle2 = (window.innerWidth - 50)/2;
         },
         modelStyle: function(slide) {
@@ -74,7 +74,7 @@ var app2 = Vue.createApp({
             windowWidth: window.innerWidth,
             rand: '10px',
             color: 'red',
-            middle: (window.innerWidth - 1180)/2,
+            middle: (window.innerWidth - 960)/2,
             middle2: (window.innerWidth - 10)/2,
         }
     },
@@ -104,7 +104,7 @@ var app2 = Vue.createApp({
         onResize() {
             this.windowHeight = window.innerHeight;
             this.windowWidth = window.innerWidth;
-            this.middle = (window.innerWidth - 1180)/2;
+            this.middle = (window.innerWidth - 960)/2;
             this.middle2 = (window.innerWidth - 50)/2;
         },
         modelStyle: function(slide) {
