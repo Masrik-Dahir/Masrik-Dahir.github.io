@@ -175,21 +175,25 @@
 
         </div>
     </div>
+
+
+    <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
+        <div class="w3-row-padding">
+            <div class="w3-container w3-card" style="background-color: white; padding: 0px">
+                <div id="map" class="map" style="background: white"></div>
+            </div>
+        </div>
+    </div>
+
 </div>
 <script>
     function togglePopup(num) {
         document.getElementById(`popup-${num}`).classList.toggle("active");
     }
 </script>
+<script src="js/map.js" defer></script>
 
-<div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
-    <div class="w3-row-padding">
-        <div class="w3-container w3-card" style="background-color: white; padding: 0px">
-            <div id="map" class="map" style="background: white"></div>
-            <script src="js/map.js"></script>
-        </div>
-    </div>
-</div>
+
 
 <div id="footer"></div>
 </body>
