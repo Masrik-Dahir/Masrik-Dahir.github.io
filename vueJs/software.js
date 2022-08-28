@@ -151,4 +151,34 @@ const app_software = {
     }
 }
 
+const app_map = {
+    data() {
+        return {
+            searchQuery: null,
+            resources:[
+                {
+                    title:"United States of America",
+                },
+                {
+                    title:"Bangladesh",
+                },
+
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    }
+}
+
+
 Vue.createApp(app_software).mount('#app_software')
+Vue.createApp(app_map).mount('#app_map')

@@ -28,7 +28,7 @@
 
     style: new ol.style.Style({
     image: new ol.style.Icon({
-    anchor: [0.5, 46],
+    anchor: [0, 46],
     anchorXUnits: 'fraction',
     anchorYUnits: 'pixels',
     src: './Images/pin.png',
@@ -39,25 +39,25 @@
     view: new ol.View({
     center: ol.proj.fromLonLat([-78.024902, 37.926868]),
     zoom: 5,
-    maxZoom: 7,
+    maxZoom: 5,
     minZoom: 3,
 })
 
 });
-    // map.addOverlay(overlayLayer);
-    // const overlayFeatureName = document.getElementsById('feature-name')
-    // const overlayFeatureAdditionalInfo = document.getElementsById('feature-additional-info')
-    //
-    // map.on('click', function(e){
-    //     // overlayLayer.setPosition(undefined)
-    //     map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
-    //         let clickedCoordinate = e.coordinate;
-    //         let clickedFeatureName = feature.get('name');
-    //         let clickedFeatureAdditionInfo = feature.get('additionalinfo');
-    //         // overlayLayer.setPosition(clickedCoordinate)
-    //         overlayFeatureName.innerHTML = clickedFeatureName;
-    //         overlayFeatureAdditionalInfo.innerHTML = clickedFeatureAdditionInfo;
-    //         console.log(clickedFeatureName, clickedFeatureAdditionInfo);
-    //     })
-    // })
+    map.addOverlay(overlayLayer);
+    const overlayFeatureName = document.getElementsById('feature-name')
+    const overlayFeatureAdditionalInfo = document.getElementsById('feature-additional-info')
+
+    map.on('click', function(e){
+        // overlayLayer.setPosition(undefined)
+        map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
+            let clickedCoordinate = e.coordinate;
+            let clickedFeatureName = feature.get('name');
+            let clickedFeatureAdditionInfo = feature.get('additionalinfo');
+            // overlayLayer.setPosition(clickedCoordinate)
+            overlayFeatureName.innerHTML = clickedFeatureName;
+            overlayFeatureAdditionalInfo.innerHTML = clickedFeatureAdditionInfo;
+            console.log(clickedFeatureName, clickedFeatureAdditionInfo);
+        })
+    })
 
