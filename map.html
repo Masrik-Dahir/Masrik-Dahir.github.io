@@ -59,6 +59,14 @@
             justify-content: center;
             align-items: center;
         } */
+        @media only screen and (max-width: 1225px) {
+            .info {
+                display: none;
+            }
+            .w3-third{
+                width:100%
+            }
+        }
 
         #us-map {
             display: block;
@@ -240,7 +248,6 @@
 
 <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
 
-
     <!-- The Grid -->
     <div class="w3-row-padding">
 
@@ -304,8 +311,6 @@
         <div class="w3-twothird w3-margin-top">
             <div class="w3-card w3-margin-bottom" style="margin-left: 0px">
                 <h4 style="margin-top: 0px"><img style="width: calc(5% + 40px); margin: 1px" src="./Images/usa.webp"/> United States of America</h4>
-
-
 
             <div id="details-box"></div>
 
@@ -755,13 +760,6 @@
 
 
 </div>
-
-
-
-
-
-
-
 
 
 </body>
