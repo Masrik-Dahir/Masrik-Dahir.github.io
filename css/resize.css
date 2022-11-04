@@ -1,0 +1,49 @@
+.sizing{
+    float: right;
+    font-size: min(calc(10px + .5vw), 10vw);
+}
+
+.invis{
+    background-color: #528B8B; color: white;
+}
+
+.grow_club {
+    padding: 5px 5px 5px 20px;
+    margin: 5px 0px 5px 70px;
+    border-radius: 10px;
+    height: 70px;
+    width: calc(100% - 80px);
+    float: left;
+    /*position: relative;*/
+    transition: height 0.5s;
+    -webkit-transition: height 0.5s;
+    text-align: left;
+    overflow: hidden;
+}
+.grow_club:hover {
+    height: 150px;
+}
+
+.grow_org {
+    background-color: #C85A53;
+    color: white;
+    padding: 5px 5px 5px 20px;
+    margin: 5px 0px 5px 70px;
+    border-radius: 10px;
+    height: 70px;
+    width: calc(100% - 80px);
+    float: left;
+    /*position: relative;*/
+    transition: height 0.5s;
+    -webkit-transition: height 0.5s;
+    text-align: left;
+    overflow: hidden;
+}
+.grow_org:hover {
+    background-color: #C85A53;
+    color: white;
+    height: 150px;
+}
+
+
+

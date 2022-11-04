@@ -1,0 +1,8 @@
+@media only screen and (max-width: 1224px) {
+    .show_d {
+        display: none;
+    }
+    .w3-twothird{
+        width:100%
+    }
+}

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--    Metadata imports-->
+    <link rel="icon" type="image/gif/png" href="../Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--    CSS imports-->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://visitor-badge.laobi.icu/badge?page_id=Masrik-Dahir.repoName">
+    <link rel="stylesheet" href="../css/icons.css">
+    <link rel="stylesheet" href="../css/box.css">
+    <link rel="stylesheet" href="../css/default.css">
+    <link rel="stylesheet" href="../css/glowing.css">
+    <link rel="stylesheet" href="../css/popup.css">
+
+    <!--    JS imports-->
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="../js/html.js"></script>
+    <script src="../js/hourglass.js"></script>
+    <script src="../js/expand_jquery.js"></script>
+    <script src="../js/briefcase.js" defer></script>
+    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <!--    Functional JS imports-->
+    <script src="fv.js" defer></script>
+
+    <!--    Vue JS imports-->
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="../vueJs/default.js" defer></script>
+
+    <style>
+
+        .triangle-left {
+            width: 0;
+            height: 0;
+            border-top: 23px solid transparent;
+            border-bottom: 23px solid transparent;
+            border-right: 23px solid red;
+        }
+
+        .inner-triangle {
+            position: relative;
+            top: -20px;
+            left: 2px;
+            width: 0;
+            height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-right: 20px solid blue;
+        }
+
+        .glow-on-hover_nav {
+            width: 100%;
+            height: 100%;
+            border: none;
+            outline: none;
+            color: black;
+            background: white;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover_nav:before {
+            content: '';
+            background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+            position: absolute;
+            top: -2px;
+            left:-2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowing_nav 20s linear infinite;
+            opacity: 0;
+            transition: opacity .3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        .glow-on-hover_nav:active {
+            color: #000
+        }
+
+        .glow-on-hover_nav:active:after {
+            background: transparent;
+        }
+
+        .glow-on-hover_nav:hover:before {
+            opacity: 1;
+        }
+
+        .glow-on-hover_nav:after {
+            z-index: -1;
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+        }
+
+        @keyframes glowing_nav {
+            0% { background-position: 0 0; }
+            50% { background-position: 400% 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
+
+
+</head>
+<body class="w3-white">
+
+<div id="app" v-cloak>
+    <div class="container3" v-bind:style="modelStyle(slide)">
+        <div v-if="this.windowWidth >= 1200">
+            <div class="topnav">
+
+                <a href="../index.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>Home</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../work.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="">
+                                </div>Work Experience</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../publication.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Publication</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../education.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Education</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../software.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Software</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../entrepreneurship.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Entrepreneurship</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../leadership.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Leadership</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../map.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Travel</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+            </div>
+
+        </div>
+        <div v-else>
+            <div class="popup" id="popup-3">
+                <div class="overlay"></div>
+                <div class="content">
+                    <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                    <div style="color: black">
+
+                        <div style="margin-top: 30px;">
+
+                        </div>
+
+                        <a href="../index.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Home</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../work.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Work Experience</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../publication.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Publication</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../education.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Education</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../software.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Software</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../entrepreneurship.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Entrepreneurship</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../leadership.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Leadership</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                        <a href="../Demo/travel.html" style="text-decoration: none">
+                            <button class="glow-on-hover3 Blazing" type="button"
+                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                                <div style="" class="w3-container">
+                                    <h4><b style="color: black">
+                                        <div class="wrapper">
+                                        </div>
+                                        Travel</b>
+                                    </h4>
+                                </div>
+                            </button>
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div>
+                <button onclick="togglePopup('3')" class="cent crop" style=""><img src="../Images/menu.png" width="25"
+                                                                                   height="20" alt="Masrik Dahir">
+                    <bdi style=" margin-top: 5px"> Menu</bdi>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
+</script>
+
+
+
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="background-color: white; max-width: min(1800px, 95%);">
+
+    <!-- Right Column -->
+    <div>
+
+        <div class="w3-container w3-white w3-margin-bottom" style="margin-left: 0px; padding-left: 0px">
+            <div class="" style="">
+                <bdi style="float: left;">
+                    <a href="../software.html"><button class="glow-on-hover_nav Blazing" type="button" ><h4 style="margin: 0px; padding: 0px;">Software</h4></button></a>
+                </bdi>
+
+                <bdi style="float: left;">
+                    <img src="./../Images/arr.png" style="width: 20px;margin: 0px; padding: 0px; margin-top: 7px;">
+                </bdi>
+
+                <bdi style="float: left;">
+                    <button class="glow-on-hover_nav Blazing" type="button"><h4 style="margin: 0px; padding: 0px">Real Estate Analyzer</h4></button>
+                </bdi>
+
+
+            </div>
+        </div>
+
+        <div class="w3-container w3-card w3-white w3-margin-bottom">
+            <h2 style="color: black; text-align: center"><i class="fa w3-xxlarge w3-text-teal;"
+                                                            style="color:DarkSlateGray;"></i>Annuity&nbsp;&nbsp;
+                <b>
+                    <a class="btn1">
+                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
+                             src="../Images/up.jpg" ;/>
+                    </a>
+                    <a class="btn2">
+                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
+                             src="../Images/down.jpg" ;/>
+                    </a>
+
+                </b>
+            </h2>
+            <p1>
+            <div class="w3-container">
+
+
+
+                <table>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                                <tr>
+                                    <td><h4><b><label for="input_fv" style="color: black">FV = </label></b>
+                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
+                                    <td><input type="text" id="input_fv"></td>
+                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_fv`)" style="margin-left: 10px; width: fit-content"><img src="./../Images/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
+
+                                </tr>
+                                <tr>
+                                    <td><h4><b><label for="input_pv" style="color: black">PV = </label></b>
+                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
+                                    <td><input type="text" id="input_pv"></td>
+                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_pv`)" style="margin-left: 10px; width: fit-content"><img src="./../Images/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
+
+                                </tr>
+                                <tr>
+                                    <td><h4><b><label for="input_1_y" style="color: black">I/Y = </label></b>
+                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
+                                    <td><input type="text" id="input_1_y"></td>
+                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_1_y`)" style="margin-left: 10px; width: fit-content"><img src="./../Images/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
+
+                                </tr>
+                                <tr>
+                                    <td><h4><b><label for="input_n" style="color: black">N = </label></b>
+                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
+                                    <td><input type="text" id="input_n"></td>
+                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_n`)" style="margin-left: 10px; width: fit-content"><img src="./../Images/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
+
+                                </tr>
+                                <tr>
+                                    <td><h4><b><label for="input_pmt" style="color: black">PMT = </label></b>
+                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
+                                    <td><input type="text" id="input_pmt"></td>
+
+                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_pmt`)" style="margin-left: 10px; width: fit-content"><img src="./../Images/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
+
+                                </tr>
+                                <tr>
+                                    <td><h4><b style="color: black"><label for="input_type">Type = </label></b>
+                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
+
+                                    <td><select id="input_type" name="input_type">
+                                        <option value="0">End of the Period</option>
+                                        <option value="1">Beginning of the Period</option>
+                                    </select> </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+
+
+                        </td>
+                    </tr>
+                </table>
+                <br>
+                <bdi style="float: left;">
+                    <button class="glow-on-hover Blazing" type="button" ><h4>?</h4>
+                        </button>
+                </bdi>
+                <bdi style="float: left;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </bdi>
+                <bdi style="float: left;">
+                    <button class="glow-on-hover Blazing" type="button" onclick="clean_data()"><h4>Clear</h4></button>
+                </bdi>
+                <bdi style="float: left;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </bdi>
+                <bdi style="float: left;">
+                    <a id="calculate">
+                        <button class="glow-on-hover Blazing" type="submit" onclick="operation()"><h4>Calculate</h4></button>
+                    </a>
+                </bdi>
+
+            </div>
+            <br><br>
+
+            </p1>
+        </div>
+
+        <div class="w3-container w3-card w3-white w3-margin-bottom">
+            <h2 style="color: black; text-align: center"><i class="fa w3-xxlarge w3-text-teal;"
+                                                            style="color:DarkSlateGray;"></i>Cash Flow&nbsp;&nbsp;
+                <b>
+                    <a class="btn3">
+                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
+                             src="../Images/up.jpg" ;/>
+                    </a>
+                    <a class="btn4">
+                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
+                             src="../Images/down.jpg" ;/>
+                    </a>
+
+                </b>
+            </h2>
+
+            <p34>
+            </p34>
+
+        </div>
+
+    </div>
+
+    <!-- End Page Container -->
+</div>
+
+<div id="footer"></div>
+
+
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=georgia'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://visitor-badge.laobi.icu/badge?page_id=Masrik-Dahir.repoName">
+    <link rel="stylesheet" href="../css/icons.css">
+    <link rel="stylesheet" href="../css/box.css">
+    <link rel="stylesheet" href="../css/default.css">
+    <link rel="stylesheet" href="../css/glowing.css">
+    <link rel="stylesheet" href="../css/code.css">
+    <link rel="stylesheet" href="../css/new.css">
+    <link rel="stylesheet" href="../css/popup.css">
+
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="../js/html.js"></script>
+    <script src="../js/hourglass.js"></script>
+    <script src="../js/expand_jquery.js"></script>
+    <script src="../js/briefcase.js" defer></script>
+    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <script src="../web/fv.js" defer></script>
+
+    <script src ="https://unpkg.com/vue@next"></script>
+    <script src ="../vueJs/default.js" defer></script>
+
+</head>
+
+<body class="w3-white">
+
+<div id="app" v-cloak>
+    <div class="container3" v-bind:style="modelStyle(slide)">
+        <div v-if="this.windowWidth >= 1200">
+            <div class="topnav">
+                <a href="../index.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>Home</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../work.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="">
+                                </div>Work Experience</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../publication.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Publication</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../education.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Education</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../software.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Software</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../entrepreneurship.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Entrepreneurship</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../leadership.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Leadership</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="../map.html" style="text-decoration: none">
+                    <button class="glow-on-hover3" type="button"
+                            style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px">
+                        <div style="" class="w3-container">
+                            <h6><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Travel</b>
+                            </h6>
+                        </div>
+                    </button>
+                </a>
+            </div>
+
+        </div>
+    <div v-else>
+        <div class="popup" id="popup-3">
+            <div class="overlay"></div>
+            <div class="content">
+                <div class="close-btn" onclick="togglePopup('3')">&times;</div>
+                <div style="color: black">
+
+                    <div style="margin-top: 30px;">
+
+                    </div>
+
+                    <a href="../index.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                               style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Home</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../work.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                              style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Work Experience</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../publication.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                                     style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Publication</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../education.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                                   style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Education</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../software.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                                  style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Software</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../entrepreneurship.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                                          style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Entrepreneurship</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../leadership.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                                    style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Leadership</b>
+                        </h4>
+                    </div></button></a>
+
+                    <a href="../map.html" style="text-decoration: none"><button class="glow-on-hover3 Blazing" type="button"
+                                                                                                style="margin-top: min(calc(1px + 2vw), 10px); margin-left: 10px"><div style="" class="w3-container">
+                        <h4><b style="color: black"><div class="wrapper">
+                        </div>Travel</b>
+                        </h4>
+                    </div></button></a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div>
+            <button onclick="togglePopup('3')" class="cent crop" style=""><img src="../Images/menu.png" width="25" height="20" alt="Masrik Dahir"> <bdi style=" margin-top: 5px"> Menu</bdi></button>
+        </div>
+    </div>
+    </div>
+</div>
+<script>
+    function togglePopup(num){
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
+</script>
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width:1400px; background-color: white">
+
+
+    <!-- The Grid -->
+    <div>
+
+
+        <div>
+
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <!--        color fa fa-suitcase fa-fw-->
+                <svg height="100" stroke="black" stroke-width="2" class="text-line" width="100%">
+                    <text x="50%" dominant-baseline="middle" text-anchor="middle" y="50%">Cronus</text></svg>
+                <h2 style="color: black; text-align: center">
+                    <b>
+                        <a class="btn1">
+                            <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"  src=".././Images/up.jpg"; />
+                        </a>
+                        <a class="btn2">
+                            <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"  src=".././Images/down.jpg"; />
+                        </a>
+
+                    </b>
+                </h2>
+
+
+                <!--        Richmond Food Alliance     -->
+                <div class="w3-container">
+
+                    <h3>Configuration</h3>
+                    <ul>
+
+                        <li> Install <a href = "https://graphviz.org/download/" target = "_blank">Graphviz</a></li>
+                        <li> Clone the repository</li>
+                        <li> Go to the repository folder</li>
+                        <li> Run <a href = "https://github.com/Masrik-Dahir/Cronus/blob/master/requirement.bat" target = "_blank">requirement.bat </a></li>
+
+                    </ul>
+
+
+                    <h3>Run</h3>
+                    <ul>
+                        <li>python diagram.py <bdi style="color: red">&lt;instructor_cxl_direcotry&gt; &lt;student_cxl_direcotry&gt;</bdi></li>
+                    </ul>
+
+                    <h3>Example (Ubuntu, Windows)</h3>
+                    <div class="codebox">
+                        <code>
+                            <div>git clone "https://github.com/Masrik-Dahir/Cronus.git";</div>
+                            <div>cd Cronus;</div>
+                                <div>.\requirement.bat;</div>
+                                    <div>python diagram.py 'ConceptMapFiles\CXLFiles\ComputerSecurity\Instructor\Module1IntroductionComputerSecurity\Lesson1ComputerSecurityOverview\CS_Overview.cmap.cxl'
+                                        'ConceptMapFiles\CXLFiles\ComputerSecurity\Student\Module1IntroductionComputerSecurity\ICSAnonymous6.cmap.cxl';</div>
+                        </code>
+                    </div>
+                    <br>
+                    <h3>Result </h3>
+<!--                    <img src="../Images/ICSAnonymous6-%20CS_Overview.gv.png" width= 100% height=100% alt="Italian Trulli">-->
+<!--                    <br>-->
+<!--                    <img src="../Images/ICSAnonymous6-%20CS_Overview_only.gv.png" width= 100% height=100% alt="Italian Trulli">-->
+<!--                    <br>-->
+                    <ul>
+                        <li><a href = "../pdf/ICSAnonymous6-%20CS_Overview.gv.pdf" target = "_blank">ICSAnonymous6-20CS_Overview.gv.pdf</a></li>
+                        <li><a href = "../pdf/ICSAnonymous6-%20CS_Overview_only.gv.pdf" target = "_blank">ICSAnonymous6-20CS_Overview_only.gv.pdf</a></li>
+                    </ul>
+                    <br>
+
+
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- End Grid -->
+    </div>
+
+
+    <!-- End Page Container -->
+</div>
+
+
+<div id="footer"></div>
+</body>
+</html>

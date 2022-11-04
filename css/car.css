@@ -1,0 +1,173 @@
+.car-road{
+    width:110px;
+    overflow:hidden;
+}
+.car{
+    width: 110px;
+    position:relative;
+}
+
+@-webkit-keyframes rotateWheel {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}
+
+/* Standard syntax */
+@keyframes rotateWheel {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}
+
+.car-base{
+    background: #cc1c5d;
+    width: 100%;
+    height: 22px;
+    border-radius: 2px 5px 10px 10px;
+}
+.car-top{
+    height: 36px;
+    width: 66px;
+    background: #cc1c5d;
+    margin-bottom: -18px;
+    border-radius: 100px / 60px;
+    margin-left: 15px;
+    position:relative;
+}
+
+.car-top::before{
+    width: 0;
+    height: 0;
+    border-top: 18px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-right: 43px solid #cc1c5d;
+    position: absolute;
+    left: -10px;
+    content: '';
+}
+
+.car-top::after{
+    position: absolute;
+    right: -29px;
+    content: '';
+    top: 14px;
+    border-radius: 50% 50% 0 0;
+    width: 60px;
+    height: 8px;
+    background: #cc1c5d;
+}
+
+.window{
+    position: absolute;
+    background: white;
+    width: 42px;
+    height: 11px;
+    top: 3px;
+    border-radius: 50% 50% 0 0;
+    left: 12px;
+}
+
+.window::before{
+    content: '';
+    position: absolute;
+    left: 20px;
+    background: #cc1c5d;
+    height: 100%;
+    width: 5px;
+}
+
+.wheel{
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #4a4a4a;
+    position: absolute;
+    border: 2px solid white;
+    -webkit-animation: rotateWheel 0.7s infinite linear;
+    animation: rotateWheel 0.7s infinite linear;
+
+}
+
+.wheel::before{
+    content:'';
+    width: 14px;
+    height: 14px;
+    top:4px;
+    left:4px;
+    border-radius: 50%;
+    background: white;
+    position: absolute;
+
+}
+
+.wheel:after{
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4a4a4a;
+}
+
+.wheel-left{
+    left: 12px;
+    bottom: -10px;
+}
+
+.wheel-right{
+    right: 12px;
+    bottom: -10px;
+}
+.wheel-spike{
+    position: absolute;
+    top: 50%;
+    bottom: 4px;
+    width: calc(100% - 8px);
+    left: 4px;
+    height: 3px;
+    transform: translateY(-50%);
+    background: #4a4a4a;
+}
+.wheel-center{
+    position: absolute;
+    top: 50%;
+    left:50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background:white;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+}
+
+.head-light{
+    position: absolute;
+    background: #e2dfcb;
+    right: 1px;
+    top: 19px;
+    border-radius: 50% 15px 15px 50%;
+    width: 10px;
+    height: 4px;
+}
+
+.road{
+    position:relative;
+    width: 100%;
+    margin-top: 8px;
+    animation: border-dance 0.5s infinite linear;
+    height:3px;
+    background-image: linear-gradient(to left, #ccc 0%, #ccc 20%, #fff 20%, #fff 40%, #ccc 40%, #ccc 60%, #fff 60%, #fff 80%, #ccc 80%);
+}
+
+@keyframes border-dance {
+    0% {
+        left: 40px;
+    }
+
+    100% {
+        left: 0px;
+    }
+
+}
+

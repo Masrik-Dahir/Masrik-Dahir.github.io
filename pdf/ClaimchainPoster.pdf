@@ -1,0 +1,170 @@
+# Helper graphs
+
+# Masrik's degree matrix
+def degree_matrix(G):
+    a = []
+    length = len(G.vertices())
+    n = 0
+    for i in G.vertices():
+        b = []
+        for j in range(0,length):
+            b.append(0)
+        b[n] = G.degree(i)
+        a.append(b)
+
+        n += 1
+
+    M = matrix(ZZ,a)
+    return M
+
+# Masrik's distance Matrix
+def distance_matrix(G):
+    V = G.vertices()
+    E = G.vertices()
+    length = len(V)
+    dict = G.distance_all_pairs()
+
+    dic = {}
+    n = 0
+    for v in G.vertices(sort=True):
+        dic[v] = n
+        n += 1
+
+    a = []
+    for i, j in dict.items():
+        b = []
+        for k in range(0,G.order()):
+            b.append(0)
+        for j_1, j_2 in j.items():
+            b[dic[j_1]] = j_2
+        a.append(b)
+
+    M = matrix(ZZ,a)
+    return M
+
+# Masrik's is_isomorphic()
+def is_isomorphic(G,H):
+
+    G_copy = G.copy()
+    H_copy = H.copy()
+
+
+    G_ins = (distance_matrix(G_copy)*distance_matrix(H_copy)*distance_matrix(G_copy).transpose()*degree_matrix(G_copy)).eigenvalues()
+    H_ins = (distance_matrix(H_copy)*distance_matrix(G_copy)*distance_matrix(H_copy).transpose()*degree_matrix(H_copy)).eigenvalues()
+    G_ins.sort()
+    H_ins.sort()
+
+    if (G_ins == H_ins):
+        return True
+    return False
+
+#generate all non-isomorphic connect graphs with order n
+def engine(ord):
+    count = 0
+    dictionary = {}
+    lis = []
+
+    for g in graphs.nauty_geng("%d -c" %(ord)):
+        dictionary[str(g.graph6_string())] = g
+        count = count +1
+    print("There are a total of %d connected graphs" %(count))
+
+    for i, j in dictionary.items():
+        for m, n in dictionary.items():
+            if m != i:
+                if is_isomorphic(j,n):
+                    print(i)
+                    print(m)
+                    return "Error"
+    return "works"
+
+# Takes any order and generate all k-regular graph possible
+def k_regualr_graph(order):
+    count = 0
+    graph = {}
+    dis_sp_list = []
+    dis_sp_dict = {}
+    range = order-1
+    for t in [1..range]:
+        try:
+            for g in graphs.nauty_geng("%d -d%d -D%d" %(order,t,t)):
+                count += 1
+                g6 = g.graph6_string()
+                graph[g6] = g
+            print("the total number of graphs for {}-regular order {} is {}".format(t,order,count))
+            count = 0
+        except ValueError:
+            print("There is no {}-regular graph with Order {}.".format(t,order))
+    return graph
+
+# testting if all k-regular graph are isomorphic or not using my properties for order n
+def test_k_regualr_graph(r):
+    g = k_regualr_graph(r)
+    for i,j in g.items():
+        for i_i, j_j in g.items():
+            if (i > i_i):
+                a = (distance_matrix(j)*distance_matrix(j_j)*distance_matrix(j)).eigenvalues()
+                b = (distance_matrix(j_j)*distance_matrix(j)*distance_matrix(j_j)).eigenvalues()
+                a.sort()
+                b.sort()
+                if (a == b):
+                    return "corrupt"
+    return "Works"
+
+# What if we have to include the degree matrix to make out hypothesis a success!
+# testting if all graph are isomorphic or not using my properties for order n
+#generate all non-isomorphic connect graphs with order n
+def test_all_graph(ord):
+    count = 0
+    dictionary = {}
+    lis = []
+
+    for g in graphs.nauty_geng("%d -c" %(ord)):
+        dictionary[str(g.graph6_string())] = g
+        count = count +1
+    print("There are a total of %d connected graphs" %(count))
+
+    for i, j in dictionary.items():
+        for i_i, j_j in dictionary.items():
+            if (i > i_i):
+                a = (distance_matrix(j)*distance_matrix(j_j)*distance_matrix(j)*degree_matrix(j)).eigenvalues()
+                b = (distance_matrix(j_j)*distance_matrix(j)*distance_matrix(j_j)*degree_matrix(j_j)).eigenvalues()
+                a.sort()
+                b.sort()
+                if (a == b):
+                    return "corrupt"
+    return "works"
+
+︡98d5156a-cd04-4fe3-a4da-9b136eae1be3︡{"done":true}
+︠7f34ce95-03c8-46f4-8268-8df2c18022df︠
+
+︡30f0b397-579b-4a09-a2db-984b3cc12fee︡
+︠027c20a4-429f-4db6-b073-11b8664dc2d3︠
+# print(engine(7))
+
+# Bingo!
+for i in range(1,10):
+    print("Order: %d" %(i))
+    print(test_all_graph(i))
+︡6529ba72-825f-43aa-b407-c6648029e9de︡{"stdout":"Order: 1\nThere are a total of 1 connected graphs\nworks\nOrder: 2\nThere are a total of 1 connected graphs"}︡{"stdout":"\nworks\nOrder: 3\nThere are a total of 2 connected graphs\nworks"}︡{"stdout":"\nOrder: 4\nThere are a total of 6 connected graphs\nworks"}︡{"stdout":"\nOrder: 5\nThere are a total of 21 connected graphs\nworks"}︡{"stdout":"\nOrder: 6\nThere are a total of 112 connected graphs\nworks"}︡
+
+# G and H are nondirected graphs
+# A = distance_matrix of G
+# B = distance_matrix of H
+# d_g = degree_matrix of G
+# d_h = degree_matrix of H
+
+# ABAd_g is similar to BABd_g
+# ABAd_g = P * BABd_g * (P^-1) ; where P is nonsingular and invertible
+
+
+
+
+
+
+
+
+
+
+
+
