@@ -130,6 +130,54 @@ function changeImage_all() {
 
 }
 
+// AWS Cloud Practitioner
+function changeImage_AWS_Cloud_Practitioner() {
+    var image = document.getElementById("always-image-aWS-Cloud-Practitioner");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+
+}
+
+// Problem Solving (Intermediate)
+function changeImage_Problem_Solving_Intermediate() {
+    var image = document.getElementById("always-image-Problem-Solving-Intermediate");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+
+}
+
+// Problem Solving (Basic)
+function changeImage_Problem_Solving_Basic() {
+    var image = document.getElementById("always-image-Problem-Solving-Basic");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+
+}
+
+// Python (Basic)
+function changeImage_Python_Basic() {
+    var image = document.getElementById("always-image-Python-Basic");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+
+}
+
 // CMSC 255
 function changeImageCmsc255() {
     var image = document.getElementById("always-image-cmsc255");
