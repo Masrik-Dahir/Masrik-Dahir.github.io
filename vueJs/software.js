@@ -121,8 +121,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"http://cmsc508.com/~nguyenvt35/508-project-nguyenvt35-dahirma/PHP/index.php",
-                    uri:"http://cmsc508.com/~nguyenvt35/508-project-nguyenvt35-dahirma/PHP/index.php"
+                    uri_web:"",
+                    uri:"https://github.com/Masrik-Dahir/DATABASE_database"
                 },
                 {
                     title:"Employee Management System",
