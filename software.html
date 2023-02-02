@@ -14,15 +14,14 @@
     <link rel="stylesheet" href="css/icons.css">
     <link rel="stylesheet" href="css/box.css">
     <link rel="stylesheet" href="css/default.css">
-    <link rel="stylesheet" href="css/popup.css">
-    <link rel="stylesheet" href="css/community.css">
-    <link rel="stylesheet" href="css/resize.css">
     <link rel="stylesheet" href="css/glowing.css">
-    <link rel="stylesheet" href="css/lead.css">
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
     <link rel="stylesheet" href="css/popup.css">
     <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-grid.css"/>
+
+
 
     <!--    JS imports-->
     <script src="library/code.jquery.com.jquery-1.10.2.js"></script>
@@ -40,6 +39,12 @@
     <!--    Top Nav -->
     <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
     <script src="library/maxcdn.bootstrapcdn.com.bootstrap.3.4.1.js.bootstrap.min.js"></script>
+
+    <!--   Info Tooltip -->
+    <link rel="stylesheet" href="d.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/js/random.js" defer></script>
 
 </head>
 
@@ -158,8 +163,7 @@
                 <div style="color: black">
 
                     <div class="w3-margin-bottom" style="position: relative; top: 10px; color: black;">
-                        <link rel="stylesheet" href="css/bootstrap4.3.1.min.css" crossorigin="anonymous">
-                        <div class="btn btn-dark" onclick="togglePopup('3')">&times;</div>
+                        <div class="btn btn-danger" onclick="togglePopup('3')">&times;</div>
                     </div>
                     <a href="index.html" style="text-decoration: none">
                         <button class="glow-on-hover3 Blazing" type="button"
@@ -288,9 +292,9 @@
 
 <!-- Page Container -->
 <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
-        <div id="app_software">
-            <div class="panel panel-default">
-                <div class="panel-heading">
+    <div id="app_software">
+        <div class="panel panel-default">
+            <div class="panel-heading">
                 <div class="row" style="margin-bottom: 10px">
                     <div class="form-control search-wrapper panel-heading col-sm-12" type="text" v-model="searchQuery" placeholder="Search">
                         <center>
@@ -308,7 +312,7 @@
                 <div class="table-responsive" style="margin-right: 20px">
                     <div v-if="resources.length" class="table">
                         <div v-for="item in resultQuery">
-<!--                            <td><a v-bind:href="item.uri" target="_blank">{{item.title}} {{item.des}}</a></td>-->
+                            <!--                            <td><a v-bind:href="item.uri" target="_blank">{{item.title}} {{item.des}}</a></td>-->
                             <button class="glow-on-hover3 Blazing" type="button"
                                     style="margin: min(calc(1px + 2vw), 10px); padding-left: 15px">
                                 <TABLE WIDTH="100%">
@@ -371,7 +375,7 @@
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 
 
 

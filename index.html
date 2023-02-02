@@ -9,24 +9,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!--    CSS imports-->
-    <link rel='stylesheet' href='library/fonts.googleapis.com.css'>
     <link rel="stylesheet" href="library/cdnjs.cloudflare.com.ajax.libs.font-awesome.4.7.0.css.font-awesome.min.css">
-    <link rel="stylesheet" href="css/default.css">
-    <link rel="stylesheet" href="css/if_quote.css">
-    <link rel="stylesheet" href="css/quote.css">
-    <link rel="stylesheet" href="css/popup.css">
+
     <link rel="stylesheet" href="css/icons.css">
     <link rel="stylesheet" href="css/box.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/glowing.css">
     <link rel="stylesheet" href="css/new.css">
-    <link rel='stylesheet' href='library/css.gg.eye.css'>
+    <link rel="stylesheet" href="css/if.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="bootstrap/css/bootstrap-grid.css"/>
+
 
     <!--    JS imports-->
     <script src="library/code.jquery.com.jquery-1.10.2.js"></script>
     <script src="js/html.js"></script>
     <script src="js/hourglass.js"></script>
-    <script src="js/file.js" defer></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="js/briefcase.js" defer></script>
     <script src='js/aesthetics.js' crossorigin='anonymous'></script>
 
     <!--    Vue JS imports-->
@@ -34,6 +35,22 @@
     <script src="vueJs/default.js" defer></script>
 
 
+    <!--    Top Nav -->
+    <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
+    <script src="library/maxcdn.bootstrapcdn.com.bootstrap.3.4.1.js.bootstrap.min.js"></script>
+
+    <!--   Info Tooltip -->
+    <link rel="stylesheet" href="d.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="/bootstrap/js/random.js" defer></script>
+
+
+
+    <link rel="stylesheet" href="css/if_quote.css">
+    <link rel="stylesheet" href="css/quote.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel='stylesheet' href='library/css.gg.eye.css'>
 
 </head>
 
@@ -262,8 +279,8 @@
                                 </style>
 
                                 <div class="w3-margin-bottom" style="position: relative; top: 10px; color: black;">
-                                    <link rel="stylesheet" href="css/bootstrap4.3.1.min.css" crossorigin="anonymous">
-                                    <div class="btn btn-dark" onclick="togglePopup('3')">&times;</div>
+
+                                    <div class="btn btn-danger" onclick="togglePopup('3')">&times;</div>
                                 </div>
                                 <a href="index.html" style="text-decoration: none">
                                     <button class="glow-on-hover3" type="button"
@@ -463,44 +480,66 @@
                         <h4><p style="color: black; font-family: georgia, sans-serif">
                             <i class="fa fa-history fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Work History</p></h4>
 
-                        <!--          CoStar -->
-                        <div data-toggle="tooltip" data-html="true" title="CoStar Group">
-                            <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                 src="./Images/costar.png"/>
-                        </div>
+
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          CoStar -->
+                                    <div data-toggle="tooltip" data-html="true" title="CoStar Group">
+                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
+                                             src="./Images/costar.png"/>
+                                    </div>
+                                </TD>
+                                <TD>
+                                    <!--          Capital One -->
+                                    <div data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
+                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
+                                             src="./Images/capitalone.png"/>
+                                    </div>
+                                </TD>
+
+                            </TR>
+                        </TABLE>
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          Dept of Election -->
+                                    <div data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
+                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/dept-of-elections-logo.png"/>
+                                    </div>
+                                </TD>
+                                <TD>
+                                    <!--          VCU -->
+                                    <div data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
+                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/vcu_ram.png"/>
+                                    </div>
 
 
+                                </TD>
+                            </TR>
+                        </TABLE>
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          Roanoke -->
+                                    <div data-toggle="tooltip" data-html="true" title="Roanoke County">
+                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/roanoke.png"/>
+                                    </div>
+                                </TD>
 
-                        <!--          Capital One -->
-                        <div data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
-                            <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                 src="./Images/capitalone.png"/>
-                        </div>
+                                <TD>
+                                    <!--          Att -->
+                                    <div data-toggle="tooltip" data-html="true" title="AT&T Inc.">
+                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/att.png"/>
+                                    </div>
+                                </TD>
+                            </TR>
+                        </TABLE>
 
-
-                        <!--          Dept of Election -->
-                        <div data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
-                            <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                 src="./Images/dept-of-elections-logo.png"/>
-                        </div>
-
-                        <!--          VCU -->
-                        <div data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
-                            <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                 src="./Images/vcu_ram.png"/>
-                        </div>
-
-                        <!--          Roanoke -->
-                        <div data-toggle="tooltip" data-html="true" title="Roanoke County">
-                            <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                 src="./Images/roanoke.png"/>
-                        </div>
-
-                        <!--          Att -->
-                        <div data-toggle="tooltip" data-html="true" title="AT&T Inc.">
-                            <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                 src="./Images/att.png"/>
-                        </div>
 
                         <div class="w3-white w3-round-xlarge w3-small">
                             <div class="w3-container w3-center w3-round-xlarge "
@@ -518,91 +557,131 @@
                         <h4><p style="color: black; font-family: georgia, sans-serif">
                             <i class="fa fa-code fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Skill</p></h4>
 
-                        <!--          Python-->
-                        <div data-toggle="tooltip" data-html="true" title="Python Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px; "
-                                 src="./Images/python.png"/>
-                        </div>
 
-                        <!--          Java-->
-                        <div data-toggle="tooltip" data-html="true" title="Java Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/java.png"/>
-                        </div>
-                        <!--          C-->
-                        <div data-toggle="tooltip" data-html="true" title="C Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/c2.png"/>
 
-                        </div>
-                        <!--          C++-->
-                        <div data-toggle="tooltip" data-html="true" title="C++ Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/c-logo-vector.svg"/>
 
-                        </div>
-                        <!--          Csharp-->
-                        <div data-toggle="tooltip" data-html="true" title="C# Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/csharp.png"/>
 
-                        </div>
-                        <!--          Nodejs-->
-                        <div data-toggle="tooltip" data-html="true" title="Node JS Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/nodejs.png" ;/>
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          Python-->
+                                    <div data-toggle="tooltip" data-html="true" title="Python Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
+                                             src="./Images/python.png"/>
+                                    </div>
+                                </TD>
+                                <TD>
+                                    <!--          Java-->
+                                    <div data-toggle="tooltip" data-html="true" title="Java Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/java.png"/>
+                                    </div>
+                                </TD>
 
-                        </div>
-                        <!--          SageMath-->
-                        <div data-toggle="tooltip" data-html="true" title="Sage Math Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/sage.png" ;/>
+                                <TD>
+                                    <!--          C-->
+                                    <div data-toggle="tooltip" data-html="true" title="C Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/c2.png"/>
 
-                        </div>
-                        <!--          Rust-->
-                        <div data-toggle="tooltip" data-html="true" title="Rust Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/Rust_programming_language_black_logo.svg.png" ;/>
+                                    </div>
+                                </TD>
 
-                        </div>
+                                <TD>
+                                    <!--          Nodejs-->
+                                    <div data-toggle="tooltip" data-html="true" title="Node JS Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/nodejs.png"/>
 
-                        <!--          HTML-->
-                        <div data-toggle="tooltip" data-html="true" title="HTML Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/html.png"/>
+                                    </div>
+                                </TD>
 
-                        </div>
+                                <TD>
+                                    <!--          SageMath-->
+                                    <div data-toggle="tooltip" data-html="true" title="Sage Math Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/sage.png"/>
 
-                        <!--          CSS-->
-                        <div data-toggle="tooltip" data-html="true" title="CSS Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/css.png"/>
+                                    </div>
+                                </TD>
 
-                        </div>
-                        <!--          SQL-->
-                        <div data-toggle="tooltip" data-html="true" title="SQL Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/sql.png"/>
+                            </TR>
+                        </TABLE>
 
-                        </div>
-                        <!--          PHP-->
-                        <div data-toggle="tooltip" data-html="true" title="PHP Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/php.png" ;/>
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          Rust-->
+                                    <div data-toggle="tooltip" data-html="true" title="Rust Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/Rust_programming_language_black_logo.svg.png" />
 
-                        </div>
-                        <!--          Angular JS-->
-                        <div data-toggle="tooltip" data-html="true" title="Angular JS Programming Language">
-                            <img class="box w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/AngularJS-Shield.svg" ;/>
+                                    </div>
+                                </TD>
+                                <TD>
+                                    <!--          HTML-->
+                                    <div data-toggle="tooltip" data-html="true" title="HTML Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/html.png"/>
 
-                        </div>
+                                    </div>
+                                </TD>
 
-                        <!--        AWS Cloud Practitioner-->
-                        <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner Certification">
-                            <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                 src="./Images/aws-certified-cloud-practitioner.png"/>
-                        </div>
+                                <TD>
+                                    <!--          CSS-->
+                                    <div data-toggle="tooltip" data-html="true" title="CSS Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/css.png"/>
+
+                                    </div>
+                                </TD>
+
+                                <TD>
+                                    <!--          SQL-->
+                                    <div data-toggle="tooltip" data-html="true" title="SQL Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/sql.png"/>
+
+                                    </div>
+                                </TD>
+
+                                <TD>
+                                    <!--          PHP-->
+                                    <div data-toggle="tooltip" data-html="true" title="PHP Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/php.png" />
+
+                                    </div>
+                                </TD>
+                            </TR>
+                        </TABLE>
+
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          Angular JS-->
+                                    <div data-toggle="tooltip" data-html="true" title="Angular JS Programming Language">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/AngularJS-Shield.svg" />
+
+                                    </div>
+                                </TD>
+
+                                <TD>
+                                    <!--        AWS Cloud Practitioner-->
+                                    <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner Certification">
+                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
+                                             src="./Images/aws-certified-cloud-practitioner.png"/>
+                                    </div>
+                                </TD>
+                            </TR>
+                        </TABLE>
+
+
+
+
+
+
 
                         <div class="w3-white w3-round-xlarge w3-small">
                             <div class="w3-container w3-center w3-round-xlarge "
@@ -619,32 +698,54 @@
                         <h4><p style="color: black; font-family: georgia, sans-serif">
                             <i class="fa fa-map-marked-alt fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Travel</p></h4>
 
-                        <!--          Virginia -->
-                        <div data-toggle="tooltip" data-html="true" title="Virginia">
-                            <img class="box3 w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px;"
-                                 src="./Images/va.png"/>
-                        </div>
 
-                        <!--          Maryland -->
 
-                        <div data-toggle="tooltip" data-html="true" title="Maryland">
-                            <img class="box3 w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/md.png"/>
-                        </div>
 
-                        <!--          Rhode Island -->
+                        <TABLE>
+                            <TR>
+                                <TD>
+                                    <!--          Virginia -->
+                                    <div data-toggle="tooltip" data-html="true" title="Virginia">
+                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px;"
+                                             src="./Images/va.png"/>
+                                    </div>
+                                </TD>
 
-                        <div data-toggle="tooltip" data-html="true" title="Rhode Island">
-                            <img class="box3 w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/ri.png"/>
-                        </div>
+                                <TD>
+                                    <!--          Maryland -->
+                                    <div data-toggle="tooltip" data-html="true" title="Maryland">
+                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/md.png"/>
+                                    </div>
+                                </TD>
 
-                        <!--          Washington DC -->
+                                <TD>
+                                    <!--          Rhode Island -->
+                                    <div data-toggle="tooltip" data-html="true" title="Rhode Island">
+                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/ri.png"/>
+                                    </div>
+                                </TD>
 
-                        <div data-toggle="tooltip" data-html="true" title="Washington DC">
-                            <img class="box3 w3-hover-opacity" style="float: left; width:12%; vertical-align: middle; margin: 5px"
-                                 src="./Images/dc.png"/>
-                        </div>
+                                <TD>
+                                    <!--          Washington DC -->
+                                    <div data-toggle="tooltip" data-html="true" title="Washington DC">
+                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
+                                             src="./Images/dc.png"/>
+                                    </div>
+                                </TD>
+                            </TR>
+                        </TABLE>
+
+
+
+
+
+
+
+
+
+
 
                         <div class="w3-white w3-round-xlarge w3-small">
                             <div class="w3-container w3-center w3-round-xlarge "
