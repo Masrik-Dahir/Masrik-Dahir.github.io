@@ -107,7 +107,7 @@ const app_software = {
                 {
                     title:"Real Estate Analyzer",
                     des:"Mortgage Analysis, Cash Flow Analysis",
-                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_github:"",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
