@@ -2360,7 +2360,8 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     position: fixed;
     right: 0;
     left: 0;
-    z-index: 1030
+    z-index: 1030;
+    border-bottom-color: black;
 }
 
 .navbar-fixed-bottom .navbar-collapse, .navbar-fixed-top .navbar-collapse {
@@ -2473,7 +2474,7 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
 }
 
 .navbar-nav > li > a {
-    padding-top: 10px;
+    padding-top: 0px;
     padding-bottom: 10px;
     line-height: 20px
 }
@@ -2513,7 +2514,7 @@ select[multiple].input-group-sm > .form-control, select[multiple].input-group-sm
     }
 
     .navbar-nav > li > a {
-        padding-top: 15px;
+        padding-top: 0px;
         padding-bottom: 15px
     }
 }
@@ -4609,7 +4610,7 @@ button.close {
     bottom: 20px;
     left: 15%;
     z-index: 10;
-    padding-top: 20px;
+    padding-top: 0px;
     padding-bottom: 20px;
     color: #fff;
     text-align: center;

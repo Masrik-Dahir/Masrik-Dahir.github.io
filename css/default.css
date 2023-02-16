@@ -455,3 +455,15 @@ body {
     top: -40px;
     left: 0;
 }
+
+#footer-relative {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+#footer-fixed {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
