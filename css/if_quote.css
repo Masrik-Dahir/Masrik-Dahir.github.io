@@ -1,4 +1,4 @@
-@media only screen and (min-width: 520px) {
+@media only screen and (min-width: 1024px) {
     .info {
         display: none;
     }
@@ -168,7 +168,7 @@
 
 }
 
-@media only screen and (max-width: 520px) {
+@media only screen and (max-width: 1024px) {
     .show {
         display: none;
     }
