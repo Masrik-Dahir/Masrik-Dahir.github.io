@@ -467,3 +467,15 @@ body {
     bottom: 0;
     width: 100%;
 }
+
+@media only screen and (max-width: 1026px) {
+    .resizing-1026-more {
+        display: none;
+    }
+}
+
+@media only screen and (min-width: 1026px) {
+    .resizing-1026-less {
+        display: none;
+    }
+}
