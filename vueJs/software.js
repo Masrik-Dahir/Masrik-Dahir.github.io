@@ -26,7 +26,7 @@ const app_software = {
                     uri:"https://mega.nz/file/uSISSYLS#5htqGrOOXY66HbqrZLY68TVwKkfSDlcPwf79WyMu6pY"
                 },
                 {
-                    title:"Fraud Model",
+                    title:"Fraud Detection Model",
                     des:"A threat modeling of attacks realizable in ClaimChain through attack trees, red flags identified by National Insurance Crime Bureau and use Machine Learning models to detect fraudulent activities with significant accuracy",
                     uri_github:"https://github.com/Masrik-Dahir/Fraud-Model",
                     uri_windows:"",
