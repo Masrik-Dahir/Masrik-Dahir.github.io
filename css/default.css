@@ -479,3 +479,9 @@ body {
         display: none;
     }
 }
+
+@media only screen and (max-width: 520px) {
+    .resizing-520-more {
+        display: none;
+    }
+}
