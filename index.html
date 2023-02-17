@@ -73,20 +73,19 @@
 
                                 <style>
                                     .glow-on-hover3 {
-                                        border-style: solid;
-                                        border-color: silver;
+                                        /*width: min(calc(100% + 10px), 300px);*/
+                                        /*height: min(calc(100% + 50px), 100px);*/
+                                        /*border: none;*/
+                                        /*outline: none;*/
+                                        padding: 0px;
+                                        border: solid silver 2px;
                                         color: #111;
                                         background: whitesmoke;
                                         cursor: pointer;
                                         position: relative;
                                         z-index: 0;
-                                        width: 100%;
-                                        border-radius: 10px;
-                                        text-align: left;
-                                    }
 
-                                    .glow-on-hover3 h2 {
-                                        text-align: left;
+                                        border-radius: 10px;
                                     }
 
                                     .glow-on-hover3:before {
@@ -94,24 +93,24 @@
                                         background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
                                         position: absolute;
                                         top: -2px;
-                                        left: -2px;
+                                        left:-2px;
                                         background-size: 400%;
                                         z-index: -1;
                                         filter: blur(5px);
-                                        width: calc(100% + 4px);
-                                        height: calc(100% + 4px);
-                                        animation: glowing3 20s linear infinite;
+                                        width: calc(100% + 1px);
+                                        height: calc(100% + 1px);
+                                        animation: glowing 20s linear infinite;
                                         opacity: 0;
                                         transition: opacity .3s ease-in-out;
                                         border-radius: 10px;
                                     }
 
                                     .glow-on-hover3:active {
-                                        color: black;
+                                        color: white;
                                     }
 
                                     .glow-on-hover3:active:after {
-                                        background: transparent;
+                                        background: whitesmoke;
                                     }
 
                                     .glow-on-hover3:hover:before {
@@ -131,15 +130,9 @@
                                     }
 
                                     @keyframes glowing3 {
-                                        0% {
-                                            background-position: 0 0;
-                                        }
-                                        50% {
-                                            background-position: 400% 0;
-                                        }
-                                        100% {
-                                            background-position: 0 0;
-                                        }
+                                        0% { background-position: 0 0; }
+                                        50% { background-position: 400% 0; }
+                                        100% { background-position: 0 0; }
                                     }
 
 
@@ -405,7 +398,7 @@
                 }
             </script>
             <br>
-            <div class="w3-third" style="margin-left: 0px">
+            <div class="" style="margin-left: 0px">
                 <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom">
                     <div class="w3-display-container">
                         <img src="./Images/masrik_dahir_formal.jpeg" style="width:100%" alt="Masrik Dahir">
@@ -913,7 +906,6 @@
             }
 
             h4 {
-                font-size: 20px
             }
 
             h5 {
@@ -1477,7 +1469,7 @@
             }
 
             h4 {
-                font-size: 20px
+                margin: 10px;
             }
 
             h5 {
@@ -1959,7 +1951,9 @@
             <span style="--index: 2; color: #00EE00">MASRIK&nbsp;DAHIR</span>
         </div>
         <span>
-            <a href="https://www.instragram.com/masrik_dahir" target="blank"><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px;"><i style="font-size:36px; color: black" class="fab fa-instagram w3-hover-opacity"></i></button></a>
+
+            <a href="https://www.instragram.com/masrik_dahir" target="blank">
+                <button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px;"><i style="font-size:36px; color: black" class="fab fa-instagram w3-hover-opacity"></i></button></a>
             <a href="https://www.twitter.com/masrik_dahir" target="blank"><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px"><i style="font-size:36px; color: black" class="fab fa-twitter w3-hover-opacity"></i></button></a>
             <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank"><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px"><i style="font-size:36px; color: black" class="fab fa-linkedin w3-hover-opacity"></i></button></a>
             <a href="https://github.com/Masrik-Dahir" target="blank"><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px"><i style="font-size:36px; color: black" class="fab fa-github w3-hover-opacity"></i></button></a>
@@ -1968,7 +1962,7 @@
             <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px"><i style="font-size:36px; color: black" class="fas fa-graduation-cap w3-hover-opacity"></i></button></a>
 
             <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank; color: white">
-                <button class="glow-on-hover12" style="margin-right: 10px; padding-right: 5px; padding-left: 5px;">
+                <button class="glow-on-hover12" style="margin-right: 10px; margin-top: 10px; padding-right: 5px; padding-left: 5px;">
 
 
                     <b style="font-size:27px; color: black; margin-top: -20px" class='w3-hover-opacity'>
@@ -1982,7 +1976,7 @@
 
 
             <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
-                    <button class="glow-on-hover12" style="margin-right: 10px; ">
+                    <button class="glow-on-hover12" style="margin-right: 10px; margin-top: 10px ">
                     <b style="font-size:32px; color: black; margin-top: -20px" class='w3-hover-opacity'>
                         <img class="" style="width:43px; padding: 5px; margin-top: -5px"
                              src="Images/w3-1.png"/>
@@ -1990,7 +1984,7 @@
                 </button>
             </a>
             <a href="https://orcid.org/0000-0002-7841-310X" style="padding: 0px" target="orcid.widget">
-                <button class="glow-on-hover12" style="margin-right: 10px; ">
+                <button class="glow-on-hover12" style="margin-right: 10px; margin-top: 10px ">
                 <b style="font-size:32px; color: black; margin-top: -20px" class='w3-hover-opacity'>
                         <img class="" style="width:43px; padding: 5px; margin-top: -5px"
                              alt="ORCID iD icon"
