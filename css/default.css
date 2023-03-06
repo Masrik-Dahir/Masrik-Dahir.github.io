@@ -486,31 +486,22 @@ body {
     }
 }
 
-
- html {
-     overflow: scroll;
-     overflow-x: hidden;
- }
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 17px;
+#menu-bar {
+    z-index: 1;
+    position: fixed;
+    top: 97px;
+    width: 100%;
 }
 
-::-webkit-scrollbar-track {
-    background-color: rgb(35, 47, 62);
-    /*-webkit-border-radius: 10px;*/
-    /*border-radius: 10px;*/
+#scroll {
+    overflow-y: hidden;
+    height: 100%;
+    margin-bottom: 15px;
 }
 
-::-webkit-scrollbar-thumb {
-    -webkit-border-radius: 17px;
-    border-radius: 10px;
-    background: whitesmoke;
-    border: 2px solid rgb(35, 47, 62);
-}
 
-::-webkit-scrollbar-thumb:hover {
-    background: lightgray;
+html {
+    overflow: scroll;
+    overflow-x: hidden;
 }
-
 
