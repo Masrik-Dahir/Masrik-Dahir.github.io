@@ -111,8 +111,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"web/re.html",
-                    uri:"web/re.html"
+                    uri_web:"web/re",
+                    uri:"web/re"
                 },
                 {
                     title:"Stock Market",
