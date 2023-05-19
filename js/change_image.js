@@ -488,3 +488,25 @@ function vcu_bachelor_of_science() {
         image.src = "Images/down.jpg";
     }
 }
+
+// Master of Science, VCU
+function vcu_master_of_science() {
+    var image = document.getElementById("always-image-vcu-master-of-science");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+}
+
+// Summa Cum Laude, VCU
+function Summa_Cum_Laude() {
+    var image = document.getElementById("Summa_Cum_Laude");
+    if (image.src.match("Images/down.jpg")) {
+        image.src = "Images/up.jpg";
+    }
+    else {
+        image.src = "Images/down.jpg";
+    }
+}
