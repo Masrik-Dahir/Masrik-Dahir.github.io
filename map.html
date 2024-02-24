@@ -46,8 +46,140 @@
     <script src="bootstrap/js/maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="bootstrap/js/random.js" defer></script>
 
-
+    <!--  Custom  -->
     <style>
+
+        /* Dots */
+        .dot-container {
+            text-align: center;
+            padding: 16px;
+        }
+
+        .dot {
+            cursor: pointer;
+            height: 15px;
+            width: 15px;
+            margin: 0 2px;
+            background-color: #bbb;
+            border-radius: 50%;
+            display: inline-block;
+            transition: background-color 0.6s ease;
+        }
+
+        .active, .dot:hover {
+            background-color: #717171;
+        }
+
+        /* Updated CSS for slide images */
+        .slide {
+            display: none; /* Hide slides by default */
+            width: 60vw; /* 1/3 of the viewport width */
+            height: 60vh; /* 1/3 of the viewport height */
+            object-fit: contain; /* Cover the designated area, may cause distortion */
+        }
+
+        /* Popup Overlay */
+        .popup {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            display: flex; /* Enable flexbox */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        /* Popup Content */
+        .popup-content {
+            top: 20vh;
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Adjust if necessary to accommodate slides */
+            /* Removed max-width: none; to ensure the content is not too wide */
+            display: flex; /* Use flexbox to align items */
+            justify-content: center; /* Center items horizontally */
+            align-items: center; /* Center items vertically */
+            flex-direction: column; /* Stack items vertically */
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19); /* Optional: Adds shadow for better visibility */
+        }
+
+
+        /* Adjust the Previous and Next button positioning */
+        .prev, .next {
+            cursor: pointer;
+            position: absolute;
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust alignment */
+            width: auto;
+            margin-top: 0;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.6s ease;
+            user-select: none;
+        }
+
+        .next {
+            right: 10px; /* Position to the right */
+        }
+
+        .prev {
+            left: 10px; /* Position to the left */
+        }
+
+
+
+        /* Popup window */
+        .popup {
+            display: none; /* Hidden by default */
+            top: 0;
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+    </style>
+    <style>
+        #photoDisplay {
+            width: 200px; /* or any other size */
+            height: 200px; /* or any other size */
+            background-size: cover;
+            display: none; /* Initially hidden */
+        }
+
         path {
             stroke: black;
             fill:paleturquoise;
@@ -105,6 +237,7 @@
             position: fixed;
         }
     </style>
+
 </head>
 <body class="w3-white">
 <div id="app" v-cloak>
@@ -519,6 +652,7 @@
                         </cc:Work>
                     </rdf:RDF>
                 </metadata>
+
                 <path
                         inkscape:connector-curvature="0"
                         id="MA"
@@ -879,7 +1013,7 @@
             </svg>
 
 
-            <div class="w3-center box2" style="color:transparent;">
+            <div class="" style="color:transparent;">
                 <div style="display: inline-block">
 
                     <TABLE>
@@ -887,24 +1021,49 @@
                             <TD>
                                 <div data-toggle="tooltip" data-html="true" title="Virginia">
                                     <a  target="blank"><i style="font-size:36px" class="w3-hover-opacity">
-                                        <img style="width:45px; vertical-align: middle; margin-right: 5px; margin-bottom: 30px;margin-left: 5px; "
-                                             src="./Images/va.png"/></i></a>
+                                        <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; margin-right: 5px; margin-bottom: 30px;margin-left: 5px; ">
+
+                                        <img id="openSlideshow" style="width:50px; vertical-align: middle; "
+                                                                        src="./Images/va.png"/>
+                                        </button>
+                                        </i>
+                                    </a>
+<!--                                    <div id="slideshowPopup" class="popup">-->
+<!--                                        <div class="popup-content">-->
+<!--                                            <span class="close">&times;</span>-->
+<!--                                            <img src="Images/apk-icon-1.jpg" class="slide" style="display: block;">-->
+<!--                                            <img src="Images/altria.png" class="slide">-->
+<!--                                            <img src="Images/bridge.jpg" class="slide">-->
+<!--                                            <button class="glow-on-hover7 Blazing prev">&#10094;</button>-->
+<!--                                            <button class="glow-on-hover7 Blazing next">&#10095;</button>-->
+<!--                                        </div>-->
+
+<!--                                    </div>-->
                                 </div>
                             </TD>
                             <TD>
                                 <div data-toggle="tooltip" data-html="true" title="Marryland">
                                     <a  target="blank"><i style="font-size:36px" class="w3-hover-opacity">
-                                        <img style="width:50px; vertical-align: middle; margin-right: 5px;margin-bottom: 30px;margin-left: 5px; "
-                                             src="./Images/md.png"/></i></a>
+                                        <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; margin-right: 5px; margin-bottom: 30px;margin-left: 5px; ">
+
+                                            <img id="" style="width:50px; vertical-align: middle; "
+                                                 src="./Images/md.png"/>
+                                        </button>
+                                    </i></a>
+
                                 </div>
 
 
                             </TD>
                             <TD>
-                                <div data-toggle="tooltip" data-html="true" title="Rhode Island">
+                                <div data-toggle="tooltip" data-html="true" title="Delaware">
                                     <a  target="blank"><i style="font-size:36px" class="w3-hover-opacity">
-                                        <img style="width:38px; vertical-align: middle; margin-right: 5px;margin-bottom: 30px;margin-left: 5px; "
-                                             src="./Images/ri.png"/></i></a>
+                                        <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; margin-right: 5px; margin-bottom: 30px;margin-left: 5px; ">
+
+                                            <img id="" style="width:50px; vertical-align: middle; "
+                                                 src="./Images/delaware_flag.png"/>
+                                        </button>
+                                    </i></a>
                                 </div>
 
 
@@ -912,8 +1071,12 @@
                             <TD>
                                 <div data-toggle="tooltip" data-html="true" title="Washington DC">
                                     <a  target="blank"><i style="font-size:36px" class="w3-hover-opacity">
-                                        <img style="width:34px; vertical-align: middle; margin-right: 5px;margin-bottom: 30px;margin-left: 5px; "
-                                             src="./Images/dc.png"/></i></a>
+                                        <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; margin-right: 5px; margin-bottom: 30px;margin-left: 5px; ">
+
+                                            <img id="" style="width:50px; vertical-align: middle; "
+                                                 src="./Images/dc.png"/>
+                                        </button>
+                                    </i></a>
                                 </div>
 
                             </TD>
@@ -1008,6 +1171,85 @@
         detailsBox.style.top = (y + 20) + 'px';
         detailsBox.style.left = (x) + 'px';
     };
+</script>
+
+<script>
+    // Assume you have a div with the id "photoDisplay" for showing the photos
+    const photoDisplay = document.getElementById('MA');
+
+    // Add event listener for mouseover on the SVG path
+    document.getElementById('examplePath').addEventListener('mouseover', function() {
+        // Change the background image of the photo display div
+        // Replace 'urlToYourPhoto' with the actual path to your photo
+        photoDisplay.style.backgroundImage = "url('https://www.masrikdahir.com/Images/costar.png')";
+        photoDisplay.style.display = "block"; // Make sure the div is visible
+    });
+
+    // Optional: Hide the photo display div on mouseout
+    document.getElementById('examplePath').addEventListener('mouseout', function() {
+        photoDisplay.style.display = "none"; // Hide the div
+    });
+</script>
+
+<script>
+    // Get elements
+    var popup = document.getElementById("slideshowPopup");
+    var btn = document.getElementById("openSlideshow");
+    var span = document.getElementsByClassName("close")[0];
+    var slides = document.getElementsByClassName("slide");
+    var prev = document.querySelector(".prev");
+    var next = document.querySelector(".next");
+
+    var slideIndex = 1;
+    showSlides(slideIndex);
+
+    // Open the popup
+    btn.onclick = function() {
+        popup.style.display = "block";
+        showSlides(slideIndex = 1);
+    }
+
+    // Close the popup
+    span.onclick = function() {
+        popup.style.display = "none";
+    }
+
+    // Next/previous controls
+    function plusSlides(n) {
+        showSlides(slideIndex += n);
+    }
+
+    prev.onclick = function() {
+        plusSlides(-1);
+    }
+
+    next.onclick = function() {
+        plusSlides(1);
+    }
+
+    // Show slides
+    function showSlides(n) {
+        var i;
+        if (n > slides.length) {slideIndex = 1}
+        if (n < 1) {slideIndex = slides.length}
+        for (i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slides[slideIndex-1].style.display = "block";
+    }
+
+    // Existing code remains unchanged...
+
+    // Close the popup when clicking outside of it
+    window.onclick = function(event) {
+        if (event.target === popup) {
+            popup.style.display = "none";
+        }
+    }
+
+
+
+
 </script>
 
 </html>

@@ -425,6 +425,170 @@
 }
 
 
+
+
+
+.glow-on-hover7 {
+    /*width: min(calc(100% + 10px), 300px);*/
+    /*height: min(calc(100% + 50px), 100px);*/
+    /*border: none;*/
+    /*outline: none;*/
+    border-style: solid;
+    border-color: #dcdcdc;
+    color: #111;
+    background: #dcdcdc;
+    cursor: pointer;
+    position: absolute;
+    z-index: 0;
+    width: min(100%, 50px);
+
+    border-radius: 10px;
+}
+
+.glow-on-hover7:before {
+    content: '';
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    position: absolute;
+    top: -2px;
+    left:-2px;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(5px);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    animation: glowing7 20s linear infinite;
+    opacity: 0;
+    transition: opacity .3s ease-in-out;
+    border-radius: 10px;
+}
+
+.glow-on-hover7:active {
+    color: black;
+}
+
+.glow-on-hover7:active:after {
+    background: transparent;
+}
+
+.glow-on-hover7:hover:before {
+    opacity: 1;
+}
+
+.glow-on-hover7:after {
+    z-index: -1;
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: black;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+}
+
+@keyframes glowing7 {
+    0% { background-position: 0 0; }
+    50% { background-position: 400% 0; }
+    100% { background-position: 0 0; }
+}
+
+
+
+
+
+
+
+.glow-on-hover8 {
+    /*width: min(calc(100% + 10px), 300px);*/
+    /*height: min(calc(100% + 50px), 100px);*/
+    /*border: none;*/
+    /*outline: none;*/
+    border-style: solid;
+    border-color: #dcdcdc;
+    color: #111;
+    background: #dcdcdc;
+    cursor: pointer;
+    position: relative;
+    z-index: 0;
+    width: min(100%, 50px);
+
+    border-radius: 10px;
+}
+
+.glow-on-hover8:before {
+    content: '';
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    position: relative;
+    top: -2px;
+    left:-2px;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(5px);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    animation: glowing8 20s linear infinite;
+    opacity: 0;
+    transition: opacity .3s ease-in-out;
+    border-radius: 10px;
+}
+
+.glow-on-hover8:active {
+    color: black;
+}
+
+.glow-on-hover8:active:after {
+    background: transparent;
+}
+
+.glow-on-hover8:hover:before {
+    opacity: 1;
+}
+
+.glow-on-hover8:after {
+    z-index: -1;
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #dcdcdc;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+}
+
+@keyframes glowing8 {
+    0% { background-position: 0 0; }
+    50% { background-position: 400% 0; }
+    100% { background-position: 0 0; }
+}
+
+
+
+
+
+
+.pop-up-button {
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for pop effect and shadow */
+    transform: scale(1); /* Initial scale */
+    box-shadow: 0px 2px 5px 5px rgba(0, 0, 0, 0.2); /* Initial shadow for depth */
+    height: fit-content;
+    width: fit-content;
+    border-radius: 5px;
+}
+
+.pop-up-button:hover {
+    transform: scale(1.1); /* Scale up to 110% when hovered */
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.4); /* Increased shadow for lifted effect */
+    height: fit-content;
+    width: fit-content;
+}
+
+
+
+
+
+
+
 .glow-on-hover9 {
     width: min(calc(100% + 10px), 300px);
     height: min(calc(100% + 50px), 100px);
