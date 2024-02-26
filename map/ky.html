@@ -167,6 +167,31 @@
         .content-active-dot, .content-dot:hover {
             background-color: #717171;
         }
+        @keyframes flameFlicker {
+            0%, 100% {
+                text-shadow:
+                        0 0 5px #E0E0E0, /* Silver */
+                        0 0 10px #B0B0B0, /* Ash */
+                        0 0 15px #D0D0D0, /* Light Gray */
+                        0 0 20px #E0E0E0, /* Silver */
+                        0 0 25px darkgrey; /* Ash */
+            }
+            50% {
+                text-shadow:
+                        0 0 6px #E0E0E0, /* Silver */
+                        0 0 12px #B0B0B0, /* Ash */
+                        0 0 18px #D0D0D0, /* Light Gray */
+                        0 0 24px #E0E0E0, /* Silver */
+                        0 0 30px darkgrey; /* Ash */
+            }
+        }
+
+        .rusted-paper-heading {
+            font-size: 48px;
+            color: #8a6552; /* Base text color */
+            animation: flameFlicker 2s infinite alternate;
+        }
+
 
     </style>
 </head>
@@ -413,10 +438,14 @@
     }
 </script>
 
+
+
+
 <TABLE WIDTH="100%" style="margin-top: 10px">
     <TR>
         <TD WIDTH="100%">
             <button class="glow-on-hover3 w3-margin" style="position: relative; float: left; width: fit-content; height: fit-content; margin: 5px; padding: 5px" onclick="nextSlide();"><a href="https://www.masrikdahir.com/map"><img src=".././Images/map.png" style="width: 40px"></a> </button>
+            <h1 class="rusted-paper-heading">Kentucky</h1>
             <div class="content-slideshow-container">
                 <div id="app_kentucky" style="">
                     <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" :title="item.title">

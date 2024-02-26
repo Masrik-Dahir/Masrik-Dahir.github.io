@@ -405,6 +405,18 @@ const app_kentucky = {
                 {
                     title:"10",
                     url:"../Images/Kentucky/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/Kentucky/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/Kentucky/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/Kentucky/13.jpg",
                 }
 
             ]
