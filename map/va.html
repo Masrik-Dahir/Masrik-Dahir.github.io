@@ -447,18 +447,22 @@
                             <button class="glow-on-hover7 Blazing content-prev" style="position: relative" onclick="prevSlide()">&#10094;</button>
                         </TD>
                         <TD WIDTH="33%">
-                            <div class="content-dot-container">
-                                <span class="content-dot" onclick="currentSlide(1)"></span>
-                                <span class="content-dot" onclick="currentSlide(2)"></span>
-                                <span class="content-dot" onclick="currentSlide(3)"></span>
+                            <div class="content-dot-container"  style="float: right">
+                                <!-- Pause Button -->
+                                <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
+                                <!-- Resume Button -->
+                                <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
+                                <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(1)"></span>
+                                <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(2)"></span>
+                                <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(3)"></span>
                                 <span style="float: left;" onclick="nextSlide()">
-                                    <img src=".././Images/arr.png" style="width: 20px;margin-top: -8px">
+                                    <img src=".././Images/arr.png" style="width: 20px;margin-top: 12px">
                                 </span>
                             </div>
                         </TD>
-
                         <TD WIDTH="33%">
                             <button class="glow-on-hover7 Blazing content-next" style="position: relative; float: right" onclick="nextSlide()">&#10095;</button>
+
                         </TD>
                     </TR>
                 </TABLE>
@@ -512,7 +516,17 @@
         slideInterval = setInterval(function() { changeSlide(1); }, 2000);
     }
 
-    var slideInterval = setInterval(function() { changeSlide(1); }, 2000); // Change image every 2 seconds
+    // Directly using pauseSlideShow and resumeSlideShow to control the slideshow
+    var slideInterval = setInterval(function() { changeSlide(1); }, 2000); // Auto-change slides
+
+    // Pause and Resume functions
+    function pauseSlideShow() {
+        clearInterval(slideInterval);
+    }
+
+    function resumeSlideShow() {
+        resetSlideInterval(); // Calls reset to resume auto-navigation
+    }
 
 
 </script>
