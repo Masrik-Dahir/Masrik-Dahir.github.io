@@ -235,6 +235,238 @@ const app_map = {
     }
 }
 
+const app_pic = {
+    data() {
+        return {
+            showingPopupIndex: null, // Index of the currently shown popup
+            searchQuery: null,
+            resources:[
+                {
+                    title:"Kentucky",
+                    abv:"KY",
+                    image:"./Images/KY.svg.png",
+                    url:"https://www.masrikdahir.com/map/ky",
+                },
+                {
+                    title:"Virginia",
+                    abv:"VA",
+                    image:"./Images/va.png",
+                    url:"https://www.masrikdahir.com/map/va",
+                },
+                {
+                    title:"West Virginia",
+                    abv:"WV",
+                    image:"./Images/WV.png",
+                    url:"https://www.masrikdahir.com/map/wv",
+                },
+                {
+                    title:"Maryland",
+                    abv:"MD",
+                    image:"./Images/md.png",
+                    url:"https://www.masrikdahir.com/map/md",
+                },
+                {
+                    title:"Delaware",
+                    abv:"DE",
+                    image:"./Images/delaware_flag.png",
+                    url:"https://www.masrikdahir.com/map/de",
+                },
+                {
+                    title:"North Carolina",
+                    abv:"NC",
+                    image:"./Images/NC.svg.png",
+                    url:"https://www.masrikdahir.com/map/nc",
+                },
+
+                {
+                    title:"Indiana",
+                    abv:"IN",
+                    image:"./Images/IN.svg.png",
+                    url:"https://www.masrikdahir.com/map/in",
+                },
+                {
+                    title:"Tennessee",
+                    abv:"TN",
+                    image:"./Images/TN.png",
+                    url:"https://www.masrikdahir.com/map/tn",
+                },
+                {
+                    title:"Washington DC",
+                    abv:"DC",
+                    image:"./Images/dc.png",
+                    url:"https://www.masrikdahir.com/map/dc",
+                },
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+        openPopup(index) {
+            this.showingPopupIndex = index;
+        },
+        closePopup() {
+            this.showingPopupIndex = null;
+        }
+    }
+}
+
+const app_kentucky = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Kentucky/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Kentucky/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Kentucky/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Kentucky/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Kentucky/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Kentucky/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Kentucky/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/Kentucky/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/Kentucky/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/Kentucky/10.jpg",
+                }
+
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
 const top_nav = {
     data() {
         return {
@@ -284,3 +516,6 @@ const top_nav = {
 
 Vue.createApp(app_software).mount('#app_software')
 Vue.createApp(app_map).mount('#app_map')
+Vue.createApp(app_pic).mount('#app_pic')
+Vue.createApp(app_kentucky).mount('#app_kentucky')
+
