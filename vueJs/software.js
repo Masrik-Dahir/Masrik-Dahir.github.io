@@ -172,7 +172,7 @@ const app_map = {
                     title:"United States of America",
                 },
                 {
-                    title:"Bangladesh",
+                    title:"United Kingdom",
                 },
 
             ]
