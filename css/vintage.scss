@@ -1,0 +1,42 @@
+$header-color: #953914;
+$tag-color: #947C60;
+$main-font-color: #10142D;
+$tag-text-color: #fff;
+
+
+body {
+  margin: 0;
+  border: 5px solid $main-font-color;
+  font-family: 'Old Standard TT', serif;
+  color: $main-font-color;
+}
+
+header {
+  background: $header-color;
+}
+
+.main {
+  font-size: 5.66em;
+  font-weight: 700;
+}
+
+.blurb {
+  font-size: 2em;
+}
+
+.title {
+  padding: 3.33em 0;
+  text-align: center
+}
+
+.tag {
+  background: $main-font-color;
+  padding: .33em 0;
+  text-align: center;
+  font-size: 1.66em;
+  color: $tag-color;
+}
+
+.it {
+  font-style: italic;
+}

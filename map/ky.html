@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="../css/new.css">
     <link rel="stylesheet" href="../css/if.css">
     <link rel="stylesheet" href="../css/popup.css">
+    <link rel="stylesheet" href="../css/vintage.css">
+
 
     <!--    JS imports-->
     <script src="../library/code.jquery.com.jquery-1.10.2.js"></script>
@@ -152,6 +154,22 @@
             justify-content: center; /* Center children vertically */
         }
 
+        .content-dot-container-2 {
+            text-align: center;
+            padding: 5px;
+            background: #ddd;
+            width: 100%; /* Ensure it spans the full width of the slideshow container */
+            height: auto;
+            max-width: fit-content; /* Maximum size */
+            margin: auto; /* Margin auto for horizontal centering, 20px for some spacing from top/bottom */
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Optional: adds shadow for depth */
+            overflow: hidden;
+            border-radius: 10px; /* Optional: adds rounded corners */
+            display: flex; /* Added for vertical alignment */
+            justify-content: center; /* Center children vertically */
+        }
+
         .content-dot {
             cursor: pointer;
             height: 15px;
@@ -166,30 +184,10 @@
         .content-active-dot, .content-dot:hover {
             background-color: #717171;
         }
-        @keyframes flameFlicker {
-            0%, 100% {
-                text-shadow:
-                        0 0 5px #E0E0E0, /* Silver */
-                        0 0 10px #B0B0B0, /* Ash */
-                        0 0 15px #D0D0D0, /* Light Gray */
-                        0 0 20px #E0E0E0, /* Silver */
-                        0 0 25px darkgrey; /* Ash */
-            }
-            50% {
-                text-shadow:
-                        0 0 6px #E0E0E0, /* Silver */
-                        0 0 12px #B0B0B0, /* Ash */
-                        0 0 18px #D0D0D0, /* Light Gray */
-                        0 0 24px #E0E0E0, /* Silver */
-                        0 0 30px darkgrey; /* Ash */
-            }
-        }
 
-        .rusted-paper-heading {
-            font-size: 48px;
-            color: #8a6552; /* Base text color */
-            animation: flameFlicker 2s infinite alternate;
-        }
+
+
+
 
 
     </style>
@@ -279,7 +277,7 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: red; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
                                 <div class="wrapper">
                                 </div>
                                 Leadership</b>
@@ -446,11 +444,13 @@
 <TABLE WIDTH="100%" style="margin-top: 10px">
     <TR>
         <TD WIDTH="100%">
-            <button class="glow-on-hover3 w3-margin" style="position: relative; float: left; width: fit-content; height: fit-content; margin: 5px; padding: 5px" onclick="nextSlide();"><a href="https://www.masrikdahir.com/map"><img src=".././Images/map.png" style="width: 40px"></a> </button>
-            <h1 class="rusted-paper-heading">Kentucky</h1>
+
             <div class="content-slideshow-container">
-                <div id="app_kentucky" style="">
-                    <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" :title="item.title">
+                <div class="tag w3-margin-bottom">
+                    <div class="it">Kentucky</div>
+                </div>
+                <div id="app_kentucky" class="w3-margin-bottom" style="">
+                    <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" > <!--:title="item.title"-->
                         <img :src="item.url" style="width:100%; height: auto; object-fit: contain;"/>
                     </div>
                 </div>
@@ -461,31 +461,62 @@
     <TR>
         <TD WIDTH="100%">
             <div class="content-dot-container-frame">
-                <TABLE WIDTH="100%">
-                    <TR>
-                        <TD WIDTH="33%">
-                            <button class="glow-on-hover7 Blazing content-prev" style="position: relative" onclick="prevSlide()">&#10094;</button>
-                        </TD>
-                        <TD WIDTH="33%">
-                            <div class="content-dot-container"  style="float: right">
-                                <!-- Pause Button -->
-                                <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
-                                <!-- Resume Button -->
-                                <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
-                                <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(1)"></span>
-                                <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(2)"></span>
-                                <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(3)"></span>
-                                <span style="float: left;" onclick="nextSlide()">
+                <div class="resizing-1026-more">
+                    <TABLE WIDTH="100%">
+                        <TR>
+                            <TD WIDTH="33%">
+                                <button class="glow-on-hover7 Blazing content-prev" style="position: relative" onclick="prevSlide()">&#10094;</button>
+                            </TD>
+                            <TD WIDTH="33%">
+                                <div class="content-dot-container"  style="float: right">
+                                    <button class="glow-on-hover4" style="width: fit-content"><a href="https://www.masrikdahir.com/map"><img src=".././Images/go-back-arrow.svg" style="width: 40px"></a> </button>
+                                    <!-- Pause Button -->
+                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
+                                    <!-- Resume Button -->
+                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
+                                    <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(1)"></span>
+                                    <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(2)"></span>
+                                    <span class="content-dot" style="margin-top: 15px" onclick="currentSlide(3)"></span>
+                                    <span style="float: left;" onclick="nextSlide()">
                                     <img src=".././Images/arr.png" style="width: 20px;margin-top: 12px">
                                 </span>
-                            </div>
-                        </TD>
-                        <TD WIDTH="33%">
-                            <button class="glow-on-hover7 Blazing content-next" style="position: relative; float: right" onclick="nextSlide()">&#10095;</button>
+                                </div>
+                            </TD>
+                            <TD WIDTH="33%">
+                                <button class="glow-on-hover7 Blazing content-next" style="position: relative; float: right" onclick="nextSlide()">&#10095;</button>
 
-                        </TD>
-                    </TR>
-                </TABLE>
+                            </TD>
+                        </TR>
+                    </TABLE>
+                </div>
+                <div class="resizing-1026-less">
+                    <TABLE WIDTH="100%">
+                        <TR>
+                            <TD WIDTH="33%">
+                                <button class="glow-on-hover7 Blazing content-prev" style="margin-left: 8px; position: relative; font-size: 10px; padding: 5px 10px;" onclick="prevSlide()">&#10094;</button>
+                            </TD>
+                            <TD WIDTH="33%">
+                                <div class="content-dot-container-2"  style="float: right">
+                                    <button class="glow-on-hover4" style="width: fit-content"><a href="https://www.masrikdahir.com/map"><img src=".././Images/go-back-arrow.svg" style="width: 20px"></a> </button>
+                                    <!-- Pause Button -->
+                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 20px;"></button>
+                                    <!-- Resume Button -->
+                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 20px;"></button>
+                                    <span class="content-dot" style="margin-top: 11px; width: 8px; height: 8px" onclick="currentSlide(1)"></span>
+                                    <span class="content-dot" style="margin-top: 11px; width: 8px; height: 8px" onclick="currentSlide(2)"></span>
+                                    <span class="content-dot" style="margin-top: 11px; width: 8px; height: 8px" onclick="currentSlide(3)"></span>
+                                    <span style="float: left;" onclick="nextSlide()">
+                                    <img src=".././Images/arr.png" style="width: 15px;margin-top: 7px">
+                                </span>
+                                </div>
+                            </TD>
+                            <TD WIDTH="33%">
+                                <button class="glow-on-hover7 Blazing content-next" style="margin-right: 8px; position: relative; font-size: 10px; padding: 5px 10px; float: right" onclick="nextSlide()">&#10095;</button>
+
+                            </TD>
+                        </TR>
+                    </TABLE>
+                </div>
             </div>
 
         </TD>
