@@ -689,11 +689,9 @@
 }
 
 .glow-on-hover-nav:active {
-    color: transparent;
 }
 
 .glow-on-hover-nav:active:after {
-    background: transparent;
 }
 
 .glow-on-hover-nav:hover:before {
