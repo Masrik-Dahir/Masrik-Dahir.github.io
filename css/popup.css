@@ -15,14 +15,13 @@
 
 .popup .content {
     position:absolute;
-    top:50%;
-    left:50%;
+    top: 270px;
+    left:140px;
     transform:translate(-50%,-50%) scale(0);
     background:#fff;
-    width: 350px;
+    width: 280px;
     height: min(80%, 700);
     z-index:2;
-    text-align:center;
     padding:20px;
     box-sizing:border-box;
     overflow-y: scroll;

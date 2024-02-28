@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/popup.css">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="bootstrap/css/bootstrap-grid.css"/>
+    <link rel="stylesheet" href="css/vintage.css">
 
 
     <!--    JS imports-->
@@ -65,330 +66,143 @@
         <!-- Left Column -->
         <header-tag class="info">
             <div id="app3" v-cloak>
-                <div>
-                    <div class="popup" id="popup-3">
+                <div class="resizing-1026-less" style="margin-bottom: 30px; padding: 10px">
+                    <div class="popup" id="popup-3" style="">
                         <div class="overlay"></div>
-                        <div class="content">
-                            <div style="color: black" >
+                        <div class="content" style="">
+                            <div style="color: black; ">
+                                <TABLE>
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Home</b>
+                                                    </div>
+                                                </button>
+                                            </a>
+                                        </TD>
 
-                                <style>
-                                    .glow-on-hover3 {
-                                        /*width: min(calc(100% + 10px), 300px);*/
-                                        /*height: min(calc(100% + 50px), 100px);*/
-                                        /*border: none;*/
-                                        /*outline: none;*/
-                                        padding: 0px;
-                                        border: solid silver 2px;
-                                        color: #111;
-                                        background: whitesmoke;
-                                        cursor: pointer;
-                                        position: relative;
-                                        z-index: 0;
-
-                                        border-radius: 10px;
-                                    }
-
-                                    .glow-on-hover3:before {
-                                        content: '';
-                                        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-                                        position: absolute;
-                                        top: -2px;
-                                        left:-2px;
-                                        background-size: 400%;
-                                        z-index: -1;
-                                        filter: blur(5px);
-                                        width: calc(100% + 1px);
-                                        height: calc(100% + 1px);
-                                        animation: glowing 20s linear infinite;
-                                        opacity: 0;
-                                        transition: opacity .3s ease-in-out;
-                                        border-radius: 10px;
-                                    }
-
-                                    .glow-on-hover3:active {
-                                        color: white;
-                                    }
-
-                                    .glow-on-hover3:active:after {
-                                        background: whitesmoke;
-                                    }
-
-                                    .glow-on-hover3:hover:before {
-                                        opacity: 1;
-                                    }
-
-                                    .glow-on-hover3:after {
-                                        z-index: -1;
-                                        content: '';
-                                        position: absolute;
-                                        width: 100%;
-                                        height: 100%;
-                                        background: whitesmoke;
-                                        left: 0;
-                                        top: 0;
-                                        border-radius: 10px;
-                                    }
-
-                                    @keyframes glowing3 {
-                                        0% { background-position: 0 0; }
-                                        50% { background-position: 400% 0; }
-                                        100% { background-position: 0 0; }
-                                    }
+                                    </TR>
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Work</b>
+                                                    </div>
+                                                </button>
+                                            </a>
+                                        </TD>
 
 
-                                    .glow-on-hover {
-                                        width: fit-content;
-                                        height: 50px;
-                                        border: 1px solid #00EE00;
-                                        outline: none;
-                                        color: #00EE00;
-                                        background: #111;
-                                        cursor: pointer;
-                                        position: relative;
-                                        z-index: 0;
-                                        border-radius: 10px;
+                                    </TR>
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Publication</b>
+                                                    </div>
+                                                </button>
+                                            </a>
+                                        </TD>
+                                    </TR>
 
-                                    }
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Education</b>
+                                                    </div>
+                                                </button>
+                                            </a>
+                                        </TD>
+                                    </TR>
 
-                                    .glow-on-hover:before {
-                                        content: '';
-                                        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-                                        position: absolute;
-                                        top: -2px;
-                                        left: -2px;
-                                        background-size: 400%;
-                                        z-index: -1;
-                                        filter: blur(5px);
-                                        width: calc(100% + 4px);
-                                        height: calc(100% + 4px);
-                                        animation: glowing3 20s linear infinite;
-                                        opacity: 0;
-                                        transition: opacity .3s ease-in-out;
-                                        border-radius: 10px;
-                                    }
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Software</b>
+                                                    </div>
+                                                </button>
+                                            </a>
 
-                                    .glow-on-hover:hover:before {
-                                        opacity: 1;
-                                    }
+                                        </TD>
+                                    </TR>
 
-                                    .glow-on-hover:active {
-                                        color: #000;
-                                    }
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Entrepreneurship</b>
+                                                    </div>
+                                                </button>
+                                            </a>
 
-                                    .glow-on-hover:active:after {
-                                        background: transparent;
-                                    }
+                                        </TD>
+                                    </TR>
 
-                                    .glow-on-hover:after {
-                                        z-index: -1;
-                                        content: '';
-                                        position: absolute;
-                                        width: 100%;
-                                        height: 100%;
-                                        background: #111;
-                                        left: 0;
-                                        top: 0;
-                                        border-radius: 10px;
-                                    }
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/leadership" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Leadership</b>
+                                                    </div>
+                                                </button>
+                                            </a>
+                                        </TD>
+                                    </TR>
 
-                                    @keyframes glowing {
-                                        0% { background-position: 0 0; }
-                                        50% { background-position: 400% 0; }
-                                        100% { background-position: 0 0; }
-                                    }
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Travel</b>
+                                                    </div>
+                                                </button>
 
-
-
-
-                                    .glow-on-hover12 {
-                                        border-style: solid;
-                                        border-color: silver;
-                                        color: #111;
-                                        background: whitesmoke;
-                                        cursor: pointer;
-                                        position: relative;
-                                        z-index: 0;
-                                        border-radius: 10px;
-                                        text-align: left;
-                                        width: fit-content;
-                                    }
-
-                                    .glow-on-hover12 h2 {
-                                        text-align: left;
-                                    }
-
-                                    .glow-on-hover12:before {
-                                        content: '';
-                                        background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
-                                        position: absolute;
-                                        top: -2px;
-                                        left: -2px;
-                                        background-size: 400%;
-                                        z-index: -1;
-                                        filter: blur(5px);
-                                        width: calc(100% + 4px);
-                                        height: calc(100% + 4px);
-                                        animation: glowing12 20s linear infinite;
-                                        opacity: 0;
-                                        transition: opacity .3s ease-in-out;
-                                        border-radius: 10px;
-                                    }
-
-                                    .glow-on-hover12:active {
-                                        color: black;
-                                    }
-
-                                    .glow-on-hover12:active:after {
-                                        background: transparent;
-                                    }
-
-                                    .glow-on-hover12:hover:before {
-                                        opacity: 1;
-                                    }
-
-                                    .glow-on-hover12:after {
-                                        z-index: -1;
-                                        content: '';
-                                        position: absolute;
-                                        width: 100%;
-                                        height: 100%;
-                                        background: whitesmoke;
-                                        left: 0;
-                                        top: 0;
-                                        border-radius: 10px;
-                                    }
-
-                                    @keyframes glowing12 {
-                                        0% {
-                                            background-position: 0 0;
-                                        }
-                                        50% {
-                                            background-position: 400% 0;
-                                        }
-                                        100% {
-                                            background-position: 0 0;
-                                        }
-                                    }
-                                </style>
-
-                                <div class="w3-margin-bottom" style="position: relative; top: 10px; color: black;">
-
-                                    <div class="btn btn-danger" onclick="togglePopup('3')">&times;</div>
-                                </div>
-                                <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px;border: red 3px solid ">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Home</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Work Experience</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Publication</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Education</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Software</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Entrepreneurship</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/leadership" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Leadership</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
-
-                                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                                    <button class="glow-on-hover3" type="button"
-                                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                                        <div style="" class="w3-container">
-                                            <h4><b style="color: black;">
-                                                <div class="wrapper">
-                                                </div>
-                                                Travel</b>
-                                            </h4>
-                                        </div>
-                                    </button>
-                                </a>
+                                            </a>
+                                        </TD>
+                                    </TR>
+                                </TABLE>
 
                             </div>
 
                         </div>
                     </div>
-                    <div>
-                        <button onclick="togglePopup('3')" class="cent crop" style=""><img src="Images/menu.png"
-                                                                                           width="25" height="20"
-                                                                                           alt="Masrik Dahir">
-                            <bdi style=" margin-top: 5px">Menu</bdi>
+
+                    <div class="topnav-2 navbar-fixed-top" style="margin-top: -13px;">
+
+                        <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 0px; margin-bottom: 13px">
+                            <div class="main">Masrik Dahir</div>
+                        </h5>
+
+                        <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 27px; margin-bottom: 13px"><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir">
                         </button>
+
                     </div>
                 </div>
             </div>
