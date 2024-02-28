@@ -1,6 +1,7 @@
 @media only screen and (min-width: 1024px) {
     .info {
         display: none;
+        background: white;
     }
     .w3-third{
         width:100%
@@ -15,7 +16,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        background: white;
+        background: #000;
     }
 
     .glow-on-hover {
