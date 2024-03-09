@@ -578,7 +578,7 @@ const app_maine = {
                 },
                 {
                     title:"14",
-                    url:"../Images/Maine/14.jpg",
+                    url:"../Images/Maine/14.jpeg",
                 },
                 {
                     title:"15",
