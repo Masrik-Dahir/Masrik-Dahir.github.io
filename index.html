@@ -55,7 +55,7 @@
 
 </head>
 
-<body class="">
+<body class="" style="background: white">
 
 <!-- Page Container -->
 <div class="w3-content" style="max-width:1400px; background-color: white;">
@@ -613,7 +613,7 @@
 </div>
 
 
-<div class="show" style="margin-right: 10px; padding-right: 10px">
+<div class="show" style="margin-right: 10px; padding-right: 10px; background: white">
         <div class="resizing-1026-more">
             <style>
                 .w3-padding-small {
@@ -1752,13 +1752,13 @@
 
         </div>
 
-        <canvas id='canv'></canvas>
+        <canvas id='canv' style="background: white"></canvas>
 
         <div class="container2" style="margin: 10px">
             <div class="stack" style="--stacks: 3;">
-                <span style="--index: 0; color: #00EE00">MASRIK&nbsp;DAHIR</span>
-                <span style="--index: 1; color: #00EE00">MASRIK&nbsp;DAHIR</span>
-                <span style="--index: 2; color: #00EE00">MASRIK&nbsp;DAHIR</span>
+                <span style="--index: 0; color: #000">MASRIK&nbsp;DAHIR</span>
+                <span style="--index: 1; color: #000">MASRIK&nbsp;DAHIR</span>
+                <span style="--index: 2; color: #000">MASRIK&nbsp;DAHIR</span>
             </div>
             <span>
 
@@ -1815,7 +1815,7 @@
             let cols = Math.floor(window.innerWidth / 20) + 1;
             let ypos = Array(cols).fill(0);
 
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#fffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             function matrix() {
@@ -1831,10 +1831,10 @@
                     canvas.height = h;
                 }
 
-                ctx.fillStyle = '#0001';
+                ctx.fillStyle = '#fff1';
                 ctx.fillRect(0, 0, w, h);
 
-                ctx.fillStyle = '#0f0';
+                ctx.fillStyle = '#000';
                 ctx.font = '15pt monospace';
 
                 ypos.forEach((y, ind) => {
