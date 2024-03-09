@@ -263,7 +263,7 @@ const app_pic = {
                     title:"New Hampshire",
                     abv:"WH",
                     image:"./Images/New Hampshire/WH.svg.png",
-                    url:"https://www.masrikdahir.com/map/wh",
+                    url:"https://www.masrikdahir.com/map/nh",
                 },
                 {
                     title:"New York",
