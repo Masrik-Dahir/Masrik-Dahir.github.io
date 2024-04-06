@@ -293,19 +293,19 @@ const app_pic = {
                     title:"Virginia",
                     abv:"VA",
                     image:"./Images/va.png",
-                    url:"https://www.masrikdahir.com/map/va",
+                    url:"",
                 },
                 {
                     title:"West Virginia",
                     abv:"WV",
                     image:"./Images/West Virginia/WV.svg.png",
-                    url:"https://www.masrikdahir.com/map/wv",
+                    url:"",
                 },
                 {
                     title:"Maryland",
                     abv:"MD",
                     image:"./Images/Maryland/MD.svg.png",
-                    url:"https://www.masrikdahir.com/map/md",
+                    url:"",
                 },
                 {
                     title:"Delaware",
