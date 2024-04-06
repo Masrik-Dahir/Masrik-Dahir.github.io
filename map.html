@@ -1305,6 +1305,30 @@
                 </g>
             </svg>
 
+            <div id="app_pic_gbr" style="">
+
+                <div class="" style="color:transparent;">
+                    <div style="display: inline-block">
+
+                        <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
+
+                            <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
+                                <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
+                                    <div data-toggle="tooltip" data-html="true" :title="item.title">
+                                        <a :href="item.url" style="text-decoration: none">
+                                            <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                                <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                            </button>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
         <hr>
 
