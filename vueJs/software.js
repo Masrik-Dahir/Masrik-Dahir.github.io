@@ -244,7 +244,7 @@ const app_pic = {
                 {
                     title:"Kentucky",
                     abv:"KY",
-                    image:"./Images/KY.svg.png",
+                    image:"./Images/Kentucky/KY.svg.png",
                     url:"https://www.masrikdahir.com/map/ky",
                 },
                 {
@@ -287,7 +287,7 @@ const app_pic = {
                     title:"New Jersey",
                     abv:"NJ",
                     image:"./Images/New Jersey/NJ.svg.png",
-                    url:"https://www.masrikdahir.com/map/nj",
+                    url:"",
                 },
                 {
                     title:"Virginia",
@@ -298,44 +298,50 @@ const app_pic = {
                 {
                     title:"West Virginia",
                     abv:"WV",
-                    image:"./Images/WV.png",
+                    image:"./Images/West Virginia/WV.svg.png",
                     url:"https://www.masrikdahir.com/map/wv",
                 },
                 {
                     title:"Maryland",
                     abv:"MD",
-                    image:"./Images/md.png",
+                    image:"./Images/Maryland/MD.svg.png",
                     url:"https://www.masrikdahir.com/map/md",
                 },
                 {
                     title:"Delaware",
                     abv:"DE",
-                    image:"./Images/delaware_flag.png",
-                    url:"https://www.masrikdahir.com/map/de",
+                    image:"./Images/Delaware/DE.svg.png",
+                    url:"",
                 },
                 {
                     title:"North Carolina",
                     abv:"NC",
-                    image:"./Images/NC.svg.png",
-                    url:"https://www.masrikdahir.com/map/nc",
+                    image:"./Images/North Carolina/NC.svg.png",
+                    url:"",
                 },
                 {
                     title:"Indiana",
                     abv:"IN",
-                    image:"./Images/IN.svg.png",
+                    image:"./Images/Indiana/IN.svg.png",
                     url:"https://www.masrikdahir.com/map/in",
                 },
                 {
                     title:"Tennessee",
                     abv:"TN",
-                    image:"./Images/TN.png",
+                    image:"./Images/Tennessee/TN.svg.png",
                     url:"https://www.masrikdahir.com/map/tn",
                 },
                 {
                     title:"Washington DC",
                     abv:"DC",
-                    image:"./Images/dc.png",
-                    url:"https://www.masrikdahir.com/map/dc",
+                    image:"./Images/DC/DC.svg.png",
+                    url:"",
+                },
+                {
+                    title:"Pennsylvania ",
+                    abv:"DC",
+                    image:"./Images/Pennsylvania/PA.svg.png",
+                    url:"",
                 }
             ]
         };
