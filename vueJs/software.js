@@ -323,13 +323,13 @@ const app_pic = {
                     title:"Indiana",
                     abv:"IN",
                     image:"./Images/Indiana/IN.svg.png",
-                    url:"https://www.masrikdahir.com/map/in",
+                    url:"",
                 },
                 {
                     title:"Tennessee",
                     abv:"TN",
                     image:"./Images/Tennessee/TN.svg.png",
-                    url:"https://www.masrikdahir.com/map/tn",
+                    url:"",
                 },
                 {
                     title:"Washington DC",
