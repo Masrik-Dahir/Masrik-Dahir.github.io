@@ -34,6 +34,7 @@
     <!--    Vue JS imports-->
     <script src="library/vue@3.2.36.dist.vue.global.js"></script>
     <script src="vueJs/default.js" defer></script>
+    <script src="vueJs/software.js" defer></script>
 
 
     <!--    Top Nav -->
@@ -501,49 +502,59 @@
 
                 <!--                Travel-->
                 <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom">
+
                     <div class="w3-container" style="color:transparent;">
                         <h4><p style="color: black;">
                             <i class="fa fa-map-marked-alt fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Travel</p></h4>
 
 
+                        <div id="app_pic" style="">
 
+                            <div class="" style="color:transparent;">
+                                <div style="display: inline-block">
 
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Virginia -->
-                                    <div data-toggle="tooltip" data-html="true" title="Virginia">
-                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px;"
-                                             src="./Images/va.png"/>
+                                    <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
+
+                                        <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
+                                            <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
+                                                <div data-toggle="tooltip" data-html="true" :title="item.title">
+                                                    <a :href="item.url" style="text-decoration: none">
+                                                        <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                                            <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                                        </button>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </TD>
+                                </div>
+                            </div>
 
-                                <TD>
-                                    <!--          Maryland -->
-                                    <div data-toggle="tooltip" data-html="true" title="Maryland">
-                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="./Images/md.png"/>
+                        </div>
+
+                        <div id="app_pic_gbr" style="">
+
+                            <div class="" style="color:transparent;">
+                                <div style="display: inline-block">
+
+                                    <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
+
+                                        <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
+                                            <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
+                                                <div data-toggle="tooltip" data-html="true" :title="item.title">
+                                                    <a :href="item.url" style="text-decoration: none">
+                                                        <button class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                                            <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                                        </button>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </TD>
+                                </div>
+                            </div>
 
-                                <TD>
-                                    <!--          Rhode Island -->
-                                    <div data-toggle="tooltip" data-html="true" title="Rhode Island">
-                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="./Images/ri.png"/>
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          Washington DC -->
-                                    <div data-toggle="tooltip" data-html="true" title="Washington DC">
-                                        <img class="box3 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="./Images/dc.png"/>
-                                    </div>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
+                        </div>
 
 
 
