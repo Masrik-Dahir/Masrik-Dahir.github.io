@@ -511,7 +511,6 @@ const app_pic_gbr = {
     }
 }
 
-
 const app_kentucky = {
     data() {
         return {
@@ -842,27 +841,27 @@ const app_new_hampshire = {
                     url:"../Images/New Hampshire/13.jpg",
                 },
                 {
-                    title:"13",
+                    title:"14",
                     url:"../Images/New Hampshire/14.jpg",
                 },
                 {
-                    title:"13",
+                    title:"15",
                     url:"../Images/New Hampshire/15.jpg",
                 },
                 {
-                    title:"13",
+                    title:"16",
                     url:"../Images/New Hampshire/16.jpg",
                 },
                 {
-                    title:"13",
+                    title:"17",
                     url:"../Images/New Hampshire/17.jpg",
                 },
                 {
-                    title:"13",
+                    title:"18",
                     url:"../Images/New Hampshire/18.jpg",
                 },
                 {
-                    title:"13",
+                    title:"19",
                     url:"../Images/New Hampshire/19.jpg",
                 }
 
