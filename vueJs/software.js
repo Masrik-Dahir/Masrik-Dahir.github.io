@@ -191,7 +191,6 @@ const app_map = {
     },
 
 
-
     mounted() {
         this.$nextTick(() => {
             window.addEventListener('resize', this.onResize);
@@ -329,7 +328,7 @@ const app_pic = {
                     title:"Tennessee",
                     abv:"TN",
                     image:"./Images/Tennessee/TN.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/tn",
                 },
                 {
                     title:"Washington DC",
@@ -338,10 +337,28 @@ const app_pic = {
                     url:"",
                 },
                 {
-                    title:"Pennsylvania ",
+                    title:"Pennsylvania",
                     abv:"DC",
                     image:"./Images/Pennsylvania/PA.svg.png",
                     url:"",
+                },
+                {
+                    title:"South Carolina",
+                    abv:"SC",
+                    image:"./Images/South Carolina/SC.svg.png",
+                    url:"https://www.masrikdahir.com/map/sc",
+                },
+                {
+                    title:"Georgia ",
+                    abv:"GA",
+                    image:"./Images/Georgia/GA.svg.png",
+                    url:"https://www.masrikdahir.com/map/ga",
+                },
+                {
+                    title:"Alabama ",
+                    abv:"AL",
+                    image:"./Images/Alabama/AL.svg.png",
+                    url:"https://www.masrikdahir.com/map/al",
                 }
             ]
         };
@@ -1341,6 +1358,522 @@ const app_massachusetts = {
     }
 }
 
+const app_south_carolina = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/South Carolina/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/South Carolina/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/South Carolina/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/South Carolina/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/South Carolina/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/South Carolina/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/South Carolina/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/South Carolina/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/South Carolina/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/South Carolina/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/South Carolina/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/South Carolina/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/South Carolina/13.jpg",
+                },
+                {
+                    title:"14",
+                    url:"../Images/South Carolina/14.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
+const app_georgia = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Georgia/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Georgia/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Georgia/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Georgia/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Georgia/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Georgia/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Georgia/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/Georgia/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/Georgia/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/Georgia/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/Georgia/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/Georgia/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/Georgia/13.jpg",
+                },
+                {
+                    title:"14",
+                    url:"../Images/Georgia/14.jpg",
+                },
+                {
+                    title:"15",
+                    url:"../Images/Georgia/15.jpg",
+                },
+                {
+                    title:"16",
+                    url:"../Images/Georgia/16.jpg",
+                },
+                {
+                    title:"17",
+                    url:"../Images/Georgia/17.jpg",
+                },
+                {
+                    title:"18",
+                    url:"../Images/Georgia/18.jpg",
+                },
+                {
+                    title:"19",
+                    url:"../Images/Georgia/19.jpg",
+                },
+                {
+                    title:"20",
+                    url:"../Images/Georgia/20.jpg",
+                },
+                {
+                    title:"21",
+                    url:"../Images/Georgia/21.jpg",
+                },
+                {
+                    title:"22",
+                    url:"../Images/Georgia/22.jpg",
+                },
+                {
+                    title:"23",
+                    url:"../Images/Georgia/23.jpg",
+                },
+                {
+                    title:"24",
+                    url:"../Images/Georgia/24.jpg",
+                },
+                {
+                    title:"25",
+                    url:"../Images/Georgia/25.jpg",
+                },
+                {
+                    title:"26",
+                    url:"../Images/Georgia/26.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
+const app_alabama = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Alabama/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Alabama/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Alabama/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Alabama/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Alabama/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Alabama/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Alabama/7.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
+const app_tennessee = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Tennessee/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Tennessee/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Tennessee/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Tennessee/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Tennessee/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Tennessee/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Tennessee/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/Tennessee/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/Tennessee/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/Tennessee/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/Tennessee/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/Tennessee/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/Tennessee/13.jpg",
+                },
+                {
+                    title:"14",
+                    url:"../Images/Tennessee/14.jpg",
+                },
+                {
+                    title:"15",
+                    url:"../Images/Tennessee/15.jpg",
+                },
+                {
+                    title:"16",
+                    url:"../Images/Tennessee/16.jpg",
+                },
+                {
+                    title:"17",
+                    url:"../Images/Tennessee/17.jpg",
+                },
+                {
+                    title:"18",
+                    url:"../Images/Tennessee/18.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
 const top_nav = {
     data() {
         return {
@@ -1399,6 +1932,11 @@ Vue.createApp(app_connecticut).mount('#app_connecticut')
 Vue.createApp(app_vermont).mount('#app_vermont')
 Vue.createApp(app_new_york).mount('#app_new_york')
 Vue.createApp(app_massachusetts).mount('#app_massachusetts')
+Vue.createApp(app_south_carolina).mount('#app_south_carolina')
+Vue.createApp(app_georgia).mount('#app_georgia')
+Vue.createApp(app_alabama).mount('#app_alabama')
+Vue.createApp(app_tennessee).mount('#app_tennessee')
+
 
 
 
