@@ -169,7 +169,10 @@ const app_map = {
             searchQuery: null,
             resources:[
                 {
-                    title:"United States of America",
+                    title:"United States",
+                },
+                {
+                    title:"Canada",
                 },
                 {
                     title:"British Isles",
@@ -340,7 +343,7 @@ const app_pic = {
                     title:"Pennsylvania",
                     abv:"DC",
                     image:"./Images/Pennsylvania/PA.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/pa",
                 },
                 {
                     title:"South Carolina",
@@ -359,6 +362,12 @@ const app_pic = {
                     abv:"AL",
                     image:"./Images/Alabama/AL.svg.png",
                     url:"https://www.masrikdahir.com/map/al",
+                },
+                {
+                    title:"Ohio ",
+                    abv:"OH",
+                    image:"./Images/Ohio/OH.svg.png",
+                    url:"https://www.masrikdahir.com/map/oh",
                 }
             ]
         };
@@ -374,9 +383,81 @@ const app_pic = {
             }
         }
     },
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
 
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
 
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
 
+        },
+        openPopup(index) {
+            this.showingPopupIndex = index;
+        },
+        closePopup() {
+            this.showingPopupIndex = null;
+        }
+    }
+}
+
+const app_pic_can = {
+    data() {
+        return {
+            showingPopupIndex: null, // Index of the currently shown popup
+            searchQuery: null,
+            resources:[
+                {
+                    title:"Ontario ",
+                    abv:"ON",
+                    image:"./Images/Ontario/ON.svg.png",
+                    url:"https://www.masrikdahir.com/map/on",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
     mounted() {
         this.$nextTick(() => {
             window.addEventListener('resize', this.onResize);
@@ -1874,6 +1955,554 @@ const app_tennessee = {
     }
 }
 
+const app_pennsylvania = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Pennsylvania/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Pennsylvania/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Pennsylvania/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Pennsylvania/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Pennsylvania/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Pennsylvania/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Pennsylvania/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/Pennsylvania/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/Pennsylvania/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/Pennsylvania/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/Pennsylvania/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/Pennsylvania/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/Pennsylvania/13.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
+const app_ontario = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Ontario/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Ontario/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Ontario/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Ontario/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Ontario/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Ontario/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Ontario/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/Ontario/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/Ontario/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/Ontario/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/Ontario/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/Ontario/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/Ontario/13.jpg",
+                },
+                {
+                    title:"14",
+                    url:"../Images/Ontario/14.jpg",
+                },
+                {
+                    title:"15",
+                    url:"../Images/Ontario/15.jpg",
+                },
+                {
+                    title:"16",
+                    url:"../Images/Ontario/16.jpg",
+                },
+                {
+                    title:"17",
+                    url:"../Images/Ontario/17.jpg",
+                },
+                {
+                    title:"18",
+                    url:"../Images/Ontario/28.jpg",
+                },
+                {
+                    title:"19",
+                    url:"../Images/Ontario/19.jpg",
+                },
+                {
+                    title:"20",
+                    url:"../Images/Ontario/20.jpg",
+                },
+                {
+                    title:"21",
+                    url:"../Images/Ontario/21.jpg",
+                },
+                {
+                    title:"22",
+                    url:"../Images/Ontario/22.jpg",
+                },
+                {
+                    title:"23",
+                    url:"../Images/Ontario/23.jpg",
+                },
+                {
+                    title:"24",
+                    url:"../Images/Ontario/24.jpg",
+                },
+                {
+                    title:"25",
+                    url:"../Images/Ontario/25.jpg",
+                },
+                {
+                    title:"26",
+                    url:"../Images/Ontario/26.jpg",
+                },
+                {
+                    title:"27",
+                    url:"../Images/Ontario/27.jpg",
+                },
+                {
+                    title:"28",
+                    url:"../Images/Ontario/28.jpg",
+                },
+                {
+                    title:"29",
+                    url:"../Images/Ontario/29.jpg",
+                },
+                {
+                    title:"30",
+                    url:"../Images/Ontario/30.jpg",
+                },
+                {
+                    title:"31",
+                    url:"../Images/Ontario/31.jpg",
+                },
+                {
+                    title:"32",
+                    url:"../Images/Ontario/32.jpg",
+                },
+                {
+                    title:"33",
+                    url:"../Images/Ontario/33.jpg",
+                },
+                {
+                    title:"34",
+                    url:"../Images/Ontario/34.jpg",
+                },
+                {
+                    title:"35",
+                    url:"../Images/Ontario/35.jpg",
+                },
+                {
+                    title:"36",
+                    url:"../Images/Ontario/36.jpg",
+                },
+                {
+                    title:"37",
+                    url:"../Images/Ontario/37.jpg",
+                },
+                {
+                    title:"38",
+                    url:"../Images/Ontario/38.jpg",
+                },
+                {
+                    title:"39",
+                    url:"../Images/Ontario/39.jpg",
+                },
+                {
+                    title:"40",
+                    url:"../Images/Ontario/40.jpg",
+                },
+                {
+                    title:"41",
+                    url:"../Images/Ontario/41.jpg",
+                },
+                {
+                    title:"42",
+                    url:"../Images/Ontario/42.jpg",
+                },
+                {
+                    title:"43",
+                    url:"../Images/Ontario/43.jpg",
+                },
+                {
+                    title:"44",
+                    url:"../Images/Ontario/44.jpg",
+                },
+                {
+                    title:"45",
+                    url:"../Images/Ontario/45.jpg",
+                },
+                {
+                    title:"46",
+                    url:"../Images/Ontario/46.jpg",
+                },
+                {
+                    title:"47",
+                    url:"../Images/Ontario/47.jpg",
+                },
+                {
+                    title:"48",
+                    url:"../Images/Ontario/48.jpg",
+                },
+                {
+                    title:"49",
+                    url:"../Images/Ontario/49.jpg",
+                },
+                {
+                    title:"50",
+                    url:"../Images/Ontario/50.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
+const app_ohio = {
+    data() {
+        return {
+            resources:[
+                {
+                    title:"1",
+                    url:"../Images/Ohio/1.jpg",
+                },
+                {
+                    title:"2",
+                    url:"../Images/Ohio/2.jpg",
+                },
+                {
+                    title:"3",
+                    url:"../Images/Ohio/3.jpg",
+                },
+                {
+                    title:"4",
+                    url:"../Images/Ohio/4.jpg",
+                },
+                {
+                    title:"5",
+                    url:"../Images/Ohio/5.jpg",
+                },
+                {
+                    title:"6",
+                    url:"../Images/Ohio/6.jpg",
+                },
+                {
+                    title:"7",
+                    url:"../Images/Ohio/7.jpg",
+                },
+                {
+                    title:"8",
+                    url:"../Images/Ohio/8.jpg",
+                },
+                {
+                    title:"9",
+                    url:"../Images/Ohio/9.jpg",
+                },
+                {
+                    title:"10",
+                    url:"../Images/Ohio/10.jpg",
+                },
+                {
+                    title:"11",
+                    url:"../Images/Ohio/11.jpg",
+                },
+                {
+                    title:"12",
+                    url:"../Images/Ohio/12.jpg",
+                },
+                {
+                    title:"13",
+                    url:"../Images/Ohio/13.jpg",
+                },
+                {
+                    title:"14",
+                    url:"../Images/Ohio/14.jpg",
+                },
+                {
+                    title:"15",
+                    url:"../Images/Ohio/15.jpg",
+                },
+                {
+                    title:"16",
+                    url:"../Images/Ohio/16.jpg",
+                },
+                {
+                    title:"17",
+                    url:"../Images/Ohio/17.jpg",
+                },
+                {
+                    title:"18",
+                    url:"../Images/Ohio/18.jpg",
+                },
+                {
+                    title:"19",
+                    url:"../Images/Ohio/19.jpg",
+                },
+                {
+                    title:"20",
+                    url:"../Images/Ohio/20.jpg",
+                },
+                {
+                    title:"21",
+                    url:"../Images/Ohio/21.jpg",
+                },
+                {
+                    title:"22",
+                    url:"../Images/Ohio/22.jpg",
+                },
+                {
+                    title:"23",
+                    url:"../Images/Ohio/23.jpg",
+                },
+                {
+                    title:"24",
+                    url:"../Images/Ohio/24.jpg",
+                },
+                {
+                    title:"25",
+                    url:"../Images/Ohio/25.jpg",
+                },
+                {
+                    title:"26",
+                    url:"../Images/Ohio/26.jpg",
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+    }
+}
+
 const top_nav = {
     data() {
         return {
@@ -1924,6 +2553,7 @@ const top_nav = {
 Vue.createApp(app_software).mount('#app_software')
 Vue.createApp(app_map).mount('#app_map')
 Vue.createApp(app_pic).mount('#app_pic')
+Vue.createApp(app_pic_can).mount('#app_pic_can')
 Vue.createApp(app_pic_gbr).mount('#app_pic_gbr')
 Vue.createApp(app_kentucky).mount('#app_kentucky')
 Vue.createApp(app_maine).mount('#app_maine')
@@ -1936,6 +2566,11 @@ Vue.createApp(app_south_carolina).mount('#app_south_carolina')
 Vue.createApp(app_georgia).mount('#app_georgia')
 Vue.createApp(app_alabama).mount('#app_alabama')
 Vue.createApp(app_tennessee).mount('#app_tennessee')
+Vue.createApp(app_pennsylvania).mount('#app_pennsylvania')
+Vue.createApp(app_ohio).mount('#app_ohio')
+Vue.createApp(app_ontario).mount('#app_ontario')
+
+
 
 
 
