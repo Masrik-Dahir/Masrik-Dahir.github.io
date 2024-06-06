@@ -1,11 +1,8 @@
 .box {
     height: 50px;
     padding: 5px;
-    background:
-        repeating-linear-gradient(90deg,#0000 0,rgba(220,220,220, 0.9) 25%,#0000 50%)
-        aliceblue;
+    background:transparent;
     background-size:200% 100%;
-    animation: shine 1s infinite linear;
     z-index: 1
 
 }
@@ -13,22 +10,15 @@
 .box2 {
     height: 50px;
     padding: 2px;
-    background:
-        repeating-linear-gradient(90deg,#0000 0,rgba(220, 220, 220, 0.9) 25%,#0000 50%)
-            LightGoldenRodYellow;
+    background:transparent;
     background-size:200% 100%;
-    animation: shine 1s infinite linear;
     z-index: 1
 
 }
 .box3 {
     height: 50px;
     padding: 4px;
-    background:
-        repeating-linear-gradient(90deg,#0000 0,rgba(220, 220, 220, 0.9) 25%,#0000 50%)
-            rgba(250, 235, 215, 0.3);
-    background-size:200% 100%;
-    animation: shine 1s infinite linear;
+    background:transparent;
     z-index: 1
 
 }
