@@ -301,7 +301,7 @@ const app_pic = {
                     title:"West Virginia",
                     abv:"WV",
                     image:"./Images/West Virginia/WV.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/va",
                 },
                 {
                     title:"Maryland",
@@ -313,19 +313,19 @@ const app_pic = {
                     title:"Delaware",
                     abv:"DE",
                     image:"./Images/Delaware/DE.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/de",
                 },
                 {
                     title:"North Carolina",
                     abv:"NC",
                     image:"./Images/North Carolina/NC.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/nc",
                 },
                 {
                     title:"Indiana",
                     abv:"IN",
                     image:"./Images/Indiana/IN.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/in",
                 },
                 {
                     title:"Tennessee",
@@ -337,7 +337,7 @@ const app_pic = {
                     title:"Washington DC",
                     abv:"DC",
                     image:"./Images/Washington DC/DC.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/dc",
                 },
                 {
                     title:"Pennsylvania",
