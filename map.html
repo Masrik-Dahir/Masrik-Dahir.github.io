@@ -1155,7 +1155,7 @@
 
                         <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
 
-                            <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
+                            <div v-if="resources.length" v-cloak class="table" style="display: flex; flex-wrap: wrap;">
                                 <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
                                         <div data-toggle="tooltip" data-html="true" :title="item.title">
                                             <a :href="item.url" style="text-decoration: none">
@@ -1313,7 +1313,7 @@
 
                         <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
 
-                            <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
+                            <div v-if="resources.length" v-cloak class="table" style="display: flex; flex-wrap: wrap;">
                                 <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
                                     <div data-toggle="tooltip" data-html="true" :title="item.title">
                                         <a :href="item.url" style="text-decoration: none">
@@ -1470,7 +1470,7 @@
 
                         <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
 
-                            <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
+                            <div v-if="resources.length" v-cloak class="table" style="display: flex; flex-wrap: wrap;">
                                 <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
                                     <div data-toggle="tooltip" data-html="true" :title="item.title">
                                         <a :href="item.url" style="text-decoration: none">
