@@ -295,13 +295,13 @@ const app_pic = {
                     title:"Virginia",
                     abv:"VA",
                     image:"./Images/va.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/va",
                 },
                 {
                     title:"West Virginia",
                     abv:"WV",
                     image:"./Images/West Virginia/WV.svg.png",
-                    url:"https://www.masrikdahir.com/map/va",
+                    url:"https://www.masrikdahir.com/map/wv",
                 },
                 {
                     title:"Maryland",
