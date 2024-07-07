@@ -307,7 +307,7 @@ const app_pic = {
                     title:"Maryland",
                     abv:"MD",
                     image:"./Images/Maryland/MD.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/md",
                 },
                 {
                     title:"Delaware",
@@ -2671,6 +2671,7 @@ const states = [
     { name: "Washington DC", abbreviation: "DC", numImages: 61 },
     { name: "Delaware", abbreviation: "DE", numImages: 17 },
     { name: "Indiana", abbreviation: "IN", numImages: 23 },
+    { name: "Maryland", abbreviation: "MD", numImages: 7 },
 ];
 
 states.forEach(state => {
