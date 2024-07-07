@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html style="caret-color: transparent;">
 <head>
-
     <!--    Metadata imports-->
     <link rel="icon" type="image/gif/png" href="./Images/logo.png">
     <title>Masrik Dahir</title>
@@ -15,15 +14,15 @@
     <link rel="stylesheet" href="css/icons.css">
     <link rel="stylesheet" href="css/box.css">
     <link rel="stylesheet" href="css/default.css">
-    <link rel="stylesheet" href="css/popup.css">
-    <link rel="stylesheet" href="css/community.css">
-    <link rel="stylesheet" href="css/resize.css">
     <link rel="stylesheet" href="css/glowing.css">
-    <link rel="stylesheet" href="css/lead.css">
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
     <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap-grid.css"/>
     <link rel="stylesheet" href="css/vintage.css">
+
+
 
     <!--    JS imports-->
     <script src="library/code.jquery.com.jquery-1.10.2.js"></script>
@@ -32,13 +31,11 @@
     <script src="js/expand_jquery.js"></script>
     <script src="js/briefcase.js" defer></script>
     <script src='js/aesthetics.js' crossorigin='anonymous'></script>
-    <script src="js/achievement.js" defer></script>
-    <script src="js/collapsible.js" defer></script>
-    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
 
     <!--    Vue JS imports-->
     <script src="library/vue@3.2.36.dist.vue.global.js"></script>
     <script src="vueJs/default.js" defer></script>
+    <script src="vueJs/software.js" defer></script>
 
     <!--    Top Nav -->
     <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
@@ -343,21 +340,33 @@
 
                 <bdi v-if="this.windowWidth >= 1200">
                     <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                        <bdi style="font-size: calc(10px + .5vw);">July 2023 - <span
+                        <bdi style="font-size: calc(10px + .5vw);">Jul 2023 - <span
                                 style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
                     </b>
                 </bdi>
             </h4>
             <ul>
-                <a href="https://www.costar.com/" target="_blank">
-                    <img src="./Images/costar.png"
-                         style="width: calc(1vw + 100px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="CoStar Group" style="margin-right: 50px">
+                                <a href="https://www.costar.com/" target="_blank">
+                                    <img src="./Images/costar.png"
+                                         style="width: calc(1vw + 100px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
             <p1>
                 <ul>
                     <bdi v-if="this.windowWidth < 1200">
                         <li class="color w3-text-teal;" style="">
-                            <bdi style="">July 2023 - Current</bdi>
+                            <bdi style="">Jul 2023 - Current</bdi>
                         </li>
                     </bdi>
                     <li>C#, .NET, .NET Framework, Entity Framework, ASP.NET, ASP.NET Core, NUnit</li>
@@ -386,20 +395,112 @@
 
                 <bdi v-if="this.windowWidth >= 1200">
                     <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                        <bdi style="font-size: calc(10px + .5vw);">May 2022 - June 2023</bdi>
+                        <bdi style="font-size: calc(10px + .5vw);">May 2022 - Jun 2023</bdi>
                     </b>
                 </bdi>
             </h4>
             <ul>
-                <a href="https://www.capitalone.com/" target="_blank">
-                    <img src="./Images/capitalone.png"
-                         style="width: calc(1vw + 100px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation" style="margin-right: 50px">
+                                <a href="https://www.capitalone.com/" target="_blank">
+                                    <img style="float: left; vertical-align: middle; margin: 5px; width: calc(1vw + 100px); margin-left: calc(0% + -20px)" src="./Images/capitalone.png"
+                                         alt="Masrik Dahir"/></a>
+                            </div>
+
+                        </TD>
+
+                        <TD WIDTH="1%" style="color:transparent;" v-if="this.windowWidth >= 1200">
+                            <div data-toggle="tooltip" data-html="true" title="Digital Thinking" style="margin-right: 20px; margin-top: 10px">
+                                <a href="https://www.credly.com/badges/8b7e822d-0fbd-488c-a4a2-576f45132df1"
+                                   target="_blank">
+                                    <img class="box2 w3-hover-opacity" src="./Images/idt.png"
+                                         style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/>
+                                </a>
+                            </div>
+
+                        </TD>
+                        <TD WIDTH="1%" style="color:transparent;" v-if="this.windowWidth >= 1200">
+                            <div data-toggle="tooltip" data-html="true" title="The Art of the Pitch" style="margin-right: 20px; margin-top: 10px">
+                                <a href="https://www.credly.com/badges/428e687d-68fa-4ced-b123-2399275d921d"
+                                   target="_blank">
+                                    <img class="box2 w3-hover-opacity" src="./Images/taop.png"
+                                         style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/>
+                                </a>
+                            </div>
+
+                        </TD>
+                        <TD WIDTH="1%" style="color:transparent;" v-if="this.windowWidth >= 1200">
+                            <div data-toggle="tooltip" data-html="true" title="Business Model Canvas" style="margin-right: 20px; margin-top: 10px">
+                                <a href="https://www.credly.com/badges/87a2accc-5b8c-42a9-a923-c4e191881f86"
+                                   target="_blank">
+                                    <img class="box2 w3-hover-opacity" src="./Images/itbmc.png"
+                                         style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/>
+                                </a>
+                            </div>
+
+                        </TD>
+                        <TD WIDTH="1%" style="color:transparent;" v-if="this.windowWidth >= 1200">
+                            <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner" style="margin-right: 50px; margin-top: 10px">
+                                <a href="https://www.credly.com/badges/d5fb9b8a-3519-4480-bd92-ab5d066ce8d8"
+                                   target="_blank">
+                                    <img class="box2 w3-hover-opacity" src="./Images/aws-certified-cloud-practitioner.png"
+                                         style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/>
+                                </a>
+                            </div>
+
+                        </TD>
+                    </TR>
+                </TABLE>
+
+                <div style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 15px" v-if="this.windowWidth < 1200">
+                    <div data-toggle="tooltip" data-html="true" title="Digital Thinking" style="margin-right: 20px; margin-top: 10px;">
+                        <a href="https://www.credly.com/badges/8b7e822d-0fbd-488c-a4a2-576f45132df1"
+                           target="_blank">
+                            <img class="box2 w3-hover-opacity" src="./Images/idt.png"
+                                 style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/>
+                        </a>
+                    </div>
+
+                    <div data-toggle="tooltip" data-html="true" title="The Art of the Pitch" style="margin-right: 20px; margin-top: 10px">
+                        <a href="https://www.credly.com/badges/428e687d-68fa-4ced-b123-2399275d921d"
+                           target="_blank">
+                            <img class="box2 w3-hover-opacity" src="./Images/taop.png"
+                                 style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/>
+                        </a>
+                    </div>
+
+                    <div data-toggle="tooltip" data-html="true" title="Business Model Canvas" style="margin-right: 20px; margin-top: 10px">
+                        <a href="https://www.credly.com/badges/87a2accc-5b8c-42a9-a923-c4e191881f86"
+                           target="_blank">
+                            <img class="box2 w3-hover-opacity" src="./Images/itbmc.png"
+                                 style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/>
+                        </a>
+                    </div>
+
+                    <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner" style="margin-right: 50px; margin-top: 10px">
+                        <a href="https://www.credly.com/badges/d5fb9b8a-3519-4480-bd92-ab5d066ce8d8"
+                           target="_blank">
+                            <img class="box2 w3-hover-opacity" src="./Images/aws-certified-cloud-practitioner.png"
+                                 style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/>
+                        </a>
+                    </div>
+                </div>
             </ul>
             <p1>
                 <ul>
                     <bdi v-if="this.windowWidth < 1200">
                         <li class="color w3-text-teal;" style="">
-                            <bdi style="">May 2022 - June 2023</bdi>
+                            <bdi style="">May 2022 - Jun 2023</bdi>
                         </li>
                     </bdi>
                     <li>Node.Js: NVM, HTTP API, Fastify, DynamoDB, NPM, Yarn;</li>
@@ -426,22 +527,35 @@
 
                     <bdi v-if="this.windowWidth >= 1200">
                         <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                            <bdi style="font-size: calc(10px + .5vw);">May 2022 - August 2022</bdi>
+                            <bdi style="font-size: calc(10px + .5vw);">May 2022 - Aug 2022</bdi>
                         </b>
                     </bdi>
 
             </h4>
 
             <ul>
-                <a href="https://www.elections.virginia.gov/" target="_blank">
-                    <img src="./Images/dept-of-elections-logo.png"
-                         style="width: calc(1vw + 200px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="Virginia Department of Elections" style="margin-right: 50px">
+                                <a href="https://www.elections.virginia.gov/" target="_blank">
+                                    <img src="./Images/dept-of-elections-logo.png"
+                                         style="width: calc(1vw + 200px); margin-left: calc(0% + -20px)" alt="Masrik Dahir"/></a>
+
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
             <p1>
                 <ul>
                     <bdi v-if="this.windowWidth < 1200">
                         <li class="color w3-text-teal;" style="">
-                            <bdi> May 2022 - August 2022</bdi>
+                            <bdi> May 2022 - Aug 2022</bdi>
                         </li>
                     </bdi>
                     <li>Worked closely with Roanoke County and Virginia Department of Election</li>
@@ -466,31 +580,57 @@
 
                 <TABLE WIDTH="100%">
                     <TR>
-                        <TD WIDTH="99%">
-                            <a href="https://cbds.vcu.edu/" target="_blank">
-                                <img src="./Images/life.png"
-                                     style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
-                                     alt="Masrik Dahir"/></a>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="VCU iCubed" style="margin-right: 50px">
+                                <a href="https://cbds.vcu.edu/" target="_blank">
+                                    <img src="./Images/life.png"
+                                         style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -25px)"
+                                         alt="Masrik Dahir"/></a>
+                            </div>
                         </TD>
-                        <TD WIDTH="1%">
-                            <a href="https://www.credly.com/badges/3444641a-9f4a-41ab-8ff2-e978d642acb5/public_url"
-                               target="_blank">
-                                <img src="./Images/por.png"
-                                     style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
-                                     alt="Masrik Dahir"/></a>
+
+
+                        <TD WIDTH="1%" style="color:transparent;" v-if="this.windowWidth >= 1200">
+                            <div data-toggle="tooltip" data-html="true" title="Presentation of Research" style="margin-right: 50px; margin-top: 10px">
+                                <a href="https://www.credly.com/badges/3444641a-9f4a-41ab-8ff2-e978d642acb5/public_url"
+                                   target="_blank">
+                                    <img class="box2 w3-hover-opacity" src="./Images/por.png"
+                                         style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/>
+                                </a>
+                            </div>
+
                         </TD>
                     </TR>
                 </TABLE>
+
+                <div style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 15px" v-if="this.windowWidth < 1200">
+                    <div data-toggle="tooltip" data-html="true" title="Presentation of Research" style="margin-right: 50px; margin-top: 10px">
+                        <a href="https://www.credly.com/badges/3444641a-9f4a-41ab-8ff2-e978d642acb5/public_url"
+                           target="_blank">
+                            <img class="box2 w3-hover-opacity" src="./Images/por.png"
+                                 style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/>
+                        </a>
+                    </div>
+                </div>
+
             </ul>
             <p1>
                 <ul>
-                    <bdi v-if="this.windowWidth < 1200">
-                        <li class="color w3-text-teal;" style="">
-                            <bdi style="">Aug 2021 - May 2022</bdi>
-                        </li>
-                    </bdi>
-                    <li>Built and coded automated Rampantries (food cart at VCU Monroe Park Campus); and</li>
-                    <li>Used Raspberry pi to receive data and save it in the Cloud storage.</li>
+                    <TD WIDTH="99%">
+                        <bdi v-if="this.windowWidth < 1200">
+                            <li class="color w3-text-teal;" style="">
+                                <bdi style="">Aug 2021 - May 2022</bdi>
+                            </li>
+                        </bdi>
+                        <li>Built and coded automated Rampantries (food cart at VCU Monroe Park Campus); and</li>
+                        <li>Used Raspberry pi to receive data and save it in the Cloud storage.</li>
+                    </TD>
+                    <TD WIDTH="1%">
+
+                    </TD>
+
                 </ul>
             </p1>
             <hr>
@@ -507,10 +647,24 @@
                 </bdi>
             </h4>
             <ul>
-                <a href="https://pharmacy.vcu.edu/" target="_blank">
-                    <img src="./Images/sop.png"
-                         style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
-                         alt="Masrik Dahir"/></a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="VCU School of Pharmacy" style="margin-right: 50px">
+                                <a href="https://pharmacy.vcu.edu/" target="_blank">
+                                    <img src="./Images/sop.png"
+                                         style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -25px)"
+                                         alt="Masrik Dahir"/></a>
+
+
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
             <p1>
                 <ul>
@@ -535,32 +689,49 @@
             <h4><b style="color: black; font-size: calc(20px + .2vw);">AT&T Summer Learning Academy Extern&emsp;</b>
                 <bdi v-if="this.windowWidth >= 1200">
                 <b class="color w3-text-teal;" style="float: right; color:crimson;">
-                    <bdi style="font-size: calc(10px + .5vw);">May 2021 - September 2021</bdi>
+                    <bdi style="font-size: calc(10px + .5vw);">May 2021 - Sep 2021</bdi>
                 </b></bdi></h4>
             <ul>
                 <TABLE WIDTH="100%">
                     <TR>
-                        <TD WIDTH="99%">
-                            <a href="https://www.att.com/" target="_blank">
-                                <img src="./Images/att.png"
-                                     style="width: calc(1vw + 50px); min-width: 100px; margin-left: calc(0% + -20px)"
-                                     alt="Masrik Dahir"/></a>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="AT&T Inc." style="margin-right: 50px">
+                                <a href="https://www.att.com/" target="_blank">
+                                    <img src="./Images/att.png"
+                                         style="width: calc(1vw + 40px); min-width: 100px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/></a>
+                            </div>
+
                         </TD>
-                        <TD WIDTH="1%">
-                            <a href="https://www.credly.com/badges/d388f220-d5f2-44d8-8cee-7f2892d45f97/public_url"
-                               target="_blank">
-                                <img src="./Images/badge_att.png"
-                                     style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
-                                     alt="Masrik Dahir"/></a>
+                        <TD WIDTH="1%" style="color:transparent;" v-if="this.windowWidth >= 1200">
+                            <div data-toggle="tooltip" data-html="true" title="AT&T Academy Extern" style="margin-right: 50px; margin-top: 10px">
+
+                                <a href="https://www.credly.com/badges/d388f220-d5f2-44d8-8cee-7f2892d45f97/public_url"
+                                   target="_blank">
+                                    <img src="./Images/badge_att.png"
+                                         style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/></a>
+                            </div>
+
                         </TD>
                     </TR>
                 </TABLE>
+                <div style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 20px" v-if="this.windowWidth < 1200">
+                    <div data-toggle="tooltip" data-html="true" title="AT&T Academy Extern" style="margin-right: 50px; margin-top: 10px">
+
+                        <a href="https://www.credly.com/badges/d388f220-d5f2-44d8-8cee-7f2892d45f97/public_url"
+                           target="_blank">
+                            <img class="box2 w3-hover-opacity"  src="./Images/badge_att.png"
+                                 style="width: calc(1vw + 20px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                 alt="Masrik Dahir"/></a>
+                    </div>
+                </div>
             </ul>
             <p1>
                 <ul>
                     <bdi v-if="this.windowWidth < 1200">
                         <li class="color w3-text-teal;" style="">
-                            <bdi style="">May 2021 - September 2021</bdi>
+                            <bdi style="">May 2021 - Sep 2021</bdi>
                         </li>
                     </bdi>
                     <li>5G and Edge Technology, Artificial Intelligence, Business Ethics, Cable Routing Basics, etc.
@@ -584,10 +755,22 @@
                     </bdi>
             </h4>
             <ul>
-                <a href="https://engineering.missouri.edu/" target="_blank">
-                    <img src="./Images/mu.jpg"
-                         style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
-                         alt="Masrik Dahir"/></a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="VIMAN Lab, Mizzou Engineering" style="margin-right: 50px">
+                                <a href="https://engineering.missouri.edu/" target="_blank">
+                                    <img src="./Images/mu.jpg"
+                                         style="width: calc(1vw + 100px); min-width: 210px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/></a>
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
             <p1>
                 <ul>
@@ -625,10 +808,22 @@
                     </bdi>
                 </b></bdi></h4>
             <ul>
-                <a href="https://civiliancyber.com/" target="_blank" style="text-decoration: none;">
-                    <img src="./Images/civiliancyber.png"
-                         style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px); "
-                         alt="Masrik Dahir"/> Civilian Cyber</a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="Civilian Cyber LLC" style="margin-right: 50px">
+                                <a href="https://civiliancyber.com/" target="_blank" style="text-decoration: none;">
+                                    <img src="./Images/civiliancyber.png"
+                                         style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px); "
+                                         alt="Masrik Dahir"/> <bdi style="color: black">Civilian Cyber</bdi></a>
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
 
             <p1>
@@ -661,10 +856,23 @@
                     <bdi style="font-size: calc(10px + .5vw);">Jun 2020 - May 2022</bdi>
                 </b></bdi></h4>
             <ul>
-                <a href="https://safe.lab.vcu.edu/" target="_blank" style="text-decoration: none;">
-                    <img src="./Images/safelab.JPG"
-                         style="width: calc(1vw + 50px); min-width: 70px; margin-left: calc(0% + -20px)"
-                         alt="Masrik Dahir"/> SAFE Lab</a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="SAFE Lab, VCU Engineering" style="margin-right: 50px">
+                                <a href="https://safe.lab.vcu.edu/" target="_blank" style="text-decoration: none;">
+                                    <img src="./Images/safelab.JPG"
+                                         style="width: calc(1vw + 50px); min-width: 70px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/><bdi style="color: black"> SAFE Lab</bdi></a>
+
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
             <p1>
                 <ul>
@@ -701,10 +909,22 @@
                     </bdi>
                 </b></bdi></h4>
             <ul>
-                <a href="http://www.people.vcu.edu/~cfung/lab.html" target="_blank" style="text-decoration: none;">
-                    <img src="./Images/vcu.png"
-                         style="width: calc(1vw + 50px); min-width: 50px; margin-left: calc(0% + -20px)"
-                         alt="Masrik Dahir"/> RamSec: Cybersecurity Lab</a>
+                <TABLE WIDTH="100%">
+                    <TR>
+                        <TD WIDTH="96%" style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 10px">
+                            <div data-toggle="tooltip" data-html="true" title="RamSec Lab, VCU Engineering" style="margin-right: 50px">
+                                <a href="http://www.people.vcu.edu/~cfung/lab.html" target="_blank" style="text-decoration: none;">
+                                    <img src="./Images/vcu.png"
+                                         style="width: calc(1vw + 40px); min-width: 50px; margin-left: calc(0% + -20px)"
+                                         alt="Masrik Dahir"/> <bdi style="color: black">RamSec: Cybersecurity Lab</bdi></a>
+                            </div>
+
+                        </TD>
+                    </TR>
+                    <TR>
+
+                    </TR>
+                </TABLE>
             </ul>
             <p1>
                 <ul>
@@ -768,4 +988,5 @@
 
 </footer>
 </body>
+
 </html>
