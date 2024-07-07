@@ -336,7 +336,7 @@ const app_pic = {
                 {
                     title:"Washington DC",
                     abv:"DC",
-                    image:"./Images/DC/DC.svg.png",
+                    image:"./Images/Washington DC/DC.svg.png",
                     url:"",
                 },
                 {
