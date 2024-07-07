@@ -569,25 +569,25 @@ const app_pic_gbr = {
             resources:[
                 {
                     title:"England",
-                    abv:"GB-ENG",
+                    abv:"ENG",
                     image:"./Images/England/GB-ENG.svg.png",
                     url:"",
                 },
                 {
                     title:"Wales",
-                    abv:"GB-WLS",
+                    abv:"WLS",
                     image:"./Images/Wales/GB-WLS.svg.png",
                     url:"",
                 },
                 {
                     title:"Northern Ireland",
-                    abv:"GB-NIR",
+                    abv:"NIR",
                     image:"./Images/North Ireland/GB-NIR.svg.png",
                     url:"",
                 },
                 {
                     title:"Scotland",
-                    abv:"GB-SCT",
+                    abv:"SCT",
                     image:"./Images/Scotland/GB-SCT.svg.png",
                     url:"",
                 },
