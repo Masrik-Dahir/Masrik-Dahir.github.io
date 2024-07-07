@@ -368,6 +368,60 @@ const app_pic = {
                     abv:"OH",
                     image:"./Images/Ohio/OH.svg.png",
                     url:"https://www.masrikdahir.com/map/oh",
+                },
+                {
+                    title:"Michigan ",
+                    abv:"MI",
+                    image:"./Images/Michigan/MI.svg.png",
+                    url:"https://www.masrikdahir.com/map/mi",
+                },
+                {
+                    title:"Wisconsin ",
+                    abv:"WI",
+                    image:"./Images/Wisconsin/WI.svg.png",
+                    url:"https://www.masrikdahir.com/map/wi",
+                },
+                {
+                    title:"Illinois ",
+                    abv:"IL",
+                    image:"./Images/Illinois/IL.svg.png",
+                    url:"https://www.masrikdahir.com/map/il",
+                },
+                {
+                    title:"Iowa ",
+                    abv:"IA",
+                    image:"./Images/Iowa/IA.svg.png",
+                    url:"https://www.masrikdahir.com/map/ia",
+                },
+                {
+                    title:"Missouri ",
+                    abv:"MO",
+                    image:"./Images/Missouri/MO.svg.png",
+                    url:"https://www.masrikdahir.com/map/mo",
+                },
+                {
+                    title:"Arkansas ",
+                    abv:"AR",
+                    image:"./Images/Arkansas/AR.svg.png",
+                    url:"https://www.masrikdahir.com/map/ar",
+                },
+                {
+                    title:"Louisiana ",
+                    abv:"LA",
+                    image:"./Images/Louisiana/LA.svg.png",
+                    url:"https://www.masrikdahir.com/map/la",
+                },
+                {
+                    title:"Mississippi ",
+                    abv:"MA",
+                    image:"./Images/Mississippi/MA.svg.png",
+                    url:"https://www.masrikdahir.com/map/ma",
+                },
+                {
+                    title:"Texas ",
+                    abv:"TX",
+                    image:"./Images/Texas/TX.svg.png",
+                    url:"https://www.masrikdahir.com/map/tx",
                 }
             ]
         };
@@ -2569,6 +2623,57 @@ Vue.createApp(app_tennessee).mount('#app_tennessee')
 Vue.createApp(app_pennsylvania).mount('#app_pennsylvania')
 Vue.createApp(app_ohio).mount('#app_ohio')
 Vue.createApp(app_ontario).mount('#app_ontario')
+
+
+function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
+    return {
+        name: `app_${stateAbbreviation.toLowerCase()}`, // Component name
+        data() {
+            // Generate resources array dynamically based on numImages
+            let resources = [];
+            for (let i = 1; i <= numImages; i++) {
+                resources.push({
+                    title: `${i}`,
+                    url: `../Images/${stateName}/${i}.jpg`, // Adjust folder and file name as per your structure
+                });
+            }
+
+            return {
+                resources: resources,
+            };
+        },
+        computed: {
+            resultQuery() {
+                if (this.searchQuery) {
+                    return this.resources.filter((item) => {
+                        return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
+                    });
+                } else {
+                    return this.resources;
+                }
+            }
+        },
+    };
+}
+const states = [
+    { name: "Wisconsin", abbreviation: "WI", numImages: 51 },
+    { name: "Michigan", abbreviation: "MI", numImages: 51 },
+    { name: "Illinois", abbreviation: "IL", numImages: 51 },
+    { name: "Iowa", abbreviation: "IA", numImages: 51 },
+    { name: "Missouri", abbreviation: "MO", numImages: 51 },
+    { name: "Arkansas", abbreviation: "AR", numImages: 51 },
+    { name: "Louisiana", abbreviation: "LA", numImages: 51 },
+    { name: "Texas", abbreviation: "TX", numImages: 51 },
+    { name: "Mississippi", abbreviation: "MS", numImages: 51 },
+    { name: "Virginia", abbreviation: "VA", numImages: 51 },
+    { name: "West Virginia", abbreviation: "WV", numImages: 51 },
+    { name: "North Carolina", abbreviation: "NC", numImages: 51 },
+    { name: "Washington DC", abbreviation: "DC", numImages: 51 }
+];
+
+states.forEach(state => {
+    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.name.toLowerCase()}`);
+});
 
 
 
