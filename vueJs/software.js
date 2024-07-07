@@ -2657,22 +2657,24 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
 }
 const states = [
     { name: "Wisconsin", abbreviation: "WI", numImages: 51 },
-    { name: "Michigan", abbreviation: "MI", numImages: 51 },
-    { name: "Illinois", abbreviation: "IL", numImages: 51 },
-    { name: "Iowa", abbreviation: "IA", numImages: 51 },
-    { name: "Missouri", abbreviation: "MO", numImages: 51 },
-    { name: "Arkansas", abbreviation: "AR", numImages: 51 },
-    { name: "Louisiana", abbreviation: "LA", numImages: 51 },
-    { name: "Texas", abbreviation: "TX", numImages: 51 },
-    { name: "Mississippi", abbreviation: "MS", numImages: 51 },
-    { name: "Virginia", abbreviation: "VA", numImages: 51 },
-    { name: "West Virginia", abbreviation: "WV", numImages: 51 },
-    { name: "North Carolina", abbreviation: "NC", numImages: 51 },
-    { name: "Washington DC", abbreviation: "DC", numImages: 51 }
+    { name: "Michigan", abbreviation: "MI", numImages: 14 },
+    { name: "Illinois", abbreviation: "IL", numImages: 48 },
+    { name: "Iowa", abbreviation: "IA", numImages: 16 },
+    { name: "Missouri", abbreviation: "MO", numImages: 21 },
+    { name: "Arkansas", abbreviation: "AR", numImages: 12 },
+    { name: "Louisiana", abbreviation: "LA", numImages: 13 },
+    { name: "Texas", abbreviation: "TX", numImages: 20 },
+    { name: "Mississippi", abbreviation: "MS", numImages: 14 },
+    { name: "Virginia", abbreviation: "VA", numImages: 42 },
+    { name: "West Virginia", abbreviation: "WV", numImages: 18 },
+    { name: "North Carolina", abbreviation: "NC", numImages: 26 },
+    { name: "Washington DC", abbreviation: "DC", numImages: 61 },
+    { name: "Delaware", abbreviation: "DE", numImages: 17 },
+    { name: "Indiana", abbreviation: "IN", numImages: 23 },
 ];
 
 states.forEach(state => {
-    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.name.toLowerCase()}`);
+    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase()}`);
 });
 
 

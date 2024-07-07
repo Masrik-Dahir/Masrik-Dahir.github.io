@@ -1,63 +1,63 @@
-
-    const iconFeature = new ol.Feature({
-    geometry: new ol.geom.Point(ol.proj.fromLonLat([-77.434769, 37.541290])),
-    name: 'Somewhere near Nottingham',
+document.addEventListener('DOMContentLoaded', function() {
+    showSlides(slideIndex);
 });
+// Get elements
+var popup = document.getElementById("slideshowPopup");
+var btn = document.getElementById("openSlideshow");
+var span = document.getElementsByClassName("content-close")[0];
+var slides = document.getElementsByClassName("content-slide");
+var prev = document.querySelector(".content-prev");
+var next = document.querySelector(".content-next");
 
-    const iconFeature2 = new ol.Feature({
-    geometry: new ol.geom.Point(ol.proj.fromLonLat([-76.598633, 39.264969])),
-    name: 'Somewhere near Nottingham',
-});
+var slideIndex = 1;
+showSlides(slideIndex);
 
-    const iconFeature3 = new ol.Feature({
-    geometry: new ol.geom.Point(ol.proj.fromLonLat([-75.500000, 39])),
-    name: 'Somewhere near Nottingham',
-});
+function changeSlide(n) {
+    showSlides(slideIndex += n);
+}
 
-    const map = new ol.Map({
-    target: 'map',
-    layers: [
-    new ol.layer.Tile({
-    source: new ol.source.OSM(),
-}),
-    new ol.layer.Vector({
-    source: new ol.source.Vector({
-    features: [iconFeature, iconFeature2, iconFeature3],
-}),
+function nextSlide() {
+    changeSlide(1); // This will increment the slideIndex by 1 and show the next slide
+}
 
+function prevSlide() {
+    changeSlide(-1); // Corrected to use changeSlide for decrement
+}
 
-    style: new ol.style.Style({
-    image: new ol.style.Icon({
-    anchor: [0, 46],
-    anchorXUnits: 'fraction',
-    anchorYUnits: 'pixels',
-    src: './Images/pin.png',
-})
-})
-})
-    ],
-    view: new ol.View({
-    center: ol.proj.fromLonLat([-78.024902, 37.926868]),
-    zoom: 5,
-    maxZoom: 5,
-    minZoom: 3,
-})
+function currentSlide(n) {
+    showSlides(slideIndex = n); // Corrected to properly use the parameter 'n'
+}
 
-});
-    map.addOverlay(overlayLayer);
-    const overlayFeatureName = document.getElementsById('feature-name')
-    const overlayFeatureAdditionalInfo = document.getElementsById('feature-additional-info')
+function showSlides(n) {
+    var i;
+    var slides = document.getElementsByClassName("content-slide");
+    var dots = document.getElementsByClassName("content-dot");
+    if (n > slides.length) {slideIndex = 1}
+    if (n < 1) {slideIndex = slides.length}
+    for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+    for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" content-active-dot", "");
+    }
+    slides[slideIndex-1].style.display = "block";
+    dots[slideIndex-1].className += " content-active-dot";
+}
 
-    map.on('click', function(e){
-        // overlayLayer.setPosition(undefined)
-        map.forEachFeatureAtPixel(e.pixel, function(feature, layer){
-            let clickedCoordinate = e.coordinate;
-            let clickedFeatureName = feature.get('name');
-            let clickedFeatureAdditionInfo = feature.get('additionalinfo');
-            // overlayLayer.setPosition(clickedCoordinate)
-            overlayFeatureName.innerHTML = clickedFeatureName;
-            overlayFeatureAdditionalInfo.innerHTML = clickedFeatureAdditionInfo;
-            console.log(clickedFeatureName, clickedFeatureAdditionInfo);
-        })
-    })
+// Optional: Resetting Auto navigation upon manual changes
+function resetSlideInterval() {
+    clearInterval(slideInterval);
+    slideInterval = setInterval(function() { changeSlide(1); }, 2000);
+}
 
+// Directly using pauseSlideShow and resumeSlideShow to control the slideshow
+var slideInterval = setInterval(function() { changeSlide(1); }, 2000); // Auto-change slides
+
+// Pause and Resume functions
+function pauseSlideShow() {
+    clearInterval(slideInterval);
+}
+
+function resumeSlideShow() {
+    resetSlideInterval(); // Calls reset to resume auto-navigation
+}

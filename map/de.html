@@ -3,9 +3,59 @@
 <html lang="en">
 <!-- Include the head content -->
 <head>
-    <script>
-        $(function(){ $("head").load("https://www.masrikdahir.com/map/head.html") });
-    </script>
+    <!--    Metadata imports-->
+    <link rel="icon" type="image/gif/png" href=".././Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--    CSS imports-->
+    <link rel="stylesheet" href="../library/www.w3schools.com.w3css.4.w3.css">
+    <link rel="stylesheet" href="../library/cdnjs.cloudflare.com.ajax.libs.font-awesome.4.7.0.css.font-awesome.min.css">
+
+    <link rel="stylesheet" href="../css/icons.css">
+    <link rel="stylesheet" href="../css/box.css">
+    <link rel="stylesheet" href="../css/default.css">
+    <link rel="stylesheet" href="../css/popup.css">
+    <link rel="stylesheet" href="../css/community.css">
+    <link rel="stylesheet" href="../css/resize.css">
+    <link rel="stylesheet" href="../css/glowing.css">
+    <link rel="stylesheet" href="../css/lead.css">
+    <link rel="stylesheet" href="../css/new.css">
+    <link rel="stylesheet" href="../css/if.css">
+    <link rel="stylesheet" href="../css/popup.css">
+    <link rel="stylesheet" href="../css/vintage.css">
+
+
+    <!--    JS imports-->
+    <script src="../library/code.jquery.com.jquery-1.10.2.js"></script>
+    <script src="../js/html.js"></script>
+    <script src="../js/hourglass.js"></script>
+    <script src="../js/expand_jquery.js"></script>
+    <script src="../js/briefcase.js" defer></script>
+    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
+    <script src="../js/achievement.js" defer></script>
+    <script src="../js/collapsible.js" defer></script>
+    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <!--    Vue JS imports-->
+    <script src="../library/vue@3.2.36.dist.vue.global.js"></script>
+    <script src="../vueJs/default.js" defer></script>
+    <script src="../vueJs/software.js" defer></script>
+
+
+    <!--    Top Nav -->
+    <script src="../library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
+    <script src="../library/maxcdn.bootstrapcdn.com.bootstrap.3.4.1.js.bootstrap.min.js"></script>
+
+    <!--   Info Tooltip -->
+    <link rel="stylesheet" href="../css/d.css">
+    <script src="../bootstrap/js/ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="../bootstrap/js/maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../bootstrap/js/random.js" defer></script>
+    <link rel="stylesheet" href="../css/glowing.css">
+    <link rel="stylesheet" href="../css/map.css">
+
 </head>
 <body class="w3-white" style="">
 <div id="app" v-cloak>
@@ -269,18 +319,15 @@
     }
 </script>
 
-
-
-
 <TABLE WIDTH="100%" style="margin-top: 10px">
     <TR>
         <TD WIDTH="100%">
 
             <div class="content-slideshow-container">
                 <div class="tag w3-margin-bottom">
-                    <div class="it">Maine</div>
+                    <div class="it">Delaware</div>
                 </div>
-                <div id="app_maine" class="w3-margin-bottom" style="">
+                <div id="app_de" class="w3-margin-bottom" style="">
                     <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" > <!--:title="item.title"-->
                         <img :src="item.url" style="width:100%; height: auto; object-fit: contain;"/>
                     </div>
@@ -353,6 +400,7 @@
         </TD>
     </TR>
 </TABLE>
+
 <footer id="footer-relative" class="w3-center w3-margin-top;" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
     <div style="padding: 10px">
         <p style="padding-top: 15px;">Connect with me through Social Media</p>
@@ -388,74 +436,6 @@
     <br>
 
 </footer>
-
 </body>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        showSlides(slideIndex);
-    });
-    // Get elements
-    var popup = document.getElementById("slideshowPopup");
-    var btn = document.getElementById("openSlideshow");
-    var span = document.getElementsByClassName("content-close")[0];
-    var slides = document.getElementsByClassName("content-slide");
-    var prev = document.querySelector(".content-prev");
-    var next = document.querySelector(".content-next");
-
-    var slideIndex = 1;
-    showSlides(slideIndex);
-
-    function changeSlide(n) {
-        showSlides(slideIndex += n);
-    }
-
-    function nextSlide() {
-        changeSlide(1); // This will increment the slideIndex by 1 and show the next slide
-    }
-
-    function prevSlide() {
-        changeSlide(-1); // Corrected to use changeSlide for decrement
-    }
-
-    function currentSlide(n) {
-        showSlides(slideIndex = n); // Corrected to properly use the parameter 'n'
-    }
-
-    function showSlides(n) {
-        var i;
-        var slides = document.getElementsByClassName("content-slide");
-        var dots = document.getElementsByClassName("content-dot");
-        if (n > slides.length) {slideIndex = 1}
-        if (n < 1) {slideIndex = slides.length}
-        for (i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none";
-        }
-        for (i = 0; i < dots.length; i++) {
-            dots[i].className = dots[i].className.replace(" content-active-dot", "");
-        }
-        slides[slideIndex-1].style.display = "block";
-        dots[slideIndex-1].className += " content-active-dot";
-    }
-
-    // Optional: Resetting Auto navigation upon manual changes
-    function resetSlideInterval() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(function() { changeSlide(1); }, 2000);
-    }
-
-    // Directly using pauseSlideShow and resumeSlideShow to control the slideshow
-    var slideInterval = setInterval(function() { changeSlide(1); }, 2000); // Auto-change slides
-
-    // Pause and Resume functions
-    function pauseSlideShow() {
-        clearInterval(slideInterval);
-    }
-
-    function resumeSlideShow() {
-        resetSlideInterval(); // Calls reset to resume auto-navigation
-    }
-
-
-</script>
+<script src="../js/map.js"></script>
 </html>
