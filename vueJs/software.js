@@ -281,7 +281,7 @@ const app_pic = {
                 },
                 {
                     title:"Connecticut",
-                    abv:"DC",
+                    abv:"CT",
                     image:"./Images/Connecticut/CT.svg.png",
                     url:"https://www.masrikdahir.com/map/ct",
                 },
@@ -341,7 +341,7 @@ const app_pic = {
                 },
                 {
                     title:"Pennsylvania",
-                    abv:"DC",
+                    abv:"PA",
                     image:"./Images/Pennsylvania/PA.svg.png",
                     url:"https://www.masrikdahir.com/map/pa",
                 },
