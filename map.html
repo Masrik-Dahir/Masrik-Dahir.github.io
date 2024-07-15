@@ -685,14 +685,32 @@
 
 
 
-    <div  class="w3-container w3-margin-top" style="float: right; padding: 5px; margin: auto">
-        <button id="mymapshowButton"  type="button" class="btn btn-outline-primary pop-up-button" style="border: 1px solid black; background: black; color: white">Map</button>
-        <button id="mymaphideButton"  type="button" class="btn btn-outline-primary pop-up-button" style="border: 1px solid black; background: white; color: black">Photo</button>
 
-    </div>
+
+
+    <h4 class="" style="margin-bottom: 10px;" >
+        <b>
+            <a class="btn3">
+                <img type="button" id="mymapshowButtonvideo" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid black; background: white"  src="./Images/Icons/video.png"
+                />
+            </a>
+            <a class="btn1">
+                <img type="button" id="mymaphideButton"  class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid black; background: white" src="./Images/Icons/photo.png"
+                />
+
+            </a>
+            <a class="btn2">
+                <img type="button" id="mymapshowButton" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid red; background: lightsalmon"  src="./Images/Icons/map.png"
+                />
+            </a>
+        </b>
+    </h4>
+
+
+
 
     <!-- Right Column -->
-    <div class="w3-twothird" style="caret-color: transparent;">
+    <div class="w3-twothird w3-margin-top" style="caret-color: transparent;">
 
 
 
@@ -1524,7 +1542,7 @@
 
 </div>
 
-<footer id="footer-relative" class="w3-center w3-margin-top " style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
+<footer id="footer-relative" class="w3-center w3-margin-top" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100%;">
         <div style="padding: 10px">
             <p style="padding-top: 15px;">Connect with me through Social Media</p>
             <a href="https://www.instragram.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
@@ -1739,10 +1757,10 @@
 
         mymaphideButton.classList.add('active');
         mymapshowButton.classList.remove('active');
-        mymaphideButton.style.color = "white";
-        mymaphideButton.style.background = "black";
-        mymapshowButton.style.color = "black";
+        mymaphideButton.style.border = "1px solid red";
+        mymaphideButton.style.background = "lightsalmon";
         mymapshowButton.style.background = "white";
+        mymapshowButton.style.border = "1px solid black";
 
     });
 
@@ -1753,10 +1771,10 @@
 
         mymapshowButton.classList.add('active');
         mymaphideButton.classList.remove('active');
-        mymaphideButton.style.color = "black";
+        mymaphideButton.style.border = "1px solid black";
+        mymapshowButton.style.border = "1px solid red";
+        mymapshowButton.style.background = "lightsalmon";
         mymaphideButton.style.background = "white";
-        mymapshowButton.style.color = "white";
-        mymapshowButton.style.background = "black";
     });
 </script>
 </html>

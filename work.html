@@ -315,16 +315,14 @@
 <div  class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
 
     <!-- The Grid -->
-
-
-        <h4 style="margin-bottom: 15px">
+        <h4 class="w3-container w3-margin-top" style="margin-bottom: 10px;" >
             <b>
                 <a class="btn1">
-                    <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/up.jpg"
+                    <img type="button" id="mymapshowButton" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid black" src="./Images/Icons/collapse.png"
                          />
                 </a>
                 <a class="btn2">
-                    <img style="width: calc(1% + 40px); height:calc(1% + 40px); margin: 1px" src="./Images/down.jpg"
+                    <img type="button" id="mymaphideButton"  class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid red; background: lightsalmon" src="./Images/Icons/extend.png"
                          />
                 </a>
             </b>
@@ -951,7 +949,34 @@
 
     <!-- End Page Container -->
 </div>
+<script>
+    const mymaphideButton = document.getElementById('mymaphideButton');
+    const mymapshowButton = document.getElementById('mymapshowButton');
 
+
+
+    mymaphideButton.addEventListener('click', () => {
+
+        mymaphideButton.classList.add('active');
+        mymapshowButton.classList.remove('active');
+        mymaphideButton.style.border = "1px solid red";
+        mymaphideButton.style.background = "lightsalmon";
+        mymapshowButton.style.background = "white";
+        mymapshowButton.style.border = "1px solid black";
+
+    });
+
+    mymapshowButton.addEventListener('click', () => {
+        mymapshowButton.classList.add('active');
+        mymaphideButton.classList.remove('active');
+        mymaphideButton.style.border = "1px solid black";
+        mymapshowButton.style.border = "1px solid red";
+        mymapshowButton.style.background = "lightsalmon";
+        mymaphideButton.style.background = "white";
+
+
+    });
+</script>
 <footer id="footer-relative" class="w3-center w3-margin-top;" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
     <div style="padding: 10px">
         <p style="padding-top: 15px;">Connect with me through Social Media</p>
