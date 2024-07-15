@@ -457,17 +457,18 @@
 
 
 
+
+
 <TABLE WIDTH="100%" style="margin-top: 10px">
     <TR>
         <TD WIDTH="100%">
-
             <div class="content-slideshow-container">
                 <div class="tag w3-margin-bottom">
                     <div class="it">Wisconsin</div>
                 </div>
                 <div id="app_wi" class="w3-margin-bottom" style="">
                     <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" > <!--:title="item.title"-->
-                        <img :src="item.url" style="width:100%; height: auto; object-fit: contain;"/>
+                        <img :src="item.url" style="width:100%; height: 100%; object-fit: contain; padding: 0px"/>
                     </div>
                 </div>
 
@@ -480,10 +481,13 @@
                 <div class="resizing-1026-more">
                     <TABLE WIDTH="100%">
                         <TR>
-                            <TD WIDTH="33%">
+                            <TD WIDTH="10%">
+                                <div class="content-dot-container" style="float: right; padding: 10px">
+                                    <a href="http://www.masrikdahir.com" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/home.png" style="width: 40px;"></a>
+                                </div>
                             </TD>
-                            <TD WIDTH="33%">
-                                <div class="content-dot-container" id="app_wi_2" style="float: right">
+                            <TD WIDTH="80%">
+                                <div class="content-dot-container" id="app_wi_2" style="padding: 10px">
                                     <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 40px;"></button>
                                     <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
                                     <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
@@ -502,7 +506,10 @@
                                 </span>
                                 </div>
                             </TD>
-                            <TD WIDTH="33%">
+                            <TD WIDTH="10%">
+                                <div class="content-dot-container" style="float: right; padding: 10px">
+                                    <a href="http://www.masrikdahir.com/map" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/travel.png" style="width: 40px;"></a>
+                                </div>
                             </TD>
                         </TR>
                     </TABLE>
@@ -510,19 +517,24 @@
                 <div class="resizing-1026-less">
                     <TABLE WIDTH="100%">
                         <TR>
-                            <TD WIDTH="33%">
-                            </TD>
-                            <TD WIDTH="33%">
+                            <TD WIDTH="0%">
                                 <div class="content-dot-container app_wi" style="float: right; padding: 5px">
-                                    <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 35px;"></button>
-                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 35px;"></button>
-                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 35px;"></button>
-                                    <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 35px;"></button>
-                                    <span style="float: left;" onclick="nextSlide()">
-                                </span>
+                                    <a href="http://www.masrikdahir.com" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/home.png" style="width: 30px;"></a>
                                 </div>
                             </TD>
                             <TD WIDTH="33%">
+                                <div class="content-dot-container" style="padding: 5px">
+                                    <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 30px;"></button>
+                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 30px;"></button>
+                                    <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 30px;"></button>
+                                    <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 30px;"></button>
+                                    <span style="float: left;" onclick="nextSlide()"></span>
+                                </div>
+                            </TD>
+                            <TD WIDTH="0%">
+                                <div class="content-dot-container app_wi" style="float: left; padding: 5px">
+                                    <a href="http://www.masrikdahir.com/map" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/travel.png" style="width: 30px;"></a>
+                                </div>
                             </TD>
                         </TR>
                     </TABLE>
