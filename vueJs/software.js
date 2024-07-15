@@ -2651,6 +2651,12 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                 } else {
                     return this.resources;
                 }
+            },
+            limitedResultQuery() {
+                return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 50));
+            },
+            phoneLimitedResultQuery() {
+                return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 10));
             }
         },
     };
@@ -2676,6 +2682,9 @@ const states = [
 
 states.forEach(state => {
     Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase()}`);
+    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase()}_2`);
+    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase()}_3`);
+    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`.app_${state.abbreviation.toLowerCase()}`);
 });
 
 
