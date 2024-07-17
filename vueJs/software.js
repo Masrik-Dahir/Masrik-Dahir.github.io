@@ -19,11 +19,11 @@ const app_software = {
                     title:"Video Downloader",
                     des:"Download any video files from a web url, convert video to audio, YouTube video downloader",
                     uri_github:"https://github.com/Masrik-Dahir/Downloader",
-                    uri_windows:"https://mega.nz/file/uSISSYLS#5htqGrOOXY66HbqrZLY68TVwKkfSDlcPwf79WyMu6pY",
+                    uri_windows:"https://github.com/Masrik-Dahir/Downloader/releases/latest",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://mega.nz/file/uSISSYLS#5htqGrOOXY66HbqrZLY68TVwKkfSDlcPwf79WyMu6pY"
+                    uri:"https://github.com/Masrik-Dahir/Downloader"
                 },
                 {
                     title:"Fraud Detection Model",
@@ -39,21 +39,21 @@ const app_software = {
                     title:"DDoS Penetration Testing Tool",
                     des:"A penetration testing tool to conduct DDoS attack in Application layer and Transport layer",
                     uri_github:"https://github.com/Masrik-Dahir/DDoS_interface",
-                    uri_windows:"https://mega.nz/file/LHAGRKob#apm6_LpDjX1A8svDQeXTRIWElwoQlBX4Xc4DGfWlHC0",
+                    uri_windows:"https://github.com/Masrik-Dahir/DDoS-interface/releases/latest",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://mega.nz/file/LHAGRKob#apm6_LpDjX1A8svDQeXTRIWElwoQlBX4Xc4DGfWlHC0"
+                    uri:"https://github.com/Masrik-Dahir/DDoS_interface"
                 },
                 {
                     title:"Password Manager",
                     des:"Encrypt, decrypt files and folders and hash matches (md5, sha1, sha224, sha256, sha384, sha512) to check file integrity, password manager",
                     uri_github:"https://github.com/Masrik-Dahir/Encryption-decryption-interface",
-                    uri_windows:"https://mega.nz/file/jTJHSAzI#oD6NmCxgvR2DtMdBKI9ghtaV1nK-sKgepvglF2lhUuI",
+                    uri_windows:"https://github.com/Masrik-Dahir/Encryption-decryption-interface/releases/latest",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://mega.nz/file/jTJHSAzI#oD6NmCxgvR2DtMdBKI9ghtaV1nK-sKgepvglF2lhUuI"
+                    uri:"https://github.com/Masrik-Dahir/Encryption-decryption-interface"
                 },
                 {
                     title:"PDF Interface",
@@ -61,53 +61,44 @@ const app_software = {
                     uri_github:"https://github.com/Masrik-Dahir/Pdf_interface",
                     uri_windows:"",
                     uri_android:"",
-                    uri_apple:"", uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Pdf_interface"
-                },
-                {
-                    title:"Synchronizer",
-                    des:"",
-                    uri_github:"",
-                    uri_windows:"",
-                    uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:""
+                    uri:"https://github.com/Masrik-Dahir/Pdf_interface"
                 },
                 {
                     title:"Formats",
                     des:"OCR, Bar code, and QR code scanner, text to speech",
-                    uri_github:"",
+                    uri_github:"https://github.com/Masrik-Dahir/Formats",
                     uri_windows:"",
-                    uri_android:"https://play.google.com/store/apps/details?id=com.apps.masrik.formats",
+                    uri_android:"https://github.com/Masrik-Dahir/Formats/releases/latest",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://play.google.com/store/apps/details?id=com.apps.masrik.formats"
+                    uri:"https://github.com/Masrik-Dahir/Formats"
                 },
                 {
                     title:"Automata",
                     des:"Converts the regex to NFA, DFA, Minimum-DFA; converts CFG to LL Grammar and CNF",
-                    uri_github:"",
+                    uri_github:"https://github.com/Masrik-Dahir/Automation",
                     uri_windows:"",
-                    uri_android:"https://play.google.com/store/apps/details?id=com.masrik.automation",
+                    uri_android:"https://github.com/Masrik-Dahir/Automation/releases/latest",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://play.google.com/store/apps/details?id=com.masrik.automation"
+                    uri:"https://github.com/Masrik-Dahir/Automation"
                 },
                 {
                     title:"Universal Calculator",
                     des:"Basic Calculator, Scientific Calculator, Bitwise Calculator (i.e., decimal, binary, hexadecimal), Unit Calculator (i.e., Any types of unit in all standards), Binary operations (i.e., 1's complement, 2's complement) ",
-                    uri_github:"",
+                    uri_github:"https://github.com/Masrik-Dahir/Universal-calculator",
                     uri_windows:"",
-                    uri_android:"https://play.google.com/store/apps/details?id=com.masrik.convertme",
+                    uri_android:"https://github.com/Masrik-Dahir/Universal-calculator/releases/latest",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://play.google.com/store/apps/details?id=com.masrik.convertme"
+                    uri:"https://github.com/Masrik-Dahir/Universal-calculator"
                 },
                 {
                     title:"Real Estate Analyzer",
                     des:"Mortgage Analysis, Cash Flow Analysis",
-                    uri_github:"",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
