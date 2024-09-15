@@ -765,7 +765,7 @@ const states = [
     { name: "New Hampshire", abbreviation: "NH", numImages: 19 },
     { name: "Connecticut", abbreviation: "CT", numImages: 5 },
     { name: "Vermont", abbreviation: "VT", numImages: 8 },
-    { name: "New york", abbreviation: "NY", numImages: 19 },
+    { name: "New York", abbreviation: "NY", numImages: 19 },
     { name: "Massachusetts", abbreviation: "MA", numImages: 8 },
     { name: "South Carolina", abbreviation: "SC", numImages: 14 },
     { name: "Georgia", abbreviation: "GA", numImages: 26 },
