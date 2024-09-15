@@ -1,19 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Image Slideshow</title>
-    <link rel="stylesheet" href="css/vintage.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbnail Button</title>
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+    <style>
+        .thumbnail-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .thumbnail {
+            position: relative;
+            margin: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .thumbnail img {
+            display: block;
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+        }
+        .count {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .count::before {
+            content: '▶';
+            margin-right: 5px;
+        }
+    </style>
+    <style>
+        .button-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .button-55 {
+            text-align: left;
+            align-self: center;
+            background-color: white;
+            background-image: url('Images/rpap.jpg'); /* Texture for old paper */
+            background-position: center;
+            background-repeat: repeat;
+            border-radius: 50px 50px 50px 50px; /* Irregular border radius for rustic look */
+            border-style: solid;
+            border-width: 1px;
+            border-color: black;
+            box-shadow: rgba(0, 0, 0, .4) 15px 28px 25px -18px;
+            box-sizing: border-box;
+            color: #41403e;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Neucha, sans-serif;
+            font-size: 1rem;
+            line-height: 23px;
+            outline: none;
+            padding: 1.2rem;
+            text-decoration: none;
+            transition: all 235ms ease-in-out;
+
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .button-55:hover {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
+            transform: translate3d(0, 2px, 0);
+            padding: 1.2rem;
+            background: white;
+        }
+
+        .button-55:focus {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+        }
+
+        .button-55 span {
+            display: none;
+            font-size: 0.85rem;
+            color: #41403e;
+            text-align: left;
+            margin-top: 0.5rem;
+            white-space: normal;
+        }
+
+        .button-55:hover span {
+            display: block;
+        }
+    </style>
+
 </head>
 <body>
-
-<section class="title">
-    <div class="blurb">SAFE <span class="it">for</span> Aches and Pains</div>
-    <div class="main">Bayer Aspirin</div>
-</section>
-</header>
-<section class="tag">
-    <div class="it">Does not depress the heart 1</div>
-</section>
+<div class="thumbnail-container">
+    <div class="thumbnail">
+        <img src="image1.jpg" alt="Image 1">
+        <div class="count">1 Photos</div>
+    </div>
+    <div class="thumbnail">
+        <img src="image2.jpg" alt="Image 2">
+        <div class="count">2 Photos</div>
+    </div>
+    <div class="thumbnail">
+        <img src="image3.jpg" alt="Image 3">
+        <div class="count">3 Photos</div>
+    </div>
+</div>
+<div class="button-wrapper" style="margin-top: 30px">
+    <button class="button-55" role="button"><h3>Henrico County Equity Ambassador</h3>
+        <div class="w3-container">
+            <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
+                <img src="./Images/henrico.jpg" style="width: 1vw; min-width: 120px;margin-left: 25px"
+                     alt="Masrik Dahir"/></a>
+            <li><b>Scholarship Grant: </b> $40,000</li>
+            <li>
+                <a href="https://thecollegecompanion.com/henrico-county-virginia-commonwealth-university-engineering-scholarship-program/"
+                   target="_blank">Henrico County</a></li>
+            <li><a href="https://egr.vcu.edu/admissions/scholarships/" target="_blank">Virginia
+                Commonwealth University</a></li>
+        </div>
+    </button>
+</div>
+<div class="w3-margin-top" style="margin-top: 30px">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/tgbNymZ7vqY" frameborder="0" allowfullscreen></iframe>
+</div>
 
 
 
