@@ -542,11 +542,9 @@
                                         <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
                                             <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
                                                 <div data-toggle="tooltip" data-html="true" :title="item.title">
-                                                    <a :href="item.url" style="text-decoration: none">
-                                                        <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                            <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
-                                                        </button>
-                                                    </a>
+                                                    <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                                        <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
