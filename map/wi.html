@@ -328,10 +328,11 @@
     <TR>
         <TD WIDTH="100%">
             <div class="content-slideshow-container">
-                <div class="tag w3-margin-bottom">
-                    <div class="it">Wisconsin</div>
-                </div>
+
                 <div id="app_wi" class="w3-margin-bottom" style="">
+                    <div class="tag w3-margin-bottom">
+                        <div class="it">{{ name }}</div>
+                    </div>
                     <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" > <!--:title="item.title"-->
                         <img :src="item.url" style="width:100%; height: 100%; object-fit: contain; padding: 0px"/>
                     </div>
@@ -359,12 +360,13 @@
                                     <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 40px;"></button>
 
                                     <div v-for="(item, index) in limitedResultQuery" :key="index">
+                                        <img v-if="currentIndex === index" :src="item.url" :alt="item.title" />
                                         <span class="content-dot"
                                               style="margin-top: 20px; width: 8px; height: 8px"
-                                              @click="currentSlide(index + 1)">
-                                        </span>
-
+                                              @click="currentSlide(index)">
+    </span>
                                     </div>
+
                                     <span style="float: left;" onclick="nextSlide()">
                                     <img src=".././Images/arr.png" style="width: 15px;margin-top: 17px">
 
@@ -409,6 +411,7 @@
         </TD>
     </TR>
 </TABLE>
+
 <div class="resizing-height-1026-more">
     <footer id="footer-relative" class="w3-center w3-margin-top" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100%; position: absolute">
         <div style="padding: 10px">
@@ -483,12 +486,18 @@
 
     </footer>
 </div>
+
 </body>
 
 <script>
+
     document.addEventListener('DOMContentLoaded', function() {
-        showSlides(slideIndex);
+        initializeSlides(); // Initialize slides
+        setTimeout(function() {
+            showSlides(slideIndex); // Show the first slide after delay
+        }, 500); // Delay of 2000 milliseconds (2 seconds)
     });
+
     // Get elements
     var popup = document.getElementById("slideshowPopup");
     var btn = document.getElementById("openSlideshow");
@@ -497,39 +506,56 @@
     var prev = document.querySelector(".content-prev");
     var next = document.querySelector(".content-next");
 
-    var slideIndex = 1;
-    showSlides(slideIndex);
+    var slideIndex = 1; // Start with the first slide
 
+    // Function to initialize slides
+    function initializeSlides() {
+        for (var i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none"; // Hide all slides initially
+        }
+        // Optionally, hide dots or initialize their state here if needed
+    }
+
+    // Function to change slides
     function changeSlide(n) {
         showSlides(slideIndex += n);
     }
 
+    // Function to show the next slide
     function nextSlide() {
-        changeSlide(1); // This will increment the slideIndex by 1 and show the next slide
+        changeSlide(1); // Increment slideIndex by 1
     }
 
+    // Function to show the previous slide
     function prevSlide() {
-        changeSlide(-1); // Corrected to use changeSlide for decrement
+        changeSlide(-1); // Decrement slideIndex by 1
     }
 
+    // Function to show a specific slide
     function currentSlide(n) {
-        showSlides(slideIndex = n); // Corrected to properly use the parameter 'n'
+        showSlides(slideIndex = n);
     }
 
+    // Function to display slides
     function showSlides(n) {
         var i;
-        var slides = document.getElementsByClassName("content-slide");
         var dots = document.getElementsByClassName("content-dot");
-        if (n > slides.length) {slideIndex = 1}
-        if (n < 1) {slideIndex = slides.length}
+
+        // Wrap around slideIndex if it goes out of bounds
+        if (n > slides.length) { slideIndex = 1; }
+        if (n < 1) { slideIndex = slides.length; }
+
+        // Hide all slides and remove the active class from all dots
         for (i = 0; i < slides.length; i++) {
             slides[i].style.display = "none";
         }
         for (i = 0; i < dots.length; i++) {
             dots[i].className = dots[i].className.replace(" content-active-dot", "");
         }
-        slides[slideIndex-1].style.display = "block";
-        dots[slideIndex-1].className += " content-active-dot";
+
+        // Display the current slide and mark the corresponding dot as active
+        slides[slideIndex - 1].style.display = "block";
+        dots[slideIndex - 1].className += " content-active-dot";
     }
 
     // Optional: Resetting Auto navigation upon manual changes
@@ -538,8 +564,8 @@
         slideInterval = setInterval(function() { changeSlide(1); }, 2000);
     }
 
-    // Directly using pauseSlideShow and resumeSlideShow to control the slideshow
-    var slideInterval = setInterval(function() { changeSlide(1); }, 2000); // Auto-change slides
+    // Auto-change slides every 2000 milliseconds
+    var slideInterval = setInterval(function() { changeSlide(1); }, 2000);
 
     // Pause and Resume functions
     function pauseSlideShow() {
@@ -549,6 +575,8 @@
     function resumeSlideShow() {
         resetSlideInterval(); // Calls reset to resume auto-navigation
     }
+
+
 
 
 </script>

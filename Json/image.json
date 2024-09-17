@@ -27,6 +27,6 @@
   { "name": "Alabama", "abbreviation": "AL", "numImages": 7, "isActive": true },
   { "name": "Tennessee", "abbreviation": "TN", "numImages": 18, "isActive": true },
   { "name": "Pennsylvania", "abbreviation": "PA", "numImages": 13, "isActive": true },
-  { "name": "0hio", "abbreviation": "OH", "numImages": 26, "isActive": true },
-  { "name": "Ontario", "abbreviation": "ON", "numImages": 50, "isActive": true }
+  { "name": "Ontario", "abbreviation": "ON", "numImages": 50, "isActive": true },
+  { "name": "Ohio", "abbreviation": "OH", "numImages": 26, "isActive": true }
 ]

@@ -722,6 +722,7 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
 
             return {
                 resources: resources,
+                name: stateName
             };
         },
         computed: {
@@ -744,15 +745,50 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
     };
 }
 
-const states = require('../Json/image.json');
+
+// Fetch data and handle errors with async/await and try/catch
+async function fetchData() {
+    try {
+        const response = await fetch('../Json/image.json');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return await response.json();
+    } catch (err) {
+        console.error('Error fetching JSON:', err);
+        return [];
+    }
+}
+
+// Define a function to mount Vue instances
+function mountVueInstances(images) {
+    images.forEach(state => {
+        const baseId = `app_${state.abbreviation.toLowerCase().replace(/\s+/g, '_')}`;
+
+        // Mount Vue instances to different elements
+        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
+            .mount(`#${baseId}`);
+
+        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
+            .mount(`#${baseId}_2`);
+
+        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
+            .mount(`#${baseId}_3`);
+
+        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
+            .mount(`.${baseId}`);
+    });
+}
+
+// Use the fetched data to mount Vue instances
+fetchData().then(mountVueInstances);
 
 
-states.forEach(state => {
-    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase().replaceAll(' ','_')}`);
-    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase()}_2`);
-    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`#app_${state.abbreviation.toLowerCase()}_3`);
-    Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)).mount(`.app_${state.abbreviation.toLowerCase()}`);
-});
+
+
+
+
+
 
 
 
