@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Gallery</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    #app_ny {
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column; /* Change to column layout */
+      gap: 10px;
+    }
+    .tag {
+      text-align: center;
+      width: 100%;
+    }
+    .it {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .image-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+    .image-container img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+    .inactive-image:hover {
+      transform: scale(1.1); /* Increase the scale on hover */
+      z-index: 2; /* Bring the hovered image to front */
+    }
+    .active-image {
+      width: 100%; /* Full width for active image */
+      z-index: 1; /* Bring the clicked image to front */
+    }
+    .active-image img {
+      transition: none; /* Disable transition for active image on hover */
+    }
+    .inactive-container {
+      display: flex;
+      flex-wrap: wrap; /* Allow wrapping */
+      gap: 10px; /* Space between images */
+    }
+    .inactive-container .image-container {
+      flex: 1 1 150px; /* Set smaller width for inactive images */
+    }
+  </style>
+</head>
+<body>
+
+<div id="app_ny">
+  <div class="tag">
+    <div class="it">{{ name }}</div>
+  </div>
+
+  <div class="inactive-container">
+    <div v-for="(item, index) in resources" :key="index">
+      <div v-if="item.isActive" class="image-container active-image">
+        <img :src="item.urlActive" />
+      </div>
+      <div v-if="!item.isActive" class=" inactive-image image-container" @click="selectImage(index)">
+        <img :src="item.urlInactive" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script>
+  new Vue({
+    el: '#app_ny',
+    data() {
+      return {
+        name: 'Image Gallery',
+        resources: [
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FF5733/FFFFFF?text=Active+Image+1', urlInactive: 'https://via.placeholder.com/150x100/FF9999/FFFFFF?text=Inactive+Image+1' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/33FF57/FFFFFF?text=Active+Image+2', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+2' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3357FF/FFFFFF?text=Active+Image+3', urlInactive: 'https://via.placeholder.com/150x100/9999FF/FFFFFF?text=Inactive+Image+3' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FFC300/FFFFFF?text=Active+Image+4', urlInactive: 'https://via.placeholder.com/150x100/FFFF99/FFFFFF?text=Inactive+Image+4' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/581845/FFFFFF?text=Active+Image+5', urlInactive: 'https://via.placeholder.com/150x100/FF99FF/FFFFFF?text=Inactive+Image+5' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FF5733/FFFFFF?text=Active+Image+6', urlInactive: 'https://via.placeholder.com/150x100/FF9999/FFFFFF?text=Inactive+Image+6' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/33FF57/FFFFFF?text=Active+Image+7', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+7' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3357FF/FFFFFF?text=Active+Image+8', urlInactive: 'https://via.placeholder.com/150x100/9999FF/FFFFFF?text=Inactive+Image+8' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FFC300/FFFFFF?text=Active+Image+9', urlInactive: 'https://via.placeholder.com/150x100/FFFF99/FFFFFF?text=Inactive+Image+9' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/581845/FFFFFF?text=Active+Image+10', urlInactive: 'https://via.placeholder.com/150x100/FF99FF/FFFFFF?text=Inactive+Image+10' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/900C3F/FFFFFF?text=Active+Image+11', urlInactive: 'https://via.placeholder.com/150x100/FFB3D1/FFFFFF?text=Inactive+Image+11' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/581845/FFFFFF?text=Active+Image+12', urlInactive: 'https://via.placeholder.com/150x100/FF99FF/FFFFFF?text=Inactive+Image+12' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2ECC71/FFFFFF?text=Active+Image+13', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+13' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3498DB/FFFFFF?text=Active+Image+14', urlInactive: 'https://via.placeholder.com/150x100/99CCFF/FFFFFF?text=Inactive+Image+14' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/E67E22/FFFFFF?text=Active+Image+15', urlInactive: 'https://via.placeholder.com/150x100/FFB84D/FFFFFF?text=Inactive+Image+15' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/9B59B6/FFFFFF?text=Active+Image+16', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+16' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/34495E/FFFFFF?text=Active+Image+17', urlInactive: 'https://via.placeholder.com/150x100/AAB8C8/FFFFFF?text=Inactive+Image+17' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/16A085/FFFFFF?text=Active+Image+18', urlInactive: 'https://via.placeholder.com/150x100/7ED957/FFFFFF?text=Inactive+Image+18' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+19', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+19' },
+          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/C0392B/FFFFFF?text=Active+Image+20', urlInactive: 'https://via.placeholder.com/150x100/FF7070/FFFFFF?text=Inactive+Image+20' },
+        ],
+      };
+    },
+    methods: {
+      selectImage(index) {
+        // Deactivate all images and activate the clicked one
+        this.resources.forEach((item, i) => {
+          item.isActive = (i === index); // Set active state based on clicked index
+        });
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
