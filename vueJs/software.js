@@ -721,9 +721,15 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
             }
 
             return {
+                isSlideVisible: true,
                 resources: resources,
                 name: stateName
             };
+        },
+        mounted() {
+            if (this.resources.length > 0) {
+                this.resources[0].isActive = true; // Set the first item as active
+            }
         },
         computed: {
             resultQuery() {
@@ -759,7 +765,13 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                         }
                     }
                 });
-            }
+            },
+            showSlide() {
+                this.isSlideVisible = true; // Show slides
+            },
+            showGallery() {
+                this.isSlideVisible = false; // Show gallery
+            },
         }
     };
 }
