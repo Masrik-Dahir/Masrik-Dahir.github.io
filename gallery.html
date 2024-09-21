@@ -4,17 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Gallery</title>
+
+
+  <!--    Metadata imports-->
+  <link rel="icon" type="image/gif/png" href="././Images/logo.png">
+  <title>Masrik Dahir</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!--    CSS imports-->
+  <link rel="stylesheet" href="./library/www.w3schools.com.w3css.4.w3.css">
+  <link rel="stylesheet" href="./library/cdnjs.cloudflare.com.ajax.libs.font-awesome.4.7.0.css.font-awesome.min.css">
+
+  <link rel="stylesheet" href="./css/icons.css">
+  <link rel="stylesheet" href="./css/box.css">
+  <link rel="stylesheet" href="./css/default.css">
+  <link rel="stylesheet" href="./css/popup.css">
+  <link rel="stylesheet" href="./css/community.css">
+  <link rel="stylesheet" href="./css/resize.css">
+  <link rel="stylesheet" href="./css/glowing.css">
+  <link rel="stylesheet" href="./css/lead.css">
+  <link rel="stylesheet" href="./css/new.css">
+  <link rel="stylesheet" href="./css/if.css">
+  <link rel="stylesheet" href="./css/popup.css">
+  <link rel="stylesheet" href="./css/vintage.css">
+
+
+  <!--    JS imports-->
+  <script src="./library/code.jquery.com.jquery-1.10.2.js"></script>
+  <script src="./js/html.js"></script>
+  <script src="./js/hourglass.js"></script>
+  <script src="./js/expand_jquery.js"></script>
+  <script src="./js/briefcase.js" defer></script>
+  <script src='./js/aesthetics.js' crossorigin='anonymous'></script>
+  <script src="./js/achievement.js" defer></script>
+  <script src="./js/collapsible.js" defer></script>
+  <script src='./js/aesthetics.js' crossorigin='anonymous'></script>
+
+  <!--    Vue JS imports-->
+  <script src="./library/vue@3.2.36.dist.vue.global.js"></script>
+
+
+  <!--    Top Nav -->
+  <script src="./library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
+  <script src="./library/maxcdn.bootstrapcdn.com.bootstrap.3.4.1.js.bootstrap.min.js"></script>
+
+  <!--   Info Tooltip -->
+  <link rel="stylesheet" href="./css/d.css">
+  <script src="./bootstrap/js/ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+  <script src="./bootstrap/js/maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="./bootstrap/js/random.js" defer></script>
+
+  <!--   Animation -->
+  <link rel="stylesheet" href="./css/glowing.css">
+  <link rel="stylesheet" href="./css/map.element.css">
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
       padding: 20px;
-    }
-    #app_ny {
-      max-width: 1200px;
-      display: flex;
-      flex-direction: column; /* Change to column layout */
-      gap: 10px;
     }
     .tag {
       text-align: center;
@@ -37,6 +86,9 @@
       border-radius: 10px;
       transition: transform 0.3s ease;
     }
+    .inactive-image {
+      width: 150px;
+    }
     .inactive-image:hover {
       transform: scale(1.1); /* Increase the scale on hover */
       z-index: 2; /* Bring the hovered image to front */
@@ -57,109 +109,476 @@
       flex: 1 1 150px; /* Set smaller width for inactive images */
     }
   </style>
+
+  <script src="./vueJs/default.js" defer></script>
+  <script src="./vueJs/software.js" defer></script>
+
 </head>
 <body>
+<div id="app" v-cloak>
+  <div class="resizing-1026-more">
+    <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
+      <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
+        <a href="https://www.masrikdahir.com" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>Home</b>
+              </div>
+            </div>
+          </button>
+        </a>
 
-<div id="app_ny">
+        <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="">
+                </div>Work</b>
+              </div>
+            </div>
+          </button>
+        </a>
+
+        <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>
+                Publication</b>
+              </div>
+            </div>
+          </button>
+        </a>
+
+        <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>
+                Education</b>
+              </div>
+            </div>
+          </button>
+        </a>
+
+        <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>
+                Software</b>
+              </div>
+            </div>
+          </button>
+        </a>
+
+        <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>
+                Entrepreneurship</b>
+              </div>
+            </div>
+          </button>
+        </a>
+
+        <a href="https://www.masrikdahir.com/leadership" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>
+                Leadership</b>
+              </div>
+            </div>
+          </button>
+        </a>
+
+        <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+          <button class="glow-on-hover-nav" type="button"
+                  style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+            <div style="" class="w3-padding-small">
+              <div style=""><b style="color: red; font-size: calc(10px + 0.4vw)">
+                <div class="wrapper">
+                </div>
+                Travel</b>
+              </div>
+            </div>
+          </button>
+        </a>
+      </div>
+      <br><br><br>
+    </div>
+
+  </div>
+  <div class="resizing-1026-less" style="margin-bottom: 70px">
+    <div class="popup" id="popup-3" style="">
+      <div class="overlay"></div>
+      <div class="content" style="">
+        <div style="color: black; ">
+          <TABLE>
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Home</b>
+                    </div>
+                  </button>
+                </a>
+              </TD>
+
+            </TR>
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Work</b>
+                    </div>
+                  </button>
+                </a>
+              </TD>
+
+
+            </TR>
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Publication</b>
+                    </div>
+                  </button>
+                </a>
+              </TD>
+            </TR>
+
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Education</b>
+                    </div>
+                  </button>
+                </a>
+              </TD>
+            </TR>
+
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Software</b>
+                    </div>
+                  </button>
+                </a>
+
+              </TD>
+            </TR>
+
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Entrepreneurship</b>
+                    </div>
+                  </button>
+                </a>
+
+              </TD>
+            </TR>
+
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/leadership" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Leadership</b>
+                    </div>
+                  </button>
+                </a>
+              </TD>
+            </TR>
+
+            <TR>
+              <TD>
+                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                  <button class="glow-on-hover-nav" type="button"
+                          style="float: left; padding: 5px">
+                    <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
+                      <div class="wrapper" >
+                      </div>Travel</b>
+                    </div>
+                  </button>
+
+                </a>
+              </TD>
+            </TR>
+          </TABLE>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div class="topnav-2 navbar-fixed-top">
+
+
+
+      <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px">
+        <div class="main">Masrik Dahir</div>
+      </h5>
+
+      <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px"><img src="../Images/menu.png" width="25" height="20" alt="Masrik Dahir">
+      </button>
+
+
+
+
+    </div>
+  </div>
+</div>
+<script>
+  function togglePopup(num) {
+    document.getElementById(`popup-${num}`).classList.toggle("active");
+  }
+</script>
+<TABLE WIDTH="100%" style="margin-top: 10px">
+  <TR>
+    <TD WIDTH="100%">
+      <div class="content-slideshow-container">
+
+        <div id="app_ny" class="w3-margin-bottom" style="">
+          <div class="tag w3-margin-bottom">
+            <div class="it">{{ name }}</div>
+          </div>
+          <div v-for="item in resources" class="content-slide content-active" data-toggle="tooltip" data-html="true" > <!--:title="item.title"-->
+            <img :src="item.url" style="width:100%; height: 100%; object-fit: contain; padding: 0px"/>
+          </div>
+
+        </div>
+
+      </div>
+    </TD>
+  </TR>
+  <TR>
+    <TD WIDTH="100%">
+      <div class="content-dot-container-frame w3-margin-bottom">
+        <div class="resizing-1026-more">
+          <TABLE WIDTH="100%">
+            <TR>
+              <TD WIDTH="10%">
+                <div class="content-dot-container" style="float: right; padding: 10px">
+                  <a href="http://www.masrikdahir.com" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/home.png" style="width: 40px;"></a>
+                </div>
+              </TD>
+              <TD WIDTH="80%">
+                <div class="content-dot-container" id="app_ny_2" style="padding: 10px">
+                  <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 40px;"></button>
+                  <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/gallery.png" style="width: 40px;"></button>
+                  <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
+                  <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
+                  <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 40px;"></button>
+
+                  <div v-for="(item, index) in limitedResultQuery" :key="index">
+                    <img v-if="currentIndex === index" :src="item.url" :alt="item.title" />
+                    <span class="content-dot"
+                          style="margin-top: 20px; width: 8px; height: 8px"
+                          @click="currentSlide(index)">
+    </span>
+                  </div>
+
+                  <span style="float: left;" onclick="nextSlide()">
+                                    <img src=".././Images/arr.png" style="width: 15px;margin-top: 17px">
+
+                                </span>
+                </div>
+              </TD>
+              <TD WIDTH="10%">
+                <div class="content-dot-container" style="float: right; padding: 10px">
+                  <a href="http://www.masrikdahir.com/map" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/map.png" style="width: 40px;"></a>
+                </div>
+              </TD>
+            </TR>
+          </TABLE>
+        </div>
+        <div class="resizing-1026-less">
+          <TABLE WIDTH="100%">
+            <TR>
+              <TD WIDTH="0%">
+                <div class="content-dot-container" style="float: right; padding: 5px">
+                  <a href="http://www.masrikdahir.com" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/home.png" style="width: 30px;"></a>
+                </div>
+              </TD>
+              <TD WIDTH="33%">
+                <div class="content-dot-container" style="padding: 5px">
+                  <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 30px;"></button>
+                  <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/gallery.png" style="width: 30px;"></button>
+                  <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 30px;"></button>
+                  <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 30px;"></button>
+                  <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 30px;"></button>
+                  <span style="float: left;" onclick="nextSlide()"></span>
+                </div>
+              </TD>
+              <TD WIDTH="0%">
+                <div class="content-dot-container" style="float: left; padding: 5px">
+                  <a href="http://www.masrikdahir.com/map" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/map.png" style="width: 30px;"></a>
+                </div>
+              </TD>
+            </TR>
+          </TABLE>
+        </div>
+      </div>
+
+    </TD>
+  </TR>
+</TABLE>
+
+
+
+<div id="app_ny_3">
   <div class="tag">
     <div class="it">{{ name }}</div>
   </div>
 
-  <div class="inactive-container">
+  <div class="inactive-container w3-margin-top">
     <div v-for="(item, index) in resources" :key="index">
       <div v-if="item.isActive" class="image-container active-image">
-        <img :src="item.urlActive" />
+        <img :src="item.url" />
       </div>
       <div v-if="!item.isActive" class=" inactive-image image-container" @click="selectImage(index)">
-        <img :src="item.urlInactive" />
+        <img :src="item.url" />
       </div>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script>
-  new Vue({
-    el: '#app_ny',
-    data() {
-      return {
-        name: 'Image Gallery',
-        resources: [
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FF5733/FFFFFF?text=Active+Image+1', urlInactive: 'https://via.placeholder.com/150x100/FF9999/FFFFFF?text=Inactive+Image+1' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/33FF57/FFFFFF?text=Active+Image+2', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+2' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3357FF/FFFFFF?text=Active+Image+3', urlInactive: 'https://via.placeholder.com/150x100/9999FF/FFFFFF?text=Inactive+Image+3' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FFC300/FFFFFF?text=Active+Image+4', urlInactive: 'https://via.placeholder.com/150x100/FFFF99/FFFFFF?text=Inactive+Image+4' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/581845/FFFFFF?text=Active+Image+5', urlInactive: 'https://via.placeholder.com/150x100/FF99FF/FFFFFF?text=Inactive+Image+5' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FF5733/FFFFFF?text=Active+Image+6', urlInactive: 'https://via.placeholder.com/150x100/FF9999/FFFFFF?text=Inactive+Image+6' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/33FF57/FFFFFF?text=Active+Image+7', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+7' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3357FF/FFFFFF?text=Active+Image+8', urlInactive: 'https://via.placeholder.com/150x100/9999FF/FFFFFF?text=Inactive+Image+8' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/FFC300/FFFFFF?text=Active+Image+9', urlInactive: 'https://via.placeholder.com/150x100/FFFF99/FFFFFF?text=Inactive+Image+9' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/581845/FFFFFF?text=Active+Image+10', urlInactive: 'https://via.placeholder.com/150x100/FF99FF/FFFFFF?text=Inactive+Image+10' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/900C3F/FFFFFF?text=Active+Image+11', urlInactive: 'https://via.placeholder.com/150x100/FFB3D1/FFFFFF?text=Inactive+Image+11' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/581845/FFFFFF?text=Active+Image+12', urlInactive: 'https://via.placeholder.com/150x100/FF99FF/FFFFFF?text=Inactive+Image+12' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2ECC71/FFFFFF?text=Active+Image+13', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+13' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3498DB/FFFFFF?text=Active+Image+14', urlInactive: 'https://via.placeholder.com/150x100/99CCFF/FFFFFF?text=Inactive+Image+14' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/E67E22/FFFFFF?text=Active+Image+15', urlInactive: 'https://via.placeholder.com/150x100/FFB84D/FFFFFF?text=Inactive+Image+15' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/9B59B6/FFFFFF?text=Active+Image+16', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+16' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/34495E/FFFFFF?text=Active+Image+17', urlInactive: 'https://via.placeholder.com/150x100/AAB8C8/FFFFFF?text=Inactive+Image+17' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/16A085/FFFFFF?text=Active+Image+18', urlInactive: 'https://via.placeholder.com/150x100/7ED957/FFFFFF?text=Inactive+Image+18' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+19', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+19' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/C0392B/FFFFFF?text=Active+Image+20', urlInactive: 'https://via.placeholder.com/150x100/FF7070/FFFFFF?text=Inactive+Image+20' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/8E44AD/FFFFFF?text=Active+Image+21', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+21' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/27AE60/FFFFFF?text=Active+Image+22', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+22' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+23', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+23' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/E67E22/FFFFFF?text=Active+Image+24', urlInactive: 'https://via.placeholder.com/150x100/FFB84D/FFFFFF?text=Inactive+Image+24' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/8E44AD/FFFFFF?text=Active+Image+25', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+25' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2ECC71/FFFFFF?text=Active+Image+26', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+26' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/3498DB/FFFFFF?text=Active+Image+27', urlInactive: 'https://via.placeholder.com/150x100/99CCFF/FFFFFF?text=Inactive+Image+27' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/E67E22/FFFFFF?text=Active+Image+28', urlInactive: 'https://via.placeholder.com/150x100/FFB84D/FFFFFF?text=Inactive+Image+28' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/9B59B6/FFFFFF?text=Active+Image+29', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+29' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/34495E/FFFFFF?text=Active+Image+30', urlInactive: 'https://via.placeholder.com/150x100/AAB8C8/FFFFFF?text=Inactive+Image+30' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/16A085/FFFFFF?text=Active+Image+31', urlInactive: 'https://via.placeholder.com/150x100/7ED957/FFFFFF?text=Inactive+Image+31' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+32', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+32' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/C0392B/FFFFFF?text=Active+Image+33', urlInactive: 'https://via.placeholder.com/150x100/FF7070/FFFFFF?text=Inactive+Image+33' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/8E44AD/FFFFFF?text=Active+Image+34', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+34' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/27AE60/FFFFFF?text=Active+Image+35', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+35' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+36', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+36' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/E67E22/FFFFFF?text=Active+Image+37', urlInactive: 'https://via.placeholder.com/150x100/FFB84D/FFFFFF?text=Inactive+Image+37' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/9B59B6/FFFFFF?text=Active+Image+38', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+38' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/34495E/FFFFFF?text=Active+Image+39', urlInactive: 'https://via.placeholder.com/150x100/AAB8C8/FFFFFF?text=Inactive+Image+39' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/16A085/FFFFFF?text=Active+Image+40', urlInactive: 'https://via.placeholder.com/150x100/7ED957/FFFFFF?text=Inactive+Image+40' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+41', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+41' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/C0392B/FFFFFF?text=Active+Image+42', urlInactive: 'https://via.placeholder.com/150x100/FF7070/FFFFFF?text=Inactive+Image+42' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/8E44AD/FFFFFF?text=Active+Image+43', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+43' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/27AE60/FFFFFF?text=Active+Image+44', urlInactive: 'https://via.placeholder.com/150x100/99FF99/FFFFFF?text=Inactive+Image+44' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+45', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+45' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/E67E22/FFFFFF?text=Active+Image+46', urlInactive: 'https://via.placeholder.com/150x100/FFB84D/FFFFFF?text=Inactive+Image+46' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/9B59B6/FFFFFF?text=Active+Image+47', urlInactive: 'https://via.placeholder.com/150x100/D1A0D0/FFFFFF?text=Inactive+Image+47' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/34495E/FFFFFF?text=Active+Image+48', urlInactive: 'https://via.placeholder.com/150x100/AAB8C8/FFFFFF?text=Inactive+Image+48' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/16A085/FFFFFF?text=Active+Image+49', urlInactive: 'https://via.placeholder.com/150x100/7ED957/FFFFFF?text=Inactive+Image+49' },
-          { isActive: false, urlActive: 'https://via.placeholder.com/1200x800/2980B9/FFFFFF?text=Active+Image+50', urlInactive: 'https://via.placeholder.com/150x100/69C0D8/FFFFFF?text=Inactive+Image+50' }
-
-        ],
-      };
-    },
-    methods: {
-      selectImage(index) {
-        this.resources.forEach((item, i) => {
-          item.isActive = (i === index); // Set active state based on clicked index
-        });
-        this.scrollToActiveImage();
-      },
-      scrollToActiveImage() {
-        this.$nextTick(() => {
-          const activeIndex = this.resources.findIndex(item => item.isActive);
-          if (activeIndex !== -1) {
-            const activeImage = this.$refs[`activeImage${activeIndex}`]; // Use a dynamic ref
-            if (activeImage) {
-              activeImage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-          }
-        });
-      }
-    }
-  });
 </script>
 
 </body>
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeSlides(); // Initialize slides
+    setTimeout(function() {
+      showSlides(slideIndex); // Show the first slide after delay
+    }, 500); // Delay of 2000 milliseconds (2 seconds)
+  });
+
+  // Get elements
+  var popup = document.getElementById("slideshowPopup");
+  var btn = document.getElementById("openSlideshow");
+  var span = document.getElementsByClassName("content-close")[0];
+  var slides = document.getElementsByClassName("content-slide");
+  var prev = document.querySelector(".content-prev");
+  var next = document.querySelector(".content-next");
+
+  var slideIndex = 1; // Start with the first slide
+
+  // Function to initialize slides
+  function initializeSlides() {
+    for (var i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none"; // Hide all slides initially
+    }
+    // Optionally, hide dots or initialize their state here if needed
+  }
+
+  // Function to change slides
+  function changeSlide(n) {
+    showSlides(slideIndex += n);
+  }
+
+  // Function to show the next slide
+  function nextSlide() {
+    changeSlide(1); // Increment slideIndex by 1
+  }
+
+  // Function to show the previous slide
+  function prevSlide() {
+    changeSlide(-1); // Decrement slideIndex by 1
+  }
+
+  // Function to show a specific slide
+  function currentSlide(n) {
+    showSlides(slideIndex = n);
+  }
+
+  // Function to display slides
+  function showSlides(n) {
+    var i;
+    var dots = document.getElementsByClassName("content-dot");
+
+    // Wrap around slideIndex if it goes out of bounds
+    if (n > slides.length) { slideIndex = 1; }
+    if (n < 1) { slideIndex = slides.length; }
+
+    // Hide all slides and remove the active class from all dots
+    for (i = 0; i < slides.length; i++) {
+      slides[i].style.display = "none";
+    }
+    for (i = 0; i < dots.length; i++) {
+      dots[i].className = dots[i].className.replace(" content-active-dot", "");
+    }
+
+    // Display the current slide and mark the corresponding dot as active
+    slides[slideIndex - 1].style.display = "block";
+    dots[slideIndex - 1].className += " content-active-dot";
+  }
+
+  // Optional: Resetting Auto navigation upon manual changes
+  function resetSlideInterval() {
+    clearInterval(slideInterval);
+    slideInterval = setInterval(function() { changeSlide(1); }, 2000);
+  }
+
+  // Auto-change slides every 2000 milliseconds
+  var slideInterval = setInterval(function() { changeSlide(1); }, 2000);
+
+  // Pause and Resume functions
+  function pauseSlideShow() {
+    clearInterval(slideInterval);
+  }
+
+  function resumeSlideShow() {
+    resetSlideInterval(); // Calls reset to resume auto-navigation
+  }
+
+
+
+
+</script>
+
 </html>

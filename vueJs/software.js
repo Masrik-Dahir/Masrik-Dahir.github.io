@@ -742,6 +742,25 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                 return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 10));
             }
         },
+        methods:{
+            selectImage(index) {
+                this.resources.forEach((item, i) => {
+                    item.isActive = (i === index); // Set active state based on clicked index
+                });
+                this.scrollToActiveImage();
+            },
+            scrollToActiveImage() {
+                this.$nextTick(() => {
+                    const activeIndex = this.resources.findIndex(item => item.isActive);
+                    if (activeIndex !== -1) {
+                        const activeImage = this.$refs[`activeImage${activeIndex}`]; // Use a dynamic ref
+                        if (activeImage) {
+                            activeImage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    }
+                });
+            }
+        }
     };
 }
 
