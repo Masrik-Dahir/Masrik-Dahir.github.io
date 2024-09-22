@@ -795,7 +795,7 @@
                                         <button @click="scrollToSection(item.id)" class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
                                             <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
                                         </button>
-                                        <div v-cloak style="color: black; text-align: center; width: 80px;">{{ item.title }}</div> <!-- Set a fixed width -->
+                                        <div v-cloak style="color: black; text-align: center; width: 50px;">{{ item.abv }}</div> <!-- Set a fixed width -->
                                     </center>
                                 </div>
                             </div>
@@ -1515,7 +1515,7 @@
         <hr>
 
         <!--        Bangladesh-->
-        <div class="w3-card w3-margin-bottom" style="margin-left: 0px">
+        <div id="scroll_BGD" class="w3-card w3-margin-bottom" style="margin-left: 0px">
             <TABLE WIDTH="100%">
                 <TR>
                     <TD WIDTH="50%" style="float: left">
