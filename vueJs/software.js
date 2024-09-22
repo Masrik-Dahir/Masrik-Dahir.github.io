@@ -355,6 +355,7 @@ const app_country = {
                 { title: "Montenegro", abv: "MNE", image: "https://www.masrikdahir.com/Images/Montenegro/Thumbnail/MNE.svg.png", url: "https://www.masrikdahir.com/map/montenegro", id: "scroll_MNE" },
                 { title: "Morocco", abv: "MAR", image: "https://www.masrikdahir.com/Images/Morocco/Thumbnail/MAR.svg.png", url: "https://www.masrikdahir.com/map/morocco", id: "scroll_MAR" },
                 { title: "Mozambique", abv: "MOZ", image: "https://www.masrikdahir.com/Images/Mozambique/Thumbnail/MOZ.svg.png", url: "https://www.masrikdahir.com/map/mozambique", id: "scroll_MOZ" },
+                { title: "Myanmar", abv: "MMR", image: "https://www.masrikdahir.com/Images/Myanmar/Thumbnail/MMR.svg.png", url: "https://www.masrikdahir.com/map/myanmar", id: "scroll_MMR" },
                 { title: "Namibia", abv: "NAM", image: "https://www.masrikdahir.com/Images/Namibia/Thumbnail/NAM.svg.png", url: "https://www.masrikdahir.com/map/namibia", id: "scroll_NAM" },
                 { title: "Nauru", abv: "NRU", image: "https://www.masrikdahir.com/Images/Nauru/Thumbnail/NRU.svg.png", url: "https://www.masrikdahir.com/map/nauru", id: "scroll_NRU" },
                 { title: "Nepal", abv: "NPL", image: "https://www.masrikdahir.com/Images/Nepal/Thumbnail/NPL.svg.png", url: "https://www.masrikdahir.com/map/nepal", id: "scroll_NPL" },
