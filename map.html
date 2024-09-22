@@ -762,28 +762,63 @@
 <!--        &lt;!&ndash; End Left Column &ndash;&gt;-->
 <!--    </div>-->
 
+    <div id="app_country">
+        <div class="">
+            <div class="">
+                <div class="row" style="margin-bottom: 10px; margin-top: 15px">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%;; min-width: 250px;">
+                            <div class="search_bar" style="display: flex; align-items: center; width: 100%;">
+                                <img src="Images/Search.png" width="25" style="margin-left: 8px;margin-right: 8px">
+                                <input class="search_searchbar" type="text" title="Search" v-model="searchQuery" placeholder="Search" style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 30px; max-height: 60px">
+                            </div>
+                        </div>
+                        <div style="align-items: flex-end;">
+                            <a class="btn2" style="margin: 1px;">
+                                <img type="button" id="mymapshowButton" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height: calc(1% + 45px); border: 1px solid red; background: lightsalmon;" src="./Images/Icons/map.png"/>
+                            </a>
+                            <a class="btn1" style="margin: 1px;">
+                                <img type="button" id="mymaphideButton" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height: calc(1% + 45px); border: 1px solid black; background: white;" src="./Images/Icons/photo.png"/>
+                            </a>
+                            <a class="btn3" style="margin: 1px;">
+                                <img type="button" id="mymapshowButtonvideo" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height: calc(1% + 45px); border: 1px solid black; background: white;" src="./Images/Icons/video.png"/>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: inline-block; overflow: hidden;">
+                    <div style="display: flex; margin-left: 10px; white-space: nowrap; justify-content: space-between;">
+                        <div v-if="resources.length" v-cloak class="table" style="display: flex;">
+                            <div v-for="(item, index) in resultQuery" :key="index" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
+                                <div data-toggle="" data-html="true" :title="item.title" style="margin: auto">
+                                    <center>
+                                        <button @click="scrollToSection(item.id)" class="pop-up-button" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                            <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                        </button>
+                                        <div v-cloak style="color: black; text-align: center; width: 80px;">{{ item.title }}</div> <!-- Set a fixed width -->
+                                    </center>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
+                                <div style="margin: auto" data-toggle="" data-html="true" title="+190">
+                                    <center>
+                                        <button style="background: transparent; border: none">
+                                            <img src="./Images/three-dots.svg" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                        </button>
+                                        <div v-cloak style="color: black; text-align: center; width: 80px;">+192</div>
+                                    </center>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 
 
+            </div>
+        </div>
+    </div>
 
-
-    <h4 class="" style="margin-bottom: 10px;" >
-        <b>
-            <a class="btn3">
-                <img type="button" id="mymapshowButtonvideo" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid black; background: white"  src="./Images/Icons/video.png"
-                />
-            </a>
-            <a class="btn1">
-                <img type="button" id="mymaphideButton"  class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid black; background: white" src="./Images/Icons/photo.png"
-                />
-
-            </a>
-            <a class="btn2">
-                <img type="button" id="mymapshowButton" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid red; background: lightsalmon"  src="./Images/Icons/map.png"
-                />
-            </a>
-        </b>
-    </h4>
 
 
 
@@ -793,7 +828,7 @@
 
 
         <!--        USA-->
-        <div class="w3-card  w3-margin-top w3-margin-bottom" style="margin-left: 0px">
+        <div id="scroll_USA" class="w3-card  w3-margin-top w3-margin-bottom" style="margin-left: 0px">
 
             <div id = "myDiv">
 
@@ -1305,7 +1340,7 @@
         <hr>
 
         <!--        Canada-->
-        <div class="w3-card w3-margin-bottom" style="margin-left: 0px">
+        <div id="scroll_CAN" class="w3-card w3-margin-bottom" style="margin-left: 0px">
 
             <div id="Canada">
                 <TABLE WIDTH="100%">
@@ -1484,7 +1519,7 @@
             <TABLE WIDTH="100%">
                 <TR>
                     <TD WIDTH="50%" style="float: left">
-                        <h4 style="margin-top: 0px;"><img style="width: calc(5% + 40px); margin: 1px" src="Images/Bangladesh/Thumbnail/bd.svg.png"/> Bangladesh</h4>
+                        <h4 style="margin-top: 0px;"><img style="width: calc(5% + 40px); margin: 1px" src="./Images/Bangladesh/Thumbnail/BGD.svg.png"/> Bangladesh</h4>
                     </TD>
                     <TD WIDTH="50%" style="float: right">
                         <TABLE style="float:right; margin: 20px" >
