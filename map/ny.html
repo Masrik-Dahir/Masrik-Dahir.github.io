@@ -405,25 +405,24 @@
                         <div class="resizing-1026-more">
                             <TABLE WIDTH="100%">
                                 <TR>
-                                    <TD WIDTH="10%">
-                                        <div class="content-dot-container" style="float: right; padding: 10px">
-                                            <a href="http://www.masrikdahir.com" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/home.png" style="width: 40px;"></a>
-                                        </div>
-                                    </TD>
-                                    <TD WIDTH="80%">
+                                    <TD >
                                         <div class="content-dot-container" id="" style="padding: 10px">
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 40px;"></button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content" @click="showGallery">
+                                            <button class="glow-on-hover4 Blazing" style="margin: 5pxx">
+                                                <a href="http://www.masrikdahir.com" class="" style="width: 40px;"><img src=".././Images/Icons/home.png" style="width: 40px;"></a>
+                                            </button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 40px;"></button>
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" @click="showGallery">
                                                 <img src="../Images/gallery.png" style="width: 40px;">
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content" @click="showSlide">
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" @click="showSlide">
                                                 <img src="../Images/slideshow.png" style="width: 40px;">
                                             </button>
 
-                                            <button class="glow-on-hover4" style="width: fit-content"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
-                                            <button class="glow-on-hover4" style="width: fit-content"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 40px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 40px;"></button>
 
                                             <div v-for="(item, index) in limitedResultQuery" :key="index">
                                                 <img v-if="currentIndex === index" :src="item.url" :alt="item.title" />
@@ -437,11 +436,9 @@
                                     <img src=".././Images/arr.png" style="width: 15px;margin-top: 17px">
 
                                 </span>
-                                        </div>
-                                    </TD>
-                                    <TD WIDTH="10%">
-                                        <div class="content-dot-container" style="float: right; padding: 10px">
-                                            <a href="http://www.masrikdahir.com/map" class="glow-on-hover4 Blazing" style="width: fit-content"><img src=".././Images/Icons/map.png" style="width: 40px;"></a>
+                                            <button class="glow-on-hover4 Blazing" style="margin: 5px">
+                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 40px"><img src=".././Images/Icons/map.png" style="width: 40px;"></a>
+                                            </button>
                                         </div>
                                     </TD>
                                 </TR>
@@ -452,21 +449,21 @@
                                 <TR>
                                     <TD>
                                         <div class="content-dot-container" style="padding: 2px">
-                                            <button class="glow-on-hover4 Blazing" style="padding: 2px">
+                                            <button class="glow-on-hover4 Blazing" style="padding: 2px; margin: 5px">
                                                 <a href="http://www.masrikdahir.com" class="" style="width: 30px;"><img src=".././Images/Icons/home.png" style="width: 30px;"></a>
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 30px;"></button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px" @click="showGallery">
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 30px;"></button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" @click="showGallery">
                                                 <img src="../Images/gallery.png" style="width: 30px;">
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px" @click="showSlide">
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" @click="showSlide">
                                                 <img src="../Images/slideshow.png" style="width: 30px;">
                                             </button>
-                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 30px;"></button>
-                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 30px;"></button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 30px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 30px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 30px;"></button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 30px;"></button>
                                             <span style="float: left;" onclick="nextSlide()"></span>
-                                            <button class="glow-on-hover4 Blazing" style="padding: 2px">
+                                            <button class="glow-on-hover4 Blazing" style="padding: 2px; margin: 5px">
                                                 <a href="http://www.masrikdahir.com/map" class="" style="width: 30px"><img src=".././Images/Icons/map.png" style="width: 30px;"></a>
                                             </button>
                                         </div>
