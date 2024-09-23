@@ -139,7 +139,50 @@ function changeImage_AWS_Cloud_Practitioner() {
     else {
         image.src = "Images/Icons/more.png";
     }
+}
 
+// AWS Certified Developer
+function changeImage_AWS_Certified_Developer() {
+    var image = document.getElementById("always-image-Aws-Certified-Developer");
+    if (image.src.match("Images/Icons/more.png")) {
+        image.src = "Images/Icons/down_more.png";
+    }
+    else {
+        image.src = "Images/Icons/more.png";
+    }
+}
+
+// Databricks Fundamentals
+function changeImage_Databricks_Fundamentals() {
+    var image = document.getElementById("always-image-Databricks-Fundamentals");
+    if (image.src.match("Images/Icons/more.png")) {
+        image.src = "Images/Icons/down_more.png";
+    }
+    else {
+        image.src = "Images/Icons/more.png";
+    }
+}
+
+// Databricks Generative AI Fundamentals
+function changeImage_Databricks_Generative_AI_Fundamentals() {
+    var image = document.getElementById("always-image-Databricks-Generative-AI-Fundamentals");
+    if (image.src.match("Images/Icons/more.png")) {
+        image.src = "Images/Icons/down_more.png";
+    }
+    else {
+        image.src = "Images/Icons/more.png";
+    }
+}
+
+// Postman Student Expert
+function changeImage_Postman_API_Fundamentals() {
+    var image = document.getElementById("always-image-Postman-API-Fundamentals");
+    if (image.src.match("Images/Icons/more.png")) {
+        image.src = "Images/Icons/down_more.png";
+    }
+    else {
+        image.src = "Images/Icons/more.png";
+    }
 }
 
 // Problem Solving (Intermediate)
