@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head style="caret-color: transparent;">
+    <!--    Metadata imports-->
+    <link rel="icon" type="image/gif/png" href="./Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
+    <style>
+        .thumbnail-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .thumbnail {
+            position: relative;
+            margin: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .thumbnail img {
+            display: block;
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+        }
+        .count {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 3px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        .count::before {
+            content: '▶';
+            margin-right: 5px;
+        }
+    </style>
+    <style>
+        .button-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .button-55 {
+            text-align: left;
+            align-self: center;
+            background-color: white;
+            background-image: url('Images/rpap.jpg'); /* Texture for old paper */
+            background-position: center;
+            background-repeat: repeat;
+            border-radius: 50px 50px 50px 50px; /* Irregular border radius for rustic look */
+            border-style: solid;
+            border-width: 1px;
+            border-color: black;
+            box-shadow: rgba(0, 0, 0, .4) 15px 28px 25px -18px;
+            box-sizing: border-box;
+            color: #41403e;
+            cursor: pointer;
+            display: inline-block;
+            font-family: Neucha, sans-serif;
+            font-size: 1rem;
+            line-height: 23px;
+            outline: none;
+            padding: 1.2rem;
+            text-decoration: none;
+            transition: all 235ms ease-in-out;
+
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .button-55:hover {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
+            transform: translate3d(0, 2px, 0);
+            padding: 1.2rem;
+            background: white;
+        }
+
+        .button-55:focus {
+            box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+        }
+
+        .button-55 span {
+            display: none;
+            font-size: 0.85rem;
+            color: #41403e;
+            text-align: left;
+            margin-top: 0.5rem;
+            white-space: normal;
+        }
+
+        .button-55:hover span {
+            display: block;
+        }
+    </style>
+
+    <!--    CSS imports-->
+    <link rel="stylesheet" href="library/www.w3schools.com.w3css.4.w3.css">
+    <link rel="stylesheet" href="library/cdnjs.cloudflare.com.ajax.libs.font-awesome.4.7.0.css.font-awesome.min.css">
+
+    <link rel="stylesheet" href="css/icons.css">
+    <link rel="stylesheet" href="css/box.css">
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/community.css">
+    <link rel="stylesheet" href="css/resize.css">
+    <link rel="stylesheet" href="css/glowing.css">
+    <link rel="stylesheet" href="css/lead.css">
+    <link rel="stylesheet" href="css/new.css">
+    <link rel="stylesheet" href="css/if.css">
+    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/vintage.css">
+
+    <!--    JS imports-->
+    <script src="library/code.jquery.com.jquery-1.10.2.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.5.1.jquery.min.js"></script>
+    <script src="js/html.js"></script>
+    <script src="js/hourglass.js"></script>
+    <script src="js/expand_jquery.js"></script>
+    <script src="js/change_image.js"></script>
+    <script src="js/block.js"></script>
+    <script src="js/battery.js" defer></script>
+    <script src="js/achievement.js" defer></script>
+    <script src="js/collapsible.js" defer></script>
+    <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <!--    Vue JS imports-->
+    <script src="library/vue@3.2.36.dist.vue.global.js"></script>
+    <script src="vueJs/default.js" defer></script>
+
+    <!--    Top Nav -->
+    <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
+    <script src="library/maxcdn.bootstrapcdn.com.bootstrap.3.4.1.js.bootstrap.min.js"></script>
+
+    <!--   Info Tooltip -->
+    <link rel="stylesheet" href="css/d.css">
+    <script src="bootstrap/js/ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="bootstrap/js/maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="bootstrap/js/random.js" defer></script>
+
+    <!--    Customized (for the file) CSS-->
+    <style>
+        .collapsible {
+            /*background-color: #777;*/
+            /*color: white;*/
+            cursor: pointer;
+            padding: 5px;
+            width: 100%;
+            /*border: none;*/
+            text-align: left;
+            /*outline: none;*/
+            /*font-size: 15px;*/
+        }
+
+        .active, .collapsible:hover {
+            background-color: #555;
+        }
+
+        .content2 {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            /*background-color: #f1f1f1;*/
+        }
+    </style>
+</head>
+
+<body class="w3-white">
+<div id="app" v-cloak>
+    <div class="resizing-1026-more">
+        <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
+            <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
+                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>Home</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="">
+                                </div>Work</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Publication</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Education</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Software</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Entrepreneurship</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/leadership" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: red; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Leadership</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px;">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Travel</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+            </div>
+            <br><br><br>
+        </div>
+
+    </div>
+    <div class="resizing-1026-less" style="margin-bottom: 70px">
+        <div class="popup" id="popup-3" style="">
+            <div class="overlay"></div>
+            <div class="content" style="">
+                <div style="color: black; ">
+                    <TABLE>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Home</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+
+                        </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Work</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+
+
+                        </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Publication</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Education</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Software</b>
+                                        </div>
+                                    </button>
+                                </a>
+
+                            </TD>
+                        </TR>
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Entrepreneurship</b>
+                                        </div>
+                                    </button>
+                                </a>
+
+                            </TD>
+                        </TR>
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/leadership" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Leadership</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Travel</b>
+                                        </div>
+                                    </button>
+
+                                </a>
+                            </TD>
+                        </TR>
+                    </TABLE>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="topnav-2 navbar-fixed-top">
+
+
+
+            <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px">
+                <div class="main">Masrik Dahir</div>
+            </h5>
+
+            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px"><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir">
+            </button>
+
+
+
+
+        </div>
+    </div>
+</div>
+<script>
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
+</script>
+
+<!-- Page Container -->
+<div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%); background-color: white">
+
+
+
+    <!-- Right Column -->
+    <div class="">
+
+        <div class="button-wrapper" style="margin-top: 30px">
+            <button class="button-55" role="button" style="margin: 10px"><h3>Henrico County Equity Ambassador</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
+                        <img src="./Images/henrico.webp" style="width: 1vw; min-width: 120px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                    <div><a href="https://www.henricoschools.us/page/equity-diversity-and-opportunity" target="_blank">Henrico County</a></div>
+                    <div>Echoing the voices of the Henrico County Schools</div>
+                    <div>Advocating for anti-discriminating policy</div>
+                    <div>Donating foods and cloths in holidays</div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>Henrico County Engineering Scholar</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
+                        <img src="./Images/henrico.webp" style="width: 1vw; min-width: 120px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                    <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
+                        <img src="./Images/vcu_ram.png" style="width: 1vw; min-width: 120px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                    <div>
+                        <a href="https://thecollegecompanion.com/henrico-county-virginia-commonwealth-university-engineering-scholarship-program/"
+                           target="_blank">Henrico County</a></div>
+                    <div><a href="https://egr.vcu.edu/admissions/scholarships/" target="_blank">Virginia
+                        Commonwealth University</a></div>
+                    <div>BS and MS program</div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>Altria Scholar</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://www.altria.com/en" target="_blank">
+                        <img src="./Images/altria.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                    <div><a href="https://www.altria.com/en" target="_blank">Altria Group, Inc.</a></div>
+                    <div>Entrepreneurship and Professional Networking Seminars</div>
+                    <div>Business Idea Pitching</div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>Summa Cum Laude</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://rar.vcu.edu/graduation/" target="_blank">
+                        <img src="./Images/summacumlaude.png" style="width: 1vw; min-width: 100px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                    <div><a href="https://registrar.vcu.edu/graduation/" target="_next">VCU Graduation Honors</a></div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>iCubed Scholar</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://icubed.vcu.edu/" target="_blank">
+                        <img src="./Images/icubed%20(1).png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                        <div><b>Research Area:</b> iCubed Food Core</div>
+                        <div>Research Paper Publication</div>
+                        <div>Poster Presentation</div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>Deans List</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
+                        <img src="./Images/deanslistlogo.png" style="width: 1vw; min-width: 120px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                    <div>Fall 2020, Spring 2021, Fall 2021, Spring 2022, Fall 2022, Spring 2023</div>
+                    <div>Receive above 3.5 GPA</div>
+                    <div>Top 10% of the Class</div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>Superintendent’s Scholar</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://henricoschools.us/division-leadership-team/"
+                       target="_blank">
+                        <img src="./Images/henrico.webp" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                        <div>High School Graduation, Henrico County Public Schools</div>
+                        <div>Top 5% of Class of 2020</div>
+                </div>
+            </button>
+            <button class="button-55" role="button" style="margin: 10px"><h3>CarMax Scholar</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://www.carmax.com/" target="_blank">
+                        <img src="./Images/carmax.png"
+                             style="width: 1vw; height: 5vw;min-width: 100px;min-height: 100px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                        <div>
+                            <a href="https://www.cfrichmond.org/Partnering-with-Us/For-Nonprofits/Awards-Scholarships/Search-by-Scholarship-Criteria/Results?s=CarMax-Rick+Sharp+Entrepreneur+Scholarship"
+                               target="_blank">CarMax-Rick Sharp Entrepreneur Scholarship</a></div>
+
+                </div>
+            </button>
+
+            <button class="button-55" role="button" style="margin: 10px"><h3>Susanne and Sam Dibert STEM Scholar</h3>
+                <div class="w3-container">
+                    <a style="text-decoration:none" href="https://www.swagelok.com/" target="_blank">
+                        <img src="./Images/swagelok.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
+                             alt="Masrik Dahir"/></a>
+                        <div><a href="https://www.swagelok.com/" target="_blank">Swagelok</a></div>
+                </div>
+            </button>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+<footer id="footer-relative" class="w3-center w3-margin-top;" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
+    <div style="padding: 10px">
+        <p style="padding-top: 15px;">Connect with me through Social Media</p>
+        <a href="https://www.instragram.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://www.twitter.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://github.com/Masrik-Dahir" target="blank"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://app.joinhandshake.com/users/20195119" target="blank"><i style="font-size:36px" class="fas fa-handshake w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" ><i style="font-size:36px" class="fab fa-youtube-square w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><i style="font-size:36px" class="fas fa-graduation-cap w3-hover-opacity">&#160</i></a>
+        <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank"><i style="font-size:34px" class='w3-hover-opacity'>R<sup>C</sup></i></a>
+        <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
+            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
+                <img class="" style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px "
+                     src="Images/w3_white.png"/>
+            </b>
+        </a>
+
+
+        <a href="https://orcid.org/0000-0002-7841-310X" style="text-decoration: none" target="blank">
+            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
+                <img class="" style="width:41px; vertical-align: middle;padding: 0px; margin-bottom: 5px"
+                     alt="ORCID iD icon"
+                     src="Images/orcid_white.png"/>
+            </b>
+        </a>
+
+
+
+
+
+    </div>
+    <br>
+
+</footer>
+</body>
+</html>
