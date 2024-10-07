@@ -259,13 +259,13 @@ const app_milestone = {
                     title: "Bachelors of Science (Hons.)",
                     des: "",
                     uri_2: "https://egr.vcu.edu/",
-                    img_2: "./Images/CS-icon-01.png",
+                    img_2: "./Images/csecurity.png",
                     uri: "https://www.vcu.edu/",
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
                     style: "width: 1vw; min-width: 120px"
                 },
                 {
-                    title: "Masters of Science (Hons.)",
+                    title: "Masters of Science",
                     des: "",
                     uri: "https://www.vcu.edu/",
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
