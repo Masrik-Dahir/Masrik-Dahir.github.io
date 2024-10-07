@@ -142,6 +142,153 @@ const app_software = {
     }
 }
 
+const app_milestone = {
+    data() {
+        return {
+            searchQuery: null,
+            resources:[
+                {
+                    title:"Henrico County Equity Ambassador",
+                    des:"",
+                    uri:"https://henrico.us/",
+                    img:"https://www.masrikdahir.com/Images/henrico.webp",
+                    uri_2:"",
+                    img_2:"",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "Henrico County Engineering Scholar",
+                    des: "",
+                    uri: "https://henrico.us/",
+                    img: "https://www.masrikdahir.com/Images/henrico.webp",
+                    uri_2: "https://www.vcu.edu/",
+                    img_2: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "Altria Scholar",
+                    des: "",
+                    uri: "https://www.altria.com/en",
+                    img: "https://www.masrikdahir.com/Images/altria.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "Summa Cum Laude",
+                    des: "",
+                    uri: "https://rar.vcu.edu/graduation/",
+                    img: "https://www.masrikdahir.com/Images/summacumlaude.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "iCubed Scholar",
+                    des: "",
+                    uri: "https://icubed.vcu.edu/",
+                    img: "https://www.masrikdahir.com/Images/icubed%20(1).png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "Deans List",
+                    des: "",
+                    uri: "https://henrico.us/",
+                    img: "https://www.masrikdahir.com/Images/deanslistlogo.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "Superintendent’s Scholar",
+                    des: "",
+                    uri: "https://henricoschools.us/division-leadership-team/",
+                    img: "https://www.masrikdahir.com/Images/henrico.webp",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "CarMax Scholar",
+                    des: "",
+                    uri: "https://www.carmax.com/",
+                    img: "https://www.masrikdahir.com/Images/carmax.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "Susanne and Sam Dibert STEM Scholar",
+                    des: "",
+                    uri: "https://www.swagelok.com/",
+                    img: "https://www.masrikdahir.com/Images/swagelok.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+
+                },
+                {
+                    title: "GRRC Scholar",
+                    des: "",
+                    uri: "http://richmondrelo.org/",
+                    img: "./Images/grrc.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 280px"
+                },
+                {
+                    title: "Harrison-Labouisse Memorial Scholar",
+                    des: "",
+                    uri: "https://www.cfrichmond.org/Apply-for-a-Scholarship/View-All-Scholarships?s=Harrison-Labouisse-Mayo+Memorial+Scholarship",
+                    img: "./Images/Me66Jxa.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 100px"
+                },
+                {
+                    title: "Bachelors of Science (Hons.)",
+                    des: "",
+                    uri_2: "https://egr.vcu.edu/",
+                    img_2: "./Images/CS-icon-01.png",
+                    uri: "https://www.vcu.edu/",
+                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "Masters of Science (Hons.)",
+                    des: "",
+                    uri: "https://www.vcu.edu/",
+                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    uri_2: "https://egr.vcu.edu/",
+                    img_2: "https://www.masrikdahir.com/Images/ai.png",
+                    style: "width: 1vw; min-width: 120px"
+                }
+            ]
+        };
+    },
+    computed: {
+        resultQuery(){
+            if(this.searchQuery){
+                return this.resources.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v) || item.des.toLowerCase().includes(v))
+                })
+            }else{
+                return this.resources;
+            }
+        }
+    }
+}
+
 const app_map = {
     data() {
         return {
@@ -956,7 +1103,7 @@ const top_nav = {
                     title:"Entrepreneurship",
                 },
                 {
-                    title:"Leadership",
+                    title:"Milestone",
                 },
                 {
                     title:"Travel",
@@ -980,6 +1127,7 @@ const top_nav = {
 
 
 Vue.createApp(app_software).mount('#app_software')
+Vue.createApp(app_milestone).mount('#app_milestone')
 Vue.createApp(app_map).mount('#app_map')
 Vue.createApp(app_country).mount('#app_country')
 Vue.createApp(app_pic).mount('#app_pic')
