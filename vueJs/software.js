@@ -253,7 +253,7 @@ const app_milestone = {
                     img: "./Images/Me66Jxa.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 100px"
+                    style: "width: 1vw; min-width: 120px"
                 },
                 {
                     title: "Bachelors of Science (Hons.)",
