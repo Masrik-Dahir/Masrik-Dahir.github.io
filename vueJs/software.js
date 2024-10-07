@@ -231,6 +231,8 @@ const app_map = {
 const app_country = {
     data() {
         return {
+            windowHeight: window.innerHeight,
+            windowWidth: window.innerWidth,
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources: [
@@ -445,7 +447,8 @@ const app_country = {
                 : this.resources;
 
             // Return only the first 10 items
-            return filteredResults.slice(0, 3);
+            console.log(parseInt(this.windowWidth/150))
+            return filteredResults.slice(0, Math.min(parseInt(this.windowWidth/150), 20));
         }
     },
     mounted() {
@@ -462,6 +465,12 @@ const app_country = {
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
             }
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
         },
         toggleBox() {
             this.button_to_activate_box = !this.button_to_activate_box;
