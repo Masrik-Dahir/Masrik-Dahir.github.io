@@ -410,13 +410,6 @@ const app_milestone = {
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
-
-
-
-
-
-
-
                 {
                     title: "Accepted in George Mason",
                     des: "",
@@ -430,7 +423,7 @@ const app_milestone = {
                     title: "Accepted in Virginia Tech",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Virginia Tech.jpg",
-                    img: "./Images/Virginia_Tech.png",
+                    img: "https://www.masrikdahir.com/Images/Virginia-Tech-Logo.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -439,7 +432,7 @@ const app_milestone = {
                     title: "Accepted in George Washington",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/George Washington University.jpg",
-                    img: "./Images/George_Washington_University_logo.svg.png",
+                    img: "https://www.masrikdahir.com/Images/George_Washington_Athletics_logo.svg.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -448,7 +441,7 @@ const app_milestone = {
                     title: "Accepted in Rensselaer",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Rensselaer.jpg",
-                    img: "./Images/Rensselaer.jpg",
+                    img: "https://www.masrikdahir.com/Images/Rensselaer_at_Hartford_Seal.svg.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -457,7 +450,7 @@ const app_milestone = {
                     title: "Accepted in Purdue",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Purdue.jpg",
-                    img: "./Images/Purdue.jpg",
+                    img: "https://www.masrikdahir.com/Images/Purdue.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -466,18 +459,16 @@ const app_milestone = {
                     title: "Accepted in University of Maryland",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Maryland.jpg",
-                    img: "./Images/University of Maryland.jpg",
+                    img: "https://www.masrikdahir.com/Images/University_of_Maryland_seal.svg.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
-
-
                 {
                     title: "University of Richmond",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Richmond.jpg",
-                    img: "./Images/University of Richmond.jpg",
+                    img: "https://www.masrikdahir.com/Images/university-of-richmond-logo-C721BEBDD6-seeklogo.com.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -486,7 +477,7 @@ const app_milestone = {
                     title: "Accepted in James Madison University",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/James Madison University Engineering.jpg",
-                    img: "./Images/James Madison University_Engineering.jpg",
+                    img: "https://www.masrikdahir.com/Images/James-Madison-Dukes-Logo-2002.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -495,7 +486,7 @@ const app_milestone = {
                     title: "Accepted in University of Vermont",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Vermont Honors College.jpg",
-                    img: "",
+                    img: "https://www.masrikdahir.com/Images/Vermont_Catamounts_logo.svg.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -504,7 +495,7 @@ const app_milestone = {
                     title: "Accepted in University of Iowa",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Iowa.jpg",
-                    img: "",
+                    img: "https://www.masrikdahir.com/Images/iowa_hawkeyes_logo_wordmark_2019_sportslogosnet-8297.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -513,7 +504,7 @@ const app_milestone = {
                     title: "Accepted in University of PittsBurgh",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Pittsburgh.jpg",
-                    img: "",
+                    img: "https://www.masrikdahir.com/Images/University_of_Pittsburgh_seal.svg.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -522,16 +513,16 @@ const app_milestone = {
                     title: "Accepted in Michigan State University",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Michigan State University.jpg",
-                    img: "",
+                    img: "https://www.masrikdahir.com/Images/Michigan-State-University-Logo.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
-                    title: "Accepted in York University",
+                    title: "Accepted in York College",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/York University.jpg",
-                    img: "",
+                    img: "https://www.masrikdahir.com/Images/york college.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -540,7 +531,47 @@ const app_milestone = {
                     title: "Accepted in Roanoke University",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Roanoke College.jpg",
-                    img: "",
+                    img: "https://www.masrikdahir.com/Images/RoanokeCollegeWordmark.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+
+
+
+
+                {
+                    title: "Trustee Award: Roanoke University",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Roanoke University Scholarship.jpg",
+                    img: "https://www.masrikdahir.com/Images/RoanokeCollegeWordmark.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Presidential Scholarship: University of PittsBurgh",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/University of PittsBurgh Presidential Scholarship.jpg",
+                    img: "https://www.masrikdahir.com/Images/University_of_Pittsburgh_seal.svg.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Presidential Scholarship: York College",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/York University Scholarship.jpg",
+                    img: "https://www.masrikdahir.com/Images/york%20college.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Clark Scholarship: Virginia Tech",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Virginia Tech Scholarship.jpg",
+                    img: "https://www.masrikdahir.com/Images/Virginia-Tech-Logo.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
