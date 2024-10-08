@@ -430,7 +430,7 @@ const app_milestone = {
                     title: "Accepted in Virginia Tech",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Virginia Tech.jpg",
-                    img: "",
+                    img: "./Images/Virginia_Tech.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -439,7 +439,7 @@ const app_milestone = {
                     title: "Accepted in George Washington",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/George Washington University.jpg",
-                    img: "",
+                    img: "./Images/George_Washington_University_logo.svg.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -448,7 +448,7 @@ const app_milestone = {
                     title: "Accepted in Rensselaer",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Rensselaer.jpg",
-                    img: "",
+                    img: "./Images/Rensselaer.jpg",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -457,7 +457,7 @@ const app_milestone = {
                     title: "Accepted in Purdue",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Purdue.jpg",
-                    img: "",
+                    img: "./Images/Purdue.jpg",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -466,7 +466,7 @@ const app_milestone = {
                     title: "Accepted in University of Maryland",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Maryland.jpg",
-                    img: "",
+                    img: "./Images/University of Maryland.jpg",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -477,7 +477,7 @@ const app_milestone = {
                     title: "University of Richmond",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/University of Richmond.jpg",
-                    img: "",
+                    img: "./Images/University of Richmond.jpg",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -486,7 +486,7 @@ const app_milestone = {
                     title: "Accepted in James Madison University",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/James Madison University Engineering.jpg",
-                    img: "",
+                    img: "./Images/James Madison University_Engineering.jpg",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
