@@ -272,7 +272,142 @@ const app_milestone = {
                     uri_2: "https://egr.vcu.edu/",
                     img_2: "https://www.masrikdahir.com/Images/ai.png",
                     style: "width: 1vw; min-width: 120px"
-                }
+                },
+                {
+                    title: "AWS Certified Developer",
+                    des: "",
+                    uri: "https://www.credly.com/badges/4ea74952-8783-44af-9425-119b2434bf38/public_url",
+                    img: "https://www.masrikdahir.com/Images/acd.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "AWS Cloud practitioner",
+                    des: "",
+                    uri: "https://www.credly.com/badges/17619069-ea55-49da-bf46-ac605180477d/public_url",
+                    img: "https://www.masrikdahir.com/Images/aws-certified-cloud-practitioner.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "Databricks Fundamentals",
+                    des: "",
+                    uri: "https://credentials.databricks.com/3fc5d768-443c-40fa-828c-fedadb94ba5e#gs.fsb476",
+                    img: "https://www.masrikdahir.com/Images/databricksfundamental.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "Databricks Generative AI Fundamentals",
+                    des: "",
+                    uri: "https://credentials.databricks.com/65a906a0-cddf-4ef7-92d6-e4c8a35b8c97#gs.f0jlz6",
+                    img: "https://www.masrikdahir.com/Images/databricksgenerativeai.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "Postman API Fundamentals Student Expert",
+                    des: "",
+                    uri: "https://badgr.com/public/assertions/6VeZHynPSSCsqE6RQIA0_A?identity__email=masrikdahir@gmail.com",
+                    img: "https://www.masrikdahir.com/Images/pafse.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "HackerRank Problem Solving (Intermediate)",
+                    des: "",
+                    uri: "https://www.hackerrank.com/certificates/5af21130d688",
+                    img: "https://www.masrikdahir.com/Images/Problem%20Solving%20(Intermediate)%20Certificate.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "HackerRank Problem Solving (Basic)",
+                    des: "",
+                    uri: "https://www.hackerrank.com/certificates/0a8a402e77b1/",
+                    img: "https://www.masrikdahir.com/Images/Problem%20Solving%20(Basic)%20Certificate.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "HackerRank Python (Basic)",
+                    des: "",
+                    uri: "https://www.hackerrank.com/certificates/4e15d1f36815",
+                    img: "https://www.masrikdahir.com/Images/Python%20(Basic)%20Certificate.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: 120px"
+                },
+                {
+                    title: "Paper: Cronus",
+                    des: "",
+                    uri: "https://www.ieee.org/",
+                    img: "https://www.masrikdahir.com/Images/ieee.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
+                {
+                    title: "Paper: ClaimChain",
+                    des: "",
+                    uri: "https://www.ieee.org/",
+                    img: "https://www.masrikdahir.com/Images/ieee.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/ClaimChain.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
+                {
+                    title: "Poster: Cronus",
+                    des: "",
+                    uri: "https://www.vcu.edu/",
+                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/CronusPoster.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
+                {
+                    title: "Poster: ClaimChain",
+                    des: "",
+                    uri: "https://www.missouri.edu/",
+                    img: "https://www.masrikdahir.com/Images/University-of-Missouri-Logo.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/NewClaimchainPoster.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
+                {
+                    title: "Poster: Security Operations Center",
+                    des: "",
+                    uri: "https://www.vcu.edu/",
+                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/CS%2023-318_Poster.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
+                {
+                    title: "Poster: Ram-pantries",
+                    des: "",
+                    uri: "https://www.vcu.edu/",
+                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/VCU_Health_Research.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
+                {
+                    title: "Essay: The Last Basketball Game",
+                    des: "",
+                    uri: "https://tucker.henricoschools.us/",
+                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri_2: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
+                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                },
             ]
         };
     },
