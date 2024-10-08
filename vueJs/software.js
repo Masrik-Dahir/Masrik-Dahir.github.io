@@ -145,6 +145,8 @@ const app_software = {
 const app_milestone = {
     data() {
         return {
+            windowHeight: window.innerHeight,
+            windowWidth: window.innerWidth,
             searchQuery: null,
             resources:[
                 {
@@ -420,6 +422,45 @@ const app_milestone = {
             }else{
                 return this.resources;
             }
+        }
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+        openPopup(index) {
+            this.showingPopupIndex = index;
+        },
+        closePopup() {
+            this.showingPopupIndex = null;
         }
     }
 }
