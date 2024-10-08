@@ -218,7 +218,7 @@ const app_milestone = {
 
                 },
                 {
-                    title: "CarMax Scholar",
+                    title: "CarMax Entrepreneur Scholar",
                     des: "",
                     uri: "https://www.carmax.com/",
                     img: "https://www.masrikdahir.com/Images/carmax.png",
