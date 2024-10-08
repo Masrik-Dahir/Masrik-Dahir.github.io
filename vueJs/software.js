@@ -450,7 +450,7 @@ const app_milestone = {
                     title: "Accepted in Purdue",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/Purdue.jpg",
-                    img: "https://www.masrikdahir.com/Images/Purdue.png",
+                    img: "https://www.masrikdahir.com/Images/purdue.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
