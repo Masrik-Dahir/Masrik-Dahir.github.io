@@ -410,6 +410,58 @@ const app_milestone = {
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
+
+
+
+
+
+
+
+                {
+                    title: "Admitted to George Mason",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/George Mason.jpg",
+                    img: "https://www.masrikdahir.com/Images/George_Mason_University_logo.svg.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Essay: The Last Basketball Game",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
+                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Essay: The Last Basketball Game",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
+                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Essay: The Last Basketball Game",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
+                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Essay: The Last Basketball Game",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
+                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
             ]
         };
     },
