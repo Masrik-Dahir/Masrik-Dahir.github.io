@@ -418,7 +418,7 @@ const app_milestone = {
 
 
                 {
-                    title: "Admitted to George Mason",
+                    title: "Accepted in George Mason",
                     des: "",
                     uri: "https://www.masrikdahir.com/Images/Admission/George Mason.jpg",
                     img: "https://www.masrikdahir.com/Images/George_Mason_University_logo.svg.png",
@@ -427,37 +427,120 @@ const app_milestone = {
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
-                    title: "Essay: The Last Basketball Game",
+                    title: "Accepted in Virginia Tech",
                     des: "",
-                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
-                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Virginia Tech.jpg",
+                    img: "",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
-                    title: "Essay: The Last Basketball Game",
+                    title: "Accepted in George Washington",
                     des: "",
-                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
-                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri: "https://www.masrikdahir.com/Images/Admission/George Washington University.jpg",
+                    img: "",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
-                    title: "Essay: The Last Basketball Game",
+                    title: "Accepted in Rensselaer",
                     des: "",
-                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
-                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Rensselaer.jpg",
+                    img: "",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
-                    title: "Essay: The Last Basketball Game",
+                    title: "Accepted in Purdue",
                     des: "",
-                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
-                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Purdue.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in University of Maryland",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/University of Maryland.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+
+
+                {
+                    title: "University of Richmond",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/University of Richmond.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in James Madison University",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/James Madison University Engineering.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in University of Vermont",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/University of Vermont Honors College.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in University of Iowa",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/University of Iowa.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in University of PittsBurgh",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/University of Pittsburgh.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in Michigan State University",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Michigan State University.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in York University",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/York University.jpg",
+                    img: "",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
+                    title: "Accepted in Roanoke University",
+                    des: "",
+                    uri: "https://www.masrikdahir.com/Images/Admission/Roanoke College.jpg",
+                    img: "",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
