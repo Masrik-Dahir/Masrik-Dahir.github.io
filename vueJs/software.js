@@ -156,7 +156,7 @@ const app_milestone = {
                     img:"https://www.masrikdahir.com/Images/henrico.webp",
                     uri_2:"",
                     img_2:"",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -166,7 +166,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/henrico.webp",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -176,7 +176,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/altria.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -186,7 +186,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/summacumlaude.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -196,7 +196,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/icubed%20(1).png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -206,7 +206,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/deanslistlogo.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -216,7 +216,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/henrico.webp",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -226,7 +226,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/carmax.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -236,7 +236,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/swagelok.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
 
                 },
                 {
@@ -246,7 +246,7 @@ const app_milestone = {
                     img: "./Images/grrc.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Harrison-Labouisse Memorial Scholar",
@@ -255,7 +255,7 @@ const app_milestone = {
                     img: "./Images/Me66Jxa.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Bachelors of Science (Hons.)",
@@ -264,7 +264,7 @@ const app_milestone = {
                     img_2: "",
                     uri: "https://egr.vcu.edu/",
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Masters of Science",
@@ -273,7 +273,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "AWS Certified Developer",
@@ -282,7 +282,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/acd.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "AWS Cloud practitioner",
@@ -291,7 +291,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/aws-certified-cloud-practitioner.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Databricks Fundamentals",
@@ -300,7 +300,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/databricksfundamental.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Databricks Generative AI Fundamentals",
@@ -309,7 +309,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/databricksgenerativeai.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Postman API Fundamentals Student Expert",
@@ -318,7 +318,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/pafse.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "HackerRank Problem Solving Intermediate",
@@ -327,7 +327,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/Problem%20Solving%20(Intermediate)%20Certificate.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "HackerRank Problem Solving Basic",
@@ -336,7 +336,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/Problem%20Solving%20(Basic)%20Certificate.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "HackerRank Python Basic",
@@ -345,7 +345,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/Python%20(Basic)%20Certificate.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Paper: Cronus",
@@ -354,7 +354,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/ieee.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Paper: ClaimChain",
@@ -363,7 +363,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/ieee.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Poster: Cronus",
@@ -372,7 +372,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Poster: ClaimChain",
@@ -381,7 +381,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/University-of-Missouri-Logo.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Poster: Security Operations Center",
@@ -390,7 +390,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Poster: Ram-pantries",
@@ -399,7 +399,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
                     title: "Essay: The Last Basketball Game",
@@ -408,7 +408,7 @@ const app_milestone = {
                     img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
             ]
         };

@@ -434,24 +434,21 @@
                     <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap; gap: 10px;">
                         <div v-for="item in resultQuery">
                             <div v-if="windowWidth > 1000">
+                                <a style="text-decoration:none" v-bind:href="item.uri" target="_blank">
                                 <button class="button-55" role="button" style="margin: 10px; width: 200px; overflow-wrap: break-word;"> <!-- Fixed width with word break -->
                                     <center>
                                         <h3 style="font-size: calc(12px + 0.4vw); word-break: break-word; white-space: normal;">{{item.title}}</h3>
                                         <div class="w3-container">
-                                            <a style="text-decoration:none" v-bind:href="item.uri" target="_blank">
                                                 <img v-bind:src="item.img" v-bind:style="item.style" alt="Masrik Dahir"/>
-                                            </a>
-                                            <bdi v-if="item.uri_2 !== '' ">
-                                                <a style="text-decoration:none" v-bind:href="item.uri_2" target="_blank">
-                                                    <img v-bind:src="item.img_2" v-bind:style="item.style" alt="Masrik Dahir"/>
-                                                </a>
-                                            </bdi>
                                             <p style="font-size: 15px; word-break: break-word; white-space: normal;">{{item.des}}</p>
                                         </div>
                                     </center>
                                 </button>
+                                </a>
                             </div>
                             <div v-else>
+                                <a style="text-decoration:none" v-bind:href="item.uri_2" target="_blank">
+
                                 <button class="button-55" role="button" style="margin: 10px; width: 150px; overflow-wrap: break-word;"> <!-- Fixed width with word break -->
                                     <center>
                                         <h3 style="font-size: calc(12px + 0.4vw); word-break: break-word; white-space: normal;">{{item.title}}</h3>
@@ -459,15 +456,12 @@
                                             <a style="text-decoration:none" v-bind:href="item.uri" target="_blank">
                                                 <img v-bind:src="item.img" v-bind:style="item.style" alt="Masrik Dahir"/>
                                             </a>
-                                            <bdi v-if="item.uri_2 !== '' ">
-                                                <a style="text-decoration:none" v-bind:href="item.uri_2" target="_blank">
-                                                    <img v-bind:src="item.img_2" v-bind:style="item.style" alt="Masrik Dahir"/>
-                                                </a>
-                                            </bdi>
                                             <p style="font-size: 15px; word-break: break-word; white-space: normal;">{{item.des}}</p>
                                         </div>
                                     </center>
                                 </button>
+                                </a>
+
                             </div>
                         </div>
                     </div>
