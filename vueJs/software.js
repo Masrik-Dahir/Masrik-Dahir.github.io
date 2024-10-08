@@ -238,13 +238,13 @@ const app_milestone = {
 
                 },
                 {
-                    title: "GRRC Scholar",
+                    title: "Greater Richmond Relocation Center Scholar",
                     des: "",
                     uri: "http://richmondrelo.org/",
                     img: "./Images/grrc.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 160px"
+                    style: "width: 1vw; min-width: 140px"
                 },
                 {
                     title: "Harrison-Labouisse Memorial Scholar",
