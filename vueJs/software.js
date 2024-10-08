@@ -244,7 +244,7 @@ const app_milestone = {
                     img: "./Images/grrc.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 140px"
+                    style: "width: 1vw; min-width: calc(90px + 0.5vw)"
                 },
                 {
                     title: "Harrison-Labouisse Memorial Scholar",
@@ -319,7 +319,7 @@ const app_milestone = {
                     style: "width: 1vw; min-width: calc(90px + 0.5vw)"
                 },
                 {
-                    title: "HackerRank Problem Solving (Intermediate)",
+                    title: "HackerRank Problem Solving Intermediate",
                     des: "",
                     uri: "https://www.hackerrank.com/certificates/5af21130d688",
                     img: "https://www.masrikdahir.com/Images/Problem%20Solving%20(Intermediate)%20Certificate.png",
@@ -328,7 +328,7 @@ const app_milestone = {
                     style: "width: 1vw; min-width: calc(90px + 0.5vw)"
                 },
                 {
-                    title: "HackerRank Problem Solving (Basic)",
+                    title: "HackerRank Problem Solving Basic",
                     des: "",
                     uri: "https://www.hackerrank.com/certificates/0a8a402e77b1/",
                     img: "https://www.masrikdahir.com/Images/Problem%20Solving%20(Basic)%20Certificate.png",
@@ -337,7 +337,7 @@ const app_milestone = {
                     style: "width: 1vw; min-width: calc(90px + 0.5vw)"
                 },
                 {
-                    title: "HackerRank Python (Basic)",
+                    title: "HackerRank Python Basic",
                     des: "",
                     uri: "https://www.hackerrank.com/certificates/4e15d1f36815",
                     img: "https://www.masrikdahir.com/Images/Python%20(Basic)%20Certificate.png",
