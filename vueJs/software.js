@@ -162,8 +162,8 @@ const app_milestone = {
                     des: "",
                     uri: "https://henrico.us/",
                     img: "https://www.masrikdahir.com/Images/henrico.webp",
-                    uri_2: "https://www.vcu.edu/",
-                    img_2: "https://www.masrikdahir.com/Images/vcu_ram.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 120px"
 
                 },
@@ -244,7 +244,7 @@ const app_milestone = {
                     img: "./Images/grrc.png",
                     uri_2: "",
                     img_2: "",
-                    style: "width: 1vw; min-width: 280px"
+                    style: "width: 1vw; min-width: 160px"
                 },
                 {
                     title: "Harrison-Labouisse Memorial Scholar",
@@ -258,19 +258,19 @@ const app_milestone = {
                 {
                     title: "Bachelors of Science (Hons.)",
                     des: "",
-                    uri_2: "https://egr.vcu.edu/",
-                    img_2: "./Images/csecurity.png",
-                    uri: "https://www.vcu.edu/",
+                    uri_2: "",
+                    img_2: "",
+                    uri: "https://egr.vcu.edu/",
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
                     style: "width: 1vw; min-width: 120px"
                 },
                 {
                     title: "Masters of Science",
                     des: "",
-                    uri: "https://www.vcu.edu/",
+                    uri: "https://egr.vcu.edu/",
                     img: "https://www.masrikdahir.com/Images/vcu_ram.png",
-                    uri_2: "https://egr.vcu.edu/",
-                    img_2: "https://www.masrikdahir.com/Images/ai.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 120px"
                 },
                 {
@@ -348,64 +348,64 @@ const app_milestone = {
                 {
                     title: "Paper: Cronus",
                     des: "",
-                    uri: "https://www.ieee.org/",
-                    img: "https://www.masrikdahir.com/Images/ieee.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
                 {
                     title: "Paper: ClaimChain",
                     des: "",
-                    uri: "https://www.ieee.org/",
-                    img: "https://www.masrikdahir.com/Images/ieee.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/ClaimChain.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/ClaimChain.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
                 {
                     title: "Poster: Cronus",
                     des: "",
-                    uri: "https://www.vcu.edu/",
-                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/CronusPoster.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/CronusPoster.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
                 {
                     title: "Poster: ClaimChain",
                     des: "",
-                    uri: "https://www.missouri.edu/",
-                    img: "https://www.masrikdahir.com/Images/University-of-Missouri-Logo.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/NewClaimchainPoster.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/NewClaimchainPoster.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
                 {
                     title: "Poster: Security Operations Center",
                     des: "",
-                    uri: "https://www.vcu.edu/",
-                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/CS%2023-318_Poster.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/CS%2023-318_Poster.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
                 {
                     title: "Poster: Ram-pantries",
                     des: "",
-                    uri: "https://www.vcu.edu/",
-                    img: "https://www.masrikdahir.com/Images/vcu_ram.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/VCU_Health_Research.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/VCU_Health_Research.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
                 {
                     title: "Essay: The Last Basketball Game",
                     des: "",
-                    uri: "https://tucker.henricoschools.us/",
-                    img: "https://www.masrikdahir.com/Images/Daco_6097739.png",
-                    uri_2: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
-                    img_2: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri: "https://www.masrikdahir.com/pdf/The%20Hearing%202019-2020.pdf",
+                    img: "https://www.masrikdahir.com/Images/adobe-pdf-icon-logo-png-transparent.png",
+                    uri_2: "",
+                    img_2: "",
                     style: "width: 1vw; min-width: 90px; margin-left: 10px; margin-right: 10px;"
                 },
             ]
