@@ -127,259 +127,206 @@
 <body class="w3-white">
 
 <div id="app" v-cloak>
-    <div class="container3" v-bind:style="modelStyle(slide)">
-        <div class="resizing-1026-more">
-            <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
-                <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
-                    <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>Home</b>
-                                </div>
+    <div class="resizing-1026-more">
+        <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
+            <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
+                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>Home</b>
                             </div>
-                        </button>
-                    </a>
+                        </div>
+                    </button>
+                </a>
 
-                    <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="">
-                                    </div>Work</b>
-                                </div>
+                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="">
+                                </div>Work</b>
                             </div>
-                        </button>
-                    </a>
+                        </div>
+                    </button>
+                </a>
 
-                    <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>
-                                    Publication</b>
+                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
                                 </div>
+                                Academia</b>
                             </div>
-                        </button>
-                    </a>
+                        </div>
+                    </button>
+                </a>
 
-                    <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>
-                                    Education</b>
+                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: red; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
                                 </div>
+                                Software</b>
                             </div>
-                        </button>
-                    </a>
+                        </div>
+                    </button>
+                </a>
 
-                    <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: red; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>
-                                    Software</b>
-                                </div>
-                            </div>
-                        </button>
-                    </a>
 
-                    <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>
-                                    Entrepreneurship</b>
-                                </div>
-                            </div>
-                        </button>
-                    </a>
 
-                    <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>
-                                    Milestone</b>
+                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
                                 </div>
+                                Milestone</b>
                             </div>
-                        </button>
-                    </a>
+                        </div>
+                    </button>
+                </a>
 
-                    <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                        <button class="glow-on-hover-nav" type="button"
-                                style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                            <div style="" class="w3-padding-small">
-                                <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                    <div class="wrapper">
-                                    </div>
-                                    Travel</b>
+                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
                                 </div>
+                                Travel</b>
                             </div>
-                        </button>
-                    </a>
-                </div>
-                <br><br><br>
+                        </div>
+                    </button>
+                </a>
             </div>
-
+            <br><br><br>
         </div>
-        <div class="resizing-1026-less" style="margin-bottom: 70px">
-            <div class="popup" id="popup-3" style="">
-                <div class="overlay"></div>
-                <div class="content" style="">
-                    <div style="color: black; ">
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Home</b>
-                                            </div>
-                                        </button>
-                                    </a>
-                                </TD>
 
-                            </TR>
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Work</b>
-                                            </div>
-                                        </button>
-                                    </a>
-                                </TD>
+    </div>
+    <div class="resizing-1026-less" style="margin-bottom: 70px">
+        <div class="popup" id="popup-3" style="">
+            <div class="overlay"></div>
+            <div class="content" style="">
+                <div style="color: black; ">
+                    <TABLE>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Home</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+
+                        </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Work</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
 
 
-                            </TR>
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Publication</b>
-                                            </div>
-                                        </button>
-                                    </a>
-                                </TD>
-                            </TR>
+                        </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Academia</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
 
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Education</b>
-                                            </div>
-                                        </button>
-                                    </a>
-                                </TD>
-                            </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Software</b>
+                                        </div>
+                                    </button>
+                                </a>
 
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Software</b>
-                                            </div>
-                                        </button>
-                                    </a>
+                            </TD>
+                        </TR>
 
-                                </TD>
-                            </TR>
 
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/entrepreneurship" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Entrepreneurship</b>
-                                            </div>
-                                        </button>
-                                    </a>
 
-                                </TD>
-                            </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Milestone</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
 
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Milestone</b>
-                                            </div>
-                                        </button>
-                                    </a>
-                                </TD>
-                            </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Travel</b>
+                                        </div>
+                                    </button>
 
-                            <TR>
-                                <TD>
-                                    <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                                        <button class="glow-on-hover-nav" type="button"
-                                                style="float: left; padding: 5px">
-                                            <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                                <div class="wrapper" >
-                                                </div>Travel</b>
-                                            </div>
-                                        </button>
-
-                                    </a>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </div>
+                                </a>
+                            </TD>
+                        </TR>
+                    </TABLE>
 
                 </div>
-            </div>
-
-            <div class="topnav-2 navbar-fixed-top">
-
-
-
-                <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px">
-                    <div class="main">Masrik Dahir</div>
-                </h5>
-
-                <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px"><img src="../Images/menu.png" width="25" height="20" alt="Masrik Dahir">
-                </button>
-
-
-
 
             </div>
+        </div>
+
+        <div class="topnav-2 navbar-fixed-top">
+
+
+
+            <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px">
+                <div class="main">Masrik Dahir</div>
+            </h5>
+
+            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px"><img src="Images/menu.png" width="25" height="20" alt="Masrik Dahir">
+            </button>
+
+
+
+
         </div>
     </div>
 </div>
