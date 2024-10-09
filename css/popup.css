@@ -15,7 +15,7 @@
 
 .popup .content {
     position:absolute;
-    top: 245px;
+    top: 215px;
     left:140px;
     transform:translate(-50%,-50%) scale(0);
     background:#fff;
@@ -91,7 +91,7 @@
 
 .popuphome .content {
     position:absolute;
-    top: 270px;
+    top: 215px;
     left:140px;
     transform:translate(-50%,-50%) scale(0);
     background:#fff;
