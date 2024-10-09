@@ -59,7 +59,7 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
                                 <div class="wrapper">
                                 </div>Home</b>
                             </div>
@@ -71,22 +71,9 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
                                 <div class="">
                                 </div>Work</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Publication</b>
                             </div>
                         </div>
                     </button>
@@ -96,10 +83,10 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: red; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: red; font-size: calc(15px + 0.4vw)">
                                 <div class="wrapper">
                                 </div>
-                                Education</b>
+                                Academia</b>
                             </div>
                         </div>
                     </button>
@@ -109,7 +96,7 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
                                 <div class="wrapper">
                                 </div>
                                 Software</b>
@@ -124,7 +111,7 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
                                 <div class="wrapper">
                                 </div>
                                 Milestone</b>
@@ -137,7 +124,7 @@
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                         <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(10px + 0.4vw)">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
                                 <div class="wrapper">
                                 </div>
                                 Travel</b>
@@ -187,26 +174,12 @@
                         </TR>
                         <TR>
                             <TD>
-                                <a href="https://www.masrikdahir.com/publication" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Publication</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-                        </TR>
-
-                        <TR>
-                            <TD>
                                 <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
                                     <button class="glow-on-hover-nav" type="button"
                                             style="float: left; padding: 5px">
                                         <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
                                             <div class="wrapper" >
-                                            </div>Education</b>
+                                            </div>Academia</b>
                                         </div>
                                     </button>
                                 </a>
@@ -301,7 +274,7 @@
                 <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
                 <div class="">
 
-                    <button onclick="vcu_bachelor_of_science()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('vcu_bachelor_of_science')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -325,7 +298,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="vcu_bachelor_of_science" style="display: none">
                         <a href="https://egr.vcu.edu/" target="_blank">
                             <img src="./Images/vcu_eng.png"
                                  style="width: 1vw; min-width: 210px; margin-left: calc(0% + 20px)"
@@ -393,7 +366,7 @@
                         </TABLE>
                     </div>
 
-                    <button onclick="vcu_master_of_science()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('vcu_master_of_science')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -417,7 +390,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="vcu_master_of_science" style="display: none">
                         <a href="https://egr.vcu.edu/" target="_blank">
                             <img src="./Images/vcu_eng.png"
                                  style="width: 1vw; min-width: 210px; margin-left: calc(0% + 20px)"
@@ -472,7 +445,7 @@
                 <!--                AWS Certified Developer -->
                 <div class="">
 
-                    <button onclick="changeImage_AWS_Certified_Developer()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_AWS_Certified_Developer')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -495,7 +468,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_AWS_Certified_Developer" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://www.credly.com/badges/4ea74952-8783-44af-9425-119b2434bf38/public_url" target="_blank">
@@ -521,7 +494,7 @@
                 <!--                AWS Cloud Practitioner -->
                 <div class="">
 
-                    <button onclick="changeImage_AWS_Cloud_Practitioner()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_AWS_Cloud_Practitioner')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -544,7 +517,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_AWS_Cloud_Practitioner" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://www.credly.com/badges/d5fb9b8a-3519-4480-bd92-ab5d066ce8d8/public_url" target="_blank">
@@ -569,7 +542,7 @@
                 <!--                Databricks Fundamentals -->
                 <div class="">
 
-                    <button onclick="changeImage_Databricks_Fundamentals()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_Databricks_Fundamentals')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -592,7 +565,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_Databricks_Fundamentals" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://credentials.databricks.com/3fc5d768-443c-40fa-828c-fedadb94ba5e#gs.f0jij7" target="_blank">
@@ -617,7 +590,7 @@
                 <!--                Databricks Generative AI Fundamentals -->
                 <div class="">
 
-                    <button onclick="changeImage_Databricks_Generative_AI_Fundamentals()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_Databricks_Generative_AI_Fundamentals')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -640,7 +613,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_Databricks_Generative_AI_Fundamentals" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://credentials.databricks.com/65a906a0-cddf-4ef7-92d6-e4c8a35b8c97#gs.f0jlz6" target="_blank">
@@ -665,7 +638,7 @@
                 <!--                Postman Fundamentals Student Expert -->
                 <div class="">
 
-                    <button onclick="changeImage_Postman_API_Fundamentals()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_Postman_API_Fundamentals')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -688,7 +661,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_Postman_API_Fundamentals" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://api.badgr.io/public/assertions/6VeZHynPSSCsqE6RQIA0_A?identity__email=masrikdahir%40gmail.com" target="_blank">
@@ -713,7 +686,7 @@
                 <!--                HackerRank Problem Solving (Intermediate) -->
                 <div class="">
 
-                    <button onclick="changeImage_Problem_Solving_Intermediate()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_Problem_Solving_Intermediate')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -736,7 +709,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_Problem_Solving_Intermediate" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://www.hackerrank.com/certificates/5af21130d688" target="_blank">
@@ -761,7 +734,7 @@
                 <!--                HackerRank Problem Solving (Basic) -->
                 <div class="">
 
-                    <button onclick="changeImage_Problem_Solving_Basic()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_Problem_Solving_Basic')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -784,7 +757,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_Problem_Solving_Basic" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://www.hackerrank.com/certificates/0a8a402e77b1" target="_blank">
@@ -809,7 +782,7 @@
                 <!--                Python (Basic)  -->
                 <div class="">
 
-                    <button onclick="changeImage_Python_Basic()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage_Python_Basic')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -832,7 +805,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage_Python_Basic" style="display: none">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <a href="https://www.hackerrank.com/certificates/4e15d1f36815" target="_blank">
@@ -858,6 +831,241 @@
 
             </div>
 
+            <!-- Research Paper Section -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Paper</b></h4>
+
+
+                    <!-- Paper 1 -->
+                    <button onclick="toggleVisibility('paper1')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Cronus: An Automated Feedback Tool for Concept Maps</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="paper1" class="content1" style="display: none;" >
+                        <ul>
+                            <a href="./pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept Maps," in <i>IEEE Access</i>, vol. 9, pp. 119564-119577, 2021, doi: <a href="https://ieeexplore.ieee.org/document/9519627" target="_blank">10.1109/ACCESS.2021.3106509</a>.</li>
+                        </ul>
+
+                    </div>
+
+                    <!-- Paper 2 -->
+                    <button onclick="toggleVisibility('paper2')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="paper2" class="content1" style="display: none;" style="float: right; margin-left: 10px; margin-right: 10px">
+                        <ul>
+                            <a href="./pdf/ClaimChain.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>M. A. Dahir</b>, Naga Ramya Bhamidipati, et al., "ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing," <i>2021 IEEE International Conference on Blockchain (Blockchain)</i>, 2021, pp. 55-64, doi: <a href="https://ieeexplore.ieee.org/document/9680598" target="_blank">10.1109/Blockchain53845.2021.00019</a>.</li>
+                        </ul>
+
+                    </div>
+                <hr>
+            </div>
+
+            <!-- Research Poster Section -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Poster</b></h4>
+
+                    <!-- Poster 1 -->
+                    <button onclick="toggleVisibility('poster1')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img id="always-image-Aws-Certified-Developer" style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Continuation of the VA Security Operations Center (SOC)</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2023</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="poster1" class="content1" style="display: none;">
+                        <ul>
+                            <a href="./pdf/CS 23-318_Poster.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>M. A. Dahir</b>, N. Camacho, G. Attard, J. Watkins, "Continuation of the VA Security Operations Center (SOC)," VCU Capstone Design Expo, 2023.</li>
+                        </ul>
+
+                    </div>
+
+                    <!-- Poster 2 -->
+                    <button onclick="toggleVisibility('poster2')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Facing Food Insecurity During COVID-19</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2022</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="poster2" class="content1" style="display: none;">
+                        <ul>
+                            <a href="./pdf/VCU_Health_Research.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>Dahir M</b>, Jones J, et al., “Facing Food Insecurity During COVID-19: The Emerging Case of Little Free Food Pantries,” VCU Symposium for Undergraduate Research and Creativity, 2022.</li>
+                        </ul>
+
+                    </div>
+
+                    <!-- Poster 3 -->
+                    <button onclick="toggleVisibility('poster3')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="poster3" class="content1" style="display: none;">
+                        <ul>
+                            <a href="./pdf/NewClaimchainPoster.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>Masrik Dahir</b>, Hank Stafford, Roshan Neupane, et al., "ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing," MU Digital Library, University of Missouri, 2021. <a href="https://lnkd.in/ewvaniu" target="_blank">Umsystem.edu</a></li>
+                        </ul>
+                    </div>
+
+                <button onclick="toggleVisibility('posterCronus')" class="pretty">
+                    <table width="100%">
+                        <tr>
+                            <TD WIDTH="0%">
+                                <img style="width:20px; height:20px;"
+                                     src="./Images/Icons/more.png" ;/>
+                            </TD>
+                            <td width="80%">
+                                <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Cronus: An Automated Feedback Tool for Concept Maps</b></h4>
+                            </td>
+                            <td width="20%">
+                                <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                            </td>
+                        </tr>
+                    </table>
+                </button>
+                <div id="posterCronus" class="content1" style="display: none;">
+                    <ul>
+                        <a href="./pdf/CronusPoster.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                            <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                        </a>
+                        <li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept Maps," VCU DURI Symposium, 2021.</li>
+                    </ul>
+                </div>
+
+                <hr>
+            </div>
+
+            <!-- Contributing Editor Section -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Contributing Editor</b></h4>
+                    <!-- Editor 1 -->
+                    <button onclick="toggleVisibility('editor1')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img id="always-image-Aws-Certified-Developer" style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">The Last Basketball Game</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2020</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="editor1" class="content1" style="display: none;">
+                        <ul>
+                            <a href="./pdf/The Hearing 2019-2020.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>Masrik Dahir</b>, et al., "The Last Basketball Game," <i>Hearing</i>, June 2020, pp. 28-29.</li>
+                        </ul>
+
+                    </div>
+                <hr>
+            </div>
+
+            <!-- Forum Presentation Section -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Forum Presentation</b></h4>
+                    <!-- Presentation 1 -->
+                    <button onclick="toggleVisibility('presentation1')" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <TD WIDTH="0%">
+                                    <img style="width:20px; height:20px;"
+                                         src="./Images/Icons/more.png" ;/>
+                                </TD>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div id="presentation1" class="content1" style="display: none;">
+                        <ul>
+                            <a href="./pdf/ClaimChainPowerPoint.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img src="./Images/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            </a>
+                            <li><b>Masrik Dahir</b>, Hank Stafford, "ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing," Undergraduate Research and Creative Achievements Forum, July 2021, University of Missouri, Columbia. Presentation.</li>
+                        </ul>
+                    </div>
+                <hr>
+            </div>
 
 
             <div class="w3-container w3-card w3-white w3-margin-bottom">
@@ -867,11 +1075,11 @@
                 <div class="">
 
                     <!--              Summa Cum Laude -->
-                    <button onclick="Summa_Cum_Laude()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('Summa_Cum_Laude')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
-                                    <img id="Summa_Cum_Laude" style="width:20px; height:20px;"
+                                    <img style="width:20px; height:20px;"
                                          src="./Images/Icons/more.png" ;/>
                                 </TD>
 
@@ -889,7 +1097,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="Summa_Cum_Laude" style="display: none">
                         <a style="text-decoration:none" href="https://rar.vcu.edu/graduation/" target="_blank">
                             <img src="./Images/sumcamlause.jpg" style="width: 1vw; min-width: 100px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -899,7 +1107,7 @@
                     </div>
 
                     <!--              Altria Scholar-->
-                    <button onclick="changeImage10()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage10')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -921,7 +1129,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="changeImage10" style="display: none">
                         <a style="text-decoration:none" href="https://www.altria.com/en" target="_blank">
                             <img src="./Images/altria.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -935,12 +1143,11 @@
 
 
                     <!--                    iCubed Scholar-->
-                    <button onclick="changeImage()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
-                                    <img id="always-image" style="width:20px; height:20px;" src="./Images/Icons/more.png"
-                                         ;/>
+                                    <img id="always-image" style="width:20px; height:20px;" src="./Images/Icons/more.png";/>
                                 </TD>
 
                                 <TD WIDTH="80%">
@@ -957,7 +1164,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="changeImage" style="display: none">
                         <a style="text-decoration:none" href="https://icubed.vcu.edu/" target="_blank">
                             <img src="./Images/icubed%20(1).png" style="width: 1vw; min-width: 140px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -971,7 +1178,7 @@
 
 
                     <!--                    Dean List Fall 2020, Spring 2021, Fall 2021, Spring 2022 -->
-                    <button onclick="changeImage2()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage2')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -993,7 +1200,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="changeImage2" style="display: none">
                         <a style="text-decoration:none" href="https://egr.vcu.edu/about/dean/" target="_blank">
                             <img src="./Images/vcu_eng.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -1007,7 +1214,7 @@
 
 
                     <!--                    Honors Trivia Champion October 2020-->
-                    <button onclick="changeImage3()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage3')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1029,7 +1236,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="changeImage3" style="display: none">
                         <a style="text-decoration:none" href="https://honors.vcu.edu/" target="_blank">
                             <img src="./Images/honors.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -1041,7 +1248,7 @@
 
 
                     <!--                  Superintendent’s Scholar July 2020 -->
-                    <button onclick="changeImage4()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage4')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1063,7 +1270,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="changeImage4" style="display: none">
                         <a style="text-decoration:none" href="https://henricoschools.us/division-leadership-team/"
                            target="_blank">
                             <img src="./Images/henrico.jpg" style="width: 1vw; min-width: 140px;margin-left: 25px"
@@ -1076,7 +1283,7 @@
 
 
                     <!--                    Henrico County Engineering Scholar August 2020-->
-                    <button onclick="changeImage5()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage5')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1099,7 +1306,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage5" style="display: none">
                         <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
                             <img src="./Images/henrico.jpg" style="width: 1vw; min-width: 120px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -1117,7 +1324,7 @@
 
 
                     <!--                    CarMax Scholar August 2020-->
-                    <button onclick="changeImage6()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage6')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1140,7 +1347,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage6" style="display: none">
                         <a style="text-decoration:none" href="https://www.carmax.com/" target="_blank">
                             <img src="./Images/carmax.png"
                                  style="width: 1vw; height: 5vw;min-width: 100px;min-height: 100px;margin-left: 25px"
@@ -1157,7 +1364,7 @@
 
 
                     <!--                    Susanne and Sam Dibert – STEM Scholarship (Swagelok, $2500) August 2020-->
-                    <button onclick="changeImage7()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage7')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1180,7 +1387,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage7" style="display: none">
                         <a style="text-decoration:none" href="https://www.swagelok.com/" target="_blank">
                             <img src="./Images/swagelok.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
@@ -1194,7 +1401,7 @@
 
 
                     <!--                    GRRC Award (Greater Richmond Relocation August 2020-->
-                    <button onclick="changeImage8()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage8')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1217,10 +1424,10 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage8" style="display: none">
                         <a style="text-decoration:none" href="https://richmondrelo.org/" target="_blank">
                             <img src="./Images/grrc.png"
-                                 style="width: 1vw; min-width: 350px;min-height: 50px;margin-left: 25px"
+                                 style="width: 1vw; min-width: 80px;min-height: 50px;margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
                         <ul>
                             <li><b>Scholarship Grant: </b> $2500</li>
@@ -1233,7 +1440,7 @@
 
 
                     <!--                    Harrison-Labouisse Memorial Scholarship (Community Foundation, $1500) August 2020-->
-                    <button onclick="changeImage9()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImage9')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1256,7 +1463,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImage9" style="display: none">
                         <!--<a style="text-decoration:none" href = "https://egr.vcu.edu/" target = "_blank">
                             <img src="./Images/grrc.png" style="width: 15vw; margin-left: 25px" alt="Avatar"/></a>-->
                         <ul>
@@ -1278,7 +1485,7 @@
                 <div class="">
 
                     <!--                    CMSC Senior Project (Capstone)-->
-                    <button onclick="changeImageCmsc451()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc451')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1302,7 +1509,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc451" style="display: none">
                         <ul>
                             <li>CMSC 441 & 451</li>
                             <li>
@@ -1344,7 +1551,7 @@
                     </div>
 
                     <!--                    CMSC 502-->
-                    <button onclick="changeImageCmsc502()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc502')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1368,7 +1575,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc502" style="display: none">
                         <ul>
                             <li>CMSC 502</li>
                             <li>
@@ -1393,7 +1600,7 @@
                     </div>
 
                     <!--                    CMSC 501-->
-                    <button onclick="changeImageCmsc501()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc501')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1417,7 +1624,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc501" style="display: none">
                         <ul>
                             <li>CMSC 501</li>
                             <li>
@@ -1432,7 +1639,7 @@
                     </div>
 
                     <!--                    ENGR 291-->
-                    <button onclick="changeImageEngr291()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageEngr291')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1456,7 +1663,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageEngr291" style="display: none">
                         <ul>
                             <li>ENGR 291</li>
                             <li>
@@ -1467,7 +1674,7 @@
                     </div>
 
                     <!--                    CMSC 440-->
-                    <button onclick="changeImageCmsc440()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc440')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1491,7 +1698,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc440" style="display: none">
                         <ul>
                             <li>CMSC 440</li>
                             <li>
@@ -1519,7 +1726,7 @@
                     </div>
 
                     <!--                    CMSC 508-->
-                    <button onclick="changeImageCmsc508()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc508')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1543,7 +1750,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc508" style="display: none">
                         <ul>
                             <li>CMSC 508</li>
                             <li>
@@ -1568,7 +1775,7 @@
                     </div>
 
                     <!--                    CMSC 414-->
-                    <button onclick="changeImageCmsc414()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc414')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1592,7 +1799,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc414" style="display: none">
                         <ul>
                             <li>CMSC 414</li>
                             <li>
@@ -1611,7 +1818,7 @@
                     </div>
 
                     <!--                    CMSC 403-->
-                    <button onclick="changeImageCmsc403()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc403')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1635,7 +1842,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc403" style="display: none">
                         <ul>
                             <li>CMSC 403</li>
                             <li>
@@ -1660,7 +1867,7 @@
                     </div>
 
                     <!--                    CMSC 312-->
-                    <button onclick="changeImageCmsc312()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc312')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1684,7 +1891,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc312" style="display: none">
                         <ul>
                             <li>CMSC 312</li>
                             <li>
@@ -1697,7 +1904,7 @@
                     </div>
 
                     <!--                    CMSC 401-->
-                    <button onclick="changeImageCmsc401()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc401')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1721,7 +1928,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc401" style="display: none">
                         <ul>
                             <li>CMSC 401;</li>
                             <li>Multiple linked lists, height-balanced trees, B-trees, hashing and graph representation;
@@ -1735,7 +1942,7 @@
                     </div>
 
                     <!--                    CMSC 355-->
-                    <button onclick="changeImageCmsc355()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc355')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1758,7 +1965,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc355" style="display: none">
                         <ul>
                             <li>CMSC 355;</li>
                             <li>Software development methodology, write specification and design documents, and develop
@@ -1772,7 +1979,7 @@
                     </div>
 
                     <!--                    CMSC 311-->
-                    <button onclick="changeImageCmsc311()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc311')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1794,7 +2001,7 @@
                             </TR>
                         </TABLE>
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc311" style="display: none">
                         <ul>
                             <li>CMSC 311;</li>
                             <li>Elementary digital logic design, processor and arithmetic/logic unit design, data paths,
@@ -1806,7 +2013,7 @@
                     </div>
 
                     <!--                    CMSC 303-->
-                    <button onclick="changeImageCmsc303()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc303')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1829,7 +2036,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc303" style="display: none">
                         <ul>
                             <li>CMSC 303;</li>
                             <li>Complexity classes, grammars, automata, formal languages, Turing machines,
@@ -1840,7 +2047,7 @@
                     </div>
 
                     <!--                    CMSC 257-->
-                    <button onclick="changeImageCmsc257()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc257')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1863,7 +2070,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc257" style="display: none">
                         <ul>
                             <li>CMSC 257;</li>
                             <li>UNIX essentials; system programming in C; machine-level representation and organization
@@ -1876,7 +2083,7 @@
                     </div>
 
                     <!--                    CMSC 302-->
-                    <button onclick="changeImageCmsc302()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc302')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1899,7 +2106,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc302" style="display: none">
                         <ul>
                             <li>CMSC 302;</li>
                             <li>Logic and proofs, sets, functions, sequences and sums, relations, graphs, trees,
@@ -1909,7 +2116,7 @@
                     </div>
 
                     <!--                    CMSC 256-->
-                    <button onclick="changeImageCmsc256()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc256')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1933,7 +2140,7 @@
 
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc256" style="display: none">
                         <ul>
                             <li>CMSC 256;</li>
                             <li>Bridge API, object-oriented design, inheritance, polymorphism, exceptions, interfaces,
@@ -1947,7 +2154,7 @@
                     </div>
 
                     <!--                    CMSC 255-->
-                    <button onclick="changeImageCmsc255()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageCmsc255')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -1970,7 +2177,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageCmsc255" style="display: none">
                         <ul>
                             <li>CMSC 255;</li>
                             <li>Fundamental Computing Skills, Object-oriented programming, real-life problem solving,
@@ -1994,7 +2201,7 @@
 
                 <!--                    MATH 356-->
                 <div class="">
-                    <button onclick="changeImageMath356()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageMath356')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -2017,7 +2224,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageMath356" style="display: none">
                         <ul>
                             <li>MATH 356;</li>
                             <li>Trees, colorings and matchings; basic theorems such as the handshaking lemma and the
@@ -2029,7 +2236,7 @@
                     </div>
 
                     <!--                    MATH 310-->
-                    <button onclick="changeImageMath310()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageMath310')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -2052,7 +2259,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageMath310" style="display: none">
                         <ul>
                             <li>CMSC 310;</li>
                             <li>System of Linear Equation, Vector Space, Sub Space, Kernel, Range, Dimension, Matrix
@@ -2063,7 +2270,7 @@
                     </div>
 
                     <!--                    STAT 212-->
-                    <button onclick="changeImageStat212()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageStat212')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -2086,7 +2293,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageStat212" style="display: none">
                         <ul>
                             <li>STAT 212 (Advanced Placement Exam);</li>
                             <li>descriptive statistics, correlation and regression, probability, normal distributions, t
@@ -2096,7 +2303,7 @@
                     </div>
 
                     <!--                    MATH 201-->
-                    <button onclick="changeImageMath201()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageMath201')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -2119,7 +2326,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageMath201" style="display: none">
                         <ul>
                             <li>MATH 201;</li>
                             <li>Application of differentiation and integration, Infinite Series, selected topic in
@@ -2130,7 +2337,7 @@
                     </div>
 
                     <!--                    MATH 200-->
-                    <button onclick="changeImageMath200()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageMath200')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -2153,7 +2360,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageMath200" style="display: none">
                         <ul>
                             <li>MATH 200;</li>
                             <li>Limits, Derivatives, Differentials, Antiderivatives, Definite Integrals, Continuity</li>
@@ -2161,7 +2368,7 @@
                     </div>
 
                     <!--                    MATH 151-->
-                    <button onclick="changeImageMath151()" value="Change" type="button" class="collapsible">
+                    <button onclick="toggleVisibility('changeImageMath151')" class="pretty">
                         <TABLE WIDTH="100%">
                             <TR>
                                 <TD WIDTH="0%">
@@ -2184,7 +2391,7 @@
                         </TABLE>
 
                     </button>
-                    <div class="content1">
+                    <div id="changeImageMath151" style="display: none">
                         <ul>
                             <li>MATH 151;</li>
                             <li>Application of Algebra, Trigonometry, functions, transformations</li>
@@ -2201,7 +2408,7 @@
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Finance</b></h4>
 
                 <!--                    FIRE 435-->
-                <button onclick="changeImageFire435()" value="Change" type="button" class="collapsible">
+                <button onclick="toggleVisibility('changeImageFire435')" class="pretty">
                     <TABLE WIDTH="100%">
                         <TR>
                             <TD WIDTH="0%">
@@ -2224,7 +2431,7 @@
                     </TABLE>
 
                 </button>
-                <div class="content1">
+                <div id="changeImageFire435" style="display: none">
                     <ul>
                         <li>FIRE 435;</li>
                         <li>
@@ -2237,7 +2444,7 @@
                 </div>
 
                 <!--                    MGMT 310-->
-                <button onclick="changeImageMgmt310()" value="Change" type="button" class="collapsible">
+                <button onclick="toggleVisibility('changeImageMgmt310')" class="pretty">
                     <TABLE WIDTH="100%">
                         <TR>
                             <TD WIDTH="0%">
@@ -2260,7 +2467,7 @@
                     </TABLE>
 
                 </button>
-                <div class="content1">
+                <div id="changeImageMgmt310" style="display: none">
                     <ul>
                         <li>MGMT 310;</li>
                         <li>Clep Exam</li>
@@ -2272,7 +2479,7 @@
                 </div>
 
                 <!--                    BUSN 323-->
-                <button onclick="changeImageBusn323()" value="Change" type="button" class="collapsible">
+                <button onclick="toggleVisibility('changeImageBusn323')" class="pretty">
                     <TABLE WIDTH="100%">
                         <TR>
                             <TD WIDTH="0%">
@@ -2295,7 +2502,7 @@
                     </TABLE>
 
                 </button>
-                <div class="content1">
+                <div id="changeImageBusn323" style="display: none">
                     <ul>
                         <li>BUSN 323</li>
                         <li>Clep Exam</li>
@@ -2304,7 +2511,7 @@
                     </ul>
                 </div>
 
-                <button onclick="changeImageFire305()" value="Change" type="button" class="collapsible">
+                <button onclick="toggleVisibility('changeImageFire305')" class="pretty">
                     <TABLE WIDTH="100%">
                         <TR>
                             <TD WIDTH="0%">
@@ -2327,7 +2534,7 @@
                     </TABLE>
 
                 </button>
-                <div class="content1">
+                <div id="changeImageFire305" style="display: none">
                     <ul>
                         <li>FIRE 305;</li>
                         <li>principles, practices and laws that govern the real estate enterprise, including property

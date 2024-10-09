@@ -553,3 +553,49 @@ function Summa_Cum_Laude() {
         image.src = "Images/Icons/more.png";
     }
 }
+
+// Toggle visibility of the collapsible section
+// function toggleVisibility(elementId) {
+//     var content = document.getElementById(elementId);
+//     var image = document.querySelector(`#${elementId}`).previousElementSibling.querySelector("img");
+//
+//     // Toggle the display of the content
+//     if (content.style.display === "none" || content.style.display === "") {
+//         content.style.display = "block";
+//     } else {
+//         content.style.display = "none";
+//     }
+//
+//     // Toggle the image source between 'more' and 'down_more'
+//     if (image.src.match("Images/Icons/more.png")) {
+//         image.src = "Images/Icons/down_more.png";
+//     } else {
+//         image.src = "Images/Icons/more.png";
+//     }
+// }
+
+// function toggleVisibility(elementId) {
+//     var content = document.getElementById(elementId);
+//
+//     // Check if the content is currently hidden or visible
+//     if (content.style.display === "none" || content.style.display === "") {
+//         content.style.display = "block";  // Show the content
+//     } else {
+//         content.style.display = "none";  // Hide the content
+//     }
+// }
+
+function toggleVisibility(elementId) {
+    var content = document.getElementById(elementId);
+    var image = document.querySelector(`#${elementId}`).previousElementSibling.querySelector("img");
+
+    // Toggle content visibility
+    if (content.style.display === "none" || content.style.display === "") {
+        content.style.display = "block";  // Show content
+        image.src = "./Images/Icons/down_more.png";  // Change the image to 'down_more'
+    } else {
+        content.style.display = "none";  // Hide content
+        image.src = "./Images/Icons/more.png";  // Change the image back to 'more'
+    }
+}
+
