@@ -1244,6 +1244,8 @@ const app_pic = {
     }
 }
 
+
+
 const app_pic_can = {
     data() {
         return {
@@ -1421,36 +1423,55 @@ const app_pic_gbr = {
     }
 }
 
-const top_nav = {
+
+const app_pic_bangladesh = {
     data() {
         return {
+            showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
                 {
-                    title:"Home",
+                    title:"Dhaka",
+                    abv:"ENG",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Dhaka/Thumbnail/img.png",
+                    url:"",
                 },
                 {
-                    title:"Work Experience",
+                    title:"Sylhet",
+                    abv:"WLS",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Sylhet/Thumbnail/img.png",
+                    url:"",
                 },
                 {
-                    title:"Publication",
+                    title:"Chittagong",
+                    abv:"NIR",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Chittagong/Thumbnail/img.png",
+                    url:"",
                 },
                 {
-                    title:"Education",
+                    title:"Khulna",
+                    abv:"SCT",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Dhaka/Thumbnail/img.png",
+                    url:"",
                 },
                 {
-                    title:"Software",
+                    title:"Barisal",
+                    abv:"IRL",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Khulna/Thumbnail/img.png",
+                    url:"",
                 },
                 {
-                    title:"Entrepreneurship",
+                    title:"Rajshahi",
+                    abv:"IRL",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Rajshahi/Thumbnail/img.png",
+                    url:"",
                 },
                 {
-                    title:"Milestone",
-                },
-                {
-                    title:"Travel",
-                },
-
+                    title:"Rangpur",
+                    abv:"IRL",
+                    image:"https://www.masrikdahir.com/Images/Bangladesh/Rangpur/Thumbnail/img.png",
+                    url:"",
+                }
             ]
         };
     },
@@ -1464,6 +1485,56 @@ const top_nav = {
                 return this.resources;
             }
         }
+    },
+
+
+
+    mounted() {
+        this.$nextTick(() => {
+            window.addEventListener('resize', this.onResize);
+        })
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.onResize);
+    },
+    methods: {
+        toggleBox() {
+            this.button_to_activate_box = !this.button_to_activate_box;
+
+            if (this.button_text == "show") {
+                this.button_text = "hide";
+            } else {
+                this.button_text = "show";
+            }
+        },
+        greet(greeting) {
+            console.log(greeting);
+        },
+        onResize() {
+            this.windowHeight = window.innerHeight;
+            this.windowWidth = window.innerWidth;
+            this.middle = (window.innerWidth - 1000) / 2;
+            this.middle2 = (window.innerWidth - 50) / 2;
+        },
+        modelStyle: function (slide) {
+
+            if (slide === 'middle') {
+                return {
+                    'left': `${this.middle}px`
+                };
+            } else if (slide === 'middle2') {
+                return {
+                    'left': `${this.middle2}px`
+                };
+            }
+
+        },
+        openPopup(index) {
+            this.showingPopupIndex = index;
+        },
+        closePopup() {
+            this.showingPopupIndex = null;
+        }
     }
 }
 
@@ -1475,6 +1546,8 @@ Vue.createApp(app_country).mount('#app_country')
 Vue.createApp(app_pic).mount('#app_pic')
 Vue.createApp(app_pic_can).mount('#app_pic_can')
 Vue.createApp(app_pic_gbr).mount('#app_pic_gbr')
+Vue.createApp(app_pic_bangladesh).mount('#app_pic_bangladesh')
+
 
 function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
     return {
