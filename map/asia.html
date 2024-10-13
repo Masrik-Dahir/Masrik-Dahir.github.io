@@ -646,6 +646,25 @@
         document.getElementById(`popup-${num}`).classList.toggle("active");
     }
 </script>
+<script>
+    function togglePopup(id) {
+        var popup = document.getElementById('popup-' + id);
+        popup.classList.toggle('active');
+    }
+
+    function closePopup(id) {
+        var popup = document.getElementById('popup-' + id);
+        popup.classList.remove('active');
+    }
+
+    // Optional: Close the popup when clicking outside the content (the overlay)
+    document.querySelectorAll('.overlay').forEach(overlay => {
+        overlay.addEventListener('click', function() {
+            const popup = this.parentElement;
+            popup.classList.remove('active');
+        });
+    });
+</script>
 <style>
     #myDiv #Canada #BritishIsle {
         display: block;
