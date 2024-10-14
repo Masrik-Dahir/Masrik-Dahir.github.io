@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+
+
+    <!--    Metadata imports-->
+    <link rel="icon" type="image/gif/png" href=".././Images/logo.png">
+    <title>Masrik Dahir</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--    CSS imports-->
+    <link rel="stylesheet" href="../library/www.w3schools.com.w3css.4.w3.css">
+    <link rel="stylesheet" href="../library/cdnjs.cloudflare.com.ajax.libs.font-awesome.4.7.0.css.font-awesome.min.css">
+
+    <link rel="stylesheet" href="../css/icons.css">
+    <link rel="stylesheet" href="../css/box.css">
+    <link rel="stylesheet" href="../css/default.css">
+    <link rel="stylesheet" href="../css/popup.css">
+    <link rel="stylesheet" href="../css/community.css">
+    <link rel="stylesheet" href="../css/resize.css">
+    <link rel="stylesheet" href="../css/glowing.css">
+    <link rel="stylesheet" href="../css/lead.css">
+    <link rel="stylesheet" href="../css/new.css">
+    <link rel="stylesheet" href="../css/if.css">
+    <link rel="stylesheet" href="../css/popup.css">
+    <link rel="stylesheet" href="../css/vintage.css">
+
+
+    <!--    JS imports-->
+    <script src="../library/code.jquery.com.jquery-1.10.2.js"></script>
+    <script src="../js/html.js"></script>
+    <script src="../js/hourglass.js"></script>
+    <script src="../js/expand_jquery.js"></script>
+    <script src="../js/briefcase.js" defer></script>
+    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
+    <script src="../js/achievement.js" defer></script>
+    <script src="../js/collapsible.js" defer></script>
+    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
+
+    <!--    Vue JS imports-->
+    <script src="../library/vue@3.2.36.dist.vue.global.js"></script>
+
+
+    <!--    Top Nav -->
+    <script src="../library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
+    <script src="../library/maxcdn.bootstrapcdn.com.bootstrap.3.4.1.js.bootstrap.min.js"></script>
+
+    <!--   Info Tooltip -->
+    <link rel="stylesheet" href="../css/d.css">
+    <script src="../bootstrap/js/ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="../bootstrap/js/maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../bootstrap/js/random.js" defer></script>
+
+    <!--   Animation -->
+    <link rel="stylesheet" href="../css/glowing.css">
+    <link rel="stylesheet" href="../css/map.element.css">
+
+    <style>
+        .tag {
+            text-align: center;
+            width: 100%;
+        }
+        .it {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .inactive-image {
+            width: 150px;
+        }
+        .inactive-image:hover {
+            transform: scale(1.1); /* Increase the scale on hover */
+            z-index: 2; /* Bring the hovered image to front */
+        }
+        .active-image {
+            width: 100%; /* Full width for active image */
+        }
+        .active-image img {
+            transition: none; /* Disable transition for active image on hover */
+        }
+        .inactive-container {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping */
+            gap: 10px; /* Space between images */
+        }
+        .inactive-container .image-container {
+            flex: 1 1 150px; /* Set smaller width for inactive images */
+        }
+    </style>
+
+    <script src="../vueJs/default.js" defer></script>
+    <script src="../vueJs/software.js" defer></script>
+
+</head>
+<body class="w3-white" style="">
+<div id="app" v-cloak>
+    <div class="resizing-1026-more">
+        <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
+            <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
+                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>Home</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="">
+                                </div>Work</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Academia</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+
+                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Software</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+
+
+                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Milestone</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+
+                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: red; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Travel</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
+            </div>
+            <br><br><br>
+        </div>
+
+    </div>
+    <div class="resizing-1026-less" style="margin-bottom: 70px">
+        <div class="popup" id="popup-3" style="">
+            <div class="overlay" onclick="closePopup('3')"></div>
+            <div class="content" style="">
+                <div style="color: black; ">
+                    <TABLE>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Home</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+
+                        </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Work</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+
+
+                        </TR>
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Academia</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
+
+
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Software</b>
+                                        </div>
+                                    </button>
+                                </a>
+
+                            </TD>
+                        </TR>
+
+
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Milestone</b>
+                                        </div>
+                                    </button>
+                                </a>
+                            </TD>
+                        </TR>
+
+                        <TR>
+                            <TD>
+                                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                                    <button class="glow-on-hover-nav" type="button"
+                                            style="float: left; padding: 5px">
+                                        <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
+                                            <div class="wrapper" >
+                                            </div>Travel</b>
+                                        </div>
+                                    </button>
+
+                                </a>
+                            </TD>
+                        </TR>
+                    </TABLE>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="topnav-2 navbar-fixed-top">
+
+
+
+            <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px; padding-top: 7px; padding-bottom: 3px">
+                <div class="main">Masrik Dahir</div>
+            </h5>
+
+            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px"><img src="../Images/menu.png" width="25" height="20" alt="Masrik Dahir">
+            </button>
+
+
+
+
+        </div>
+    </div>
+</div>
+<script>
+    function togglePopup(num) {
+        document.getElementById(`popup-${num}`).classList.toggle("active");
+    }
+</script>
+<script>
+    function togglePopup(id) {
+        var popup = document.getElementById('popup-' + id);
+        popup.classList.toggle('active');
+    }
+
+    function closePopup(id) {
+        var popup = document.getElementById('popup-' + id);
+        popup.classList.remove('active');
+    }
+
+    // Optional: Close the popup when clicking outside the content (the overlay)
+    document.querySelectorAll('.overlay').forEach(overlay => {
+        overlay.addEventListener('click', function() {
+            const popup = this.parentElement;
+            popup.classList.remove('active');
+        });
+    });
+</script>
+
+
+<TABLE WIDTH="100%" style="margin-top: 10px">
+    <TR>
+        <TD WIDTH="100%">
+            <div class="content-slideshow-container">
+
+                <div id="app_sd" class="w3-margin-bottom" style="">
+                    <div class="tag w3-margin-bottom">
+                        <div class="it">{{ name }}</div>
+                    </div>
+
+                    <div id="showSlide" v-if="isSlideVisible">
+                        <div v-for="item in resources" :key="item.id" class="content-slide">
+                            <img :src="item.url" style="width:100%; height: 100%; object-fit: contain; padding: 0px"/>
+                        </div>
+                    </div>
+
+                    <div id="showGal" v-if="!isSlideVisible">
+                        <div class="inactive-container w3-margin-top w3-margin-left w3-margin-right">
+                            <div v-for="(item, index) in resources" :key="index">
+                                <div v-if="item.isActive" class="image-container active-image">
+                                    <img :src="item.url" />
+                                </div>
+                                <div v-if="!item.isActive" class="inactive-image image-container" @click="selectImage(index)">
+                                    <img :src="item.url" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-dot-container-frame w3-margin-bottom  w3-margin-top">
+                        <div class="resizing-1026-more">
+                            <TABLE WIDTH="100%">
+                                <TR>
+                                    <TD >
+                                        <div class="content-dot-container" id="" style="padding: 10px">
+
+                                            <button class="glow-on-hover4 Blazing" style="margin: 5px">
+                                                <a href="http://www.masrikdahir.com" class="" style="width: 40px;"><img src=".././Images/Icons/home.png" style="width: 40px;"></a>
+                                            </button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 40px;"></button>
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" @click="showGallery">
+                                                <img src="../Images/gallery.png" style="width: 40px;">
+                                            </button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" @click="showSlide">
+                                                <img src="../Images/slideshow.png" style="width: 40px;">
+                                            </button>
+
+                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 40px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 40px;"></button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 40px;"></button>
+
+                                            <div v-for="(item, index) in limitedResultQuery" :key="index">
+                                                <img v-if="currentIndex === index" :src="item.url" :alt="item.title" />
+                                                <span class="content-dot"
+                                                      style="margin-top: 20px; width: 8px; height: 8px"
+                                                      @click="currentSlide(index)">
+    </span>
+                                            </div>
+
+                                            <span style="float: left;" onclick="nextSlide()">
+                                    <img src=".././Images/arr.png" style="width: 15px;margin-top: 17px">
+
+                                </span>
+                                            <button class="glow-on-hover4 Blazing" style="margin: 5px">
+                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 40px"><img src=".././Images/Icons/map.png" style="width: 40px;"></a>
+                                            </button>
+                                        </div>
+                                    </TD>
+                                </TR>
+                            </TABLE>
+                        </div>
+                        <div class="resizing-1026-less">
+                            <TABLE WIDTH="100%">
+                                <TR>
+                                    <TD>
+                                        <div class="content-dot-container" style="padding: 2px">
+                                            <button class="glow-on-hover4 Blazing" style="padding: 2px; margin: 5px">
+                                                <a href="http://www.masrikdahir.com" class="" style="width: 20px;"><img src=".././Images/Icons/home.png" style="width: 20px;"></a>
+                                            </button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="prevSlide()"><img src=".././Images/Icons/left_arrow.png" style="width: 20px;"></button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" @click="showGallery">
+                                                <img src="../Images/gallery.png" style="width: 20px;">
+                                            </button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" @click="showSlide">
+                                                <img src="../Images/slideshow.png" style="width: 20px;">
+                                            </button>
+                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px"  onclick="pauseSlideShow()"><img src=".././Images/pause.png" style="width: 20px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px"  onclick="resumeSlideShow()"><img src=".././Images/resume.webp" style="width: 20px;"></button>
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="nextSlide()"><img src=".././Images/Icons/right_arrow.png" style="width: 20px;"></button>
+                                            <span style="float: left;" onclick="nextSlide()"></span>
+                                            <button class="glow-on-hover4 Blazing" style="padding: 2px; margin: 5px">
+                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 20px"><img src=".././Images/Icons/map.png" style="width: 20px;"></a>
+                                            </button>
+                                        </div>
+                                    </TD>
+                                </TR>
+                            </TABLE>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </TD>
+    </TR>
+</TABLE>
+
+
+<footer id="footer-relative" class="w3-center w3-margin-top" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100%; position: relative">
+    <div style="padding: 10px">
+        <p style="padding-top: 15px;">Connect with me through Social Media</p>
+        <a href="https://www.instragram.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://www.twitter.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://github.com/Masrik-Dahir" target="blank"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://app.joinhandshake.com/users/20195119" target="blank"><i style="font-size:36px" class="fas fa-handshake w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" ><i style="font-size:36px" class="fab fa-youtube-square w3-hover-opacity">&#160&#160</i></a>
+        <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><i style="font-size:36px" class="fas fa-graduation-cap w3-hover-opacity">&#160</i></a>
+        <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank"><i style="font-size:34px" class='w3-hover-opacity'>R<sup>C</sup></i></a>
+        <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
+            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
+                <img class="" style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px "
+                     src="../Images/w3_white.png"/>
+            </b>
+        </a>
+
+
+        <a href="https://orcid.org/0000-0002-7841-310X" style="text-decoration: none" target="blank">
+            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
+                <img class="" style="width:41px; vertical-align: middle;padding: 0px; margin-bottom: 5px"
+                     alt="ORCID iD icon"
+                     src="../Images/orcid_white.png"/>
+            </b>
+        </a>
+
+
+
+
+
+    </div>
+    <br>
+
+</footer>
+
+
+</body>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeSlides(); // Initialize slides
+        setTimeout(function() {
+            showSlides(slideIndex); // Show the first slide after delay
+        }, 500); // Delay of 2000 milliseconds (2 seconds)
+    });
+
+    // Get elements
+    var popup = document.getElementById("slideshowPopup");
+    var btn = document.getElementById("openSlideshow");
+    var span = document.getElementsByClassName("content-close")[0];
+    var slides = document.getElementsByClassName("content-slide");
+    var prev = document.querySelector(".content-prev");
+    var next = document.querySelector(".content-next");
+
+
+    var sla = document.getElementById("showSlide");
+    var gal = document.getElementById("showGal");
+
+    var slideIndex = 1; // Start with the first slide
+
+    function showSlideById() {
+        console.log("Show Slide Button Clicked");
+        sla.style.display = "block"; // Show the slide
+        gal.style.display = "none";  // Hide the gallery
+    }
+
+    function showGalById() {
+        console.log("Show Gallery Button Clicked");
+        gal.style.display = "block";  // Show the gallery
+        sla.style.display = "none";    // Hide the slide
+    }
+
+    // Function to initialize slides
+    function initializeSlides() {
+        for (var i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none"; // Hide all slides initially
+        }
+        // Optionally, hide dots or initialize their state here if needed
+    }
+
+    // Function to change slides
+    function changeSlide(n) {
+        showSlides(slideIndex += n);
+    }
+
+    // Function to show the next slide
+    function nextSlide() {
+        changeSlide(1); // Increment slideIndex by 1
+    }
+
+    // Function to show the previous slide
+    function prevSlide() {
+        changeSlide(-1); // Decrement slideIndex by 1
+    }
+
+    // Function to show a specific slide
+    function currentSlide(n) {
+        showSlides(slideIndex = n);
+    }
+
+    // Function to display slides
+    function showSlides(n) {
+        var i;
+        var dots = document.getElementsByClassName("content-dot");
+
+        // Wrap around slideIndex if it goes out of bounds
+        if (n > slides.length) { slideIndex = 1; }
+        if (n < 1) { slideIndex = slides.length; }
+
+        // Hide all slides and remove the active class from all dots
+        for (i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        for (i = 0; i < dots.length; i++) {
+            dots[i].className = dots[i].className.replace(" content-active-dot", "");
+        }
+
+        // Display the current slide and mark the corresponding dot as active
+        slides[slideIndex - 1].style.display = "block";
+        dots[slideIndex - 1].className += " content-active-dot";
+    }
+
+    // Optional: Resetting Auto navigation upon manual changes
+    function resetSlideInterval() {
+        clearInterval(slideInterval);
+        slideInterval = setInterval(function() { changeSlide(1); }, 2000);
+    }
+
+    // Auto-change slides every 2000 milliseconds
+    var slideInterval = setInterval(function() { changeSlide(1); }, 2000);
+
+    // Pause and Resume functions
+    function pauseSlideShow() {
+        clearInterval(slideInterval);
+    }
+
+    function resumeSlideShow() {
+        resetSlideInterval(); // Calls reset to resume auto-navigation
+    }
+
+
+
+
+</script>
+</html>

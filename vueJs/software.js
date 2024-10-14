@@ -1181,6 +1181,66 @@ const app_pic = {
                     image:"https://www.masrikdahir.com/Images/Texas/Thumbnail/TX.svg.png",
                     url:"https://www.masrikdahir.com/map/tx",
                 },
+                {
+                    title: "Kansas",
+                    abv: "KS",
+                    image: "https://www.masrikdahir.com/Images/Kansas/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ks"
+                },
+                {
+                    title: "South Dakota",
+                    abv: "SD",
+                    image: "https://www.masrikdahir.com/Images/SouthDakota/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/sd"
+                },
+                {
+                    title: "Wyoming",
+                    abv: "WY",
+                    image: "https://www.masrikdahir.com/Images/Wyoming/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/wy"
+                },
+                {
+                    title: "Colorado",
+                    abv: "CO",
+                    image: "https://www.masrikdahir.com/Images/Colorado/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/co"
+                },
+                {
+                    title: "Utah",
+                    abv: "UT",
+                    image: "https://www.masrikdahir.com/Images/Utah/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ut"
+                },
+                {
+                    title: "Nebraska",
+                    abv: "NE",
+                    image: "https://www.masrikdahir.com/Images/Nebraska/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ne"
+                },
+                {
+                    title: "Montana",
+                    abv: "MT",
+                    image: "https://www.masrikdahir.com/Images/Montana/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/mo"
+                },
+                {
+                    title: "Minnesota",
+                    abv: "MN",
+                    image: "https://www.masrikdahir.com/Images/Minnesota/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/mn"
+                },
+                {
+                    title: "North Dakota",
+                    abv: "ND",
+                    image: "https://www.masrikdahir.com/Images/NorthDakota/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/nd"
+                },
+                {
+                    title: "Idaho",
+                    abv: "ID",
+                    image: "https://www.masrikdahir.com/Images/Idaho/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/id"
+                }
             ]
         };
     },
