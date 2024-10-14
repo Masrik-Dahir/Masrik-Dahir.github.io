@@ -1047,7 +1047,7 @@ const app_pic = {
                     title:"New Jersey",
                     abv:"NJ",
                     image:"https://www.masrikdahir.com/Images/New Jersey/Thumbnail/NJ.svg.png",
-                    url:"",
+                    url:"https://www.masrikdahir.com/map/nj",
                 },
                 {
                     title:"Virginia",
