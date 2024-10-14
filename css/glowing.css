@@ -221,9 +221,9 @@
     /*border: none;*/
     /*outline: none;*/
     border-style: solid;
-    border-color: #dcdcdc;
+    border-color: black;
     color: #111;
-    background: #dcdcdc;
+    background: white;
     cursor: pointer;
     position: relative;
     z-index: 0;
@@ -254,7 +254,8 @@
 }
 
 .glow-on-hover4:active:after {
-    background: transparent;
+    background: inherit;
+
 }
 
 .glow-on-hover4:hover:before {
@@ -742,7 +743,7 @@
     padding: 0px;
     border: solid silver 2px;
     color: #111;
-    background: whitesmoke;
+    background: white;
     cursor: pointer;
     position: relative;
     z-index: 0;
@@ -773,7 +774,7 @@
 }
 
 .glow-on-hover3:active:after {
-    background: whitesmoke;
+    background: inherit;
 }
 
 .glow-on-hover3:hover:before {
