@@ -690,6 +690,7 @@
     animation: glowing-nav 20s linear infinite;
     opacity: 0;
     transition: opacity .3s ease-in-out;
+    border: none;
     border-radius: 10px;
 }
 
@@ -712,6 +713,7 @@
     background: white;
     left: 0;
     top: 0;
+    border: none;
     border-radius: 10px;
 }
 
