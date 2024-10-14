@@ -1190,7 +1190,7 @@ const app_pic = {
                 {
                     title: "South Dakota",
                     abv: "SD",
-                    image: "https://www.masrikdahir.com/Images/SouthDakota/Thumbnail/img.png",
+                    image: "https://www.masrikdahir.com/Images/South Dakota/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/sd"
                 },
                 {
@@ -1232,7 +1232,7 @@ const app_pic = {
                 {
                     title: "North Dakota",
                     abv: "ND",
-                    image: "https://www.masrikdahir.com/Images/NorthDakota/Thumbnail/img.png",
+                    image: "https://www.masrikdahir.com/Images/North Dakota/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/nd"
                 },
                 {
