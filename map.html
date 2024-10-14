@@ -663,6 +663,9 @@
     });
 </script>
 <style>
+    body {
+        overflow-x: hidden;
+    }
     #myDiv #Canada #BritishIsle {
         display: block;
     }
@@ -671,65 +674,7 @@
     }
 </style>
 
-<div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
-
-
-
-    <!-- Left Column -->
-<!--    <div class="w3-third w3-margin-top info">-->
-
-<!--        <div class="w3-container w3-white w3-margin-bottom">-->
-<!--            <div id="app_map" style="margin-right: 20px">-->
-<!--                <div class="panel panel-default">-->
-<!--                    <div class="panel-heading">-->
-<!--                        <div class="row" style="margin-bottom: 10px">-->
-<!--                            <div class="form-control search-wrapper panel-heading col-sm-12" type="text" v-model="searchQuery" placeholder="Search">-->
-<!--                                <center>-->
-<!--                                    <div class="search_logo">-->
-<!--                                    </div>-->
-<!--                                    <div class="search_bar">-->
-<!--                                        <img src="Images/Search.png" width="25"> &nbsp;&nbsp;-->
-<!--                                        <input class="search_searchbar" type="text" title="Search" v-model="searchQuery">-->
-<!--                                    </div>-->
-<!--                                    <div class="search_buttons">-->
-<!--                                    </div>-->
-<!--                                </center>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="table-responsive" style="caret-color: transparent;">-->
-<!--                            <div v-if="resources.length" class="table">-->
-<!--                                <div v-for="item in resultQuery">-->
-<!--                                    &lt;!&ndash;                            <td><a v-bind:href="item.uri" target="_blank">{{item.title}} {{item.des}}</a></td>&ndash;&gt;-->
-<!--                                    <button class="glow-on-hover-nav Blazing" type="button"-->
-<!--                                            style="margin-left: 20px;margin-bottom: min(calc(1px + 2vw), 5px); padding: 2px">-->
-<!--                                        <TABLE WIDTH="100%">-->
-<!--                                            <TR>-->
-<!--                                                <TD WIDTH="100%">-->
-<!--                                                    <a v-bind:href="item.uri" target="_blank" style="text-decoration: none">-->
-<!--                                                        <h3><b style="color: black;">-->
-<!--                                                            <div class="wrapper">-->
-<!--                                                            </div>{{item.title}}</b>-->
-<!--                                                            <b class="color w3-text-teal;" style="float: right; color:DarkSlateGray;">-->
-<!--                                                                <bdi style="font-size: calc(7px + .5vw);"></bdi>-->
-<!--                                                            </b></h3>-->
-<!--                                                    </a>-->
-<!--                                                </TD>-->
-<!--                                            </TR>-->
-<!--                                        </TABLE>-->
-<!--                                    </button>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <br>-->
-
-<!--        </div>-->
-
-<!--        &lt;!&ndash; End Left Column &ndash;&gt;-->
-<!--    </div>-->
+<div class="w3-content" style="max-width: min(1800px, 95%); background-color: white; margin: 0 auto; padding: 20px;">
 
     <div id="app_country">
         <div class="">
@@ -798,7 +743,7 @@
 
 
     <!-- Right Column -->
-    <div class="w3-container w3-margin-top" style="caret-color: transparent; margin-right: 10px; margin-left: 10px">
+    <div class="w3-container w3-margin-top" style="caret-color: transparent;">
 
 
         <!--        USA-->
