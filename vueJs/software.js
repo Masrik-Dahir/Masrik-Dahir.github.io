@@ -3111,7 +3111,7 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                 }
             },
             limitedResultQuery() {
-                return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 50));
+                return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 30));
             },
             phoneLimitedResultQuery() {
                 return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 10));
