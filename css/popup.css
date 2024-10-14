@@ -16,16 +16,16 @@
 .popup .content {
     position:fixed;
     top: 215px;
-    left:140px;
-    transform:translate(-50%,-50%) scale(0);
+    left:93px;
     background:#fff;
-    width: 280px;
+    width: 200px;
     height: min(80%, 700);
     z-index:2;
     padding:20px;
     box-sizing:border-box;
     overflow-y: scroll;
-
+    transform: translate(-50%, -100%) scale(0); /* Start above the viewport */
+    transition: transform 300ms ease-in-out;
 }
 
 .popup .close-btn{
@@ -92,16 +92,16 @@
 .popuphome .content {
     position:fixed;
     top: 215px;
-    left:140px;
-    transform:translate(-50%,-50%) scale(0);
+    left:93px;
     background:#fff;
-    width: 280px;
+    width: 200px;
     height: min(80%, 700);
     z-index:2;
     padding:20px;
     box-sizing:border-box;
     overflow-y: scroll;
-
+    transform: translate(-50%, -100%) scale(0); /* Start above the viewport */
+    transition: transform 300ms ease-in-out;
 }
 
 .popuphome .close-btn{
