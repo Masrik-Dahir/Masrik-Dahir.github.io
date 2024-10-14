@@ -40,6 +40,6 @@
   { "name": "North Dakota", "abbreviation": "ND", "numImages": 10, "isActive": true },
   { "name": "Idaho", "abbreviation": "ID", "numImages": 16, "isActive": true },
   { "name": "New Jersey", "abbreviation": "NJ", "numImages": 30, "isActive": true },
-  { "name": "Rhode Island", "abbreviation": "NJ", "numImages": 22, "isActive": true }
+  { "name": "Rhode Island", "abbreviation": "RI", "numImages": 22, "isActive": true }
 
 ]
