@@ -1221,7 +1221,7 @@ const app_pic = {
                     title: "Montana",
                     abv: "MT",
                     image: "https://www.masrikdahir.com/Images/Montana/Thumbnail/img.png",
-                    url: "https://www.masrikdahir.com/map/mo"
+                    url: "https://www.masrikdahir.com/map/mt"
                 },
                 {
                     title: "Minnesota",
