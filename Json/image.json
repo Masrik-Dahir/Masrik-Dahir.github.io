@@ -18,10 +18,10 @@
   { "name": "Kentucky", "abbreviation": "KY", "numImages": 13, "isActive": true },
   { "name": "Maine", "abbreviation": "ME", "numImages": 23, "isActive": true },
   { "name": "New Hampshire", "abbreviation": "NH", "numImages": 19, "isActive": true },
-  { "name": "Connecticut", "abbreviation": "CT", "numImages": 5, "isActive": true },
+  { "name": "Connecticut", "abbreviation": "CT", "numImages": 9, "isActive": true },
   { "name": "Vermont", "abbreviation": "VT", "numImages": 8, "isActive": true },
   { "name": "New York", "abbreviation": "NY", "numImages": 19, "isActive": true },
-  { "name": "Massachusetts", "abbreviation": "MA", "numImages": 8, "isActive": true },
+  { "name": "Massachusetts", "abbreviation": "MA", "numImages": 29, "isActive": true },
   { "name": "South Carolina", "abbreviation": "SC", "numImages": 14, "isActive": true },
   { "name": "Georgia", "abbreviation": "GA", "numImages": 26, "isActive": true },
   { "name": "Alabama", "abbreviation": "AL", "numImages": 7, "isActive": true },
@@ -38,6 +38,8 @@
   { "name": "Montana", "abbreviation": "MT", "numImages": 13, "isActive": true },
   { "name": "Minnesota", "abbreviation": "MN", "numImages": 11, "isActive": true },
   { "name": "North Dakota", "abbreviation": "ND", "numImages": 10, "isActive": true },
-  { "name": "Idaho", "abbreviation": "ID", "numImages": 16, "isActive": true }
+  { "name": "Idaho", "abbreviation": "ID", "numImages": 16, "isActive": true },
+  { "name": "New Jersey", "abbreviation": "NJ", "numImages": 30, "isActive": true },
+  { "name": "Rhode Island", "abbreviation": "NJ", "numImages": 22, "isActive": true }
 
 ]

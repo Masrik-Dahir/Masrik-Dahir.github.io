@@ -1240,6 +1240,12 @@ const app_pic = {
                     abv: "ID",
                     image: "https://www.masrikdahir.com/Images/Idaho/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/id"
+                },
+                {
+                    title: "Rhode Island",
+                    abv: "RI",
+                    image: "https://www.masrikdahir.com/Images/Rhode Island/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ri"
                 }
             ]
         };
