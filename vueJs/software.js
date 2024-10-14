@@ -202,7 +202,7 @@ const app_milestone = {
                 {
                     title: "Deans List",
                     des: "",
-                    uri: "https://henrico.us/",
+                    uri: "https://egr.vcu.edu/current-students/deans-list/",
                     img: "https://www.masrikdahir.com/Images/deanslistlogo.png",
                     uri_2: "",
                     img_2: "",
