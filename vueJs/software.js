@@ -276,6 +276,15 @@ const app_milestone = {
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
                 },
                 {
+                    title: "AWS Certified Solutions Architect",
+                    des: "",
+                    uri: "https://www.credly.com/badges/12749f5b-e7fc-460d-a317-60a1ebc976fe/public_url",
+                    img: "https://www.masrikdahir.com/Images/aws-certified-solutions-architect-associate.png",
+                    uri_2: "",
+                    img_2: "",
+                    style: "width: 1vw; min-width: calc(70px + 0.7vw)"
+                },
+                {
                     title: "AWS Certified Developer",
                     des: "",
                     uri: "https://www.credly.com/badges/4ea74952-8783-44af-9425-119b2434bf38/public_url",
