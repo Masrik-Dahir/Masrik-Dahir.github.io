@@ -1255,6 +1255,12 @@ const app_pic = {
                     abv: "RI",
                     image: "https://www.masrikdahir.com/Images/Rhode Island/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/ri"
+                },
+                {
+                    title: "Florida",
+                    abv: "FL",
+                    image: "https://www.masrikdahir.com/Images/Florida/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/fl"
                 }
             ]
         };

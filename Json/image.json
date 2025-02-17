@@ -8,7 +8,7 @@
   { "name": "Louisiana", "abbreviation": "LA", "numImages": 13, "isActive": true },
   { "name": "Texas", "abbreviation": "TX", "numImages": 20, "isActive": true },
   { "name": "Mississippi", "abbreviation": "MS", "numImages": 14, "isActive": true },
-  { "name": "Virginia", "abbreviation": "VA", "numImages": 42, "isActive": true },
+  { "name": "Virginia", "abbreviation": "VA", "numImages": 73, "isActive": true },
   { "name": "West Virginia", "abbreviation": "WV", "numImages": 18, "isActive": true },
   { "name": "North Carolina", "abbreviation": "NC", "numImages": 26, "isActive": true },
   { "name": "Washington DC", "abbreviation": "DC", "numImages": 61, "isActive": true },
@@ -20,7 +20,7 @@
   { "name": "New Hampshire", "abbreviation": "NH", "numImages": 19, "isActive": true },
   { "name": "Connecticut", "abbreviation": "CT", "numImages": 9, "isActive": true },
   { "name": "Vermont", "abbreviation": "VT", "numImages": 8, "isActive": true },
-  { "name": "New York", "abbreviation": "NY", "numImages": 19, "isActive": true },
+  { "name": "New York", "abbreviation": "NY", "numImages": 42, "isActive": true },
   { "name": "Massachusetts", "abbreviation": "MA", "numImages": 29, "isActive": true },
   { "name": "South Carolina", "abbreviation": "SC", "numImages": 14, "isActive": true },
   { "name": "Georgia", "abbreviation": "GA", "numImages": 26, "isActive": true },
@@ -39,7 +39,7 @@
   { "name": "Minnesota", "abbreviation": "MN", "numImages": 11, "isActive": true },
   { "name": "North Dakota", "abbreviation": "ND", "numImages": 10, "isActive": true },
   { "name": "Idaho", "abbreviation": "ID", "numImages": 16, "isActive": true },
-  { "name": "New Jersey", "abbreviation": "NJ", "numImages": 30, "isActive": true },
-  { "name": "Rhode Island", "abbreviation": "RI", "numImages": 22, "isActive": true }
-
+  { "name": "New Jersey", "abbreviation": "NJ", "numImages": 32, "isActive": true },
+  { "name": "Rhode Island", "abbreviation": "RI", "numImages": 22, "isActive": true },
+  { "name": "Florida", "abbreviation": "FL", "numImages": 148, "isActive": true }
 ]
