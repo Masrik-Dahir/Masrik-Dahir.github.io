@@ -1175,7 +1175,7 @@ const app_pic = {
                 {
                     title:"Louisiana",
                     abv:"LA",
-                    image:"https://www.masrikdahir.com/Images/Louisiana/Thumbnail/LA.svg.png",
+                    image:"https://www.masrikdahir.com/Images/Louisiana/Thumbnail/img.png",
                     url:"https://www.masrikdahir.com/map/la",
                 },
                 {
