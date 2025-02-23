@@ -1336,7 +1336,7 @@ const app_pic_can = {
                 {
                     title:"Ontario ",
                     abv:"ON",
-                    image:"https://www.masrikdahir.com/Images/Ontario/Thumbnail/ON.svg.png",
+                    image:"https://www.masrikdahir.com/Images/Ontario/Thumbnail/img.png",
                     url:"https://www.masrikdahir.com/map/on",
                 }
             ]
