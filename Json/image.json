@@ -39,7 +39,7 @@
   { "name": "Minnesota", "abbreviation": "MN", "numImages": 11, "isActive": true },
   { "name": "North Dakota", "abbreviation": "ND", "numImages": 10, "isActive": true },
   { "name": "Idaho", "abbreviation": "ID", "numImages": 16, "isActive": true },
-  { "name": "New Jersey", "abbreviation": "NJ", "numImages": 32, "isActive": true },
+  { "name": "New Jersey", "abbreviation": "NJ", "numImages": 31, "isActive": true },
   { "name": "Rhode Island", "abbreviation": "RI", "numImages": 22, "isActive": true },
-  { "name": "Florida", "abbreviation": "FL", "numImages": 148, "isActive": true }
+  { "name": "Florida", "abbreviation": "FL", "numImages": 125, "isActive": true }
 ]
