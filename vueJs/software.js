@@ -243,7 +243,7 @@ const app_milestone = {
                     title: "Greater Richmond Relocation Center Scholar",
                     des: "",
                     uri: "http://richmondrelo.org/",
-                    img: "./Images/grrc.png",
+                    img: "https://d30tgmewtclfrp.cloudfront.net/grrc.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
@@ -252,7 +252,7 @@ const app_milestone = {
                     title: "Harrison-Labouisse Memorial Scholar",
                     des: "",
                     uri: "https://www.cfrichmond.org/Apply-for-a-Scholarship/View-All-Scholarships?s=Harrison-Labouisse-Mayo+Memorial+Scholarship",
-                    img: "./Images/Me66Jxa.png",
+                    img: "https://d30tgmewtclfrp.cloudfront.net/Me66Jxa.png",
                     uri_2: "",
                     img_2: "",
                     style: "width: 1vw; min-width: calc(70px + 0.7vw)"
