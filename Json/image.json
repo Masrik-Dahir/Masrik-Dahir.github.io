@@ -1,45 +1,1436 @@
 [
-  { "name": "Wisconsin", "abbreviation": "WI", "numImages": 51, "isActive": true },
-  { "name": "Michigan", "abbreviation": "MI", "numImages": 14, "isActive": true },
-  { "name": "Illinois", "abbreviation": "IL", "numImages": 48, "isActive": true },
-  { "name": "Iowa", "abbreviation": "IA", "numImages": 16, "isActive": true },
-  { "name": "Missouri", "abbreviation": "MO", "numImages": 21, "isActive": true },
-  { "name": "Arkansas", "abbreviation": "AR", "numImages": 12, "isActive": true },
-  { "name": "Louisiana", "abbreviation": "LA", "numImages": 13, "isActive": true },
-  { "name": "Texas", "abbreviation": "TX", "numImages": 20, "isActive": true },
-  { "name": "Mississippi", "abbreviation": "MS", "numImages": 14, "isActive": true },
-  { "name": "Virginia", "abbreviation": "VA", "numImages": 73, "isActive": true },
-  { "name": "West Virginia", "abbreviation": "WV", "numImages": 18, "isActive": true },
-  { "name": "North Carolina", "abbreviation": "NC", "numImages": 26, "isActive": true },
-  { "name": "Washington DC", "abbreviation": "DC", "numImages": 61, "isActive": true },
-  { "name": "Delaware", "abbreviation": "DE", "numImages": 17, "isActive": true },
-  { "name": "Indiana", "abbreviation": "IN", "numImages": 23, "isActive": true },
-  { "name": "Maryland", "abbreviation": "MD", "numImages": 7, "isActive": true },
-  { "name": "Kentucky", "abbreviation": "KY", "numImages": 13, "isActive": true },
-  { "name": "Maine", "abbreviation": "ME", "numImages": 23, "isActive": true },
-  { "name": "New Hampshire", "abbreviation": "NH", "numImages": 19, "isActive": true },
-  { "name": "Connecticut", "abbreviation": "CT", "numImages": 9, "isActive": true },
-  { "name": "Vermont", "abbreviation": "VT", "numImages": 8, "isActive": true },
-  { "name": "New York", "abbreviation": "NY", "numImages": 42, "isActive": true },
-  { "name": "Massachusetts", "abbreviation": "MA", "numImages": 29, "isActive": true },
-  { "name": "South Carolina", "abbreviation": "SC", "numImages": 14, "isActive": true },
-  { "name": "Georgia", "abbreviation": "GA", "numImages": 26, "isActive": true },
-  { "name": "Alabama", "abbreviation": "AL", "numImages": 7, "isActive": true },
-  { "name": "Tennessee", "abbreviation": "TN", "numImages": 18, "isActive": true },
-  { "name": "Pennsylvania", "abbreviation": "PA", "numImages": 13, "isActive": true },
-  { "name": "Ontario", "abbreviation": "ON", "numImages": 50, "isActive": true },
-  { "name": "Ohio", "abbreviation": "OH", "numImages": 26, "isActive": true },
-  { "name": "Kansas", "abbreviation": "KS", "numImages": 14, "isActive": true },
-  { "name": "South Dakota", "abbreviation": "SD", "numImages": 56, "isActive": true },
-  { "name": "Wyoming", "abbreviation": "WY", "numImages": 61, "isActive": true },
-  { "name": "Colorado", "abbreviation": "CO", "numImages": 16, "isActive": true },
-  { "name": "Utah", "abbreviation": "UT", "numImages": 18, "isActive": true },
-  { "name": "Nebraska", "abbreviation": "NE", "numImages": 42, "isActive": true },
-  { "name": "Montana", "abbreviation": "MT", "numImages": 13, "isActive": true },
-  { "name": "Minnesota", "abbreviation": "MN", "numImages": 11, "isActive": true },
-  { "name": "North Dakota", "abbreviation": "ND", "numImages": 10, "isActive": true },
-  { "name": "Idaho", "abbreviation": "ID", "numImages": 16, "isActive": true },
-  { "name": "New Jersey", "abbreviation": "NJ", "numImages": 31, "isActive": true },
-  { "name": "Rhode Island", "abbreviation": "RI", "numImages": 22, "isActive": true },
-  { "name": "Florida", "abbreviation": "FL", "numImages": 125, "isActive": true }
+  {
+    "name": "Wisconsin",
+    "abbreviation": "WI",
+    "numImages": 51,
+    "isActive": true
+  },
+  {
+    "name": "Michigan",
+    "abbreviation": "MI",
+    "numImages": 14,
+    "isActive": true
+  },
+  {
+    "name": "Illinois",
+    "abbreviation": "IL",
+    "numImages": 48,
+    "isActive": true
+  },
+  {
+    "name": "Iowa",
+    "abbreviation": "IA",
+    "numImages": 16,
+    "isActive": true
+  },
+  {
+    "name": "Missouri",
+    "abbreviation": "MO",
+    "numImages": 21,
+    "isActive": true
+  },
+  {
+    "name": "Arkansas",
+    "abbreviation": "AR",
+    "numImages": 12,
+    "isActive": true
+  },
+  {
+    "name": "Louisiana",
+    "abbreviation": "LA",
+    "numImages": 13,
+    "isActive": true
+  },
+  {
+    "name": "Texas",
+    "abbreviation": "TX",
+    "numImages": 20,
+    "isActive": true
+  },
+  {
+    "name": "Mississippi",
+    "abbreviation": "MS",
+    "numImages": 14,
+    "isActive": true
+  },
+  {
+    "name": "Virginia",
+    "abbreviation": "VA",
+    "numImages": 73,
+    "isActive": true
+  },
+  {
+    "name": "West Virginia",
+    "abbreviation": "WV",
+    "numImages": 18,
+    "isActive": true
+  },
+  {
+    "name": "North Carolina",
+    "abbreviation": "NC",
+    "numImages": 26,
+    "isActive": true
+  },
+  {
+    "name": "Washington DC",
+    "abbreviation": "DC",
+    "numImages": 61,
+    "isActive": true
+  },
+  {
+    "name": "Delaware",
+    "abbreviation": "DE",
+    "numImages": 17,
+    "isActive": true
+  },
+  {
+    "name": "Indiana",
+    "abbreviation": "IN",
+    "numImages": 23,
+    "isActive": true
+  },
+  {
+    "name": "Maryland",
+    "abbreviation": "MD",
+    "numImages": 7,
+    "isActive": true
+  },
+  {
+    "name": "Kentucky",
+    "abbreviation": "KY",
+    "numImages": 13,
+    "isActive": true
+  },
+  {
+    "name": "Maine",
+    "abbreviation": "ME",
+    "numImages": 23,
+    "isActive": true
+  },
+  {
+    "name": "New Hampshire",
+    "abbreviation": "NH",
+    "numImages": 19,
+    "isActive": true
+  },
+  {
+    "name": "Connecticut",
+    "abbreviation": "CT",
+    "numImages": 9,
+    "isActive": true
+  },
+  {
+    "name": "Vermont",
+    "abbreviation": "VT",
+    "numImages": 8,
+    "isActive": true
+  },
+  {
+    "name": "New York",
+    "abbreviation": "NY",
+    "numImages": 42,
+    "isActive": true
+  },
+  {
+    "name": "Massachusetts",
+    "abbreviation": "MA",
+    "numImages": 29,
+    "isActive": true
+  },
+  {
+    "name": "South Carolina",
+    "abbreviation": "SC",
+    "numImages": 14,
+    "isActive": true
+  },
+  {
+    "name": "Georgia",
+    "abbreviation": "GA",
+    "numImages": 26,
+    "isActive": true
+  },
+  {
+    "name": "Alabama",
+    "abbreviation": "AL",
+    "numImages": 7,
+    "isActive": true
+  },
+  {
+    "name": "Tennessee",
+    "abbreviation": "TN",
+    "numImages": 18,
+    "isActive": true
+  },
+  {
+    "name": "Pennsylvania",
+    "abbreviation": "PA",
+    "numImages": 13,
+    "isActive": true
+  },
+  {
+    "name": "Ontario",
+    "abbreviation": "CAN",
+    "numImages": 50,
+    "isActive": true
+  },
+  {
+    "name": "Ohio",
+    "abbreviation": "OH",
+    "numImages": 26,
+    "isActive": true
+  },
+  {
+    "name": "Kansas",
+    "abbreviation": "KS",
+    "numImages": 14,
+    "isActive": true
+  },
+  {
+    "name": "South Dakota",
+    "abbreviation": "SD",
+    "numImages": 56,
+    "isActive": true
+  },
+  {
+    "name": "Wyoming",
+    "abbreviation": "WY",
+    "numImages": 61,
+    "isActive": true
+  },
+  {
+    "name": "Colorado",
+    "abbreviation": "CO",
+    "numImages": 16,
+    "isActive": true
+  },
+  {
+    "name": "Utah",
+    "abbreviation": "UT",
+    "numImages": 18,
+    "isActive": true
+  },
+  {
+    "name": "Nebraska",
+    "abbreviation": "NE",
+    "numImages": 42,
+    "isActive": true
+  },
+  {
+    "name": "Montana",
+    "abbreviation": "MT",
+    "numImages": 13,
+    "isActive": true
+  },
+  {
+    "name": "Minnesota",
+    "abbreviation": "MN",
+    "numImages": 11,
+    "isActive": true
+  },
+  {
+    "name": "North Dakota",
+    "abbreviation": "ND",
+    "numImages": 10,
+    "isActive": true
+  },
+  {
+    "name": "Idaho",
+    "abbreviation": "ID",
+    "numImages": 16,
+    "isActive": true
+  },
+  {
+    "name": "New Jersey",
+    "abbreviation": "NJ",
+    "numImages": 31,
+    "isActive": true
+  },
+  {
+    "name": "Rhode Island",
+    "abbreviation": "RI",
+    "numImages": 22,
+    "isActive": true
+  },
+  {
+    "name": "Florida",
+    "abbreviation": "FL",
+    "numImages": 125,
+    "isActive": true
+  },
+  {
+    "name": "Afghanistan",
+    "abbreviation": "AFG",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Albania",
+    "abbreviation": "ALB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Algeria",
+    "abbreviation": "DZA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Andorra",
+    "abbreviation": "AND",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Angola",
+    "abbreviation": "AGO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Antigua & Deps",
+    "abbreviation": "ANT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Argentina",
+    "abbreviation": "ARG",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Armenia",
+    "abbreviation": "ARM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Australia",
+    "abbreviation": "AUS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Austria",
+    "abbreviation": "AUT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Azerbaijan",
+    "abbreviation": "AZE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bahamas",
+    "abbreviation": "BHS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bahrain",
+    "abbreviation": "BHR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bangladesh",
+    "abbreviation": "BGD",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Barbados",
+    "abbreviation": "BRB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Belarus",
+    "abbreviation": "BLR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Belgium",
+    "abbreviation": "BEL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Belize",
+    "abbreviation": "BLZ",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Benin",
+    "abbreviation": "BEN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bhutan",
+    "abbreviation": "BTN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bolivia",
+    "abbreviation": "BOL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bosnia Herzegovina",
+    "abbreviation": "BOS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Botswana",
+    "abbreviation": "BWA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Brazil",
+    "abbreviation": "BRA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Brunei",
+    "abbreviation": "BRN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Bulgaria",
+    "abbreviation": "BGR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Burkina",
+    "abbreviation": "BFA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Burundi",
+    "abbreviation": "BDI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Cambodia",
+    "abbreviation": "KHM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Cameroon",
+    "abbreviation": "CMR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Canada",
+    "abbreviation": "CAN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Cape Verde",
+    "abbreviation": "CAP",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Central African Republic",
+    "abbreviation": "CAF",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Chad",
+    "abbreviation": "TCD",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Chile",
+    "abbreviation": "CHL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "China",
+    "abbreviation": "CHN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Colombia",
+    "abbreviation": "COL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Comoros",
+    "abbreviation": "COM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Congo",
+    "abbreviation": "COG",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Costa Rica",
+    "abbreviation": "CRI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Croatia",
+    "abbreviation": "HRV",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Cuba",
+    "abbreviation": "CUB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Cyprus",
+    "abbreviation": "CYP",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Democratic Republic of Congo",
+    "abbreviation": "DEM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Denmark",
+    "abbreviation": "DNK",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Djibouti",
+    "abbreviation": "DJI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Dominica",
+    "abbreviation": "DMA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Dominican Republic",
+    "abbreviation": "DOM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "East Timor",
+    "abbreviation": "EAS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ecuador",
+    "abbreviation": "ECU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Egypt",
+    "abbreviation": "EGY",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "El Salvador",
+    "abbreviation": "SLV",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "England",
+    "abbreviation": "GBR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Equatorial Guinea",
+    "abbreviation": "GNQ",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ertrea",
+    "abbreviation": "ERT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Estonia",
+    "abbreviation": "EST",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ethiopia",
+    "abbreviation": "ETH",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Fiji",
+    "abbreviation": "FJI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Finland",
+    "abbreviation": "FIN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "France",
+    "abbreviation": "FRA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Gabon",
+    "abbreviation": "GAB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Germany",
+    "abbreviation": "DEU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ghana",
+    "abbreviation": "GHA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Greece",
+    "abbreviation": "GRC",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Grenada",
+    "abbreviation": "GRD",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Guatemala",
+    "abbreviation": "GTM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Guinea Bissau",
+    "abbreviation": "GUI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Guinea",
+    "abbreviation": "GIN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Guyana",
+    "abbreviation": "GUY",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Haiti",
+    "abbreviation": "HTI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Honduras",
+    "abbreviation": "HND",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Hungary",
+    "abbreviation": "HUN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Iceland",
+    "abbreviation": "ISL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Icons",
+    "abbreviation": "ICO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "India",
+    "abbreviation": "IND",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Indonesia",
+    "abbreviation": "IDN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Iran",
+    "abbreviation": "IRN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Iraq",
+    "abbreviation": "IRQ",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ireland",
+    "abbreviation": "IRL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Israel",
+    "abbreviation": "ISR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Italy",
+    "abbreviation": "ITA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ivory Coast",
+    "abbreviation": "IVO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Jamaica",
+    "abbreviation": "JAM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Japan",
+    "abbreviation": "JPN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Jordan",
+    "abbreviation": "JOR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Kazakhstan",
+    "abbreviation": "KAZ",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Kenya",
+    "abbreviation": "KEN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Kiribati",
+    "abbreviation": "KIR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Kosovo",
+    "abbreviation": "SRB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Kuwait",
+    "abbreviation": "KWT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Kyrgyzstan",
+    "abbreviation": "KGZ",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Laos",
+    "abbreviation": "LAO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Latvia",
+    "abbreviation": "LVA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Lebanon",
+    "abbreviation": "LBN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Lesotho",
+    "abbreviation": "LSO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Liberia",
+    "abbreviation": "LBR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Libya",
+    "abbreviation": "LBY",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Liechtenstein",
+    "abbreviation": "LIE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Lithuania",
+    "abbreviation": "LTU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Luxembourg",
+    "abbreviation": "LUX",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Madagascar",
+    "abbreviation": "MDG",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Malawi",
+    "abbreviation": "MWI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Malaysia",
+    "abbreviation": "MYS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Maldives",
+    "abbreviation": "MDV",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mali",
+    "abbreviation": "MLI",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Malta",
+    "abbreviation": "MLT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Marshall Islands",
+    "abbreviation": "MHL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mauritania",
+    "abbreviation": "MRT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mauritius",
+    "abbreviation": "MUS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mayanmar",
+    "abbreviation": "MAY",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mexico",
+    "abbreviation": "MEX",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Micronesia",
+    "abbreviation": "FSM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Moldova",
+    "abbreviation": "MDA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Monaco",
+    "abbreviation": "MCO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mongolia",
+    "abbreviation": "MNG",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Montenegro",
+    "abbreviation": "MNE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Morocco",
+    "abbreviation": "MAR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Mozambique",
+    "abbreviation": "MOZ",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Nambia",
+    "abbreviation": "NAM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Nauru",
+    "abbreviation": "NRU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Nepal",
+    "abbreviation": "NPL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Netherlands",
+    "abbreviation": "NLD",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "New Zealand",
+    "abbreviation": "NZL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Nicaragua",
+    "abbreviation": "NIC",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Niger",
+    "abbreviation": "NGA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Nigeria",
+    "abbreviation": "NGA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "North Ireland",
+    "abbreviation": "NOR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "North Korea",
+    "abbreviation": "NOR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "North Macedonia",
+    "abbreviation": "MKD",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Norway",
+    "abbreviation": "NOR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Oman",
+    "abbreviation": "OMN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Pakistan",
+    "abbreviation": "PAK",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Palau",
+    "abbreviation": "PLW",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Papua New Guinea",
+    "abbreviation": "PNG",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Paraguay",
+    "abbreviation": "PRY",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Peru",
+    "abbreviation": "PER",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Philippines",
+    "abbreviation": "PHL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Poland",
+    "abbreviation": "POL",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Portugal",
+    "abbreviation": "PRT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Qatar",
+    "abbreviation": "QAT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Romania",
+    "abbreviation": "ROU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Russia",
+    "abbreviation": "RUS",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Rwanda",
+    "abbreviation": "RWA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Saint Kitts and Nevis",
+    "abbreviation": "KNA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Saint Lucia",
+    "abbreviation": "LCA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Saint Vincent and the Grenadines",
+    "abbreviation": "VCT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Samoa",
+    "abbreviation": "WSM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Sao Tome and Principe",
+    "abbreviation": "STP",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Saudi Arabia",
+    "abbreviation": "SAU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Scotland",
+    "abbreviation": "GBR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Senegal",
+    "abbreviation": "SEN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Serbia",
+    "abbreviation": "SRB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Seychelles",
+    "abbreviation": "SYC",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Sierra Leone",
+    "abbreviation": "SLE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Singapore",
+    "abbreviation": "SGP",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Slovakia",
+    "abbreviation": "SVK",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Slovenia",
+    "abbreviation": "SVN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Solomon Islands",
+    "abbreviation": "SLB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Somalia",
+    "abbreviation": "SOM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "South Africa",
+    "abbreviation": "ZAF",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "South Korea",
+    "abbreviation": "SOU",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "South Sudan",
+    "abbreviation": "SSD",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Spain",
+    "abbreviation": "ESP",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Sri Lanka",
+    "abbreviation": "LKA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Sudan",
+    "abbreviation": "SDN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Suriname",
+    "abbreviation": "SUR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Sweden",
+    "abbreviation": "SWE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Switzerland",
+    "abbreviation": "CHE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Syria",
+    "abbreviation": "SYR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Taiwan",
+    "abbreviation": "TWN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Tajikistan",
+    "abbreviation": "TJK",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Tanzania",
+    "abbreviation": "TZA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Thailand",
+    "abbreviation": "THA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Timor Leste",
+    "abbreviation": "TIM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Togo",
+    "abbreviation": "TGO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Tonga",
+    "abbreviation": "TON",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Trinidad and Tobago",
+    "abbreviation": "TTO",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Tunisia",
+    "abbreviation": "TUN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Turkey",
+    "abbreviation": "TUR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Turkmenistan",
+    "abbreviation": "TKM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Tuvalu",
+    "abbreviation": "TUV",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Uganda",
+    "abbreviation": "UGA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Ukraine",
+    "abbreviation": "UKR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "United Arab Emirates",
+    "abbreviation": "ARE",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "United Kingdom",
+    "abbreviation": "GBR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "United States",
+    "abbreviation": "USA",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Uruguay",
+    "abbreviation": "URY",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Uzbekistan",
+    "abbreviation": "UZB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Vanuatu",
+    "abbreviation": "VUT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Vatican City",
+    "abbreviation": "VAT",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Venezuela",
+    "abbreviation": "VEN",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Vietnam",
+    "abbreviation": "VNM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Wales",
+    "abbreviation": "GBR",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Yemen",
+    "abbreviation": "YEM",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Zambia",
+    "abbreviation": "ZMB",
+    "numImages": 0,
+    "isActive": true
+  },
+  {
+    "name": "Zimbabwe",
+    "abbreviation": "ZWE",
+    "numImages": 0,
+    "isActive": true
+  }
 ]
