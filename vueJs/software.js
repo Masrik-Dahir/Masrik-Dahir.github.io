@@ -3164,7 +3164,7 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
 // Fetch data and handle errors with async/await and try/catch
 async function fetchData() {
     try {
-        const response = await fetch('../Json/image.json');
+        const response = await fetch('https://d30tgmewtclfrp.cloudfront.net/Json/image.json');
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
