@@ -1012,19 +1012,19 @@ const app_pic = {
             resources:[
                 {
                     title: "California",
-                    abv: "FL",
+                    abv: "CA",
                     image: "https://d30tgmewtclfrp.cloudfront.net/California/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/ca"
                 },
                 {
                     title: "Nevada",
-                    abv: "FL",
+                    abv: "NV",
                     image: "https://d30tgmewtclfrp.cloudfront.net/Nevada/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/nv"
                 },
                 {
                     title: "Arizona",
-                    abv: "FL",
+                    abv: "AZ",
                     image: "https://d30tgmewtclfrp.cloudfront.net/Arizona/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/az"
                 },
