@@ -1011,16 +1011,46 @@ const app_pic = {
             searchQuery: null,
             resources:[
                 {
-                    title:"Kentucky",
-                    abv:"KY",
-                    image:"https://d30tgmewtclfrp.cloudfront.net/Kentucky/Thumbnail/img.png",
-                    url:"https://www.masrikdahir.com/map/ky",
+                    title: "California",
+                    abv: "FL",
+                    image: "https://d30tgmewtclfrp.cloudfront.net/California/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ca"
+                },
+                {
+                    title: "Nevada",
+                    abv: "FL",
+                    image: "https://d30tgmewtclfrp.cloudfront.net/Nevada/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/nv"
+                },
+                {
+                    title: "Arizona",
+                    abv: "FL",
+                    image: "https://d30tgmewtclfrp.cloudfront.net/Arizona/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/az"
+                },
+                {
+                    title:"Virginia",
+                    abv:"VA",
+                    image:"https://d30tgmewtclfrp.cloudfront.net/Virginia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/va",
+                },
+                {
+                    title:"New York",
+                    abv:"NY",
+                    image:"https://d30tgmewtclfrp.cloudfront.net/New York/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ny",
                 },
                 {
                     title:"Maine",
                     abv:"ME",
                     image:"https://d30tgmewtclfrp.cloudfront.net/Maine/Thumbnail/img.png",
                     url:"https://www.masrikdahir.com/map/me",
+                },
+                {
+                    title:"Kentucky",
+                    abv:"KY",
+                    image:"https://d30tgmewtclfrp.cloudfront.net/Kentucky/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ky",
                 },
                 {
                     title:"Vermont",
@@ -1034,12 +1064,7 @@ const app_pic = {
                     image:"https://d30tgmewtclfrp.cloudfront.net/New Hampshire/Thumbnail/img.png",
                     url:"https://www.masrikdahir.com/map/nh",
                 },
-                {
-                    title:"New York",
-                    abv:"NY",
-                    image:"https://d30tgmewtclfrp.cloudfront.net/New York/Thumbnail/img.png",
-                    url:"https://www.masrikdahir.com/map/ny",
-                },
+
                 {
                     title:"Massachusetts",
                     abv:"MA",
@@ -1057,12 +1082,6 @@ const app_pic = {
                     abv:"NJ",
                     image:"https://d30tgmewtclfrp.cloudfront.net/New Jersey/Thumbnail/img.png",
                     url:"https://www.masrikdahir.com/map/nj",
-                },
-                {
-                    title:"Virginia",
-                    abv:"VA",
-                    image:"https://d30tgmewtclfrp.cloudfront.net/Virginia/Thumbnail/img.png",
-                    url:"https://www.masrikdahir.com/map/va",
                 },
                 {
                     title:"West Virginia",
