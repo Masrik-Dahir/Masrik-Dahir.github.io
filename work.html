@@ -309,7 +309,7 @@
                 <bdi v-if="this.windowWidth >= 1200">
                     <b class="color w3-text-teal;" style="float: right; color:crimson;">
                         <bdi style="font-size: calc(10px + .5vw);">Jan 2025 - <span
-                                style="background-color: crimson; color:white; padding: 2px">Current</span></bdi>
+                                style="background-color: crimson; color:white; padding: 2px">Present</span></bdi>
                     </b>
                 </bdi>
             </h4>
@@ -330,24 +330,26 @@
 
                             <div style="display: flex; justify-content: flex-end; align-items: center;">
 
-
                             </div>
                         </TD>
                     </TR>
                 </TABLE>
 
                 <div style="color:transparent;display: flex; flex-wrap: wrap;margin-left: 10px; margin-top: 15px" v-if="this.windowWidth < 1200">
-
                 </div>
             </ul>
             <p1>
                 <ul>
                     <bdi v-if="this.windowWidth < 1200">
                         <li class="color w3-text-teal;" style="">
-                            <bdi style="">Jan 2025 - Current</bdi>
+                            <bdi style="">Jan 2025 - Present</bdi>
                         </li>
                     </bdi>
-
+                    <li>Designed and implemented a scalable, event-driven microservices architecture on AWS to automate detection of expired IAM and ACM certificates across all Capital One accounts. Utilized decoupled Lambda functions orchestrated via SQS queues: one function aggregated multi-account metadata and published to SQS; a second function concurrently consumed messages to identify expired certificates and relay findings to a downstream SQS queue, which triggered a final Lambda function to persist results in DynamoDB for centralized auditing and compliance reporting
+                    </li>
+                    <li>Led the migration of secrets for business applications (BACERTIFICATECATALOG, BAACMAUTOMATION, BATLSCERTMANAGER) to AWS Secrets Manager in compliance with ETB-1943. Transitioned from unmanaged to managed secrets, automating secret lifecycle management and eliminating operational overhead and run-the-engine work
+                    </li>
+                    <li>Developed and integrated live dependency tests for business applications (BACERTIFICATECATALOG, BATLSCERTMANAGER) in accordance with CTB5 standards. Migrated test framework from Puppeteer to Playwright, improving CI/CD reliability, reducing flakiness, accelerating build times, and resolving long-standing technical debt</li>
                 </ul>
             </p1>
             <hr>
@@ -362,7 +364,7 @@
                 <bdi v-if="this.windowWidth >= 1200">
                     <b class="color w3-text-teal;" style="float: right; color:crimson;">
                         <bdi style="font-size: calc(10px + .5vw);">Jul 2023 - <span
-                                style="background-color: transparent; color:crimson; padding: 2px">Oct 2024</span></bdi>
+                                style="background-color: transparent; color:crimson; padding: 2px">Dec 2024</span></bdi>
                     </b>
                 </bdi>
             </h4>
@@ -453,7 +455,7 @@
                 <ul>
                     <bdi v-if="this.windowWidth < 1200">
                         <li class="color w3-text-teal;" style="">
-                            <bdi style="">Jul 2023 - Oct 2024</bdi>
+                            <bdi style="">Jul 2023 - Dec 2024</bdi>
                         </li>
                     </bdi>
                     <li>C#, .NET, .NET Framework, Entity Framework, ASP.NET, ASP.NET Core, NUnit</li>
