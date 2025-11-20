@@ -3181,18 +3181,43 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
 
 
 // Fetch data and handle errors with async/await and try/catch
+// Fetch data from CloudFront with better diagnostics
 async function fetchData() {
+    const url = 'https://d3dw5jtb3w1kgy.cloudfront.net/Json/image.json';
+
     try {
-        const response = await get('https://d3dw5jtb3w1kgy.cloudfront.net/Json/image.json');
+        const response = await fetch(`${url}?cb=${Date.now()}`, {
+            mode: "cors",
+            credentials: "omit",
+            cache: "no-store",
+        });
+
+        // Helpful logging to debug CORS/header issues
+        console.log("Fetch status:", response.status);
+        console.log("Content-Type:", response.headers.get("content-type"));
+        console.log("ACAO header:", response.headers.get("access-control-allow-origin"));
+
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            const text = await response.text().catch(() => "");
+            console.error("Non-OK response body preview:", text.slice(0, 200));
+            throw new Error(`Network response was not ok (${response.status})`);
         }
-        return await response.json();
+
+        const text = await response.text();
+        // If we got HTML/XML, this will show you right away
+        if (text.trim().startsWith("<")) {
+            console.error("Got non-JSON response preview:", text.slice(0, 200));
+            throw new Error("Response was not JSON (starts with '<')");
+        }
+
+        return JSON.parse(text);
+
     } catch (err) {
-        console.error('Error fetching JSON:', err);
+        console.error("Error fetching JSON:", err);
         return [];
     }
 }
+
 
 // Define a function to mount Vue instances
 function mountVueInstances(images) {
