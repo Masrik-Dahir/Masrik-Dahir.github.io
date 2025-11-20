@@ -1,20 +1,20 @@
 function chargebtc() {
     var image = document.getElementById("image-btc");
-    image.src = "https://d30tgmewtclfrp.cloudfront.net/btc.svg";
+    image.src = "https://d3dw5jtb3w1kgy.cloudfront.net/btc.svg";
     setTimeout(function () {
-        image.src = "https://d30tgmewtclfrp.cloudfront.net/eth.svg";
+        image.src = "https://d3dw5jtb3w1kgy.cloudfront.net/eth.svg";
     }, 1000);
     setTimeout(function () {
-        image.src = "https://d30tgmewtclfrp.cloudfront.net/algo.svg";
+        image.src = "https://d3dw5jtb3w1kgy.cloudfront.net/algo.svg";
     }, 2000);
     setTimeout(function () {
-        image.src = "https://d30tgmewtclfrp.cloudfront.net/atom.svg";
+        image.src = "https://d3dw5jtb3w1kgy.cloudfront.net/atom.svg";
     }, 3000);
     setTimeout(function () {
-        image.src = "https://d30tgmewtclfrp.cloudfront.net/dot.svg";
+        image.src = "https://d3dw5jtb3w1kgy.cloudfront.net/dot.svg";
     }, 4000);
     setTimeout(function () {
-        image.src = "https://d30tgmewtclfrp.cloudfront.net/aave.svg";
+        image.src = "https://d3dw5jtb3w1kgy.cloudfront.net/aave.svg";
     }, 5000);
 }
 chargebtc();
