@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Virginia Slideshow</title>
+
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <style>
+        :root {
+            --bg: #0c0f14;
+            --panel: #141923;
+            --panel-2: #0f1420;
+            --text: #e6e8ee;
+            --muted: #97a0b3;
+            --accent: #7aa2ff;
+            --accent-2: #9bffcc;
+            --radius: 16px;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: radial-gradient(1200px 600px at 20% -10%, #1b2440, transparent),
+            radial-gradient(1000px 700px at 100% 0%, #1a3a2d, transparent),
+            var(--bg);
+            color: var(--text);
+        }
+
+        .wrap {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 16px 24px;
+        }
+
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: clamp(20px, 2.2vw, 28px);
+            margin: 0;
+            letter-spacing: 0.3px;
+        }
+
+        .muted { color: var(--muted); font-size: 14px; }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #1e2533, #161c28);
+            color: var(--text);
+            border: 1px solid #262f41;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.15s ease;
+            user-select: none;
+        }
+        .btn:hover { transform: translateY(-1px); border-color: #34405a; }
+        .btn.active { border-color: var(--accent); box-shadow: 0 0 0 2px #7aa2ff22 inset; }
+
+        .search {
+            background: var(--panel);
+            border: 1px solid #27324a;
+            color: var(--text);
+            border-radius: 999px;
+            padding: 8px 12px;
+            outline: none;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, var(--panel), var(--panel-2));
+            border: 1px solid #222b3e;
+            border-radius: var(--radius);
+            padding: 12px;
+            box-shadow: 0 10px 30px #0007;
+        }
+
+        /* slideshow */
+        .slideshow {
+            position: relative;
+            overflow: hidden;
+            border-radius: calc(var(--radius) - 4px);
+            background: #0a0d12;
+            min-height: 320px;
+            display: grid;
+            place-items: center;
+        }
+        .slideshow img {
+            width: 100%;
+            height: min(70vh, 680px);
+            object-fit: contain;
+            display: none;
+            background: #05070a;
+        }
+        .slideshow img.active {
+            display: block;
+            animation: fade 240ms ease;
+        }
+        @keyframes fade {
+            from { opacity: 0.4; transform: scale(0.995); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .navBtn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            background: #101522cc;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: 0.15s ease;
+            border: 1px solid #2b3550;
+            backdrop-filter: blur(6px);
+        }
+        .navBtn:hover { background: #161d2ecc; }
+        .navBtn.prev { left: 10px; }
+        .navBtn.next { right: 10px; }
+
+        /* dots */
+        .dots {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: #3a4254;
+            border: 1px solid #4a5367;
+            cursor: pointer;
+            transition: 0.12s ease;
+        }
+        .dot.active {
+            width: 20px;
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* thumbnails */
+        .thumbs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .thumb {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0a0d12;
+            border: 1px solid #262f41;
+            cursor: pointer;
+            transition: 0.12s ease;
+        }
+        .thumb:hover { transform: translateY(-2px); border-color: #3a4762; }
+        .thumb img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+        }
+        .thumb .label {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #0009;
+            color: #fff;
+            border: 1px solid #ffffff22;
+        }
+
+        @media (max-width: 700px) {
+            .slideshow img { height: min(60vh, 480px); }
+            .thumb img { height: 90px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="wrap">
+    <div id="app_va"></div>
+</div>
+
+<script>
+    async function fetchData() {
+        const url = "https://d3dw5jtb3w1kgy.cloudfront.net/Json/image.json";
+        try {
+            const response = await fetch(`${url}?cb=${Date.now()}`, {
+                mode: "cors",
+                credentials: "omit",
+                cache: "no-store",
+            });
+            if (!response.ok) throw new Error(`Bad status ${response.status}`);
+            return await response.json();
+        } catch (err) {
+            console.error("Error fetching JSON:", err);
+            return [];
+        }
+    }
+
+    // App that contains ONLY Virginia images
+    const VAImagesApp = {
+        name: "va_images_slideshow",
+        data() {
+            return {
+                state: null,
+                resources: [],
+                searchQuery: "",
+                isSlideVisible: true,
+                activeIdx: 0
+            };
+        },
+        computed: {
+            filteredResources() {
+                if (!this.searchQuery) return this.resources;
+                const q = this.searchQuery.toLowerCase().trim().split(/\s+/);
+                return this.resources.filter(r =>
+                    q.every(part =>
+                        r.title.toLowerCase().includes(part) ||
+                        r.state.toLowerCase().includes(part)
+                    )
+                );
+            },
+            activeResource() {
+                return this.filteredResources[this.activeIdx];
+            }
+        },
+        watch: {
+            filteredResources(newList) {
+                if (!newList.length) this.activeIdx = 0;
+                else if (this.activeIdx >= newList.length) this.activeIdx = 0;
+            }
+        },
+        methods: {
+            selectImage(i) {
+                this.activeIdx = i;
+                this.scrollToActiveThumb();
+            },
+            next() {
+                const n = this.filteredResources.length;
+                if (!n) return;
+                this.activeIdx = (this.activeIdx + 1) % n;
+                this.scrollToActiveThumb();
+            },
+            prev() {
+                const n = this.filteredResources.length;
+                if (!n) return;
+                this.activeIdx = (this.activeIdx - 1 + n) % n;
+                this.scrollToActiveThumb();
+            },
+            showSlide() { this.isSlideVisible = true; },
+            showGallery() { this.isSlideVisible = false; },
+            scrollToActiveThumb() {
+                this.$nextTick(() => {
+                    const el = this.$refs[`thumb${this.activeIdx}`];
+                    if (el && el.scrollIntoView) {
+                        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    }
+                });
+            },
+            onKey(e) {
+                if (!this.isSlideVisible) return;
+                if (e.key === "ArrowRight") this.next();
+                if (e.key === "ArrowLeft") this.prev();
+            }
+        },
+        async mounted() {
+            window.addEventListener("keydown", this.onKey);
+
+            const states = await fetchData();
+
+            // Find Virginia by abbreviation OR name (case/space safe)
+            const va = states.find(s => {
+                const abbr = String(s.abbreviation || "").toUpperCase().trim();
+                const name = String(s.name || "").toLowerCase().trim();
+                return abbr === "VA" || name === "virginia";
+            });
+
+            if (!va) {
+                console.warn("Virginia not found in image.json");
+                this.resources = [];
+                return;
+            }
+
+            this.state = va;
+
+            const num = Number(va.numImages || 0);
+            const stateName = va.name;                  // folder name in your CDN
+            const abbr = String(va.abbreviation).toUpperCase();
+
+            const list = [];
+            for (let i = 1; i <= num; i++) {
+                list.push({
+                    title: `${abbr} ${i}`,
+                    state: abbr,
+                    index: i,
+                    url: `https://d3dw5jtb3w1kgy.cloudfront.net/${stateName}/${i}.jpg`
+                });
+            }
+
+            this.resources = list;
+            this.activeIdx = 0;
+        },
+        beforeUnmount() {
+            window.removeEventListener("keydown", this.onKey);
+        },
+        template: `
+          <header>
+            <div>
+              <h1>Virginia — Slideshow</h1>
+              <div class="muted">{{ resources.length }} Virginia images</div>
+            </div>
+
+            <div class="controls">
+              <input class="search" v-model="searchQuery" placeholder="Search e.g. 'VA 3' or '3'" />
+              <button class="btn" :class="{active:isSlideVisible}" @click="showSlide()">Slideshow</button>
+              <button class="btn" :class="{active:!isSlideVisible}" @click="showGallery()">Gallery</button>
+            </div>
+          </header>
+
+          <div class="panel">
+            <!-- Slideshow view -->
+            <div v-if="isSlideVisible">
+              <div class="slideshow">
+                <button class="navBtn prev" @click="prev()" aria-label="Previous">‹</button>
+                <button class="navBtn next" @click="next()" aria-label="Next">›</button>
+
+                <img
+                    v-for="(img, i) in filteredResources"
+                    :key="img.url"
+                    :src="img.url"
+                    :alt="img.title"
+                    :class="{active: i === activeIdx}"
+                    loading="lazy"
+                />
+              </div>
+
+              <div class="dots" v-if="filteredResources.length">
+                <div
+                    v-for="(img, i) in filteredResources"
+                    :key="img.url + '_dot'"
+                    class="dot"
+                    :class="{active:i===activeIdx}"
+                    @click="selectImage(i)"
+                ></div>
+              </div>
+
+              <div class="muted" style="text-align:center; margin-top:8px" v-if="activeResource">
+                Showing: {{ activeResource.title }}
+              </div>
+            </div>
+
+            <!-- Gallery view -->
+            <div v-else>
+              <div v-if="!filteredResources.length" class="muted">No results.</div>
+
+              <div class="thumbs">
+                <div
+                    v-for="(img, i) in filteredResources"
+                    :key="img.url + '_thumb'"
+                    class="thumb"
+                    @click="selectImage(i); showSlide()"
+                    :ref="'thumb' + i"
+                >
+                  <img :src="img.url" :alt="img.title" loading="lazy"/>
+                  <div class="label">{{ img.title }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+    };
+
+    // Mount into #app_va
+    const el = document.querySelector("#app_va");
+    if (el) Vue.createApp(VAImagesApp).mount("#app_va");
+    else console.warn("No #app_va element found.");
+</script>
+</body>
+</html>
