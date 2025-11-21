@@ -3118,13 +3118,13 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
             let resources = [];
             for (let i = 1; i <= numImages; i++) {
                 resources.push({
-                    currentIndex: 0,
                     title: `${i}`,
                     url: `https://d3dw5jtb3w1kgy.cloudfront.net/${stateName}/${i}.jpg`, // Adjust folder and file name as per your structure
                 });
             }
 
             return {
+                currentIndex: 0,
                 isSlideVisible: true,
                 resources: resources,
                 name: stateName
