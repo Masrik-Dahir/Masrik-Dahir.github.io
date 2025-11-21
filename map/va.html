@@ -360,11 +360,11 @@
 
                     <div id="showGal" v-if="!isSlideVisible">
                         <div class="inactive-container w3-margin-top w3-margin-left w3-margin-right">
-                            <div v-for="item in resources" :key="item.id || item.url">
+                            <div v-for="(item, index) in resources" :key="index">
                                 <div v-if="item.isActive" class="image-container active-image">
                                     <img :src="item.url" />
                                 </div>
-                                <div v-else class="inactive-image image-container" @click="selectImage(item.id)">
+                                <div v-if="!item.isActive" class="inactive-image image-container" @click="selectImage(index)">
                                     <img :src="item.url" />
                                 </div>
                             </div>
