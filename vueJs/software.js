@@ -3124,7 +3124,6 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
             }
 
             return {
-                currentIndex: 0,
                 isSlideVisible: true,
                 resources: resources,
                 name: stateName
@@ -3154,7 +3153,6 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
         },
         methods:{
             selectImage(index) {
-                this.currentIndex = index;
                 this.resources.forEach((item, i) => {
                     item.isActive = (i === index); // Set active state based on clicked index
                 });
