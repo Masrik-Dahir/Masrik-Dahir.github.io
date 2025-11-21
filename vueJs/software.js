@@ -3220,22 +3220,18 @@ async function fetchData() {
 
 
 // Define a function to mount Vue instances
+function safeMount(app, selector) {
+    if (document.querySelector(selector)) app.mount(selector);
+}
+
 function mountVueInstances(images) {
     images.forEach(state => {
         const baseId = `app_${state.abbreviation.toLowerCase().replace(/\s+/g, '_')}`;
 
-        // Mount Vue instances to different elements
-        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
-            .mount(`#${baseId}`);
-
-        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
-            .mount(`#${baseId}_2`);
-
-        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
-            .mount(`#${baseId}_3`);
-
-        Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages))
-            .mount(`.${baseId}`);
+        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}`);
+        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}_2`);
+        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}_3`);
+        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `.${baseId}`);
     });
 }
 
