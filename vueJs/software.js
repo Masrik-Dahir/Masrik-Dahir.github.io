@@ -3112,37 +3112,37 @@ Vue.createApp(app_pic_new_zealand).mount('#app_pic_new_zealand')
 
 function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
     return {
-        name: `app_${stateAbbreviation.toLowerCase()}`, // Component name
+        name: `app_${stateAbbreviation.toLowerCase()}`,
         data() {
-            // Generate resources array dynamically based on numImages
             let resources = [];
             for (let i = 1; i <= numImages; i++) {
                 resources.push({
                     title: `${i}`,
-                    url: `https://d3dw5jtb3w1kgy.cloudfront.net/${stateName}/${i}.jpg`, // Adjust folder and file name as per your structure
+                    url: `https://d3dw5jtb3w1kgy.cloudfront.net/${stateName}/${i}.jpg`,
+                    isActive: false
                 });
             }
 
             return {
+                currentIndex: 0,
+                searchQuery: "",
                 isSlideVisible: true,
-                resources: resources,
+                resources,
                 name: stateName
             };
         },
         mounted() {
-            if (this.resources.length > 0) {
-                this.resources[0].isActive = true; // Set the first item as active
-            }
+            if (this.resources.length) this.resources[0].isActive = true;
         },
         computed: {
             resultQuery() {
                 if (this.searchQuery) {
-                    return this.resources.filter((item) => {
-                        return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v))
-                    });
-                } else {
-                    return this.resources;
+                    return this.resources.filter(item =>
+                        this.searchQuery.toLowerCase().split(" ")
+                            .every(v => item.title.toLowerCase().includes(v))
+                    );
                 }
+                return this.resources;
             },
             limitedResultQuery() {
                 return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 30));
@@ -3151,10 +3151,11 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                 return this.resultQuery.slice(0, Math.min(this.resultQuery.length, 10));
             }
         },
-        methods:{
+        methods: {
             selectImage(index) {
+                this.currentIndex = index;
                 this.resources.forEach((item, i) => {
-                    item.isActive = (i === index); // Set active state based on clicked index
+                    item.isActive = (i === index);
                 });
                 this.scrollToActiveImage();
             },
@@ -3162,64 +3163,41 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                 this.$nextTick(() => {
                     const activeIndex = this.resources.findIndex(item => item.isActive);
                     if (activeIndex !== -1) {
-                        const activeImage = this.$refs[`activeImage${activeIndex}`]; // Use a dynamic ref
+                        const activeImage = this.$refs[`activeImage${activeIndex}`];
                         if (activeImage) {
                             activeImage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         }
                     }
                 });
             },
-            showSlide() {
-                this.isSlideVisible = true; // Show slides
-            },
-            showGallery() {
-                this.isSlideVisible = false; // Show gallery
-            },
+            showSlide() { this.isSlideVisible = true; },
+            showGallery() { this.isSlideVisible = false; },
+
+            // Dot click -> sync Vue + global slideshow
+            currentSlideVue(index) {
+                this.currentIndex = index;
+                if (window.currentSlide) window.currentSlide(index + 1);
+            }
         }
     };
 }
 
-
-// Fetch data and handle errors with async/await and try/catch
-// Fetch data from CloudFront with better diagnostics
 async function fetchData() {
     const url = 'https://d3dw5jtb3w1kgy.cloudfront.net/Json/image.json';
-
     try {
         const response = await fetch(`${url}?cb=${Date.now()}`, {
             mode: "cors",
             credentials: "omit",
             cache: "no-store",
         });
-
-        // Helpful logging to debug CORS/header issues
-        console.log("Fetch status:", response.status);
-        console.log("Content-Type:", response.headers.get("content-type"));
-        console.log("ACAO header:", response.headers.get("access-control-allow-origin"));
-
-        if (!response.ok) {
-            const text = await response.text().catch(() => "");
-            console.error("Non-OK response body preview:", text.slice(0, 200));
-            throw new Error(`Network response was not ok (${response.status})`);
-        }
-
-        const text = await response.text();
-        // If we got HTML/XML, this will show you right away
-        if (text.trim().startsWith("<")) {
-            console.error("Got non-JSON response preview:", text.slice(0, 200));
-            throw new Error("Response was not JSON (starts with '<')");
-        }
-
-        return JSON.parse(text);
-
+        if (!response.ok) throw new Error(`Bad status ${response.status}`);
+        return await response.json();
     } catch (err) {
         console.error("Error fetching JSON:", err);
         return [];
     }
 }
 
-
-// Define a function to mount Vue instances
 function safeMount(app, selector) {
     if (document.querySelector(selector)) app.mount(selector);
 }
@@ -3235,7 +3213,6 @@ function mountVueInstances(images) {
     });
 }
 
-// Use the fetched data to mount Vue instances
 fetchData().then(mountVueInstances);
 
 
