@@ -3124,7 +3124,7 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
             }
 
             return {
-                currentIndex: 0,
+                // currentIndex: 0,
                 searchQuery: "",
                 isSlideVisible: true,
                 resources,
