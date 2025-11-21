@@ -555,24 +555,32 @@
 
     // Function to display slides
     function showSlides(n) {
-        var i;
+        var slides = document.getElementsByClassName("content-slide"); // re-query every time
         var dots = document.getElementsByClassName("content-dot");
 
-        // Wrap around slideIndex if it goes out of bounds
-        if (n > slides.length) { slideIndex = 1; }
-        if (n < 1) { slideIndex = slides.length; }
+        if (!slides.length) return; // Vue hasn't rendered slides / slideshow hidden
 
-        // Hide all slides and remove the active class from all dots
-        for (i = 0; i < slides.length; i++) {
+        // Wrap around slideIndex if it goes out of bounds
+        if (n > slides.length) slideIndex = 1;
+        if (n < 1) slideIndex = slides.length;
+
+        // Hide all slides
+        for (var i = 0; i < slides.length; i++) {
             slides[i].style.display = "none";
         }
-        for (i = 0; i < dots.length; i++) {
-            dots[i].className = dots[i].className.replace(" content-active-dot", "");
+
+        // Clear active dot
+        for (var j = 0; j < dots.length; j++) {
+            dots[j].className = dots[j].className.replace(" content-active-dot", "");
         }
 
-        // Display the current slide and mark the corresponding dot as active
+        // Show current slide
         slides[slideIndex - 1].style.display = "block";
-        dots[slideIndex - 1].className += " content-active-dot";
+
+        // Only touch dot if it exists (lengths may differ)
+        if (dots[slideIndex - 1]) {
+            dots[slideIndex - 1].className += " content-active-dot";
+        }
     }
 
     // Optional: Resetting Auto navigation upon manual changes
