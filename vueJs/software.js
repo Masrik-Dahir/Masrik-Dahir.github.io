@@ -3153,7 +3153,7 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
         },
         methods: {
             selectImage(index) {
-                this.currentIndex = index;
+                // this.currentIndex = index;
                 this.resources.forEach((item, i) => {
                     item.isActive = (i === index);
                 });
@@ -3175,7 +3175,7 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
 
             // Dot click -> sync Vue + global slideshow
             currentSlideVue(index) {
-                this.currentIndex = index;
+                // this.currentIndex = index;
                 if (window.currentSlide) window.currentSlide(index + 1);
             }
         }
