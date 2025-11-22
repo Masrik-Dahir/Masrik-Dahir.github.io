@@ -445,30 +445,29 @@
                                                     <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/home.png" style="width: min(40px, max(1vw + 10px, 25px));">
                                                 </a>
                                             </button>
-
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="prevSlide()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="prevSlide()" >
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/left_arrow.png" style="width: min(40px, max(1vw + 10px, 25px));">
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px"
+                                            <button v-show="isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px"
                                                     @click="showGallery" onclick="showGalById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/gallery.png" style="width: min(40px, max(1vw + 10px, 25px));padding-top: 3px;padding-bottom: 3px">
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px"
+                                            <button v-show="!isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px"
                                                     @click="showSlide" onclick="showSlideById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/slideshow.png" style="width: min(40px, max(1vw + 10px, 25px));">
                                             </button>
 
-                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px" onclick="pauseSlideShow()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4" style="width: fit-content;margin: 5px" onclick="pauseSlideShow()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/pause.png" style="width: min(40px, max(1vw + 10px, 25px));">
                                             </button>
 
-                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px" onclick="resumeSlideShow()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4" style="width: fit-content;margin: 5px" onclick="resumeSlideShow()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/resume.webp" style="width: min(40px, max(1vw + 10px, 25px));">
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="nextSlide()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="nextSlide()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/right_arrow.png" style="width: min(40px, max(1vw + 10px, 25px));">
                                             </button>
 
@@ -496,29 +495,29 @@
                                                 </a>
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="prevSlide()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="prevSlide()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/left_arrow.png" style="width: calc(1vw + 20px);">
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px"
+                                            <button v-show="isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px"
                                                     @click="showGallery" onclick="showGalById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/gallery.png" style="width: calc(1vw + 20px);">
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px"
+                                            <button v-show="!isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px"
                                                     @click="showSlide" onclick="showSlideById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/slideshow.png" style="width: calc(1vw + 20px);">
                                             </button>
 
-                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px" onclick="pauseSlideShow()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px" onclick="pauseSlideShow()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/pause.png" style="width: calc(1vw + 20px);">
                                             </button>
 
-                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px" onclick="resumeSlideShow()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px" onclick="resumeSlideShow()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/resume.webp" style="width: calc(1vw + 20px);">
                                             </button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="nextSlide()">
+                                            <button v-show="isSlideVisible" class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="nextSlide()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/right_arrow.png" style="width: calc(1vw + 20px);">
                                             </button>
 
