@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Gallery</title>
 
-
     <!--    Metadata imports-->
     <link rel="icon" type="image/gif/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
     <title>Masrik Dahir</title>
@@ -29,7 +28,6 @@
     <link rel="stylesheet" href="../css/popup.css">
     <link rel="stylesheet" href="../css/vintage.css">
 
-
     <!--    JS imports-->
     <script src="../library/code.jquery.com.jquery-1.10.2.js"></script>
     <script src="../js/html.js"></script>
@@ -43,7 +41,6 @@
 
     <!--    Vue JS imports-->
     <script src="../library/vue@3.2.36.dist.vue.global.js"></script>
-
 
     <!--    Top Nav -->
     <script src="../library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
@@ -85,22 +82,22 @@
             width: 150px;
         }
         .inactive-image:hover {
-            transform: scale(1.1); /* Increase the scale on hover */
-            z-index: 2; /* Bring the hovered image to front */
+            transform: scale(1.1);
+            z-index: 2;
         }
         .active-image {
-            width: 100%; /* Full width for active image */
+            width: 100%;
         }
         .active-image img {
-            transition: none; /* Disable transition for active image on hover */
+            transition: none;
         }
         .inactive-container {
             display: flex;
-            flex-wrap: wrap; /* Allow wrapping */
-            gap: 10px; /* Space between images */
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .inactive-container .image-container {
-            flex: 1 1 150px; /* Set smaller width for inactive images */
+            flex: 1 1 150px;
         }
     </style>
 
@@ -149,7 +146,6 @@
                     </button>
                 </a>
 
-
                 <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
@@ -162,8 +158,6 @@
                         </div>
                     </button>
                 </a>
-
-
 
                 <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
                     <button class="glow-on-hover-nav" type="button"
@@ -193,8 +187,8 @@
             </div>
             <br><br><br>
         </div>
-
     </div>
+
     <div class="resizing-1026-less" style="margin-bottom: 70px">
         <div class="popup" id="popup-3" style="">
             <div class="overlay" onclick="closePopup('3')"></div>
@@ -213,8 +207,8 @@
                                     </button>
                                 </a>
                             </TD>
-
                         </TR>
+
                         <TR>
                             <TD>
                                 <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
@@ -227,9 +221,8 @@
                                     </button>
                                 </a>
                             </TD>
-
-
                         </TR>
+
                         <TR>
                             <TD>
                                 <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
@@ -244,8 +237,6 @@
                             </TD>
                         </TR>
 
-
-
                         <TR>
                             <TD>
                                 <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
@@ -257,11 +248,8 @@
                                         </div>
                                     </button>
                                 </a>
-
                             </TD>
                         </TR>
-
-
 
                         <TR>
                             <TD>
@@ -287,39 +275,27 @@
                                             </div>Travel</b>
                                         </div>
                                     </button>
-
                                 </a>
                             </TD>
                         </TR>
                     </TABLE>
-
                 </div>
-
             </div>
         </div>
 
         <div class="topnav-2 navbar-fixed-top">
-
-
-
             <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px; padding-top: 7px; padding-bottom: 3px">
                 <div class="main">Masrik Dahir</div>
             </h5>
 
-            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px; border: none"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/menu.png" width="25" height="20" alt="Masrik Dahir">
+            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav"
+                    style="float: right; padding: 5px; margin-top: 15px; border: none">
+                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/menu.png" width="25" height="20" alt="Masrik Dahir">
             </button>
-
-
-
-
         </div>
     </div>
 </div>
-<script>
-    function togglePopup(num) {
-        document.getElementById(`popup-${num}`).classList.toggle("active");
-    }
-</script>
+
 <script>
     function togglePopup(id) {
         var popup = document.getElementById('popup-' + id);
@@ -331,7 +307,6 @@
         popup.classList.remove('active');
     }
 
-    // Optional: Close the popup when clicking outside the content (the overlay)
     document.querySelectorAll('.overlay').forEach(overlay => {
         overlay.addEventListener('click', function() {
             const popup = this.parentElement;
@@ -351,13 +326,15 @@
                         <div class="it">{{ name }}</div>
                     </div>
 
-                    <div id="showSlide" v-if="isSlideVisible">
+                    <!-- CHANGED v-if -> v-show so both exist; JS can toggle display -->
+                    <div id="showSlide" v-show="isSlideVisible">
                         <div v-for="item in resources" :key="item.id" class="content-slide">
                             <img :src="item.url" style="width:100%; height: 100%; object-fit: contain; padding: 0px"/>
                         </div>
                     </div>
 
-                    <div id="showGal" v-if="!isSlideVisible">
+                    <!-- CHANGED v-if -> v-show -->
+                    <div id="showGal" v-show="!isSlideVisible">
                         <div class="inactive-container w3-margin-top w3-margin-left w3-margin-right">
                             <div v-for="(item, index) in resources" :key="index">
                                 <div v-if="item.isActive" class="image-container active-image">
@@ -378,62 +355,102 @@
                                         <div class="content-dot-container" id="" style="padding: 10px">
 
                                             <button class="glow-on-hover4 Blazing" style="margin: 5px">
-                                                <a href="http://www.masrikdahir.com" class="" style="width: 40px;"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/home.png" style="width: 40px;"></a>
+                                                <a href="http://www.masrikdahir.com" class="" style="width: 40px;">
+                                                    <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/home.png" style="width: 40px;">
+                                                </a>
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="prevSlide()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/left_arrow.png" style="width: 40px;"></button>
 
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" @click="showGallery">
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="prevSlide()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/left_arrow.png" style="width: 40px;">
+                                            </button>
+
+                                            <!-- ADDED onclick fallback so slideshow stops/starts correctly -->
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px"
+                                                    @click="showGallery" onclick="showGalById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/gallery.png" style="width: 40px;">
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" @click="showSlide">
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px"
+                                                    @click="showSlide" onclick="showSlideById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/slideshow.png" style="width: 40px;">
                                             </button>
 
-                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px"  onclick="pauseSlideShow()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/pause.png" style="width: 40px;"></button>
-                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px"  onclick="resumeSlideShow()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/resume.webp" style="width: 40px;"></button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="nextSlide()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/right_arrow.png" style="width: 40px;"></button>
+                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px" onclick="pauseSlideShow()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/pause.png" style="width: 40px;">
+                                            </button>
+
+                                            <button class="glow-on-hover4" style="width: fit-content;margin: 5px" onclick="resumeSlideShow()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/resume.webp" style="width: 40px;">
+                                            </button>
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content;margin: 5px" onclick="nextSlide()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/right_arrow.png" style="width: 40px;">
+                                            </button>
 
                                             <div v-for="(item, index) in limitedResultQuery" :key="index">
                                                 <img v-if="currentIndex === index" :src="item.url" :alt="item.title" />
                                                 <span class="content-dot"
                                                       style="margin-top: 20px; width: 8px; height: 8px"
                                                       @click="currentSlide(index)">
-    </span>
+                                                </span>
                                             </div>
 
                                             <span style="float: left;" onclick="nextSlide()">
-                                    <img src="https://d3dw5jtb3w1kgy.cloudfront.net/arr.png" style="width: 15px;margin-top: 17px">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/arr.png" style="width: 15px;margin-top: 17px">
+                                            </span>
 
-                                </span>
                                             <button class="glow-on-hover4 Blazing" style="margin: 5px">
-                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 40px"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/map.png" style="width: 40px;"></a>
+                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 40px">
+                                                    <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/map.png" style="width: 40px;">
+                                                </a>
                                             </button>
                                         </div>
                                     </TD>
                                 </TR>
                             </TABLE>
                         </div>
+
                         <div class="resizing-1026-less">
                             <TABLE WIDTH="100%">
                                 <TR>
                                     <TD>
                                         <div class="content-dot-container" style="padding: 2px">
                                             <button class="glow-on-hover4 Blazing" style="padding: 2px; margin: 5px">
-                                                <a href="http://www.masrikdahir.com" class="" style="width: calc(1vw + 20px);"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/home.png" style="width: calc(1vw + 20px);"></a>
+                                                <a href="http://www.masrikdahir.com" class="" style="width: calc(1vw + 20px);">
+                                                    <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/home.png" style="width: calc(1vw + 20px);">
+                                                </a>
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="prevSlide()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/left_arrow.png" style="width: calc(1vw + 20px);"></button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" @click="showGallery">
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="prevSlide()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/left_arrow.png" style="width: calc(1vw + 20px);">
+                                            </button>
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px"
+                                                    @click="showGallery" onclick="showGalById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/gallery.png" style="width: calc(1vw + 20px);">
                                             </button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" @click="showSlide">
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px"
+                                                    @click="showSlide" onclick="showSlideById()">
                                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/slideshow.png" style="width: calc(1vw + 20px);">
                                             </button>
-                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px"  onclick="pauseSlideShow()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/pause.png" style="width: calc(1vw + 20px);"></button>
-                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px"  onclick="resumeSlideShow()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/resume.webp" style="width: calc(1vw + 20px);"></button>
-                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="nextSlide()"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/right_arrow.png" style="width: calc(1vw + 20px);"></button>
-                                            <span style="float: left;" onclick="nextSlide()"></span>
+
+                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px" onclick="pauseSlideShow()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/pause.png" style="width: calc(1vw + 20px);">
+                                            </button>
+
+                                            <button class="glow-on-hover4" style="width: fit-content; padding: 2px; margin: 5px" onclick="resumeSlideShow()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/resume.webp" style="width: calc(1vw + 20px);">
+                                            </button>
+
+                                            <button class="glow-on-hover4 Blazing" style="width: fit-content; padding: 2px; margin: 5px" onclick="nextSlide()">
+                                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/right_arrow.png" style="width: calc(1vw + 20px);">
+                                            </button>
+
                                             <button class="glow-on-hover4 Blazing" style="padding: 2px; margin: 5px">
-                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 20px"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/map.png" style="width: calc(1vw + 20px);"></a>
+                                                <a href="http://www.masrikdahir.com/map" class="" style="width: 20px">
+                                                    <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/map.png" style="width: calc(1vw + 20px);">
+                                                </a>
                                             </button>
                                         </div>
                                     </TD>
@@ -468,7 +485,6 @@
             </b>
         </a>
 
-
         <a href="https://orcid.org/0000-0002-7841-310X" style="text-decoration: none" target="blank">
             <b style="font-size:37px; color: black" class='w3-hover-opacity'>
                 <img class="" style="width:41px; vertical-align: middle;padding: 0px; margin-bottom: 5px"
@@ -476,92 +492,64 @@
                      src="https://d3dw5jtb3w1kgy.cloudfront.net/orcid_white.png"/>
             </b>
         </a>
-
-
-
-
-
     </div>
     <br>
-
 </footer>
-
 
 </body>
 
+<!-- REPLACED your slideshow script with gallery-first + no auto-start -->
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Default to gallery view first
+        showGalById();
 
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeSlides(); // Initialize slides
-        setTimeout(function() {
-            showSlides(slideIndex); // Show the first slide after delay
-        }, 500); // Delay of 2000 milliseconds (2 seconds)
+        // Prepare slides but DO NOT auto-start slideshow
+        initializeSlides();
     });
 
-    // Get elements
-    var popup = document.getElementById("slideshowPopup");
-    var btn = document.getElementById("openSlideshow");
-    var span = document.getElementsByClassName("content-close")[0];
     var slides = document.getElementsByClassName("content-slide");
-    var prev = document.querySelector(".content-prev");
-    var next = document.querySelector(".content-next");
-
-
     var sla = document.getElementById("showSlide");
     var gal = document.getElementById("showGal");
 
-    var slideIndex = 1; // Start with the first slide
+    var slideIndex = 1;
+    var slideInterval = null; // don't start automatically
 
     function showSlideById() {
         console.log("Show Slide Button Clicked");
-        sla.style.display = "block"; // Show the slide
-        gal.style.display = "none";  // Hide the gallery
+        sla.style.display = "block";
+        gal.style.display = "none";
+        startSlideShow(); // start only when user clicks slideshow
     }
 
     function showGalById() {
         console.log("Show Gallery Button Clicked");
-        gal.style.display = "block";  // Show the gallery
-        sla.style.display = "none";    // Hide the slide
+        gal.style.display = "block";
+        sla.style.display = "none";
+        stopSlideShow(); // stop slideshow when switching to gallery
     }
 
-    // Function to initialize slides
     function initializeSlides() {
         for (var i = 0; i < slides.length; i++) {
-            slides[i].style.display = "none"; // Hide all slides initially
+            slides[i].style.display = "none";
         }
-        // Optionally, hide dots or initialize their state here if needed
     }
 
-    // Function to change slides
     function changeSlide(n) {
         showSlides(slideIndex += n);
     }
 
-    // Function to show the next slide
-    function nextSlide() {
-        changeSlide(1); // Increment slideIndex by 1
-    }
+    function nextSlide() { changeSlide(1); }
+    function prevSlide() { changeSlide(-1); }
+    function currentSlide(n) { showSlides(slideIndex = n); }
 
-    // Function to show the previous slide
-    function prevSlide() {
-        changeSlide(-1); // Decrement slideIndex by 1
-    }
-
-    // Function to show a specific slide
-    function currentSlide(n) {
-        showSlides(slideIndex = n);
-    }
-
-    // Function to display slides
     function showSlides(n) {
         var i;
         var dots = document.getElementsByClassName("content-dot");
 
-        // Wrap around slideIndex if it goes out of bounds
         if (n > slides.length) { slideIndex = 1; }
         if (n < 1) { slideIndex = slides.length; }
 
-        // Hide all slides and remove the active class from all dots
         for (i = 0; i < slides.length; i++) {
             slides[i].style.display = "none";
         }
@@ -569,31 +557,30 @@
             dots[i].className = dots[i].className.replace(" content-active-dot", "");
         }
 
-        // Display the current slide and mark the corresponding dot as active
         slides[slideIndex - 1].style.display = "block";
-        dots[slideIndex - 1].className += " content-active-dot";
+        if (dots[slideIndex - 1]) {
+            dots[slideIndex - 1].className += " content-active-dot";
+        }
     }
 
-    // Optional: Resetting Auto navigation upon manual changes
-    function resetSlideInterval() {
-        clearInterval(slideInterval);
-        slideInterval = setInterval(function() { changeSlide(1); }, 2000);
+    function startSlideShow() {
+        stopSlideShow(); // prevent double intervals
+        initializeSlides();
+        showSlides(slideIndex);
+        slideInterval = setInterval(function () {
+            changeSlide(1);
+        }, 2000);
     }
 
-    // Auto-change slides every 2000 milliseconds
-    var slideInterval = setInterval(function() { changeSlide(1); }, 2000);
-
-    // Pause and Resume functions
-    function pauseSlideShow() {
-        clearInterval(slideInterval);
+    function stopSlideShow() {
+        if (slideInterval) {
+            clearInterval(slideInterval);
+            slideInterval = null;
+        }
     }
 
-    function resumeSlideShow() {
-        resetSlideInterval(); // Calls reset to resume auto-navigation
-    }
-
-
-
-
+    function pauseSlideShow() { stopSlideShow(); }
+    function resumeSlideShow() { startSlideShow(); }
 </script>
 </html>
+```

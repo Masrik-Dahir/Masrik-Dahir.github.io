@@ -14,13 +14,24 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
             return {
                 // currentIndex: 0,
                 searchQuery: "",
-                isSlideVisible: true,
+
+                // ✅ GALLERY FIRST BY DEFAULT
+                isSlideVisible: false,
+
                 resources,
                 name: stateName
             };
         },
         mounted() {
             if (this.resources.length) this.resources[0].isActive = true;
+
+            // ✅ Force gallery after Vue mounts (prevents blank first load)
+            this.isSlideVisible = false;
+
+            // Sync with global DOM togglers if present
+            if (typeof window.showGalById === "function") {
+                window.showGalById();
+            }
         },
         computed: {
             resultQuery() {
@@ -58,8 +69,22 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
                     }
                 });
             },
-            showSlide() { this.isSlideVisible = true; },
-            showGallery() { this.isSlideVisible = false; },
+
+            // ✅ Show slideshow (Vue + global JS)
+            showSlide() {
+                this.isSlideVisible = true;
+                if (typeof window.showSlideById === "function") {
+                    window.showSlideById(); // also starts slideshow interval in your HTML script
+                }
+            },
+
+            // ✅ Show gallery (Vue + global JS)
+            showGallery() {
+                this.isSlideVisible = false;
+                if (typeof window.showGalById === "function") {
+                    window.showGalById(); // also stops slideshow interval in your HTML script
+                }
+            },
 
             // Dot click -> sync Vue + global slideshow
             currentSlideVue(index) {
