@@ -18,11 +18,9 @@
     <link rel="stylesheet" href="css/vintage.css">
     <script src="library/code.jquery.com.jquery-1.10.2.js"></script>
     <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.5.1.jquery.min.js"></script>
-    <script src="js/html.js"></script>
+    <script src="js/icon-animation.js"></script>
     <script src="js/hourglass.js"></script>
     <script src="js/expand_jquery.js"></script>
-    <script src="js/change_image.js"></script>
-    <script src="js/block.js"></script>
     <script src="js/battery.js" defer></script>
     <script src="js/achievement.js" defer></script>
     <script src="js/collapsible.js" defer></script>
@@ -32,6 +30,8 @@
     <script src='js/aesthetics.js' crossorigin='anonymous'></script>
     <script src="library/vue@3.2.36.dist.vue.global.js"></script>
     <script src="vueJs/default.js" defer></script>
+    <script src="vueJs/academia.js" defer></script>
+    <script src="js/components.js" defer></script>
 
     <!--    Top Nav -->
     <script src="library/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
@@ -48,3243 +48,344 @@
 
 
 <body class="w3-white">
-<div id="app" v-cloak>
-    <div class="resizing-1026-more">
-        <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
-            <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
-                <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>Home</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="">
-                                </div>Career</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: red; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Academia</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Software</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-
-
-                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Milestones</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Travel</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-            </div>
-            <br><br><br>
-        </div>
-
-    </div>
-    <div class="resizing-1026-less" style="margin-bottom: 70px">
-        <div class="popup" id="popup-3" style="">
-            <div class="overlay" onclick="closePopup('3')"></div>
-            <div class="content" style="">
-                <div style="color: black; ">
-                    <TABLE>
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Home</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-
-                        </TR>
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Career</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-
-
-                        </TR>
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/education" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Academia</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-                        </TR>
-
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Software</b>
-                                        </div>
-                                    </button>
-                                </a>
-
-                            </TD>
-                        </TR>
-
-
-
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Milestones</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-                        </TR>
-
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Travel</b>
-                                        </div>
-                                    </button>
-
-                                </a>
-                            </TD>
-                        </TR>
-                    </TABLE>
-
-                </div>
-
-            </div>
-        </div>
-
-        <div class="topnav-2 navbar-fixed-top">
-
-
-
-             <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px; padding-top: 7px; padding-bottom: 3px">
-                <div class="main">Masrik Dahir</div>
-            </h5>
-
-            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px; border: none"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/menu.png" width="25" height="20" alt="Masrik Dahir">
-            </button>
-
-
-
-
-        </div>
-    </div>
-</div>
-<script>
-    function togglePopup(num) {
-        document.getElementById(`popup-${num}`).classList.toggle("active");
-    }
-</script>
-<script>
-    function togglePopup(id) {
-        var popup = document.getElementById('popup-' + id);
-        popup.classList.toggle('active');
-    }
-
-    function closePopup(id) {
-        var popup = document.getElementById('popup-' + id);
-        popup.classList.remove('active');
-    }
-
-    // Optional: Close the popup when clicking outside the content (the overlay)
-    document.querySelectorAll('.overlay').forEach(overlay => {
-        overlay.addEventListener('click', function() {
-            const popup = this.parentElement;
-            popup.classList.remove('active');
-        });
-    });
-</script>
+<div id="nav-placeholder"></div>
 
 <!-- Page Container -->
+<div id="app_academia" v-cloak>
 <div class="w3-content w3-margin-top" style="max-width: min(1800px, 95%);">
-
-
-        <!-- Right Column -->
 
         <div class="">
             <!-- Degree -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Degree</b></h4>
-                <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
-                <div class="">
-
-                    <button onclick="toggleVisibility('vcu_bachelor_of_science')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-vcu-bachelor-of-science" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Bachelor of Science (Hons.) </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">May 2023</bdi>
-
+                <div v-for="degree in degrees" :key="degree.id">
+                    <button @click="toggle(degree.id)" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <td width="0%">
+                                    <img style="width:20px; height:20px;"
+                                         :src="isExpanded(degree.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ degree.title }}</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="float: right; color:crimson; margin-left: 10px">
+                                        <bdi style="font-size: calc(10px + .5vw);">{{ degree.date }}</bdi>
                                     </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
+                                </td>
+                            </tr>
+                        </table>
                     </button>
-                    <div id="vcu_bachelor_of_science" style="display: none">
-                        <a href="https://egr.vcu.edu/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_eng.png"
+                    <div v-show="isExpanded(degree.id)">
+                        <a :href="degree.credentialUrl" target="_blank">
+                            <img :src="degree.imageUrl"
                                  style="width: 1vw; min-width: 210px; margin-left: calc(0% + 20px)"
                                  alt="Masrik Dahir"/></a>
-                        <TABLE WIDTH="99%" style="margin-left: 20px; margin-top: 10px; border: none; align-content: center; background-color: white; " >
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Institution:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    Virginia Commonwealth University
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Major:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    Software Engineering
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Minor:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    Real Estate
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Cumulative GPA:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    3.9/4.0
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Program:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <li>Honors College </li>
-                                    <li>College of Engineering </li>
-                                    <li>Kornblau Real Estate Program </li>
-                                    <li>Accelerated Masters Program </li>
-                                    <li>VCU Entrepreneurship Academy</li>
-                                </TD>
-                            </TR>
-
-<!--                            <TR>-->
-<!--                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">-->
-<!--                                    <strong>Honors:</strong>-->
-<!--                                </TD>-->
-<!--                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">-->
-<!--                                    <li>Summa Cum Laude</li>-->
-<!--                                    <li>Presentation of Research</li>-->
-<!--                                </TD>-->
-<!--                            </TR>-->
-
-                        </TABLE>
+                        <ul>
+                            <li v-for="(detail, i) in degree.details" :key="i" v-html="detail"></li>
+                        </ul>
                     </div>
-
-                    <button onclick="toggleVisibility('vcu_master_of_science')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-vcu-master-of-science" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Master of Science </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">May 2025</bdi>
-
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="vcu_master_of_science" style="display: none">
-                        <a href="https://egr.vcu.edu/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_eng.png"
-                                 style="width: 1vw; min-width: 210px; margin-left: calc(0% + 20px)"
-                                 alt="Masrik Dahir"/></a>
-                        <TABLE WIDTH="99%" style="margin-left: 20px; margin-top: 10px; border: none; align-content: center; background-color: white; " >
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Institution:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    Virginia Commonwealth University
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Area:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    Software Engineering
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Cumulative GPA:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    4.0/4.0
-                                </TD>
-                            </TR>
-
-                            <TR>
-                                <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                    <strong>Thesis:</strong>
-                                </TD>
-                                <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-
-                                </TD>
-                            </TR>
-
-                        </TABLE>
-                    </div>
-                    <hr>
-
                 </div>
+                <hr>
             </div>
 
             <!-- Certification -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Certification</b></h4>
-                <!--                AWS Certified Solutions Architect -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_AWS_Solutions_Architect')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Aws-Solutions-Architect" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        AWS Certified Solutions Architect </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_AWS_Solutions_Architect" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.credly.com/badges/12749f5b-e7fc-460d-a317-60a1ebc976fe/public_url" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://aws.amazon.com/training/" target="_blank">Amazon Web Services</a></li>
-                                    <li>Build secure and robust solutions using architectural design principles based on customer requirements</li>
-                                    <li>Design well-architected distributed systems that are scalable, resilient, efficient, and fault-tolerant.</li>
-                                    <li><b>Issued:</b> October 31, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                AWS Certified Developer -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_AWS_Certified_Developer')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Aws-Certified-Developer" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        AWS Certified Developer </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_AWS_Certified_Developer" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.credly.com/badges/4ea74952-8783-44af-9425-119b2434bf38/public_url" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/acd.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://aws.amazon.com/training/" target="_blank">Amazon Web Services</a></li>
-                                    <li>Proficiency in writing applications with AWS service APIs, AWS CLI, and SDKs; using containers; and deploying with a CI/CD pipeline</li>
-                                    <li>Develop, deploy, and debug cloud-based applications that follow AWS best practices</li>
-                                    <li><b>Issued:</b> August 22, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                AWS Cloud Practitioner -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_AWS_Cloud_Practitioner')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-aWS-Cloud-Practitioner" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        AWS Cloud Practitioner </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">January 2023</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_AWS_Cloud_Practitioner" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.credly.com/badges/d5fb9b8a-3519-4480-bd92-ab5d066ce8d8/public_url" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://aws.amazon.com/training/" target="_blank">Amazon Web Services</a></li>
-                                    <li>Knowledge of core AWS services and use cases, billing and pricing models, security concepts, and how cloud impacts your business</li>
-                                    <li><b>Issued:</b> January 08, 2023</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                Databricks Fundamentals -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Databricks_Fundamentals')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Databricks-Fundamentals" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Databricks Fundamentals </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">September 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Databricks_Fundamentals" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://credentials.databricks.com/3fc5d768-443c-40fa-828c-fedadb94ba5e#gs.f0jij7" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.databricks.com/" target="_blank">Databricks</a></li>
-                                    <li>Understanding of fundamental concepts related to Databricks Data Intelligence Platform</li>
-                                    <li><b>Issued:</b> September 20, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                Databricks Generative AI Fundamentals -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Databricks_Generative_AI_Fundamentals')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Databricks-Generative-AI-Fundamentals" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Databricks Generative AI Fundamentals </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">September 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Databricks_Generative_AI_Fundamentals" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://credentials.databricks.com/65a906a0-cddf-4ef7-92d6-e4c8a35b8c97#gs.f0jlz6" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.databricks.com/" target="_blank">Databricks</a></li>
-                                    <li>Fundamentals of the Databricks Generative AI accreditation</li>
-                                    <li><b>Issued:</b> September 20, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                Postman Fundamentals Student Expert -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Postman_API_Fundamentals')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Postman-API-Fundamentals" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Postman API Fundamentals Student Expert </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">September 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Postman_API_Fundamentals" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://api.badgr.io/public/assertions/6VeZHynPSSCsqE6RQIA0_A?identity__email=masrikdahir%40gmail.com" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.postman.com/" target="_blank">Postman</a></li>
-                                    <li>Proficient in the essential skills required for consuming APIs in Postman and applications</li>
-                                    <li><b>Issued:</b> Sep 19, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank SQL (Advanced) -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_HackerRank_SQL')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
+                <div v-for="cert in certifications" :key="cert.id">
+                    <button @click="toggle(cert.id)" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <td width="0%">
                                     <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank SQL (Advanced) </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
+                                         :src="isExpanded(cert.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ cert.title }}</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="float: right; color:crimson; margin-left: 10px">
+                                        <bdi style="font-size: calc(10px + .5vw);">{{ cert.date }}</bdi>
                                     </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
+                                </td>
+                            </tr>
+                        </table>
                     </button>
-                    <div id="changeImage_HackerRank_SQL" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/20c59721e6e7" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/sql_advanced%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Query optimization, data modeling, Indexing, window functions, and pivots in SQL</li>
-                                    <li><b>Issued:</b> October 10, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
+                    <div v-show="isExpanded(cert.id)">
+                        <a :href="cert.credentialUrl" target="_blank">
+                            <img :src="cert.imageUrl"
+                                 style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
+                                 alt="Masrik Dahir"/></a>
+                        <ul>
+                            <li v-for="(detail, i) in cert.details" :key="i" v-html="detail"></li>
+                        </ul>
                     </div>
                 </div>
-
-                <!--                HackerRank Software Engineer -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_software_engineer')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Software Engineer  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_software_engineer" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/1566f94cf3c7" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/software_engineer%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Problem solving, SQL, and REST API</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank Frontend Developer (React) -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Frontend_Developer')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Frontend Developer </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Frontend_Developer" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/d0123fbe61f3" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/frontend_developer_react%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>React, CSS, and JavaScript</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank Angular -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Angular_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Angular (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Angular_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/568be08b3514" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/angular_intermediate%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Routing, NgModules, Observables for data transmission and event handling, Dependency Injections, and APIs</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank GO -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Go_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Go (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Go_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/bffe8be93fb9" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/golang_intermediate%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Functions, pointers, file handling, building web services in Go and error handling</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank JavaScript -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Javascript_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Javascript (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Javascript_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/216c0cb409ef" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/javascript_intermediate%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Design Patterns, Memory management, concurrency model, and event loops, among others</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank R -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_R_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank R (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_R_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/eb74ca4e3f5a" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/r_intermediate%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Conditional statements, loops, and functions, writing efficient and readable code, regular expressions in R, data structure manipulations, and times and dates</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank NodeJs -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Node_js_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Node.js (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Node_js_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/082541e9663b" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/nodejs_intermediate%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Topics of Data Structures (such as HashMaps, Stacks and Queues) and Algorithms (such as Optimal Solutions)</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank Rest API -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Rest_API_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Rest API (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Rest_API_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/c8d2f0d9165a" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/rest_api_intermediate%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Getting data from an API and process using parameters or paging</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank C# -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_C_Sharp_Basic')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank C# (Basic)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_C_Sharp_Basic" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/7ab02f58a5b3" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/c_sharp_basic%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Structure of C# programs, types, and Variables, basic OOP, Properties and Indexers, Collections, Exception handling, among others</li>
-                                    <li><b>Issued:</b> October 13, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank CSS -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_CSS_Basic')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank CSS (Basic)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_CSS_Basic" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/cb15349075d3" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/css%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Cascading and Inheritance, exploring text styling fundamentals, understanding the use of layouts in CSS, understand the boxing of elements in CSS, among others</li>
-                                    <li><b>Issued:</b> October 13, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank Python -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Python_Basic_2')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Python (Basic)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Python_Basic_2" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/b84b56319ddc" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/python_basic%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Scalar Types, Operators and Control Flow, Strings, Collections and Iteration, Modularity, Objects and Types and Classes</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank JAVA -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_JAVA_Basic')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank JAVA (Basic)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2024</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_JAVA_Basic" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/4ac127ae0995" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/java_basic%20certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Classes, data structures, inheritance, exception handling, etc. You are expected to be proficient in either Java 7 or Java 8</li>
-                                    <li><b>Issued:</b> October 11, 2024</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank Problem Solving (Intermediate) -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Problem_Solving_Intermediate')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Problem Solving (Intermediate)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">January 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Problem_Solving_Intermediate" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/5af21130d688" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Problem%20Solving%20(Intermediate)%20Certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Data Structures (such as HashMaps, Stacks and Queues) and Algorithms (such as Optimal Solutions)</li>
-                                    <li><b>Issued:</b> January 23, 2022</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                HackerRank Problem Solving (Basic) -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Problem_Solving_Basic')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Problem-Solving-Basic" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" />
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Problem Solving (Basic)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">January 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Problem_Solving_Basic" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/0a8a402e77b1" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Problem%20Solving%20(Basic)%20Certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Data Structures (such as Arrays, Strings) and Algorithms (such as Sorting and Searching)</li>
-                                    <li><b>Issued:</b> January 22, 2022</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
-                <!--                Python (Basic)  -->
-                <div class="">
-
-                    <button onclick="toggleVisibility('changeImage_Python_Basic')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Python-Basic" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        HackerRank Python (Basic)  </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">January 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage_Python_Basic" style="display: none">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <a href="https://www.hackerrank.com/certificates/4e15d1f36815" target="_blank">
-                                    <img class="" style="width: 1vw; min-width: 150px; margin-left: calc(0% + 20px)"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Python%20(Basic)%20Certificate.png"/>
-                                </a>
-
-                                <ul>
-                                    <li><a href="https://www.hackerrank.com/" target="_blank">HackerRank</a></li>
-                                    <li>Scalar Types, Operators and Control Flow, Strings, Collections and Iteration, Modularity, Objects and Types and Classes</li>
-                                    <li><b>Issued:</b> January 22, 2022</li>
-                                </ul>
-
-                            </TR>
-                        </TABLE>
-
-
-
-                    </div>
-                </div>
-
                 <hr>
-
             </div>
 
-            <!-- Research Paper Section -->
+            <!-- Research Paper -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Paper</b></h4>
-
-
-                    <!-- Paper 1 -->
-                    <button onclick="toggleVisibility('paper1')" class="pretty">
+                <div v-for="pub in publications.filter(function(p) { return p.type === 'paper'; })" :key="pub.id">
+                    <button @click="toggle(pub.id)" class="pretty">
                         <table width="100%">
                             <tr>
-                                <TD WIDTH="0%">
+                                <td width="0%">
                                     <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
+                                         :src="isExpanded(pub.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
                                 <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Cronus: An Automated Feedback Tool for Concept Maps</b></h4>
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ pub.title }}</b></h4>
                                 </td>
                                 <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                                    <b style="float: right; color:crimson; margin-left: 10px; font-size: calc(10px + .5vw);">{{ pub.date }}</b>
                                 </td>
                             </tr>
                         </table>
                     </button>
-                    <div id="paper1" class="content1" style="display: none;" >
+                    <div v-show="isExpanded(pub.id)">
                         <ul>
-                            <a href="./pdf/Cronus_An_Automated_Feedback_Tool_for_Concept_Maps.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            <a :href="pub.pdfUrl" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img :src="pub.pdfIconUrl" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
                             </a>
-                            <li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept Maps," in <i>IEEE Access</i>, vol. 9, pp. 119564-119577, 2021, doi: <a href="https://ieeexplore.ieee.org/document/9519627" target="_blank">10.1109/ACCESS.2021.3106509</a>.</li>
+                            <li v-for="(detail, i) in pub.details" :key="i" v-html="detail"></li>
                         </ul>
-
                     </div>
-
-                    <!-- Paper 2 -->
-                    <button onclick="toggleVisibility('paper2')" class="pretty">
-                        <table width="100%">
-                            <tr>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-                                <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing</b></h4>
-                                </td>
-                                <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
-                                </td>
-                            </tr>
-                        </table>
-                    </button>
-                    <div id="paper2" class="content1" style="display: none;" style="float: right; margin-left: 10px; margin-right: 10px">
-                        <ul>
-                            <a href="./pdf/ClaimChain.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
-                            </a>
-                            <li><b>M. A. Dahir</b>, Naga Ramya Bhamidipati, et al., "ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing," <i>2021 IEEE International Conference on Blockchain (Blockchain)</i>, 2021, pp. 55-64, doi: <a href="https://ieeexplore.ieee.org/document/9680598" target="_blank">10.1109/Blockchain53845.2021.00019</a>.</li>
-                        </ul>
-
-                    </div>
+                </div>
                 <hr>
             </div>
 
-            <!-- Research Poster Section -->
+            <!-- Research Poster -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Research Poster</b></h4>
-
-                    <!-- Poster 1 -->
-                    <button onclick="toggleVisibility('poster1')" class="pretty">
+                <div v-for="pub in publications.filter(function(p) { return p.type === 'poster'; })" :key="pub.id">
+                    <button @click="toggle(pub.id)" class="pretty">
                         <table width="100%">
                             <tr>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Poster-SOC" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-                                <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Continuation of the VA Security Operations Center (SOC)</b></h4>
-                                </td>
-                                <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2023</b>
-                                </td>
-                            </tr>
-                        </table>
-                    </button>
-                    <div id="poster1" class="content1" style="display: none;">
-                        <ul>
-                            <a href="./pdf/CS 23-318_Poster.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
-                            </a>
-                            <li><b>M. A. Dahir</b>, N. Camacho, G. Attard, J. Watkins, "Continuation of the VA Security Operations Center (SOC)," VCU Capstone Design Expo, 2023.</li>
-                        </ul>
-
-                    </div>
-
-                    <!-- Poster 2 -->
-                    <button onclick="toggleVisibility('poster2')" class="pretty">
-                        <table width="100%">
-                            <tr>
-                                <TD WIDTH="0%">
+                                <td width="0%">
                                     <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
+                                         :src="isExpanded(pub.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
                                 <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Facing Food Insecurity During COVID-19</b></h4>
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ pub.title }}</b></h4>
                                 </td>
                                 <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2022</b>
+                                    <b style="float: right; color:crimson; margin-left: 10px; font-size: calc(10px + .5vw);">{{ pub.date }}</b>
                                 </td>
                             </tr>
                         </table>
                     </button>
-                    <div id="poster2" class="content1" style="display: none;">
+                    <div v-show="isExpanded(pub.id)">
                         <ul>
-                            <a href="./pdf/VCU_Health_Research.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            <a :href="pub.pdfUrl" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img :src="pub.pdfIconUrl" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
                             </a>
-                            <li><b>Dahir M</b>, Jones J, et al., “Facing Food Insecurity During COVID-19: The Emerging Case of Little Free Food Pantries,” VCU Symposium for Undergraduate Research and Creativity, 2022.</li>
-                        </ul>
-
-                    </div>
-
-                    <!-- Poster 3 -->
-                    <button onclick="toggleVisibility('poster3')" class="pretty">
-                        <table width="100%">
-                            <tr>
-                                <TD WIDTH="0%">
-                                    <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-                                <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing</b></h4>
-                                </td>
-                                <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
-                                </td>
-                            </tr>
-                        </table>
-                    </button>
-                    <div id="poster3" class="content1" style="display: none;">
-                        <ul>
-                            <a href="./pdf/NewClaimchainPoster.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
-                            </a>
-                            <li><b>Masrik Dahir</b>, Hank Stafford, Roshan Neupane, et al., "ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing," MU Digital Library, University of Missouri, 2021. <a href="https://lnkd.in/ewvaniu" target="_blank">Umsystem.edu</a></li>
+                            <li v-for="(detail, i) in pub.details" :key="i" v-html="detail"></li>
                         </ul>
                     </div>
-
-                <button onclick="toggleVisibility('posterCronus')" class="pretty">
-                    <table width="100%">
-                        <tr>
-                            <TD WIDTH="0%">
-                                <img style="width:20px; height:20px;"
-                                     src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                            </TD>
-                            <td width="80%">
-                                <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">Cronus: An Automated Feedback Tool for Concept Maps</b></h4>
-                            </td>
-                            <td width="20%">
-                                <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
-                            </td>
-                        </tr>
-                    </table>
-                </button>
-                <div id="posterCronus" class="content1" style="display: none;">
-                    <ul>
-                        <a href="./pdf/CronusPoster.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
-                        </a>
-                        <li><b>M. A. Dahir</b>, S. A. Qasim and I. Ahmed, "Cronus: An Automated Feedback Tool for Concept Maps," VCU DURI Symposium, 2021.</li>
-                    </ul>
                 </div>
-
                 <hr>
             </div>
 
-            <!-- Contributing Editor Section -->
+            <!-- Contributing Editor -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Contributing Editor</b></h4>
-                    <!-- Editor 1 -->
-                    <button onclick="toggleVisibility('editor1')" class="pretty">
+                <div v-for="pub in publications.filter(function(p) { return p.type === 'editor'; })" :key="pub.id">
+                    <button @click="toggle(pub.id)" class="pretty">
                         <table width="100%">
                             <tr>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-Editorial-Basketball-Game" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
+                                <td width="0%">
+                                    <img style="width:20px; height:20px;"
+                                         :src="isExpanded(pub.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
                                 <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">The Last Basketball Game</b></h4>
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ pub.title }}</b></h4>
                                 </td>
                                 <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2020</b>
+                                    <b style="float: right; color:crimson; margin-left: 10px; font-size: calc(10px + .5vw);">{{ pub.date }}</b>
                                 </td>
                             </tr>
                         </table>
                     </button>
-                    <div id="editor1" class="content1" style="display: none;">
+                    <div v-show="isExpanded(pub.id)">
                         <ul>
-                            <a href="./pdf/The Hearing 2019-2020.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            <a :href="pub.pdfUrl" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img :src="pub.pdfIconUrl" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
                             </a>
-                            <li><b>Masrik Dahir</b>, et al., "The Last Basketball Game," <i>Hearing</i>, June 2020, pp. 28-29.</li>
+                            <li v-for="(detail, i) in pub.details" :key="i" v-html="detail"></li>
                         </ul>
-
                     </div>
+                </div>
                 <hr>
             </div>
 
-            <!-- Forum Presentation Section -->
+            <!-- Forum Presentation -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Forum Presentation</b></h4>
-                    <!-- Presentation 1 -->
-                    <button onclick="toggleVisibility('presentation1')" class="pretty">
+                <div v-for="pub in publications.filter(function(p) { return p.type === 'presentation'; })" :key="pub.id">
+                    <button @click="toggle(pub.id)" class="pretty">
                         <table width="100%">
                             <tr>
-                                <TD WIDTH="0%">
+                                <td width="0%">
                                     <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
+                                         :src="isExpanded(pub.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
                                 <td width="80%">
-                                    <h4 class="h4" style="margin-left: 10px;"><b style="color: black;">ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing</b></h4>
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ pub.title }}</b></h4>
                                 </td>
                                 <td width="20%">
-                                    <b style="color: crimson; float: right; margin-left: 10px; font-size: calc(10px + .5vw);">2021</b>
+                                    <b style="float: right; color:crimson; margin-left: 10px; font-size: calc(10px + .5vw);">{{ pub.date }}</b>
                                 </td>
                             </tr>
                         </table>
                     </button>
-                    <div id="presentation1" class="content1" style="display: none;">
+                    <div v-show="isExpanded(pub.id)">
                         <ul>
-                            <a href="./pdf/ClaimChainPowerPoint.pdf" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
-                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/adobe-pdf-icon-logo-png-transparent.png" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
+                            <a :href="pub.pdfUrl" target="_blank" style="float: right; margin-left: 10px; margin-right: 10px">
+                                <img :src="pub.pdfIconUrl" style="width: 1vw; min-width: 30px; margin-left: 25px;" alt="PDF"/>
                             </a>
-                            <li><b>Masrik Dahir</b>, Hank Stafford, "ClaimChain: Secure Blockchain Platform for Handling Insurance Claims Processing," Undergraduate Research and Creative Achievements Forum, July 2021, University of Missouri, Columbia. Presentation.</li>
+                            <li v-for="(detail, i) in pub.details" :key="i" v-html="detail"></li>
                         </ul>
                     </div>
+                </div>
                 <hr>
             </div>
 
-            <!-- Achievements -->
+            <!-- Achievement -->
             <div class="w3-container w3-card w3-white w3-margin-bottom">
                 <h4><b style="color: black; font-size: calc(20px + .5vw);">Achievement</b></h4>
-                <h2 style="color: black"><i class="w3-xxlarge w3-text-teal;" style="color:crimson;"></i></h2>
-
-                <div class="">
-
-                    <!--              Summa Cum Laude -->
-                    <button onclick="toggleVisibility('Summa_Cum_Laude')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
+                <div v-for="ach in achievements" :key="ach.id">
+                    <button @click="toggle(ach.id)" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <td width="0%">
                                     <img style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Summa Cum Laude </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">May 2023</bdi>
+                                         :src="isExpanded(ach.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ ach.title }}</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="float: right; color:crimson; margin-left: 10px">
+                                        <bdi style="font-size: calc(10px + .5vw);">{{ ach.date }}</bdi>
                                     </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
+                                </td>
+                            </tr>
+                        </table>
                     </button>
-                    <div id="Summa_Cum_Laude" style="display: none">
-                        <a style="text-decoration:none" href="https://rar.vcu.edu/graduation/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/sumcamlause.jpg" style="width: 1vw; min-width: 100px;margin-left: 25px"
+                    <div v-show="isExpanded(ach.id)">
+                        <a v-if="ach.imageUrl" :href="ach.credentialUrl" target="_blank" style="text-decoration:none">
+                            <img :src="ach.imageUrl"
+                                 style="width: 1vw; min-width: 100px; margin-left: 25px"
                                  alt="Masrik Dahir"/></a>
                         <ul>
-                            <li><b>GPA: </b> 3.95</li>
+                            <li v-for="(detail, i) in ach.details" :key="i" v-html="detail"></li>
                         </ul>
                     </div>
-
-                    <!--              Altria Scholar-->
-                    <button onclick="toggleVisibility('changeImage10')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image10" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Altria Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                    </button>
-                    <div id="changeImage10" style="display: none">
-                        <a style="text-decoration:none" href="https://www.altria.com/en" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/altria.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li><a href="https://www.altria.com/en" target="_blank">Altria Group, Inc.</a></li>
-                            <li>Entrepreneurship and Professional Networking Seminars</li>
-                            <li>Business Idea Pitching</li>
-                            <li><b>Scholarship Grant: </b> $3500</li>
-                        </ul>
-                    </div>
-
-
-                    <!--                    iCubed Scholar-->
-                    <button onclick="toggleVisibility('changeImage')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image" style="width:20px; height:20px;" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png";/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black;">
-                                        iCubed Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                    </button>
-                    <div id="changeImage" style="display: none">
-                        <a style="text-decoration:none" href="https://icubed.vcu.edu/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/icubed%20(1).png" style="width: 1vw; min-width: 140px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li><b>Research Area:</b> iCubed Food Core</li>
-                            <li>Research Paper Publication</li>
-                            <li>Poster Presentation</li>
-                        </ul>
-                    </div>
-
-
-
-                    <!--                    Dean List Fall 2020, Spring 2021, Fall 2021, Spring 2022 -->
-                    <button onclick="toggleVisibility('changeImage2')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image2" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Dean's List </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Every Semester</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                    </button>
-                    <div id="changeImage2" style="display: none">
-                        <a style="text-decoration:none" href="https://egr.vcu.edu/about/dean/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_eng.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li>Fall 2020, Spring 2021, Fall 2021, Spring 2022</li>
-                            <li>Receive above 3.5 GPA</li>
-                            <li>Top 10% of the Class</li>
-                        </ul>
-                    </div>
-
-
-
-                    <!--                    Honors Trivia Champion October 2020-->
-                    <button onclick="toggleVisibility('changeImage3')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image3" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Honors Trivia Champion </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">October 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                    </button>
-                    <div id="changeImage3" style="display: none">
-                        <a style="text-decoration:none" href="https://honors.vcu.edu/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/honors.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li>Hosted by Honors College</li>
-                            <li>General Science, Social Science, and Math</li>
-                        </ul>
-                    </div>
-
-
-                    <!--                  Superintendent’s Scholar July 2020 -->
-                    <button onclick="toggleVisibility('changeImage4')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image4" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Superintendent’s Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">July 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                    </button>
-                    <div id="changeImage4" style="display: none">
-                        <a style="text-decoration:none" href="https://henricoschools.us/division-leadership-team/"
-                           target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/henrico.jpg" style="width: 1vw; min-width: 140px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li>High School Graduation, Henrico County Public Schools</li>
-                            <li>Top 5% of Class of 2020</li>
-                        </ul>
-                    </div>
-
-
-                    <!--                    Henrico County Engineering Scholar August 2020-->
-                    <button onclick="toggleVisibility('changeImage5')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image5" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Henrico County Engineering Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage5" style="display: none">
-                        <a style="text-decoration:none" href="https://henrico.us/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/henrico.jpg" style="width: 1vw; min-width: 120px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li><b>Scholarship Grant: </b> $40,000</li>
-                            <li>
-                                <a href="https://thecollegecompanion.com/henrico-county-virginia-commonwealth-university-engineering-scholarship-program/"
-                                   target="_blank">Henrico County</a></li>
-                            <li><a href="https://egr.vcu.edu/admissions/scholarships/" target="_blank">Virginia
-                                Commonwealth University</a></li>
-
-                        </ul>
-                    </div>
-                    <!--                    <hr>-->
-
-
-                    <!--                    CarMax Scholar August 2020-->
-                    <button onclick="toggleVisibility('changeImage6')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image6" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        CarMax Entrepreneur Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage6" style="display: none">
-                        <a style="text-decoration:none" href="https://www.carmax.com/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/carmax.png"
-                                 style="width: 1vw; height: 5vw;min-width: 100px;min-height: 100px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li><b>Scholarship Grant: </b> $2500</li>
-                            <li>
-                                <a href="https://www.cfrichmond.org/Partnering-with-Us/For-Nonprofits/Awards-Scholarships/Search-by-Scholarship-Criteria/Results?s=CarMax-Rick+Sharp+Entrepreneur+Scholarship"
-                                   target="_blank">CarMax</a></li>
-
-                        </ul>
-                    </div>
-                    <!--                    <hr>-->
-
-
-                    <!--                    Susanne and Sam Dibert – STEM Scholarship (Swagelok, $2500) August 2020-->
-                    <button onclick="toggleVisibility('changeImage7')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image7" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Susanne and Sam Dibert Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage7" style="display: none">
-                        <a style="text-decoration:none" href="https://www.swagelok.com/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/swagelok.png" style="width: 1vw; min-width: 140px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li><b>Scholarship Grant: </b> $2500</li>
-                            <li><a href="https://www.swagelok.com/" target="_blank">Swagelok</a></li>
-
-                        </ul>
-                    </div>
-                    <!--                    <hr>-->
-
-
-                    <!--                    GRRC Award (Greater Richmond Relocation August 2020-->
-                    <button onclick="toggleVisibility('changeImage8')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image8" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        GRRC Award </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage8" style="display: none">
-                        <a style="text-decoration:none" href="https://richmondrelo.org/" target="_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/grrc.png"
-                                 style="width: 1vw; min-width: 80px;min-height: 50px;margin-left: 25px"
-                                 alt="Masrik Dahir"/></a>
-                        <ul>
-                            <li><b>Scholarship Grant: </b> $2500</li>
-                            <li><a href=https://richmondrelo.org/scholarships/" target="_blank">Greater Richmond
-                                Relocation Council</a></li>
-
-                        </ul>
-                    </div>
-                    <!--                    <hr>-->
-
-
-                    <!--                    Harrison-Labouisse Memorial Scholarship (Community Foundation, $1500) August 2020-->
-                    <button onclick="toggleVisibility('changeImage9')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image9" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Harrison-Labouisse Memorial Scholar </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">August 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImage9" style="display: none">
-                        <!--<a style="text-decoration:none" href = "https://egr.vcu.edu/" target = "_blank">
-                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/grrc.png" style="width: 15vw; margin-left: 25px" alt="Avatar"/></a>-->
-                        <ul>
-                            <li><b>Scholarship Grant: </b> $1500</li>
-                            <li>
-                                <a href=https://www.cfrichmond.org/Apply-for-a-Scholarship/View-All-Scholarships?s=Harrison-Labouisse-Mayo+Memorial+Scholarship"
-                                   target="_blank">Harrison-Labouisse Memorial</a></li>
-
-                        </ul>
-                    </div>
-                    <hr>
-                </div>
-            </div>
-
-            <!--            Computer Science-->
-            <div class="w3-container w3-card w3-white w3-margin-bottom">
-                <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Computer Science</b></h4>
-
-                <div class="">
-
-                    <!--                    CMSC Senior Project (Capstone)-->
-                    <button onclick="toggleVisibility('changeImageCmsc451')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc451" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Senior Project I (Capstone) </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc451" style="display: none">
-                        <ul>
-                            <li>CMSC 441 & 451</li>
-                            <li>
-                                Topics relevant to senior-level computer science students in support of the capstone project and upcoming graduation
-                            </li>
-                            <li>
-                                Proposal writing; project planning and management; scheduling resources and budgeting for software development projects; patents and intellectual property; entrepreneurship; ethical, legal and social issues in computing; and professional responsibilities of computer scientists
-                            </li>
-                            <li>
-                                Write and revise a research paper on a technical topic associated with the project
-                            </li>
-                            <li>
-                                A final project report and presentation, which will include a discussion of associated legal, social and/or ethical issues, are due at the conclusion of the two-semester project or experience
-                            </li>
-                            <TABLE WIDTH="99%" style="margin-left: -5px; margin-top: 10px; border: none; align-content: center; background-color: white; " >
-                                <TR>
-                                    <TD WIDTH="50%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                        <strong>Federal Reserve:</strong>
-                                    </TD>
-                                    <TD WIDTH="50%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                        <a href="https://github.com/VCU-CS-Capstone/CS-22-323-Federal-Reserve-Project"
-                                           target="_blank">Github</a>
-                                    </TD>
-                                </TR>
-
-                                <TR>
-                                    <TD WIDTH="20%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                        <strong>VA Security Operation Center:</strong>
-                                    </TD>
-                                    <TD WIDTH="80%" style="margin-top: 10px; border: none;background-color: #F5F5F5; padding: 10px">
-                                        <a href="https://github.com/VCU-CS-Capstone/CS-23-318-Continuation-of-the-VA-Security-Operations-Center-SOC-.git"
-                                           target="_blank">Github</a>
-                                    </TD>
-                                </TR>
-
-                            </TABLE>
-
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 502-->
-                    <button onclick="toggleVisibility('changeImageCmsc502')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc502" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Parallel Algorithms </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc502" style="display: none">
-                        <ul>
-                            <li>CMSC 502</li>
-                            <li>
-                                Software and hardware mechanisms for providing mutual exclusion in uniprocessor and multiprocessor environments
-                            </li>
-                            <li>
-                                Architectural issues including pipeline design, superscalar computers, multiprocessors, memory systems, peripherals, interfacing techniques, networks, performance and software issues
-                            </li>
-                            <li>
-                                Design and uses of parallel algorithms to solve concurrency problems in a distributed environment including message passing and remote procedure calls
-                            </li>
-                            <li>
-                                A design project implementing parallel algorithms
-                            </li>
-
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Parallal_algorithm"
-                                   target="_blank">Github</a>
-                            </li>
-
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 501-->
-                    <button onclick="toggleVisibility('changeImageCmsc501')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc501" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Advanced Algorithms </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc501" style="display: none">
-                        <ul>
-                            <li>CMSC 501</li>
-                            <li>
-                                Advanced graph algorithms, advanced data structures, applied numerical algorithms, optimization methods, approximation methods for hard graph and string problems and computational geometry algorithms
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Advanced_algorithm"
-                                   target="_blank">Github</a>
-                            </li>
-
-                        </ul>
-                    </div>
-
-                    <!--                    ENGR 291-->
-                    <button onclick="toggleVisibility('changeImageEngr291')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-engr291" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Election Security </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageEngr291" style="display: none">
-                        <ul>
-                            <li>ENGR 291</li>
-                            <li>
-                                Risk assessment, security audits and security plans
-                            </li>
-
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 440-->
-                    <button onclick="toggleVisibility('changeImageCmsc440')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc440" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Data Communication and Networking </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc440" style="display: none">
-                        <ul>
-                            <li>CMSC 440</li>
-                            <li>
-                                Computer networking, focusing on the applications and protocols that run on the Internet
-                            </li>
-                            <li>
-                                A top-down approach to the layered network architecture, studying applications first and then proceeding down the network “stack” toward the physical link
-                            </li>
-                            <li>
-                                The operation of applications such as the web, FTP, e-mail and DNS
-                            </li>
-                            <li>
-                                Connectionless UDP and connection-oriented TCP, with an in-depth study of TCP operation, specifically flow control and congestion control
-                            </li>
-                            <li>
-                                Data communications are explored through various data routing protocols
-                            </li>
-                            <li>
-                                Network security and wireless/mobile networking
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Data_communication_and_networking"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 508-->
-                    <button onclick="toggleVisibility('changeImageCmsc508')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc508" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Database Theory </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc508" style="display: none">
-                        <ul>
-                            <li>CMSC 508</li>
-                            <li>
-                                Design and implementation of relational database systems
-                            </li>
-                            <li>
-                                Entity-relationship diagrams, relational algebra, normal forms and normalization
-                            </li>
-                            <li>
-                                Introduction to SQL
-                            </li>
-                            <li>
-                                Discussion of physical level issues
-                            </li>
-                            <li>
-                                A design project with oral presentation
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/DATABASE_database"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 414-->
-                    <button onclick="toggleVisibility('changeImageCmsc414')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc414" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Computer & Network Security </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc414" style="display: none">
-                        <ul>
-                            <li>CMSC 414</li>
-                            <li>
-                                Best practices of computer systems and network security
-                            </li>
-                            <li>
-                                Key topics include security architecture, cryptographic systems and security management tools
-                            </li>
-                            <li>
-                                Global properties of algorithmic languages. Sub-routines, co-routines and tasks
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Computer-and-Network-Security"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 403-->
-                    <button onclick="toggleVisibility('changeImageCmsc403')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc403" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Programming Language </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc403" style="display: none">
-                        <ul>
-                            <li>CMSC 403</li>
-                            <li>
-                                Formal definition of programming languages including specifications of syntax and semantics
-                            </li>
-                            <li>
-                                Precedence, infix, prefix and postfix notation
-                            </li>
-                            <li>
-                                Global properties of algorithmic languages. Sub-routines, co-routines and tasks
-                            </li>
-                            <li>
-                                List processing, string manipulation, data description and simulation languages
-                            </li>
-                            <li>
-                                Run-time representation of program and data structures
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Programming-Language"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 312-->
-                    <button onclick="toggleVisibility('changeImageCmsc312')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc312" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Introduction to Operating Systems </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc312" style="display: none">
-                        <ul>
-                            <li>CMSC 312</li>
-                            <li>
-                                Computer systems design, I/O processing, secondary memory organization, command languages, memory management and job scheduling
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Operating-System"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 401-->
-                    <button onclick="toggleVisibility('changeImageCmsc401')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc401" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Algorithm Analysis with Advanced Data Structure </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc401" style="display: none">
-                        <ul>
-                            <li>CMSC 401;</li>
-                            <li>Multiple linked lists, height-balanced trees, B-trees, hashing and graph representation;
-                                incorporating data structures into object-oriented design; analysis of various searching
-                                and sorting algorithms;
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Algorithm-Analysis-with-Advanced-Data-Structures"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 355-->
-                    <button onclick="toggleVisibility('changeImageCmsc355')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc355" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Fundamentals Software Engineering </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageCmsc355" style="display: none">
-                        <ul>
-                            <li>CMSC 355;</li>
-                            <li>Software development methodology, write specification and design documents, and develop
-                                a prototype;
-                            </li>
-                            <li><a href="https://play.google.com/store/apps/details?id=com.masrik.automation"
-                                   target="_blank">Github (Android Application)</a></li>
-                            <li><a href="https://github.com/Masrik-Dahir/xfigx-1.0.0" target="_blank">Github (C
-                                Application)</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 311-->
-                    <button onclick="toggleVisibility('changeImageCmsc311')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc311" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Computer Organization </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                    </button>
-                    <div id="changeImageCmsc311" style="display: none">
-                        <ul>
-                            <li>CMSC 311;</li>
-                            <li>Elementary digital logic design, processor and arithmetic/logic unit design, data paths,
-                                memory hierarchy, I/O devices, instruction set architecture and addressing modes;
-                            </li>
-                            <li><a href="https://github.com/Masrik-Dahir/Computer-Organization"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 303-->
-                    <button onclick="toggleVisibility('changeImageCmsc303')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc303" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Introduction to Theory of Computation </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageCmsc303" style="display: none">
-                        <ul>
-                            <li>CMSC 303;</li>
-                            <li>Complexity classes, grammars, automata, formal languages, Turing machines,
-                                computability;
-                            </li>
-                            <li><a href="https://github.com/Masrik-Dahir/dfa" target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 257-->
-                    <button onclick="toggleVisibility('changeImageCmsc257')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc257" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Computer System </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageCmsc257" style="display: none">
-                        <ul>
-                            <li>CMSC 257;</li>
-                            <li>UNIX essentials; system programming in C; machine-level representation and organization
-                                of programs/data, arrays and pointers; types, structs and unions; strings; bit/byte
-                                operations; memory management; shell programming;
-                            </li>
-                            <li><a href="https://github.com/Masrik-Dahir/Computer-System" target="_blank">Github</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 302-->
-                    <button onclick="toggleVisibility('changeImageCmsc302')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc302" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Discrete Mathematics </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageCmsc302" style="display: none">
-                        <ul>
-                            <li>CMSC 302;</li>
-                            <li>Logic and proofs, sets, functions, sequences and sums, relations, graphs, trees,
-                                induction and recursion, advanced counting technique (recurrences);
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 256-->
-                    <button onclick="toggleVisibility('changeImageCmsc256')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc256" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Data Structure and Object-Oriented Programming </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                    </button>
-                    <div id="changeImageCmsc256" style="display: none">
-                        <ul>
-                            <li>CMSC 256;</li>
-                            <li>Bridge API, object-oriented design, inheritance, polymorphism, exceptions, interfaces,
-                                linked lists, stacks, queues, binary trees, recursion, and basic searching and sorting
-                                techniques;
-                            </li>
-                            <li>
-                                <a href="https://github.com/Masrik-Dahir/Data-Structures-and-Object-Oriented-Programming"
-                                   target="_blank">Github</a></li>
-                        </ul>
-                    </div>
-
-                    <!--                    CMSC 255-->
-                    <button onclick="toggleVisibility('changeImageCmsc255')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-cmsc255" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Introduction to Programming </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageCmsc255" style="display: none">
-                        <ul>
-                            <li>CMSC 255;</li>
-                            <li>Fundamental Computing Skills, Object-oriented programming, real-life problem solving,
-                                Top-down design of algorithm, Control structures, Methods, Arrays, Basic I/O, Basic
-                                concepts of objects and classes in Java, Java classes for manipulating strings, Program
-                                testing/debugging, UML notation, Integrated development environments, IDE: IntelliJ,
-                                Eclipse JAVA, Editor: Sublime Text 3;
-                            </li>
-                            <li><a href="https://github.com/Masrik-Dahir/Introduction-to-JAVA"
-                                   target="_blank">Github</a></li>
-
-                        </ul>
-                    </div>
-
-                    <hr>
-                </div>
-            </div>
-
-            <div class="w3-container w3-card w3-white w3-margin-bottom">
-                <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Mathematics</b></h4>
-
-                <!--                    MATH 356-->
-                <div class="">
-                    <button onclick="toggleVisibility('changeImageMath356')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-math356" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Graphs and Algorithms </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2021</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageMath356" style="display: none">
-                        <ul>
-                            <li>MATH 356;</li>
-                            <li>Trees, colorings and matchings; basic theorems such as the handshaking lemma and the
-                                Gallai
-                                identities; algorithms
-                                such as Dijkstra’s and Kruskal’s
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!--                    MATH 310-->
-                    <button onclick="toggleVisibility('changeImageMath310')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-math310" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Linear Algebra </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageMath310" style="display: none">
-                        <ul>
-                            <li>CMSC 310;</li>
-                            <li>System of Linear Equation, Vector Space, Sub Space, Kernel, Range, Dimension, Matrix
-                                operations, Determinant,
-                                Eigen vector and values, Diagonalizable Matrix, Linear Mapping
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!--                    STAT 212-->
-                    <button onclick="toggleVisibility('changeImageStat212')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-stat212" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Concepts of Statistics </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageStat212" style="display: none">
-                        <ul>
-                            <li>STAT 212 (Advanced Placement Exam);</li>
-                            <li>descriptive statistics, correlation and regression, probability, normal distributions, t
-                                distributions, and statistical inference
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!--                    MATH 201-->
-                    <button onclick="toggleVisibility('changeImageMath201')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-math201" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Calculus with Analytical Geometry II </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2020</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageMath201" style="display: none">
-                        <ul>
-                            <li>MATH 201;</li>
-                            <li>Application of differentiation and integration, Infinite Series, selected topic in
-                                analytical geometry, Basics of the
-                                Matrix, real-life application of differential and integral calculus
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!--                    MATH 200-->
-                    <button onclick="toggleVisibility('changeImageMath200')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-math200" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Calculus with Analytical Geometry I </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Fall 2019</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageMath200" style="display: none">
-                        <ul>
-                            <li>MATH 200;</li>
-                            <li>Limits, Derivatives, Differentials, Antiderivatives, Definite Integrals, Continuity</li>
-                        </ul>
-                    </div>
-
-                    <!--                    MATH 151-->
-                    <button onclick="toggleVisibility('changeImageMath151')" class="pretty">
-                        <TABLE WIDTH="100%">
-                            <TR>
-                                <TD WIDTH="0%">
-                                    <img id="always-image-math151" style="width:20px; height:20px;"
-                                         src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                                </TD>
-
-                                <TD WIDTH="80%">
-                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                        Precalculus Mathematics </b>
-                                    </h4>
-                                </TD>
-
-                                <TD WIDTH="20%">
-                                    <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                        <bdi style="font-size: calc(10px + .5vw);">Spring 2019</bdi>
-                                    </b>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                    </button>
-                    <div id="changeImageMath151" style="display: none">
-                        <ul>
-                            <li>MATH 151;</li>
-                            <li>Application of Algebra, Trigonometry, functions, transformations</li>
-                        </ul>
-                    </div>
-
-                    <hr>
-                </div>
-            </div>
-
-            <!--            Finance -->
-            <div class="w3-container w3-card w3-white w3-margin-bottom">
-
-                <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Finance</b></h4>
-
-                <!--                    FIRE 435-->
-                <button onclick="toggleVisibility('changeImageFire435')" class="pretty">
-                    <TABLE WIDTH="100%">
-                        <TR>
-                            <TD WIDTH="0%">
-                                <img id="always-image-fire435" style="width:20px; height:20px;"
-                                     src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                            </TD>
-
-                            <TD WIDTH="80%">
-                                <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                    Real Estate Finance & Capital Market </b>
-                                </h4>
-                            </TD>
-
-                            <TD WIDTH="20%">
-                                <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                    <bdi style="font-size: calc(10px + .5vw);">Fall 2022</bdi>
-                                </b>
-                            </TD>
-                        </TR>
-                    </TABLE>
-
-                </button>
-                <div id="changeImageFire435" style="display: none">
-                    <ul>
-                        <li>FIRE 435;</li>
-                        <li>
-                            Instruments, techniques and institutions of real estate finance; the mortgage market; financing process; mortgage risk analysis; creative financing; emphasis on policies and procedures used in financing residential and commercial properties and their interaction with the capital markets
-                        </li>
-                        <li>
-                            Financial modeling with various software programs
-                        </li>
-                    </ul>
-                </div>
-
-                <!--                    MGMT 310-->
-                <button onclick="toggleVisibility('changeImageMgmt310')" class="pretty">
-                    <TABLE WIDTH="100%">
-                        <TR>
-                            <TD WIDTH="0%">
-                                <img id="always-image-mgmt310" style="width:20px; height:20px;"
-                                     src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                            </TD>
-
-                            <TD WIDTH="80%">
-                                <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                    Managing People-Organizations </b>
-                                </h4>
-                            </TD>
-
-                            <TD WIDTH="20%">
-                                <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                    <bdi style="font-size: calc(10px + .5vw);">Summer 2022</bdi>
-                                </b>
-                            </TD>
-                        </TR>
-                    </TABLE>
-
-                </button>
-                <div id="changeImageMgmt310" style="display: none">
-                    <ul>
-                        <li>MGMT 310;</li>
-                        <li>Clep Exam</li>
-                        <li>principles, practices and laws that govern the real estate enterprise, including property
-                            rights, legal elements, physical aspects of location and production, brokerage, valuation,
-                            ethical dimensions, development, financing and land use
-                        </li>
-                    </ul>
-                </div>
-
-                <!--                    BUSN 323-->
-                <button onclick="toggleVisibility('changeImageBusn323')" class="pretty">
-                    <TABLE WIDTH="100%">
-                        <TR>
-                            <TD WIDTH="0%">
-                                <img id="always-image-busn323" style="width:20px; height:20px;"
-                                     src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                            </TD>
-
-                            <TD WIDTH="80%">
-                                <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                    Legal Environment of Business </b>
-                                </h4>
-                            </TD>
-
-                            <TD WIDTH="20%">
-                                <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                    <bdi style="font-size: calc(10px + .5vw);">Summer 2022</bdi>
-                                </b>
-                            </TD>
-                        </TR>
-                    </TABLE>
-
-                </button>
-                <div id="changeImageBusn323" style="display: none">
-                    <ul>
-                        <li>BUSN 323</li>
-                        <li>Clep Exam</li>
-                        <li>Basic legal concepts applicable to business, including the legal aspects of operating a business, contracts, employment relationships, sales, and bailments and commercial paper
-                        </li>
-                    </ul>
-                </div>
-
-                <button onclick="toggleVisibility('changeImageFire305')" class="pretty">
-                    <TABLE WIDTH="100%">
-                        <TR>
-                            <TD WIDTH="0%">
-                                <img id="always-image-fire305" style="width:20px; height:20px;"
-                                     src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png" ;/>
-                            </TD>
-
-                            <TD WIDTH="80%">
-                                <h4 class="h4" style="margin-left: 10px"><b style="color: black">
-                                    Principle of Real Estate </b>
-                                </h4>
-                            </TD>
-
-                            <TD WIDTH="20%">
-                                <b class="w3-text-teal;" style="float: right; color:crimson; margin-left: 10px">
-                                    <bdi style="font-size: calc(10px + .5vw);">Spring 2022</bdi>
-                                </b>
-                            </TD>
-                        </TR>
-                    </TABLE>
-
-                </button>
-                <div id="changeImageFire305" style="display: none">
-                    <ul>
-                        <li>FIRE 305;</li>
-                        <li>principles, practices and laws that govern the real estate enterprise, including property
-                            rights, legal elements, physical aspects of location and production, brokerage, valuation,
-                            ethical dimensions, development, financing and land use
-                        </li>
-                    </ul>
                 </div>
                 <hr>
+            </div>
 
+            <!-- Coursework: Computer Science -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Computer Science</b></h4>
+                <div v-for="course in courses_cs" :key="course.id">
+                    <button @click="toggle(course.id)" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <td width="0%">
+                                    <img style="width:20px; height:20px;"
+                                         :src="isExpanded(course.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ course.title }}</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="float: right; color:crimson; margin-left: 10px">
+                                        <bdi style="font-size: calc(10px + .5vw);">{{ course.date }}</bdi>
+                                    </b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div v-show="isExpanded(course.id)">
+                        <ul>
+                            <li v-for="(detail, i) in course.details" :key="i" v-html="detail"></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
+            </div>
 
-                <!--                </div>-->
+            <!-- Coursework: Mathematics -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Mathematics</b></h4>
+                <div v-for="course in courses_math" :key="course.id">
+                    <button @click="toggle(course.id)" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <td width="0%">
+                                    <img style="width:20px; height:20px;"
+                                         :src="isExpanded(course.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ course.title }}</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="float: right; color:crimson; margin-left: 10px">
+                                        <bdi style="font-size: calc(10px + .5vw);">{{ course.date }}</bdi>
+                                    </b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div v-show="isExpanded(course.id)">
+                        <ul>
+                            <li v-for="(detail, i) in course.details" :key="i" v-html="detail"></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
+            </div>
+
+            <!-- Coursework: Finance -->
+            <div class="w3-container w3-card w3-white w3-margin-bottom">
+                <h4><b style="color: black; font-size: calc(20px + .5vw);">Coursework: Finance</b></h4>
+                <div v-for="course in courses_finance" :key="course.id">
+                    <button @click="toggle(course.id)" class="pretty">
+                        <table width="100%">
+                            <tr>
+                                <td width="0%">
+                                    <img style="width:20px; height:20px;"
+                                         :src="isExpanded(course.id) ? 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/down_more.png' : 'https://d3dw5jtb3w1kgy.cloudfront.net/Icons/more.png'" alt="toggle"/>
+                                </td>
+                                <td width="80%">
+                                    <h4 class="h4" style="margin-left: 10px"><b style="color: black">{{ course.title }}</b></h4>
+                                </td>
+                                <td width="20%">
+                                    <b style="float: right; color:crimson; margin-left: 10px">
+                                        <bdi style="font-size: calc(10px + .5vw);">{{ course.date }}</bdi>
+                                    </b>
+                                </td>
+                            </tr>
+                        </table>
+                    </button>
+                    <div v-show="isExpanded(course.id)">
+                        <ul>
+                            <li v-for="(detail, i) in course.details" :key="i" v-html="detail"></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
             </div>
         </div>
 
-
+</div>
 </div>
 
-<!-- End Grid -->
-</div>
-
-
-<!-- End Page Container -->
-</div>
-
-<footer id="footer-relative" class="w3-center w3-margin-top;" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
-    <div style="padding: 10px">
-        <p style="padding-top: 15px;">Connect with me through Social Media</p>
-        <a href="https://www.instragram.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://www.twitter.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://github.com/Masrik-Dahir" target="blank"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://app.joinhandshake.com/users/20195119" target="blank"><i style="font-size:36px" class="fas fa-handshake w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" ><i style="font-size:36px" class="fab fa-youtube-square w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><i style="font-size:36px" class="fas fa-graduation-cap w3-hover-opacity">&#160</i></a>
-        <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank"><i style="font-size:34px" class='w3-hover-opacity'>R<sup>C</sup></i></a>
-        <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
-            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
-                <img class="" style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px "
-                     src="https://d3dw5jtb3w1kgy.cloudfront.net/w3_white.png"/>
-            </b>
-        </a>
-
-
-        <a href="https://orcid.org/0000-0002-7841-310X" style="text-decoration: none" target="blank">
-            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
-                <img class="" style="width:41px; vertical-align: middle;padding: 0px; margin-bottom: 5px"
-                     alt="ORCID iD icon"
-                     src="https://d3dw5jtb3w1kgy.cloudfront.net/orcid_white.png"/>
-            </b>
-        </a>
-
-
-
-
-
-    </div>
-    <br>
-
-</footer>
+<div id="footer-placeholder"></div>
 
 </body>
-
 </html>

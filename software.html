@@ -26,11 +26,12 @@
 
     <!--    JS imports-->
     <script src="library/code.jquery.com.jquery-1.10.2.js"></script>
-    <script src="js/html.js"></script>
+    <script src="js/icon-animation.js"></script>
     <script src="js/hourglass.js"></script>
     <script src="js/expand_jquery.js"></script>
     <script src="js/briefcase.js" defer></script>
     <script src='js/aesthetics.js' crossorigin='anonymous'></script>
+    <script src="js/components.js" defer></script>
 
     <!--    Vue JS imports-->
     <script src="library/vue@3.2.36.dist.vue.global.js"></script>
@@ -46,247 +47,11 @@
     <script src="bootstrap/js/ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="bootstrap/js/maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="bootstrap/js/random.js" defer></script>
-    <style>
-        body {
-            overflow-x: hidden;
-        }
-    </style>
 
 </head>
 
 <body class="w3-white">
-<div id="app" v-cloak>
-    <div class="resizing-1026-more">
-        <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">
-            <div class="topnav navbar-fixed-top" style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">
-                <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>Home</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="">
-                                </div>Career</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Academia</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: red; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Software</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-
-
-                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Milestones</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-
-                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                    <button class="glow-on-hover-nav" type="button"
-                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
-                        <div style="" class="w3-padding-small">
-                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
-                                <div class="wrapper">
-                                </div>
-                                Travel</b>
-                            </div>
-                        </div>
-                    </button>
-                </a>
-            </div>
-            <br><br><br>
-        </div>
-
-    </div>
-    <div class="resizing-1026-less" style="margin-bottom: 70px">
-        <div class="popup" id="popup-3" style="">
-            <div class="overlay" onclick="closePopup('3')"></div>
-            <div class="content" style="">
-                <div style="color: black; ">
-                    <TABLE>
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Home</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-
-                        </TR>
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/work" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Career</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-
-
-                        </TR>
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/academia" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Academia</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-                        </TR>
-
-
-
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/software" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: red; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Software</b>
-                                        </div>
-                                    </button>
-                                </a>
-
-                            </TD>
-                        </TR>
-
-
-
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Milestones</b>
-                                        </div>
-                                    </button>
-                                </a>
-                            </TD>
-                        </TR>
-
-                        <TR>
-                            <TD>
-                                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
-                                    <button class="glow-on-hover-nav" type="button"
-                                            style="float: left; padding: 5px">
-                                        <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
-                                            <div class="wrapper" >
-                                            </div>Travel</b>
-                                        </div>
-                                    </button>
-
-                                </a>
-                            </TD>
-                        </TR>
-                    </TABLE>
-
-                </div>
-
-            </div>
-        </div>
-
-        <div class="topnav-2 navbar-fixed-top">
-
-
-
-             <h5 class="w3-margin-right w3-margin-left" style="float: left; padding: 5px; padding-top: 7px; padding-bottom: 3px">
-                <div class="main">Masrik Dahir</div>
-            </h5>
-
-            <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px; border: none"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/menu.png" width="25" height="20" alt="Masrik Dahir">
-            </button>
-
-
-
-
-        </div>
-    </div>
-    <br>
-</div>
-<script>
-    function togglePopup(num) {
-        document.getElementById(`popup-${num}`).classList.toggle("active");
-    }
-</script>
-<script>
-<script>
-    function togglePopup(id) {
-        var popup = document.getElementById('popup-' + id);
-        popup.classList.toggle('active');
-    }
-
-    function closePopup(id) {
-        var popup = document.getElementById('popup-' + id);
-        popup.classList.remove('active');
-    }
-
-    // Optional: Close the popup when clicking outside the content (the overlay)
-    document.querySelectorAll('.overlay').forEach(overlay => {
-        overlay.addEventListener('click', function() {
-            const popup = this.parentElement;
-            popup.classList.remove('active');
-        });
-    });
-</script>
+<div id="nav-placeholder"></div>
 
 
 <!-- Page Container -->
@@ -392,40 +157,6 @@
     <!-- End Page Container -->
 </div>
 
-<footer id="footer-relative" class="w3-center w3-margin-top;" style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
-    <div style="padding: 10px">
-        <p style="padding-top: 15px;">Connect with me through Social Media</p>
-        <a href="https://www.instragram.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://www.twitter.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://github.com/Masrik-Dahir" target="blank"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://app.joinhandshake.com/users/20195119" target="blank"><i style="font-size:36px" class="fas fa-handshake w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" ><i style="font-size:36px" class="fab fa-youtube-square w3-hover-opacity">&#160&#160</i></a>
-        <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><i style="font-size:36px" class="fas fa-graduation-cap w3-hover-opacity">&#160</i></a>
-        <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank"><i style="font-size:34px" class='w3-hover-opacity'>R<sup>C</sup></i></a>
-        <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
-            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
-                <img class="" style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px "
-                     src="https://d3dw5jtb3w1kgy.cloudfront.net/w3_white.png"/>
-            </b>
-        </a>
-
-
-        <a href="https://orcid.org/0000-0002-7841-310X" style="text-decoration: none" target="blank">
-            <b style="font-size:37px; color: black" class='w3-hover-opacity'>
-                <img class="" style="width:41px; vertical-align: middle;padding: 0px; margin-bottom: 5px"
-                     alt="ORCID iD icon"
-                     src="https://d3dw5jtb3w1kgy.cloudfront.net/orcid_white.png"/>
-            </b>
-        </a>
-
-
-
-
-
-    </div>
-    <br>
-
-</footer>
+<div id="footer-placeholder"></div>
 </body>
 </html>

@@ -1,3 +1,18 @@
+/**
+ * image.js - Vue components for state/region image galleries.
+ *
+ * Data flow:
+ *   1. fetchData() loads image counts from CloudFront JSON
+ *   2. mountVueInstances() creates a Vue app per state via createStateComponent()
+ *   3. safeMount() only mounts if the target selector exists in the DOM
+ *
+ * Each state component provides:
+ *   - Gallery view (grid of thumbnails with active selection)
+ *   - Slideshow view (auto-advancing slides via state-gallery.js controls)
+ *   - Search filtering on image titles
+ *
+ * Requires: Vue 3, state-gallery.js (for slideshow DOM controls)
+ */
 function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
     return {
         name: `app_${stateAbbreviation.toLowerCase()}`,

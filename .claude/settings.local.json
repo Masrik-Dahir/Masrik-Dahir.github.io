@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find map:*)",
+      "Bash(while read:*)",
+      "Bash(do sed:*)",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(grep -c \"<style>\" /e/Repo/WebstormProjects/Masrik-Dahir.github.io/*.html /e/Repo/WebstormProjects/Masrik-Dahir.github.io/map/*.html)",
+      "Bash(grep -c \"<script\" /e/Repo/WebstormProjects/Masrik-Dahir.github.io/*.html)",
+      "Bash(ls -1 /e/Repo/WebstormProjects/Masrik-Dahir.github.io/map/*.html)",
+      "Bash(xargs basename:*)",
+      "Bash(wc -l /e/Repo/WebstormProjects/Masrik-Dahir.github.io/css/*.css)",
+      "Bash(wc -l /e/Repo/WebstormProjects/Masrik-Dahir.github.io/js/*.js)",
+      "Bash(wc -l /e/Repo/WebstormProjects/Masrik-Dahir.github.io/vueJs/*.js)",
+      "Bash(ls -1 \"E:\\\\Repo\\\\WebstormProjects\\\\Masrik-Dahir.github.io\\\\map\"/*.html)",
+      "Bash(ls map/*.html)",
+      "Bash(cd:*)",
+      "Bash(xargs wc:*)",
+      "Bash(wc -l /e/Repo/WebstormProjects/Masrik-Dahir.github.io/map/*.html)",
+      "Bash(python3:*)",
+      "Bash(ls *.html)",
+      "Bash(ls E:/Repo/WebstormProjects/Masrik-Dahir.github.io/map/svg/*.svg)",
+      "Bash(git -C E:/Repo/WebstormProjects/Masrik-Dahir.github.io show HEAD:map/asia.html)",
+      "Bash(git:*)"
+    ]
+  }
+}

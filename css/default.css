@@ -2,6 +2,10 @@ html, body, h1, h2, h3, h4, h5, h6 {
     font-family: "georgia", sans-serif;
 }
 
+[v-cloak] {
+    display: none;
+}
+
 .centerblock {
     background-color: red;
     padding-top: 100px;

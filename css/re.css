@@ -1,30 +1,41 @@
-html,
-body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    background: #000;
+/**
+ * re.css - Styles specific to the Real Estate Analyzer page (web/re.html).
+ * Extracted from inline <style> block.
+ */
+
+.triangle-left {
+    width: 0;
+    height: 0;
+    border-top: 23px solid transparent;
+    border-bottom: 23px solid transparent;
+    border-right: 23px solid red;
 }
 
-.glow-on-hover {
-    width: 220px;
-    height: 50px;
+.inner-triangle {
+    position: relative;
+    top: -20px;
+    left: 2px;
+    width: 0;
+    height: 0;
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-right: 20px solid blue;
+}
+
+.glow-on-hover_nav {
+    width: 100%;
+    height: 100%;
     border: none;
     outline: none;
-    color: #fff;
-    background: #111;
+    color: black;
+    background: white;
     cursor: pointer;
     position: relative;
     z-index: 0;
     border-radius: 10px;
 }
 
-.glow-on-hover:before {
+.glow-on-hover_nav:before {
     content: '';
     background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
     position: absolute;
@@ -35,37 +46,37 @@ body {
     filter: blur(5px);
     width: calc(100% + 4px);
     height: calc(100% + 4px);
-    animation: glowing 20s linear infinite;
+    animation: glowing_nav 20s linear infinite;
     opacity: 0;
     transition: opacity .3s ease-in-out;
     border-radius: 10px;
 }
 
-.glow-on-hover:active {
+.glow-on-hover_nav:active {
     color: #000
 }
 
-.glow-on-hover:active:after {
+.glow-on-hover_nav:active:after {
     background: transparent;
 }
 
-.glow-on-hover:hover:before {
+.glow-on-hover_nav:hover:before {
     opacity: 1;
 }
 
-.glow-on-hover:after {
+.glow-on-hover_nav:after {
     z-index: -1;
     content: '';
     position: absolute;
     width: 100%;
     height: 100%;
-    background: #111;
+    background: white;
     left: 0;
     top: 0;
     border-radius: 10px;
 }
 
-@keyframes glowing {
+@keyframes glowing_nav {
     0% { background-position: 0 0; }
     50% { background-position: 400% 0; }
     100% { background-position: 0 0; }

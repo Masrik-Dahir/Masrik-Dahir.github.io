@@ -1,0 +1,248 @@
+/**
+ * map-page.css - Styles specific to the travel/map page.
+ * Extracted from inline <style> blocks in map.html.
+ */
+
+/* Dots */
+.dot-container {
+    text-align: center;
+    padding: 16px;
+}
+
+.dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.dot:hover {
+    background-color: #717171;
+}
+
+/* Slide images */
+.content-slide {
+    display: none;
+    width: 60vw;
+    height: 60vh;
+    object-fit: contain;
+}
+
+/* Popup Overlay */
+.content-popup {
+    display: none;
+    top: 0;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Popup Content */
+.content-popup-content {
+    top: 10vh;
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 10px;
+    border: 1px solid #888;
+    width: 80%;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+/* Prev/Next button positioning */
+.content-prev,
+.content-next {
+    cursor: pointer;
+    position: absolute;
+    width: auto;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    user-select: none;
+}
+
+.content-next {
+    right: 0;
+}
+
+.content-prev {
+    left: 0;
+}
+
+/* Close Button */
+.content-close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.content-close:hover,
+.content-close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.content-more-dots {
+    margin: 0 5px;
+    font-size: 24px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.content-icon {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.content-slideshow-container {
+    width: 100%;
+    max-width: 1000px;
+    height: auto;
+    margin: auto;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.content-dot-container-frame {
+    width: 100%;
+    max-width: 1000px;
+    height: auto;
+    margin: auto;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.content-slide img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.content-active {
+    display: flex;
+}
+
+.content-dot-container {
+    text-align: center;
+    padding: 20px;
+    background: #ddd;
+    width: 100%;
+    max-width: fit-content;
+    margin: auto;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.content-dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.content-active-dot,
+.content-dot:hover {
+    background-color: #717171;
+}
+
+/* Photo display and SVG map styles */
+#photoDisplay {
+    width: 200px;
+    height: 200px;
+    background-size: cover;
+    display: none;
+}
+
+path {
+    stroke: black;
+    fill: paleturquoise;
+    transition: fill .4s ease;
+    transform-origin: center center;
+}
+
+path:hover {
+    fill: darkred !important;
+    cursor: pointer;
+    transform: scale(1.005, 1.005);
+}
+
+@media only screen and (max-width: 1225px) {
+    .info {
+        display: none;
+    }
+    .w3-third {
+        width: 100%;
+    }
+}
+
+#us-map {
+    display: block;
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#details-box {
+    box-shadow: 0px 7px 40px rgba(0, 0, 0, 0.7);
+    opacity: 0%;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 24px;
+    position: fixed;
+    color: white;
+    font-family: "Poppins";
+    background-color: black;
+    width: fit-content;
+    transform: translateX(-50%);
+    transition: opacity .4s ease;
+    z-index: 1;
+}
+
+.left-container {
+    position: fixed;
+}
+
+/* Additional map page overrides */
+#myDiv #Canada #BritishIsle {
+    display: block;
+}

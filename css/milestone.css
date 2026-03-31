@@ -1,0 +1,120 @@
+/**
+ * milestone.css - Styles specific to the milestones page.
+ * Extracted from inline <style> blocks in milestone.html.
+ */
+
+.thumbnail-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.thumbnail {
+    position: relative;
+    margin: 10px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.thumbnail img {
+    display: block;
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.count {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.count::before {
+    content: '\25B6';
+    margin-right: 5px;
+}
+
+.button-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.button-55 {
+    text-align: left;
+    align-self: center;
+    background-color: white;
+    background: transparent;
+    background-position: center;
+    background-repeat: repeat;
+    border-radius: 50px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+    box-shadow: rgba(0, 0, 0, .4) 15px 28px 25px -18px;
+    box-sizing: border-box;
+    color: #41403e;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Neucha, sans-serif;
+    font-size: 1rem;
+    line-height: 23px;
+    outline: none;
+    padding: 1.2rem;
+    text-decoration: none;
+    transition: all 235ms ease-in-out;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.button-55:hover {
+    box-shadow: rgba(0, 0, 0, .3) 2px 8px 8px -5px;
+    transform: translate3d(0, 2px, 0);
+    padding: 1.2rem;
+    background: white;
+}
+
+.button-55:focus {
+    box-shadow: rgba(0, 0, 0, .3) 2px 8px 4px -6px;
+}
+
+.button-55 span {
+    display: none;
+    font-size: 0.85rem;
+    color: #41403e;
+    text-align: left;
+    margin-top: 0.5rem;
+    white-space: normal;
+}
+
+.button-55:hover span {
+    display: block;
+}
+
+.collapsible {
+    cursor: pointer;
+    padding: 5px;
+    width: 100%;
+    text-align: left;
+}
+
+.collapsible.active,
+.collapsible:hover {
+    background-color: #555;
+}
+
+.content2 {
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+}

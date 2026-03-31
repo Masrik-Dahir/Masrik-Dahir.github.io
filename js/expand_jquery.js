@@ -1,44 +1,18 @@
-$(document).ready(function(){
-    $(".btn1").click(function(){
-        $("p1").slideUp();
-    });
-    $(".btn2").click(function(){
-        $("p1").slideDown();
-    });
-});
+$(document).ready(function () {
+    var pairs = [
+        { up: ".btn1",  down: ".btn2",  target: "p1" },
+        { up: ".btn3",  down: ".btn4",  target: "p34" },
+        { up: ".btn5",  down: ".btn6",  target: "p56" },
+        { up: ".btn7",  down: ".btn8",  target: "p78" },
+        { up: ".btn9",  down: ".btn10", target: "p910" }
+    ];
 
-$(document).ready(function(){
-    $(".btn3").click(function(){
-        $("p34").slideUp();
-    });
-    $(".btn4").click(function(){
-        $("p34").slideDown();
-    });
-});
-
-$(document).ready(function(){
-    $(".btn5").click(function(){
-        $("p56").slideUp();
-    });
-    $(".btn6").click(function(){
-        $("p56").slideDown();
-    });
-});
-
-$(document).ready(function(){
-    $(".btn7").click(function(){
-        $("p78").slideUp();
-    });
-    $(".btn8").click(function(){
-        $("p78").slideDown();
-    });
-});
-
-$(document).ready(function(){
-    $(".btn9").click(function(){
-        $("p910").slideUp();
-    });
-    $(".btn10").click(function(){
-        $("p190").slideDown();
+    pairs.forEach(function (pair) {
+        $(pair.up).click(function () {
+            $(pair.target).slideUp();
+        });
+        $(pair.down).click(function () {
+            $(pair.target).slideDown();
+        });
     });
 });

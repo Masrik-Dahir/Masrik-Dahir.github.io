@@ -3077,34 +3077,40 @@ const app_pic_new_zealand = {
 }
 
 
-Vue.createApp(app_software).mount('#app_software')
-Vue.createApp(app_milestone).mount('#app_milestone')
-Vue.createApp(app_map).mount('#app_map')
-Vue.createApp(app_country).mount('#app_country')
-Vue.createApp(app_pic).mount('#app_pic')
-Vue.createApp(app_pic_can).mount('#app_pic_can')
-Vue.createApp(app_pic_gbr).mount('#app_pic_gbr')
-Vue.createApp(app_pic_bangladesh).mount('#app_pic_bangladesh')
-Vue.createApp(app_pic_northern_asia).mount('#app_pic_northern_asia')
-Vue.createApp(app_pic_southern_asia).mount('#app_pic_southern_asia')
-Vue.createApp(app_pic_eastern_asia).mount('#app_pic_eastern_asia')
-Vue.createApp(app_pic_central_asia).mount('#app_pic_central_asia')
-Vue.createApp(app_pic_south_eastern_asia).mount('#app_pic_south_eastern_asia')
-Vue.createApp(app_pic_middle_east).mount('#app_pic_middle_east')
-Vue.createApp(app_pic_central_america).mount('#app_pic_central_america')
-Vue.createApp(app_pic_caribbean_america).mount('#app_pic_caribbean_america')
-Vue.createApp(app_pic_south_america).mount('#app_pic_south_america')
-Vue.createApp(app_pic_western_europe).mount('#app_pic_western_europe')
-Vue.createApp(app_pic_eastern_europe).mount('#app_pic_eastern_europe')
-Vue.createApp(app_pic_southern_europe).mount('#app_pic_southern_europe')
-Vue.createApp(app_pic_northern_europe).mount('#app_pic_northern_europe')
-Vue.createApp(app_pic_northern_africa).mount('#app_pic_northern_africa')
-Vue.createApp(app_pic_western_africa).mount('#app_pic_western_africa')
-Vue.createApp(app_pic_eastern_africa).mount('#app_pic_eastern_africa')
-Vue.createApp(app_pic_central_africa).mount('#app_pic_central_africa')
-Vue.createApp(app_pic_southern_africa).mount('#app_pic_southern_africa')
-Vue.createApp(app_pic_australia).mount('#app_pic_australia')
-Vue.createApp(app_pic_new_zealand).mount('#app_pic_new_zealand')
+function safeMount(component, selector) {
+    if (document.querySelector(selector)) {
+        Vue.createApp(component).mount(selector);
+    }
+}
+
+safeMount(app_software, '#app_software');
+safeMount(app_milestone, '#app_milestone');
+safeMount(app_map, '#app_map');
+safeMount(app_country, '#app_country');
+safeMount(app_pic, '#app_pic');
+safeMount(app_pic_can, '#app_pic_can');
+safeMount(app_pic_gbr, '#app_pic_gbr');
+safeMount(app_pic_bangladesh, '#app_pic_bangladesh');
+safeMount(app_pic_northern_asia, '#app_pic_northern_asia');
+safeMount(app_pic_southern_asia, '#app_pic_southern_asia');
+safeMount(app_pic_eastern_asia, '#app_pic_eastern_asia');
+safeMount(app_pic_central_asia, '#app_pic_central_asia');
+safeMount(app_pic_south_eastern_asia, '#app_pic_south_eastern_asia');
+safeMount(app_pic_middle_east, '#app_pic_middle_east');
+safeMount(app_pic_central_america, '#app_pic_central_america');
+safeMount(app_pic_caribbean_america, '#app_pic_caribbean_america');
+safeMount(app_pic_south_america, '#app_pic_south_america');
+safeMount(app_pic_western_europe, '#app_pic_western_europe');
+safeMount(app_pic_eastern_europe, '#app_pic_eastern_europe');
+safeMount(app_pic_southern_europe, '#app_pic_southern_europe');
+safeMount(app_pic_northern_europe, '#app_pic_northern_europe');
+safeMount(app_pic_northern_africa, '#app_pic_northern_africa');
+safeMount(app_pic_western_africa, '#app_pic_western_africa');
+safeMount(app_pic_eastern_africa, '#app_pic_eastern_africa');
+safeMount(app_pic_central_africa, '#app_pic_central_africa');
+safeMount(app_pic_southern_africa, '#app_pic_southern_africa');
+safeMount(app_pic_australia, '#app_pic_australia');
+safeMount(app_pic_new_zealand, '#app_pic_new_zealand');
 
 
 
