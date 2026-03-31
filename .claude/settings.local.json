@@ -22,7 +22,8 @@
       "Bash(ls *.html)",
       "Bash(ls E:/Repo/WebstormProjects/Masrik-Dahir.github.io/map/svg/*.svg)",
       "Bash(git -C E:/Repo/WebstormProjects/Masrik-Dahir.github.io show HEAD:map/asia.html)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "WebFetch(domain:www.masrikdahir.com)"
     ]
   }
 }

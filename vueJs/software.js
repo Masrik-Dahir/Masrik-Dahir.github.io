@@ -3204,7 +3204,7 @@ async function fetchData() {
     }
 }
 
-function safeMount(app, selector) {
+function safeMountApp(app, selector) {
     if (document.querySelector(selector)) app.mount(selector);
 }
 
@@ -3212,10 +3212,10 @@ function mountVueInstances(images) {
     images.forEach(state => {
         const baseId = `app_${state.abbreviation.toLowerCase().replace(/\s+/g, '_')}`;
 
-        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}`);
-        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}_2`);
-        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}_3`);
-        safeMount(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `.${baseId}`);
+        safeMountApp(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}`);
+        safeMountApp(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}_2`);
+        safeMountApp(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `#${baseId}_3`);
+        safeMountApp(Vue.createApp(createStateComponent(state.name, state.abbreviation, state.numImages)), `.${baseId}`);
     });
 }
 
