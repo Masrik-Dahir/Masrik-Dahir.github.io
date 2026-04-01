@@ -789,7 +789,7 @@ const app_country = {
                 { title: "Egypt", abv: "EGY", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Egypt/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/egypt", id: "scroll_EGY" },
                 { title: "El Salvador", abv: "SLV", image: "https://d3dw5jtb3w1kgy.cloudfront.net/El Salvador/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/el-salvador", id: "scroll_SLV" },
                 { title: "Equatorial Guinea", abv: "GNQ", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Equatorial Guinea/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/equatorial-guinea", id: "scroll_GNQ" },
-                { title: "Eritrea", abv: "ERI", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Eritrea/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/eritrea", id: "scroll_ERI" },
+                { title: "Eritrea", abv: "ERI", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Ertrea/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/eritrea", id: "scroll_ERI" },
                 { title: "Estonia", abv: "EST", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Estonia/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/estonia", id: "scroll_EST" },
                 { title: "Ethiopia", abv: "ETH", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Ethiopia/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/ethiopia", id: "scroll_ETH" },
                 { title: "Fiji", abv: "FJI", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Fiji/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/fiji", id: "scroll_FJI" },
@@ -855,8 +855,8 @@ const app_country = {
                 { title: "Montenegro", abv: "MNE", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Montenegro/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/montenegro", id: "scroll_MNE" },
                 { title: "Morocco", abv: "MAR", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Morocco/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/morocco", id: "scroll_MAR" },
                 { title: "Mozambique", abv: "MOZ", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Mozambique/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/mozambique", id: "scroll_MOZ" },
-                { title: "Myanmar", abv: "MMR", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Myanmar/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/myanmar", id: "scroll_MMR" },
-                { title: "Namibia", abv: "NAM", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Namibia/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/namibia", id: "scroll_NAM" },
+                { title: "Myanmar", abv: "MMR", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Mayanmar/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/myanmar", id: "scroll_MMR" },
+                { title: "Namibia", abv: "NAM", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Nambia/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/namibia", id: "scroll_NAM" },
                 { title: "Nauru", abv: "NRU", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Nauru/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/nauru", id: "scroll_NRU" },
                 { title: "Nepal", abv: "NPL", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Nepal/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/nepal", id: "scroll_NPL" },
                 { title: "Netherlands", abv: "NLD", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Netherlands/Thumbnail/img.png", url: "https://www.masrikdahir.com/map/netherlands", id: "scroll_NLD" },
@@ -1280,6 +1280,42 @@ const app_pic = {
                     abv: "FL",
                     image: "https://d3dw5jtb3w1kgy.cloudfront.net/Florida/Thumbnail/img.png",
                     url: "https://www.masrikdahir.com/map/fl"
+                },
+                {
+                    title: "Alaska",
+                    abv: "AK",
+                    image: "https://d3dw5jtb3w1kgy.cloudfront.net/Alaska/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ak"
+                },
+                {
+                    title: "Hawaii",
+                    abv: "HI",
+                    image: "https://d3dw5jtb3w1kgy.cloudfront.net/Hawaii/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/hi"
+                },
+                {
+                    title: "Washington",
+                    abv: "WA",
+                    image: "https://d3dw5jtb3w1kgy.cloudfront.net/Washington/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/wash"
+                },
+                {
+                    title: "Oregon",
+                    abv: "OR",
+                    image: "https://d3dw5jtb3w1kgy.cloudfront.net/Oregon/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/or"
+                },
+                {
+                    title: "New Mexico",
+                    abv: "NM",
+                    image: "https://d3dw5jtb3w1kgy.cloudfront.net/New Mexico/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/nm"
+                },
+                {
+                    title: "Oklahoma",
+                    abv: "OK",
+                    image: "https://d3dw5jtb3w1kgy.cloudfront.net/Oklahoma/Thumbnail/img.png",
+                    url: "https://www.masrikdahir.com/map/ok"
                 }
             ]
         };
@@ -1357,6 +1393,78 @@ const app_pic_can = {
                     abv:"ON",
                     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ontario/Thumbnail/img.png",
                     url:"https://www.masrikdahir.com/map/on",
+                },
+                {
+                    title:"Alberta",
+                    abv:"AB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Alberta/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ab",
+                },
+                {
+                    title:"British Columbia",
+                    abv:"BC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/British Columbia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bc",
+                },
+                {
+                    title:"Manitoba",
+                    abv:"MB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Manitoba/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mb",
+                },
+                {
+                    title:"New Brunswick",
+                    abv:"NB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/New Brunswick/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nb",
+                },
+                {
+                    title:"Newfoundland and Labrador",
+                    abv:"NL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Newfoundland and Labrador/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nl",
+                },
+                {
+                    title:"Nova Scotia",
+                    abv:"NS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nova Scotia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ns",
+                },
+                {
+                    title:"Northwest Territories",
+                    abv:"NT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Northwest Territories/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nt",
+                },
+                {
+                    title:"Nunavut",
+                    abv:"NU",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nunavut/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nu",
+                },
+                {
+                    title:"Prince Edward Island",
+                    abv:"PE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Prince Edward Island/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pe",
+                },
+                {
+                    title:"Quebec",
+                    abv:"QC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Quebec/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/qc",
+                },
+                {
+                    title:"Saskatchewan",
+                    abv:"SK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Saskatchewan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sk",
+                },
+                {
+                    title:"Yukon",
+                    abv:"YT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Yukon/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/yt",
                 }
             ]
         };
@@ -1530,48 +1638,48 @@ const app_pic_bangladesh = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
-                // {
-                //     title:"Dhaka",
-                //     abv:"DAC",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Dhaka/Thumbnail/img.png",
-                //     url:"",
-                // },
-                // {
-                //     title:"Sylhet",
-                //     abv:"ZYL",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Sylhet/Thumbnail/img.png",
-                //     url:"",
-                // },
-                // {
-                //     title:"Chittagong",
-                //     abv:"CGP",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Chittagong/Thumbnail/img.png",
-                //     url:"",
-                // },
-                // {
-                //     title:"Khulna",
-                //     abv:"KHL",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Dhaka/Thumbnail/img.png",
-                //     url:"",
-                // },
-                // {
-                //     title:"Barisal",
-                //     abv:"BZL",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Khulna/Thumbnail/img.png",
-                //     url:"",
-                // },
-                // {
-                //     title:"Rajshahi",
-                //     abv:"RJH",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Rajshahi/Thumbnail/img.png",
-                //     url:"",
-                // },
-                // {
-                //     title:"Rangpur",
-                //     abv:"RAU",
-                //     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Rangpur/Thumbnail/img.png",
-                //     url:"",
-                // }
+                {
+                    title:"Barisal",
+                    abv:"BAR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Barisal/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bar",
+                },
+                {
+                    title:"Chittagong",
+                    abv:"CTG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Chittagong/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ctg",
+                },
+                {
+                    title:"Dhaka",
+                    abv:"DHK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Dhaka/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/dhk",
+                },
+                {
+                    title:"Khulna",
+                    abv:"KHL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Khulna/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/khl",
+                },
+                {
+                    title:"Rajshahi",
+                    abv:"RAJ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Rajshahi/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/raj",
+                },
+                {
+                    title:"Rangpur",
+                    abv:"RPR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Rangpur/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/rpr",
+                },
+                {
+                    title:"Sylhet",
+                    abv:"SYL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sylhet/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/syl",
+                }
             ]
         };
     },
@@ -1644,7 +1752,12 @@ const app_pic_northern_asia = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
-
+                {
+                    title:"Russia",
+                    abv:"RUS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Russia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/rus",
+                }
             ]
         };
     },
@@ -1717,6 +1830,42 @@ const app_pic_southern_asia = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Bhutan",
+                    abv:"BTN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bhutan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/btn",
+                },
+                {
+                    title:"India",
+                    abv:"IND",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/India/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ind",
+                },
+                {
+                    title:"Maldives",
+                    abv:"MDV",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Maldives/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mdv",
+                },
+                {
+                    title:"Nepal",
+                    abv:"NPL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nepal/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/npl",
+                },
+                {
+                    title:"Pakistan",
+                    abv:"PAK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Pakistan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pak",
+                },
+                {
+                    title:"Sri Lanka",
+                    abv:"LKA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sri Lanka/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lka",
+                }
             ]
         };
     },
@@ -1789,6 +1938,48 @@ const app_pic_eastern_asia = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"China",
+                    abv:"CHN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/China/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/chn",
+                },
+                {
+                    title:"Hong Kong",
+                    abv:"HKG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Hong Kong/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/hkg",
+                },
+                {
+                    title:"Japan",
+                    abv:"JPN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Japan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/jpn",
+                },
+                {
+                    title:"Mongolia",
+                    abv:"MNG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mongolia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mng",
+                },
+                {
+                    title:"North Korea",
+                    abv:"PRK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/North Korea/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/prk",
+                },
+                {
+                    title:"South Korea",
+                    abv:"KOR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/South Korea/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/kor",
+                },
+                {
+                    title:"Taiwan",
+                    abv:"TWN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Taiwan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/twn",
+                }
             ]
         };
     },
@@ -1861,6 +2052,42 @@ const app_pic_central_asia = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Afghanistan",
+                    abv:"AFG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Afghanistan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/afg",
+                },
+                {
+                    title:"Kazakhstan",
+                    abv:"KAZ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Kazakhstan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/kaz",
+                },
+                {
+                    title:"Kyrgyzstan",
+                    abv:"KGZ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Kyrgyzstan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/kgz",
+                },
+                {
+                    title:"Tajikistan",
+                    abv:"TJK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Tajikistan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tjk",
+                },
+                {
+                    title:"Turkmenistan",
+                    abv:"TKM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Turkmenistan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tkm",
+                },
+                {
+                    title:"Uzbekistan",
+                    abv:"UZB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Uzbekistan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/uzb",
+                }
             ]
         };
     },
@@ -1933,6 +2160,72 @@ const app_pic_south_eastern_asia = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Brunei",
+                    abv:"BRN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Brunei/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/brn",
+                },
+                {
+                    title:"Cambodia",
+                    abv:"KHM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Cambodia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/khm",
+                },
+                {
+                    title:"Indonesia",
+                    abv:"IDN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Indonesia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/idn",
+                },
+                {
+                    title:"Laos",
+                    abv:"LAO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Laos/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lao",
+                },
+                {
+                    title:"Malaysia",
+                    abv:"MYS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Malaysia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mys",
+                },
+                {
+                    title:"Myanmar",
+                    abv:"MMR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mayanmar/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mmr",
+                },
+                {
+                    title:"Philippines",
+                    abv:"PHL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Philippines/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/phl",
+                },
+                {
+                    title:"Singapore",
+                    abv:"SGP",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Singapore/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sgp",
+                },
+                {
+                    title:"Thailand",
+                    abv:"THA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Thailand/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tha",
+                },
+                {
+                    title:"Timor-Leste",
+                    abv:"TLS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/East Timor/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tls",
+                },
+                {
+                    title:"Vietnam",
+                    abv:"VNM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Vietnam/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/vnm",
+                }
             ]
         };
     },
@@ -2005,6 +2298,90 @@ const app_pic_middle_east = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Bahrain",
+                    abv:"BHR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bahrain/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bhr",
+                },
+                {
+                    title:"Iran",
+                    abv:"IRN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Iran/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/irn",
+                },
+                {
+                    title:"Iraq",
+                    abv:"IRQ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Iraq/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/irq",
+                },
+                {
+                    title:"Israel",
+                    abv:"ISR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Israel/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/isr",
+                },
+                {
+                    title:"Jordan",
+                    abv:"JOR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Jordan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/jor",
+                },
+                {
+                    title:"Kuwait",
+                    abv:"KWT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Kuwait/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/kwt",
+                },
+                {
+                    title:"Lebanon",
+                    abv:"LBN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Lebanon/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lbn",
+                },
+                {
+                    title:"Oman",
+                    abv:"OMN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Oman/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/omn",
+                },
+                {
+                    title:"Palestine",
+                    abv:"PSE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Palestine/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pse",
+                },
+                {
+                    title:"Qatar",
+                    abv:"QAT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Qatar/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/qat",
+                },
+                {
+                    title:"Saudi Arabia",
+                    abv:"SAU",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Saudi Arabia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sau",
+                },
+                {
+                    title:"Syria",
+                    abv:"SYR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Syria/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/syr",
+                },
+                {
+                    title:"United Arab Emirates",
+                    abv:"ARE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/United Arab Emirates/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/are",
+                },
+                {
+                    title:"Yemen",
+                    abv:"YEM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Yemen/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/yem",
+                }
             ]
         };
     },
@@ -2077,6 +2454,54 @@ const app_pic_central_america = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Belize",
+                    abv:"BLZ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Belize/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/blz",
+                },
+                {
+                    title:"Costa Rica",
+                    abv:"CRI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Costa Rica/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cri",
+                },
+                {
+                    title:"El Salvador",
+                    abv:"SLV",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/El Salvador/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/slv",
+                },
+                {
+                    title:"Guatemala",
+                    abv:"GTM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Guatemala/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gtm",
+                },
+                {
+                    title:"Honduras",
+                    abv:"HND",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Honduras/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/hnd",
+                },
+                {
+                    title:"Mexico",
+                    abv:"MEX",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mexico/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mex",
+                },
+                {
+                    title:"Nicaragua",
+                    abv:"NIC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nicaragua/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nic",
+                },
+                {
+                    title:"Panama",
+                    abv:"PAN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Panama/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pan",
+                }
             ]
         };
     },
@@ -2149,6 +2574,150 @@ const app_pic_caribbean_america = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Antigua and Barbuda",
+                    abv:"ATG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Antigua & Deps/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/atg",
+                },
+                {
+                    title:"Aruba",
+                    abv:"ABW",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Aruba/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/abw",
+                },
+                {
+                    title:"Bahamas",
+                    abv:"BHS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bahamas/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bhs",
+                },
+                {
+                    title:"Barbados",
+                    abv:"BRB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Barbados/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/brb",
+                },
+                {
+                    title:"British Virgin Islands",
+                    abv:"VGB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/British Virgin Islands/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/vgb",
+                },
+                {
+                    title:"Cayman Islands",
+                    abv:"CYM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Cayman Islands/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cym",
+                },
+                {
+                    title:"Cuba",
+                    abv:"CUB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Cuba/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cub",
+                },
+                {
+                    title:"Curaçao",
+                    abv:"CUW",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Curacao/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cuw",
+                },
+                {
+                    title:"Dominica",
+                    abv:"DMA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Dominica/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/dma",
+                },
+                {
+                    title:"Dominican Republic",
+                    abv:"DOM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Dominican Republic/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/dom",
+                },
+                {
+                    title:"Grenada",
+                    abv:"GRD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Grenada/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/grd",
+                },
+                {
+                    title:"Guadeloupe",
+                    abv:"GLP",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Guadeloupe/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/glp",
+                },
+                {
+                    title:"Haiti",
+                    abv:"HTI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Haiti/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/hti",
+                },
+                {
+                    title:"Jamaica",
+                    abv:"JAM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Jamaica/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/jam",
+                },
+                {
+                    title:"Martinique",
+                    abv:"MTQ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Martinique/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mtq",
+                },
+                {
+                    title:"Montserrat",
+                    abv:"MSR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Montserrat/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/msr",
+                },
+                {
+                    title:"Puerto Rico",
+                    abv:"PRI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Puerto Rico/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pri",
+                },
+                {
+                    title:"Saint Kitts and Nevis",
+                    abv:"KNA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Saint Kitts and Nevis/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/kna",
+                },
+                {
+                    title:"Saint Lucia",
+                    abv:"LCA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Saint Lucia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lca",
+                },
+                {
+                    title:"Saint Vincent and the Grenadines",
+                    abv:"VCT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Saint Vincent and the Grenadines/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/vct",
+                },
+                {
+                    title:"Sint Maarten",
+                    abv:"SXM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sint Maarten/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sxm",
+                },
+                {
+                    title:"Trinidad and Tobago",
+                    abv:"TTO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Trinidad and Tobago/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tto",
+                },
+                {
+                    title:"Turks and Caicos Islands",
+                    abv:"TCA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Turks and Caicos Islands/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tca",
+                },
+                {
+                    title:"US Virgin Islands",
+                    abv:"VIR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/US Virgin Islands/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/vir",
+                }
             ]
         };
     },
@@ -2221,6 +2790,84 @@ const app_pic_south_america = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Argentina",
+                    abv:"ARG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Argentina/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/arg",
+                },
+                {
+                    title:"Bolivia",
+                    abv:"BOL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bolivia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bol",
+                },
+                {
+                    title:"Brazil",
+                    abv:"BRA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Brazil/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bra",
+                },
+                {
+                    title:"Chile",
+                    abv:"CHL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Chile/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/chl",
+                },
+                {
+                    title:"Colombia",
+                    abv:"COL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Colombia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/col",
+                },
+                {
+                    title:"Ecuador",
+                    abv:"ECU",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ecuador/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ecu",
+                },
+                {
+                    title:"French Guiana",
+                    abv:"GUF",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/French Guiana/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/guf",
+                },
+                {
+                    title:"Guyana",
+                    abv:"GUY",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Guyana/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/guy",
+                },
+                {
+                    title:"Paraguay",
+                    abv:"PRY",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Paraguay/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pry",
+                },
+                {
+                    title:"Peru",
+                    abv:"PER",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Peru/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/per",
+                },
+                {
+                    title:"Suriname",
+                    abv:"SUR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Suriname/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sur",
+                },
+                {
+                    title:"Uruguay",
+                    abv:"URY",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Uruguay/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ury",
+                },
+                {
+                    title:"Venezuela",
+                    abv:"VEN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Venezuela/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ven",
+                }
             ]
         };
     },
@@ -2293,6 +2940,72 @@ const app_pic_western_europe = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Austria",
+                    abv:"AUT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Austria/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/aut",
+                },
+                {
+                    title:"Belgium",
+                    abv:"BEL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Belgium/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bel",
+                },
+                {
+                    title:"France",
+                    abv:"FRA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/France/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/fra",
+                },
+                {
+                    title:"Germany",
+                    abv:"DEU",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Germany/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/deu",
+                },
+                {
+                    title:"Ireland",
+                    abv:"IRL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ireland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/irl",
+                },
+                {
+                    title:"Liechtenstein",
+                    abv:"LIE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Liechtenstein/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lie",
+                },
+                {
+                    title:"Luxembourg",
+                    abv:"LUX",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Luxembourg/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lux",
+                },
+                {
+                    title:"Monaco",
+                    abv:"MCO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Monaco/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mco",
+                },
+                {
+                    title:"Netherlands",
+                    abv:"NLD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Netherlands/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nld",
+                },
+                {
+                    title:"Switzerland",
+                    abv:"CHE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Switzerland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/che",
+                },
+                {
+                    title:"United Kingdom",
+                    abv:"GBR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/United Kingdom/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gbr",
+                }
             ]
         };
     },
@@ -2365,6 +3078,96 @@ const app_pic_eastern_europe = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Armenia",
+                    abv:"ARM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Armenia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/arm",
+                },
+                {
+                    title:"Azerbaijan",
+                    abv:"AZE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Azerbaijan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/aze",
+                },
+                {
+                    title:"Belarus",
+                    abv:"BLR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Belarus/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/blr",
+                },
+                {
+                    title:"Bulgaria",
+                    abv:"BGR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bulgaria/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bgr",
+                },
+                {
+                    title:"Czech Republic",
+                    abv:"CZE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Czech Republic/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cze",
+                },
+                {
+                    title:"Hungary",
+                    abv:"HUN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Hungary/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/hun",
+                },
+                {
+                    title:"Kazakhstan",
+                    abv:"KAZ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Kazakhstan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/kaz",
+                },
+                {
+                    title:"Lithuania",
+                    abv:"LTU",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Lithuania/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ltu",
+                },
+                {
+                    title:"Moldova",
+                    abv:"MDA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Moldova/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mda",
+                },
+                {
+                    title:"Poland",
+                    abv:"POL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Poland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/pol",
+                },
+                {
+                    title:"Romania",
+                    abv:"ROU",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Romania/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/rou",
+                },
+                {
+                    title:"Russia",
+                    abv:"RUS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Russia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/rus",
+                },
+                {
+                    title:"Serbia",
+                    abv:"SRB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Serbia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/srb",
+                },
+                {
+                    title:"Slovakia",
+                    abv:"SVK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Slovakia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/svk",
+                },
+                {
+                    title:"Ukraine",
+                    abv:"UKR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ukraine/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ukr",
+                }
             ]
         };
     },
@@ -2437,6 +3240,114 @@ const app_pic_southern_europe = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Albania",
+                    abv:"ALB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Albania/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/alb",
+                },
+                {
+                    title:"Andorra",
+                    abv:"AND",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Andorra/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/and",
+                },
+                {
+                    title:"Bosnia and Herzegovina",
+                    abv:"BIH",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bosnia Herzegovina/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bih",
+                },
+                {
+                    title:"Croatia",
+                    abv:"HRV",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Croatia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/hrv",
+                },
+                {
+                    title:"Cyprus",
+                    abv:"CYP",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Cyprus/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cyp",
+                },
+                {
+                    title:"Gibraltar",
+                    abv:"GIB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Gibraltar/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gib",
+                },
+                {
+                    title:"Greece",
+                    abv:"GRC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Greece/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/grc",
+                },
+                {
+                    title:"Italy",
+                    abv:"ITA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Italy/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ita",
+                },
+                {
+                    title:"Kosovo",
+                    abv:"XKX",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Kosovo/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/xkx",
+                },
+                {
+                    title:"Malta",
+                    abv:"MLT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Malta/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mlt",
+                },
+                {
+                    title:"Montenegro",
+                    abv:"MNE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Montenegro/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mne",
+                },
+                {
+                    title:"North Macedonia",
+                    abv:"MKD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/North Macedonia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mkd",
+                },
+                {
+                    title:"Portugal",
+                    abv:"PRT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Portugal/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/prt",
+                },
+                {
+                    title:"San Marino",
+                    abv:"SMR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/San Marino/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/smr",
+                },
+                {
+                    title:"Slovenia",
+                    abv:"SVN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Slovenia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/svn",
+                },
+                {
+                    title:"Spain",
+                    abv:"ESP",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Spain/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/esp",
+                },
+                {
+                    title:"Turkey",
+                    abv:"TUR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Turkey/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tur",
+                },
+                {
+                    title:"Vatican City",
+                    abv:"VAT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Vatican City/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/vat",
+                }
             ]
         };
     },
@@ -2509,6 +3420,48 @@ const app_pic_northern_europe = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Denmark",
+                    abv:"DNK",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Denmark/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/dnk",
+                },
+                {
+                    title:"Estonia",
+                    abv:"EST",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Estonia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/est",
+                },
+                {
+                    title:"Finland",
+                    abv:"FIN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Finland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/fin",
+                },
+                {
+                    title:"Iceland",
+                    abv:"ISL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Iceland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/isl",
+                },
+                {
+                    title:"Latvia",
+                    abv:"LVA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Latvia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lva",
+                },
+                {
+                    title:"Norway",
+                    abv:"NOR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Norway/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nor",
+                },
+                {
+                    title:"Sweden",
+                    abv:"SWE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sweden/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/swe",
+                }
             ]
         };
     },
@@ -2581,6 +3534,42 @@ const app_pic_northern_africa = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Algeria",
+                    abv:"DZA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Algeria/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/dza",
+                },
+                {
+                    title:"Egypt",
+                    abv:"EGY",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Egypt/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/egy",
+                },
+                {
+                    title:"Libya",
+                    abv:"LBY",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Libya/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lby",
+                },
+                {
+                    title:"Morocco",
+                    abv:"MAR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Morocco/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mar",
+                },
+                {
+                    title:"Sudan",
+                    abv:"SDN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sudan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sdn",
+                },
+                {
+                    title:"Tunisia",
+                    abv:"TUN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Tunisia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tun",
+                }
             ]
         };
     },
@@ -2653,6 +3642,102 @@ const app_pic_western_africa = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Benin",
+                    abv:"BEN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Benin/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ben",
+                },
+                {
+                    title:"Burkina Faso",
+                    abv:"BFA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Burkina/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bfa",
+                },
+                {
+                    title:"Cape Verde",
+                    abv:"CPV",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Cape Verde/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cpv",
+                },
+                {
+                    title:"Côte d'Ivoire",
+                    abv:"CIV",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ivory Coast/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/civ",
+                },
+                {
+                    title:"Gambia",
+                    abv:"GMB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Gambia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gmb",
+                },
+                {
+                    title:"Ghana",
+                    abv:"GHA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ghana/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gha",
+                },
+                {
+                    title:"Guinea",
+                    abv:"GIN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Guinea/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gin",
+                },
+                {
+                    title:"Guinea-Bissau",
+                    abv:"GNB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Guinea Bissau/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gnb",
+                },
+                {
+                    title:"Liberia",
+                    abv:"LBR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Liberia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lbr",
+                },
+                {
+                    title:"Mali",
+                    abv:"MLI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mali/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mli",
+                },
+                {
+                    title:"Mauritania",
+                    abv:"MRT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mauritania/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mrt",
+                },
+                {
+                    title:"Niger",
+                    abv:"NER",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Niger/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ner",
+                },
+                {
+                    title:"Nigeria",
+                    abv:"NGA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nigeria/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nga",
+                },
+                {
+                    title:"Senegal",
+                    abv:"SEN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Senegal/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sen",
+                },
+                {
+                    title:"Sierra Leone",
+                    abv:"SLE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sierra Leone/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sle",
+                },
+                {
+                    title:"Togo",
+                    abv:"TGO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Togo/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tgo",
+                }
             ]
         };
     },
@@ -2725,6 +3810,114 @@ const app_pic_eastern_africa = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Burundi",
+                    abv:"BDI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Burundi/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bdi",
+                },
+                {
+                    title:"Comoros",
+                    abv:"COM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Comoros/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/com",
+                },
+                {
+                    title:"Djibouti",
+                    abv:"DJI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Djibouti/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/dji",
+                },
+                {
+                    title:"Eritrea",
+                    abv:"ERI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ertrea/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/eri",
+                },
+                {
+                    title:"Ethiopia",
+                    abv:"ETH",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Ethiopia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/eth",
+                },
+                {
+                    title:"Kenya",
+                    abv:"KEN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Kenya/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ken",
+                },
+                {
+                    title:"Madagascar",
+                    abv:"MDG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Madagascar/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mdg",
+                },
+                {
+                    title:"Malawi",
+                    abv:"MWI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Malawi/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mwi",
+                },
+                {
+                    title:"Mauritius",
+                    abv:"MUS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mauritius/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mus",
+                },
+                {
+                    title:"Mozambique",
+                    abv:"MOZ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Mozambique/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/moz",
+                },
+                {
+                    title:"Rwanda",
+                    abv:"RWA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Rwanda/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/rwa",
+                },
+                {
+                    title:"Seychelles",
+                    abv:"SYC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Seychelles/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/syc",
+                },
+                {
+                    title:"Somalia",
+                    abv:"SOM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Somalia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/som",
+                },
+                {
+                    title:"South Sudan",
+                    abv:"SSD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/South Sudan/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ssd",
+                },
+                {
+                    title:"Tanzania",
+                    abv:"TZA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Tanzania/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tza",
+                },
+                {
+                    title:"Uganda",
+                    abv:"UGA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Uganda/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/uga",
+                },
+                {
+                    title:"Zambia",
+                    abv:"ZMB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Zambia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/zmb",
+                },
+                {
+                    title:"Zimbabwe",
+                    abv:"ZWE",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Zimbabwe/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/zwe",
+                }
             ]
         };
     },
@@ -2794,6 +3987,60 @@ const app_pic_central_africa = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Angola",
+                    abv:"AGO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Angola/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ago",
+                },
+                {
+                    title:"Cameroon",
+                    abv:"CMR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Cameroon/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cmr",
+                },
+                {
+                    title:"Central African Republic",
+                    abv:"CAF",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Central African Republic/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/caf",
+                },
+                {
+                    title:"Chad",
+                    abv:"TCD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Chad/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tcd",
+                },
+                {
+                    title:"Democratic Republic of Congo",
+                    abv:"COD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Democratic Republic of Congo/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cod",
+                },
+                {
+                    title:"Equatorial Guinea",
+                    abv:"GNQ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Equatorial Guinea/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gnq",
+                },
+                {
+                    title:"Gabon",
+                    abv:"GAB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Gabon/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gab",
+                },
+                {
+                    title:"Republic of Congo",
+                    abv:"COG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Congo/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cog",
+                },
+                {
+                    title:"Sao Tome and Principe",
+                    abv:"STP",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Sao Tome and Principe/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/stp",
+                }
             ]
         };
     },
@@ -2866,6 +4113,36 @@ const app_pic_southern_africa = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Botswana",
+                    abv:"BWA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Botswana/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bwa",
+                },
+                {
+                    title:"Lesotho",
+                    abv:"LSO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Lesotho/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/lso",
+                },
+                {
+                    title:"Namibia",
+                    abv:"NAM",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nambia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nam",
+                },
+                {
+                    title:"South Africa",
+                    abv:"ZAF",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/South Africa/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/zaf",
+                },
+                {
+                    title:"Eswatini",
+                    abv:"SWZ",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Eswatini/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/swz",
+                }
             ]
         };
     },
@@ -2938,6 +4215,54 @@ const app_pic_australia = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Australian Capital Territory",
+                    abv:"ACT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Australian Capital Territory/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/act",
+                },
+                {
+                    title:"New South Wales",
+                    abv:"NSW",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/New South Wales/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nsw",
+                },
+                {
+                    title:"Northern Territory",
+                    abv:"NTR",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Northern Territory/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ntr",
+                },
+                {
+                    title:"Queensland",
+                    abv:"QLD",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Queensland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/qld",
+                },
+                {
+                    title:"South Australia",
+                    abv:"SA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/South Australia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/sa",
+                },
+                {
+                    title:"Tasmania",
+                    abv:"TAS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Tasmania/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tas",
+                },
+                {
+                    title:"Victoria",
+                    abv:"VIC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Victoria/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/vic",
+                },
+                {
+                    title:"Western Australia",
+                    abv:"WA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Western Australia/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/wa",
+                }
             ]
         };
     },
@@ -3010,6 +4335,102 @@ const app_pic_new_zealand = {
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
             resources:[
+                {
+                    title:"Auckland",
+                    abv:"AKL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Auckland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/akl",
+                },
+                {
+                    title:"Bay of Plenty",
+                    abv:"BOP",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Bay of Plenty/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/bop",
+                },
+                {
+                    title:"Canterbury",
+                    abv:"CBY",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Canterbury/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/cby",
+                },
+                {
+                    title:"Gisborne",
+                    abv:"GIS",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Gisborne/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/gis",
+                },
+                {
+                    title:"Hawke's Bay",
+                    abv:"HKB",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Hawkes Bay/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/hkb",
+                },
+                {
+                    title:"Manawatu-Wanganui",
+                    abv:"MWT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Manawatu-Wanganui/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mwt",
+                },
+                {
+                    title:"Marlborough",
+                    abv:"MBH",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Marlborough/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/mbh",
+                },
+                {
+                    title:"Nelson",
+                    abv:"NSN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Nelson/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/nsn",
+                },
+                {
+                    title:"Northland",
+                    abv:"NTL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Northland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ntl",
+                },
+                {
+                    title:"Otago",
+                    abv:"OTA",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Otago/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/ota",
+                },
+                {
+                    title:"Southland",
+                    abv:"STL",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Southland/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/stl",
+                },
+                {
+                    title:"Taranaki",
+                    abv:"TKI",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Taranaki/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tki",
+                },
+                {
+                    title:"Tasman",
+                    abv:"TSN",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Tasman/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/tsn",
+                },
+                {
+                    title:"Waikato",
+                    abv:"WKO",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Waikato/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/wko",
+                },
+                {
+                    title:"Wellington",
+                    abv:"WLG",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Wellington/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/wlg",
+                },
+                {
+                    title:"West Coast",
+                    abv:"WTC",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/West Coast/Thumbnail/img.png",
+                    url:"https://www.masrikdahir.com/map/wtc",
+                }
             ]
         };
     },

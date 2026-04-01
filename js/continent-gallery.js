@@ -108,6 +108,8 @@ function buildRegionCard(region, isFirst) {
             '</TR>' +
         '</TABLE>' +
         '<div id="' + region.id + '"></div>' +
+        '<hr>' +
+        '<a class="btn1" style="margin: 0px;"><center><img type="button" class="btn-outline-primary" style="width: calc(1% + 45px); height: calc(1% + 45px); border: 0px solid black; background: white;" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/photo.png"/></center></a>' +
         '<div id="' + region.vueMount + '" style="margin-top: 33px">' +
             '<div class="" style="color:transparent;">' +
                 '<div style="display: inline-block">' +
