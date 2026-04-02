@@ -87,6 +87,20 @@
         "name:Bonaire, Saint Eustachius and Saba": "bes"
     };
 
+    // Subdivision prefix → parent country name (for thumbnail fallback)
+    var SUBDIVISION_PARENT = {
+        "AU": "Australia",
+        "CA": "Canada",
+        "NZ": "New Zealand",
+        "BD": "Bangladesh",
+        "UM": "United States"
+    };
+
+    function getParentThumbnail(svgId) {
+        var prefix = (svgId || "").split("-")[0].toUpperCase();
+        return SUBDIVISION_PARENT[prefix] ? getThumbnailUrl(SUBDIVISION_PARENT[prefix]) : null;
+    }
+
     // Cached data
     var _dataPromise = null;
     var _lookups = null;
@@ -292,7 +306,7 @@
                     // Unvisited styling with flag thumbnail on hover
                     var directDataName = p.dataset ? p.dataset.name : p.getAttribute("data-name");
                     var directPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
-                    var directThumbUrl = getThumbnailUrl(NAME_OVERRIDES[directDataName] || directDataName);
+                    var directThumbUrl = getParentThumbnail(p.id) || getThumbnailUrl(NAME_OVERRIDES[directDataName] || directDataName);
                     createFlagPattern(svgEl, directPatternId, directThumbUrl, p);
                     setPathFill(p, UNVISITED_COLOR);
                     (function (pathEl, pId) {
