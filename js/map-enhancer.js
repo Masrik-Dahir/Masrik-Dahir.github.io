@@ -45,6 +45,7 @@
         "NZ-HKB": "hkb", "NZ-MBH": "mbh", "NZ-MWT": "mwt", "NZ-NSN": "nsn",
         "NZ-NTL": "ntl", "NZ-OTA": "ota", "NZ-STL": "stl", "NZ-TAS": "tsn",
         "NZ-TKI": "tki", "NZ-WKO": "wko", "NZ-WGN": "wlg", "NZ-WTC": "wtc",
+        "NZ-CIT": "cit",
         // Canadian provinces (except Ontario which is in image.json)
         "CA-AB": "ab", "CA-BC": "bc", "CA-MB": "mb", "CA-NB": "nb",
         "CA-NL": "nl", "CA-NS": "ns", "CA-NT": "nt", "CA-NU": "nu",
@@ -207,26 +208,24 @@
         return defs;
     }
 
-    function createFlagPattern(svgEl, patternId, imageUrl, pathEl) {
+    function createFlagPattern(svgEl, patternId, imageUrl) {
         var defs = ensureDefs(svgEl);
         if (defs.querySelector("#" + patternId)) return; // already exists
 
-        var bbox = pathEl.getBBox();
         var ns = "http://www.w3.org/2000/svg";
         var pattern = document.createElementNS(ns, "pattern");
         pattern.setAttribute("id", patternId);
-        pattern.setAttribute("patternUnits", "userSpaceOnUse");
-        pattern.setAttribute("x", String(bbox.x));
-        pattern.setAttribute("y", String(bbox.y));
-        pattern.setAttribute("width", String(bbox.width));
-        pattern.setAttribute("height", String(bbox.height));
+        pattern.setAttribute("patternContentUnits", "objectBoundingBox");
+        pattern.setAttribute("patternUnits", "objectBoundingBox");
+        pattern.setAttribute("width", "1");
+        pattern.setAttribute("height", "1");
+        pattern.setAttribute("viewBox", "0 0 1 1");
+        pattern.setAttribute("preserveAspectRatio", "xMidYMid slice");
 
         var img = document.createElementNS(ns, "image");
         img.setAttribute("href", imageUrl);
-        img.setAttribute("x", String(bbox.x));
-        img.setAttribute("y", String(bbox.y));
-        img.setAttribute("width", String(bbox.width));
-        img.setAttribute("height", String(bbox.height));
+        img.setAttribute("width", "1");
+        img.setAttribute("height", "1");
         img.setAttribute("preserveAspectRatio", "xMidYMid slice");
 
         pattern.appendChild(img);
@@ -318,7 +317,7 @@
             if (entry.numImages > 0) {
                 var patternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
                 var thumbUrl = getThumbnailUrl(entry.name);
-                createFlagPattern(svgEl, patternId, thumbUrl, p);
+                createFlagPattern(svgEl, patternId, thumbUrl);
                 setPathFill(p, VISITED_COLOR);
 
                 // Flag fades in on hover, teal returns on leave
