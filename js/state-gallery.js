@@ -74,7 +74,7 @@
     function buildGalleryTemplate() {
         // Title bar rendered statically (not dependent on Vue mounting)
         var titleHtml = regionName
-            ? '<div class="tag w3-margin-bottom" style="margin-top:70px"><div class="it"><img src="' + thumbCdn + regionName + '/img.png" alt="' + regionName + '" style="width: calc(5% + 40px); margin: 1px; vertical-align: middle;"/> ' + regionName + '</div></div>'
+            ? '<div class="tag w3-margin-bottom" style="margin-top:70px"><div class="it"><img src="' + thumbCdn + regionName + '/img.png" alt="' + regionName + '" onerror="this.style.display=\'none\'" style="width: calc(5% + 40px); margin: 1px; vertical-align: middle;"/> ' + regionName + '</div></div>'
             : '';
 
         return '<table width="100%" style="margin-top: 10px"><tr><td width="100%">' +
