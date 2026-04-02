@@ -107,7 +107,7 @@
             '<a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank"><i style="font-size:34px" class="w3-hover-opacity">R<sup>C</sup></i></a>' +
             '<a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">' +
             '<b style="font-size:37px; color: black" class="w3-hover-opacity">' +
-            '<img style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px" src="https://d3dw5jtb3w1kgy.cloudfront.net/w3_white.png"/>' +
+            '<img style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px" src="https://d3dw5jtb3w1kgy.cloudfront.net/w3_white.png" alt=""/>' +
             '</b></a>' +
             '<a href="https://orcid.org/0000-0002-7841-310X" style="text-decoration: none" target="blank">' +
             '<b style="font-size:37px; color: black" class="w3-hover-opacity">' +

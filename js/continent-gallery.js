@@ -101,7 +101,7 @@ function buildRegionCard(region, isFirst) {
             '<TR>' +
                 '<TD WIDTH="50%" style="float: left">' +
                     '<h4 style="margin-top: 0px;">' +
-                        '<img style="width: calc(5% + 40px); margin: 1px" src="' + region.thumbnail + '"/> ' +
+                        '<img style="width: calc(5% + 40px); margin: 1px" src="' + region.thumbnail + '" alt="' + region.name + '"/> ' +
                         region.name +
                     '</h4>' +
                 '</TD>' +
@@ -109,7 +109,7 @@ function buildRegionCard(region, isFirst) {
         '</TABLE>' +
         '<div id="' + region.id + '"></div>' +
         '<hr>' +
-        '<a class="btn1" style="margin: 0px;"><center><img type="button" class="btn-outline-primary" style="width: calc(1% + 45px); height: calc(1% + 45px); border: 0px solid black; background: white;" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/photo.png"/></center></a>' +
+        '<a class="btn1" style="margin: 0px;"><center><img type="button" class="btn-outline-primary" style="width: calc(1% + 45px); height: calc(1% + 45px); border: 0px solid black; background: white;" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/photo.png" alt=""/></center></a>' +
         '<div id="' + region.vueMount + '" style="margin-top: 33px">' +
             '<div class="" style="color:transparent;">' +
                 '<div style="display: inline-block">' +
@@ -119,7 +119,7 @@ function buildRegionCard(region, isFirst) {
                                 '<div data-toggle="tooltip" data-html="true" :title="item.title">' +
                                     '<a :href="item.url" style="text-decoration: none">' +
                                         '<button class="pop-up-button" style="background-color: transparent; border: 1px solid black; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">' +
-                                            '<img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>' +
+                                            '<img :src="item.image" :alt="item.title" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>' +
                                         '</button>' +
                                         '<center><div v-cloak style="color: black">{{ item.abv }}</div></center>' +
                                     '</a>' +
