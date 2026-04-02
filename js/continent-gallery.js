@@ -185,15 +185,21 @@ function renderContinentGallery(containerId) {
             if (e.target.tagName === "path" && e.target.dataset.name) {
                 detailsBox.innerHTML = e.target.dataset.name;
                 detailsBox.style.opacity = "100%";
-            } else {
+            }
+        });
+
+        document.addEventListener("mouseout", function (e) {
+            if (e.target.tagName === "path") {
                 detailsBox.style.opacity = "0%";
             }
         });
 
-        document.addEventListener("click", function (e) {
-            if (e.target.tagName !== "path") {
-                detailsBox.style.opacity = "0%";
-            }
+        document.addEventListener("click", function () {
+            detailsBox.style.opacity = "0%";
+        });
+
+        window.addEventListener("pageshow", function () {
+            detailsBox.style.opacity = "0%";
         });
 
         window.addEventListener("mousemove", function (e) {
