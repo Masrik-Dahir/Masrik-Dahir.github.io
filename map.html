@@ -49,6 +49,7 @@
 
     <!--  Custom  -->
     <link rel="stylesheet" href="css/map-page.css">
+    <script src="js/map-enhancer.js" defer></script>
     <script src="js/components.js" defer></script>
 
 
@@ -778,7 +779,7 @@
             <TABLE WIDTH="100%">
                 <TR>
                     <TD WIDTH="100%" style="float: left">
-                        <h4 style="margin-top: 0px;"><img style="width: calc(5% + 40px); margin: 1px" src="https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Thumbnail/img.png"/> Bangladesh</h4>
+                        <h4 style="margin-top: 0px;"><img style="width: calc(5% + 40px); margin: 1px" src="https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Bangladesh/img.png"/> Bangladesh</h4>
                     </TD>
                 </TR>
             </TABLE>
@@ -829,7 +830,7 @@
                         }</style>
 
                         <pattern id="bangladesh-flag-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Thumbnail/img.png" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
+                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Bangladesh/img.png" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
                         </pattern>
                     </defs>
                     <metadata
@@ -3810,6 +3811,19 @@
         detailsBox.style.top = (y + 20) + 'px';
         detailsBox.style.left = (x) + 'px';
     };
+
+    // Enhance all inline SVGs with click-to-navigate and flag fills
+    // (DOMContentLoaded fires after deferred scripts, so MapEnhancer is available)
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.MapEnhancer) {
+            window.MapEnhancer.fetchData().then(function () {
+                var allSvgs = document.querySelectorAll('svg');
+                for (var i = 0; i < allSvgs.length; i++) {
+                    window.MapEnhancer.enhance(allSvgs[i]);
+                }
+            });
+        }
+    });
 </script>
 
 <script>

@@ -66,13 +66,21 @@
             '</div></td></tr></table></div>';
     }
 
+    // Extract region name from page title ("Masrik Dahir - Region Name" or just "Masrik Dahir")
+    var pageTitle = document.title || "";
+    var regionName = pageTitle.indexOf(" - ") !== -1 ? pageTitle.substring(pageTitle.indexOf(" - ") + 3).trim() : "";
+    var thumbCdn = "https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/";
+
     function buildGalleryTemplate() {
+        // Title bar rendered statically (not dependent on Vue mounting)
+        var titleHtml = regionName
+            ? '<div class="tag w3-margin-bottom" style="margin-top:70px"><div class="it"><img src="' + thumbCdn + regionName + '/img.png" style="width: calc(5% + 40px); margin: 1px; vertical-align: middle;"/> ' + regionName + '</div></div>'
+            : '';
+
         return '<table width="100%" style="margin-top: 10px"><tr><td width="100%">' +
             '<div class="content-slideshow-container">' +
+            titleHtml +
             '<div id="app_' + abbr + '" class="w3-margin-bottom">' +
-
-            // Title
-            '<div class="tag w3-margin-bottom" style="margin-top:70px"><div class="it"><img :src="\'https://d3dw5jtb3w1kgy.cloudfront.net/\' + name + \'/Thumbnail/img.png\'" style="width: calc(5% + 40px); margin: 1px; vertical-align: middle;"/> {{ name }}</div></div>' +
 
             // Slideshow view
             '<div id="showSlide" v-show="isSlideVisible">' +

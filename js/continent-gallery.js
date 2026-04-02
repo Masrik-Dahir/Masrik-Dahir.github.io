@@ -22,7 +22,7 @@ var CONTINENT_DATA = {
     },
     asia: {
         regions: [
-            { id: "bangladesh", name: "Bangladesh", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Thumbnail/img.png", svgFile: "bangladesh.svg", vueMount: "app_pic_bangladesh", cardId: "scroll_BGD" },
+            { id: "bangladesh", name: "Bangladesh", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Bangladesh/img.png", svgFile: "bangladesh.svg", vueMount: "app_pic_bangladesh", cardId: "scroll_BGD" },
             { id: "northern_asia", name: "Northern Asia", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/NorthernAsia.svg.png", svgFile: "northern_asia.svg", vueMount: "app_pic_northern_asia" },
             { id: "southern_asia", name: "Southern Asia", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/SouthernAsia.png", svgFile: "southern_asia.svg", vueMount: "app_pic_southern_asia" },
             { id: "eastern_asia", name: "Eastern Asia", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/EastAsia.png", svgFile: "eastern_asia.svg", vueMount: "app_pic_eastern_asia" },
@@ -160,6 +160,9 @@ function renderContinentGallery(containerId) {
     // Resolve SVG base path relative to the page
     var basePath = "svg/";
 
+    // Pre-fetch image.json so it's ready when SVGs load
+    var enhancerReady = window.MapEnhancer ? window.MapEnhancer.fetchData() : Promise.resolve();
+
     // Load SVGs asynchronously
     data.regions.forEach(function (region) {
         var svgContainer = document.getElementById(region.id);
@@ -172,6 +175,13 @@ function renderContinentGallery(containerId) {
             })
             .then(function (svgText) {
                 svgContainer.innerHTML = svgText;
+                // Enhance SVG paths with click-to-navigate and flag fills
+                var svgEl = svgContainer.querySelector("svg");
+                if (svgEl && window.MapEnhancer) {
+                    enhancerReady.then(function () {
+                        window.MapEnhancer.enhance(svgEl);
+                    });
+                }
             })
             .catch(function (err) {
                 console.error("Failed to load SVG for " + region.id + ":", err);

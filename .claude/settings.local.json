@@ -51,7 +51,21 @@
       "WebFetch(domain:whatthelogo.com)",
       "WebFetch(domain:www.thedailystar.net)",
       "Bash(mkdir:*)",
-      "Bash(file *.png)"
+      "Bash(file *.png)",
+      "Bash(node:*)",
+      "Bash(cp:*)",
+      "Bash(ls -d Thumbnail/*/)",
+      "Bash(wc -l echo \"\" echo \"Pages with logo.png favicon:\" grep -l 'cloudfront.net/logo.png' map/*.html)",
+      "Bash(wc -l echo \"\" echo \"Pages with local Thumbnail:\" grep -l 'href=\"../Thumbnail/' map/*.html)",
+      "Bash(rm:*)",
+      "Bash(ls -la Thumbnail/*/img.png)",
+      "Read(//e/Repo/WebstormProjects/Masrik-Dahir.github.io/>50KB count: $\\(ls -la Thumbnail/*/**)",
+      "Bash(xxd -l 16 Thumbnail/stl/img.png)",
+      "Bash(xxd -l 16 Thumbnail/wko/img.png)",
+      "Bash(PYTHONIOENCODING=utf-8 python3)",
+      "Bash(rm -rf Thumbnail)",
+      "Bash(rm -f flag_download_list.txt flag_download_list2.txt image_data_tmp.json all_map_pages_tmp.txt slug_cdn_map_tmp.txt)",
+      "Bash(sort wc:*)"
     ]
   }
 }

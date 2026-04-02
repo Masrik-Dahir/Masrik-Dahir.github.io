@@ -43,7 +43,7 @@
                         }</style>
 
                         <pattern id="bangladesh-flag-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/Bangladesh/Thumbnail/img.png" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
+                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Bangladesh/img.png" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
                         </pattern>
                     </defs>
                     <metadata
