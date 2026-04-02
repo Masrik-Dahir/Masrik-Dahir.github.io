@@ -214,24 +214,27 @@
         return defs;
     }
 
-    function createFlagPattern(svgEl, patternId, imageUrl) {
+    var TILES_ACROSS = 5; // target ~5 tiles across the region width
+
+    function createFlagPattern(svgEl, patternId, imageUrl, pathEl) {
         var defs = ensureDefs(svgEl);
         if (defs.querySelector("#" + patternId)) return; // already exists
+
+        var bbox = pathEl.getBBox();
+        var tileW = bbox.width / TILES_ACROSS;
+        var tileH = tileW * 2 / 3; // flag aspect ratio ~3:2
 
         var ns = "http://www.w3.org/2000/svg";
         var pattern = document.createElementNS(ns, "pattern");
         pattern.setAttribute("id", patternId);
-        pattern.setAttribute("patternContentUnits", "objectBoundingBox");
-        pattern.setAttribute("patternUnits", "objectBoundingBox");
-        pattern.setAttribute("width", "1");
-        pattern.setAttribute("height", "1");
-        pattern.setAttribute("viewBox", "0 0 1 1");
-        pattern.setAttribute("preserveAspectRatio", "xMidYMid slice");
+        pattern.setAttribute("patternUnits", "userSpaceOnUse");
+        pattern.setAttribute("width", tileW);
+        pattern.setAttribute("height", tileH);
 
         var img = document.createElementNS(ns, "image");
         img.setAttribute("href", imageUrl);
-        img.setAttribute("width", "1");
-        img.setAttribute("height", "1");
+        img.setAttribute("width", tileW);
+        img.setAttribute("height", tileH);
         img.setAttribute("preserveAspectRatio", "xMidYMid slice");
 
         pattern.appendChild(img);
@@ -290,7 +293,7 @@
                     var directDataName = p.dataset ? p.dataset.name : p.getAttribute("data-name");
                     var directPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
                     var directThumbUrl = getThumbnailUrl(NAME_OVERRIDES[directDataName] || directDataName);
-                    createFlagPattern(svgEl, directPatternId, directThumbUrl);
+                    createFlagPattern(svgEl, directPatternId, directThumbUrl, p);
                     setPathFill(p, UNVISITED_COLOR);
                     (function (pathEl, pId) {
                         pathEl.addEventListener("mouseenter", function () {
@@ -327,7 +330,7 @@
             if (entry.numImages > 0) {
                 var patternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
                 var thumbUrl = getThumbnailUrl(entry.name);
-                createFlagPattern(svgEl, patternId, thumbUrl);
+                createFlagPattern(svgEl, patternId, thumbUrl, p);
                 setPathFill(p, VISITED_COLOR);
 
                 // Flag fades in on hover, teal returns on leave
@@ -343,7 +346,7 @@
                 // Unvisited: grey, flag thumbnail reveals on hover
                 var unvisitedPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
                 var unvisitedThumbUrl = getThumbnailUrl(entry.name);
-                createFlagPattern(svgEl, unvisitedPatternId, unvisitedThumbUrl);
+                createFlagPattern(svgEl, unvisitedPatternId, unvisitedThumbUrl, p);
                 setPathFill(p, UNVISITED_COLOR);
                 (function (pathEl, pId) {
                     pathEl.addEventListener("mouseenter", function () {
