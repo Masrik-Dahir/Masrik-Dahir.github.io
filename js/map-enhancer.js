@@ -258,6 +258,12 @@
         return CDN_BASE + "Thumbnail/" + name + "/img.png";
     }
 
+    function makePatternId(pathEl) {
+        var id = (pathEl.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
+        var name = (pathEl.dataset ? pathEl.dataset.name : pathEl.getAttribute("data-name")) || "";
+        return "flag-" + id + "-" + name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+    }
+
     // ── Colors ─────────────────────────────────────────────────────
 
     var VISITED_COLOR = "#26A69A";       // teal
@@ -292,7 +298,7 @@
 
                     // Unvisited styling with flag thumbnail on hover
                     var directDataName = p.dataset ? p.dataset.name : p.getAttribute("data-name");
-                    var directPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
+                    var directPatternId = makePatternId(p);
                     var directThumbUrl = getThumbnailUrl(NAME_OVERRIDES[directDataName] || directDataName);
                     createFlagPattern(svgEl, directPatternId, directThumbUrl, p);
                     setPathFill(p, UNVISITED_COLOR);
@@ -323,13 +329,13 @@
                             window.location.href = navUrl;
                         }, 400);
                     });
-                })(p, url, entry.numImages > 0, entry.numImages > 0 ? "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-") : null);
+                })(p, url, entry.numImages > 0, entry.numImages > 0 ? makePatternId(p) : null);
                 p.style.cursor = "pointer";
             }
 
             // Visited: teal fill, flag reveals on hover
             if (entry.numImages > 0) {
-                var patternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
+                var patternId = makePatternId(p);
                 var thumbUrl = getThumbnailUrl(entry.name);
                 createFlagPattern(svgEl, patternId, thumbUrl, p);
                 setPathFill(p, VISITED_COLOR);
@@ -345,7 +351,7 @@
                 })(p, patternId);
             } else {
                 // Unvisited: grey, flag thumbnail reveals on hover
-                var unvisitedPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
+                var unvisitedPatternId = makePatternId(p);
                 var unvisitedThumbUrl = getThumbnailUrl(entry.name);
                 createFlagPattern(svgEl, unvisitedPatternId, unvisitedThumbUrl, p);
                 setPathFill(p, UNVISITED_COLOR);
