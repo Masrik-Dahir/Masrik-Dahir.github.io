@@ -54,6 +54,11 @@ def get_all_map_html_files():
 
 # --- Parse map-enhancer.js -----------------------------------------
 
+def decode_js_unicode(s):
+    """Decode JS unicode escapes like \\u00e9 to actual characters."""
+    return re.sub(r'\\u([0-9a-fA-F]{4})', lambda m: chr(int(m.group(1), 16)), s)
+
+
 def parse_map_enhancer():
     path = os.path.join(JS_DIR, "map-enhancer.js")
     with open(path, "r", encoding="utf-8") as f:
@@ -65,7 +70,7 @@ def parse_map_enhancer():
     if block_match:
         block = block_match.group(1)
         for m in re.finditer(r'"([^"]+)"\s*:\s*"([^"]+)"', block):
-            direct_map[m.group(1)] = m.group(2)
+            direct_map[decode_js_unicode(m.group(1))] = m.group(2)
 
     # Extract NAME_OVERRIDES
     name_overrides = {}
@@ -218,11 +223,29 @@ def test_svg_paths_resolve():
     svg_paths = parse_svg_data_names()
 
     # Build lookups mirroring map-enhancer.js
+    # Note: image.json is the real source at runtime. software.js is a proxy.
+    # Handle two known mismatches:
+    # 1. Duplicate abbreviations (e.g., WA = Washington state AND Western Australia)
+    #    -> prefer 2-letter state entries for by_abbr (image.json has states as 2-letter)
+    # 2. NAME_OVERRIDES target names may differ from software.js titles
+    #    -> also index by override target names
     by_abbr = {}
     by_name = {}
     for e in software_entries:
-        by_abbr[e["abbreviation"].upper()] = e
+        abbr = e["abbreviation"].upper()
+        # For 2-letter abbreviations, prefer entries with shorter names (US states)
+        # to avoid Western Australia overwriting Washington
+        if abbr in by_abbr and len(abbr) == 2:
+            if len(e["name"]) > len(by_abbr[abbr]["name"]):
+                continue  # skip longer name (e.g., "Western Australia" vs "Washington")
+        by_abbr[abbr] = e
         by_name[e["name"]] = e
+
+    # Also index by NAME_OVERRIDE target names so lookups match runtime behavior
+    # e.g., NAME_OVERRIDES["Gambia"] = "The Gambia" but software.js has title "Gambia"
+    for svg_name, json_name in name_overrides.items():
+        if json_name not in by_name and svg_name in by_name:
+            by_name[json_name] = by_name[svg_name]
 
     for p in svg_paths:
         data_name = p["data_name"]
@@ -239,22 +262,25 @@ def test_svg_paths_resolve():
                 fail("SVG->DIRECT", f'{svg_file}: "{data_name}" (id={p["id"]}) -> map/{direct_slug}.html MISSING')
             continue
 
-        # Simulate resolveEntry logic
+        # Simulate resolveEntry logic (independent checks, NOT elif chain)
         entry = None
 
-        # Canadian province
+        # Strategy 1: Canadian province
         if path_id.startswith("CA-"):
             entry = by_name.get(lookup_name)
-        # US state (2-letter id)
-        elif len(path_id) == 2 and path_id in by_abbr and len(by_abbr[path_id]["abbreviation"]) == 2:
+
+        # Strategy 2: US state (2-letter id matching 2-letter abbreviation)
+        if not entry and len(path_id) == 2 and path_id in by_abbr and len(by_abbr[path_id]["abbreviation"]) == 2:
             candidate = by_abbr[path_id]
             if candidate["name"] == lookup_name:
                 entry = candidate
-        # Bangladesh
-        elif path_id.startswith("BD-"):
+
+        # Strategy 3: Bangladesh divisions
+        if not entry and path_id.startswith("BD-"):
             entry = by_name.get(lookup_name)
-        # Country by name
-        else:
+
+        # Strategy 4: Country by name (3+ letter abbreviation)
+        if not entry:
             e = by_name.get(lookup_name)
             if e and len(e["abbreviation"]) >= 3:
                 entry = e
@@ -262,7 +288,7 @@ def test_svg_paths_resolve():
         if not entry:
             # Not resolvable via image.json — check if it's in DIRECT_URL_MAP by name
             if "name:" + data_name not in direct_map and path_id not in direct_map:
-                warn("SVG->unlinked", f'{svg_file}: "{data_name}" (id={p["id"]}) has no click target')
+                fail("SVG->unlinked", f'{svg_file}: "{data_name}" (id={p["id"]}) has no click target')
             continue
 
         # Simulate getNavUrl

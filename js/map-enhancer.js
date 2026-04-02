@@ -78,7 +78,13 @@
         "name:British Indian Ocean Territory": "iot",
         "name:Cocos (Keeling) Islands": "cck",
         "name:Christmas Island": "cxr",
-        "name:Federated States of Micronesia": "fsm"
+        "name:Federated States of Micronesia": "fsm",
+        // US minor outlying islands
+        "UM-81": "umi81", "UM-84": "umi84", "UM-67": "umi67", "UM-71": "umi71",
+        // Caribbean territories
+        "name:Saint-Barth\u00e9lemy": "blm",
+        "name:Saint Martin": "maf",
+        "name:Bonaire, Saint Eustachius and Saba": "bes"
     };
 
     // Cached data
