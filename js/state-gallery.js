@@ -91,10 +91,10 @@
             // Gallery view
             '<div id="showGal" v-show="!isSlideVisible">' +
             '<div class="inactive-container w3-margin-top w3-margin-left w3-margin-right">' +
-            '<template v-for="(item, index) in resources" :key="index">' +
+            '<div v-for="(item, index) in resources" :key="index" :style="item.isActive ? \'flex-basis:100%\' : \'\'">' +
             '<div v-if="item.isActive" class="image-container active-image"><img :src="item.url" /></div>' +
             '<div v-else class="inactive-image image-container" @click="selectImage(index)"><img :src="item.url" /></div>' +
-            '</template></div></div>' +
+            '</div></div></div>' +
 
             // Nav panel
             '<div class="content-dot-container-frame w3-margin-bottom w3-margin-top">' +
