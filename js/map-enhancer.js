@@ -286,16 +286,20 @@
                     })(p, directUrl);
                     p.style.cursor = "pointer";
 
-                    // Unvisited styling
+                    // Unvisited styling with flag thumbnail on hover
+                    var directDataName = p.dataset ? p.dataset.name : p.getAttribute("data-name");
+                    var directPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
+                    var directThumbUrl = getThumbnailUrl(NAME_OVERRIDES[directDataName] || directDataName);
+                    createFlagPattern(svgEl, directPatternId, directThumbUrl);
                     setPathFill(p, UNVISITED_COLOR);
-                    (function (pathEl) {
+                    (function (pathEl, pId) {
                         pathEl.addEventListener("mouseenter", function () {
-                            setPathFill(pathEl, UNVISITED_HOVER);
+                            setPathFill(pathEl, "url(#" + pId + ")");
                         });
                         pathEl.addEventListener("mouseleave", function () {
                             setPathFill(pathEl, UNVISITED_COLOR);
                         });
-                    })(p);
+                    })(p, directPatternId);
                 }
                 continue;
             }
@@ -336,16 +340,19 @@
                     });
                 })(p, patternId);
             } else {
-                // Unvisited: grey, subtle darken on hover
+                // Unvisited: grey, flag thumbnail reveals on hover
+                var unvisitedPatternId = "flag-" + (p.id || "unknown").toLowerCase().replace(/[^a-z0-9]/g, "-");
+                var unvisitedThumbUrl = getThumbnailUrl(entry.name);
+                createFlagPattern(svgEl, unvisitedPatternId, unvisitedThumbUrl);
                 setPathFill(p, UNVISITED_COLOR);
-                (function (pathEl) {
+                (function (pathEl, pId) {
                     pathEl.addEventListener("mouseenter", function () {
-                        setPathFill(pathEl, UNVISITED_HOVER);
+                        setPathFill(pathEl, "url(#" + pId + ")");
                     });
                     pathEl.addEventListener("mouseleave", function () {
                         setPathFill(pathEl, UNVISITED_COLOR);
                     });
-                })(p);
+                })(p, unvisitedPatternId);
             }
         }
     }
