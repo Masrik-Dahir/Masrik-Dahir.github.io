@@ -4354,6 +4354,12 @@ const app_pic_new_zealand = {
                     url:"https://www.masrikdahir.com/map/cby",
                 },
                 {
+                    title:"Chatham Islands Territory",
+                    abv:"CIT",
+                    image:"https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Chatham Islands Territory/img.png",
+                    url:"https://www.masrikdahir.com/map/cit",
+                },
+                {
                     title:"Gisborne",
                     abv:"GIS",
                     image:"https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Gisborne/img.png",
