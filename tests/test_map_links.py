@@ -366,6 +366,46 @@ def test_no_duplicate_slugs():
 
 
 # ===================================================================
+# TEST 7: All favicon/thumbnail URLs on CDN are reachable
+# (requires network access; pass --check-cdn to enable)
+# ===================================================================
+
+def test_thumbnail_cdn_reachable():
+    print("\n-- Test 7: Favicon thumbnail URLs reachable on CDN --")
+    import urllib.request, urllib.error, urllib.parse
+
+    # Collect all unique thumbnail URLs from map/*.html favicons
+    urls = {}
+    for html_file in glob.glob(os.path.join(MAP_DIR, "*.html")):
+        slug = os.path.splitext(os.path.basename(html_file))[0]
+        with open(html_file, "r", encoding="utf-8") as fh:
+            content = fh.read()
+        m = re.search(r'href="(https://d3dw5jtb3w1kgy\.cloudfront\.net/Thumbnail/[^"]+)"', content)
+        if m:
+            urls[slug] = m.group(1)
+
+    checked = 0
+    for slug, url in sorted(urls.items()):
+        try:
+            parts = urllib.parse.urlparse(url)
+            encoded_path = urllib.parse.quote(parts.path, safe='/')
+            encoded_url = urllib.parse.urlunparse(parts._replace(path=encoded_path))
+            req = urllib.request.Request(encoded_url, method='HEAD')
+            req.add_header('User-Agent', 'Mozilla/5.0')
+            resp = urllib.request.urlopen(req, timeout=10)
+            passed()
+            checked += 1
+        except urllib.error.HTTPError as e:
+            fail("CDN thumbnail", f'{slug}: HTTP {e.code} - {url}')
+            checked += 1
+        except Exception as e:
+            fail("CDN thumbnail", f'{slug}: {e} - {url}')
+            checked += 1
+
+    print(f"   Checked {checked} URLs")
+
+
+# ===================================================================
 
 def main():
     print("=" * 70)
@@ -378,6 +418,11 @@ def main():
     test_page_state_abbr()
     test_page_titles()
     test_no_duplicate_slugs()
+
+    if "--check-cdn" in sys.argv:
+        test_thumbnail_cdn_reachable()
+    else:
+        print("\n-- Test 7: SKIPPED (pass --check-cdn to check thumbnail URLs) --")
 
     print("\n" + "=" * 70)
     print(f"Results: {passes} passed, {len(failures)} failed, {len(warnings)} warnings")

@@ -41,6 +41,10 @@
     width: 100%;
 }
 
+.inactive-container .active-image {
+    flex: 0 0 100%;
+}
+
 .active-image img {
     transition: none;
 }
