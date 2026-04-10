@@ -36,7 +36,7 @@
        alt="Masrik-Dahir.github.io — application screenshot" width="900"/>
 </p>
 
-## TL;DR
+## ⚡ TL;DR
 
 - **What:** A static personal portfolio and travel photography site featuring an interactive SVG world map with 290+ clickable region galleries and photo slideshows.
 - **Who:** Anyone curious about Masrik Dahir's travel photography, work experience, software projects, and academic background.
@@ -46,54 +46,54 @@
 
 ---
 
-## Table of Contents
+## 📋 Table of Contents
 
-- [TL;DR](#tldr)
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Project Structure](#-project-structure)
-- [Prerequisites](#-prerequisites)
-- [Quick Start](#-quick-start)
-- [Usage](#-usage)
-- [CI/CD](#-cicd)
-- [Repository Statistics](#-repository-statistics)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Changelog](#-changelog)
-
----
-
-## Features
-
-- **Interactive SVG World Map** — 23 SVG region maps with click-to-navigate and hover-to-preview flag thumbnails via dynamic pattern fills
-- **290+ Photo Galleries** — Individual region pages with gallery grid and slideshow view modes powered by Vue 3
-- **Dynamic Template Engine** — `continent-gallery.js` and `state-gallery.js` inject gallery layouts from lightweight HTML stubs without any build step
-- **CloudFront CDN Media Delivery** — All images and thumbnails served through AWS CloudFront for fast global access
-- **Responsive Navigation** — Shared navbar and footer injected via `components.js` across all pages
-- **Portfolio Sections** — Work experience timeline, academic history, software project showcase, and personal milestones
-- **Region Hover Tooltips** — SVG map paths show country/state names and photo counts on hover with flag image fills for visited regions
-- **Zero Build, Zero Server** — Entirely static — clone and serve with any HTTP server, deploy instantly on GitHub Pages
+- [⚡ TL;DR](#-tldr)
+- [✨ Features](#-features)
+- [🏗️ Architecture](#️-architecture)
+- [📁 Project Structure](#-project-structure)
+- [⚙️ Prerequisites](#️-prerequisites)
+- [🚀 Quick Start](#-quick-start)
+- [📖 Usage](#-usage)
+- [🔄 CI/CD](#-cicd)
+- [📈 Repository Statistics](#-repository-statistics)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+- [📝 Changelog](#-changelog)
 
 ---
 
-## Architecture
+## ✨ Features
+
+- 🗺️ **Interactive SVG World Map** — 23 SVG region maps with click-to-navigate and hover-to-preview flag thumbnails via dynamic pattern fills
+- 📸 **290+ Photo Galleries** — Individual region pages with gallery grid and slideshow view modes powered by Vue 3
+- ⚙️ **Dynamic Template Engine** — `continent-gallery.js` and `state-gallery.js` inject gallery layouts from lightweight HTML stubs without any build step
+- 🌐 **CloudFront CDN Media Delivery** — All images and thumbnails served through AWS CloudFront for fast global access
+- 🧭 **Responsive Navigation** — Shared navbar and footer injected via `components.js` across all pages
+- 💼 **Portfolio Sections** — Work experience timeline, academic history, software project showcase, and personal milestones
+- 🏳️ **Region Hover Tooltips** — SVG map paths show country/state names and photo counts on hover with flag image fills for visited regions
+- 🚀 **Zero Build, Zero Server** — Entirely static — clone and serve with any HTTP server, deploy instantly on GitHub Pages
+
+---
+
+## 🏗️ Architecture
 
 ```mermaid
 graph TB
-    subgraph Browser["Browser"]
-        Pages["HTML Pages<br/>index, map, work, software..."]
-        Vue["Vue 3 CDN<br/>Reactive galleries"]
-        JS["Vanilla JS Modules<br/>map-enhancer, continent-gallery,<br/>state-gallery, components"]
+    subgraph Browser["🖥️ Browser"]
+        Pages["📄 HTML Pages<br/>index, map, work, software..."]
+        Vue["⚡ Vue 3 CDN<br/>Reactive galleries"]
+        JS["🔧 Vanilla JS Modules<br/>map-enhancer, continent-gallery,<br/>state-gallery, components"]
     end
 
-    subgraph GitHub["GitHub Pages"]
-        Static["Static Hosting<br/>www.masrikdahir.com"]
+    subgraph GitHub["🌐 GitHub Pages"]
+        Static["📡 Static Hosting<br/>www.masrikdahir.com"]
     end
 
-    subgraph AWS["AWS Cloud"]
-        S3["S3 Bucket<br/>masrikdahir"]
-        CF["CloudFront CDN<br/>d3dw5jtb3w1kgy.cloudfront.net"]
-        ImageJSON["image.json<br/>Region metadata"]
+    subgraph AWS["☁️ AWS Cloud"]
+        S3["🗄️ S3 Bucket<br/>masrikdahir"]
+        CF["⚡ CloudFront CDN<br/>d3dw5jtb3w1kgy.cloudfront.net"]
+        ImageJSON["📋 image.json<br/>Region metadata"]
     end
 
     Pages --> Vue
@@ -121,19 +121,19 @@ flowchart LR
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-Masrik-Dahir.github.io/
-├── index.html                  # Home / landing page
-├── work.html                   # Work experience timeline
-├── academia.html               # Academic history
-├── software.html               # Software project showcase
-├── milestone.html              # Personal milestones
-├── map.html                    # Interactive world map hub
+📦 Masrik-Dahir.github.io/
+├── 📄 index.html               # Home / landing page
+├── 📄 work.html                # Work experience timeline
+├── 📄 academia.html            # Academic history
+├── 📄 software.html            # Software project showcase
+├── 📄 milestone.html           # Personal milestones
+├── 📄 map.html                 # Interactive world map hub
 │
-├── map/                        # 290+ region gallery pages
-│   ├── svg/                    # 23 interactive SVG region maps
+├── 📁 map/                     # 290+ region gallery pages
+│   ├── 📁 svg/                 # 23 interactive SVG region maps
 │   │   ├── usa.svg
 │   │   ├── canada.svg
 │   │   ├── northern_europe.svg
@@ -145,38 +145,38 @@ Masrik-Dahir.github.io/
 │   ├── wash.html
 │   └── ...
 │
-├── js/                         # Core JavaScript modules
-│   ├── components.js           # Shared navbar + footer injection
-│   ├── continent-gallery.js    # Dynamic continent page builder
-│   ├── state-gallery.js        # Region gallery template engine
-│   ├── map-enhancer.js         # SVG map hover/click behavior
-│   ├── aesthetics.js           # Visual effects
-│   ├── icon-animation.js       # Animated icon effects
-│   ├── hourglass.js            # Loading animation
-│   └── map.js                  # Map page utilities
+├── 📁 js/                      # Core JavaScript modules
+│   ├── 🔧 components.js        # Shared navbar + footer injection
+│   ├── 🔧 continent-gallery.js # Dynamic continent page builder
+│   ├── 🔧 state-gallery.js     # Region gallery template engine
+│   ├── 🔧 map-enhancer.js      # SVG map hover/click behavior
+│   ├── 🔧 aesthetics.js        # Visual effects
+│   ├── 🔧 icon-animation.js    # Animated icon effects
+│   ├── 🔧 hourglass.js         # Loading animation
+│   └── 🔧 map.js               # Map page utilities
 │
-├── vueJs/                      # Vue component data
-│   ├── image.js                # Gallery/slideshow Vue apps
-│   ├── software.js             # Software project cards
-│   ├── academia.js             # Academia page data
-│   ├── work.js                 # Work page data
-│   └── default.js              # Shared Vue utilities
+├── 📁 vueJs/                   # Vue component data
+│   ├── ⚡ image.js              # Gallery/slideshow Vue apps
+│   ├── ⚡ software.js           # Software project cards
+│   ├── ⚡ academia.js           # Academia page data
+│   ├── ⚡ work.js               # Work page data
+│   └── ⚡ default.js            # Shared Vue utilities
 │
-├── css/                        # Stylesheets
-│   ├── default.css             # Base styles
-│   ├── glowing.css             # Glowing button hover effects
-│   ├── map.element.css         # SVG map element styles
-│   ├── state-gallery.css       # Gallery layout
-│   ├── vintage.css             # Vintage theme
+├── 📁 css/                     # Stylesheets
+│   ├── 🎨 default.css          # Base styles
+│   ├── 🎨 glowing.css          # Glowing button hover effects
+│   ├── 🎨 map.element.css      # SVG map element styles
+│   ├── 🎨 state-gallery.css    # Gallery layout
+│   ├── 🎨 vintage.css          # Vintage theme
 │   └── ...
 │
-├── library/                    # Vendored third-party libraries
+├── 📁 library/                 # Vendored third-party libraries
 │   └── vue@3.2.36.dist.vue.global.js
 │
-├── bootstrap/                  # Bootstrap JS dependencies
+├── 📁 bootstrap/               # Bootstrap JS dependencies
 │
-├── .github/
-│   ├── workflows/              # CI/CD pipelines
+├── 📁 .github/
+│   ├── 📁 workflows/           # CI/CD pipelines
 │   │   ├── jekyll.yml
 │   │   ├── codeql-analysis.yml
 │   │   ├── laravel.yml
@@ -184,35 +184,35 @@ Masrik-Dahir.github.io/
 │   │   ├── stats.yml
 │   │   ├── release-stats.yml
 │   │   └── update-badges.yml
-│   ├── banners/                # Animated SVG banners
-│   ├── screenshots/            # UI mockup screenshots
-│   └── dependabot.yml
+│   ├── 📁 banners/             # Animated SVG banners
+│   ├── 📁 screenshots/         # UI mockup screenshots
+│   └── ⚙️ dependabot.yml
 │
-├── CNAME                       # Custom domain: www.masrikdahir.com
-├── LICENSE                     # CC BY-NC-SA 4.0
-├── CHANGELOG.md
-├── CODE_OF_CONDUCT.md
-└── SECURITY.md
+├── 🌐 CNAME                    # Custom domain: www.masrikdahir.com
+├── 📄 LICENSE                   # CC BY-NC-SA 4.0
+├── 📄 CHANGELOG.md
+├── 📄 CODE_OF_CONDUCT.md
+└── 📄 SECURITY.md
 ```
 
 ```mermaid
 graph LR
-    Root["Masrik-Dahir.github.io"] --> Pages["HTML Pages"]
-    Root --> MapDir["map/ — 290+ galleries"]
-    Root --> JS["js/ — core modules"]
-    Root --> VueDir["vueJs/ — Vue data"]
-    Root --> CSS["css/ — stylesheets"]
-    Root --> GH[".github/ — CI + banners"]
-    MapDir --> SVGs["svg/ — 23 region maps"]
+    Root["📦 Masrik-Dahir.github.io"] --> Pages["📄 HTML Pages"]
+    Root --> MapDir["🗺️ map/ — 290+ galleries"]
+    Root --> JS["🔧 js/ — core modules"]
+    Root --> VueDir["⚡ vueJs/ — Vue data"]
+    Root --> CSS["🎨 css/ — stylesheets"]
+    Root --> GH["⚙️ .github/ — CI + banners"]
+    MapDir --> SVGs["🌍 svg/ — 23 region maps"]
     JS --> |"template injection"| MapDir
     VueDir --> |"reactive data"| MapDir
-    GH --> Workflows["workflows/"]
-    GH --> Banners["banners/"]
+    GH --> Workflows["🔄 workflows/"]
+    GH --> Banners["🎨 banners/"]
 ```
 
 ---
 
-## Prerequisites
+## ⚙️ Prerequisites
 
 Before you begin, make sure you have the following installed:
 
@@ -222,11 +222,11 @@ Before you begin, make sure you have the following installed:
 | Git | Any | [git-scm.com](https://git-scm.com) |
 | AWS CLI *(optional, for media uploads)* | >= 2.x | [aws.amazon.com/cli](https://aws.amazon.com/cli/) |
 
-> No build step, no package manager, no bundler required. The site runs as pure static files.
+> 💡 **Tip:** No build step, no package manager, no bundler required. The site runs as pure static files.
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Clone the repository
 
@@ -258,7 +258,7 @@ Navigate to the **Travel Map** page to explore the interactive SVG maps and phot
 
 ---
 
-## Usage
+## 📖 Usage
 
 ### Adding a New Region Gallery
 
@@ -286,7 +286,7 @@ The site deploys automatically to GitHub Pages on push to `master`. The custom d
 
 ---
 
-## CI/CD
+## 🔄 CI/CD
 
 This project uses GitHub Actions for automated validation, statistics collection, and badge updates.
 
@@ -320,7 +320,7 @@ flowchart LR
 
 ---
 
-## Repository Statistics
+## 📈 Repository Statistics
 
 > Traffic and download data are harvested daily by automated workflows and stored in the [`stats`](../../tree/stats) branch before GitHub's 14-day retention window expires.
 
@@ -349,7 +349,7 @@ cat releases/summary.json
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -375,7 +375,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/):
 
 ---
 
-## License
+## 📄 License
 
 Distributed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
@@ -390,7 +390,7 @@ Under the following terms:
 
 ---
 
-## Changelog
+## 📝 Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
