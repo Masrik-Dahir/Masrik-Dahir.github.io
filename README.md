@@ -32,7 +32,7 @@
 </div>
 
 <p align="center">
-  <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.svg"
+  <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.png"
        alt="Masrik-Dahir.github.io — application screenshot" width="900"/>
 </p>
 
