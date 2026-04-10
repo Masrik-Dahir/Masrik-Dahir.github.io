@@ -32,7 +32,7 @@
 </div>
 
 <p align="center">
-  <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.png"
+  <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.svg"
        alt="Masrik-Dahir.github.io — application screenshot" width="900"/>
 </p>
 
@@ -72,6 +72,7 @@
 - 🧭 **Responsive Navigation** — Shared navbar and footer injected via `components.js` across all pages
 - 💼 **Portfolio Sections** — Work experience timeline, academic history, software project showcase, and personal milestones
 - 🏳️ **Region Hover Tooltips** — SVG map paths show country/state names and photo counts on hover with flag image fills for visited regions
+- 🎮 **32 Canvas Retro Games** — Auto-playing canvas-based game animations on the home page (Matrix Rain, Tetris, Snake, Pong, Space Invaders, Pac-Man, and 26 more) with a shuffle button to cycle through them
 - 🚀 **Zero Build, Zero Server** — Entirely static — clone and serve with any HTTP server, deploy instantly on GitHub Pages
 
 ---
@@ -153,6 +154,7 @@ flowchart LR
 │   ├── 🔧 aesthetics.js        # Visual effects
 │   ├── 🔧 icon-animation.js    # Animated icon effects
 │   ├── 🔧 hourglass.js         # Loading animation
+│   ├── 🔧 matrix.js            # 32 auto-playing retro game animations
 │   └── 🔧 map.js               # Map page utilities
 │
 ├── 📁 vueJs/                   # Vue component data
@@ -394,6 +396,7 @@ Under the following terms:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.1.0 | 2026-04-10 | Added 32 canvas retro game animations with shuffle, replaced 4 games, improved 8 games |
 | v2.0.0 | 2026-04-10 | Full README rewrite with animated banners, hero screenshot, Mermaid diagrams, stats workflows |
 | v1.0.0 | — | Initial README |
 
