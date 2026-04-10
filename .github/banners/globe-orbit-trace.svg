@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="120" viewBox="0 0 800 120">
+  <defs>
+    <linearGradient id="globe-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#071520"/>
+      <stop offset="50%" stop-color="#0d2137"/>
+      <stop offset="100%" stop-color="#071520"/>
+    </linearGradient>
+    <linearGradient id="globe-teal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ecdc4"/>
+      <stop offset="100%" stop-color="#2aa198"/>
+    </linearGradient>
+    <radialGradient id="globe-earth-glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#4ecdc4" stop-opacity="0.15"/>
+      <stop offset="70%" stop-color="#4ecdc4" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#4ecdc4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="120" fill="url(#globe-bg)"/>
+
+  <!-- Globe circle -->
+  <circle cx="690" cy="60" r="42" fill="none" stroke="#1a3a55" stroke-width="1" opacity="0">
+    <animate attributeName="opacity" values="0;0.8" dur="1s" fill="freeze"/>
+  </circle>
+
+  <!-- Globe glow -->
+  <circle cx="690" cy="60" r="50" fill="url(#globe-earth-glow)" opacity="0">
+    <animate attributeName="opacity" values="0;1" dur="1.5s" fill="freeze"/>
+  </circle>
+
+  <!-- Globe latitude lines -->
+  <ellipse cx="690" cy="60" rx="42" ry="14" fill="none" stroke="#1a4a65" stroke-width="0.6" opacity="0">
+    <animate attributeName="opacity" values="0;0.7" dur="1s" begin="0.3s" fill="freeze"/>
+  </ellipse>
+  <ellipse cx="690" cy="60" rx="42" ry="30" fill="none" stroke="#1a4a65" stroke-width="0.6" opacity="0">
+    <animate attributeName="opacity" values="0;0.7" dur="1s" begin="0.4s" fill="freeze"/>
+  </ellipse>
+
+  <!-- Globe longitude lines -->
+  <ellipse cx="690" cy="60" rx="14" ry="42" fill="none" stroke="#1a4a65" stroke-width="0.6" opacity="0">
+    <animate attributeName="opacity" values="0;0.7" dur="1s" begin="0.5s" fill="freeze"/>
+  </ellipse>
+  <ellipse cx="690" cy="60" rx="30" ry="42" fill="none" stroke="#1a4a65" stroke-width="0.6" opacity="0">
+    <animate attributeName="opacity" values="0;0.7" dur="1s" begin="0.6s" fill="freeze"/>
+  </ellipse>
+
+  <!-- Globe vertical axis -->
+  <line x1="690" y1="18" x2="690" y2="102" stroke="#1a4a65" stroke-width="0.6" opacity="0">
+    <animate attributeName="opacity" values="0;0.7" dur="1s" begin="0.7s" fill="freeze"/>
+  </line>
+
+  <!-- Orbiting dot 1 (large orbit) -->
+  <circle cx="0" cy="0" r="3" fill="#4ecdc4" opacity="0.9">
+    <animateTransform attributeName="transform" type="rotate" from="0 690 60" to="360 690 60" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="690" dur="6s" fill="freeze"/>
+    <animate attributeName="cy" values="12" dur="6s" fill="freeze"/>
+  </circle>
+
+  <!-- Orbiting dot 2 (medium orbit, offset start) -->
+  <circle cx="0" cy="0" r="2" fill="#f0c040" opacity="0.7">
+    <animateTransform attributeName="transform" type="rotate" from="120 690 60" to="480 690 60" dur="4.5s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="690" dur="4.5s" fill="freeze"/>
+    <animate attributeName="cy" values="25" dur="4.5s" fill="freeze"/>
+  </circle>
+
+  <!-- Orbiting dot 3 (small orbit) -->
+  <circle cx="0" cy="0" r="1.5" fill="#ff6b6b" opacity="0.6">
+    <animateTransform attributeName="transform" type="rotate" from="240 690 60" to="600 690 60" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="690" dur="3s" fill="freeze"/>
+    <animate attributeName="cy" values="35" dur="3s" fill="freeze"/>
+  </circle>
+
+  <!-- Flight path arcs connecting to globe -->
+  <path d="M 50,100 Q 200,20 370,60 Q 500,90 690,40" fill="none" stroke="#4ecdc4" stroke-width="0.8" stroke-dasharray="4,6" opacity="0">
+    <animate attributeName="opacity" values="0;0.5" dur="2s" begin="1s" fill="freeze"/>
+  </path>
+  <path d="M 100,15 Q 250,80 400,50 Q 550,20 690,70" fill="none" stroke="#f0c040" stroke-width="0.6" stroke-dasharray="3,7" opacity="0">
+    <animate attributeName="opacity" values="0;0.4" dur="2s" begin="1.3s" fill="freeze"/>
+  </path>
+  <path d="M 30,60 Q 180,110 350,40 Q 520,10 690,55" fill="none" stroke="#ff6b6b" stroke-width="0.5" stroke-dasharray="2,8" opacity="0">
+    <animate attributeName="opacity" values="0;0.3" dur="2s" begin="1.6s" fill="freeze"/>
+  </path>
+
+  <!-- Traveling dot along flight path 1 -->
+  <circle r="2.5" fill="#4ecdc4" opacity="0">
+    <animate attributeName="opacity" values="0;0.8" dur="1s" begin="2s" fill="freeze"/>
+    <animateMotion path="M 50,100 Q 200,20 370,60 Q 500,90 690,40" dur="5s" begin="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Location pin dots -->
+  <circle cx="120" cy="50" r="2" fill="#4ecdc4" opacity="0">
+    <animate attributeName="opacity" values="0;0.8;0.4;0.8" dur="3s" begin="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="280" cy="35" r="1.5" fill="#f0c040" opacity="0">
+    <animate attributeName="opacity" values="0;0.7;0.3;0.7" dur="3.5s" begin="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="450" cy="70" r="1.8" fill="#ff6b6b" opacity="0">
+    <animate attributeName="opacity" values="0;0.6;0.3;0.6" dur="4s" begin="2.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Dark overlay behind text -->
+  <rect x="150" y="28" width="420" height="65" rx="8" fill="#000000" opacity="0.45"/>
+
+  <!-- Project name -->
+  <text x="360" y="52" font-family="'Segoe UI',sans-serif" font-size="30" font-weight="700"
+        fill="#4ecdc4" text-anchor="middle" letter-spacing="4" opacity="0">
+    Masrik-Dahir.github.io<animate attributeName="opacity" values="0;1" dur="1s" fill="freeze"/>
+  </text>
+
+  <!-- Tagline -->
+  <text x="360" y="80" font-family="'Segoe UI',sans-serif" font-size="12"
+        fill="#8ba4c4" text-anchor="middle" letter-spacing="1" opacity="0">
+    Portfolio &amp; travel gallery spanning 290+ regions worldwide<animate attributeName="opacity" values="0;1" begin="0.6s" dur="0.8s" fill="freeze"/>
+  </text>
+</svg>

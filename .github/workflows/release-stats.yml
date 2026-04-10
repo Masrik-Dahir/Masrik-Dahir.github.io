@@ -1,0 +1,72 @@
+name: Release Download Statistics
+
+on:
+  release:
+    types: [published, edited]
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout stats branch
+        uses: actions/checkout@v4
+        with:
+          ref: stats
+          fetch-depth: 0
+        continue-on-error: true
+
+      - name: Create stats branch if absent
+        run: |
+          git fetch origin stats || true
+          git checkout stats 2>/dev/null || git checkout --orphan stats
+          git reset --hard 2>/dev/null || true
+
+      - name: Collect download counts for all releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          mkdir -p releases
+          gh api repos/$REPO/releases \
+            --jq '[.[] | {
+              tag: .tag_name,
+              name: .name,
+              published_at: .published_at,
+              total_downloads: ([.assets[].download_count] | add // 0),
+              assets: [.assets[] | {name: .name, downloads: .download_count, size_bytes: .size}]
+            }]' \
+            > releases/downloads_${DATE}.json
+          echo "Captured download stats for all releases"
+          cat releases/downloads_${DATE}.json
+
+      - name: Generate cumulative download summary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api repos/$REPO/releases \
+            --jq '{
+              total_downloads: ([.[].assets[].download_count] | add // 0),
+              release_count: length,
+              latest_tag: .[0].tag_name,
+              as_of: (now | strftime("%Y-%m-%dT%H:%M:%SZ"))
+            }' \
+            > releases/summary.json
+          echo "Summary:"
+          cat releases/summary.json
+
+      - name: Commit and push release stats
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add releases/
+          git diff --cached --quiet || git commit -m "chore(stats): release downloads $(date -u +%Y-%m-%d)"
+          git push origin stats

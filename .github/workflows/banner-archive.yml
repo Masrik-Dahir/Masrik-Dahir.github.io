@@ -1,0 +1,52 @@
+name: Archive Banner Assets
+
+on:
+  push:
+    paths:
+      - '.github/banners/**'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate SVG files
+        run: |
+          echo "Checking banner SVGs..."
+          for f in .github/banners/*.svg; do
+            [ -f "$f" ] || continue
+            if grep -q "script\|javascript\|@keyframes" "$f" 2>/dev/null; then
+              echo "FAIL $f contains forbidden elements"
+              exit 1
+            fi
+            echo "OK $f"
+          done
+
+      - name: Count and report banners
+        run: |
+          COUNT=$(ls .github/banners/*.svg 2>/dev/null | wc -l)
+          echo "Banner collection size: $COUNT unique animations"
+          cat .github/banners/manifest.json | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print(f'  Manifest entries: {len(d[\"used\"])}')
+for e in d['used'][-3:]:
+    print(f'  - {e[\"slug\"]} ({e[\"project\"]}, {e[\"created\"]})')
+          " 2>/dev/null || true
+
+      - name: Commit new banners
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/banners/
+          git diff --cached --quiet || \
+            git commit -m "feat(banners): add $(ls .github/banners/*.svg | wc -l | tr -d ' ') animations to collection"
+          git push origin HEAD

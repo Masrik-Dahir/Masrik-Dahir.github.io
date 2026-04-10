@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <!-- Window chrome -->
+  <rect width="960" height="540" rx="8" fill="#1a1a2e"/>
+  <rect width="960" height="32" rx="8" fill="#16213e"/>
+  <rect y="24" width="960" height="8" fill="#16213e"/>
+  <!-- Window buttons -->
+  <circle cx="16" cy="16" r="6" fill="#ff5f56"/>
+  <circle cx="36" cy="16" r="6" fill="#ffbd2e"/>
+  <circle cx="56" cy="16" r="6" fill="#27c93f"/>
+  <!-- URL bar -->
+  <rect x="120" y="6" width="720" height="20" rx="4" fill="#0f3460"/>
+  <text x="480" y="20" font-family="'Segoe UI',sans-serif" font-size="11" fill="#8ba4c4" text-anchor="middle">www.masrikdahir.com/map.html</text>
+
+  <!-- Navigation bar -->
+  <rect x="0" y="32" width="960" height="40" fill="#0f3460"/>
+  <text x="30" y="58" font-family="'Segoe UI',sans-serif" font-size="14" fill="#4ecdc4" font-weight="700">Masrik Dahir</text>
+  <text x="200" y="58" font-family="'Segoe UI',sans-serif" font-size="12" fill="#8ba4c4">Home</text>
+  <text x="260" y="58" font-family="'Segoe UI',sans-serif" font-size="12" fill="#8ba4c4">Work</text>
+  <text x="320" y="58" font-family="'Segoe UI',sans-serif" font-size="12" fill="#8ba4c4">Academia</text>
+  <text x="410" y="58" font-family="'Segoe UI',sans-serif" font-size="12" fill="#8ba4c4">Software</text>
+  <text x="500" y="58" font-family="'Segoe UI',sans-serif" font-size="12" fill="#8ba4c4">Milestones</text>
+  <text x="600" y="58" font-family="'Segoe UI',sans-serif" font-size="12" fill="#ffffff" font-weight="600">Travel Map</text>
+  <!-- Active indicator -->
+  <rect x="592" y="68" width="80" height="3" rx="1.5" fill="#4ecdc4"/>
+
+  <!-- Main content area -->
+  <rect x="0" y="72" width="960" height="468" fill="#0a1628"/>
+
+  <!-- Title section -->
+  <text x="480" y="105" font-family="'Segoe UI',sans-serif" font-size="22" fill="#ffffff" text-anchor="middle" font-weight="700">Interactive Travel Map</text>
+  <text x="480" y="125" font-family="'Segoe UI',sans-serif" font-size="11" fill="#8ba4c4" text-anchor="middle">290+ countries, states, and regions photographed</text>
+
+  <!-- Continent navigation pills -->
+  <rect x="140" y="138" width="100" height="28" rx="14" fill="#4ecdc4" opacity="0.9"/>
+  <text x="190" y="156" font-family="'Segoe UI',sans-serif" font-size="11" fill="#0a1628" text-anchor="middle" font-weight="600">N. America</text>
+
+  <rect x="252" y="138" width="95" height="28" rx="14" fill="#0f3460" stroke="#4ecdc4" stroke-width="1"/>
+  <text x="300" y="156" font-family="'Segoe UI',sans-serif" font-size="11" fill="#4ecdc4" text-anchor="middle">S. America</text>
+
+  <rect x="359" y="138" width="75" height="28" rx="14" fill="#0f3460" stroke="#4ecdc4" stroke-width="1"/>
+  <text x="397" y="156" font-family="'Segoe UI',sans-serif" font-size="11" fill="#4ecdc4" text-anchor="middle">Europe</text>
+
+  <rect x="446" y="138" width="60" height="28" rx="14" fill="#0f3460" stroke="#4ecdc4" stroke-width="1"/>
+  <text x="476" y="156" font-family="'Segoe UI',sans-serif" font-size="11" fill="#4ecdc4" text-anchor="middle">Asia</text>
+
+  <rect x="518" y="138" width="65" height="28" rx="14" fill="#0f3460" stroke="#4ecdc4" stroke-width="1"/>
+  <text x="551" y="156" font-family="'Segoe UI',sans-serif" font-size="11" fill="#4ecdc4" text-anchor="middle">Africa</text>
+
+  <rect x="595" y="138" width="85" height="28" rx="14" fill="#0f3460" stroke="#4ecdc4" stroke-width="1"/>
+  <text x="638" y="156" font-family="'Segoe UI',sans-serif" font-size="11" fill="#4ecdc4" text-anchor="middle">Australia</text>
+
+  <!-- SVG Map area (simplified North America) -->
+  <rect x="30" y="180" width="560" height="340" rx="6" fill="#0d2137" stroke="#1a3a55" stroke-width="1"/>
+
+  <!-- Simplified US map shapes -->
+  <!-- West coast -->
+  <path d="M 80,220 L 90,200 L 95,240 L 85,280 L 75,260 Z" fill="#4ecdc4" opacity="0.7"/>
+  <path d="M 95,195 L 120,190 L 130,210 L 95,240 Z" fill="#4ecdc4" opacity="0.6"/>
+  <!-- Mountain states -->
+  <path d="M 100,210 L 140,200 L 150,250 L 95,260 Z" fill="#4ecdc4" opacity="0.5"/>
+  <path d="M 140,195 L 170,190 L 175,240 L 150,250 Z" fill="#2aa198" opacity="0.6"/>
+  <!-- Midwest -->
+  <path d="M 170,200 L 220,195 L 230,250 L 175,250 Z" fill="#4ecdc4" opacity="0.5"/>
+  <path d="M 220,190 L 260,195 L 270,240 L 230,245 Z" fill="#2aa198" opacity="0.7"/>
+  <!-- South -->
+  <path d="M 150,250 L 270,240 L 280,300 L 200,310 L 130,290 Z" fill="#4ecdc4" opacity="0.6"/>
+  <!-- Southeast -->
+  <path d="M 270,240 L 310,220 L 320,280 L 280,300 Z" fill="#2aa198" opacity="0.5"/>
+  <!-- Northeast -->
+  <path d="M 260,195 L 310,185 L 320,220 L 270,230 Z" fill="#4ecdc4" opacity="0.8"/>
+  <!-- Florida -->
+  <path d="M 280,300 L 290,310 L 285,345 L 275,335 Z" fill="#4ecdc4" opacity="0.7"/>
+  <!-- Texas -->
+  <path d="M 140,280 L 195,275 L 200,340 L 150,330 Z" fill="#2aa198" opacity="0.6"/>
+  <!-- Alaska (top left) -->
+  <path d="M 50,310 L 100,300 L 110,340 L 60,350 Z" fill="#4ecdc4" opacity="0.5"/>
+
+  <!-- Canada shapes -->
+  <path d="M 80,170 L 310,155 L 320,195 L 90,200 Z" fill="#1a5a55" opacity="0.4"/>
+  <path d="M 100,140 L 280,130 L 310,155 L 80,170 Z" fill="#1a5a55" opacity="0.3"/>
+
+  <!-- Mexico -->
+  <path d="M 85,290 L 140,280 L 150,340 L 120,370 L 80,350 Z" fill="#1a5a55" opacity="0.4"/>
+
+  <!-- Caribbean dots -->
+  <circle cx="310" cy="320" r="3" fill="#4ecdc4" opacity="0.6"/>
+  <circle cx="325" cy="315" r="2" fill="#4ecdc4" opacity="0.5"/>
+  <circle cx="340" cy="325" r="2.5" fill="#4ecdc4" opacity="0.7"/>
+  <circle cx="350" cy="335" r="2" fill="#2aa198" opacity="0.5"/>
+
+  <!-- Central America -->
+  <path d="M 120,370 L 140,360 L 155,400 L 130,410 Z" fill="#1a5a55" opacity="0.4"/>
+
+  <!-- Hover tooltip -->
+  <rect x="230" y="205" width="120" height="32" rx="4" fill="#16213e" stroke="#4ecdc4" stroke-width="1"/>
+  <text x="240" y="220" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" font-weight="600">New York</text>
+  <text x="240" y="232" font-family="'Segoe UI',sans-serif" font-size="9" fill="#8ba4c4">42 photos</text>
+  <!-- Small flag indicator -->
+  <rect x="325" y="210" width="18" height="12" rx="1" fill="#4ecdc4" opacity="0.3"/>
+
+  <!-- Map legend -->
+  <rect x="50" y="470" width="10" height="10" rx="2" fill="#4ecdc4" opacity="0.7"/>
+  <text x="66" y="479" font-family="'Segoe UI',sans-serif" font-size="9" fill="#8ba4c4">Visited</text>
+  <rect x="120" y="470" width="10" height="10" rx="2" fill="#555555"/>
+  <text x="136" y="479" font-family="'Segoe UI',sans-serif" font-size="9" fill="#8ba4c4">Not visited</text>
+  <text x="210" y="479" font-family="'Segoe UI',sans-serif" font-size="9" fill="#4ecdc4">|</text>
+  <text x="224" y="479" font-family="'Segoe UI',sans-serif" font-size="9" fill="#8ba4c4">Click any region to explore photos</text>
+
+  <!-- Right sidebar - Region cards -->
+  <rect x="610" y="180" width="330" height="340" rx="6" fill="#0d2137" stroke="#1a3a55" stroke-width="1"/>
+  <text x="625" y="205" font-family="'Segoe UI',sans-serif" font-size="13" fill="#ffffff" font-weight="600">Regions</text>
+
+  <!-- Region card 1 -->
+  <rect x="625" y="215" width="145" height="95" rx="4" fill="#16213e" stroke="#1a3a55" stroke-width="1"/>
+  <rect x="631" y="221" width="133" height="55" rx="3" fill="#0f3460"/>
+  <text x="698" y="254" font-family="'Segoe UI',sans-serif" font-size="20" fill="#ffffff" text-anchor="middle">&#127482;&#127480;</text>
+  <text x="698" y="301" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600">United States</text>
+
+  <!-- Region card 2 -->
+  <rect x="783" y="215" width="145" height="95" rx="4" fill="#16213e" stroke="#1a3a55" stroke-width="1"/>
+  <rect x="789" y="221" width="133" height="55" rx="3" fill="#0f3460"/>
+  <text x="856" y="254" font-family="'Segoe UI',sans-serif" font-size="20" fill="#ffffff" text-anchor="middle">&#127464;&#127462;</text>
+  <text x="856" y="301" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600">Canada</text>
+
+  <!-- Region card 3 -->
+  <rect x="625" y="320" width="145" height="95" rx="4" fill="#16213e" stroke="#1a3a55" stroke-width="1"/>
+  <rect x="631" y="326" width="133" height="55" rx="3" fill="#0f3460"/>
+  <text x="698" y="359" font-family="'Segoe UI',sans-serif" font-size="20" fill="#ffffff" text-anchor="middle">&#127474;&#127485;</text>
+  <text x="698" y="406" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600">Mexico</text>
+
+  <!-- Region card 4 -->
+  <rect x="783" y="320" width="145" height="95" rx="4" fill="#16213e" stroke="#1a3a55" stroke-width="1"/>
+  <rect x="789" y="326" width="133" height="55" rx="3" fill="#0f3460"/>
+  <text x="856" y="359" font-family="'Segoe UI',sans-serif" font-size="20" fill="#ffffff" text-anchor="middle">&#127464;&#127482;</text>
+  <text x="856" y="406" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600">Cuba</text>
+
+  <!-- Region card 5 -->
+  <rect x="625" y="425" width="145" height="80" rx="4" fill="#16213e" stroke="#1a3a55" stroke-width="1"/>
+  <rect x="631" y="431" width="133" height="45" rx="3" fill="#0f3460"/>
+  <text x="698" y="459" font-family="'Segoe UI',sans-serif" font-size="20" fill="#ffffff" text-anchor="middle">&#127471;&#127474;</text>
+  <text x="698" y="498" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600">Jamaica</text>
+
+  <!-- Region card 6 -->
+  <rect x="783" y="425" width="145" height="80" rx="4" fill="#16213e" stroke="#1a3a55" stroke-width="1"/>
+  <rect x="789" y="431" width="133" height="45" rx="3" fill="#0f3460"/>
+  <text x="856" y="459" font-family="'Segoe UI',sans-serif" font-size="20" fill="#ffffff" text-anchor="middle">&#127469;&#127481;</text>
+  <text x="856" y="498" font-family="'Segoe UI',sans-serif" font-size="10" fill="#ffffff" text-anchor="middle" font-weight="600">Haiti</text>
+
+  <!-- Stats bar at bottom -->
+  <rect x="610" y="515" width="330" height="20" rx="3" fill="#16213e"/>
+  <text x="625" y="529" font-family="'Segoe UI',sans-serif" font-size="9" fill="#4ecdc4">52 regions visited</text>
+  <text x="775" y="529" font-family="'Segoe UI',sans-serif" font-size="9" fill="#8ba4c4" text-anchor="middle">|</text>
+  <text x="820" y="529" font-family="'Segoe UI',sans-serif" font-size="9" fill="#f0c040">1,240+ photos</text>
+</svg>

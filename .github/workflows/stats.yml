@@ -1,0 +1,87 @@
+name: Repository Statistics
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  collect-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout stats branch (create if absent)
+        uses: actions/checkout@v4
+        with:
+          ref: stats
+          fetch-depth: 0
+        continue-on-error: true
+
+      - name: Create stats branch if it does not exist
+        run: |
+          git fetch origin stats || true
+          git checkout stats 2>/dev/null || git checkout --orphan stats
+          git reset --hard 2>/dev/null || true
+
+      - name: Collect traffic — page views
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          mkdir -p traffic
+          gh api repos/$REPO/traffic/views \
+            --jq '{date: $date, views: .count, uniques: .uniques}' \
+            --argjson date "\"$DATE\"" \
+            > traffic/views_${DATE}.json
+
+      - name: Collect traffic — clones
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          gh api repos/$REPO/traffic/clones \
+            --jq '{date: $date, clones: .count, uniques: .uniques}' \
+            --argjson date "\"$DATE\"" \
+            > traffic/clones_${DATE}.json
+
+      - name: Collect traffic — top referrers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          gh api repos/$REPO/traffic/popular/referrers \
+            > traffic/referrers_${DATE}.json
+
+      - name: Collect traffic — top paths
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          gh api repos/$REPO/traffic/popular/paths \
+            > traffic/paths_${DATE}.json
+
+      - name: Collect repo-level statistics (stars, forks, watchers)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +"%Y-%m-%d")
+          gh api repos/$REPO \
+            --jq '{date: $date, stars: .stargazers_count, forks: .forks_count, watchers: .watchers_count, open_issues: .open_issues_count}' \
+            --argjson date "\"$DATE\"" \
+            > traffic/repo_stats_${DATE}.json
+
+      - name: Commit and push stats
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add traffic/
+          git diff --cached --quiet || git commit -m "chore(stats): snapshot $(date -u +%Y-%m-%d)"
+          git push origin stats
