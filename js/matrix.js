@@ -1906,12 +1906,31 @@
         animations[index].fn();
     }
 
+    // Build a randomized playlist — no repeats until every game has been shown.
+    // Order is randomized per page load but stays fixed for the session.
+    var playlist = [];
+    var playlistPos = 0;
+    function buildPlaylist() {
+        playlist = [];
+        for (var i = 0; i < animations.length; i++) playlist.push(i);
+        // Fisher-Yates shuffle
+        for (var j = playlist.length - 1; j > 0; j--) {
+            var k = randInt(0, j + 1);
+            var tmp = playlist[j]; playlist[j] = playlist[k]; playlist[k] = tmp;
+        }
+        // Ensure Matrix Rain is first on initial load
+        var matIdx = playlist.indexOf(MATRIX_INDEX);
+        if (matIdx > 0) { playlist.splice(matIdx, 1); playlist.unshift(MATRIX_INDEX); }
+        playlistPos = 0;
+    }
+    buildPlaylist();
+
     function shuffleAnimation() {
-        var next;
-        do { next = randInt(0, animations.length); } while (next === currentAnim && animations.length > 1);
-        switchTo(next);
+        playlistPos++;
+        if (playlistPos >= playlist.length) playlistPos = 0;
+        switchTo(playlist[playlistPos]);
     }
 
     window.shuffleAnimation = shuffleAnimation;
-    switchTo(MATRIX_INDEX);
+    switchTo(playlist[0]);
 })();
