@@ -49,6 +49,14 @@
     <!--    Matrix animation -->
     <script src="js/matrix.js" defer></script>
 
+    <style>
+        .shuffle-spin { animation: shuffleSpin 0.5s ease; }
+        @keyframes shuffleSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
 </head>
 
 <body class="" style="background: white">
@@ -151,6 +159,20 @@
                                                     </div>
                                                 </button>
 
+                                            </a>
+                                        </TD>
+                                    </TR>
+
+                                    <TR>
+                                        <TD>
+                                            <a href="https://www.masrikdahir.com/games" style="text-decoration: none">
+                                                <button class="glow-on-hover-nav" type="button"
+                                                        style="float: left; padding: 5px; border: none; background: transparent ">
+                                                    <div style=""><b style="color: black; font-size: calc(20px + 0.4vw)">
+                                                        <div class="wrapper" >
+                                                        </div>Games</b>
+                                                    </div>
+                                                </button>
                                             </a>
                                         </TD>
                                     </TR>
@@ -675,6 +697,19 @@
                         </div>
                     </button>
                 </a>
+
+                <a href="https://www.masrikdahir.com/games" style="text-decoration: none">
+                    <button class="glow-on-hover-nav" type="button"
+                            style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
+                        <div style="" class="w3-padding-small">
+                            <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                <div class="wrapper">
+                                </div>
+                                Games</b>
+                            </div>
+                        </div>
+                    </button>
+                </a>
             </div>
         </div>
         <div class="resizing-1026-less">
@@ -769,6 +804,19 @@
                                 </div>
                             </button>
                         </a>
+
+                        <a href="https://www.masrikdahir.com/games" style="text-decoration: none">
+                            <button class="glow-on-hover3" type="button"
+                                    style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
+                                <div style="" class="w3-padding-small">
+                                    <div style=""><b style="color: black; font-size: calc(15px + 0.4vw)">
+                                        <div class="wrapper">
+                                        </div>
+                                        Games</b>
+                                    </div>
+                                </div>
+                            </button>
+                        </a>
                     </TR>
                 </TABLE>
             </div>
@@ -778,6 +826,11 @@
         <canvas id='canv' style="background: white"></canvas>
 
         <div class="container2" style="margin: 10px">
+            <div style="text-align: right; margin-bottom: 8px;">
+                <button id="shuffleBtn" class="glow-on-hover12" onclick="shuffleAnimation(); this.querySelector('.shuffle-icon').classList.remove('shuffle-spin'); void this.offsetWidth; this.querySelector('.shuffle-icon').classList.add('shuffle-spin');" style="border-radius: 50%; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0; min-width: 0;" title="Shuffle background animation" data-dark="0">
+                    <i class="fas fa-sync-alt shuffle-icon" style="font-size: 22px; color: rgba(0,0,0,0.7);"></i>
+                </button>
+            </div>
             <div class="stack" style="--stacks: 3;">
                 <span style="--index: 0; color: #000">MASRIK&nbsp;DAHIR</span>
                 <span style="--index: 1; color: #000">MASRIK&nbsp;DAHIR</span>
@@ -794,7 +847,7 @@
             <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" ><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px"><i style="font-size:36px; color: black" class="fab fa-youtube-square w3-hover-opacity"></i></button></a>
             <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><button class="glow-on-hover12" style=" margin-top: 10px;margin-right: 10px; padding: 5px"><i style="font-size:36px; color: black" class="fas fa-graduation-cap w3-hover-opacity"></i></button></a>
 
-            <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank; color: white">
+            <a href="https://www.researchgate.net/profile/Masrik-Dahir" style="text-decoration: none;" target="blank">
                 <button class="glow-on-hover12" style="margin-right: 10px; margin-top: 10px; padding-right: 5px; padding-left: 5px;">
                     <b style="font-size:27px; color: black; margin-top: -20px" class='w3-hover-opacity'>
                         R<sup>C</sup>

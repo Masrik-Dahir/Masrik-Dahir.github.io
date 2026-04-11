@@ -1,358 +1,167 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560">
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
   <defs>
-    <linearGradient id="h-chrome" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="mdh-chrome" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f0f0f3"/>
       <stop offset="100%" stop-color="#e4e5ea"/>
     </linearGradient>
-    <linearGradient id="h-teal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#56d4ca"/>
-      <stop offset="100%" stop-color="#42b8ae"/>
-    </linearGradient>
-    <linearGradient id="h-body" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="mdh-nav" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#fafbfc"/>
+      <stop offset="100%" stop-color="#fafafa"/>
     </linearGradient>
-    <filter id="h-drop">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="6"/>
-      <feOffset dy="3"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.12"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="h-btn">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"/>
-      <feOffset dy="1"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.08"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <clipPath id="h-clip"><rect width="960" height="560" rx="12"/></clipPath>
+    <linearGradient id="mdh-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a2e"/>
+      <stop offset="100%" stop-color="#1a0a3e"/>
+    </linearGradient>
+    <linearGradient id="mdh-road" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#555555"/>
+      <stop offset="100%" stop-color="#6b6b6b"/>
+    </linearGradient>
+    <linearGradient id="mdh-playercar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff4444"/>
+      <stop offset="100%" stop-color="#cc0000"/>
+    </linearGradient>
   </defs>
 
-  <!-- Window shadow -->
-  <rect x="2" y="4" width="956" height="556" rx="12" fill="#00000010"/>
+  <!-- Browser chrome -->
+  <rect width="960" height="540" rx="8" fill="#e4e5ea"/>
+  <rect width="960" height="36" rx="8" fill="url(#mdh-chrome)"/>
+  <rect y="28" width="960" height="8" fill="url(#mdh-chrome)"/>
 
-  <g clip-path="url(#h-clip)">
-
-  <!-- ============ WINDOW CHROME ============ -->
-  <rect width="960" height="560" rx="12" fill="url(#h-body)"/>
-  <rect width="960" height="36" fill="url(#h-chrome)"/>
-
-  <!-- Traffic lights -->
-  <circle cx="20" cy="18" r="6" fill="#ff5f57" opacity="0">
-    <animate attributeName="opacity" values="0;1" dur="0.3s" begin="0.2s" fill="freeze"/>
-  </circle>
-  <circle cx="40" cy="18" r="6" fill="#febc2e" opacity="0">
-    <animate attributeName="opacity" values="0;1" dur="0.3s" begin="0.3s" fill="freeze"/>
-  </circle>
-  <circle cx="60" cy="18" r="6" fill="#28c840" opacity="0">
-    <animate attributeName="opacity" values="0;1" dur="0.3s" begin="0.4s" fill="freeze"/>
-  </circle>
+  <!-- Window buttons -->
+  <circle cx="20" cy="18" r="6" fill="#ff5f57"/>
+  <circle cx="40" cy="18" r="6" fill="#ffbd2e"/>
+  <circle cx="60" cy="18" r="6" fill="#28ca41"/>
 
   <!-- URL bar -->
-  <rect x="160" y="7" width="640" height="22" rx="6" fill="#ffffff" opacity="0">
-    <animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.3s" fill="freeze"/>
-  </rect>
-  <text x="480" y="22" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="10.5" fill="#8b8f96" text-anchor="middle" letter-spacing="0.3" opacity="0">
-    www.masrikdahir.com<animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.5s" fill="freeze"/>
+  <rect x="90" y="8" width="780" height="20" rx="4" fill="#ffffff"/>
+  <text x="105" y="22" font-family="'Segoe UI',sans-serif" font-size="10" fill="#666">
+    www.masrikdahir.com/games
   </text>
-  <line x1="0" y1="36" x2="960" y2="36" stroke="#d5d7dc" stroke-width="0.5"/>
 
-  <!-- ============ NAVIGATION ============ -->
-  <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.4s" fill="freeze"/>
-    <text x="300" y="58" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13.5" fill="#555b64" text-anchor="middle">Home</text>
-    <text x="390" y="58" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13.5" fill="#555b64" text-anchor="middle">Career</text>
-    <text x="490" y="58" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13.5" fill="#555b64" text-anchor="middle">Academia</text>
-    <text x="595" y="58" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13.5" fill="#555b64" text-anchor="middle">Software</text>
-    <text x="700" y="58" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13.5" fill="#555b64" text-anchor="middle">Milestones</text>
-    <text x="800" y="58" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13.5" fill="#4ecdc4" text-anchor="middle" font-weight="700">Travel</text>
-    <rect x="775" y="66" width="50" height="2.5" rx="1.25" fill="#4ecdc4" opacity="0">
-      <animate attributeName="opacity" values="0;1" dur="0.3s" begin="0.8s" fill="freeze"/>
-    </rect>
-  </g>
-  <line x1="0" y1="72" x2="960" y2="72" stroke="#ecedf0" stroke-width="0.5"/>
+  <!-- Page content area -->
+  <rect x="0" y="36" width="960" height="504" fill="#ffffff"/>
 
-  <!-- ============ SEARCH BAR ============ -->
-  <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.6s" fill="freeze"/>
-    <rect x="32" y="82" width="130" height="26" rx="5" fill="#fff" stroke="#d1d5db" stroke-width="0.8"/>
-    <text x="54" y="99" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="10.5" fill="#adb2ba">Search</text>
-    <circle cx="44" cy="95" r="4" fill="none" stroke="#adb2ba" stroke-width="1"/>
-    <line x1="47" y1="98" x2="50" y2="101" stroke="#adb2ba" stroke-width="1"/>
-  </g>
+  <!-- Navigation bar -->
+  <rect x="0" y="36" width="960" height="32" fill="url(#mdh-nav)" stroke="#000000" stroke-width="0" />
+  <line x1="0" y1="68" x2="960" y2="68" stroke="#222" stroke-width="1.5"/>
 
-  <!-- ============ FLAG BUTTON ROW ============ -->
-  <!-- 13 buttons at 58px wide + 6px gap = 832px, starting x=32 -->
-  <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.5s" begin="0.7s" fill="freeze"/>
+  <!-- Nav items -->
+  <text x="120" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Home</text>
+  <text x="230" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Career</text>
+  <text x="350" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Academia</text>
+  <text x="470" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Software</text>
+  <text x="590" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Milestones</text>
+  <text x="700" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Travel</text>
+  <text x="800" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#ff0000" text-anchor="middle">Games</text>
 
-    <!-- USA -->
-    <g filter="url(#h-btn)">
-      <rect x="32" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="40" y="120" width="20" height="12" rx="1" fill="#b22234"/>
-      <rect x="40" y="122" width="20" height="1.6" fill="#fff"/><rect x="40" y="125.2" width="20" height="1.6" fill="#fff"/><rect x="40" y="128.4" width="20" height="1.6" fill="#fff"/>
-      <rect x="40" y="120" width="8" height="7" fill="#3c3b6e"/>
-      <text x="61" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">USA</text>
-    </g>
-    <!-- CAN -->
-    <g filter="url(#h-btn)">
-      <rect x="96" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="104" y="120" width="20" height="12" rx="1" fill="#ff0000"/>
-      <rect x="108" y="120" width="12" height="12" fill="#fff"/>
-      <polygon points="114,122 115.5,125.5 119,125.5 116.5,128 117.5,131.5 114,129.5 110.5,131.5 111.5,128 109,125.5 112.5,125.5" fill="#ff0000"/>
-      <text x="125" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">CAN</text>
-    </g>
-    <!-- BGD -->
-    <g filter="url(#h-btn)">
-      <rect x="160" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="168" y="120" width="20" height="12" rx="1" fill="#006a4e"/>
-      <circle cx="177" cy="126" r="4" fill="#f42a41"/>
-      <text x="189" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">BGD</text>
-    </g>
-    <!-- APE -->
-    <g filter="url(#h-btn)">
-      <rect x="224" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="232" y="120" width="20" height="4" fill="#fcdd09"/>
-      <rect x="232" y="124" width="20" height="4" fill="#da121a"/>
-      <rect x="232" y="128" width="20" height="4" fill="#078930"/>
-      <text x="253" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">APE</text>
-    </g>
-    <!-- ALB -->
-    <g filter="url(#h-btn)">
-      <rect x="288" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="296" y="120" width="20" height="12" rx="1" fill="#e41e20"/>
-      <text x="317" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">ALB</text>
-    </g>
-    <!-- INA -->
-    <g filter="url(#h-btn)">
-      <rect x="352" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="360" y="120" width="20" height="6" rx="1" fill="#ff0000"/>
-      <rect x="360" y="126" width="20" height="6" fill="#fff" stroke="#eee" stroke-width="0.3"/>
-      <text x="381" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">INA</text>
-    </g>
-    <!-- AND -->
-    <g filter="url(#h-btn)">
-      <rect x="416" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="424" y="120" width="7" height="12" fill="#0032a0"/>
-      <rect x="431" y="120" width="6" height="12" fill="#fedf00"/>
-      <rect x="437" y="120" width="7" height="12" fill="#d1001f"/>
-      <text x="445" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">AND</text>
-    </g>
-    <!-- AGO -->
-    <g filter="url(#h-btn)">
-      <rect x="480" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="488" y="120" width="20" height="6" fill="#cc092f"/>
-      <rect x="488" y="126" width="20" height="6" fill="#000"/>
-      <text x="509" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">AGO</text>
-    </g>
-    <!-- ARG -->
-    <g filter="url(#h-btn)">
-      <rect x="544" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="552" y="120" width="20" height="4" fill="#74acdf"/>
-      <rect x="552" y="124" width="20" height="4" fill="#fff" stroke="#eee" stroke-width="0.2"/>
-      <rect x="552" y="128" width="20" height="4" fill="#74acdf"/>
-      <text x="573" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">ARG</text>
-    </g>
-    <!-- ARM -->
-    <g filter="url(#h-btn)">
-      <rect x="608" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="616" y="120" width="20" height="4" fill="#d90012"/>
-      <rect x="616" y="124" width="20" height="4" fill="#0033a0"/>
-      <rect x="616" y="128" width="20" height="4" fill="#f2a800"/>
-      <text x="637" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">ARM</text>
-    </g>
-    <!-- ACT -->
-    <g filter="url(#h-btn)">
-      <rect x="672" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="680" y="120" width="20" height="12" rx="1" fill="#002b7f"/>
-      <text x="701" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">ACT</text>
-    </g>
-    <!-- BHR -->
-    <g filter="url(#h-btn)">
-      <rect x="736" y="116" width="58" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <rect x="744" y="120" width="6" height="12" fill="#fff" stroke="#eee" stroke-width="0.2"/>
-      <rect x="750" y="120" width="14" height="12" fill="#ce1126"/>
-      <text x="765" y="143" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="7" fill="#374151" text-anchor="middle" font-weight="600">BHR</text>
-    </g>
-    <!-- ... -->
-    <g filter="url(#h-btn)">
-      <rect x="800" y="116" width="42" height="32" rx="4" fill="#fff" stroke="#e2e4e8" stroke-width="0.6"/>
-      <circle cx="814" cy="132" r="1.5" fill="#9ca3af"/>
-      <circle cx="821" cy="132" r="1.5" fill="#9ca3af"/>
-      <circle cx="828" cy="132" r="1.5" fill="#9ca3af"/>
-    </g>
+  <!-- Game canvas area - Night Racer -->
+  <rect x="80" y="80" width="800" height="400" rx="6" fill="url(#mdh-sky)" stroke="#222" stroke-width="2"/>
+
+  <!-- Stars in sky -->
+  <circle cx="150" cy="110" r="1.2" fill="#ffffff" opacity="0.7"/>
+  <circle cx="280" cy="95" r="0.8" fill="#ffffff" opacity="0.5"/>
+  <circle cx="420" cy="105" r="1" fill="#ffffff" opacity="0.6"/>
+  <circle cx="560" cy="90" r="1.3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="700" cy="100" r="0.9" fill="#ffffff" opacity="0.5"/>
+  <circle cx="780" cy="115" r="1.1" fill="#ffffff" opacity="0.6"/>
+  <circle cx="200" cy="130" r="0.7" fill="#ffffff" opacity="0.4"/>
+  <circle cx="650" cy="125" r="0.8" fill="#ffffff" opacity="0.5"/>
+  <circle cx="350" cy="118" r="1" fill="#ffffff" opacity="0.7"/>
+
+  <!-- Moon -->
+  <circle cx="750" cy="110" r="18" fill="#f5f5dc"/>
+  <circle cx="743" cy="106" r="4" fill="#ddddc8" opacity="0.4"/>
+  <circle cx="758" cy="114" r="2.5" fill="#ddddc8" opacity="0.3"/>
+
+  <!-- Mountains silhouette -->
+  <polygon points="80,230 120,180 180,200 240,165 300,195 360,170 420,190 480,160 540,185 600,175 660,190 720,165 780,185 830,195 880,175 880,230" fill="#1a1a3a"/>
+  <polygon points="80,240 140,205 210,220 290,195 370,215 450,200 530,215 610,198 690,210 750,200 820,218 880,205 880,240" fill="#252545"/>
+
+  <!-- Green grass area -->
+  <rect x="80" y="235" width="800" height="245" fill="#10aa10"/>
+  <rect x="80" y="235" width="800" height="10" fill="#009a00"/>
+
+  <!-- Road (perspective trapezoid) -->
+  <polygon points="320,240 640,240 700,480 260,480" fill="#636363"/>
+
+  <!-- Road rumble strips -->
+  <polygon points="315,240 320,240 260,480 250,480" fill="#ff2222"/>
+  <polygon points="640,240 645,240 710,480 700,480" fill="#ff2222"/>
+
+  <!-- Lane markers -->
+  <line x1="420" y1="250" x2="380" y2="320" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
+  <line x1="540" y1="250" x2="580" y2="320" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
+  <line x1="380" y1="320" x2="340" y2="400" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
+  <line x1="580" y1="320" x2="620" y2="400" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
+
+  <!-- Trees left side -->
+  <rect x="150" y="260" width="5" height="25" fill="#5c3d2e"/>
+  <circle cx="152" cy="252" r="12" fill="#0d7a0d"/>
+  <circle cx="148" cy="248" r="10" fill="#11aa11"/>
+
+  <rect x="190" y="290" width="4" height="20" fill="#5c3d2e"/>
+  <circle cx="192" cy="284" r="10" fill="#0d7a0d"/>
+  <circle cx="189" cy="280" r="8" fill="#11aa11"/>
+
+  <!-- Trees right side -->
+  <rect x="760" y="255" width="5" height="25" fill="#5c3d2e"/>
+  <circle cx="762" cy="248" r="12" fill="#0d7a0d"/>
+  <circle cx="758" cy="244" r="10" fill="#11aa11"/>
+
+  <rect x="720" y="280" width="4" height="20" fill="#5c3d2e"/>
+  <circle cx="722" cy="274" r="10" fill="#0d7a0d"/>
+
+  <!-- Traffic car (blue) -->
+  <rect x="430" y="280" width="30" height="18" rx="3" fill="#3333ff"/>
+  <rect x="435" y="282" width="20" height="6" rx="1" fill="rgba(150,200,255,0.6)"/>
+  <rect x="427" y="282" width="4" height="8" rx="1" fill="#111"/>
+  <rect x="459" y="282" width="4" height="8" rx="1" fill="#111"/>
+
+  <!-- Traffic car (yellow) -->
+  <rect x="545" y="340" width="38" height="22" rx="3" fill="#ffcc00"/>
+  <rect x="551" y="343" width="26" height="7" rx="1" fill="rgba(150,200,255,0.6)"/>
+  <rect x="541" y="344" width="5" height="10" rx="1" fill="#111"/>
+  <rect x="582" y="344" width="5" height="10" rx="1" fill="#111"/>
+
+  <!-- Player car at bottom center -->
+  <g>
+    <!-- Car body -->
+    <path d="M 440,430 L 450,395 Q 460,388 480,388 Q 500,388 510,395 L 520,430 Q 510,435 480,435 Q 450,435 440,430 Z" fill="url(#mdh-playercar)"/>
+    <!-- Racing stripe -->
+    <rect x="476" y="390" width="8" height="42" fill="rgba(255,255,255,0.2)" rx="1"/>
+    <!-- Windshield -->
+    <path d="M 457,413 Q 462,400 480,398 Q 498,400 503,413 Z" fill="rgba(100,180,255,0.7)"/>
+    <!-- Headlights -->
+    <circle cx="455" cy="393" r="3" fill="#ffffcc"/>
+    <circle cx="505" cy="393" r="3" fill="#ffffcc"/>
+    <!-- Taillights -->
+    <circle cx="448" cy="432" r="3" fill="#ff2200"/>
+    <circle cx="512" cy="432" r="3" fill="#ff2200"/>
+    <!-- Wheels -->
+    <rect x="435" y="398" width="6" height="12" rx="2" fill="#111"/>
+    <rect x="519" y="398" width="6" height="12" rx="2" fill="#111"/>
+    <rect x="433" y="425" width="6" height="12" rx="2" fill="#111"/>
+    <rect x="521" y="425" width="6" height="12" rx="2" fill="#111"/>
+    <!-- Exhaust glow -->
+    <ellipse cx="465" cy="440" rx="4" ry="5" fill="rgba(255,100,0,0.5)"/>
+    <ellipse cx="495" cy="440" rx="4" ry="5" fill="rgba(255,100,0,0.5)"/>
   </g>
 
-  <!-- ============ US FLAG + LABEL ============ -->
-  <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.9s" fill="freeze"/>
-    <rect x="32" y="162" width="24" height="15" rx="1.5" fill="#b22234"/>
-    <rect x="32" y="164.2" width="24" height="1.8" fill="#fff"/>
-    <rect x="32" y="168" width="24" height="1.8" fill="#fff"/>
-    <rect x="32" y="171.8" width="24" height="1.8" fill="#fff"/>
-    <rect x="32" y="162" width="10" height="8.5" fill="#3c3b6e"/>
-    <!-- Stars grid 3x3 -->
-    <circle cx="35" cy="164" r="0.5" fill="#fff"/><circle cx="37.5" cy="164" r="0.5" fill="#fff"/><circle cx="40" cy="164" r="0.5" fill="#fff"/>
-    <circle cx="35" cy="166.5" r="0.5" fill="#fff"/><circle cx="37.5" cy="166.5" r="0.5" fill="#fff"/><circle cx="40" cy="166.5" r="0.5" fill="#fff"/>
-    <circle cx="35" cy="169" r="0.5" fill="#fff"/><circle cx="37.5" cy="169" r="0.5" fill="#fff"/><circle cx="40" cy="169" r="0.5" fill="#fff"/>
-    <text x="62" y="175" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="13" fill="#1f2937" font-weight="600">United States</text>
-  </g>
+  <!-- Speed lines overlay -->
+  <line x1="350" y1="260" x2="348" y2="290" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  <line x1="600" y1="270" x2="603" y2="300" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <line x1="420" y1="255" x2="416" y2="285" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
 
-  <!-- ============ US MAP ============ -->
-  <!-- Centered horizontally, y starts at 190. Map width ~700, centered at x=480 => offset ~130 -->
-  <g opacity="0" transform="translate(100,188)">
-    <animate attributeName="opacity" values="0;1" dur="0.8s" begin="1s" fill="freeze"/>
+  <!-- NIGHT RACER title on canvas -->
+  <text x="480" y="165" font-family="'Courier New',monospace" font-size="36" font-weight="700" fill="#ff2222" text-anchor="middle" letter-spacing="3">NIGHT RACER</text>
+  <text x="480" y="185" font-family="'Courier New',monospace" font-size="14" fill="#ffcc00" text-anchor="middle" letter-spacing="2">RETRO EDITION</text>
+  <text x="480" y="215" font-family="'Courier New',monospace" font-size="11" fill="rgba(255,255,255,0.6)" text-anchor="middle">PRESS ENTER OR TAP TO START</text>
 
-    <!-- Row 1: Top tier — WA, MT, ND, MN, WI, MI (upper), VT, NH, ME -->
-    <path d="M 80,20 L 130,16 L 140,30 L 142,45 L 85,48 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- MT -->
-    <path d="M 130,16 L 230,10 L 236,44 L 166,30 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- ND -->
-    <path d="M 236,10 L 310,7 L 314,40 L 240,42 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- MN -->
-    <path d="M 314,7 L 380,5 L 384,44 L 318,46 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- WI -->
-    <path d="M 384,5 L 432,4 L 436,44 L 388,46 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- MI -->
-    <path d="M 436,2 L 500,0 L 506,42 L 440,44 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NY -->
-    <path d="M 530,12 L 596,8 L 602,42 L 536,46 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- VT -->
-    <path d="M 596,6 L 616,5 L 620,32 L 600,33 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NH -->
-    <path d="M 616,4 L 634,3 L 638,32 L 620,33 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- ME -->
-    <path d="M 634,0 L 668,0 L 672,35 L 638,35 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
+  <!-- HUD below canvas -->
+  <text x="120" y="496" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#222">SCORE: 4,250</text>
+  <text x="420" y="496" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#222">SPEED: 287 km/h</text>
+  <text x="720" y="496" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#222">TIME: 45.2s</text>
 
-    <!-- Row 2: OR(grey), ID, WY, SD, IA, IL, IN, OH, PA, MA, CT/RI -->
-    <!-- OR (unvisited) -->
-    <path d="M 72,48 L 142,45 L 148,88 L 70,92 Z" fill="#d6d6d6" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- ID -->
-    <path d="M 142,30 L 170,26 L 178,72 L 148,76 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- WY -->
-    <path d="M 178,44 L 240,42 L 244,78 L 182,80 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- SD -->
-    <path d="M 240,42 L 314,40 L 318,76 L 244,78 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- IA -->
-    <path d="M 340,46 L 400,44 L 404,80 L 344,82 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- IL -->
-    <path d="M 404,46 L 440,44 L 446,104 L 410,106 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- IN -->
-    <path d="M 446,46 L 478,44 L 482,104 L 450,106 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- OH -->
-    <path d="M 482,40 L 526,38 L 530,86 L 486,88 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- PA -->
-    <path d="M 516,42 L 596,38 L 602,70 L 522,74 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- MA -->
-    <path d="M 600,36 L 656,33 L 658,48 L 604,50 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- CT+RI -->
-    <path d="M 598,50 L 648,48 L 650,60 L 600,62 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-
-    <!-- Row 3: CA, NV, UT, CO, NE, KS, MO, KY, WV, VA, NJ, DE/MD -->
-    <!-- CA -->
-    <path d="M 60,92 L 115,88 L 122,140 L 128,168 L 104,180 L 72,165 L 58,130 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NV -->
-    <path d="M 115,76 L 152,73 L 158,138 L 122,140 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- UT -->
-    <path d="M 152,78 L 196,76 L 200,136 L 158,138 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- CO -->
-    <path d="M 200,80 L 280,78 L 284,124 L 204,126 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NE -->
-    <path d="M 254,78 L 340,76 L 344,108 L 258,110 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- KS -->
-    <path d="M 268,110 L 356,108 L 360,144 L 272,146 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- MO -->
-    <path d="M 360,86 L 420,84 L 426,134 L 364,136 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- KY -->
-    <path d="M 430,98 L 534,94 L 538,116 L 434,120 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- WV -->
-    <path d="M 524,74 L 548,72 L 554,98 L 530,96 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- VA -->
-    <path d="M 530,86 L 608,80 L 614,102 L 536,108 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NJ -->
-    <path d="M 598,62 L 616,60 L 622,84 L 604,82 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- DE+MD -->
-    <path d="M 596,78 L 624,76 L 628,96 L 600,94 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- DC dot -->
-    <circle cx="606" cy="92" r="3" fill="#4ecdc4" stroke="#fff" stroke-width="0.8"/>
-
-    <!-- Row 4: AZ, NM, OK(grey), TX pan, AR, TN, NC, SC -->
-    <!-- AZ -->
-    <path d="M 120,142 L 196,138 L 202,188 L 128,192 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NM -->
-    <path d="M 196,128 L 280,126 L 286,186 L 202,188 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- OK (unvisited) -->
-    <path d="M 280,146 L 376,144 L 380,178 L 284,180 Z" fill="#d6d6d6" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- AR -->
-    <path d="M 380,136 L 430,134 L 434,172 L 384,174 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- TN -->
-    <path d="M 434,118 L 548,114 L 552,136 L 438,140 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- NC -->
-    <path d="M 536,104 L 626,98 L 632,118 L 542,124 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- SC -->
-    <path d="M 548,124 L 608,120 L 616,148 L 554,152 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-
-    <!-- Row 5: TX, LA, MS, AL, GA, FL -->
-    <!-- TX -->
-    <path d="M 266,180 L 384,178 L 392,254 L 348,274 L 278,258 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- LA -->
-    <path d="M 390,174 L 440,172 L 448,218 L 396,222 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- MS -->
-    <path d="M 440,142 L 472,140 L 478,212 L 446,214 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- AL -->
-    <path d="M 476,138 L 516,136 L 522,210 L 482,212 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- GA -->
-    <path d="M 520,134 L 570,130 L 578,208 L 526,212 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- FL -->
-    <path d="M 530,212 L 586,210 L 600,244 L 578,280 L 548,260 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-
-    <!-- ===== INSETS ===== -->
-    <!-- Alaska -->
-    <path d="M 42,268 L 135,262 L 148,310 L 85,320 L 38,304 Z" fill="url(#h-teal)" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
-    <!-- Hawaii -->
-    <circle cx="186" cy="298" r="3.5" fill="url(#h-teal)" stroke="#fff" stroke-width="0.8"/>
-    <circle cx="198" cy="302" r="3" fill="url(#h-teal)" stroke="#fff" stroke-width="0.8"/>
-    <circle cx="212" cy="306" r="4.5" fill="url(#h-teal)" stroke="#fff" stroke-width="0.8"/>
-    <circle cx="230" cy="308" r="6" fill="url(#h-teal)" stroke="#fff" stroke-width="0.8"/>
-
-    <!-- ===== ANIMATED PULSES on select states ===== -->
-    <!-- NY pulse -->
-    <circle cx="566" cy="28" r="0" fill="none" stroke="#4ecdc4" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="3;12" dur="2.5s" begin="2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.5;0" dur="2.5s" begin="2s" repeatCount="indefinite"/>
-    </circle>
-    <!-- TX pulse -->
-    <circle cx="340" cy="220" r="0" fill="none" stroke="#4ecdc4" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="3;14" dur="3s" begin="2.5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0" dur="3s" begin="2.5s" repeatCount="indefinite"/>
-    </circle>
-    <!-- CA pulse -->
-    <circle cx="100" cy="130" r="0" fill="none" stroke="#4ecdc4" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="3;12" dur="2.8s" begin="3s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.4;0" dur="2.8s" begin="3s" repeatCount="indefinite"/>
-    </circle>
-    <!-- FL pulse -->
-    <circle cx="570" cy="250" r="0" fill="none" stroke="#4ecdc4" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="3;10" dur="2.6s" begin="3.3s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.35;0" dur="2.6s" begin="3.3s" repeatCount="indefinite"/>
-    </circle>
-    <!-- WA pulse -->
-    <circle cx="110" cy="32" r="0" fill="none" stroke="#4ecdc4" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="3;10" dur="3.2s" begin="2.8s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.35;0" dur="3.2s" begin="2.8s" repeatCount="indefinite"/>
-    </circle>
-    <!-- AK pulse -->
-    <circle cx="95" cy="290" r="0" fill="none" stroke="#4ecdc4" stroke-width="1" opacity="0">
-      <animate attributeName="r" values="3;10" dur="3.4s" begin="3.5s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.3;0" dur="3.4s" begin="3.5s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-
-  <!-- ============ BOTTOM STATUS BAR ============ -->
-  <rect x="0" y="536" width="960" height="24" fill="#f8f9fa"/>
-  <line x1="0" y1="536" x2="960" y2="536" stroke="#ecedf0" stroke-width="0.5"/>
-  <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.5s" begin="1.8s" fill="freeze"/>
-    <text x="48" y="552" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="10" fill="#4ecdc4" font-weight="600">48 of 50 states visited</text>
-    <circle cx="200" cy="549" r="1.2" fill="#d1d5db"/>
-    <text x="280" y="552" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="10" fill="#6b7280" text-anchor="middle">290+ regions worldwide</text>
-    <circle cx="360" cy="549" r="1.2" fill="#d1d5db"/>
-    <text x="440" y="552" font-family="'SF Pro Display','Segoe UI',sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle">masrikdahir.com</text>
-  </g>
-
-  </g>
+  <!-- Controls hint -->
+  <text x="480" y="520" font-family="Georgia,serif" font-size="10" fill="#555" text-anchor="middle">Arrow / WASD: Accelerate, Brake, Left, Right</text>
 </svg>

@@ -15,6 +15,22 @@
       "created": "2026-04-10",
       "project": "Masrik-Dahir.github.io",
       "type": "project"
+    },
+    {
+      "slug": "starfield-warp",
+      "description": "Hyperspace warp tunnel with star streaks radiating from a bright central core, deep-space blue palette with pulsing glow",
+      "file": ".github/banners/starfield-warp.svg",
+      "created": "2026-04-10",
+      "project": "Masrik-Dahir.github.io",
+      "type": "author"
+    },
+    {
+      "slug": "neon-speedometer-sweep",
+      "description": "Neon speedometer gauge with sweeping needle, RPM bars, and perspective road with speed lines — cyberpunk racing aesthetic",
+      "file": ".github/banners/neon-speedometer-sweep.svg",
+      "created": "2026-04-10",
+      "project": "Masrik-Dahir.github.io",
+      "type": "project"
     }
   ]
 }

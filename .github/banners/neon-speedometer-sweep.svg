@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="120" viewBox="0 0 800 120">
+  <defs>
+    <linearGradient id="ns-bg" x1="0" y1="0" x2="800" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="50%" stop-color="#0d0820"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="ns-road" x1="400" y1="120" x2="400" y2="85" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#333340"/>
+      <stop offset="100%" stop-color="#1a1a28"/>
+    </linearGradient>
+    <filter id="ns-neon-red">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="ns-neon-cyan">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="ns-txtglow">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="ns-speedneedle" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff2244"/>
+      <stop offset="100%" stop-color="#ff6622"/>
+    </linearGradient>
+    <clipPath id="ns-gaugeClip">
+      <rect x="620" y="10" width="170" height="100"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="120" fill="url(#ns-bg)"/>
+
+  <!-- Subtle road perspective at bottom -->
+  <polygon points="300,120 500,120 430,90 370,90" fill="url(#ns-road)" opacity="0.5"/>
+  <!-- Road dashes -->
+  <line x1="400" y1="120" x2="400" y2="95" stroke="#ffcc00" stroke-width="1.5" stroke-dasharray="4,6" opacity="0.4">
+    <animate attributeName="stroke-dashoffset" values="0;-20" dur="0.5s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Speed lines (left side) -->
+  <line x1="0" y1="100" x2="160" y2="100" stroke="#ff3355" stroke-width="0.8" opacity="0" filter="url(#ns-neon-red)">
+    <animate attributeName="opacity" values="0;0.7;0" dur="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="60;160" dur="1.2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="0" y1="85" x2="120" y2="85" stroke="#ff5577" stroke-width="0.5" opacity="0">
+    <animate attributeName="opacity" values="0;0.5;0" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="40;120" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+  </line>
+  <line x1="0" y1="110" x2="140" y2="110" stroke="#ff2244" stroke-width="0.6" opacity="0">
+    <animate attributeName="opacity" values="0;0.6;0" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="50;140" dur="1s" begin="0.6s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Speed lines (right side) -->
+  <line x1="800" y1="100" x2="640" y2="100" stroke="#ff3355" stroke-width="0.8" opacity="0" filter="url(#ns-neon-red)">
+    <animate attributeName="opacity" values="0;0.7;0" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="740;640" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+  </line>
+  <line x1="800" y1="85" x2="680" y2="85" stroke="#ff5577" stroke-width="0.5" opacity="0">
+    <animate attributeName="opacity" values="0;0.5;0" dur="1.5s" begin="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="760;680" dur="1.5s" begin="0.7s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Speedometer gauge (right side) -->
+  <g clip-path="url(#ns-gaugeClip)">
+    <!-- Gauge arc background -->
+    <path d="M 660,100 A 50,50 0 0,1 760,100" fill="none" stroke="#222244" stroke-width="6"/>
+    <!-- Gauge arc ticks -->
+    <path d="M 665,98 A 47,47 0 0,1 710,58" fill="none" stroke="#00ccaa" stroke-width="3" opacity="0.6" filter="url(#ns-neon-cyan)">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 710,58 A 47,47 0 0,1 755,98" fill="none" stroke="#ff3355" stroke-width="3" opacity="0.6" filter="url(#ns-neon-red)">
+      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+    </path>
+    <!-- Needle -->
+    <line x1="710" y1="100" x2="710" y2="55" stroke="url(#ns-speedneedle)" stroke-width="2" stroke-linecap="round" filter="url(#ns-neon-red)">
+      <animateTransform attributeName="transform" type="rotate" values="-40,710,100;30,710,100;-40,710,100" dur="3s" repeatCount="indefinite"/>
+    </line>
+    <!-- Center hub -->
+    <circle cx="710" cy="100" r="4" fill="#ff4466"/>
+    <circle cx="710" cy="100" r="2" fill="#ffffff"/>
+  </g>
+
+  <!-- RPM bars (left side) -->
+  <g opacity="0.7">
+    <rect x="25" y="75" width="6" height="20" rx="1" fill="#00cc88">
+      <animate attributeName="height" values="10;25;10" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="85;70;85" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="35" y="70" width="6" height="25" rx="1" fill="#00cc88">
+      <animate attributeName="height" values="15;30;15" dur="1.5s" begin="0.1s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="80;65;80" dur="1.5s" begin="0.1s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="45" y="65" width="6" height="30" rx="1" fill="#33dd66">
+      <animate attributeName="height" values="20;35;20" dur="1.5s" begin="0.2s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="75;60;75" dur="1.5s" begin="0.2s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="55" y="60" width="6" height="35" rx="1" fill="#aadd00">
+      <animate attributeName="height" values="25;40;25" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="70;55;70" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="65" y="55" width="6" height="40" rx="1" fill="#ffcc00">
+      <animate attributeName="height" values="30;42;30" dur="1.5s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="65;53;65" dur="1.5s" begin="0.4s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="75" y="55" width="6" height="40" rx="1" fill="#ff6622">
+      <animate attributeName="height" values="28;44;28" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="67;51;67" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="85" y="60" width="6" height="35" rx="1" fill="#ff2244" filter="url(#ns-neon-red)">
+      <animate attributeName="height" values="20;38;20" dur="1.5s" begin="0.6s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="75;57;75" dur="1.5s" begin="0.6s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- Subtle text backing -->
+  <rect x="160" y="25" width="480" height="70" rx="8" fill="#000000" opacity="0.45"/>
+
+  <!-- Project name text -->
+  <text x="400" y="52" font-family="'Segoe UI',sans-serif" font-size="30" font-weight="700"
+        fill="#ffffff" text-anchor="middle" letter-spacing="4" filter="url(#ns-txtglow)">
+    Masrik-Dahir.github.io<animate attributeName="opacity" values="0;1" dur="1s" fill="freeze"/>
+  </text>
+  <text x="400" y="80" font-family="'Segoe UI',sans-serif" font-size="12"
+        fill="#00ddbb" text-anchor="middle" letter-spacing="1">
+    Portfolio, travel atlas, and retro arcade — no build step required<animate attributeName="opacity" values="0;1" begin="0.6s" dur="0.8s" fill="freeze"/>
+  </text>
+</svg>

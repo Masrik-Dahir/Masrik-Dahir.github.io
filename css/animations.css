@@ -1,0 +1,297 @@
+/**
+ * animations.css - Site-wide animation system.
+ *
+ * Includes: button ripple, scroll-reveal, card hover lift, social icon bounce,
+ * nav underline, staggered entries, page load fade-in, image hover zoom.
+ */
+
+/* ── Page Load Fade-in ─────────────────────────────────────────── */
+
+@keyframes pageEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body {
+    animation: pageEntrance 0.5s ease-out both;
+}
+
+/* ── Button Click Ripple ───────────────────────────────────────── */
+
+.ripple-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.15);
+    transform: scale(0);
+    animation: rippleExpand 0.6s ease-out forwards;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes rippleExpand {
+    0% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Light ripple variant for dark buttons */
+.glow-on-hover .ripple-effect,
+.glow-on-hover9 .ripple-effect {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Scroll-Reveal Animations ──────────────────────────────────── */
+
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-on-scroll.animated {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Slide in from left */
+.animate-slide-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-slide-left.animated {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Slide in from right */
+.animate-slide-right {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.animate-slide-right.animated {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Scale up entrance */
+.animate-scale {
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.animate-scale.animated {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ── Staggered Entry Delays ────────────────────────────────────── */
+
+.stagger-1 { transition-delay: 0.05s; }
+.stagger-2 { transition-delay: 0.1s; }
+.stagger-3 { transition-delay: 0.15s; }
+.stagger-4 { transition-delay: 0.2s; }
+.stagger-5 { transition-delay: 0.25s; }
+.stagger-6 { transition-delay: 0.3s; }
+.stagger-7 { transition-delay: 0.35s; }
+.stagger-8 { transition-delay: 0.4s; }
+.stagger-9 { transition-delay: 0.45s; }
+.stagger-10 { transition-delay: 0.5s; }
+
+/* ── Enhanced Card Hover (lift + shadow) ───────────────────────── */
+
+.w3-card,
+.w3-card-2,
+.w3-card-4 {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.w3-card:hover,
+.w3-card-2:hover,
+.w3-card-4:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Button Press Effect ──────────────────────────────────────── */
+
+.glow-on-hover3,
+.glow-on-hover4,
+.glow-on-hover12,
+.button-55 {
+    transition: transform 0.15s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.glow-on-hover3:active,
+.glow-on-hover4:active,
+.glow-on-hover12:active,
+.button-55:active {
+    transform: scale(0.97) !important;
+}
+
+/* ── Social Media Icon Hover ───────────────────────────────────── */
+
+footer a > i,
+#footer-relative a > i,
+footer a > img,
+#footer-relative a > img {
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+footer a:hover > i,
+#footer-relative a:hover > i,
+footer a:hover > img,
+#footer-relative a:hover > img {
+    transform: translateY(-4px) scale(1.15);
+    filter: brightness(1.2);
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+}
+
+footer a:hover > i,
+#footer-relative a:hover > i {
+    animation: iconBounce 0.5s ease both;
+}
+
+/* ── Nav Link Hover Underline ──────────────────────────────────── */
+
+.glow-on-hover-nav {
+    position: relative;
+}
+
+.glow-on-hover-nav::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, crimson, darkred) !important;
+    transition: width 0.3s ease, left 0.3s ease !important;
+    border-radius: 0 !important;
+    z-index: 1 !important;
+}
+
+.glow-on-hover-nav:hover::after {
+    width: 80% !important;
+    left: 10% !important;
+}
+
+/* ── Work History Logo Hover ───────────────────────────────────── */
+
+.box2 {
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.box2:hover {
+    transform: scale(1.08);
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+/* ── Gallery Image Hover Zoom ──────────────────────────────────── */
+
+.inactive-image .image-container img,
+.image-container img {
+    transition: transform 0.4s ease;
+}
+
+.inactive-image:hover img {
+    transform: scale(1.05);
+}
+
+/* ── Search Bar Focus Glow ─────────────────────────────────────── */
+
+.search_bar {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.search_bar:focus-within {
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15), 1px 1px 8px 1px #dcdcdc;
+    border-color: teal;
+}
+
+/* ── Tooltip Entry ─────────────────────────────────────────────── */
+
+[data-toggle="tooltip"] {
+    transition: transform 0.2s ease;
+}
+
+[data-toggle="tooltip"]:hover {
+    transform: translateY(-2px);
+}
+
+/* ── Smooth Collapsible Expand ─────────────────────────────────── */
+
+.content1,
+.content2 {
+    transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.content1.open,
+.content2.open {
+    max-height: 2000px;
+    opacity: 1;
+}
+
+/* ── Pulse animation for interactive elements ──────────────────── */
+
+@keyframes subtlePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 128, 128, 0); }
+    50% { box-shadow: 0 0 0 4px rgba(0, 128, 128, 0.1); }
+}
+
+.pop-up-button:hover {
+    animation: subtlePulse 2s infinite;
+}
+
+/* ── Reduce Motion Preference ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .animate-on-scroll,
+    .animate-slide-left,
+    .animate-slide-right,
+    .animate-scale {
+        opacity: 1;
+        transform: none;
+    }
+
+    body {
+        animation: none;
+    }
+}

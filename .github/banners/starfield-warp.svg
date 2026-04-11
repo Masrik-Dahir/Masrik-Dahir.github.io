@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="120" viewBox="0 0 800 120">
+  <defs>
+    <radialGradient id="sw-bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0d0d2b"/>
+      <stop offset="100%" stop-color="#000008"/>
+    </radialGradient>
+    <radialGradient id="sw-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4444ff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sw-blur">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+    <filter id="sw-txtglow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Deep space background -->
+  <rect width="800" height="120" fill="url(#sw-bg)"/>
+  <rect width="800" height="120" fill="url(#sw-glow)"/>
+
+  <!-- Warp star streaks radiating from center -->
+  <!-- Top-left cluster -->
+  <line x1="400" y1="60" x2="20" y2="5" stroke="#aaccff" stroke-width="0.6" stroke-opacity="0" filter="url(#sw-blur)">
+    <animate attributeName="stroke-opacity" values="0;0.8;0" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="300;20" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="40;5" dur="2.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="80" y2="2" stroke="#88bbff" stroke-width="0.5" stroke-opacity="0" filter="url(#sw-blur)">
+    <animate attributeName="stroke-opacity" values="0;0.7;0" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="320;80" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="35;2" dur="3s" begin="0.3s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="150" y2="0" stroke="#99ccff" stroke-width="0.4" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.6;0" dur="2.2s" begin="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="340;150" dur="2.2s" begin="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="30;0" dur="2.2s" begin="0.7s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Top-right cluster -->
+  <line x1="400" y1="60" x2="780" y2="3" stroke="#aaddff" stroke-width="0.6" stroke-opacity="0" filter="url(#sw-blur)">
+    <animate attributeName="stroke-opacity" values="0;0.8;0" dur="2.8s" begin="0.5s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="500;780" dur="2.8s" begin="0.5s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="38;3" dur="2.8s" begin="0.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="700" y2="8" stroke="#77aaee" stroke-width="0.5" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.65;0" dur="2.4s" begin="1s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="480;700" dur="2.4s" begin="1s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="42;8" dur="2.4s" begin="1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="650" y2="0" stroke="#bbddff" stroke-width="0.4" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.5;0" dur="3.2s" begin="0.2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="460;650" dur="3.2s" begin="0.2s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="32;0" dur="3.2s" begin="0.2s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Bottom-left cluster -->
+  <line x1="400" y1="60" x2="50" y2="115" stroke="#9999ff" stroke-width="0.6" stroke-opacity="0" filter="url(#sw-blur)">
+    <animate attributeName="stroke-opacity" values="0;0.75;0" dur="2.6s" begin="0.4s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="310;50" dur="2.6s" begin="0.4s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="72;115" dur="2.6s" begin="0.4s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="120" y2="120" stroke="#aaaaff" stroke-width="0.4" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.6;0" dur="2.9s" begin="0.8s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="330;120" dur="2.9s" begin="0.8s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="75;120" dur="2.9s" begin="0.8s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Bottom-right cluster -->
+  <line x1="400" y1="60" x2="750" y2="118" stroke="#8888ee" stroke-width="0.5" stroke-opacity="0" filter="url(#sw-blur)">
+    <animate attributeName="stroke-opacity" values="0;0.7;0" dur="2.3s" begin="0.6s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="490;750" dur="2.3s" begin="0.6s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="70;118" dur="2.3s" begin="0.6s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="680" y2="120" stroke="#bbbbff" stroke-width="0.4" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.55;0" dur="3.1s" begin="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="470;680" dur="3.1s" begin="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="78;120" dur="3.1s" begin="1.2s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Horizontal streaks -->
+  <line x1="400" y1="60" x2="0" y2="55" stroke="#7799dd" stroke-width="0.7" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.8;0" dur="2s" begin="0.1s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="280;0" dur="2s" begin="0.1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="400" y1="60" x2="800" y2="65" stroke="#7799dd" stroke-width="0.7" stroke-opacity="0">
+    <animate attributeName="stroke-opacity" values="0;0.8;0" dur="2s" begin="0.1s" repeatCount="indefinite"/>
+    <animate attributeName="x2" values="520;800" dur="2s" begin="0.1s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- Bright central core glow -->
+  <circle cx="400" cy="60" r="3" fill="#ffffff" opacity="0.6">
+    <animate attributeName="r" values="2;5;2" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="400" cy="60" r="12" fill="none" stroke="#6666ff" stroke-width="0.5" opacity="0.3">
+    <animate attributeName="r" values="8;18;8" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.1;0.4;0.1" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Distant static stars -->
+  <circle cx="55" cy="20" r="1" fill="#ffffff" opacity="0.4">
+    <animate attributeName="opacity" values="0.2;0.7;0.2" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="180" cy="105" r="0.8" fill="#ffffff" opacity="0.3">
+    <animate attributeName="opacity" values="0.1;0.5;0.1" dur="3.5s" begin="1s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="620" cy="15" r="1.2" fill="#ffffff" opacity="0.5">
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="5s" begin="0.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="740" cy="95" r="0.7" fill="#ffffff" opacity="0.3">
+    <animate attributeName="opacity" values="0.2;0.6;0.2" dur="3.8s" begin="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="280" cy="10" r="0.9" fill="#aabbff" opacity="0.4">
+    <animate attributeName="opacity" values="0.2;0.7;0.2" dur="4.2s" begin="0.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="520" cy="108" r="0.6" fill="#ffffff" opacity="0.3">
+    <animate attributeName="opacity" values="0.1;0.5;0.1" dur="3.3s" begin="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Subtle text backing overlay -->
+  <rect x="180" y="30" width="440" height="65" rx="8" fill="#000000" opacity="0.4"/>
+
+  <!-- Author text -->
+  <text x="400" y="52" font-family="'Segoe UI',sans-serif" font-size="27" font-weight="700"
+        fill="#e8e8ff" text-anchor="middle" letter-spacing="3" filter="url(#sw-txtglow)">
+    Masrik Dahir<animate attributeName="opacity" values="0;1" dur="1s" fill="freeze"/>
+  </text>
+  <text x="400" y="80" font-family="'Segoe UI',sans-serif" font-size="13"
+        fill="#8899dd" text-anchor="middle" letter-spacing="2">
+    &#10022; masrikdahir.com &#10022;<animate attributeName="opacity" values="0;1" begin="0.6s" dur="0.8s" fill="freeze"/>
+  </text>
+</svg>

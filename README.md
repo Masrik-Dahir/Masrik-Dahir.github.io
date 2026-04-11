@@ -5,21 +5,21 @@
 
 *— project —*
 
-<!-- Project Banner: globe-orbit-trace -->
+<!-- Project Banner: neon-speedometer-sweep -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/globe-orbit-trace.svg"
+<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/neon-speedometer-sweep.svg"
      alt="Masrik-Dahir.github.io" width="800"/>
 </a>
 
 *— author —*
 
-<!-- Author Banner: compass-rose-unfold -->
+<!-- Author Banner: starfield-warp -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/compass-rose-unfold.svg"
+<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/starfield-warp.svg"
      alt="Masrik Dahir — Masrik-Dahir.github.io" width="800"/>
 </a>
 
-> A personal portfolio and interactive travel photography atlas with 290+ region galleries, SVG maps with hover-to-preview flags, and photo slideshows — all static, no build step required.
+> Portfolio, travel atlas, and retro arcade — no build step required
 
 [![Jekyll site CI](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/jekyll.yml/badge.svg)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/jekyll.yml)
 [![CodeQL](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/codeql-analysis.yml)
@@ -38,8 +38,8 @@
 
 ## ⚡ TL;DR
 
-- **What:** A static personal portfolio and travel photography site featuring an interactive SVG world map with 290+ clickable region galleries and photo slideshows.
-- **Who:** Anyone curious about Masrik Dahir's travel photography, work experience, software projects, and academic background.
+- **What:** A static personal portfolio and travel photography site with an interactive SVG world map, 290+ region galleries, 32 canvas retro game animations, and a playable pseudo-3D racing game.
+- **Who:** Anyone curious about Masrik Dahir's work, travel photography, software projects, or looking for a quick retro gaming session.
 - **Why:** Zero build step, zero server — pure HTML/CSS/JS with Vue 3 CDN and media served through CloudFront, making it instantly forkable and deployable on GitHub Pages.
 - **Start:** `git clone https://github.com/Masrik-Dahir/Masrik-Dahir.github.io.git && python -m http.server 8000` — open `http://localhost:8000` and you're browsing.
 - **Know:** All photos are hosted on AWS S3/CloudFront, not in the repo — the HTML pages reference CDN URLs, so gallery content requires the S3 bucket to be populated.
@@ -69,10 +69,11 @@
 - 📸 **290+ Photo Galleries** — Individual region pages with gallery grid and slideshow view modes powered by Vue 3
 - ⚙️ **Dynamic Template Engine** — `continent-gallery.js` and `state-gallery.js` inject gallery layouts from lightweight HTML stubs without any build step
 - 🌐 **CloudFront CDN Media Delivery** — All images and thumbnails served through AWS CloudFront for fast global access
-- 🧭 **Responsive Navigation** — Shared navbar and footer injected via `components.js` across all pages
+- 🧭 **Responsive Navigation** — Shared navbar and footer injected via `components.js` across all pages with active-page highlighting
 - 💼 **Portfolio Sections** — Work experience timeline, academic history, software project showcase, and personal milestones
 - 🏳️ **Region Hover Tooltips** — SVG map paths show country/state names and photo counts on hover with flag image fills for visited regions
-- 🎮 **32 Canvas Retro Games** — Auto-playing canvas-based game animations on the home page (Matrix Rain, Tetris, Snake, Pong, Space Invaders, Pac-Man, and 26 more) with a shuffle button to cycle through them
+- 🎮 **32 Canvas Retro Games** — Auto-playing canvas-based game animations on the home page (Matrix Rain, Tetris, Snake, Pong, Space Invaders, Pac-Man, and 26 more) with a shuffle button
+- 🏎️ **Night Racer — Playable Racing Game** — Full pseudo-3D retro car racing game with canvas rendering, traffic obstacles, curved roads, hills, scenery, speedometer HUD, 90-second timed sessions, and mobile touch controls
 - 🚀 **Zero Build, Zero Server** — Entirely static — clone and serve with any HTTP server, deploy instantly on GitHub Pages
 
 ---
@@ -82,9 +83,10 @@
 ```mermaid
 graph TB
     subgraph Browser["🖥️ Browser"]
-        Pages["📄 HTML Pages<br/>index, map, work, software..."]
+        Pages["📄 HTML Pages<br/>index, map, work, software,<br/>games, academia, milestone"]
         Vue["⚡ Vue 3 CDN<br/>Reactive galleries"]
         JS["🔧 Vanilla JS Modules<br/>map-enhancer, continent-gallery,<br/>state-gallery, components"]
+        Canvas["🎮 Canvas Games<br/>matrix.js + games.html"]
     end
 
     subgraph GitHub["🌐 GitHub Pages"]
@@ -99,6 +101,7 @@ graph TB
 
     Pages --> Vue
     Pages --> JS
+    Pages --> Canvas
     Static --> |serves| Pages
     JS --> |fetch| ImageJSON
     JS --> |fetch| CF
@@ -118,6 +121,8 @@ flowchart LR
     CStub["Continent Stub<br/>sets window.CONTINENT_ID"] --> CGJ["continent-gallery.js<br/>fetches SVG, builds cards"]
     CGJ --> ME["map-enhancer.js<br/>adds hover + click behavior"]
     ME --> CDN
+
+    GamesPage["games.html"] --> CanvasAPI["HTML5 Canvas API<br/>pseudo-3D road rendering"]
 ```
 
 ---
@@ -132,6 +137,7 @@ flowchart LR
 ├── 📄 software.html            # Software project showcase
 ├── 📄 milestone.html           # Personal milestones
 ├── 📄 map.html                 # Interactive world map hub
+├── 📄 games.html               # Playable Night Racer racing game
 │
 ├── 📁 map/                     # 290+ region gallery pages
 │   ├── 📁 svg/                 # 23 interactive SVG region maps
@@ -205,6 +211,7 @@ graph LR
     Root --> VueDir["⚡ vueJs/ — Vue data"]
     Root --> CSS["🎨 css/ — stylesheets"]
     Root --> GH["⚙️ .github/ — CI + banners"]
+    Pages --> Games["🏎️ games.html — Night Racer"]
     MapDir --> SVGs["🌍 svg/ — 23 region maps"]
     JS --> |"template injection"| MapDir
     VueDir --> |"reactive data"| MapDir
@@ -256,11 +263,19 @@ npx serve .
 http://localhost:8000
 ```
 
-Navigate to the **Travel Map** page to explore the interactive SVG maps and photo galleries.
+Navigate to the **Travel Map** page to explore the interactive SVG maps and photo galleries, or head to the **Games** tab to play Night Racer.
 
 ---
 
 ## 📖 Usage
+
+### Playing Night Racer
+
+1. Navigate to the **Games** tab in the top navigation
+2. Press **Enter**, **Space**, or click/tap the canvas to start
+3. Use **Arrow keys** or **WASD** to steer, accelerate, and brake
+4. Dodge traffic for 90 seconds — your score depends on speed and survival
+5. On mobile, use the on-screen touch buttons
 
 ### Adding a New Region Gallery
 
@@ -396,6 +411,7 @@ Under the following terms:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v2.2.0 | 2026-04-10 | Added Games tab with playable Night Racer pseudo-3D racing game, new banners |
 | v2.1.0 | 2026-04-10 | Added 32 canvas retro game animations with shuffle, replaced 4 games, improved 8 games |
 | v2.0.0 | 2026-04-10 | Full README rewrite with animated banners, hero screenshot, Mermaid diagrams, stats workflows |
 | v1.0.0 | — | Initial README |

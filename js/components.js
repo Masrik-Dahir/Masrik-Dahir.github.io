@@ -16,7 +16,8 @@
         { label: "Academia", path: "/academia", aliases: ["/education"] },
         { label: "Software", path: "/software", aliases: [] },
         { label: "Milestones", path: "/milestone", aliases: [] },
-        { label: "Travel", path: "/map", aliases: [] }
+        { label: "Travel", path: "/map", aliases: [] },
+        { label: "Games", path: "/games", aliases: [] }
     ];
 
     var BASE_URL = "https://www.masrikdahir.com";
