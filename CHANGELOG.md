@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- Games page redesigned with white theme matching site design (white backgrounds, Georgia font, red accents)
+- Gallery header replaced with search bar matching software page pattern
+- Night Racer now supports Tab key to start/restart game
+- Cursor now stays visible on game canvas across all displays
+- Game instructions updated with accurate control descriptions (Enter, Tab, or Tap to start; Arrow keys / WASD to steer & accelerate)
+
 ### Added
 - New "Games" tab in site navigation linking to `/games`
 - Playable pseudo-3D retro car racing game ("Night Racer") in `games.html` with canvas rendering, traffic obstacles, scenery, score/time HUD, and mobile touch controls
