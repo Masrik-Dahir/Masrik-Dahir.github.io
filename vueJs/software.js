@@ -6,6 +6,16 @@ const app_software = {
             searchQuery: null,
             resources:[
                 {
+                    title:"AwsUtil",
+                    des:"Multi-language AWS SDK wrapper library — Python, C#, Go, Java, Rust, TypeScript, Ruby — with full async parity, structured errors, and Pydantic models",
+                    uri_github:"https://github.com/Masrik-Dahir/aws-util-python",
+                    uri_windows:"",
+                    uri_android:"",
+                    uri_apple:"",
+                    uri_web:"product/library/awsutil/awsutil",
+                    uri:"product/library/awsutil/awsutil"
+                },
+                {
                     title:"Cronus",
                     des:"Comparing and Contrasting Concept Maps, Algorithmic Grading",
                     uri_github:"https://github.com/Masrik-Dahir/Cronus",

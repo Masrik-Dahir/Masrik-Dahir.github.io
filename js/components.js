@@ -14,7 +14,7 @@
         { label: "Home", path: "/", aliases: ["/index"] },
         { label: "Career", path: "/work", aliases: [] },
         { label: "Academia", path: "/academia", aliases: ["/education"] },
-        { label: "Software", path: "/software", aliases: [] },
+        { label: "Software", path: "/software", aliases: ["/product"] },
         { label: "Milestones", path: "/milestone", aliases: [] },
         { label: "Travel", path: "/map", aliases: [] },
         { label: "Games", path: "/games", aliases: [] }
@@ -36,6 +36,7 @@
         if (current.indexOf(page.path + "/") === 0) return true;
         for (var i = 0; i < page.aliases.length; i++) {
             if (current === page.aliases[i]) return true;
+            if (current.indexOf(page.aliases[i] + "/") === 0) return true;
         }
         return false;
     }
