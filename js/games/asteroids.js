@@ -1,9 +1,12 @@
-// Asteroids — Full Game
+// Asteroids — Full Game (Enhanced Graphics + Difficulty Progression)
 (function(){
-var canvas,ctx,W,H,animId=null,gameState='title',score=0,lives=5,level=1,gameTime=0,titlePulse=0;
-var ship,bullets=[],asteroids=[],particles=[],stars=[];
+var canvas,ctx,W,H,animId=null,gameState='title',score=0,lives=3,level=1,gameTime=0,titlePulse=0;
+var ship,bullets=[],asteroids=[],particles=[],stars=[],bgStars2=[];
 var keyLeft=false,keyRight=false,keyUp=false,keySpace=false,lastShot=0;
 var SHIP_ACCEL=300,SHIP_DRAG=0.98,SHIP_TURN=4,BULLET_SPEED=500,BULLET_LIFE=1.5;
+var screenShake=0;
+
+function diffMult(){return level<=2?0.7:(level<=5?1.0:1.0+(level-5)*0.12);}
 // Planet colors for variety
 var PLANET_COLORS=[
 {fill:'rgba(180,100,60,0.3)',stroke:'#bb8844'},   // brown rocky
@@ -21,11 +24,11 @@ stars=[];for(var i=0;i<100;i++)stars.push({x:Math.random()*W,y:Math.random()*H,s
 function wrap(o){if(o.x<-20)o.x=W+20;if(o.x>W+20)o.x=-20;if(o.y<-20)o.y=H+20;if(o.y>H+20)o.y=-20;}
 
 function spawnAsteroids(){
-asteroids=[];var count=4+level*3;
+asteroids=[];var count=Math.round((4+level*3)*diffMult());
 // Spawn away from ship center
 for(var i=0;i<count;i++){var a=Math.random()*Math.PI*2;
 var sx,sy;do{sx=Math.random()*W;sy=Math.random()*H;}while(Math.abs(sx-W/2)<100&&Math.abs(sy-H/2)<100);
-var spd=40+Math.random()*60+level*8;
+var spd=(40+Math.random()*60+level*8)*diffMult();
 var rad=28+Math.random()*18;
 asteroids.push({x:sx,y:sy,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,
 r:rad,rot:0,rotSpeed:(Math.random()-0.5)*2.5,verts:makeVerts(rad),size:3,
@@ -43,7 +46,7 @@ colorIdx:ast.colorIdx});}}
 
 function resetGame(){
 ship={x:W/2,y:H/2,vx:0,vy:0,rot:-Math.PI/2,thrust:false,invince:2};
-score=0;lives=5;level=1;gameTime=0;bullets=[];particles=[];
+score=0;lives=3;level=1;gameTime=0;bullets=[];particles=[];
 spawnAsteroids();gameState='playing';}
 
 function addParticles(x,y,color,n){for(var i=0;i<n;i++)particles.push({x:x,y:y,vx:(Math.random()-0.5)*200,vy:(Math.random()-0.5)*200,life:0.5+Math.random()*0.5,color:color,size:1.5+Math.random()*3});}
@@ -72,7 +75,7 @@ for(var b=bullets.length-1;b>=0;b--){for(var a=asteroids.length-1;a>=0;a--){
 var dx=bullets[b].x-asteroids[a].x,dy=bullets[b].y-asteroids[a].y;
 if(dx*dx+dy*dy<asteroids[a].r*asteroids[a].r){
 score+=[0,100,50,20][asteroids[a].size]||10;
-addParticles(asteroids[a].x,asteroids[a].y,'#ffcc00',8+asteroids[a].size*4);
+addParticles(asteroids[a].x,asteroids[a].y,'#ffcc00',12+asteroids[a].size*5);screenShake=0.15;
 splitAsteroid(asteroids[a]);asteroids.splice(a,1);bullets.splice(b,1);break;}}}
 // ship-asteroid collision
 if(ship.invince<=0){for(var i=0;i<asteroids.length;i++){var a=asteroids[i];
@@ -88,15 +91,39 @@ if(asteroids.length===0){level++;spawnAsteroids();}
 
 function drawShip(x,y,rot,alpha){
 ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalAlpha=alpha;
-ctx.strokeStyle='#00ccff';ctx.lineWidth=2;ctx.shadowColor='#00ccff';ctx.shadowBlur=6;
+// Ship body with gradient
+var sg=ctx.createLinearGradient(-10,0,16,0);sg.addColorStop(0,'#006699');sg.addColorStop(1,'#00eeff');
+ctx.strokeStyle=sg;ctx.lineWidth=2.5;ctx.shadowColor='#00ccff';ctx.shadowBlur=10;
 ctx.beginPath();ctx.moveTo(16,0);ctx.lineTo(-10,10);ctx.lineTo(-6,0);ctx.lineTo(-10,-10);ctx.closePath();ctx.stroke();
-if(ship.thrust&&Math.random()>0.3){ctx.fillStyle='#ff6622';ctx.beginPath();ctx.moveTo(-8,4);ctx.lineTo(-18-Math.random()*8,0);ctx.lineTo(-8,-4);ctx.fill();}
+// Fill with semi-transparent
+ctx.fillStyle='rgba(0,150,255,0.15)';ctx.fill();
+// Cockpit
+ctx.fillStyle='#00aaff';ctx.beginPath();ctx.arc(4,0,3,0,Math.PI*2);ctx.fill();
+// Wing details
+ctx.strokeStyle='rgba(0,200,255,0.4)';ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-6,7);ctx.stroke();
+ctx.beginPath();ctx.moveTo(6,0);ctx.lineTo(-6,-7);ctx.stroke();
+// Thrust flame (enhanced)
+if(ship.thrust){
+var flameLen=12+Math.random()*10;
+var fg=ctx.createLinearGradient(-8,0,-8-flameLen,0);
+fg.addColorStop(0,'rgba(255,200,100,0.9)');fg.addColorStop(0.4,'rgba(255,100,30,0.6)');fg.addColorStop(1,'rgba(255,50,0,0)');
+ctx.fillStyle=fg;ctx.beginPath();ctx.moveTo(-8,5);ctx.lineTo(-8-flameLen+Math.random()*4,0);ctx.lineTo(-8,-5);ctx.fill();
+// Inner flame
+ctx.fillStyle='rgba(255,255,200,0.7)';ctx.beginPath();ctx.moveTo(-8,3);ctx.lineTo(-8-flameLen*0.5,0);ctx.lineTo(-8,-3);ctx.fill();}
 ctx.shadowBlur=0;ctx.restore();ctx.globalAlpha=1;}
 
 function render(){
-ctx.fillStyle='#080818';ctx.fillRect(0,0,W,H);
-// stars
-ctx.fillStyle='#fff';for(var i=0;i<stars.length;i++){var s=stars[i];ctx.globalAlpha=s.b*0.5;ctx.fillRect(s.x,s.y,s.s,s.s);}ctx.globalAlpha=1;
+ctx.save();
+var shk=screenShake>0?screenShake:0;
+ctx.translate((Math.random()-0.5)*shk*15,(Math.random()-0.5)*shk*15);
+if(screenShake>0)screenShake-=0.016;
+// Background gradient
+var bgG=ctx.createLinearGradient(0,0,0,H);bgG.addColorStop(0,'#020010');bgG.addColorStop(0.5,'#060620');bgG.addColorStop(1,'#0a0a30');
+ctx.fillStyle=bgG;ctx.fillRect(-5,-5,W+10,H+10);
+// stars with twinkle
+for(var i=0;i<stars.length;i++){var s=stars[i];ctx.globalAlpha=s.b*(0.4+0.3*Math.sin(gameTime*1.5+i));
+ctx.fillStyle=i%5===0?'#aaccff':'#fff';ctx.fillRect(s.x,s.y,s.s,s.s);}ctx.globalAlpha=1;
 // asteroids (planet-colored)
 for(var i=0;i<asteroids.length;i++){var a=asteroids[i];
 var pc=PLANET_COLORS[a.colorIdx||0];
@@ -122,6 +149,11 @@ ctx.globalAlpha=1;
 // lives
 for(var i=0;i<lives;i++){ctx.save();ctx.translate(25+i*28,H-20);ctx.rotate(-Math.PI/2);ctx.strokeStyle='#00ccff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(8,0);ctx.lineTo(-5,5);ctx.lineTo(-3,0);ctx.lineTo(-5,-5);ctx.closePath();ctx.stroke();ctx.restore();}
 ctx.fillStyle='#aaa';ctx.font='12px "Courier New",monospace';ctx.textAlign='right';ctx.fillText('LEVEL '+level,W-15,H-10);
+// vignette
+var vig=ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.85);
+vig.addColorStop(0,'transparent');vig.addColorStop(1,'rgba(0,0,0,0.35)');
+ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
+ctx.restore();
 }
 
 function drawTitle(dt){
@@ -180,5 +212,6 @@ gameState='title';titlePulse=0;lastTs=performance.now();animId=requestAnimationF
 window.stopAsteroids=function(){
 if(animId){cancelAnimationFrame(animId);animId=null;}
 document.removeEventListener('keydown',kd);document.removeEventListener('keyup',ku);
+window.removeEventListener('resize',resize);
 gameState='title';keyLeft=keyRight=keyUp=keySpace=false;};
 })();

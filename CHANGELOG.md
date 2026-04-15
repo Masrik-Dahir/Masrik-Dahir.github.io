@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 ### Added
-- 11 fully playable retro games: Space Invaders, Snake, Tetris, Pong, Breakout, Asteroids, Pac-Man, Frogger, Missile Command, Flappy Bird, Doodle Jump
+- 12 fully playable retro games: Space Invaders, Snake, Tetris, Pong, Breakout, Asteroids, Pac-Man, Frogger, Missile Command, Flappy Bird, Doodle Jump, Galaga
+- Galaga game with full arcade mechanics: 5-row x 8-column enemy formation, sine-wave dive attacks, boss capture/dual-fighter mechanic, bonus stages every 3 levels, geometric enemy sprites (butterfly regulars, red commanders with antennae, blue/purple boss with pulsing glow), scrolling parallax star field, bullet trails, expanding particle explosions
 - Each game in its own JS file under `js/games/` with IIFE architecture, init/stop lifecycle, keyboard + mobile + Tab input, title/gameover screens, particles, and HUD integration
 - Dynamic game launcher routing via GAME_MAP in games.html
 - Per-game themed title bar background animations (12 unique themes: racer, space, matrix, blocks, dots, bricks, rocks, volley, river, defend, sky, bounce)

@@ -8,7 +8,8 @@ this.moveTo(x+r[0],y);this.lineTo(x+w-r[1],y);this.arcTo(x+w,y,x+w,y+r[1],r[1]);
 this.lineTo(x+w,y+h-r[2]);this.arcTo(x+w,y+h,x+w-r[2],y+h,r[2]);
 this.lineTo(x+r[3],y+h);this.arcTo(x,y+h,x,y+h-r[3],r[3]);
 this.lineTo(x,y+r[0]);this.arcTo(x,y,x+r[0],y,r[0]);return this;};}
-var canvas,ctx,W,H,animId=null,gameState='title',score=0,lives=5,level=1,gameTime=0,titlePulse=0;
+var canvas,ctx,W,H,animId=null,gameState='title',score=0,lives=3,level=1,gameTime=0,titlePulse=0;
+function diffMult(){return level<=2?0.8:(level<=5?1.0:1.0+(level-5)*0.1);}
 var frog,lanes=[],particles=[],cs,COLS=13,ROWS=13;
 var bestRow=0,frogs_home=[];
 var HOME_SLOTS=[1,4,7,10,COLS-2];
@@ -27,7 +28,7 @@ var roadLens=[2,2,2,2,2];
 for(var i=0;i<5;i++){var objs=[];
 var spacing=COLS*cs/roadCounts[i];
 for(var j=0;j<roadCounts[i];j++){objs.push({x:j*spacing,w:roadLens[i]*cs,type:'car',color:['#ff3355','#ffaa22','#ff6644','#cc44ff','#44aaff'][i]});}
-lanes[i+1]={type:'road',speed:(roadSpeeds[i]+level*3)*roadDirs[i],objs:objs};}
+lanes[i+1]={type:'road',speed:(roadSpeeds[i]+level*3)*roadDirs[i]*diffMult(),objs:objs};}
 // River lanes (rows 7-11) — more logs, longer logs for easy mode
 var riverSpeeds=[20,30,18,35,25];
 var riverDirs=[-1,1,-1,1,-1];
@@ -36,14 +37,14 @@ var riverLens=[5,5,4,5,5];
 for(var i=0;i<5;i++){var objs=[];
 var spacing=COLS*cs/riverCounts[i];
 for(var j=0;j<riverCounts[i];j++){objs.push({x:j*spacing,w:riverLens[i]*cs,type:'log'});}
-lanes[i+7]={type:'river',speed:(riverSpeeds[i]+level*3)*riverDirs[i],objs:objs};}
+lanes[i+7]={type:'river',speed:(riverSpeeds[i]+level*3)*riverDirs[i]*diffMult(),objs:objs};}
 }
 
 function resetGame(){
 cs=Math.floor(Math.min(W/COLS,H/ROWS));
 frog={x:Math.floor(COLS/2),y:0,px:0,py:0,jumping:false,jumpT:0};
 frog.px=frog.x*cs;frog.py=(ROWS-1-frog.y)*cs;
-score=0;lives=5;level=1;gameTime=0;bestRow=0;frogs_home=[];particles=[];
+score=0;lives=3;level=1;gameTime=0;bestRow=0;frogs_home=[];particles=[];
 buildLanes();gameState='playing';}
 
 function addParticles(x,y,c,n){for(var i=0;i<n;i++)particles.push({x:x,y:y,vx:(Math.random()-0.5)*200,vy:(Math.random()-0.5)*200,life:0.4+Math.random()*0.3,color:c,size:2+Math.random()*3});}

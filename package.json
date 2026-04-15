@@ -1,0 +1,28 @@
+{
+  "name": "masrik-dahir.github.io",
+  "version": "1.0.0",
+  "description": "<!-- README auto-maintained. Update this file whenever: code structure changes,      new env vars added, commands change, new workflows added, or deps updated. -->",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Masrik-Dahir/Masrik-Dahir.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/issues"
+  },
+  "homepage": "https://github.com/Masrik-Dahir/Masrik-Dahir.github.io#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "http-server": "^14.1.1"
+  }
+}

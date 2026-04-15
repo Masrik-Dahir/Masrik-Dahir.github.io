@@ -5,44 +5,42 @@
 
 *— project —*
 
-<!-- Project Banner: neon-speedometer-sweep -->
+<!-- Project Banner: pixel-arcade-cascade -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/neon-speedometer-sweep.svg"
-     alt="Masrik-Dahir.github.io" width="800"/>
+<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/pixel-arcade-cascade.svg"
+     alt="masrikdahir.com" width="800"/>
 </a>
 
 *— author —*
 
-<!-- Author Banner: starfield-warp -->
+<!-- Author Banner: bioluminescent-reef-pulse -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/starfield-warp.svg"
-     alt="Masrik Dahir — Masrik-Dahir.github.io" width="800"/>
+<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/bioluminescent-reef-pulse.svg"
+     alt="Masrik Dahir — masrikdahir.com" width="800"/>
 </a>
 
-> Portfolio, travel atlas, and retro arcade — no build step required
+> A static portfolio, 290-region travel atlas, and 99-game retro arcade — zero build step, zero server
 
 [![Jekyll site CI](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/jekyll.yml/badge.svg)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/jekyll.yml)
 [![CodeQL](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/actions/workflows/codeql-analysis.yml)
 [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-[![Stars](https://img.shields.io/badge/stars-0-yellow)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/stargazers)
-[![Forks](https://img.shields.io/badge/forks-0-blue)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/network/members)
-[![Downloads](https://img.shields.io/badge/downloads-0-brightgreen)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/releases)
-[![Visitors](https://visitor-badge.laobi.icu/badge?page_id=Masrik-Dahir.Masrik-Dahir.github.io)](https://github.com/Masrik-Dahir/Masrik-Dahir.github.io)
+[![JavaScript](https://img.shields.io/badge/lang-JavaScript-f7df1e.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5 Canvas](https://img.shields.io/badge/canvas-HTML5-e34f26.svg)](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 
 </div>
 
 <p align="center">
   <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.svg"
-       alt="Masrik-Dahir.github.io — application screenshot" width="900"/>
+       alt="masrikdahir.com — application screenshot" width="900"/>
 </p>
 
 ## ⚡ TL;DR
 
-- **What:** A static personal portfolio and travel photography site with an interactive SVG world map, 290+ region galleries, 32 canvas retro game animations, and a playable pseudo-3D racing game.
-- **Who:** Anyone curious about Masrik Dahir's work, travel photography, software projects, or looking for a quick retro gaming session.
-- **Why:** Zero build step, zero server — pure HTML/CSS/JS with Vue 3 CDN and media served through CloudFront, making it instantly forkable and deployable on GitHub Pages.
+- **What:** A fully static personal website with a portfolio, interactive SVG world map covering 290+ regions, and 99 playable HTML5 Canvas retro arcade games — from Pac-Man to OutRun.
+- **Who:** Anyone curious about Masrik Dahir's work, travel photography, or software projects, or anyone who wants to play classic arcade games in a browser.
+- **Why:** Zero build step, zero server, zero dependencies beyond a CDN — pure HTML/CSS/JS with Vue 3 CDN and AWS CloudFront media, making it instantly forkable and deployable on GitHub Pages.
 - **Start:** `git clone https://github.com/Masrik-Dahir/Masrik-Dahir.github.io.git && python -m http.server 8000` — open `http://localhost:8000` and you're browsing.
-- **Know:** All photos are hosted on AWS S3/CloudFront, not in the repo — the HTML pages reference CDN URLs, so gallery content requires the S3 bucket to be populated.
+- **Know:** Photos are hosted on AWS S3/CloudFront (not in the repo), so gallery images require the S3 bucket to be populated; games work fully offline.
 
 ---
 
@@ -56,7 +54,6 @@
 - [🚀 Quick Start](#-quick-start)
 - [📖 Usage](#-usage)
 - [🔄 CI/CD](#-cicd)
-- [📈 Repository Statistics](#-repository-statistics)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
 - [📝 Changelog](#-changelog)
@@ -67,13 +64,13 @@
 
 - 🗺️ **Interactive SVG World Map** — 23 SVG region maps with click-to-navigate and hover-to-preview flag thumbnails via dynamic pattern fills
 - 📸 **290+ Photo Galleries** — Individual region pages with gallery grid and slideshow view modes powered by Vue 3
+- 🎮 **99 Playable Retro Games** — Full arcade collection including Space Invaders, Pac-Man, Tetris, Snake, Galaga, OutRun, Pole Position, Scramble, Tank, and 90 more — all playable with keyboard and mobile touch controls
+- 🏎️ **Pseudo-3D Racing Games** — OutRun and Pole Position with segment-based road rendering, curves, hills, scenery sprites, and detailed rear-view car graphics
 - ⚙️ **Dynamic Template Engine** — `continent-gallery.js` and `state-gallery.js` inject gallery layouts from lightweight HTML stubs without any build step
 - 🌐 **CloudFront CDN Media Delivery** — All images and thumbnails served through AWS CloudFront for fast global access
 - 🧭 **Responsive Navigation** — Shared navbar and footer injected via `components.js` across all pages with active-page highlighting
 - 💼 **Portfolio Sections** — Work experience timeline, academic history, software project showcase, and personal milestones
-- 🏳️ **Region Hover Tooltips** — SVG map paths show country/state names and photo counts on hover with flag image fills for visited regions
-- 🎮 **32 Canvas Retro Games** — Auto-playing canvas-based game animations on the home page (Matrix Rain, Tetris, Snake, Pong, Space Invaders, Pac-Man, and 26 more) with a shuffle button
-- 🏎️ **Night Racer — Playable Racing Game** — Full pseudo-3D retro car racing game with canvas rendering, traffic obstacles, curved roads, hills, scenery, speedometer HUD, 90-second timed sessions, and mobile touch controls
+- 🎨 **Per-Game Canvas Previews** — Each game card in the gallery shows a unique auto-playing canvas animation (diving aliens, falling blocks, bouncing ball, etc.)
 - 🚀 **Zero Build, Zero Server** — Entirely static — clone and serve with any HTTP server, deploy instantly on GitHub Pages
 
 ---
@@ -86,7 +83,8 @@ graph TB
         Pages["📄 HTML Pages<br/>index, map, work, software,<br/>games, academia, milestone"]
         Vue["⚡ Vue 3 CDN<br/>Reactive galleries"]
         JS["🔧 Vanilla JS Modules<br/>map-enhancer, continent-gallery,<br/>state-gallery, components"]
-        Canvas["🎮 Canvas Games<br/>matrix.js + games.html"]
+        Canvas["🎮 99 Canvas Games<br/>js/games/*.js"]
+        Matrix["🌀 32 Home Animations<br/>matrix.js"]
     end
 
     subgraph GitHub["🌐 GitHub Pages"]
@@ -102,6 +100,7 @@ graph TB
     Pages --> Vue
     Pages --> JS
     Pages --> Canvas
+    Pages --> Matrix
     Static --> |serves| Pages
     JS --> |fetch| ImageJSON
     JS --> |fetch| CF
@@ -122,7 +121,8 @@ flowchart LR
     CGJ --> ME["map-enhancer.js<br/>adds hover + click behavior"]
     ME --> CDN
 
-    GamesPage["games.html"] --> CanvasAPI["HTML5 Canvas API<br/>pseudo-3D road rendering"]
+    GamesPage["games.html"] --> GameMap["GAME_MAP<br/>99 game entries"]
+    GameMap --> CanvasAPI["HTML5 Canvas API<br/>init/stop lifecycle per game"]
 ```
 
 ---
@@ -137,7 +137,7 @@ flowchart LR
 ├── 📄 software.html            # Software project showcase
 ├── 📄 milestone.html           # Personal milestones
 ├── 📄 map.html                 # Interactive world map hub
-├── 📄 games.html               # Playable Night Racer racing game
+├── 📄 games.html               # 99 playable retro arcade games
 │
 ├── 📁 map/                     # 290+ region gallery pages
 │   ├── 📁 svg/                 # 23 interactive SVG region maps
@@ -150,7 +150,7 @@ flowchart LR
 │   ├── africa.html
 │   ├── ak.html                 # Individual region galleries
 │   ├── wash.html
-│   └── ...
+│   └── ... (335 pages)
 │
 ├── 📁 js/                      # Core JavaScript modules
 │   ├── 🔧 components.js        # Shared navbar + footer injection
@@ -158,10 +158,17 @@ flowchart LR
 │   ├── 🔧 state-gallery.js     # Region gallery template engine
 │   ├── 🔧 map-enhancer.js      # SVG map hover/click behavior
 │   ├── 🔧 aesthetics.js        # Visual effects
-│   ├── 🔧 icon-animation.js    # Animated icon effects
-│   ├── 🔧 hourglass.js         # Loading animation
 │   ├── 🔧 matrix.js            # 32 auto-playing retro game animations
-│   └── 🔧 map.js               # Map page utilities
+│   ├── 🔧 map.js               # Map page utilities
+│   └── 📁 games/               # 99 individual game engines
+│       ├── 🎮 space-invaders.js
+│       ├── 🎮 pacman.js
+│       ├── 🎮 tetris.js
+│       ├── 🎮 outrun.js
+│       ├── 🎮 pole-position.js
+│       ├── 🎮 scramble.js
+│       ├── 🎮 tank.js
+│       └── ... (99 total .js files)
 │
 ├── 📁 vueJs/                   # Vue component data
 │   ├── ⚡ image.js              # Gallery/slideshow Vue apps
@@ -176,24 +183,24 @@ flowchart LR
 │   ├── 🎨 map.element.css      # SVG map element styles
 │   ├── 🎨 state-gallery.css    # Gallery layout
 │   ├── 🎨 vintage.css          # Vintage theme
-│   └── ...
+│   └── ... (33 CSS files)
 │
 ├── 📁 library/                 # Vendored third-party libraries
 │   └── vue@3.2.36.dist.vue.global.js
 │
 ├── 📁 bootstrap/               # Bootstrap JS dependencies
 │
+├── 📁 tests/                   # Playwright + game test suites
+│   └── test_games.html         # Physics, difficulty, winnability tests
+│
 ├── 📁 .github/
 │   ├── 📁 workflows/           # CI/CD pipelines
 │   │   ├── jekyll.yml
 │   │   ├── codeql-analysis.yml
-│   │   ├── laravel.yml
 │   │   ├── banner-archive.yml
-│   │   ├── stats.yml
-│   │   ├── release-stats.yml
-│   │   └── update-badges.yml
-│   ├── 📁 banners/             # Animated SVG banners
-│   ├── 📁 screenshots/         # UI mockup screenshots
+│   │   └── laravel.yml
+│   ├── 📁 banners/             # Animated SVG author/project banners
+│   ├── 📁 screenshots/         # Hero SVG mockup
 │   └── ⚙️ dependabot.yml
 │
 ├── 🌐 CNAME                    # Custom domain: www.masrikdahir.com
@@ -205,13 +212,13 @@ flowchart LR
 
 ```mermaid
 graph LR
-    Root["📦 Masrik-Dahir.github.io"] --> Pages["📄 HTML Pages"]
+    Root["📦 Masrik-Dahir.github.io"] --> Pages["📄 7 HTML Pages"]
     Root --> MapDir["🗺️ map/ — 290+ galleries"]
     Root --> JS["🔧 js/ — core modules"]
+    Root --> Games["🎮 js/games/ — 99 game engines"]
     Root --> VueDir["⚡ vueJs/ — Vue data"]
-    Root --> CSS["🎨 css/ — stylesheets"]
+    Root --> CSS["🎨 css/ — 33 stylesheets"]
     Root --> GH["⚙️ .github/ — CI + banners"]
-    Pages --> Games["🏎️ games.html — Night Racer"]
     MapDir --> SVGs["🌍 svg/ — 23 region maps"]
     JS --> |"template injection"| MapDir
     VueDir --> |"reactive data"| MapDir
@@ -263,19 +270,38 @@ npx serve .
 http://localhost:8000
 ```
 
-Navigate to the **Travel Map** page to explore the interactive SVG maps and photo galleries, or head to the **Games** tab to play Night Racer.
+Navigate to the **Travel Map** page to explore the interactive SVG maps and photo galleries, or head to the **Games** tab to play any of the 99 retro arcade games.
 
 ---
 
 ## 📖 Usage
 
-### Playing Night Racer
+### Playing Games
 
 1. Navigate to the **Games** tab in the top navigation
-2. Press **Enter**, **Space**, or click/tap the canvas to start
-3. Use **Arrow keys** or **WASD** to steer, accelerate, and brake
-4. Dodge traffic for 90 seconds — your score depends on speed and survival
-5. On mobile, use the on-screen touch buttons
+2. Browse the gallery of 99 games — each card shows a unique auto-playing canvas preview
+3. Click any game card to launch it full-screen
+4. Use **Arrow keys** or **WASD** to play; press **Enter**, **Space**, or tap to start
+5. On mobile, use the on-screen touch buttons (D-pad + action buttons)
+
+### Game Highlights
+
+| Game | Genre | Controls |
+|------|-------|----------|
+| OutRun | Pseudo-3D Racing | Arrows/WASD — steer, accelerate, brake |
+| Pole Position | F1 Racing | Arrows/WASD — steer, accelerate, brake |
+| Pac-Man | Maze Chase | Arrows — move through maze, eat pellets |
+| Space Invaders | Shoot-em-up | Arrows + Space — move and fire |
+| Tetris | Puzzle | Arrows — move/rotate, Down — soft drop |
+| Scramble | Side-scroller | Arrows + Space — fly and bomb |
+| Tank | Maze Combat | Arrows + Space — navigate maze and fire |
+
+### Browsing the Travel Map
+
+1. Click **Map** in the navigation
+2. Click a continent to zoom into its SVG region map
+3. Hover over visited regions to see flag thumbnails and photo counts
+4. Click a region to open its full photo gallery with slideshow mode
 
 ### Adding a New Region Gallery
 
@@ -305,17 +331,13 @@ The site deploys automatically to GitHub Pages on push to `master`. The custom d
 
 ## 🔄 CI/CD
 
-This project uses GitHub Actions for automated validation, statistics collection, and badge updates.
+This project uses GitHub Actions for automated validation and security analysis.
 
 | Workflow | File | Trigger | Purpose |
 |----------|------|---------|---------|
 | Jekyll CI | `jekyll.yml` | Push / PR | Site build validation |
 | CodeQL | `codeql-analysis.yml` | Push / PR / schedule | Security analysis |
-| Laravel | `laravel.yml` | Push / PR | Additional checks |
 | Banner Archive | `banner-archive.yml` | Push to banners / README | Validate and archive SVG banners |
-| Traffic Stats | `stats.yml` | Daily cron + manual | Harvest views, clones, referrers before 14-day expiry |
-| Release Downloads | `release-stats.yml` | Release published + daily | Record per-asset download counts |
-| Badge Updater | `update-badges.yml` | After stats workflows | Keep README badge numbers current |
 
 ### Pipeline Flow
 
@@ -325,44 +347,9 @@ flowchart LR
     PR --> CodeQL["CodeQL Analysis"]
     Jekyll --> Deploy["GitHub Pages<br/>auto-deploy on master"]
     Push["Push to banners/"] --> Banner["Banner Archive"]
-    Cron["Daily Cron"] --> Stats["Traffic Stats"]
-    Release["Release Published"] --> RelStats["Release Stats"]
-    Stats --> Badges["Update Badges"]
-    RelStats --> Badges
-    Stats --> StatsStore["stats branch"]
-    RelStats --> StatsStore
 ```
 
 > All checks must pass before merging. See [`.github/workflows/`](.github/workflows/) for full configuration.
-
----
-
-## 📈 Repository Statistics
-
-> Traffic and download data are harvested daily by automated workflows and stored in the [`stats`](../../tree/stats) branch before GitHub's 14-day retention window expires.
-
-| Metric | Where stored | Updated |
-|--------|-------------|---------|
-| Page views & unique visitors | `stats/traffic/views_YYYY-MM-DD.json` | Daily |
-| Git clones | `stats/traffic/clones_YYYY-MM-DD.json` | Daily |
-| Top referrers | `stats/traffic/referrers_YYYY-MM-DD.json` | Daily |
-| Stars, forks, watchers | `stats/traffic/repo_stats_YYYY-MM-DD.json` | Daily |
-| Release asset downloads | `stats/releases/downloads_YYYY-MM-DD.json` | On release + daily |
-| Cumulative download total | `stats/releases/summary.json` | On release + daily |
-
-### Viewing Historical Stats
-
-```bash
-# Clone just the stats branch (lightweight — no source code)
-git clone --single-branch --branch stats https://github.com/Masrik-Dahir/Masrik-Dahir.github.io.git repo-stats
-cd repo-stats
-
-# Inspect a specific day's traffic
-cat traffic/views_2026-04-10.json
-
-# See total downloads across all releases
-cat releases/summary.json
-```
 
 ---
 
@@ -411,9 +398,10 @@ Under the following terms:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v3.0.0 | 2026-04-14 | Expanded to 99 playable games, fixed OutRun/Pole Position rendering, fixed Scramble terrain, fixed Tank maze connectivity, new banners, removed stats workflows |
 | v2.2.0 | 2026-04-10 | Added Games tab with playable Night Racer pseudo-3D racing game, new banners |
 | v2.1.0 | 2026-04-10 | Added 32 canvas retro game animations with shuffle, replaced 4 games, improved 8 games |
-| v2.0.0 | 2026-04-10 | Full README rewrite with animated banners, hero screenshot, Mermaid diagrams, stats workflows |
+| v2.0.0 | 2026-04-10 | Full README rewrite with animated banners, hero screenshot, Mermaid diagrams |
 | v1.0.0 | — | Initial README |
 
 ---

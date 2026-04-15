@@ -1,7 +1,7 @@
-// Tetris — Full Game
+// Tetris — Full Game (Enhanced Graphics + Difficulty Progression)
 (function(){
 var canvas,ctx,W,H,animId=null,gameState='title',score=0,linesCleared=0,level=1,gameTime=0,titlePulse=0;
-var COLS=10,ROWS=20,cs,grid=[],piece,nextPiece,dropTimer=0,dropInterval=0.8;
+var COLS=10,ROWS=20,cs,grid=[],piece,nextPiece,dropTimer=0,dropInterval=0.6;
 var keyLeft=false,keyRight=false,keyDown=false,moveTimer=0;
 var SHAPES=[
 [[1,1,1,1]],
@@ -13,7 +13,11 @@ var SHAPES=[
 [[1,1,0],[0,1,1]]
 ];
 var COLORS=['#00d4ff','#ffcc00','#aa44ff','#ff6600','#2266ff','#00cc44','#ff2244'];
+var GLOW_COLORS=['#00eeff','#ffdd33','#cc66ff','#ff8833','#4488ff','#22ee66','#ff4466'];
 var particles=[];
+var lineClearFlash=0,levelFlash=0;
+
+function diffMult(){return level<=2?0.8:(level<=5?1.0:1.0+(level-5)*0.08);}
 
 function resize(){var r=canvas.getBoundingClientRect();canvas.width=Math.round(r.width);canvas.height=Math.max(Math.round(r.height),300);W=canvas.width;H=canvas.height;
 cs=Math.floor(Math.min((W-60)/COLS,(H-20)/ROWS));}
@@ -26,48 +30,95 @@ function lock(){for(var r=0;r<piece.shape.length;r++)for(var c=0;c<piece.shape[r
 function clearLines(){var cleared=0;for(var y=ROWS-1;y>=0;y--){var full=true;for(var x=0;x<COLS;x++)if(!grid[y][x]){full=false;break;}
 if(full){cleared++;var ox=(W-COLS*cs)/2;for(var x=0;x<COLS;x++){for(var i=0;i<4;i++)particles.push({x:ox+x*cs+cs/2,y:y*cs+cs/2,vx:(Math.random()-0.5)*200,vy:-100-Math.random()*150,life:0.5+Math.random()*0.3,color:grid[y][x],size:3+Math.random()*4});}
 grid.splice(y,1);grid.unshift([]);for(var x=0;x<COLS;x++)grid[0][x]=0;y++;}}
-if(cleared>0){var pts=[0,100,300,500,800];score+=pts[Math.min(cleared,4)]*level;linesCleared+=cleared;level=Math.floor(linesCleared/10)+1;dropInterval=Math.max(0.1,0.8-level*0.04);}}
+if(cleared>0){var pts=[0,100,300,500,800];score+=pts[Math.min(cleared,4)]*level;linesCleared+=cleared;var oldLevel=level;level=Math.floor(linesCleared/10)+1;dropInterval=Math.max(0.1,0.6-level*0.05);lineClearFlash=0.5;if(level>oldLevel)levelFlash=1;}}
 
-function resetGame(){initGrid();score=0;linesCleared=0;level=1;gameTime=0;dropTimer=0;dropInterval=0.8;particles=[];
+
+function resetGame(){initGrid();score=0;linesCleared=0;level=1;gameTime=0;dropTimer=0;dropInterval=0.6;particles=[];
 piece=randomPiece();nextPiece=randomPiece();gameState='playing';}
 
 function update(dt){
 if(dt>0.1)dt=0.1;gameTime+=dt;
+if(lineClearFlash>0)lineClearFlash-=dt*3;
+if(levelFlash>0)levelFlash-=dt;
+var dm=diffMult();
+var di=dropInterval/dm;
 // soft drop
 dropTimer+=keyDown?dt*10:dt;
-if(dropTimer>=dropInterval){dropTimer=0;
+if(dropTimer>=di){dropTimer=0;
 if(valid(piece.shape,piece.x,piece.y+1))piece.y++;
 else{lock();clearLines();piece=nextPiece;nextPiece=randomPiece();if(!valid(piece.shape,piece.x,piece.y))gameState='gameover';}}
 // particles
 for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=400*dt;p.life-=dt;if(p.life<=0)particles.splice(i,1);}
 }
 
+function drawBlock(bx,by,color,glowColor){
+ctx.save();
+// 3D effect block
+ctx.fillStyle=color;
+ctx.shadowColor=glowColor||color;ctx.shadowBlur=3;
+ctx.fillRect(bx+1,by+1,cs-2,cs-2);ctx.shadowBlur=0;
+// top highlight
+ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(bx+1,by+1,cs-2,3);
+// left highlight
+ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(bx+1,by+1,2,cs-2);
+// bottom shadow
+ctx.fillStyle='rgba(0,0,0,0.25)';ctx.fillRect(bx+1,by+cs-4,cs-2,3);
+// right shadow
+ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(bx+cs-3,by+1,2,cs-2);
+// inner shine
+ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(bx+4,by+5,cs-8,cs-10);
+ctx.restore();}
+
 function render(){
-ctx.fillStyle='#080818';ctx.fillRect(0,0,W,H);
+// Background gradient
+var bgG=ctx.createLinearGradient(0,0,0,H);
+bgG.addColorStop(0,'#060618');bgG.addColorStop(0.5,'#0a0a28');bgG.addColorStop(1,'#080820');
+ctx.fillStyle=bgG;ctx.fillRect(0,0,W,H);
 var ox=(W-COLS*cs)/2,oy=0;
-// grid border
-ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;ctx.strokeRect(ox-1,oy-1,COLS*cs+2,ROWS*cs+2);
-// grid lines
-ctx.strokeStyle='rgba(255,255,255,0.04)';for(var x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(ox+x*cs,oy);ctx.lineTo(ox+x*cs,oy+ROWS*cs);ctx.stroke();}
+// Background grid glow
+ctx.strokeStyle='rgba(50,50,100,0.15)';ctx.lineWidth=1;
+for(var x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(ox+x*cs,oy);ctx.lineTo(ox+x*cs,oy+ROWS*cs);ctx.stroke();}
 for(var y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(ox,oy+y*cs);ctx.lineTo(ox+COLS*cs,oy+y*cs);ctx.stroke();}
-// placed blocks
+// grid border with glow
+ctx.strokeStyle='rgba(100,100,200,0.3)';ctx.lineWidth=2;ctx.shadowColor='rgba(100,100,255,0.3)';ctx.shadowBlur=8;
+ctx.strokeRect(ox-2,oy-2,COLS*cs+4,ROWS*cs+4);ctx.shadowBlur=0;
+// placed blocks with 3D effect
 for(var y=0;y<ROWS;y++)for(var x=0;x<COLS;x++){if(!grid[y][x])continue;
-ctx.fillStyle=grid[y][x];ctx.fillRect(ox+x*cs+1,oy+y*cs+1,cs-2,cs-2);
-ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(ox+x*cs+1,oy+y*cs+1,cs-2,3);}
-// ghost piece
+drawBlock(ox+x*cs,oy+y*cs,grid[y][x]);}
+// ghost piece with dashed outline
 var gy=piece.y;while(valid(piece.shape,piece.x,gy+1))gy++;
-if(gy!==piece.y){ctx.globalAlpha=0.2;for(var r=0;r<piece.shape.length;r++)for(var c=0;c<piece.shape[r].length;c++){if(!piece.shape[r][c])continue;ctx.fillStyle=piece.color;ctx.fillRect(ox+(piece.x+c)*cs+1,oy+(gy+r)*cs+1,cs-2,cs-2);}ctx.globalAlpha=1;}
-// current piece
+if(gy!==piece.y){
+ctx.globalAlpha=0.15;
 for(var r=0;r<piece.shape.length;r++)for(var c=0;c<piece.shape[r].length;c++){if(!piece.shape[r][c])continue;
-ctx.fillStyle=piece.color;ctx.shadowColor=piece.color;ctx.shadowBlur=4;ctx.fillRect(ox+(piece.x+c)*cs+1,oy+(piece.y+r)*cs+1,cs-2,cs-2);ctx.shadowBlur=0;
-ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(ox+(piece.x+c)*cs+1,oy+(piece.y+r)*cs+1,cs-2,3);}
-// next piece preview
-ctx.fillStyle='rgba(255,255,255,0.08)';ctx.font='11px "Courier New",monospace';ctx.textAlign='left';ctx.fillText('NEXT',ox+COLS*cs+15,20);
+ctx.fillStyle=piece.color;ctx.fillRect(ox+(piece.x+c)*cs+1,oy+(gy+r)*cs+1,cs-2,cs-2);}
+ctx.globalAlpha=0.4;ctx.strokeStyle=piece.color;ctx.lineWidth=1;ctx.setLineDash([3,3]);
+for(var r=0;r<piece.shape.length;r++)for(var c=0;c<piece.shape[r].length;c++){if(!piece.shape[r][c])continue;
+ctx.strokeRect(ox+(piece.x+c)*cs+1,oy+(gy+r)*cs+1,cs-2,cs-2);}
+ctx.setLineDash([]);ctx.globalAlpha=1;}
+// current piece with glow
+var ci=COLORS.indexOf(piece.color);
+var gc=ci>=0?GLOW_COLORS[ci]:piece.color;
+for(var r=0;r<piece.shape.length;r++)for(var c=0;c<piece.shape[r].length;c++){if(!piece.shape[r][c])continue;
+drawBlock(ox+(piece.x+c)*cs,oy+(piece.y+r)*cs,piece.color,gc);}
+// next piece preview - styled box
+var npx=ox+COLS*cs+12,npy=8;
+ctx.fillStyle='rgba(255,255,255,0.05)';ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+ctx.fillRect(npx-4,npy-4,80,70);ctx.strokeRect(npx-4,npy-4,80,70);
+ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='bold 11px "Courier New",monospace';ctx.textAlign='left';ctx.fillText('NEXT',npx+2,npy+10);
 for(var r=0;r<nextPiece.shape.length;r++)for(var c=0;c<nextPiece.shape[r].length;c++){if(!nextPiece.shape[r][c])continue;
-ctx.fillStyle=nextPiece.color;ctx.fillRect(ox+COLS*cs+15+c*14,28+r*14,12,12);}
+ctx.fillStyle=nextPiece.color;ctx.shadowColor=nextPiece.color;ctx.shadowBlur=3;
+ctx.fillRect(npx+c*14+5,npy+18+r*14,12,12);ctx.shadowBlur=0;
+ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(npx+c*14+5,npy+18+r*14,12,2);}
 // particles
-for(var i=0;i<particles.length;i++){var p=particles[i];ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);}
+for(var i=0;i<particles.length;i++){var p=particles[i];ctx.globalAlpha=p.life;ctx.fillStyle=p.color;
+ctx.beginPath();ctx.arc(p.x,p.y,p.size/2,0,Math.PI*2);ctx.fill();}
 ctx.globalAlpha=1;
+// line clear flash
+if(lineClearFlash>0){ctx.fillStyle='rgba(255,255,255,'+lineClearFlash*0.5+')';ctx.fillRect(ox,0,COLS*cs,ROWS*cs);}
+// vignette
+var vig=ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.85);
+vig.addColorStop(0,'transparent');vig.addColorStop(1,'rgba(0,0,0,0.3)');
+ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
 }
 
 function drawTitle(dt){

@@ -1,6 +1,7 @@
-// Pac-Man — Full Game
+// Pac-Man — Full Game (Enhanced Graphics + Difficulty Progression)
 (function(){
 var canvas,ctx,W,H,animId=null,gameState='title',score=0,lives=3,level=1,gameTime=0,titlePulse=0;
+function diffMult(){return level<=2?0.7:(level<=5?1.0:1.0+(level-5)*0.12);}
 var pac,ghosts=[],dots=[],powerDots=[],particles=[];
 var cs,COLS=21,ROWS=23,nextDir={x:0,y:0};
 var GHOST_COLORS=['#ff0000','#ffb8ff','#00ffff','#ffb852'];
@@ -46,13 +47,14 @@ else dots.push({x:x,y:y,eaten:false});}}
 function resetGhosts(){
 ghosts=[];
 var starts=[{x:10,y:9},{x:9,y:9},{x:11,y:9},{x:10,y:8}];
-for(var i=0;i<4;i++){ghosts.push({x:starts[i].x,y:starts[i].y,tx:starts[i].x,ty:starts[i].y,
-dir:{x:0,y:-1},color:GHOST_COLORS[i],scared:false,eaten:false,speed:1.4+level*0.1,moveTimer:0});}}
+for(var i=0;i<4;i++){var dm=diffMult();
+ghosts.push({x:starts[i].x,y:starts[i].y,tx:starts[i].x,ty:starts[i].y,
+dir:{x:0,y:-1},color:GHOST_COLORS[i],scared:false,eaten:false,speed:(1.8+level*0.15)*dm,moveTimer:0,eyeAnim:Math.random()*5});}}
 
 function resetGame(){
 cs=Math.floor(Math.min(W/COLS,(H-30)/ACTUAL_ROWS));
 pac={x:10,y:15,tx:10,ty:15,dir:{x:0,y:0},mouth:0,mouthDir:1,speed:3.5,moveTimer:0};
-nextDir={x:0,y:0};score=0;lives=5;level=1;gameTime=0;frightenTimer=0;particles=[];
+nextDir={x:0,y:0};score=0;lives=3;level=1;gameTime=0;frightenTimer=0;particles=[];
 placeDots();resetGhosts();gameState='playing';}
 
 function addParticles(x,y,c,n){var ox=(W-COLS*cs)/2;for(var i=0;i<n;i++)particles.push({x:ox+x*cs+cs/2,y:y*cs+cs/2,vx:(Math.random()-0.5)*120,vy:(Math.random()-0.5)*120,life:0.4+Math.random()*0.3,color:c,size:2+Math.random()*3});}
@@ -130,13 +132,20 @@ for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.x+=p.vx*dt;p.y+=p.vy
 }
 
 function render(){
-ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+// Background
+var bgG=ctx.createLinearGradient(0,0,0,H);bgG.addColorStop(0,'#000005');bgG.addColorStop(1,'#000010');
+ctx.fillStyle=bgG;ctx.fillRect(0,0,W,H);
 var ox=(W-COLS*cs)/2,oy=0;
-// walls
+// walls with subtle glow
 for(var y=0;y<ACTUAL_ROWS;y++)for(var x=0;x<COLS;x++){
-if(MAP[y][x]===1){ctx.fillStyle='#1a1aff';ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
-ctx.fillStyle='#2222aa';ctx.fillRect(ox+x*cs+1,oy+y*cs+1,cs-2,cs-2);}
-if(MAP[y][x]===2){ctx.fillStyle='#1a0a2e';ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);}}
+if(MAP[y][x]===1){
+var wg=ctx.createLinearGradient(ox+x*cs,oy+y*cs,ox+x*cs+cs,oy+y*cs+cs);
+wg.addColorStop(0,'#1515cc');wg.addColorStop(1,'#2020ff');
+ctx.fillStyle=wg;ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);
+ctx.fillStyle='#1a1a99';ctx.fillRect(ox+x*cs+1,oy+y*cs+1,cs-2,cs-2);
+// subtle inner glow on edges
+ctx.fillStyle='rgba(50,50,255,0.1)';ctx.fillRect(ox+x*cs,oy+y*cs,cs,1);ctx.fillRect(ox+x*cs,oy+y*cs,1,cs);}
+if(MAP[y][x]===2){ctx.fillStyle='#120a22';ctx.fillRect(ox+x*cs,oy+y*cs,cs,cs);}}
 // dots
 for(var i=0;i<dots.length;i++){if(dots[i].eaten)continue;
 ctx.fillStyle='#ffcc88';ctx.beginPath();ctx.arc(ox+dots[i].x*cs+cs/2,oy+dots[i].y*cs+cs/2,cs*0.12,0,Math.PI*2);ctx.fill();}
@@ -144,11 +153,23 @@ ctx.fillStyle='#ffcc88';ctx.beginPath();ctx.arc(ox+dots[i].x*cs+cs/2,oy+dots[i].
 for(var i=0;i<powerDots.length;i++){if(powerDots[i].eaten)continue;
 var pulse=0.6+0.4*Math.sin(gameTime*6);
 ctx.fillStyle='rgba(255,204,136,'+pulse+')';ctx.beginPath();ctx.arc(ox+powerDots[i].x*cs+cs/2,oy+powerDots[i].y*cs+cs/2,cs*0.3,0,Math.PI*2);ctx.fill();}
-// pac-man
+// pac-man (enhanced)
 var px=ox+pac.x*cs+cs/2,py=oy+pac.y*cs+cs/2;
 var angle=Math.atan2(pac.dir.y,pac.dir.x);
-ctx.fillStyle='#ffcc00';ctx.shadowColor='#ffcc00';ctx.shadowBlur=8;ctx.beginPath();
-ctx.arc(px,py,cs*0.42,angle+pac.mouth,angle+Math.PI*2-pac.mouth);ctx.lineTo(px,py);ctx.fill();ctx.shadowBlur=0;
+var pr=cs*0.42;
+ctx.save();
+// glow
+ctx.shadowColor='#ffcc00';ctx.shadowBlur=12;
+// body gradient
+var pg=ctx.createRadialGradient(px-pr*0.2,py-pr*0.2,0,px,py,pr);
+pg.addColorStop(0,'#ffee55');pg.addColorStop(1,'#ddaa00');
+ctx.fillStyle=pg;ctx.beginPath();
+ctx.arc(px,py,pr,angle+pac.mouth,angle+Math.PI*2-pac.mouth);ctx.lineTo(px,py);ctx.fill();
+// eye
+if(pac.dir.x!==0||pac.dir.y!==0){
+var ex=px+Math.cos(angle-0.5)*pr*0.35;var ey=py+Math.sin(angle-0.5)*pr*0.35;
+ctx.fillStyle='#000';ctx.beginPath();ctx.arc(ex,ey,pr*0.12,0,Math.PI*2);ctx.fill();}
+ctx.shadowBlur=0;ctx.restore();
 // ghosts
 for(var i=0;i<ghosts.length;i++){var g=ghosts[i];
 var gx=ox+g.x*cs+cs/2,gy=oy+g.y*cs+cs/2,gr=cs*0.42;

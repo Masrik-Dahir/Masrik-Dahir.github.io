@@ -31,6 +31,22 @@
       "created": "2026-04-10",
       "project": "Masrik-Dahir.github.io",
       "type": "project"
+    },
+    {
+      "slug": "bioluminescent-reef-pulse",
+      "description": "Deep-sea bioluminescent reef with pulsing coral glows, floating plankton particles in cyan/magenta/blue, swaying anemone tendrils",
+      "file": ".github/banners/bioluminescent-reef-pulse.svg",
+      "created": "2026-04-14",
+      "project": "Masrik-Dahir.github.io",
+      "type": "author"
+    },
+    {
+      "slug": "pixel-arcade-cascade",
+      "description": "CRT-style retro arcade with falling Tetris blocks, Pac-Man ghost, space invader sprite, snake body, bouncing pong ball — pixel art cascade",
+      "file": ".github/banners/pixel-arcade-cascade.svg",
+      "created": "2026-04-14",
+      "project": "Masrik-Dahir.github.io",
+      "type": "project"
     }
   ]
 }

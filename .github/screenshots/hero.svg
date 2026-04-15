@@ -1,167 +1,246 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
-  <defs>
-    <linearGradient id="mdh-chrome" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#f0f0f3"/>
-      <stop offset="100%" stop-color="#e4e5ea"/>
-    </linearGradient>
-    <linearGradient id="mdh-nav" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#fafafa"/>
-    </linearGradient>
-    <linearGradient id="mdh-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0a0a2e"/>
-      <stop offset="100%" stop-color="#1a0a3e"/>
-    </linearGradient>
-    <linearGradient id="mdh-road" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#555555"/>
-      <stop offset="100%" stop-color="#6b6b6b"/>
-    </linearGradient>
-    <linearGradient id="mdh-playercar" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ff4444"/>
-      <stop offset="100%" stop-color="#cc0000"/>
-    </linearGradient>
-  </defs>
-
   <!-- Browser chrome -->
-  <rect width="960" height="540" rx="8" fill="#e4e5ea"/>
-  <rect width="960" height="36" rx="8" fill="url(#mdh-chrome)"/>
-  <rect y="28" width="960" height="8" fill="url(#mdh-chrome)"/>
-
-  <!-- Window buttons -->
-  <circle cx="20" cy="18" r="6" fill="#ff5f57"/>
-  <circle cx="40" cy="18" r="6" fill="#ffbd2e"/>
-  <circle cx="60" cy="18" r="6" fill="#28ca41"/>
-
-  <!-- URL bar -->
-  <rect x="90" y="8" width="780" height="20" rx="4" fill="#ffffff"/>
-  <text x="105" y="22" font-family="'Segoe UI',sans-serif" font-size="10" fill="#666">
-    www.masrikdahir.com/games
-  </text>
-
-  <!-- Page content area -->
-  <rect x="0" y="36" width="960" height="504" fill="#ffffff"/>
+  <rect width="960" height="540" rx="8" fill="#1a1a2e"/>
+  <rect y="0" width="960" height="32" rx="8" fill="#2d2d44"/>
+  <rect y="16" width="960" height="16" fill="#2d2d44"/>
+  <circle cx="16" cy="14" r="5" fill="#ff5f57"/>
+  <circle cx="34" cy="14" r="5" fill="#febc2e"/>
+  <circle cx="52" cy="14" r="5" fill="#28c840"/>
+  <rect x="120" y="6" width="350" height="18" rx="9" fill="#1a1a2e"/>
+  <text x="295" y="19" font-family="'Segoe UI',sans-serif" font-size="10" fill="#888" text-anchor="middle">www.masrikdahir.com</text>
 
   <!-- Navigation bar -->
-  <rect x="0" y="36" width="960" height="32" fill="url(#mdh-nav)" stroke="#000000" stroke-width="0" />
-  <line x1="0" y1="68" x2="960" y2="68" stroke="#222" stroke-width="1.5"/>
+  <rect x="0" y="32" width="960" height="36" fill="#ffffff"/>
+  <text x="20" y="55" font-family="Georgia,serif" font-size="14" font-weight="700" fill="#cc0000">Home</text>
+  <text x="75" y="55" font-family="Georgia,serif" font-size="13" fill="#333">Career</text>
+  <text x="140" y="55" font-family="Georgia,serif" font-size="13" fill="#333">Academia</text>
+  <text x="220" y="55" font-family="Georgia,serif" font-size="13" fill="#333">Software</text>
+  <text x="300" y="55" font-family="Georgia,serif" font-size="13" fill="#333">Map</text>
+  <text x="345" y="55" font-family="Georgia,serif" font-size="13" fill="#333">Milestones</text>
+  <text x="435" y="55" font-family="Georgia,serif" font-size="13" fill="#cc0000">Games</text>
 
-  <!-- Nav items -->
-  <text x="120" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Home</text>
-  <text x="230" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Career</text>
-  <text x="350" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Academia</text>
-  <text x="470" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Software</text>
-  <text x="590" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Milestones</text>
-  <text x="700" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#000" text-anchor="middle">Travel</text>
-  <text x="800" y="56" font-family="Georgia,serif" font-size="13" font-weight="700" fill="#ff0000" text-anchor="middle">Games</text>
+  <!-- Main content area - split into two panels -->
+  <!-- LEFT: Profile + Matrix animations area -->
+  <rect x="0" y="68" width="300" height="472" fill="#ffffff"/>
 
-  <!-- Game canvas area - Night Racer -->
-  <rect x="80" y="80" width="800" height="400" rx="6" fill="url(#mdh-sky)" stroke="#222" stroke-width="2"/>
+  <!-- Profile photo placeholder -->
+  <rect x="30" y="85" width="240" height="160" rx="6" fill="#f0f0f0"/>
+  <circle cx="150" cy="145" r="40" fill="#ddd"/>
+  <text x="150" y="150" font-family="'Segoe UI',sans-serif" font-size="11" fill="#999" text-anchor="middle">Photo</text>
+  <text x="150" y="215" font-family="Georgia,serif" font-size="14" font-weight="700" fill="#222" text-anchor="middle">Masrik Dahir</text>
+  <text x="150" y="232" font-family="'Segoe UI',sans-serif" font-size="10" fill="#666" text-anchor="middle">Software Engineer</text>
 
-  <!-- Stars in sky -->
-  <circle cx="150" cy="110" r="1.2" fill="#ffffff" opacity="0.7"/>
-  <circle cx="280" cy="95" r="0.8" fill="#ffffff" opacity="0.5"/>
-  <circle cx="420" cy="105" r="1" fill="#ffffff" opacity="0.6"/>
-  <circle cx="560" cy="90" r="1.3" fill="#ffffff" opacity="0.8"/>
-  <circle cx="700" cy="100" r="0.9" fill="#ffffff" opacity="0.5"/>
-  <circle cx="780" cy="115" r="1.1" fill="#ffffff" opacity="0.6"/>
-  <circle cx="200" cy="130" r="0.7" fill="#ffffff" opacity="0.4"/>
-  <circle cx="650" cy="125" r="0.8" fill="#ffffff" opacity="0.5"/>
-  <circle cx="350" cy="118" r="1" fill="#ffffff" opacity="0.7"/>
+  <!-- Matrix-style canvas animation preview -->
+  <rect x="20" y="255" width="260" height="100" rx="4" fill="#0a0a0a"/>
+  <text x="30" y="275" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.8">0 1 1 0 1 0 0 1 1 0</text>
+  <text x="30" y="287" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.6">1 0 0 1 0 1 1 0 0 1</text>
+  <text x="30" y="299" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.9">0 1 0 1 1 0 1 0 1 0</text>
+  <text x="30" y="311" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.4">1 1 0 0 1 1 0 1 0 1</text>
+  <text x="30" y="323" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.7">0 0 1 1 0 0 1 0 1 1</text>
+  <text x="30" y="335" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.5">1 0 1 0 0 1 0 1 0 0</text>
+  <text x="30" y="347" font-family="monospace" font-size="9" fill="#00ff00" opacity="0.3">0 1 0 1 1 0 1 1 0 1</text>
+  <text x="150" y="310" font-family="Georgia,serif" font-size="11" fill="#00cc00" text-anchor="middle" opacity="0.9">32 Canvas Animations</text>
 
-  <!-- Moon -->
-  <circle cx="750" cy="110" r="18" fill="#f5f5dc"/>
-  <circle cx="743" cy="106" r="4" fill="#ddddc8" opacity="0.4"/>
-  <circle cx="758" cy="114" r="2.5" fill="#ddddc8" opacity="0.3"/>
+  <!-- Social links -->
+  <rect x="30" y="370" width="55" height="20" rx="3" fill="#0077b5"/>
+  <text x="57" y="384" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">LinkedIn</text>
+  <rect x="92" y="370" width="55" height="20" rx="3" fill="#333"/>
+  <text x="119" y="384" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">GitHub</text>
+  <rect x="154" y="370" width="55" height="20" rx="3" fill="#cc0000"/>
+  <text x="181" y="384" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">Resume</text>
 
-  <!-- Mountains silhouette -->
-  <polygon points="80,230 120,180 180,200 240,165 300,195 360,170 420,190 480,160 540,185 600,175 660,190 720,165 780,185 830,195 880,175 880,230" fill="#1a1a3a"/>
-  <polygon points="80,240 140,205 210,220 290,195 370,215 450,200 530,215 610,198 690,210 750,200 820,218 880,205 880,240" fill="#252545"/>
+  <!-- RIGHT: Games Gallery -->
+  <rect x="300" y="68" width="660" height="472" fill="#fafafa"/>
 
-  <!-- Green grass area -->
-  <rect x="80" y="235" width="800" height="245" fill="#10aa10"/>
-  <rect x="80" y="235" width="800" height="10" fill="#009a00"/>
+  <!-- Games page header -->
+  <rect x="300" y="68" width="660" height="45" fill="#ffffff"/>
+  <rect x="310" y="78" width="300" height="26" rx="4" fill="#f5f5f5" stroke="#ddd" stroke-width="1"/>
+  <text x="325" y="95" font-family="'Segoe UI',sans-serif" font-size="11" fill="#999">Search 99 games...</text>
 
-  <!-- Road (perspective trapezoid) -->
-  <polygon points="320,240 640,240 700,480 260,480" fill="#636363"/>
+  <!-- Game title bar (shows currently playing) -->
+  <rect x="310" y="115" width="640" height="30" rx="4" fill="#1a1a2e"/>
+  <text x="480" y="134" font-family="monospace" font-size="13" fill="#00ff88" text-anchor="middle" letter-spacing="3">SPACE INVADERS</text>
 
-  <!-- Road rumble strips -->
-  <polygon points="315,240 320,240 260,480 250,480" fill="#ff2222"/>
-  <polygon points="640,240 645,240 710,480 700,480" fill="#ff2222"/>
+  <!-- Game cards grid - 4 columns x 3 rows -->
+  <!-- Row 1 -->
+  <!-- Card: Space Invaders -->
+  <rect x="315" y="152" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="315" y="152" width="148" height="70" rx="5" fill="#000"/>
+  <rect x="315" y="215" width="148" height="37" fill="#111"/>
+  <rect x="370" y="165" width="4" height="4" fill="#44ff44"/>
+  <rect x="382" y="165" width="4" height="4" fill="#44ff44"/>
+  <rect x="374" y="169" width="8" height="4" fill="#44ff44"/>
+  <rect x="370" y="173" width="16" height="4" fill="#44ff44"/>
+  <rect x="366" y="177" width="4" height="4" fill="#44ff44"/>
+  <rect x="386" y="177" width="4" height="4" fill="#44ff44"/>
+  <rect x="370" y="177" width="16" height="4" fill="#44ff44"/>
+  <rect x="378" y="198" width="6" height="3" fill="#00ff00"/>
+  <rect x="375" y="201" width="12" height="3" fill="#00ff00"/>
+  <text x="389" y="237" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Space Invaders</text>
+  <rect x="418" y="226" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="436" y="236" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Lane markers -->
-  <line x1="420" y1="250" x2="380" y2="320" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
-  <line x1="540" y1="250" x2="580" y2="320" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
-  <line x1="380" y1="320" x2="340" y2="400" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
-  <line x1="580" y1="320" x2="620" y2="400" stroke="#cccccc" stroke-width="2" stroke-dasharray="8,12"/>
+  <!-- Card: Pac-Man -->
+  <rect x="470" y="152" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="470" y="152" width="148" height="70" rx="5" fill="#000011"/>
+  <rect x="470" y="215" width="148" height="37" fill="#111"/>
+  <circle cx="530" cy="185" r="12" fill="#ffff00"/>
+  <path d="M530,185 L542,178 L542,192 Z" fill="#000011"/>
+  <circle cx="550" cy="185" r="2" fill="#ffcc00"/>
+  <circle cx="560" cy="185" r="2" fill="#ffcc00"/>
+  <circle cx="570" cy="185" r="2" fill="#ffcc00"/>
+  <rect x="505" y="178" width="10" height="14" rx="5" fill="#ff0000"/>
+  <text x="544" y="237" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Pac-Man</text>
+  <rect x="573" y="226" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="591" y="236" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Trees left side -->
-  <rect x="150" y="260" width="5" height="25" fill="#5c3d2e"/>
-  <circle cx="152" cy="252" r="12" fill="#0d7a0d"/>
-  <circle cx="148" cy="248" r="10" fill="#11aa11"/>
+  <!-- Card: Tetris -->
+  <rect x="625" y="152" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="625" y="152" width="148" height="70" rx="5" fill="#0a0a1a"/>
+  <rect x="625" y="215" width="148" height="37" fill="#111"/>
+  <rect x="668" y="195" width="10" height="10" fill="#00ffff"/>
+  <rect x="678" y="195" width="10" height="10" fill="#00ffff"/>
+  <rect x="688" y="195" width="10" height="10" fill="#00ffff"/>
+  <rect x="698" y="195" width="10" height="10" fill="#00ffff"/>
+  <rect x="678" y="185" width="10" height="10" fill="#ff0000"/>
+  <rect x="688" y="185" width="10" height="10" fill="#ff0000"/>
+  <rect x="678" y="175" width="10" height="10" fill="#ff0000"/>
+  <rect x="688" y="175" width="10" height="10" fill="#ff0000"/>
+  <rect x="698" y="185" width="10" height="10" fill="#ffaa00"/>
+  <rect x="708" y="185" width="10" height="10" fill="#ffaa00"/>
+  <rect x="708" y="175" width="10" height="10" fill="#ffaa00"/>
+  <rect x="718" y="175" width="10" height="10" fill="#ffaa00"/>
+  <text x="699" y="237" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Tetris</text>
+  <rect x="728" y="226" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="746" y="236" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <rect x="190" y="290" width="4" height="20" fill="#5c3d2e"/>
-  <circle cx="192" cy="284" r="10" fill="#0d7a0d"/>
-  <circle cx="189" cy="280" r="8" fill="#11aa11"/>
+  <!-- Card: Snake -->
+  <rect x="780" y="152" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="780" y="152" width="148" height="70" rx="5" fill="#001a00"/>
+  <rect x="780" y="215" width="148" height="37" fill="#111"/>
+  <rect x="820" y="180" width="8" height="8" fill="#00ff00"/>
+  <rect x="828" y="180" width="8" height="8" fill="#00dd00"/>
+  <rect x="836" y="180" width="8" height="8" fill="#00bb00"/>
+  <rect x="836" y="188" width="8" height="8" fill="#009900"/>
+  <rect x="836" y="196" width="8" height="8" fill="#007700"/>
+  <circle cx="870" cy="184" r="4" fill="#ff0000"/>
+  <text x="854" y="237" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Snake</text>
+  <rect x="883" y="226" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="901" y="236" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Trees right side -->
-  <rect x="760" y="255" width="5" height="25" fill="#5c3d2e"/>
-  <circle cx="762" cy="248" r="12" fill="#0d7a0d"/>
-  <circle cx="758" cy="244" r="10" fill="#11aa11"/>
+  <!-- Row 2 -->
+  <rect x="315" y="260" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="315" y="260" width="148" height="70" rx="5" fill="#000033"/>
+  <rect x="315" y="323" width="148" height="37" fill="#111"/>
+  <rect x="340" y="300" width="35" height="8" rx="2" fill="#663300"/>
+  <rect x="395" y="285" width="40" height="8" rx="2" fill="#663300"/>
+  <rect x="370" y="310" width="10" height="10" rx="5" fill="#00cc00"/>
+  <text x="389" y="345" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Frogger</text>
+  <rect x="418" y="334" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="436" y="344" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <rect x="720" y="280" width="4" height="20" fill="#5c3d2e"/>
-  <circle cx="722" cy="274" r="10" fill="#0d7a0d"/>
+  <rect x="470" y="260" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="470" y="260" width="148" height="70" rx="5" fill="#000022"/>
+  <rect x="470" y="323" width="148" height="37" fill="#111"/>
+  <circle cx="520" cy="278" r="4" fill="#ff4444"/>
+  <circle cx="532" cy="278" r="4" fill="#ff4444"/>
+  <circle cx="544" cy="278" r="4" fill="#ff4444"/>
+  <circle cx="556" cy="278" r="4" fill="#ff4444"/>
+  <circle cx="526" cy="290" r="4" fill="#44ff44"/>
+  <circle cx="538" cy="290" r="4" fill="#44ff44"/>
+  <circle cx="550" cy="290" r="4" fill="#44ff44"/>
+  <rect x="534" y="310" width="8" height="8" fill="#00ccff"/>
+  <text x="544" y="345" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Galaga</text>
+  <rect x="573" y="334" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="591" y="344" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Traffic car (blue) -->
-  <rect x="430" y="280" width="30" height="18" rx="3" fill="#3333ff"/>
-  <rect x="435" y="282" width="20" height="6" rx="1" fill="rgba(150,200,255,0.6)"/>
-  <rect x="427" y="282" width="4" height="8" rx="1" fill="#111"/>
-  <rect x="459" y="282" width="4" height="8" rx="1" fill="#111"/>
+  <rect x="625" y="260" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="625" y="260" width="148" height="70" rx="5" fill="#0a0a0a"/>
+  <rect x="625" y="323" width="148" height="37" fill="#111"/>
+  <rect x="645" y="272" width="20" height="6" fill="#ff0000"/>
+  <rect x="668" y="272" width="20" height="6" fill="#ff0000"/>
+  <rect x="691" y="272" width="20" height="6" fill="#ff0000"/>
+  <rect x="714" y="272" width="20" height="6" fill="#ff0000"/>
+  <rect x="737" y="272" width="20" height="6" fill="#ff0000"/>
+  <rect x="645" y="280" width="20" height="6" fill="#ff8800"/>
+  <rect x="668" y="280" width="20" height="6" fill="#ff8800"/>
+  <rect x="691" y="280" width="20" height="6" fill="#ff8800"/>
+  <rect x="714" y="280" width="20" height="6" fill="#ff8800"/>
+  <rect x="737" y="280" width="20" height="6" fill="#ff8800"/>
+  <rect x="680" y="315" width="30" height="5" rx="2" fill="#fff"/>
+  <circle cx="699" cy="305" r="3" fill="#fff"/>
+  <text x="699" y="345" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Breakout</text>
+  <rect x="728" y="334" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="746" y="344" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Traffic car (yellow) -->
-  <rect x="545" y="340" width="38" height="22" rx="3" fill="#ffcc00"/>
-  <rect x="551" y="343" width="26" height="7" rx="1" fill="rgba(150,200,255,0.6)"/>
-  <rect x="541" y="344" width="5" height="10" rx="1" fill="#111"/>
-  <rect x="582" y="344" width="5" height="10" rx="1" fill="#111"/>
+  <rect x="780" y="260" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="780" y="260" width="148" height="70" rx="5" fill="#000"/>
+  <rect x="780" y="323" width="148" height="37" fill="#111"/>
+  <polygon points="854,285 848,298 860,298" fill="none" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="825" cy="290" r="8" fill="none" stroke="#aaa" stroke-width="1"/>
+  <circle cx="880" cy="280" r="6" fill="none" stroke="#aaa" stroke-width="1"/>
+  <circle cx="870" cy="310" r="5" fill="none" stroke="#aaa" stroke-width="1"/>
+  <text x="854" y="345" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Asteroids</text>
+  <rect x="883" y="334" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="901" y="344" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Player car at bottom center -->
-  <g>
-    <!-- Car body -->
-    <path d="M 440,430 L 450,395 Q 460,388 480,388 Q 500,388 510,395 L 520,430 Q 510,435 480,435 Q 450,435 440,430 Z" fill="url(#mdh-playercar)"/>
-    <!-- Racing stripe -->
-    <rect x="476" y="390" width="8" height="42" fill="rgba(255,255,255,0.2)" rx="1"/>
-    <!-- Windshield -->
-    <path d="M 457,413 Q 462,400 480,398 Q 498,400 503,413 Z" fill="rgba(100,180,255,0.7)"/>
-    <!-- Headlights -->
-    <circle cx="455" cy="393" r="3" fill="#ffffcc"/>
-    <circle cx="505" cy="393" r="3" fill="#ffffcc"/>
-    <!-- Taillights -->
-    <circle cx="448" cy="432" r="3" fill="#ff2200"/>
-    <circle cx="512" cy="432" r="3" fill="#ff2200"/>
-    <!-- Wheels -->
-    <rect x="435" y="398" width="6" height="12" rx="2" fill="#111"/>
-    <rect x="519" y="398" width="6" height="12" rx="2" fill="#111"/>
-    <rect x="433" y="425" width="6" height="12" rx="2" fill="#111"/>
-    <rect x="521" y="425" width="6" height="12" rx="2" fill="#111"/>
-    <!-- Exhaust glow -->
-    <ellipse cx="465" cy="440" rx="4" ry="5" fill="rgba(255,100,0,0.5)"/>
-    <ellipse cx="495" cy="440" rx="4" ry="5" fill="rgba(255,100,0,0.5)"/>
-  </g>
+  <!-- Row 3 -->
+  <rect x="315" y="368" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="315" y="368" width="148" height="70" rx="5" fill="#000"/>
+  <rect x="315" y="431" width="148" height="37" fill="#111"/>
+  <rect x="330" y="385" width="4" height="22" fill="#fff"/>
+  <rect x="446" y="390" width="4" height="22" fill="#fff"/>
+  <circle cx="389" cy="400" r="3" fill="#fff"/>
+  <line x1="389" y1="372" x2="389" y2="430" stroke="#fff" stroke-width="0.5" stroke-dasharray="3,3"/>
+  <text x="389" y="453" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Pong</text>
+  <rect x="418" y="442" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="436" y="452" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Speed lines overlay -->
-  <line x1="350" y1="260" x2="348" y2="290" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
-  <line x1="600" y1="270" x2="603" y2="300" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
-  <line x1="420" y1="255" x2="416" y2="285" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  <rect x="470" y="368" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="470" y="368" width="148" height="70" rx="5" fill="#1a0000"/>
+  <rect x="470" y="431" width="148" height="37" fill="#111"/>
+  <rect x="485" y="425" width="120" height="3" fill="#ff6600"/>
+  <rect x="490" y="410" width="110" height="3" fill="#ff6600"/>
+  <rect x="485" y="395" width="120" height="3" fill="#ff6600"/>
+  <rect x="530" y="402" width="8" height="7" rx="2" fill="#cc6600"/>
+  <rect x="560" y="418" width="6" height="8" fill="#ff0000"/>
+  <text x="544" y="453" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">Donkey Kong</text>
+  <rect x="573" y="442" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="591" y="452" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- NIGHT RACER title on canvas -->
-  <text x="480" y="165" font-family="'Courier New',monospace" font-size="36" font-weight="700" fill="#ff2222" text-anchor="middle" letter-spacing="3">NIGHT RACER</text>
-  <text x="480" y="185" font-family="'Courier New',monospace" font-size="14" fill="#ffcc00" text-anchor="middle" letter-spacing="2">RETRO EDITION</text>
-  <text x="480" y="215" font-family="'Courier New',monospace" font-size="11" fill="rgba(255,255,255,0.6)" text-anchor="middle">PRESS ENTER OR TAP TO START</text>
+  <rect x="625" y="368" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="625" y="368" width="148" height="70" rx="5" fill="#faf8ef"/>
+  <rect x="625" y="431" width="148" height="37" fill="#111"/>
+  <rect x="660" y="378" width="22" height="22" rx="3" fill="#eee4da"/>
+  <text x="671" y="393" font-family="'Segoe UI',sans-serif" font-size="9" font-weight="700" fill="#776e65" text-anchor="middle">2</text>
+  <rect x="685" y="378" width="22" height="22" rx="3" fill="#ede0c8"/>
+  <text x="696" y="393" font-family="'Segoe UI',sans-serif" font-size="9" font-weight="700" fill="#776e65" text-anchor="middle">4</text>
+  <rect x="710" y="378" width="22" height="22" rx="3" fill="#f2b179"/>
+  <text x="721" y="393" font-family="'Segoe UI',sans-serif" font-size="8" font-weight="700" fill="#fff" text-anchor="middle">16</text>
+  <rect x="660" y="403" width="22" height="22" rx="3" fill="#cdc1b4"/>
+  <rect x="685" y="403" width="22" height="22" rx="3" fill="#eee4da"/>
+  <text x="696" y="418" font-family="'Segoe UI',sans-serif" font-size="9" font-weight="700" fill="#776e65" text-anchor="middle">2</text>
+  <rect x="710" y="403" width="22" height="22" rx="3" fill="#f67c5f"/>
+  <text x="721" y="418" font-family="'Segoe UI',sans-serif" font-size="7" font-weight="700" fill="#fff" text-anchor="middle">128</text>
+  <text x="699" y="453" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">2048</text>
+  <rect x="728" y="442" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="746" y="452" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- HUD below canvas -->
-  <text x="120" y="496" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#222">SCORE: 4,250</text>
-  <text x="420" y="496" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#222">SPEED: 287 km/h</text>
-  <text x="720" y="496" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#222">TIME: 45.2s</text>
+  <rect x="780" y="368" width="148" height="100" rx="5" fill="#111"/>
+  <rect x="780" y="368" width="148" height="70" rx="5" fill="#0044aa"/>
+  <rect x="780" y="431" width="148" height="37" fill="#111"/>
+  <polygon points="854,438 820,395 888,395" fill="#444"/>
+  <polygon points="854,438 838,395 870,395" fill="#555"/>
+  <line x1="854" y1="438" x2="854" y2="395" stroke="#fff" stroke-width="1" stroke-dasharray="3,2"/>
+  <circle cx="854" cy="380" r="8" fill="#ff8800"/>
+  <text x="854" y="453" font-family="Georgia,serif" font-size="10" fill="#fff" text-anchor="middle">OutRun</text>
+  <rect x="883" y="442" width="36" height="14" rx="2" fill="#cc0000"/>
+  <text x="901" y="452" font-family="'Segoe UI',sans-serif" font-size="8" fill="#fff" text-anchor="middle">PLAY</text>
 
-  <!-- Controls hint -->
-  <text x="480" y="520" font-family="Georgia,serif" font-size="10" fill="#555" text-anchor="middle">Arrow / WASD: Accelerate, Brake, Left, Right</text>
+  <!-- Scroll indicator -->
+  <text x="630" y="490" font-family="'Segoe UI',sans-serif" font-size="10" fill="#999" text-anchor="middle">Showing 12 of 99 games   ·   Scroll for more</text>
+
+  <!-- Footer bar -->
+  <rect x="0" y="510" width="960" height="30" fill="#ffffff"/>
+  <text x="480" y="528" font-family="Georgia,serif" font-size="10" fill="#999" text-anchor="middle">Made with love by Masrik Dahir  ·  masrikdahir.com  ·  CC BY-NC-SA 4.0</text>
 </svg>
