@@ -27,8 +27,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Cronus",
+                    uri_web:"software/cronus",
+                    uri:"software/cronus",
                     hosts:["github","research","python","graph"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Cronus",research:"",python:"",graph:""}
                 },
@@ -40,8 +40,8 @@ const app_software = {
                     uri_windows:"https://github.com/Masrik-Dahir/Downloader/releases/latest",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Downloader",
+                    uri_web:"software/video-downloader",
+                    uri:"software/video-downloader",
                     hosts:["github","python","windows"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Downloader",python:"",windows:"https://github.com/Masrik-Dahir/Downloader/releases/latest"}
                 },
@@ -53,8 +53,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Fraud-Model",
+                    uri_web:"software/fraud-model",
+                    uri:"software/fraud-model",
                     hosts:["github","research","ml","security"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Fraud-Model",research:"",ml:"",security:""}
                 },
@@ -66,8 +66,8 @@ const app_software = {
                     uri_windows:"https://github.com/Masrik-Dahir/DDoS-interface/releases/latest",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/DDoS_interface",
+                    uri_web:"software/ddos-tool",
+                    uri:"software/ddos-tool",
                     hosts:["github","python","security","windows"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/DDoS_interface",python:"",security:"",windows:"https://github.com/Masrik-Dahir/DDoS-interface/releases/latest"}
                 },
@@ -79,8 +79,8 @@ const app_software = {
                     uri_windows:"https://github.com/Masrik-Dahir/Encryption-decryption-interface/releases/latest",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Encryption-decryption-interface",
+                    uri_web:"software/password-manager",
+                    uri:"software/password-manager",
                     hosts:["github","python","security","windows"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Encryption-decryption-interface",python:"",security:"",windows:"https://github.com/Masrik-Dahir/Encryption-decryption-interface/releases/latest"}
                 },
@@ -92,8 +92,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Pdf_interface",
+                    uri_web:"software/pdf-interface",
+                    uri:"software/pdf-interface",
                     hosts:["github","python"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Pdf_interface",python:""}
                 },
@@ -105,8 +105,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"https://github.com/Masrik-Dahir/Formats/releases/latest",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Formats",
+                    uri_web:"software/formats",
+                    uri:"software/formats",
                     hosts:["github","java","android"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Formats",java:"",android:"https://github.com/Masrik-Dahir/Formats/releases/latest"}
                 },
@@ -118,8 +118,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"https://github.com/Masrik-Dahir/Automation/releases/latest",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Automation",
+                    uri_web:"software/automata",
+                    uri:"software/automata",
                     hosts:["github","java","android"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Automation",java:"",android:"https://github.com/Masrik-Dahir/Automation/releases/latest"}
                 },
@@ -131,8 +131,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"https://github.com/Masrik-Dahir/Universal-calculator/releases/latest",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Universal-calculator",
+                    uri_web:"software/universal-calculator",
+                    uri:"software/universal-calculator",
                     hosts:["github","java","android"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Universal-calculator",java:"",android:"https://github.com/Masrik-Dahir/Universal-calculator/releases/latest"}
                 },
@@ -157,8 +157,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/DATABASE_database",
+                    uri_web:"software/stock-market",
+                    uri:"software/stock-market",
                     hosts:["github","php","database","finance"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/DATABASE_database",php:"",database:"",finance:""}
                 },
@@ -170,8 +170,8 @@ const app_software = {
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Fastify_server",
+                    uri_web:"software/employee-management",
+                    uri:"software/employee-management",
                     hosts:["github","nodejs","database"],
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Fastify_server",nodejs:"",database:""}
                 },
@@ -251,6 +251,10 @@ const app_software = {
             if (cat === 'library') return '<i class="fas fa-cubes"></i>';
             if (cat === 'app') return '<i class="fas fa-rocket"></i>';
             return '';
+        },
+        goToDoc(e, item) {
+            if (e.target.closest('a')) return;
+            if (item.uri_web) window.location.href = item.uri_web;
         }
     }
 }

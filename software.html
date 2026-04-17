@@ -104,7 +104,7 @@
                     </div>
                     <div class="sw-grid">
                         <div v-for="(item, idx) in resultQuery.filter(i => i.category === 'library')" :key="item.title"
-                             class="sw-card" data-cat="library" :style="{ animationDelay: (idx * 0.08) + 's' }">
+                             class="sw-card" data-cat="library" :style="{ animationDelay: (idx * 0.08) + 's', cursor: item.uri_web ? 'pointer' : 'default' }" @click="goToDoc($event, item)">
                             <div class="sw-card-accent"></div>
                             <div class="sw-card-body">
                                 <div class="sw-card-top">
@@ -146,7 +146,7 @@
                     </div>
                     <div class="sw-grid">
                         <div v-for="(item, idx) in resultQuery.filter(i => i.category === 'app')" :key="item.title"
-                             class="sw-card" data-cat="app" :style="{ animationDelay: (idx * 0.08) + 's' }">
+                             class="sw-card" data-cat="app" :style="{ animationDelay: (idx * 0.08) + 's', cursor: item.uri_web ? 'pointer' : 'default' }" @click="goToDoc($event, item)">
                             <div class="sw-card-accent"></div>
                             <div class="sw-card-body">
                                 <div class="sw-card-top">
