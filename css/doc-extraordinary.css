@@ -491,6 +491,34 @@
   text-shadow:0 0 8px rgba(255,0,0,.3);
 }
 
+/* ── Active lang-bar button — visible background + bottom border ── */
+.lang-bar a:has(b[style*="color:red"]) .glow-sm::after {
+  background:rgba(255, 60, 60, 0.08) !important;
+}
+.lang-bar a:has(b[style*="color:red"]) .glow-sm {
+  border-bottom:3px solid red;
+  border-radius:6px 6px 0 0;
+}
+/* Fallback for browsers without :has() — target the button itself */
+@supports not (selector(:has(*))) {
+  .lang-bar .glow-sm:focus-within::after {
+    background:rgba(255, 60, 60, 0.08) !important;
+  }
+}
+
+/* ── Fix: buttons inside anchors block navigation ── */
+.lang-bar a button,
+.lang-bar a button * {
+  pointer-events:none;
+}
+.lang-bar a {
+  pointer-events:auto;
+  display:inline-block;
+  cursor:pointer;
+}
+/* Glow hover should trigger on the anchor, not the button */
+.lang-bar a:hover .glow-sm::before { opacity:1 }
+
 /* ── Footer: full width, above sidebar ── */
 #footer-placeholder {
   position:relative;

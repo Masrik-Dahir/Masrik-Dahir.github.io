@@ -260,6 +260,36 @@
         content.style.transform = 'translateY(0)';
       });
     });
+    // Fallback: if transition didn't fire (e.g. element was display:none), force visible
+    setTimeout(function () {
+      if (content.style.opacity !== '1') {
+        content.style.transition = 'none';
+        content.style.opacity = '1';
+        content.style.transform = 'translateY(0)';
+      }
+    }, 1000);
+  }
+
+  /* ── Safety: dismiss page-loader and v-cloak if Vue hasn't mounted ── */
+  function ensureContentVisible() {
+    // Force-dismiss page-loader if still present
+    var loader = document.getElementById('page-loader');
+    if (loader && !loader.classList.contains('done')) {
+      loader.classList.add('done');
+      setTimeout(function () { if (loader.parentNode) loader.remove(); }, 400);
+    }
+    // Force-remove v-cloak so content is not hidden by display:none
+    var wrapper = document.getElementById('api-docs-wrapper');
+    if (wrapper && wrapper.hasAttribute('v-cloak')) {
+      wrapper.removeAttribute('v-cloak');
+    }
+    // Ensure #content is visible (reset opacity in case pageEntrance got stuck)
+    var content = document.getElementById('content');
+    if (content && getComputedStyle(content).opacity === '0') {
+      content.style.transition = 'none';
+      content.style.opacity = '1';
+      content.style.transform = 'translateY(0)';
+    }
   }
 
   /* ── Boot everything ── */
@@ -272,6 +302,8 @@
     initCopyButtons();
     initActiveTracking();
     watchVueUpdates();
+    // Safety fallback: guarantee content is visible after 2 seconds
+    setTimeout(ensureContentVisible, 2000);
   }
 
   if (document.readyState === 'loading') {
