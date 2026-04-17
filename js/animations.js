@@ -33,10 +33,10 @@
 
     function attachRipples() {
         var buttons = document.querySelectorAll(
-            "button, .glow-on-hover, .glow-on-hover2, .glow-on-hover3, " +
+            "button:not(.glow-on-hover-nav), .glow-on-hover, .glow-on-hover2, .glow-on-hover3, " +
             ".glow-on-hover4, .glow-on-hover5, .glow-on-hover6, " +
             ".glow-on-hover8, .glow-on-hover9, .glow-on-hover12, " +
-            ".glow-on-hover-nav, .pop-up-button, .button-55"
+            ".pop-up-button, .button-55"
         );
         for (var i = 0; i < buttons.length; i++) {
             if (!buttons[i].dataset.ripple) {
@@ -109,7 +109,7 @@
             for (var i = 0; i < cards.length; i++) {
                 if (!cards[i].classList.contains("animate-on-scroll")) {
                     cards[i].classList.add("animate-on-scroll");
-                    var delay = Math.min(i * 0.06, 0.5);
+                    var delay = Math.min(i * 0.12, 1.0);
                     cards[i].style.transitionDelay = delay + "s";
                 }
             }

@@ -19,7 +19,7 @@
 }
 
 body {
-    animation: pageEntrance 0.5s ease-out both;
+    animation: pageEntrance 1.8s ease-out both;
 }
 
 /* ── Button Click Ripple ───────────────────────────────────────── */
@@ -34,7 +34,7 @@ body {
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.15);
     transform: scale(0);
-    animation: rippleExpand 0.6s ease-out forwards;
+    animation: rippleExpand 1.4s ease-out forwards;
     pointer-events: none;
     z-index: 1;
 }
@@ -61,7 +61,7 @@ body {
 .animate-on-scroll {
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 1.8s ease-out, transform 1.8s ease-out;
 }
 
 .animate-on-scroll.animated {
@@ -73,7 +73,7 @@ body {
 .animate-slide-left {
     opacity: 0;
     transform: translateX(-40px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 1.8s ease-out, transform 1.8s ease-out;
 }
 
 .animate-slide-left.animated {
@@ -85,7 +85,7 @@ body {
 .animate-slide-right {
     opacity: 0;
     transform: translateX(40px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    transition: opacity 1.8s ease-out, transform 1.8s ease-out;
 }
 
 .animate-slide-right.animated {
@@ -97,7 +97,7 @@ body {
 .animate-scale {
     opacity: 0;
     transform: scale(0.85);
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    transition: opacity 1.8s ease-out, transform 1.8s ease-out;
 }
 
 .animate-scale.animated {
@@ -107,23 +107,23 @@ body {
 
 /* ── Staggered Entry Delays ────────────────────────────────────── */
 
-.stagger-1 { transition-delay: 0.05s; }
-.stagger-2 { transition-delay: 0.1s; }
-.stagger-3 { transition-delay: 0.15s; }
-.stagger-4 { transition-delay: 0.2s; }
-.stagger-5 { transition-delay: 0.25s; }
-.stagger-6 { transition-delay: 0.3s; }
-.stagger-7 { transition-delay: 0.35s; }
-.stagger-8 { transition-delay: 0.4s; }
-.stagger-9 { transition-delay: 0.45s; }
-.stagger-10 { transition-delay: 0.5s; }
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+.stagger-6 { transition-delay: 0.6s; }
+.stagger-7 { transition-delay: 0.7s; }
+.stagger-8 { transition-delay: 0.8s; }
+.stagger-9 { transition-delay: 0.9s; }
+.stagger-10 { transition-delay: 1.0s; }
 
 /* ── Enhanced Card Hover (lift + shadow) ───────────────────────── */
 
 .w3-card,
 .w3-card-2,
 .w3-card-4 {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
 
 .w3-card:hover,
@@ -139,7 +139,7 @@ body {
 .glow-on-hover4,
 .glow-on-hover12,
 .button-55 {
-    transition: transform 0.15s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.5s ease, border-color 0.5s ease;
 }
 
 .glow-on-hover3:active,
@@ -155,7 +155,7 @@ footer a > i,
 #footer-relative a > i,
 footer a > img,
 #footer-relative a > img {
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition: transform 0.5s ease, filter 0.5s ease;
 }
 
 footer a:hover > i,
@@ -174,37 +174,16 @@ footer a:hover > img,
 
 footer a:hover > i,
 #footer-relative a:hover > i {
-    animation: iconBounce 0.5s ease both;
+    animation: iconBounce 0.8s ease both;
 }
 
-/* ── Nav Link Hover Underline ──────────────────────────────────── */
-
-.glow-on-hover-nav {
-    position: relative;
-}
-
-.glow-on-hover-nav::after {
-    content: '' !important;
-    position: absolute !important;
-    bottom: 0 !important;
-    left: 50% !important;
-    width: 0 !important;
-    height: 2px !important;
-    background: linear-gradient(90deg, crimson, darkred) !important;
-    transition: width 0.3s ease, left 0.3s ease !important;
-    border-radius: 0 !important;
-    z-index: 1 !important;
-}
-
-.glow-on-hover-nav:hover::after {
-    width: 80% !important;
-    left: 10% !important;
-}
+/* ── Nav Link Hover ───────────────────────────────────────────── */
+/* Nav glow animation is handled by glowing.css — do not override here */
 
 /* ── Work History Logo Hover ───────────────────────────────────── */
 
 .box2 {
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition: transform 0.5s ease, filter 0.5s ease;
 }
 
 .box2:hover {
@@ -216,7 +195,7 @@ footer a:hover > i,
 
 .inactive-image .image-container img,
 .image-container img {
-    transition: transform 0.4s ease;
+    transition: transform 0.7s ease;
 }
 
 .inactive-image:hover img {
@@ -226,7 +205,7 @@ footer a:hover > i,
 /* ── Search Bar Focus Glow ─────────────────────────────────────── */
 
 .search_bar {
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: box-shadow 0.5s ease, border-color 0.5s ease;
 }
 
 .search_bar:focus-within {
@@ -237,7 +216,7 @@ footer a:hover > i,
 /* ── Tooltip Entry ─────────────────────────────────────────────── */
 
 [data-toggle="tooltip"] {
-    transition: transform 0.2s ease;
+    transition: transform 0.4s ease;
 }
 
 [data-toggle="tooltip"]:hover {
@@ -248,7 +227,7 @@ footer a:hover > i,
 
 .content1,
 .content2 {
-    transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease;
+    transition: max-height 0.6s ease, opacity 0.6s ease, padding 0.6s ease;
     max-height: 0;
     opacity: 0;
     overflow: hidden;

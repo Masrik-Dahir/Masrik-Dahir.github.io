@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- Java API documentation data file: added 51 missing record models across 11 modules (ai_ml_pipelines +11, cost_optimization +8, deployment +8, security_ops +6, data_flow_etl +5, networking +4, observability +4, config_loader +2, lambda_middleware +1, resilience +1, resource_ops +1); totalModels updated from 5,571 to 5,622; modelAnchors updated
+- Landing page Java card model count updated from 5,571 to 5,622; hero total models updated from 41,018 to 41,069
+
 ### Added
+- AwsUtil TypeScript API docs updated: 11 new module entries (analytics-pipelines, api-gateway, api-gateway-ops, cache-ops, ci-cd-ops, contact-center-ops, ecr, finding-ops, governance, media-processing, storage-ops); 10 existing modules updated with new functions; totals now 147 modules, 7,778 functions, 5,449 models
+- Landing page hero stats updated to reflect new cross-language totals (48,760 functions, 35,755 models)
 - 12 fully playable retro games: Space Invaders, Snake, Tetris, Pong, Breakout, Asteroids, Pac-Man, Frogger, Missile Command, Flappy Bird, Doodle Jump, Galaga
 - Galaga game with full arcade mechanics: 5-row x 8-column enemy formation, sine-wave dive attacks, boss capture/dual-fighter mechanic, bonus stages every 3 levels, geometric enemy sprites (butterfly regulars, red commanders with antennae, blue/purple boss with pulsing glow), scrolling parallax star field, bullet trails, expanding particle explosions
 - Each game in its own JS file under `js/games/` with IIFE architecture, init/stop lifecycle, keyboard + mobile + Tab input, title/gameover screens, particles, and HUD integration

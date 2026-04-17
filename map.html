@@ -57,6 +57,15 @@
 <body class="w3-white">
 <div id="nav-placeholder"></div>
 
+<div style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap; width: 100%;">
+    <a href="map/northamerica" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>North America</b></div></div></button></a>
+    <a href="map/southamerica" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>South America</b></div></div></button></a>
+    <a href="map/europe" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Europe</b></div></div></button></a>
+    <a href="map/asia" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Asia</b></div></div></button></a>
+    <a href="map/australia" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Australia</b></div></div></button></a>
+    <a href="map/africa" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Africa</b></div></div></button></a>
+</div>
+
 <div class="w3-content" style="max-width: min(1800px, 95%); background-color: white; margin: 0 auto; padding: 1px;">
 
     <div id="app_country">
@@ -83,7 +92,7 @@
                             <div v-for="(item, index) in resultQuery" :key="index" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
                                 <div data-toggle="" data-html="true" :title="item.title" style="margin: auto">
                                     <center>
-                                        <button @click="scrollToSection(item.id)" class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                        <button @click="scrollToSection(item.id, item.url)" class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
                                             <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                         </button>
                                         <div v-cloak style="color: black; text-align: center; width: 50px;">{{ item.abv }}</div> <!-- Set a fixed width -->

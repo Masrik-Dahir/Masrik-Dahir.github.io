@@ -13,7 +13,7 @@
 
 /*Animation*/
 .anim-typewriter {
-  animation: typewriter 4s steps(40) 1s 1 normal both, blinkTextCursor 500ms steps(40) infinite normal;
+  animation: typewriter 10s steps(40) 1s 1 normal both, blinkTextCursor 900ms steps(40) infinite normal;
 }
 
 @keyframes typewriter {
@@ -35,7 +35,7 @@
 .text-line {
   stroke-dasharray: 500;
   stroke-dashoffset: 500;
-  animation: dash 7s linear forwards, filling 5s ease-in forwards;
+  animation: dash 14s linear forwards, filling 12s ease-in forwards;
   font-size: min(25px + 2vw, 80px);
   margin-top: 10px;
 }

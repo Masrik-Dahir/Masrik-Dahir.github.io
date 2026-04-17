@@ -4,150 +4,253 @@ const app_software = {
     data() {
         return {
             searchQuery: null,
+            activeTab: 'all',
             resources:[
                 {
                     title:"AwsUtil",
                     des:"Multi-language AWS SDK wrapper library — Python, C#, Go, Java, Rust, TypeScript, Ruby — with full async parity, structured errors, and Pydantic models",
+                    category:"library",
                     uri_github:"https://github.com/Masrik-Dahir/aws-util-python",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
-                    uri_web:"product/library/awsutil/awsutil",
-                    uri:"product/library/awsutil/awsutil"
+                    uri_web:"library/awsutil",
+                    uri:"library/awsutil",
+                    hosts:["aws","python","pypi","npm","nuget","maven","crates","rubygems","go"],
+                    hostLinks:{aws:"",python:"",pypi:"library/awsutil/python",npm:"library/awsutil/typescript",nuget:"library/awsutil/csharp",maven:"library/awsutil/java",crates:"library/awsutil/rust",rubygems:"library/awsutil/ruby",go:"library/awsutil/go"}
                 },
                 {
                     title:"Cronus",
                     des:"Comparing and Contrasting Concept Maps, Algorithmic Grading",
+                    category:"library",
                     uri_github:"https://github.com/Masrik-Dahir/Cronus",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Cronus"
+                    uri:"https://github.com/Masrik-Dahir/Cronus",
+                    hosts:["github","research","python","graph"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Cronus",research:"",python:"",graph:""}
                 },
                 {
                     title:"Video Downloader",
                     des:"Download any video files from a web url, convert video to audio, YouTube video downloader",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Downloader",
                     uri_windows:"https://github.com/Masrik-Dahir/Downloader/releases/latest",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Downloader"
+                    uri:"https://github.com/Masrik-Dahir/Downloader",
+                    hosts:["github","python","windows"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Downloader",python:"",windows:"https://github.com/Masrik-Dahir/Downloader/releases/latest"}
                 },
                 {
                     title:"Fraud Detection Model",
                     des:"A threat modeling of attacks realizable in ClaimChain through attack trees, red flags identified by National Insurance Crime Bureau and use Machine Learning models to detect fraudulent activities with significant accuracy",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Fraud-Model",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Fraud-Model"
+                    uri:"https://github.com/Masrik-Dahir/Fraud-Model",
+                    hosts:["github","research","ml","security"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Fraud-Model",research:"",ml:"",security:""}
                 },
                 {
                     title:"DDoS Penetration Testing Tool",
                     des:"A penetration testing tool to conduct DDoS attack in Application layer and Transport layer",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/DDoS_interface",
                     uri_windows:"https://github.com/Masrik-Dahir/DDoS-interface/releases/latest",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/DDoS_interface"
+                    uri:"https://github.com/Masrik-Dahir/DDoS_interface",
+                    hosts:["github","python","security","windows"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/DDoS_interface",python:"",security:"",windows:"https://github.com/Masrik-Dahir/DDoS-interface/releases/latest"}
                 },
                 {
                     title:"Password Manager",
                     des:"Encrypt, decrypt files and folders and hash matches (md5, sha1, sha224, sha256, sha384, sha512) to check file integrity, password manager",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Encryption-decryption-interface",
                     uri_windows:"https://github.com/Masrik-Dahir/Encryption-decryption-interface/releases/latest",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Encryption-decryption-interface"
+                    uri:"https://github.com/Masrik-Dahir/Encryption-decryption-interface",
+                    hosts:["github","python","security","windows"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Encryption-decryption-interface",python:"",security:"",windows:"https://github.com/Masrik-Dahir/Encryption-decryption-interface/releases/latest"}
                 },
                 {
                     title:"PDF Interface",
-                    des:"",
+                    des:"Merge, split, rotate, watermark, and convert PDF files",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Pdf_interface",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Pdf_interface"
+                    uri:"https://github.com/Masrik-Dahir/Pdf_interface",
+                    hosts:["github","python"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Pdf_interface",python:""}
                 },
                 {
                     title:"Formats",
                     des:"OCR, Bar code, and QR code scanner, text to speech",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Formats",
                     uri_windows:"",
                     uri_android:"https://github.com/Masrik-Dahir/Formats/releases/latest",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Formats"
+                    uri:"https://github.com/Masrik-Dahir/Formats",
+                    hosts:["github","java","android"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Formats",java:"",android:"https://github.com/Masrik-Dahir/Formats/releases/latest"}
                 },
                 {
                     title:"Automata",
                     des:"Converts the regex to NFA, DFA, Minimum-DFA; converts CFG to LL Grammar and CNF",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Automation",
                     uri_windows:"",
                     uri_android:"https://github.com/Masrik-Dahir/Automation/releases/latest",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Automation"
+                    uri:"https://github.com/Masrik-Dahir/Automation",
+                    hosts:["github","java","android"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Automation",java:"",android:"https://github.com/Masrik-Dahir/Automation/releases/latest"}
                 },
                 {
                     title:"Universal Calculator",
-                    des:"Basic Calculator, Scientific Calculator, Bitwise Calculator (i.e., decimal, binary, hexadecimal), Unit Calculator (i.e., Any types of unit in all standards), Binary operations (i.e., 1's complement, 2's complement) ",
+                    des:"Basic Calculator, Scientific Calculator, Bitwise Calculator (i.e., decimal, binary, hexadecimal), Unit Calculator (i.e., Any types of unit in all standards), Binary operations (i.e., 1's complement, 2's complement)",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Universal-calculator",
                     uri_windows:"",
                     uri_android:"https://github.com/Masrik-Dahir/Universal-calculator/releases/latest",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Universal-calculator"
+                    uri:"https://github.com/Masrik-Dahir/Universal-calculator",
+                    hosts:["github","java","android"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Universal-calculator",java:"",android:"https://github.com/Masrik-Dahir/Universal-calculator/releases/latest"}
                 },
                 {
                     title:"Real Estate Analyzer",
                     des:"Mortgage Analysis, Cash Flow Analysis",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"web/re",
-                    uri:"web/re"
+                    uri:"web/re",
+                    hosts:["github","web","javascript","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/re",javascript:"",finance:""}
                 },
                 {
                     title:"Stock Market",
-                    des:"PHP Server: Building financial model and charts for ETFs, Mutual Funds, Cryptocurrencies, and Options ",
+                    des:"PHP Server: Building financial model and charts for ETFs, Mutual Funds, Cryptocurrencies, and Options",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/DATABASE_database",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/DATABASE_database"
+                    uri:"https://github.com/Masrik-Dahir/DATABASE_database",
+                    hosts:["github","php","database","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/DATABASE_database",php:"",database:"",finance:""}
                 },
                 {
                     title:"Employee Management System",
-                    des:"NodeJS Server: CRUD Functionalities for employees ",
+                    des:"NodeJS Server: CRUD Functionalities for employees",
+                    category:"app",
                     uri_github:"https://github.com/Masrik-Dahir/Fastify_server",
                     uri_windows:"",
                     uri_android:"",
                     uri_apple:"",
                     uri_web:"",
-                    uri:"https://github.com/Masrik-Dahir/Fastify_server"
+                    uri:"https://github.com/Masrik-Dahir/Fastify_server",
+                    hosts:["github","nodejs","database"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Fastify_server",nodejs:"",database:""}
                 },
-
             ]
         };
     },
     computed: {
         resultQuery(){
-            if(this.searchQuery){
-                return this.resources.filter((item)=>{
-                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v) || item.des.toLowerCase().includes(v))
-                })
-            }else{
-                return this.resources;
+            var filtered = this.resources;
+            if (this.activeTab !== 'all') {
+                filtered = filtered.filter(item => item.category === this.activeTab);
             }
+            if(this.searchQuery){
+                filtered = filtered.filter((item)=>{
+                    return this.searchQuery.toLowerCase().split(' ').every(v => item.title.toLowerCase().includes(v) || item.des.toLowerCase().includes(v))
+                });
+            }
+            return filtered;
+        },
+        tabCounts() {
+            var counts = { all: this.resources.length, library: 0, app: 0 };
+            for (var i = 0; i < this.resources.length; i++) {
+                counts[this.resources[i].category]++;
+            }
+            return counts;
+        }
+    },
+    methods: {
+        setTab(tab) { this.activeTab = tab; },
+        hostUrl(item, host) {
+            if (item.hostLinks && item.hostLinks[host]) return item.hostLinks[host];
+            return '';
+        },
+        hostIcon(host) {
+            var map = {
+                pypi:       '<i class="fas fa-code" style="color:#3776ab"></i>',
+                npm:        '<i class="fas fa-cube" style="color:#cb3837"></i>',
+                nuget:      '<i class="fas fa-gem" style="color:#004880"></i>',
+                maven:      '<i class="fas fa-coffee" style="color:#c71a36"></i>',
+                crates:     '<i class="fas fa-cog" style="color:#dea584"></i>',
+                rubygems:   '<i class="fas fa-gem" style="color:#e9573f"></i>',
+                go:         '<i class="fas fa-terminal" style="color:#00add8"></i>',
+                github:     '<i class="fab fa-github" style="color:#24292e"></i>',
+                windows:    '<i class="fab fa-windows" style="color:#0078d4"></i>',
+                android:    '<i class="fab fa-android" style="color:#3ddc84"></i>',
+                apple:      '<i class="fab fa-apple" style="color:#555"></i>',
+                web:        '<i class="fas fa-globe" style="color:#475569"></i>',
+                research:   '<i class="fas fa-flask" style="color:#8b5cf6"></i>',
+                python:     '<i class="fab fa-python" style="color:#3776ab"></i>',
+                java:       '<i class="fab fa-java" style="color:#007396"></i>',
+                javascript: '<i class="fab fa-js" style="color:#f7df1e"></i>',
+                nodejs:     '<i class="fab fa-node-js" style="color:#339933"></i>',
+                php:        '<i class="fab fa-php" style="color:#777bb4"></i>',
+                aws:        '<i class="fab fa-aws" style="color:#ff9900"></i>',
+                database:   '<i class="fas fa-database" style="color:#336791"></i>',
+                ml:         '<i class="fas fa-chart-line" style="color:#ff6f00"></i>',
+                security:   '<i class="fas fa-shield-alt" style="color:#d32f2f"></i>',
+                graph:      '<i class="fas fa-project-diagram" style="color:#0288d1"></i>',
+                finance:    '<i class="fas fa-chart-bar" style="color:#2e7d32"></i>'
+            };
+            return map[host] || host;
+        },
+        hostLabel(host) {
+            var map = {
+                pypi:'PyPI', npm:'npm', nuget:'NuGet', maven:'Maven',
+                crates:'Crates.io', rubygems:'RubyGems', go:'Go Pkg',
+                github:'GitHub', windows:'Windows', android:'Android',
+                apple:'App Store', web:'Web',
+                research:'Research', python:'Python', java:'Java', javascript:'JavaScript',
+                nodejs:'Node.js', php:'PHP', aws:'AWS',
+                database:'Database', ml:'Machine Learning', security:'Security',
+                graph:'Graph Theory', finance:'Finance'
+            };
+            return map[host] || host;
+        },
+        categoryIcon(cat) {
+            if (cat === 'library') return '<i class="fas fa-cubes"></i>';
+            if (cat === 'app') return '<i class="fas fa-rocket"></i>';
+            return '';
         }
     }
 }
@@ -968,10 +1071,12 @@ const app_country = {
         window.removeEventListener('resize', this.onResize);
     },
     methods: {
-        scrollToSection(sectionId) {
+        scrollToSection(sectionId, fallbackUrl) {
             const element = document.getElementById(sectionId);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
+            } else if (fallbackUrl) {
+                window.location.href = fallbackUrl;
             }
         },
         onResize() {

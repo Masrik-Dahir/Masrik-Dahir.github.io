@@ -23,7 +23,7 @@
         for (var i = 0; i < cols; i++) { ypos.push(rand(0, canvas.height)); colCols.push(colors[randInt(0, colors.length)]); }
         function draw() {
             var w = canvas.width, h = canvas.height;
-            ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fillRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.fillRect(0, 0, w, h);
             ctx.font = '14pt monospace';
             for (var i = 0; i < cols; i++) {
                 ctx.globalAlpha = 0.35 + Math.random() * 0.5;
@@ -31,7 +31,7 @@
                 ctx.fillText(String.fromCharCode(randInt(33, 126)), i * colW, ypos[i]);
                 ctx.globalAlpha = 1;
                 if (ypos[i] > 100 + Math.random() * 8000) { ypos[i] = 0; colCols[i] = colors[randInt(0, colors.length)]; }
-                else ypos[i] += 18;
+                else ypos[i] += 8;
             }
             animId = requestAnimationFrame(draw);
         }
