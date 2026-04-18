@@ -48,6 +48,8 @@
         BEACH_Y = RIVER_TOP - 2;
         TRACK_Y = BEACH_Y - 6;
         LIGHTHOUSE_X = W * 0.92;
+        ctx.lineCap = 'round'; bgC.lineCap = 'round'; cityC.lineCap = 'round';
+        dynC.lineCap = 'round'; fxC.lineCap = 'round';
     }
     var RIVER_TOP, RIVER_BOT, BEACH_Y, LIGHTHOUSE_X;
     resize();
@@ -1313,7 +1315,7 @@
         var jy2 = y2 + hashJ(y2, x2) * jit;
         c.beginPath(); c.moveTo(jx1, jy1); c.lineTo(jx2, jy2);
         c.strokeStyle = 'rgba(' + g + ',' + g + ',' + g + ',' + a + ')';
-        c.lineWidth = w; c.lineCap = 'round'; c.stroke();
+        c.lineWidth = w; c.stroke();
     }
     /* color stroke — accepts r,g,b separately */
     function stkC(c, x1, y1, x2, y2, w, r, g, b, a, jit) {
@@ -1325,20 +1327,20 @@
         var jy2 = y2 + hashJ(y2, x2) * jit;
         c.beginPath(); c.moveTo(jx1, jy1); c.lineTo(jx2, jy2);
         c.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
-        c.lineWidth = w; c.lineCap = 'round'; c.stroke();
+        c.lineWidth = w; c.stroke();
     }
     /* color flat stroke */
     function stkFlatC(c, x1, y1, x2, y2, w, r, g, b, a) {
         c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2);
         c.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a || 1) + ')';
-        c.lineWidth = w; c.lineCap = 'round'; c.stroke();
+        c.lineWidth = w; c.stroke();
     }
 
     /* no-jitter variant for fills */
     function stkFlat(c, x1, y1, x2, y2, w, g, a) {
         c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2);
         c.strokeStyle = 'rgba(' + g + ',' + g + ',' + g + ',' + (a || 1) + ')';
-        c.lineWidth = w; c.lineCap = 'round'; c.stroke();
+        c.lineWidth = w; c.stroke();
     }
 
     function arcStr(c, cx, cy, rx, ry, a1, a2, step, w, g, a) {
@@ -1746,54 +1748,6 @@
             }
         }
 
-        /* ── COMPLEX SKY: stars, nebulae, constellations ── */
-        /* stars — scattered across the sky (colored tints) */
-        for (var i = 0; i < 250; i++) {
-            var sx = lr(0, W), sy = lr(2, HORIZON * 0.9);
-            var sr2 = lr(0.2, 1.2);
-            var starType = layoutRng();
-            var sR, sG, sB;
-            if (starType < 0.3) { sR = lri(200, 255); sG = lri(200, 240); sB = lri(150, 200); }
-            else if (starType < 0.5) { sR = lri(150, 200); sG = lri(180, 220); sB = lri(220, 255); }
-            else { sR = lri(220, 255); sG = lri(220, 255); sB = lri(220, 255); }
-            var sa = lr(0.15, 0.55);
-            c.beginPath();
-            c.arc(sx, sy, sr2, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + sR + ',' + sG + ',' + sB + ',' + sa + ')';
-            c.fill();
-            if (sr2 > 0.8 && layoutRng() < 0.2) {
-                for (var r = 0; r < 4; r++) {
-                    var a = r * Math.PI / 2;
-                    stkC(c, sx + Math.cos(a) * sr2, sy + Math.sin(a) * sr2,
-                        sx + Math.cos(a) * (sr2 + 2.5), sy + Math.sin(a) * (sr2 + 2.5),
-                        0.08, sR, sG, sB, sa * 0.5, 0);
-                }
-            }
-        }
-        /* constellations — connect nearby bright stars */
-        var constellationStars = [];
-        for (var i = 0; i < 30; i++) {
-            constellationStars.push({ x: lr(20, W - 20), y: lr(5, HORIZON * 0.7) });
-        }
-        for (var i = 0; i < constellationStars.length - 1; i++) {
-            var s1 = constellationStars[i], s2 = constellationStars[i + 1];
-            var dist = Math.sqrt((s2.x - s1.x) * (s2.x - s1.x) + (s2.y - s1.y) * (s2.y - s1.y));
-            if (dist < 120) {
-                stkC(c, s1.x, s1.y, s2.x, s2.y, 0.06, 140, 160, 200, 0.12, 0);
-            }
-        }
-        /* nebula clouds — colored hazes (purple, teal, rose) */
-        var nebColors = [[120, 80, 160], [60, 140, 150], [160, 90, 120], [80, 100, 170], [150, 120, 80]];
-        for (var i = 0; i < 5; i++) {
-            var nx = lr(W * 0.1, W * 0.9), ny = lr(5, HORIZON * 0.6);
-            var nr = lr(25, 65);
-            var ng = c.createRadialGradient(nx, ny, 0, nx, ny, nr);
-            var nc = nebColors[i % nebColors.length];
-            ng.addColorStop(0, 'rgba(' + nc[0] + ',' + nc[1] + ',' + nc[2] + ',0.08)');
-            ng.addColorStop(1, 'rgba(' + nc[0] + ',' + nc[1] + ',' + nc[2] + ',0)');
-            c.fillStyle = ng;
-            c.fillRect(nx - nr, ny - nr, nr * 2, nr * 2);
-        }
     }
 
     /* ═══════════ PAINT STATIC CITY ═══════════ */
@@ -2031,15 +1985,24 @@
     }
 
     /* ═══════════ GRAIN & VIGNETTE ═══════════ */
+    var grainTile = null, GRAIN_SZ = 256;
     function makeGrain() {
-        var id = grainC.createImageData(W, H);
+        if (!grainTile) {
+            grainTile = document.createElement('canvas');
+            grainTile.width = grainTile.height = GRAIN_SZ;
+        }
+        var tc = grainTile.getContext('2d');
+        var id = tc.createImageData(GRAIN_SZ, GRAIN_SZ);
         var d = id.data;
         for (var i = 0; i < d.length; i += 4) {
             var v = 180 + Math.floor(Math.random() * 60);
             d[i] = v; d[i + 1] = v; d[i + 2] = v;
             d[i + 3] = Math.random() > 0.45 ? 7 : 0;
         }
-        grainC.putImageData(id, 0, 0);
+        tc.putImageData(id, 0, 0);
+        var pat = grainC.createPattern(grainTile, 'repeat');
+        grainC.fillStyle = pat;
+        grainC.fillRect(0, 0, W, H);
     }
 
     var vignetteCvs = null, vignetteW = 0, vignetteH = 0;
@@ -2757,48 +2720,19 @@
 
     /* ═══════════ SUN & MOON ═══════════ */
     function drawSunMoon(c, now) {
-        var nightAmt = getDayAlpha();
-        /* sun arc across sky: dayPhase 0→1, sun goes left→right */
-        var sunAngle = dayPhase * Math.PI * 2 - Math.PI / 2;
-        var sunX = W * 0.5 + Math.cos(sunAngle) * W * 0.42;
-        var sunY = HORIZON * 0.45 - Math.sin(sunAngle) * HORIZON * 0.35;
-
-        /* draw sun when above horizon and daytime */
-        if (nightAmt < 0.7 && sunY < HORIZON + 20) {
-            var sunR = Math.min(W, H) * 0.022;
-            var sunG = Math.floor(210 - nightAmt * 60);
-            /* disc via hatched arcs */
-            arcStr(c, sunX, sunY, sunR, sunR, 0, Math.PI * 2, 0.2, 0.35, sunG, 0.6);
-            arcStr(c, sunX, sunY, sunR * 0.7, sunR * 0.7, 0, Math.PI * 2, 0.25, 0.25, sunG, 0.5);
-            arcStr(c, sunX, sunY, sunR * 0.4, sunR * 0.4, 0, Math.PI * 2, 0.3, 0.2, sunG, 0.4);
-            /* rays */
-            for (var r = 0; r < 12; r++) {
-                var a = r * Math.PI / 6 + now * 0.00003;
-                var inner = sunR * 1.2, outer = sunR * 1.8;
-                stk(c, sunX + Math.cos(a) * inner, sunY + Math.sin(a) * inner,
-                    sunX + Math.cos(a) * outer, sunY + Math.sin(a) * outer, 0.12, sunG, 0.3, 0);
-            }
-        }
-
-        /* moon — opposite side of sun */
-        var moonAngle = sunAngle + Math.PI;
-        var moonX = W * 0.5 + Math.cos(moonAngle) * W * 0.42;
-        var moonY = HORIZON * 0.45 - Math.sin(moonAngle) * HORIZON * 0.35;
-
-        if (nightAmt > 0.3 && moonY < HORIZON + 20) {
-            var moonR = Math.min(W, H) * 0.018;
-            var moonG = Math.floor(195 + nightAmt * 30);
-            /* crescent: full circle then dark "bite" offset */
-            arcStr(c, moonX, moonY, moonR, moonR, 0, Math.PI * 2, 0.18, 0.3, moonG, 0.55);
-            /* inner shadow arc to create crescent */
-            arcStr(c, moonX + moonR * 0.35, moonY - moonR * 0.1, moonR * 0.85, moonR * 0.85,
-                0, Math.PI * 2, 0.2, 0.25, Math.floor(PAPER_BASE - nightAmt * 18), 0.55);
-            /* stipple for lunar texture */
-            for (var s = 0; s < 6; s++) {
-                var sx = moonX + br(-moonR * 0.4, moonR * 0.1);
-                var sy = moonY + br(-moonR * 0.5, moonR * 0.5);
-                stk(c, sx, sy, sx + 0.4, sy + 0.4, 0.2, moonG - 15, 0.3, 0);
-            }
+        /* fixed sun position — always midday, upper-center sky */
+        var sunX = W * 0.5;
+        var sunY = HORIZON * 0.25;
+        var sunR = Math.min(W, H) * 0.022;
+        var sunG = 210;
+        arcStr(c, sunX, sunY, sunR, sunR, 0, Math.PI * 2, 0.2, 0.35, sunG, 0.6);
+        arcStr(c, sunX, sunY, sunR * 0.7, sunR * 0.7, 0, Math.PI * 2, 0.25, 0.25, sunG, 0.5);
+        arcStr(c, sunX, sunY, sunR * 0.4, sunR * 0.4, 0, Math.PI * 2, 0.3, 0.2, sunG, 0.4);
+        for (var r = 0; r < 12; r++) {
+            var a = r * Math.PI / 6 + now * 0.00003;
+            var inner = sunR * 1.2, outer = sunR * 1.8;
+            stk(c, sunX + Math.cos(a) * inner, sunY + Math.sin(a) * inner,
+                sunX + Math.cos(a) * outer, sunY + Math.sin(a) * outer, 0.12, sunG, 0.3, 0);
         }
     }
 
@@ -4011,18 +3945,18 @@
         }
     }
     function drawRain(c) {
+        if (raindrops.length === 0) return;
         var wind = ATM.windAngle * ATM.windStrength;
+        c.beginPath();
         for (var i = 0; i < raindrops.length; i++) {
             var r = raindrops[i];
             var dx = wind * r.len * 0.5;
-            c.beginPath();
             c.moveTo(r.x, r.y);
             c.lineTo(r.x + dx, r.y + r.len);
-            c.strokeStyle = 'rgba(120,150,200,0.45)';
-            c.lineWidth = 0.9;
-            c.lineCap = 'round';
-            c.stroke();
         }
+        c.strokeStyle = 'rgba(120,150,200,0.45)';
+        c.lineWidth = 0.9;
+        c.stroke();
     }
 
     /* ═══════════ LIGHTNING ═══════════ */
@@ -4054,7 +3988,6 @@
         var alpha = Math.max(0, 1 - lightningBolt.age / lightningBolt.maxAge);
         c.lineWidth = 2.5;
         c.strokeStyle = 'rgba(240,240,245,' + alpha + ')';
-        c.lineCap = 'round';
         c.beginPath();
         c.moveTo(lightningBolt.pts[0].x, lightningBolt.pts[0].y);
         for (var i = 1; i < lightningBolt.pts.length; i++) {
@@ -4171,7 +4104,7 @@
             var ty = m.y - m.vy * 0.1 * m.len / 30;
             c.beginPath(); c.moveTo(m.x, m.y); c.lineTo(tx, ty);
             c.strokeStyle = 'rgba(' + m.g + ',' + m.g + ',' + m.g + ',' + alpha + ')';
-            c.lineWidth = 1.2; c.lineCap = 'round'; c.stroke();
+            c.lineWidth = 1.2; c.stroke();
         }
     }
 
@@ -4814,8 +4747,7 @@
 
     /* ═══════════ DAY/NIGHT ═══════════ */
     function getDayAlpha() {
-        /* returns 0 (noon) to 1 (midnight) */
-        return (Math.sin(dayPhase * Math.PI * 2 - Math.PI / 2) + 1) / 2;
+        return 0;
     }
 
     function paperColor() {
@@ -5029,8 +4961,7 @@
     function frame(now) {
         var dt = Math.min((now - lastNow) / 1000, 0.05);
         lastNow = now;
-        dayPhase += dt / DAY_CYCLE;
-        if (dayPhase > 1) dayPhase -= 1;
+        /* day-only mode — no day/night cycle */
 
         /* ── WEATHER & DISASTER ── */
         updateDisaster(dt);
@@ -5443,7 +5374,7 @@
         }
 
         /* ── COMPOSITE ── */
-        var paperG = Math.floor(PAPER_BASE - getDayAlpha() * 20 - ATM.paperDarken);
+        var paperG = Math.floor(PAPER_BASE - ATM.paperDarken);
         ctx.fillStyle = 'rgb(' + paperG + ',' + paperG + ',' + paperG + ')';
         ctx.fillRect(0, 0, W, H);
         ctx.drawImage(bgCvs, 0, 0);
