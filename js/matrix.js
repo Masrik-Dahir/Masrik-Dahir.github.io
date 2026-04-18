@@ -26,8 +26,8 @@
     var SIDEWALK_N, SIDEWALK_N_B, LANE_Y = [], CENTER_Y, SIDEWALK_S, SIDEWALK_S_B;
 
     function resize() {
-        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = window.innerWidth;
-        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = window.innerHeight;
+        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = Math.max(window.innerWidth, document.documentElement.clientWidth || 0);
+        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
         HORIZON = H * 0.12;
         GROUND = H * 0.84;
         STREET_BOT = H * 0.93;
@@ -64,7 +64,7 @@
     var MAX_PLANES = 2;
     var MAX_HELIS = 2;
     var DAY_CYCLE = 480; /* seconds — 8 minute full cycle */
-    var MAX_BOATS = 4;
+    var MAX_BOATS = 8;
     var MAX_BEACH = 8;
     var MAX_DOLPHINS = 2;
     var MAX_FISH = 12;
@@ -1421,7 +1421,7 @@
     var beachPeople = [];
     var dolphins = [];
     var fish = [];
-    var TRACK_Y = 0; /* computed on resize */
+    var TRACK_Y; /* computed on resize */
     var dayPhase = 0; /* 0..1 over DAY_CYCLE */
 
     /* ═══════════ BUILDING GENERATION ═══════════ */
@@ -1636,17 +1636,17 @@
     /* ═══════════ PAINT STATIC BACKGROUND ═══════════ */
     function paintBg() {
         var c = bgC;
-        /* sky — white-ish gradient matching navbar */
+        /* sky — near-white at top, blending seamlessly with white navbar */
         for (var y = 0; y < GROUND + 30; y += 1) {
             var t = y < HORIZON ? y / HORIZON : 1;
-            var sr = Math.floor(210 + t * 35);
-            var sg = Math.floor(215 + t * 30);
-            var sb = Math.floor(225 + t * 20);
-            if (y >= HORIZON) { sr = 240; sg = 242; sb = 245; }
+            var sr = Math.floor(248 - t * 12);
+            var sg = Math.floor(248 - t * 10);
+            var sb = Math.floor(250 - t * 8);
+            if (y >= HORIZON) { sr = 236; sg = 238; sb = 242; }
             stkFlatC(c, 0, y, W, y, 1.5, sr, sg, sb, 1);
         }
         /* sky hatching (very faint) */
-        hatch(c, 0, 0, W, HORIZON, 0.15, 8, 0.06, 230, 0.04);
+        hatch(c, 0, 0, W, HORIZON, 0.15, 8, 0.06, 240, 0.03);
 
         /* ── MOUNTAINS ── */
         var mtnSegs = [];
@@ -1657,24 +1657,41 @@
                      + Math.sin(x * 0.031) * 5;
             mtnSegs.push({ x: x, y: HORIZON - peak - 10 });
         }
-        /* mountain fill — light whitish-grey tones */
+        /* mountain fill — colorful shadow tones (purples, blues, teals) */
         for (var i = 0; i < mtnSegs.length - 1; i++) {
             var s1 = mtnSegs[i], s2 = mtnSegs[i + 1];
-            stkC(c, s1.x, s1.y, s2.x, s2.y, 0.5, 185, 190, 200, 0.65, 0.1);
+            var sunFace = (s2.y - s1.y) > 0 ? 1 : 0;
+            var ridgeR = sunFace ? 195 : 140 + lri(0, 20);
+            var ridgeG = sunFace ? 195 : 120 + lri(0, 25);
+            var ridgeB = sunFace ? 205 : 165 + lri(0, 25);
+            stkC(c, s1.x, s1.y, s2.x, s2.y, 0.6, ridgeR, ridgeG, ridgeB, 0.7, 0.1);
             for (var fy = s1.y; fy < HORIZON + 50; fy += 2) {
-                var mr = 190 + lri(0, 15), mg = 195 + lri(0, 15), mb = 205 + lri(0, 10);
-                stkC(c, s1.x, fy, s2.x, fy, 0.1, mr, mg, mb, 0.3, 0.08);
+                var depthT = (fy - s1.y) / Math.max(1, HORIZON + 50 - s1.y);
+                if (sunFace) {
+                    var mr = 195 + lri(0, 15), mg = 198 + lri(0, 12), mb = 210 + lri(0, 10);
+                    stkC(c, s1.x, fy, s2.x, fy, 0.1, mr, mg, mb, 0.3, 0.08);
+                } else {
+                    var mr = Math.floor(120 + depthT * 40 + lri(0, 20));
+                    var mg = Math.floor(100 + depthT * 35 + lri(0, 25));
+                    var mb = Math.floor(150 + depthT * 30 + lri(0, 25));
+                    stkC(c, s1.x, fy, s2.x, fy, 0.12, mr, mg, mb, 0.35, 0.08);
+                }
             }
         }
-        /* mountain ridge hatching — subtle grey */
+        /* mountain ridge hatching — deeper colors on shadow side */
         for (var i = 0; i < mtnSegs.length - 1; i += 2) {
             var s1 = mtnSegs[i];
             var depth = HORIZON + 40 - s1.y;
+            var isShadow = i + 1 < mtnSegs.length && mtnSegs[i + 1].y < s1.y;
             for (var j = 0; j < depth; j += 4) {
                 var hy = s1.y + j;
                 var hx1 = s1.x + j * 0.3;
                 var hx2 = s1.x + j * 0.3 + 3;
-                stkC(c, hx1, hy, hx2, hy + 3, 0.06, 175 + lri(0, 15), 180 + lri(0, 15), 195 + lri(0, 15), 0.25, 0.1);
+                if (isShadow) {
+                    stkC(c, hx1, hy, hx2, hy + 3, 0.07, 130 + lri(0, 25), 110 + lri(0, 20), 160 + lri(0, 25), 0.3, 0.1);
+                } else {
+                    stkC(c, hx1, hy, hx2, hy + 3, 0.06, 180 + lri(0, 15), 185 + lri(0, 15), 200 + lri(0, 15), 0.25, 0.1);
+                }
             }
         }
         /* snow caps on peaks — bright white */
@@ -1684,11 +1701,11 @@
                 var snowH = Math.min(12, (HORIZON - 40 - cur.y) * 0.4);
                 for (var sy = cur.y; sy < cur.y + snowH; sy += 1.5) {
                     var sw = (sy - cur.y) * 1.2 + 2;
-                    stkC(c, cur.x - sw, sy, cur.x + sw, sy, 0.15, 245, 248, 252, 0.5, 0.05);
+                    stkC(c, cur.x - sw, sy, cur.x + sw, sy, 0.15, 245, 248, 252, 0.55, 0.05);
                 }
             }
         }
-        /* second mountain range — farther back, very light */
+        /* second mountain range — farther back, tinted blue-purple */
         for (var x = 0; x < W; x += 3) {
             var peak2 = Math.sin(x * 0.0025 + 3) * 35
                       + Math.sin(x * 0.007 + 1.5) * 18
@@ -1700,23 +1717,31 @@
                        + Math.sin(nx * 0.018) * 8;
             var my2n = HORIZON - peak2n + 15;
             if (my2 < HORIZON + 20) {
-                stkC(c, x, my2, nx, my2n, 0.3, 205, 208, 218, 0.45, 0.1);
+                var slope2 = peak2n - peak2;
+                var mr2 = slope2 > 0 ? 175 + lri(0, 15) : 195 + lri(0, 10);
+                var mg2 = slope2 > 0 ? 160 + lri(0, 15) : 190 + lri(0, 10);
+                var mb2 = slope2 > 0 ? 200 + lri(0, 15) : 215 + lri(0, 8);
+                stkC(c, x, my2, nx, my2n, 0.35, mr2, mg2, mb2, 0.5, 0.1);
             }
         }
 
-        /* distant hills — white-ish, matching navbar */
+        /* distant hills — soft blue-lavender tint */
         for (var x = 0; x < W; x += 2) {
             var hh = Math.sin(x * 0.003) * 28 + Math.sin(x * 0.0085) * 16 + Math.sin(x * 0.019) * 7;
             var nx = x + 2;
             var nh = Math.sin(nx * 0.003) * 28 + Math.sin(nx * 0.0085) * 16 + Math.sin(nx * 0.019) * 7;
-            stkC(c, x, HORIZON + hh, nx, HORIZON + nh, 0.4, 200, 205, 210, 0.7, 0.15);
+            var hillSlope = nh - hh;
+            var hr = hillSlope > 0 ? 185 + lri(0, 10) : 200 + lri(0, 8);
+            var hgr = hillSlope > 0 ? 175 + lri(0, 12) : 200 + lri(0, 8);
+            var hbl = hillSlope > 0 ? 205 + lri(0, 10) : 215 + lri(0, 8);
+            stkC(c, x, HORIZON + hh, nx, HORIZON + nh, 0.4, hr, hgr, hbl, 0.7, 0.15);
         }
         /* hill fill below */
         for (var y = HORIZON - 25; y < HORIZON + 55; y += 2.5) {
             for (var x = 0; x < W; x += 3) {
                 var hh = Math.sin(x * 0.003) * 28 + Math.sin(x * 0.0085) * 16 + Math.sin(x * 0.019) * 7;
                 if (y > HORIZON + hh) {
-                    stkC(c, x, y, x + 3, y, 0.15, 215 + lri(0, 15), 218 + lri(0, 15), 222 + lri(0, 12), 0.35, 0.1);
+                    stkC(c, x, y, x + 3, y, 0.15, 200 + lri(0, 20), 195 + lri(0, 20), 215 + lri(0, 15), 0.35, 0.1);
                 }
             }
         }
@@ -3637,17 +3662,34 @@
     }
 
     /* ═══════════ BOATS ═══════════ */
+    var SHIP_COLORS = [
+        { hr: 180, hg: 30, hb: 30 },
+        { hr: 20, hg: 60, hb: 160 },
+        { hr: 200, hg: 120, hb: 20 },
+        { hr: 30, hg: 130, hb: 60 },
+        { hr: 140, hg: 25, hb: 120 },
+        { hr: 20, hg: 120, hb: 140 },
+        { hr: 200, hg: 60, hb: 100 },
+        { hr: 60, hg: 60, hb: 170 }
+    ];
     function createBoat() {
         var dir = behRng() > 0.5 ? 1 : -1;
-        var type = behRng() > 0.4 ? 'sail' : 'motor';
+        var roll = behRng();
+        var type = roll < 0.3 ? 'sail' : (roll < 0.55 ? 'motor' : 'ship');
+        var sc = SHIP_COLORS[bri(0, SHIP_COLORS.length)];
+        var shipStyle = bri(0, 3);
         return {
-            x: dir > 0 ? -30 : W + 30,
-            y: RIVER_TOP + br(8, (RIVER_BOT - RIVER_TOP) * 0.55),
+            x: dir > 0 ? -60 : W + 60,
+            y: RIVER_TOP + br(8, (RIVER_BOT - RIVER_TOP) * 0.5),
             dir: dir,
-            speed: type === 'sail' ? br(3, 8) : br(8, 16),
+            speed: type === 'sail' ? br(3, 8) : (type === 'ship' ? br(10, 22) : br(8, 16)),
             type: type,
             g: bri(55, 95),
             bobPhase: br(0, Math.PI * 2),
+            hr: sc.hr, hg: sc.hg, hb: sc.hb,
+            shipStyle: shipStyle,
+            smokePhase: br(0, Math.PI * 2),
+            flagPhase: br(0, Math.PI * 2),
             alive: true
         };
     }
@@ -3655,39 +3697,133 @@
     function updateBoat(b, dt) {
         b.x += b.dir * b.speed * dt;
         b.bobPhase += dt * 2.2;
-        if ((b.dir > 0 && b.x > W + 40) || (b.dir < 0 && b.x < -40)) b.alive = false;
+        b.smokePhase += dt * 3;
+        b.flagPhase += dt * 6;
+        var margin = b.type === 'ship' ? 80 : 40;
+        if ((b.dir > 0 && b.x > W + margin) || (b.dir < 0 && b.x < -margin)) b.alive = false;
     }
 
     function drawBoat(c, b) {
         var x = b.x, y = b.y + Math.sin(b.bobPhase) * 0.8, d = b.dir;
 
+        if (b.type === 'ship') {
+            drawShip(c, b, x, y, d);
+            return;
+        }
+
         if (b.type === 'sail') {
-            /* hull — dark wood brown */
             arcStrC(c, x, y + 1.5, 10, 3, 0, Math.PI, 0.25, 0.5, 100, 60, 30, 0.7);
             stkC(c, x - 9, y + 1.5, x + 9, y + 1.5, 0.4, 80, 50, 25, 0.8, 0);
-            /* mast */
             stkC(c, x + d * 1, y + 1, x + d * 1, y - 14, 0.35, 90, 65, 40, 0.8, 0);
-            /* sail — off-white */
             stkC(c, x + d * 1, y - 13, x + d * 8, y - 2, 0.3, 235, 230, 220, 0.6, 0);
             stkC(c, x + d * 1, y - 13, x + d * 1, y - 2, 0.15, 230, 225, 215, 0.5, 0);
             for (var sy = y - 12; sy < y - 3; sy += 2) {
                 var t = (sy - (y - 13)) / 11;
                 stkC(c, x + d * 1, sy, x + d * 1 + t * 7 * d, sy, 0.08, 240, 235, 225, 0.25, 0);
             }
-            stkC(c, x - 5, y + 4, x + 5, y + 4, 0.12, 80, 120, 160, 0.15, 0);
         } else {
-            /* fishing boat — blue-white hull */
             arcStrC(c, x, y + 1, 8, 2.5, 0, Math.PI, 0.25, 0.45, 50, 80, 140, 0.7);
             stkC(c, x - 7, y + 1, x + 7, y + 1, 0.4, 40, 65, 120, 0.8, 0);
             rectStkC(c, x - 2, y - 3.5, 5, 4, 0.3, 200, 200, 200, 0.7);
             stkC(c, x - 1, y - 3, x + 2, y - 3, 1, 220, 220, 210, 0.3, 0);
-            for (var w = 1; w < 5; w++) {
-                var wx = x - d * (w * 5 + 2);
-                var wa = Math.max(0, 0.25 - w * 0.05);
-                arcStrC(c, wx, y + 2, w * 2.5, 1.5, d > 0 ? Math.PI * 0.7 : 0, d > 0 ? Math.PI : Math.PI * 0.3, 0.3, 0.12, 180, 210, 235, wa);
-            }
         }
-        stkC(c, x - 8, y + 3, x + 8, y + 3, 0.08, 80, 120, 170, 0.2, 0);
+    }
+
+    function drawShip(c, b, x, y, d) {
+        var R = b.hr, G = b.hg, B = b.hb;
+        var hw = 35, hh = 6;
+
+        /* wake trail */
+        for (var w = 1; w < 4; w++) {
+            var wx = x - d * (w * 14 + hw);
+            var wa = Math.max(0, 0.2 - w * 0.05);
+            arcStrC(c, wx, y + 3, w * 5, 2, d > 0 ? Math.PI * 0.6 : 0, d > 0 ? Math.PI : Math.PI * 0.4, 0.3, 0.15, 200, 220, 240, wa);
+        }
+
+        /* hull — big curved bottom, vibrant color */
+        arcStrC(c, x, y + 2, hw, hh, 0, Math.PI, 0.2, 1.5, R, G, B, 0.9);
+        /* hull top line */
+        stkC(c, x - hw, y + 2, x + hw, y + 2, 0.6, Math.max(0, R - 40), Math.max(0, G - 40), Math.max(0, B - 40), 1, 0);
+        /* bow point */
+        stkC(c, x + d * hw, y + 2, x + d * (hw + 8), y, 0.8, R + 20, G + 20, B + 20, 0.8, 0);
+        /* stern */
+        stkC(c, x - d * hw, y - 2, x - d * hw, y + hh, 0.5, Math.max(0, R - 30), Math.max(0, G - 30), Math.max(0, B - 30), 0.9, 0);
+
+        /* white stripe along hull */
+        stkC(c, x - hw + 2, y + 1, x + hw - 2, y + 1, 0.5, 230, 230, 235, 0.7, 0);
+
+        /* deck — light grey */
+        stkC(c, x - hw + 4, y - 1, x + hw - 4, y - 1, 3, 210, 210, 215, 0.9, 0);
+
+        /* superstructure */
+        if (b.shipStyle === 0) {
+            /* cargo ship — containers on deck */
+            var cx = x - d * 10;
+            for (var ci = 0; ci < 5; ci++) {
+                var containerColors = [[200,50,40],[40,120,200],[50,170,70],[220,180,30],[180,60,160]];
+                var cc = containerColors[ci % containerColors.length];
+                rectStkC(c, cx + ci * 8 * d, y - 7, 7 * d, 5, 0.25, cc[0], cc[1], cc[2], 0.85);
+            }
+            /* bridge at stern */
+            rectStkC(c, x - d * 22, y - 12, 12 * d, 10, 0.3, 220, 220, 225, 0.9);
+            /* bridge windows */
+            stkC(c, x - d * 21, y - 10, x - d * 12, y - 10, 1.2, 120, 160, 200, 0.6, 0);
+            /* smokestack */
+            stkC(c, x - d * 17, y - 12, x - d * 17, y - 18, 2.5, R, G, B, 0.9, 0);
+            stkC(c, x - d * 17, y - 18, x - d * 17, y - 19, 1.8, 40, 40, 45, 0.8, 0);
+        } else if (b.shipStyle === 1) {
+            /* cruise ship — multi-deck white */
+            rectStkC(c, x - 18, y - 6, 36, 4, 0.3, 235, 235, 240, 0.95);
+            rectStkC(c, x - 14, y - 10, 28, 4, 0.3, 240, 240, 245, 0.9);
+            rectStkC(c, x - 10, y - 13, 20, 3, 0.3, 245, 245, 250, 0.85);
+            /* deck windows — rows of dots */
+            for (var wi = -16; wi < 16; wi += 3) {
+                stkC(c, x + wi, y - 4.5, x + wi + 1, y - 4.5, 0.6, 120, 170, 220, 0.5, 0);
+            }
+            for (var wi = -12; wi < 12; wi += 3) {
+                stkC(c, x + wi, y - 8.5, x + wi + 1, y - 8.5, 0.5, 100, 150, 200, 0.45, 0);
+            }
+            /* smokestack — ship color */
+            stkC(c, x + d * 5, y - 13, x + d * 5, y - 20, 3, R, G, B, 0.9, 0);
+            stkC(c, x + d * 5, y - 19, x + d * 5, y - 20.5, 2, 50, 50, 55, 0.8, 0);
+            /* pool on top deck */
+            arcStrC(c, x - 4, y - 12, 3, 1.5, 0, Math.PI * 2, 0.2, 0.2, 80, 180, 220, 0.5);
+        } else {
+            /* tanker — long low profile */
+            stkC(c, x - 25, y - 3, x + 25, y - 3, 4, 180, 180, 185, 0.85, 0);
+            /* pipes */
+            stkC(c, x - 20, y - 5, x + 15, y - 5, 0.5, 160, 160, 170, 0.7, 0);
+            stkC(c, x - 20, y - 6, x + 15, y - 6, 0.5, 150, 150, 160, 0.6, 0);
+            /* bridge at stern */
+            rectStkC(c, x - d * 24, y - 11, 10 * d, 9, 0.3, 220, 220, 230, 0.9);
+            stkC(c, x - d * 23, y - 9, x - d * 16, y - 9, 1, 110, 150, 200, 0.5, 0);
+            /* smokestack */
+            stkC(c, x - d * 20, y - 11, x - d * 20, y - 16, 2, R, G, B, 0.9, 0);
+            stkC(c, x - d * 20, y - 15.5, x - d * 20, y - 16.5, 1.5, 45, 45, 50, 0.8, 0);
+        }
+
+        /* smoke puffs from smokestack */
+        var smX = b.shipStyle === 1 ? x + d * 5 : (x - d * (b.shipStyle === 0 ? 17 : 20));
+        var smY = b.shipStyle === 1 ? y - 20 : (b.shipStyle === 0 ? y - 19 : y - 16.5);
+        for (var si = 0; si < 3; si++) {
+            var pAge = si * 0.4 + b.smokePhase * 0.1;
+            var pr = 1.5 + si * 1.5;
+            var pa = Math.max(0, 0.3 - si * 0.1);
+            c.beginPath(); c.arc(smX - d * si * 4, smY - si * 3, pr, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(160,160,170,' + pa + ')';
+            c.fill();
+        }
+
+        /* flag on mast */
+        var flagX = x + d * (hw - 5);
+        var flagY = y - (b.shipStyle === 1 ? 20 : 14);
+        stkC(c, flagX, flagY + 6, flagX, flagY, 0.3, 80, 80, 85, 0.8, 0);
+        var fw = Math.sin(b.flagPhase) * 1.5 + 4;
+        stkC(c, flagX, flagY, flagX + d * fw, flagY + 1, 0.8, 230, 40, 40, 0.8, 0);
+        stkC(c, flagX, flagY + 1.5, flagX + d * fw, flagY + 2.5, 0.8, 240, 240, 240, 0.8, 0);
+
+        /* water line reflection */
+        stkC(c, x - hw, y + hh + 1, x + hw, y + hh + 1, 0.15, R, G, B, 0.15, 0);
     }
 
     /* ═══════════ BEACH PEOPLE ═══════════ */
@@ -4760,17 +4896,21 @@
         nukeExplosions = [];
         nukeTimer = 0;
 
-        /* spawn initial train */
+        /* spawn initial trains — always multiple */
         trains = [];
-        var t = createTrain();
-        t.x = br(W * 0.2, W * 0.6);
-        trains.push(t);
+        var nTrains = bri(2, 4);
+        for (var ti = 0; ti < nTrains; ti++) {
+            var t = createTrain();
+            t.x = br(W * 0.1 + ti * W * 0.25, W * 0.2 + ti * W * 0.25);
+            t.dir = ti % 2 === 0 ? 1 : -1;
+            trains.push(t);
+        }
 
-        /* spawn boats */
+        /* spawn boats — always multiple ships */
         boats = [];
-        for (var i = 0; i < bri(1, 3); i++) {
+        for (var i = 0; i < bri(3, 5); i++) {
             var bt = createBoat();
-            bt.x = br(W * 0.1, W * 0.9);
+            bt.x = br(W * 0.05 + i * W * 0.18, W * 0.15 + i * W * 0.18);
             boats.push(bt);
         }
 
@@ -5013,23 +5153,24 @@
             if (!asteroids[i].alive) asteroids.splice(i, 1);
         }
 
-        /* trains */
+        /* trains — always keep at least 2 */
         for (var i = trains.length - 1; i >= 0; i--) {
             updateTrain(trains[i], dt);
             if (!trains[i].alive) trains.splice(i, 1);
         }
-        if (trains.length === 0) trains.push(createTrain());
+        while (trains.length < 2) trains.push(createTrain());
 
-        /* boats */
+        /* boats — always keep multiple */
         for (var i = boats.length - 1; i >= 0; i--) {
             updateBoat(boats[i], dt);
             if (!boats[i].alive) boats.splice(i, 1);
         }
         boatSpawnTimer += dt;
-        if (boatSpawnTimer > br(8, 20) && boats.length < MAX_BOATS) {
+        if (boatSpawnTimer > br(4, 10) && boats.length < MAX_BOATS) {
             boats.push(createBoat());
             boatSpawnTimer = 0;
         }
+        while (boats.length < 3) { boats.push(createBoat()); }
 
         /* beach people */
         for (var i = beachPeople.length - 1; i >= 0; i--) {
