@@ -59,8 +59,8 @@
     var MAX_CONSTRUCTIONS = 5;
     var MAX_CRANES = 5;
     var MAX_CLOUDS = 18;
-    var MAX_FLOCKS = 12;
-    var MAX_SMOKE = 35;
+    var MAX_FLOCKS = 30;
+    var MAX_SMOKE = 15;
     var MAX_PLANES = 2;
     var MAX_HELIS = 2;
     var DAY_CYCLE = 480; /* seconds — 8 minute full cycle */
@@ -80,17 +80,17 @@
         thunderTimer: 5,
         paperDarken: 10
     };
-    var MAX_RAIN = 900;
-    var MAX_HAIL = 200;
-    var MAX_SNOW = 300;
+    var MAX_RAIN = 350;
+    var MAX_HAIL = 80;
+    var MAX_SNOW = 120;
     var MAX_METEORS = 8;
     var MAX_DEBRIS = 25;
     var MAX_JOGGERS = 6;
     var MAX_BUSKERS = 3;
     var MAX_VENDORS = 3;
-    var MAX_PIGEONS = 12;
+    var MAX_PIGEONS = 6;
     var MAX_CATS = 3;
-    var MAX_SEAGULLS = 20;
+    var MAX_SEAGULLS = 8;
     var MAX_SWIMMERS = 5;
     var MAX_SURFERS = 4;
     var MAX_PADDLERS = 3;
@@ -118,7 +118,7 @@
     var DISASTER_TYPES = [
         { type: 'earthquake', weight: 8, dur: [10, 18] },
         { type: 'tsunami', weight: 5, dur: [30, 45] },
-        { type: 'storm', weight: 15, dur: [40, 70] },
+        { type: 'storm', weight: 0, dur: [40, 70] },
         { type: 'wildfire', weight: 6, dur: [45, 80] },
         { type: 'flood', weight: 10, dur: [50, 90] },
         { type: 'hail', weight: 8, dur: [25, 50] },
@@ -199,46 +199,48 @@
         var idx = bri(0, buildings.length);
         var target = buildings[idx];
         lightningBolt = createTargetedBolt(target.x + target.w / 2, target.y);
-        ATM.flashIntensity = 1;
-        DISASTER.shakeX = br(-3, 3);
-        DISASTER.shakeY = br(-2, 2);
+        ATM.flashIntensity = 0.3;
+        DISASTER.shakeX = br(-2, 2);
+        DISASTER.shakeY = br(-1, 1);
         pendingDamage = target;
         damageTimer = 0.3;
     }
 
     var needsCityRebake = false;
+    var rebakeCooldown = 0;
     var crumbleDebris = [];
     function spawnCrumbleDebris(b) {
-        var cx = b.x + b.w / 2, topY = b.y;
-        for (var i = 0; i < 25; i++) {
+        var topY = b.y;
+        for (var i = 0; i < 6; i++) {
             crumbleDebris.push({
                 x: b.x + behRng() * b.w,
-                y: topY + behRng() * b.h * 0.6,
-                vx: (behRng() - 0.5) * 80,
-                vy: behRng() * -60 + 30,
-                r: 1 + behRng() * 4,
-                g: b.g + Math.floor((behRng() - 0.5) * 30),
-                spin: (behRng() - 0.5) * 8,
+                y: topY + behRng() * b.h * 0.5,
+                vx: (behRng() - 0.5) * 60,
+                vy: behRng() * -40 + 20,
+                r: 1 + behRng() * 3,
+                g: b.g + Math.floor((behRng() - 0.5) * 20),
+                spin: (behRng() - 0.5) * 6,
                 angle: behRng() * Math.PI * 2,
-                age: 0, life: 0.8 + behRng() * 1.5,
+                age: 0, life: 0.6 + behRng() * 1,
                 type: behRng() < 0.3 ? 'dust' : 'chunk'
             });
         }
-        for (var i = 0; i < 12; i++) {
+        for (var i = 0; i < 2; i++) {
             crumbleDebris.push({
                 x: b.x + behRng() * b.w,
                 y: topY + behRng() * b.h * 0.3,
-                vx: (behRng() - 0.5) * 40,
-                vy: -20 - behRng() * 40,
-                r: 3 + behRng() * 8,
-                g: b.g + 40 + Math.floor(behRng() * 30),
+                vx: (behRng() - 0.5) * 30,
+                vy: -15 - behRng() * 30,
+                r: 3 + behRng() * 6,
+                g: b.g + 40 + Math.floor(behRng() * 20),
                 spin: 0, angle: 0,
-                age: 0, life: 1.5 + behRng() * 2,
+                age: 0, life: 1 + behRng() * 1.5,
                 type: 'dustcloud'
             });
         }
     }
     function updateCrumbleDebris(dt) {
+        while (crumbleDebris.length > 30) crumbleDebris.shift();
         for (var i = crumbleDebris.length - 1; i >= 0; i--) {
             var d = crumbleDebris[i];
             d.age += dt;
@@ -290,6 +292,8 @@
         if (buildings.length <= 5) return;
         spawnCrumbleDebris(b);
         buildings.splice(idx, 1);
+        /* erase just this building from city canvas instead of full rebake */
+        cityC.clearRect(b.x - 3, b.y - 30, b.w + 6, b.h + 32);
         var con = {
             x: b.x, w: b.w, floors: b.floors, floorH: b.floorH,
             h: b.h, y: b.y,
@@ -300,7 +304,6 @@
         };
         constructions.push(con);
         cranes.push(createCrane(con));
-        needsCityRebake = true;
     }
 
     function rebakeCity() {
@@ -312,151 +315,278 @@
         needsCityRebake = false;
     }
 
-    /* ── ALIEN ATTACKS ── */
+    /* ── ALIEN ATTACK SAUCERS ── */
     var aliens = [];
-    var MAX_ALIENS = 5;
-    var alienTimer = 3;
+    var MAX_ALIENS = 8;
+    var alienTimer = 1;
     function createAlien() {
+        var patrolY = br(HORIZON + 25, HORIZON + 100);
         return {
-            x: br(W * 0.1, W * 0.9), y: -20,
-            targetX: br(W * 0.1, W * 0.9), targetY: br(HORIZON + 20, GROUND * 0.5),
-            speed: br(80, 160), g: bri(60, 100),
-            beamPhase: 0, beaming: false, beamTarget: null,
+            x: br(W * 0.05, W * 0.95), y: -30,
+            targetX: br(W * 0.1, W * 0.9), targetY: patrolY,
+            patrolY: patrolY,
+            speed: br(55, 95), g: bri(65, 105),
             pulsePhase: br(0, Math.PI * 2),
             hoverPhase: br(0, Math.PI * 2),
+            ringAngle: br(0, Math.PI * 2),
+            scanAngle: 0,
             tiltAngle: 0,
-            alive: true, age: 0, maxAge: br(8, 15),
-            size: br(1.2, 2.0),
-            hp: bri(2, 4),
-            hit: false, hitFlash: 0,
-            evading: false, evadeDir: 0
+            alive: true, age: 0, maxAge: br(30, 40),
+            size: br(1.8, 3.0),
+            fireCooldown: br(3, 6),
+            launchFlash: 0,
+            launchedAst: null,
+            beamAge: 0,
+            shieldFlicker: 3,
+            engineGlow: br(0, Math.PI * 2),
+            panelPhase: br(0, Math.PI * 2)
+        };
+    }
+    function createAlienAsteroid(alien) {
+        var targetB = buildings.length > 0 ? buildings[bri(0, buildings.length)] : null;
+        var tx = targetB ? targetB.x + targetB.w / 2 : br(W * 0.1, W * 0.9);
+        var ty = GROUND - 20;
+        var ang = Math.atan2(ty - alien.y, tx - alien.x);
+        var spd = br(200, 320);
+        return {
+            x: alien.x, y: alien.y + 1 * alien.size,
+            vx: Math.cos(ang) * spd + br(-2, 2),
+            vy: Math.sin(ang) * spd,
+            r: br(2, 3), g: bri(2, 3), spin: br(-4, 4), angle: 0,
+            alive: true, exploded: false, explodeAge: 0,
+            fireTrailPhase: br(0, Math.PI * 2)
         };
     }
     function updateAlien(a, dt) {
-        a.age += dt; a.pulsePhase += dt * 6; a.hoverPhase += dt * 2.5;
-        if (a.hitFlash > 0) a.hitFlash -= dt * 4;
-        if (a.evading) {
-            a.x += a.evadeDir * 120 * dt;
-            a.y -= 40 * dt;
-            a.evading = false;
+        a.age += dt;
+        a.pulsePhase += dt * 5;
+        a.hoverPhase += dt * 2.2;
+        a.ringAngle += dt * 1.8;
+        a.scanAngle += dt * 3;
+        a.engineGlow += dt * 8;
+        a.panelPhase += dt * 1.5;
+        if (a.shieldFlicker > 0) a.shieldFlicker -= dt * 3;
+        if (a.launchFlash > 0) a.launchFlash -= dt * 2;
+        if (a.beamAge > 0) a.beamAge -= dt;
+        if (a.launchedAst && (a.beamAge <= 0 || a.launchedAst.exploded || !a.launchedAst.alive)) {
+            a.launchedAst = null;
         }
+        a.fireCooldown -= dt;
+
         var dx = a.targetX - a.x, dy = a.targetY - a.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        a.tiltAngle = dx * 0.002;
-        if (dist > 3) { a.x += dx / dist * a.speed * dt; a.y += dy / dist * a.speed * dt; }
-        else if (!a.beaming && buildings.length > 2) {
-            a.beaming = true; a.beamPhase = 0;
-            var idx = bri(0, buildings.length);
-            a.beamTarget = buildings[idx];
-            if (a.beamTarget) {
-                a.targetX = a.beamTarget.x + a.beamTarget.w / 2;
-                a.targetY = a.beamTarget.y - 25;
-            }
+        a.tiltAngle = dx * 0.0015;
+        if (dist > 5) {
+            a.x += dx / dist * a.speed * dt;
+            a.y += dy / dist * a.speed * dt;
+        } else {
+            a.targetX = br(W * 0.05, W * 0.95);
+            a.targetY = a.patrolY + br(-15, 15);
         }
-        if (a.beaming) {
-            a.beamPhase += dt;
-            if (a.beamTarget) {
-                var bx = a.beamTarget.x + a.beamTarget.w / 2;
-                var btY = a.beamTarget.y - 25;
-                a.x += (bx - a.x) * dt * 2;
-                a.y += (btY - a.y) * dt * 2;
+        a.y += Math.sin(a.hoverPhase) * 0.4;
+
+        /* launch asteroids at the city */
+        if (a.fireCooldown <= 0 && buildings.length > 2) {
+            var aCons = 0;
+            for (var ci = 0; ci < constructions.length; ci++) { if (!constructions[ci].done) aCons++; }
+            if (buildings.length > 5 && aCons < 10) {
+                var newAst = createAlienAsteroid(a);
+                asteroids.push(newAst);
+                a.launchedAst = newAst;
+                a.beamAge = 1.5;
+                a.launchFlash = 1;
+                a.shieldFlicker = 0.5;
             }
-            if (a.beamPhase > 1.5 && a.beamTarget) {
-                var aCons = 0;
-                for (var ci = 0; ci < constructions.length; ci++) { if (!constructions[ci].done) aCons++; }
-                if (buildings.length > 5 && aCons < 4) {
-                    damageBuilding(a.beamTarget);
-                    killNearbyPeds(a.beamTarget.x + a.beamTarget.w / 2);
-                }
-                a.beamTarget = null; a.beaming = false;
-                a.targetX = br(W * 0.1, W * 0.9);
-                a.targetY = br(HORIZON + 20, GROUND * 0.5);
-            }
+            a.fireCooldown = br(4, 8);
         }
-        a.y += Math.sin(a.hoverPhase) * 0.3;
+
         if (a.age > a.maxAge) a.alive = false;
-    }
-    function destroyAlien(a) {
-        for (var i = 0; i < 18; i++) {
-            alienDebris.push({
-                x: a.x + (behRng() - 0.5) * 12 * a.size,
-                y: a.y + (behRng() - 0.5) * 6 * a.size,
-                vx: (behRng() - 0.5) * 120,
-                vy: behRng() * 40 - 20,
-                r: 1 + behRng() * 3.5 * a.size,
-                g: a.g + bri(-15, 25),
-                spin: (behRng() - 0.5) * 10,
-                angle: behRng() * Math.PI * 2,
-                age: 0, life: 1.2 + behRng() * 2,
-                type: behRng() < 0.3 ? 'plate' : 'shard'
-            });
-        }
-        for (var i = 0; i < 8; i++) {
-            alienDebris.push({
-                x: a.x + (behRng() - 0.5) * 8,
-                y: a.y + (behRng() - 0.5) * 4,
-                vx: (behRng() - 0.5) * 50,
-                vy: -20 - behRng() * 40,
-                r: 4 + behRng() * 8,
-                g: a.g + 40,
-                spin: 0, angle: 0,
-                age: 0, life: 1.5 + behRng() * 2,
-                type: 'smoke'
-            });
-        }
-        ATM.flashIntensity = Math.max(ATM.flashIntensity, 0.3);
-        a.alive = false;
     }
     function drawAlien(c, a) {
         var x = a.x, y = a.y, g = a.g, sz = a.size;
-        var pulse = Math.sin(a.pulsePhase) * 0.2 + 0.7;
-        var hover = Math.sin(a.hoverPhase) * 1.5;
-        if (a.hitFlash > 0) { g = Math.min(240, g + 80); pulse = 1; }
+        var pulse = Math.sin(a.pulsePhase) * 0.15 + 0.75;
+        var hover = Math.sin(a.hoverPhase) * 2;
         c.save(); c.translate(x, y + hover); c.rotate(a.tiltAngle);
-        arcStr(c, 0, 0, 14 * sz, 5 * sz, 0, Math.PI * 2, 0.15, 0.5 * sz, g, pulse);
-        arcStr(c, 0, -4 * sz, 7 * sz, 5 * sz, Math.PI, Math.PI * 2, 0.12, 0.4 * sz, g + 25, pulse * 0.85);
-        arcStr(c, 0, 1 * sz, 12 * sz, 2 * sz, 0, Math.PI, 0.2, 0.25 * sz, g - 10, pulse * 0.6);
-        for (var li = 0; li < 8; li++) {
-            var la = (li / 8) * Math.PI * 2 + a.pulsePhase * 0.5;
-            var lx = Math.cos(la) * 11 * sz, ly = Math.sin(la) * 3.5 * sz;
-            var lBright = (Math.sin(a.pulsePhase + li * 0.8) + 1) * 0.5;
-            c.beginPath(); c.arc(lx, ly, 0.7 * sz, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + (pulse * lBright * 0.7) + ')';
+
+        var diskW = 18 * sz;
+        var diskH = 5 * sz;
+        var domeR = 7 * sz;
+
+        /* shield shimmer on fire */
+        if (a.shieldFlicker > 0) {
+            var shA = a.shieldFlicker * 0.25;
+            arcStr(c, 0, 0, diskW * 1.3, diskH * 2.5, 0, Math.PI * 2, 0.1, 0.08 * sz, g + 60, shA);
+        }
+
+        /* bottom hull glow — engine exhaust cone */
+        var engPulse = 0.25 + Math.sin(a.engineGlow) * 0.12;
+        c.beginPath();
+        c.moveTo(-diskW * 0.3, diskH * 0.5);
+        c.lineTo(0, diskH * 1.8);
+        c.lineTo(diskW * 0.3, diskH * 0.5);
+        c.closePath();
+        c.fillStyle = 'rgba(' + Math.min(210, g + 50) + ',' + Math.min(210, g + 50) + ',' + Math.min(210, g + 50) + ',' + (engPulse * 0.2) + ')';
+        c.fill();
+
+        /* main saucer disk — elliptical body */
+        c.beginPath();
+        c.ellipse(0, 0, diskW, diskH, 0, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + g + ',' + g + ',' + g + ',' + (pulse * 0.55) + ')';
+        c.fill();
+        c.strokeStyle = 'rgba(' + (g - 25) + ',' + (g - 25) + ',' + (g - 25) + ',' + (pulse * 0.8) + ')';
+        c.lineWidth = 0.5 * sz; c.stroke();
+
+        /* disk rim — double outline for thickness */
+        arcStr(c, 0, 0, diskW * 0.92, diskH * 0.85, 0, Math.PI * 2, 0.12, 0.12 * sz, g - 10, pulse * 0.35);
+
+        /* hull plate lines — horizontal bands across disk */
+        stk(c, -diskW * 0.8, -diskH * 0.2, diskW * 0.8, -diskH * 0.2, 0.08 * sz, g + 10, pulse * 0.25, 0);
+        stk(c, -diskW * 0.85, diskH * 0.15, diskW * 0.85, diskH * 0.15, 0.08 * sz, g + 10, pulse * 0.25, 0);
+
+        /* portholes — row of windows around the saucer rim */
+        for (var pi = 0; pi < 10; pi++) {
+            var pa = (pi / 10) * Math.PI * 2 + a.panelPhase * 0.15;
+            var px = Math.cos(pa) * diskW * 0.75;
+            var py = Math.sin(pa) * diskH * 0.6;
+            var pBright = (Math.sin(a.pulsePhase * 1.5 + pi * 0.7) + 1) * 0.35;
+            c.beginPath(); c.arc(px, py, 0.8 * sz, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + Math.min(230, g + 70) + ',' + Math.min(230, g + 70) + ',' + Math.min(230, g + 70) + ',' + pBright + ')';
+            c.fill();
+            c.strokeStyle = 'rgba(' + (g - 15) + ',' + (g - 15) + ',' + (g - 15) + ',' + (pBright + 0.15) + ')';
+            c.lineWidth = 0.15 * sz; c.stroke();
+        }
+
+        /* dome — glass cockpit bubble on top */
+        arcStr(c, 0, -diskH * 0.3, domeR, domeR * 0.9, Math.PI, Math.PI * 2, 0.1, 0.3 * sz, g + 20, pulse * 0.65);
+        c.beginPath();
+        c.ellipse(0, -diskH * 0.3, domeR, domeR * 0.9, 0, Math.PI, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 15) + ',' + (g + 15) + ',' + (g + 15) + ',' + (pulse * 0.35) + ')';
+        c.fill();
+        c.strokeStyle = 'rgba(' + (g - 20) + ',' + (g - 20) + ',' + (g - 20) + ',' + (pulse * 0.7) + ')';
+        c.lineWidth = 0.35 * sz; c.stroke();
+
+        /* dome highlight — reflective streak */
+        arcStr(c, -domeR * 0.2, -diskH * 0.3 - domeR * 0.35, domeR * 0.5, domeR * 0.25,
+            Math.PI * 1.2, Math.PI * 1.8, 0.15, 0.1 * sz, g + 50, pulse * 0.4);
+
+        /* dome inner glow / occupant silhouette */
+        c.beginPath(); c.arc(0, -diskH * 0.35, domeR * 0.3, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 40) + ',' + (g + 40) + ',' + (g + 40) + ',' + (pulse * 0.3) + ')';
+        c.fill();
+
+        /* antenna on top of dome */
+        stk(c, 0, -diskH * 0.3 - domeR * 0.85, 0, -diskH * 0.3 - domeR * 1.5, 0.12 * sz, g + 10, pulse * 0.6, 0);
+        var antPulse = (Math.sin(a.scanAngle) + 1) * 0.45;
+        c.beginPath(); c.arc(0, -diskH * 0.3 - domeR * 1.5, 0.6 * sz, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + Math.min(230, g + 80) + ',' + Math.min(230, g + 80) + ',' + Math.min(230, g + 80) + ',' + antPulse + ')';
+        c.fill();
+
+        /* landing legs — three small prongs underneath */
+        for (var li = 0; li < 3; li++) {
+            var lAngle = li * Math.PI * 2 / 3 + 0.5;
+            var lx = Math.cos(lAngle) * diskW * 0.55;
+            var ly = diskH * 0.4;
+            stk(c, lx, ly, lx + Math.cos(lAngle) * 2 * sz, ly + 3 * sz, 0.12 * sz, g - 15, pulse * 0.5, 0);
+        }
+
+        /* rotating ring of running lights on disk edge */
+        for (var ri = 0; ri < 6; ri++) {
+            var ra = (ri / 6) * Math.PI * 2 + a.ringAngle;
+            var rx = Math.cos(ra) * diskW * 0.95;
+            var ry = Math.sin(ra) * diskH * 0.9;
+            var rBright = (Math.sin(a.pulsePhase * 2.5 + ri * 1.1) + 1) * 0.4;
+            c.beginPath(); c.arc(rx, ry, 0.5 * sz, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + Math.min(230, g + 75) + ',' + Math.min(230, g + 75) + ',' + Math.min(230, g + 75) + ',' + rBright + ')';
             c.fill();
         }
-        arcStr(c, 0, -5 * sz, 4 * sz, 2.5 * sz, Math.PI * 1.15, Math.PI * 1.85, 0.2, 0.15 * sz, g + 40, 0.5);
-        var glowR = 8 * sz + Math.sin(a.pulsePhase * 2) * 2 * sz;
-        var grad = c.createRadialGradient(0, 3 * sz, 0, 0, 3 * sz, glowR);
-        grad.addColorStop(0, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + (0.15 * pulse) + ')');
-        grad.addColorStop(1, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',0)');
-        c.fillStyle = grad;
-        c.fillRect(-glowR, 3 * sz - glowR * 0.3, glowR * 2, glowR);
-        c.restore();
-        if (a.beaming && a.beamTarget) {
-            var bx = a.beamTarget.x + a.beamTarget.w / 2;
-            var by = a.beamTarget.y;
-            var bAlpha = Math.min(0.35, a.beamPhase * 0.2);
-            var beamW = 5 + a.beamPhase * 8;
+
+        /* bottom center — launch bay */
+        c.beginPath(); c.arc(0, diskH * 0.5, 2 * sz, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 35) + ',' + (g + 35) + ',' + (g + 35) + ',' + (pulse * 0.5) + ')';
+        c.fill();
+        arcStr(c, 0, diskH * 0.5, 3 * sz, 3 * sz, 0, Math.PI * 2, 0.2, 0.1 * sz, g + 15, pulse * 0.35);
+
+        /* launch flash — wide bright cone when firing */
+        if (a.launchFlash > 0) {
+            var lfA = a.launchFlash * 0.5;
             c.beginPath();
-            c.moveTo(x - 4 * sz, y + 5 * sz);
-            c.lineTo(bx - beamW, by); c.lineTo(bx + beamW, by);
-            c.lineTo(x + 4 * sz, y + 5 * sz); c.closePath();
-            c.fillStyle = 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + bAlpha + ')';
+            c.moveTo(-diskW * 0.25, diskH * 0.6);
+            c.lineTo(-diskW * 0.05, diskH * 5);
+            c.lineTo(diskW * 0.05, diskH * 5);
+            c.lineTo(diskW * 0.25, diskH * 0.6);
+            c.closePath();
+            c.fillStyle = 'rgba(' + Math.min(230, g + 70) + ',' + Math.min(230, g + 70) + ',' + Math.min(230, g + 70) + ',' + lfA + ')';
             c.fill();
-            for (var sl = 0; sl < 6; sl++) {
-                var st = (sl + 0.5) / 6;
-                var slY = (y + 5 * sz) + (by - y - 5 * sz) * st;
-                var slW = 4 * sz + (beamW - 4 * sz) * st;
-                var slX = x + (bx - x) * st;
-                var slA = bAlpha * 0.5 * (1 + Math.sin(a.pulsePhase * 3 + sl * 1.2));
-                stk(c, slX - slW, slY, slX + slW, slY, 0.12, g + 40, slA, 0);
+            /* bright ring around launch bay */
+            arcStr(c, 0, diskH * 0.5, 4 * sz, 4 * sz, 0, Math.PI * 2, 0.1, 0.15 * sz, g + 80, lfA * 0.7);
+        }
+
+        c.restore();
+
+        /* beam connecting saucer to the asteroid it just launched */
+        if (a.launchedAst && a.beamAge > 0 && !a.launchedAst.exploded) {
+            var ba = Math.min(0.4, a.beamAge * 0.3);
+            var ast = a.launchedAst;
+            var bx1 = x, by1 = y + hover + diskH * 0.5;
+            var bx2 = ast.x, by2 = ast.y;
+            /* wide energy beam */
+            c.beginPath();
+            c.moveTo(bx1 - 3 * sz, by1);
+            c.lineTo(bx2 - 1.5 * sz, by2);
+            c.lineTo(bx2 + 1.5 * sz, by2);
+            c.lineTo(bx1 + 3 * sz, by1);
+            c.closePath();
+            c.fillStyle = 'rgba(' + Math.min(220, g + 55) + ',' + Math.min(220, g + 55) + ',' + Math.min(220, g + 55) + ',' + ba + ')';
+            c.fill();
+            /* center line of beam */
+            stk(c, bx1, by1, bx2, by2, 0.3 * sz, g + 60, ba * 1.2, 0);
+            /* pulsing nodes along beam */
+            for (var bi = 1; bi < 4; bi++) {
+                var bf = bi / 4;
+                var bnx = bx1 + (bx2 - bx1) * bf;
+                var bny = by1 + (by2 - by1) * bf;
+                var bnP = (Math.sin(a.pulsePhase * 4 + bi * 2) + 1) * 0.3;
+                c.beginPath(); c.arc(bnx, bny, 1.2 * sz, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + Math.min(220, g + 65) + ',' + Math.min(220, g + 65) + ',' + Math.min(220, g + 65) + ',' + (ba * bnP + 0.1) + ')';
+                c.fill();
             }
         }
     }
 
+    function destroyAlien(a) {
+        for (var i = 0; i < 10; i++) {
+            alienDebris.push({
+                x: a.x + (behRng() - 0.5) * 16 * a.size,
+                y: a.y + (behRng() - 0.5) * 8 * a.size,
+                vx: (behRng() - 0.5) * 150,
+                vy: behRng() * 50 - 30,
+                r: 1.5 + behRng() * 4 * a.size,
+                g: a.g + bri(-15, 25),
+                spin: (behRng() - 0.5) * 12,
+                angle: behRng() * Math.PI * 2,
+                age: 0, life: 1.5 + behRng() * 2.5,
+                type: behRng() < 0.3 ? 'plate' : 'shard'
+            });
+        }
+        for (var i = 0; i < 5; i++) {
+            alienDebris.push({
+                x: a.x + (behRng() - 0.5) * 10,
+                y: a.y + (behRng() - 0.5) * 5,
+                vx: (behRng() - 0.5) * 60,
+                vy: -25 - behRng() * 50,
+                r: 6 + behRng() * 12,
+                g: a.g + 40,
+                spin: 0, angle: 0,
+                age: 0, life: 2 + behRng() * 2.5,
+                type: 'smoke'
+            });
+        }
+        a.alive = false;
+    }
     /* ── ALIEN DEBRIS ── */
     var alienDebris = [];
     function updateAlienDebris(dt) {
+        while (alienDebris.length > 20) alienDebris.shift();
         for (var i = alienDebris.length - 1; i >= 0; i--) {
             var d = alienDebris[i];
             d.age += dt;
@@ -501,9 +631,9 @@
     var missiles = [];
     var missileTimer = 0;
     var MISSILE_TYPES = [
-        { name: 'sam', speed: 280, r: 1.5, trailW: 0.6, g: 80, dmg: 1, turnRate: 4 },
-        { name: 'interceptor', speed: 200, r: 2.5, trailW: 1.0, g: 60, dmg: 2, turnRate: 3 },
-        { name: 'heavy', speed: 140, r: 3.5, trailW: 1.5, g: 50, dmg: 3, turnRate: 2 }
+        { name: 'sam', speed: 500, r: 1.5, trailW: 0.6, g: 80, dmg: 2, turnRate: 7 },
+        { name: 'interceptor', speed: 420, r: 2.5, trailW: 1.0, g: 60, dmg: 3, turnRate: 6 },
+        { name: 'heavy', speed: 350, r: 3.5, trailW: 1.5, g: 50, dmg: 5, turnRate: 5 }
     ];
 
     function createMissile(targetAlien) {
@@ -532,7 +662,9 @@
     function updateMissile(m, dt) {
         m.age += dt;
         m.exhaustPhase += dt * 25;
+        var hasTarget = false;
         if (m.targetId && m.targetId.alive) {
+            hasTarget = true;
             var dx = m.targetId.x - m.x, dy = m.targetId.y - m.y;
             var dist = Math.sqrt(dx * dx + dy * dy);
             if (dist > 0) {
@@ -543,7 +675,7 @@
                 var curSpd = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
                 if (curSpd > 0) { m.vx = m.vx / curSpd * m.type.speed; m.vy = m.vy / curSpd * m.type.speed; }
             }
-            if (dist < 12) {
+            if (dist < 20) {
                 m.targetId.hp -= m.type.dmg;
                 m.targetId.hitFlash = 1;
                 m.targetId.evading = true;
@@ -553,12 +685,38 @@
                 m.alive = false;
                 return;
             }
-        } else {
+        } else if (m.targetAst && !m.targetAst.exploded) {
+            hasTarget = true;
+            var dx = m.targetAst.x - m.x, dy = m.targetAst.y - m.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0) {
+                var desVx = dx / dist * m.type.speed * 1.3;
+                var desVy = dy / dist * m.type.speed * 1.3;
+                m.vx += (desVx - m.vx) * m.type.turnRate * 1.5 * dt;
+                m.vy += (desVy - m.vy) * m.type.turnRate * 1.5 * dt;
+                var curSpd = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+                var maxSpd = m.type.speed * 1.3;
+                if (curSpd > 0) { m.vx = m.vx / curSpd * maxSpd; m.vy = m.vy / curSpd * maxSpd; }
+            }
+        }
+        if (!hasTarget) {
             m.vy -= 30 * dt;
         }
         m.x += m.vx * dt; m.y += m.vy * dt;
+        for (var ai = 0; ai < asteroids.length; ai++) {
+            var ast = asteroids[ai];
+            if (ast.exploded) continue;
+            var adx = ast.x - m.x, ady = ast.y - m.y;
+            if (adx * adx + ady * ady < (ast.r + 8) * (ast.r + 8)) {
+                ast.exploded = true; ast.explodeAge = 0;
+                DISASTER.shakeX += br(-1, 1); DISASTER.shakeY += br(-1, 1);
+                spawnAsteroidImpact(ast);
+                missileExplosions.push({ x: m.x, y: m.y, age: 0, r: m.type.r * 4, g: m.type.g + 40 });
+                m.alive = false; return;
+            }
+        }
         m.trail.push({ x: m.x, y: m.y, age: 0 });
-        if (m.trail.length > 25) m.trail.shift();
+        if (m.trail.length > 12) m.trail.shift();
         for (var t = 0; t < m.trail.length; t++) m.trail[t].age += dt;
         if (m.age > 5 || m.x < -50 || m.x > W + 50 || m.y < -80 || m.y > H + 20) m.alive = false;
     }
@@ -612,16 +770,34 @@
             arcStr(c, e.x, e.y, e.r * 0.5, e.r * 0.4, 0, Math.PI * 2, 0.4, 0.15, e.g + 30, alpha * 0.7);
         }
     }
+    function createAsteroidMissile(ast) {
+        var mType = MISSILE_TYPES[bri(0, MISSILE_TYPES.length)];
+        var launchX, launchY;
+        if (buildings.length > 0 && behRng() < 0.7) {
+            var lb = buildings[bri(0, buildings.length)];
+            launchX = lb.x + lb.w * 0.5; launchY = lb.y;
+        } else {
+            launchX = br(W * 0.05, W * 0.95); launchY = GROUND;
+        }
+        var ang = Math.atan2(ast.y - launchY, ast.x - launchX);
+        return {
+            x: launchX, y: launchY,
+            vx: Math.cos(ang) * mType.speed,
+            vy: Math.sin(ang) * mType.speed,
+            targetId: null, targetAst: ast,
+            type: mType, age: 0, alive: true,
+            trail: [], exhaustPhase: br(0, Math.PI * 2)
+        };
+    }
     function updateDefenseSystem(dt) {
         missileTimer += dt;
         updateMissileExplosions(dt);
-        updateAlienDebris(dt);
-        if (missileTimer > 0.8 && aliens.length > 0) {
+        if (missileTimer > 0.6 && asteroids.length > 0) {
             missileTimer = 0;
-            var target = aliens[bri(0, aliens.length)];
-            if (target.alive && target.y > 0) {
-                missiles.push(createMissile(target));
-                if (behRng() < 0.3) missiles.push(createMissile(target));
+            for (var ai = 0; ai < asteroids.length; ai++) {
+                if (!asteroids[ai].exploded && behRng() < 0.5) {
+                    missiles.push(createAsteroidMissile(asteroids[ai]));
+                }
             }
         }
         for (var i = missiles.length - 1; i >= 0; i--) {
@@ -630,34 +806,328 @@
         }
     }
 
+    /* ═══════════ NUCLEAR MISSILE DEFENSE (anti-alien) ═══════════ */
+    var nukes = [];
+    var nukeTimer = 5;
+    var nukeExplosions = [];
+    function createNuke(targetAlien) {
+        var launchX = br(W * 0.1, W * 0.9);
+        var launchY = GROUND;
+        var ang = Math.atan2(targetAlien.y - launchY, targetAlien.x - launchX);
+        var spd = 150;
+        return {
+            x: launchX, y: launchY,
+            vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+            target: targetAlien,
+            speed: spd, turnRate: 4,
+            age: 0, alive: true,
+            trail: [],
+            exhaustPhase: br(0, Math.PI * 2),
+            r: 5, g: 55
+        };
+    }
+    function updateNuke(n, dt) {
+        n.age += dt;
+        n.exhaustPhase += dt * 15;
+        if (n.target && n.target.alive) {
+            var dx = n.target.x - n.x, dy = n.target.y - n.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0) {
+                var desVx = dx / dist * n.speed;
+                var desVy = dy / dist * n.speed;
+                n.vx += (desVx - n.vx) * n.turnRate * dt;
+                n.vy += (desVy - n.vy) * n.turnRate * dt;
+                var curSpd = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+                if (curSpd > 0) { n.vx = n.vx / curSpd * n.speed; n.vy = n.vy / curSpd * n.speed; }
+            }
+            if (dist < 30) {
+                destroyAlien(n.target);
+                nukeExplosions.push({ x: n.x, y: n.y, age: 0, maxR: 50 + n.r * 8, g: 70 });
+                DISASTER.shakeX += br(-4, 4);
+                DISASTER.shakeY += br(-3, 3);
+                ATM.flashIntensity = Math.min(ATM.flashIntensity + 0.3, 0.6);
+                n.alive = false;
+                return;
+            }
+        } else {
+            n.vy -= 50 * dt;
+        }
+        n.x += n.vx * dt; n.y += n.vy * dt;
+        n.trail.push({ x: n.x, y: n.y, age: 0 });
+        if (n.trail.length > 20) n.trail.shift();
+        for (var t = 0; t < n.trail.length; t++) n.trail[t].age += dt;
+        if (n.age > 8 || n.x < -80 || n.x > W + 80 || n.y < -100 || n.y > H + 30) n.alive = false;
+    }
+    function drawNuke(c, n) {
+        var ang = Math.atan2(n.vy, n.vx);
+        var len = n.r * 3;
+        var wid = n.r * 0.8;
+        /* thick smoke trail */
+        for (var t = 0; t < n.trail.length; t++) {
+            var tp = n.trail[t];
+            var ta = Math.max(0, 0.5 - tp.age * 0.35);
+            var tr = 2 + tp.age * 8;
+            var tg = n.g + 50 + Math.floor(tp.age * 30);
+            c.beginPath(); c.arc(tp.x, tp.y, tr, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + Math.min(200, tg) + ',' + Math.min(200, tg) + ',' + Math.min(200, tg) + ',' + (ta * 0.25) + ')';
+            c.fill();
+        }
+        /* missile body — big and stocky */
+        c.save(); c.translate(n.x, n.y); c.rotate(ang);
+        /* main body */
+        c.beginPath();
+        c.moveTo(len * 1.2, 0);
+        c.lineTo(len * 0.3, -wid);
+        c.lineTo(-len, -wid * 0.9);
+        c.lineTo(-len * 1.1, -wid * 0.4);
+        c.lineTo(-len * 1.1, wid * 0.4);
+        c.lineTo(-len, wid * 0.9);
+        c.lineTo(len * 0.3, wid);
+        c.closePath();
+        c.fillStyle = 'rgba(' + n.g + ',' + n.g + ',' + n.g + ',0.9)';
+        c.fill();
+        c.strokeStyle = 'rgba(' + (n.g - 20) + ',' + (n.g - 20) + ',' + (n.g - 20) + ',0.8)';
+        c.lineWidth = 0.6; c.stroke();
+        /* nose cone */
+        c.beginPath();
+        c.moveTo(len * 2, 0);
+        c.lineTo(len * 0.3, -wid * 0.6);
+        c.lineTo(len * 0.3, wid * 0.6);
+        c.closePath();
+        c.fillStyle = 'rgba(' + (n.g - 10) + ',' + (n.g - 10) + ',' + (n.g - 10) + ',0.9)';
+        c.fill(); c.stroke();
+        /* nuclear symbol — circle with arcs */
+        c.beginPath(); c.arc(0, 0, wid * 0.5, 0, Math.PI * 2);
+        c.strokeStyle = 'rgba(' + (n.g + 40) + ',' + (n.g + 40) + ',' + (n.g + 40) + ',0.5)';
+        c.lineWidth = 0.3; c.stroke();
+        for (var si = 0; si < 3; si++) {
+            var sa = si * Math.PI * 2 / 3;
+            stk(c, 0, 0, Math.cos(sa) * wid * 0.5, Math.sin(sa) * wid * 0.5, 0.15, n.g + 40, 0.4, 0);
+        }
+        /* body bands */
+        stk(c, -len * 0.4, -wid * 0.85, -len * 0.4, wid * 0.85, 0.15, n.g + 15, 0.4, 0);
+        stk(c, -len * 0.7, -wid * 0.8, -len * 0.7, wid * 0.8, 0.12, n.g + 10, 0.35, 0);
+        /* big tail fins */
+        c.beginPath();
+        c.moveTo(-len * 0.8, -wid * 0.8);
+        c.lineTo(-len * 1.3, -wid * 2.5);
+        c.lineTo(-len * 0.5, -wid * 0.9);
+        c.closePath();
+        c.fillStyle = 'rgba(' + (n.g + 5) + ',' + (n.g + 5) + ',' + (n.g + 5) + ',0.7)';
+        c.fill();
+        c.beginPath();
+        c.moveTo(-len * 0.8, wid * 0.8);
+        c.lineTo(-len * 1.3, wid * 2.5);
+        c.lineTo(-len * 0.5, wid * 0.9);
+        c.closePath();
+        c.fill();
+        c.restore();
+        /* exhaust flame */
+        var exLen = len * (1.5 + Math.sin(n.exhaustPhase) * 0.5);
+        var exX = n.x - Math.cos(ang) * len * 1.1;
+        var exY = n.y - Math.sin(ang) * len * 1.1;
+        stk(c, exX, exY,
+            exX - Math.cos(ang) * exLen, exY - Math.sin(ang) * exLen,
+            wid * 0.6, Math.min(210, n.g + 60), 0.5, 0);
+        stk(c, exX, exY,
+            exX - Math.cos(ang) * exLen * 0.7 + (behRng() - 0.5) * 4,
+            exY - Math.sin(ang) * exLen * 0.7 + (behRng() - 0.5) * 4,
+            wid * 0.35, Math.min(220, n.g + 80), 0.35, 0);
+    }
+    function updateNukeExplosions(dt) {
+        for (var i = nukeExplosions.length - 1; i >= 0; i--) {
+            var e = nukeExplosions[i];
+            e.age += dt;
+            if (e.age > 2) { nukeExplosions.splice(i, 1); continue; }
+        }
+    }
+    function drawNukeExplosions(c) {
+        for (var i = 0; i < nukeExplosions.length; i++) {
+            var e = nukeExplosions[i];
+            var alpha = Math.max(0, 1 - e.age / 2);
+            var growR = e.maxR * Math.min(1, e.age * 3);
+            /* mushroom cloud base ring */
+            arcStr(c, e.x, e.y, growR, growR * 0.4, 0, Math.PI * 2, 0.1, 0.2, e.g + 30, alpha * 0.4);
+            /* expanding shockwave */
+            arcStr(c, e.x, e.y, growR * 1.3, growR * 1.3, 0, Math.PI * 2, 0.08, 0.1, e.g + 50, alpha * 0.2);
+            /* bright core */
+            c.beginPath(); c.arc(e.x, e.y, growR * 0.4, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + Math.min(230, e.g + 80) + ',' + Math.min(230, e.g + 80) + ',' + Math.min(230, e.g + 80) + ',' + (alpha * 0.35) + ')';
+            c.fill();
+            /* mushroom stem */
+            if (e.age > 0.3) {
+                var stemH = growR * 1.5 * Math.min(1, (e.age - 0.3) * 2);
+                stk(c, e.x - growR * 0.1, e.y, e.x - growR * 0.05, e.y + stemH, growR * 0.15, e.g + 20, alpha * 0.25, 0);
+                stk(c, e.x + growR * 0.1, e.y, e.x + growR * 0.05, e.y + stemH, growR * 0.15, e.g + 20, alpha * 0.25, 0);
+                /* cloud top */
+                arcStr(c, e.x, e.y - growR * 0.3, growR * 0.7, growR * 0.5, Math.PI, Math.PI * 2, 0.12, 0.15, e.g + 15, alpha * 0.3);
+            }
+        }
+    }
+    function updateNukeDefense(dt) {
+        nukeTimer += dt;
+        updateNukeExplosions(dt);
+        if (nukeTimer > br(8, 16) && aliens.length > 0) {
+            nukeTimer = 0;
+            /* target the alien closest to the buildings (highest Y) */
+            var bestAlien = null, bestY = -9999;
+            for (var ai = 0; ai < aliens.length; ai++) {
+                if (aliens[ai].alive && aliens[ai].y > bestY) {
+                    bestY = aliens[ai].y;
+                    bestAlien = aliens[ai];
+                }
+            }
+            if (bestAlien) {
+                nukes.push(createNuke(bestAlien));
+            }
+        }
+        for (var i = nukes.length - 1; i >= 0; i--) {
+            updateNuke(nukes[i], dt);
+            if (!nukes[i].alive) nukes.splice(i, 1);
+        }
+    }
+
+    /* (removed F-15 system) */
     /* ── ASTEROIDS ── */
     var asteroids = [];
     var asteroidTimer = 3;
+    var asteroidImpacts = [];
     function createAsteroid() {
         return {
-            x: br(W * 0.05, W * 0.95), y: -30,
+            x: br(W * 0.05, W * 0.95), y: -60,
             vx: br(-30, 30), vy: br(150, 300),
-            r: br(4, 12), g: bri(70, 110), spin: br(-3, 3), angle: 0,
-            alive: true, exploded: false, explodeAge: 0
+            r: br(6, 16), g: bri(60, 100), spin: br(-4, 4), angle: 0,
+            alive: true, exploded: false, explodeAge: 0,
+            fireTrailPhase: br(0, Math.PI * 2)
         };
+    }
+    function spawnAsteroidImpact(a) {
+        var impactR = a.r * 2;
+        for (var i = 0; i < 5; i++) {
+            var ang = behRng() * Math.PI * 2;
+            var spd = 40 + behRng() * 120;
+            asteroidImpacts.push({
+                x: a.x, y: a.y,
+                vx: Math.cos(ang) * spd,
+                vy: Math.sin(ang) * spd * 0.5 - behRng() * 80,
+                r: 1 + behRng() * 3,
+                g: a.g + bri(-10, 20),
+                spin: (behRng() - 0.5) * 8,
+                angle: behRng() * Math.PI * 2,
+                age: 0, life: 0.8 + behRng() * 1.2,
+                type: 'rock'
+            });
+        }
+        for (var i = 0; i < 2; i++) {
+            asteroidImpacts.push({
+                x: a.x + (behRng() - 0.5) * impactR,
+                y: a.y - behRng() * 10,
+                vx: (behRng() - 0.5) * 40,
+                vy: -20 - behRng() * 50,
+                r: 4 + behRng() * 8,
+                g: a.g + 40 + bri(0, 20),
+                spin: 0, angle: 0,
+                age: 0, life: 1 + behRng() * 1.5,
+                type: 'dustball'
+            });
+        }
+        asteroidImpacts.push({
+            x: a.x, y: a.y,
+            vx: 0, vy: 0,
+            r: 3, g: a.g + 20,
+            spin: 0, angle: 0,
+            age: 0, life: 1,
+            type: 'shockwave',
+            maxR: impactR * 3
+        });
+    }
+    function updateAsteroidImpacts(dt) {
+        while (asteroidImpacts.length > 25) asteroidImpacts.shift();
+        for (var i = asteroidImpacts.length - 1; i >= 0; i--) {
+            var d = asteroidImpacts[i];
+            d.age += dt;
+            if (d.age > d.life) { asteroidImpacts.splice(i, 1); continue; }
+            if (d.type === 'rock') {
+                d.x += d.vx * dt; d.vy += 220 * dt; d.y += d.vy * dt;
+                d.angle += d.spin * dt;
+                if (d.y > GROUND) { d.y = GROUND; d.vy *= -0.3; d.vx *= 0.6; if (Math.abs(d.vy) < 8) d.vy = 0; }
+            } else if (d.type === 'dustball') {
+                d.x += d.vx * dt * 0.5; d.y += d.vy * dt * 0.4;
+                d.r += dt * 8; d.vx *= 0.97; d.vy *= 0.96;
+            } else if (d.type === 'spark') {
+                d.x += d.vx * dt; d.vy += 300 * dt; d.y += d.vy * dt;
+            } else if (d.type === 'shockwave') {
+                d.r += (d.maxR - d.r) * dt * 3;
+            }
+        }
+    }
+    function drawAsteroidImpacts(c) {
+        for (var i = 0; i < asteroidImpacts.length; i++) {
+            var d = asteroidImpacts[i];
+            var alpha = Math.max(0, 1 - d.age / d.life);
+            if (d.type === 'rock') {
+                c.save(); c.translate(d.x, d.y); c.rotate(d.angle);
+                c.beginPath();
+                var pts = 5 + Math.floor(d.r);
+                for (var p = 0; p < pts; p++) {
+                    var pa = (p / pts) * Math.PI * 2;
+                    var pr = d.r * (0.6 + hashJ(p, d.g) * 0.4);
+                    if (p === 0) c.moveTo(Math.cos(pa) * pr, Math.sin(pa) * pr);
+                    else c.lineTo(Math.cos(pa) * pr, Math.sin(pa) * pr);
+                }
+                c.closePath();
+                c.fillStyle = 'rgba(' + d.g + ',' + d.g + ',' + d.g + ',' + (alpha * 0.85) + ')';
+                c.fill();
+                c.strokeStyle = 'rgba(' + (d.g - 25) + ',' + (d.g - 25) + ',' + (d.g - 25) + ',' + (alpha * 0.6) + ')';
+                c.lineWidth = 0.4; c.stroke();
+                c.restore();
+            } else if (d.type === 'dustball') {
+                c.beginPath(); c.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + d.g + ',' + d.g + ',' + d.g + ',' + (alpha * 0.15) + ')';
+                c.fill();
+            } else if (d.type === 'spark') {
+                var sa = alpha * 0.9;
+                stk(c, d.x, d.y, d.x - d.vx * 0.02, d.y - d.vy * 0.02, 0.3, d.g, sa, 0);
+                c.beginPath(); c.arc(d.x, d.y, 0.8, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + d.g + ',' + d.g + ',' + d.g + ',' + sa + ')';
+                c.fill();
+            } else if (d.type === 'shockwave') {
+                var swA = alpha * 0.3;
+                arcStr(c, d.x, d.y, d.r, d.r * 0.3, 0, Math.PI * 2, 0.15, 0.15, d.g + 30, swA);
+                arcStr(c, d.x, d.y, d.r * 0.9, d.r * 0.25, 0, Math.PI * 2, 0.2, 0.08, d.g + 50, swA * 0.5);
+            } else if (d.type === 'crater') {
+                var crA = alpha * 0.4;
+                arcStr(c, d.x, d.y, d.r, d.r * 0.25, 0, Math.PI * 2, 0.2, 0.2, d.g, crA);
+                for (var ci = 0; ci < 6; ci++) {
+                    var ca = (ci / 6) * Math.PI * 2 + 0.3;
+                    var cr1 = d.r * 0.4, cr2 = d.r * (1.1 + hashJ(ci, d.g) * 0.3);
+                    stk(c, d.x + Math.cos(ca) * cr1, d.y + Math.sin(ca) * cr1 * 0.3,
+                        d.x + Math.cos(ca) * cr2, d.y + Math.sin(ca) * cr2 * 0.3,
+                        0.15, d.g - 15, crA * 0.6, 0);
+                }
+            }
+        }
     }
     function updateAsteroid(a, dt) {
         if (a.exploded) {
             a.explodeAge += dt;
-            if (a.explodeAge > 0.8) a.alive = false;
+            if (a.explodeAge > 2.5) a.alive = false;
             return;
         }
         a.x += a.vx * dt; a.y += a.vy * dt; a.angle += a.spin * dt;
+        a.fireTrailPhase += dt * 20;
         if (a.y > GROUND - 20) {
             a.exploded = true; a.explodeAge = 0;
-            ATM.flashIntensity = Math.max(ATM.flashIntensity, 0.6);
-            DISASTER.shakeX += br(-4, 4); DISASTER.shakeY += br(-3, 3);
+            var shakeStr = a.r * 0.3;
+            DISASTER.shakeX += br(-shakeStr, shakeStr);
+            DISASTER.shakeY += br(-shakeStr * 0.5, shakeStr * 0.5);
+            spawnAsteroidImpact(a);
             var closest = null, closestDist = 999;
             for (var i = 0; i < buildings.length; i++) {
                 var bdist = Math.abs(buildings[i].x + buildings[i].w / 2 - a.x);
                 if (bdist < closestDist) { closestDist = bdist; closest = buildings[i]; }
             }
-            if (closest && closestDist < closest.w + 30) {
+            if (closest && closestDist < closest.w + 40) {
                 damageBuilding(closest);
             }
             killNearbyPeds(a.x);
@@ -665,26 +1135,82 @@
     }
     function drawAsteroid(c, a) {
         if (a.exploded) {
-            var alpha = Math.max(0, 1 - a.explodeAge / 0.8);
-            for (var i = 0; i < 8; i++) {
-                var ex = a.x + br(-15, 15), ey = a.y + br(-10, 10);
-                var er = br(2, 6) * (1 + a.explodeAge * 2);
-                arcStr(c, ex, ey, er, er * 0.7, 0, Math.PI * 2, 0.4, 0.3, a.g + 30, alpha * 0.5);
+            var alpha = Math.max(0, 1 - a.explodeAge / 2.5);
+            var flashA = Math.max(0, 1 - a.explodeAge / 0.3);
+            if (flashA > 0) {
+                c.beginPath(); c.arc(a.x, a.y, a.r * 4, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + (a.g + 80) + ',' + (a.g + 80) + ',' + (a.g + 80) + ',' + (flashA * 0.3) + ')';
+                c.fill();
             }
             return;
         }
-        c.save(); c.translate(a.x, a.y); c.rotate(a.angle);
-        arcStr(c, 0, 0, a.r, a.r * 0.8, 0, Math.PI * 2, 0.25, 0.5, a.g, 0.8);
-        for (var cr = 0; cr < 3; cr++) {
-            arcStr(c, br(-a.r * 0.3, a.r * 0.3), br(-a.r * 0.3, a.r * 0.3),
-                a.r * br(0.15, 0.3), a.r * br(0.1, 0.2), 0, Math.PI * 2, 0.4, 0.15, a.g - 15, 0.4);
-        }
+        var ang = Math.atan2(a.vy, a.vx);
+        var len = a.r * 2.5;
+        var wid = a.r * 0.55;
+        c.save(); c.translate(a.x, a.y); c.rotate(ang);
+
+        /* missile body — elongated cylinder */
+        c.beginPath();
+        c.moveTo(len, 0);
+        c.lineTo(len * 0.3, -wid);
+        c.lineTo(-len * 0.7, -wid * 0.9);
+        c.lineTo(-len, -wid * 0.5);
+        c.lineTo(-len, wid * 0.5);
+        c.lineTo(-len * 0.7, wid * 0.9);
+        c.lineTo(len * 0.3, wid);
+        c.closePath();
+        c.fillStyle = 'rgba(' + a.g + ',' + a.g + ',' + a.g + ',0.85)';
+        c.fill();
+        c.strokeStyle = 'rgba(' + (a.g - 20) + ',' + (a.g - 20) + ',' + (a.g - 20) + ',0.75)';
+        c.lineWidth = 0.4; c.stroke();
+
+        /* nose cone — pointed tip */
+        c.beginPath();
+        c.moveTo(len * 1.5, 0);
+        c.lineTo(len * 0.3, -wid * 0.7);
+        c.lineTo(len * 0.3, wid * 0.7);
+        c.closePath();
+        c.fillStyle = 'rgba(' + (a.g - 15) + ',' + (a.g - 15) + ',' + (a.g - 15) + ',0.9)';
+        c.fill();
+        c.stroke();
+
+        /* body band details */
+        stk(c, -len * 0.2, -wid * 0.85, -len * 0.2, wid * 0.85, 0.12, a.g + 15, 0.4, 0);
+        stk(c, len * 0.1, -wid * 0.9, len * 0.1, wid * 0.9, 0.1, a.g + 10, 0.35, 0);
+        /* warhead marking */
+        stk(c, len * 0.6, -wid * 0.4, len * 0.6, wid * 0.4, 0.08, a.g + 25, 0.3, 0);
+
+        /* tail fins — 4 stabilizers */
+        stk(c, -len * 0.8, -wid * 0.8, -len * 1.1, -wid * 2, 0.25, a.g - 10, 0.7, 0);
+        stk(c, -len * 1.1, -wid * 2, -len * 0.5, -wid * 0.9, 0.15, a.g - 10, 0.5, 0);
+        stk(c, -len * 0.8, wid * 0.8, -len * 1.1, wid * 2, 0.25, a.g - 10, 0.7, 0);
+        stk(c, -len * 1.1, wid * 2, -len * 0.5, wid * 0.9, 0.15, a.g - 10, 0.5, 0);
+
         c.restore();
-        var trailLen = Math.min(a.y + 30, 50);
+
+        /* exhaust trail — oriented opposite to velocity */
+        var tailX = a.x - Math.cos(ang) * len;
+        var tailY = a.y - Math.sin(ang) * len;
+        var perpX = -Math.sin(ang);
+        var perpY = Math.cos(ang);
+        var trailLen = Math.min(a.y + 40, 60);
         for (var t = 0; t < trailLen; t += 3) {
-            var ta = Math.max(0, 0.25 - t / trailLen * 0.25);
-            stk(c, a.x + br(-1, 1), a.y - t, a.x + br(-1, 1), a.y - t - 3, 0.3 + t * 0.02, a.g + 40, ta, 0);
+            var tFrac = t / trailLen;
+            var ta = Math.max(0, 0.45 - tFrac * 0.45);
+            var tw = wid * 0.6 * (1 + tFrac * 2);
+            var wobble = Math.sin(t * 0.4 + a.fireTrailPhase) * (1 + t * 0.04);
+            var tx = tailX - Math.cos(ang) * t + perpX * wobble;
+            var ty = tailY - Math.sin(ang) * t + perpY * wobble;
+            var tg = a.g + 40 + Math.floor(tFrac * 50);
+            c.beginPath(); c.arc(tx, ty, tw, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + (ta * 0.3) + ')';
+            c.fill();
         }
+        /* exhaust core glow */
+        var exLen = len * 0.8 + Math.sin(a.fireTrailPhase) * len * 0.3;
+        stk(c, tailX, tailY,
+            tailX - Math.cos(ang) * exLen, tailY - Math.sin(ang) * exLen,
+            wid * 0.4, Math.min(220, a.g + 60), 0.4, 0);
     }
 
     function killNearbyPeds(x) {
@@ -699,11 +1225,10 @@
         for (var ci = 0; ci < constructions.length; ci++) {
             if (!constructions[ci].done) activeConstructions++;
         }
-        var canDestroy = buildings.length > 5 && activeConstructions < 4;
+        var canDestroy = buildings.length > 5 && activeConstructions < 10;
 
         strikeTimer -= dt;
         if (strikeTimer <= 0) {
-            if (canDestroy) strikeBuildingWithLightning();
             strikeTimer = br(3, 6);
         }
         if (damageTimer > 0) {
@@ -717,19 +1242,7 @@
             }
         }
 
-        /* alien attacks */
-        alienTimer -= dt;
-        if (alienTimer <= 0) {
-            if (aliens.length < MAX_ALIENS) aliens.push(createAlien());
-            alienTimer = br(3, 6);
-        }
-
-        /* asteroid strikes */
-        asteroidTimer -= dt;
-        if (asteroidTimer <= 0 && canDestroy) {
-            asteroids.push(createAsteroid());
-            asteroidTimer = br(4, 8);
-        }
+        /* (natural asteroids removed — only aliens launch missiles now) */
 
         DISASTER.shakeX *= 0.92;
         DISASTER.shakeY *= 0.92;
@@ -1034,6 +1547,61 @@
         }
         /* sky hatching (very faint) */
         hatch(c, 0, 0, W, HORIZON, 0.15, 8, 0.06, 210, 0.08);
+
+        /* ── MOUNTAINS ── */
+        var mtnSegs = [];
+        for (var x = 0; x <= W; x += 3) {
+            var peak = Math.sin(x * 0.0018 + 1.2) * 55
+                     + Math.sin(x * 0.005 + 0.7) * 30
+                     + Math.sin(x * 0.013) * 12
+                     + Math.sin(x * 0.031) * 5;
+            mtnSegs.push({ x: x, y: HORIZON - peak - 10 });
+        }
+        /* mountain fill — hatched rock face */
+        for (var i = 0; i < mtnSegs.length - 1; i++) {
+            var s1 = mtnSegs[i], s2 = mtnSegs[i + 1];
+            stk(c, s1.x, s1.y, s2.x, s2.y, 0.5, 170, 0.65, 0.1);
+            for (var fy = s1.y; fy < HORIZON + 50; fy += 2) {
+                stk(c, s1.x, fy, s2.x, fy, 0.1, lri(180, 200), 0.3, 0.08);
+            }
+        }
+        /* mountain ridge hatching — diagonal strokes for texture */
+        for (var i = 0; i < mtnSegs.length - 1; i += 2) {
+            var s1 = mtnSegs[i];
+            var depth = HORIZON + 40 - s1.y;
+            for (var j = 0; j < depth; j += 4) {
+                var hy = s1.y + j;
+                var hx1 = s1.x + j * 0.3;
+                var hx2 = s1.x + j * 0.3 + 3;
+                stk(c, hx1, hy, hx2, hy + 3, 0.06, lri(165, 185), 0.25, 0.1);
+            }
+        }
+        /* snow caps on peaks */
+        for (var i = 1; i < mtnSegs.length - 1; i++) {
+            var prev = mtnSegs[i - 1], cur = mtnSegs[i], next = mtnSegs[i + 1];
+            if (cur.y < prev.y && cur.y < next.y && cur.y < HORIZON - 40) {
+                var snowH = Math.min(12, (HORIZON - 40 - cur.y) * 0.4);
+                for (var sy = cur.y; sy < cur.y + snowH; sy += 1.5) {
+                    var sw = (sy - cur.y) * 1.2 + 2;
+                    stk(c, cur.x - sw, sy, cur.x + sw, sy, 0.15, lri(225, 240), 0.5, 0.05);
+                }
+            }
+        }
+        /* second mountain range — farther back, lighter */
+        for (var x = 0; x < W; x += 3) {
+            var peak2 = Math.sin(x * 0.0025 + 3) * 35
+                      + Math.sin(x * 0.007 + 1.5) * 18
+                      + Math.sin(x * 0.018) * 8;
+            var my2 = HORIZON - peak2 + 15;
+            var nx = x + 3;
+            var peak2n = Math.sin(nx * 0.0025 + 3) * 35
+                       + Math.sin(nx * 0.007 + 1.5) * 18
+                       + Math.sin(nx * 0.018) * 8;
+            var my2n = HORIZON - peak2n + 15;
+            if (my2 < HORIZON + 20) {
+                stk(c, x, my2, nx, my2n, 0.3, 210, 0.45, 0.1);
+            }
+        }
 
         /* distant hills */
         for (var x = 0; x < W; x += 2) {
@@ -1612,15 +2180,12 @@
 
     function updateConstruction(con, dt) {
         if (con.done) return;
-        var activeCount = 0;
-        for (var ci = 0; ci < constructions.length; ci++) {
-            if (!constructions[ci].done) activeCount++;
-        }
-        var speedMult = activeCount > 4 ? 3 + (activeCount - 4) * 1.5 : 1;
-        con.buildTimer += dt * speedMult;
-        if (con.buildTimer >= con.floorInterval) {
+        /* ensure minimum 4 seconds total build time */
+        var interval = Math.max(4 / Math.max(1, con.floors), con.floorInterval);
+        con.buildTimer += dt;
+        if (con.buildTimer >= interval) {
             con.buildTimer = 0;
-            con.curFloor += Math.max(1, Math.floor(speedMult));
+            con.curFloor += 1;
             if (con.curFloor >= con.floors) {
                 con.curFloor = con.floors;
                 con.done = true;
@@ -2083,51 +2648,48 @@
     }
     function drawPlane(c, p) {
         var x = p.x, y = p.y, d = p.dir, g = p.g;
-        var s = 1.4;
+        var s = 1.6;
         c.save(); c.translate(x, y); c.rotate(p.bankAngle);
-        /* fuselage — tapered tube */
-        stk(c, -d * 4 * s, 0, d * 18 * s, 0, 0.8 * s, g - 10, 0.85, 0);
-        stk(c, -d * 4 * s, -0.8 * s, d * 16 * s, -0.6 * s, 0.3 * s, g, 0.5, 0);
-        stk(c, -d * 4 * s, 0.8 * s, d * 16 * s, 0.6 * s, 0.3 * s, g, 0.5, 0);
-        /* nose cone */
-        stk(c, d * 18 * s, 0, d * 22 * s, -0.3 * s, 0.5 * s, g - 5, 0.75, 0);
-        stk(c, d * 22 * s, -0.3 * s, d * 24 * s, -0.1 * s, 0.3 * s, g, 0.65, 0);
-        /* cockpit windows */
-        stk(c, d * 16 * s, -1.2 * s, d * 20 * s, -0.8 * s, 1.5 * s, g + 35, 0.3, 0);
-        /* main wings — swept with dihedral */
-        var flapOff = Math.sin(p.flapPhase) * 0.3 * s;
-        stk(c, d * 7 * s, -0.5 * s, d * 4 * s, -11 * s, 0.4 * s, g - 5, 0.7, 0);
-        stk(c, d * 7 * s, 0.5 * s, d * 4 * s, 11 * s, 0.4 * s, g - 5, 0.7, 0);
-        stk(c, d * 4 * s, -11 * s, d * 9 * s, -10 * s + flapOff, 0.25 * s, g, 0.55, 0);
-        stk(c, d * 4 * s, 11 * s, d * 9 * s, 10 * s - flapOff, 0.25 * s, g, 0.55, 0);
-        /* wing detail — engine nacelles */
-        arcStr(c, d * 5 * s, -6 * s, 2.5 * s, 1.2 * s, 0, Math.PI * 2, 0.3, 0.25 * s, g - 12, 0.6);
-        arcStr(c, d * 5 * s, 6 * s, 2.5 * s, 1.2 * s, 0, Math.PI * 2, 0.3, 0.25 * s, g - 12, 0.6);
-        /* horizontal stabilizer */
-        stk(c, -d * 3 * s, 0, -d * 5 * s, -4.5 * s, 0.3 * s, g, 0.6, 0);
-        stk(c, -d * 3 * s, 0, -d * 5 * s, 4.5 * s, 0.3 * s, g, 0.6, 0);
-        stk(c, -d * 5 * s, -4.5 * s, -d * 3 * s, -3.5 * s, 0.15 * s, g + 5, 0.45, 0);
-        stk(c, -d * 5 * s, 4.5 * s, -d * 3 * s, 3.5 * s, 0.15 * s, g + 5, 0.45, 0);
-        /* vertical tail */
-        stk(c, -d * 3 * s, 0, -d * 5 * s, -6 * s, 0.35 * s, g - 5, 0.7, 0);
-        stk(c, -d * 5 * s, -6 * s, -d * 2 * s, -5 * s, 0.2 * s, g, 0.5, 0);
-        /* fuselage windows */
-        for (var wi = 0; wi < 8; wi++) {
-            var wx = d * (2 + wi * 1.8) * s;
-            c.beginPath(); c.arc(wx, -0.5 * s, 0.35 * s, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + (g + 40) + ',' + (g + 40) + ',' + (g + 40) + ',0.35)';
-            c.fill();
-        }
+        /* arrowhead body */
+        c.beginPath();
+        c.moveTo(d * 24 * s, 0);
+        c.lineTo(-d * 6 * s, -5 * s);
+        c.lineTo(-d * 4 * s, 0);
+        c.lineTo(-d * 6 * s, 5 * s);
+        c.closePath();
+        c.fillStyle = 'rgba(' + g + ',' + g + ',' + g + ',0.7)';
+        c.fill();
+        c.strokeStyle = 'rgba(' + (g - 20) + ',' + (g - 20) + ',' + (g - 20) + ',0.8)';
+        c.lineWidth = 0.4 * s; c.stroke();
+        /* swept wings */
+        c.beginPath();
+        c.moveTo(d * 8 * s, 0);
+        c.lineTo(-d * 2 * s, -14 * s);
+        c.lineTo(-d * 5 * s, -10 * s);
+        c.lineTo(-d * 1 * s, -1 * s);
+        c.closePath();
+        c.fillStyle = 'rgba(' + (g + 5) + ',' + (g + 5) + ',' + (g + 5) + ',0.55)';
+        c.fill(); c.stroke();
+        c.beginPath();
+        c.moveTo(d * 8 * s, 0);
+        c.lineTo(-d * 2 * s, 14 * s);
+        c.lineTo(-d * 5 * s, 10 * s);
+        c.lineTo(-d * 1 * s, 1 * s);
+        c.closePath(); c.fill(); c.stroke();
+        /* tail fin */
+        stk(c, -d * 4 * s, 0, -d * 7 * s, -6 * s, 0.3 * s, g - 10, 0.7, 0);
         c.restore();
-        /* contrails from engines */
-        var trailLen = Math.min(100, p.trailAge * 15);
-        for (var t = 0; t < trailLen; t += 2.5) {
-            var alpha = Math.max(0, 0.18 - t / trailLen * 0.18);
-            var tw = 0.4 + t / trailLen * 1.2;
-            stk(c, x - d * (t + 5), y - 6 + Math.sin(t * 0.12) * 0.4,
-                x - d * (t + 7.5), y - 6 + Math.sin((t + 2.5) * 0.12) * 0.4, tw, 200, alpha, 0);
-            stk(c, x - d * (t + 5), y + 6 + Math.sin(t * 0.15) * 0.3,
-                x - d * (t + 7.5), y + 6 + Math.sin((t + 2.5) * 0.15) * 0.3, tw, 200, alpha, 0);
+        /* jet exhaust */
+        var exLen = 6 + Math.sin(p.flapPhase * 8) * 2;
+        stk(c, x - d * 5 * s, y, x - d * (5 + exLen) * s, y, 0.7 * s, g + 60, 0.4, 0);
+        stk(c, x - d * 5.5 * s, y, x - d * (5.5 + exLen * 0.5) * s, y, 0.3 * s, g + 80, 0.3, 0);
+        /* contrail */
+        var trailLen = Math.min(80, p.trailAge * 15);
+        for (var t = 0; t < trailLen; t += 5) {
+            var alpha = Math.max(0, 0.12 - t / trailLen * 0.12);
+            var tw = 0.3 + t / trailLen * 1.5;
+            stk(c, x - d * (t + 7 * s), y + Math.sin(t * 0.1) * 0.3,
+                x - d * (t + 9 * s), y + Math.sin((t + 3) * 0.1) * 0.3, tw, 190, alpha, 0);
         }
     }
 
@@ -2859,14 +3421,6 @@
         c.shadowBlur = 0;
     }
     function updateLightning(dt) {
-        ATM.thunderTimer -= dt;
-        if (ATM.thunderTimer <= 0) {
-            if (behRng() < 0.7) {
-                ATM.flashIntensity = br(0.4, 0.9);
-                if (behRng() < 0.6 && !lightningBolt) lightningBolt = createLightningBolt();
-            }
-            ATM.thunderTimer = br(1.5, 5);
-        }
         if (ATM.flashIntensity > 0) ATM.flashIntensity *= Math.pow(0.03, dt);
         if (ATM.flashIntensity < 0.01) ATM.flashIntensity = 0;
         if (lightningBolt) {
@@ -3672,11 +4226,23 @@
         /* reset smoke */
         smokePuffs = [];
 
-        /* spawn planes & helicopters */
         planes = [];
         helis = [];
-        if (behRng() > 0.4) planes.push(createPlane());
-        if (behRng() > 0.5) helis.push(createHeli());
+
+        /* spawn alien attack saucers */
+        aliens = [];
+        alienDebris = [];
+        alienTimer = br(1, 3);
+        for (var i = 0; i < bri(2, 10); i++) {
+            var al = createAlien();
+            al.y = al.targetY;
+            aliens.push(al);
+        }
+
+        /* reset nuclear defense */
+        nukes = [];
+        nukeExplosions = [];
+        nukeTimer = 0;
 
         /* spawn initial train */
         trains = [];
@@ -3767,13 +4333,9 @@
         criminals = [];
         policeFoot = [];
 
-        /* war planes, spaceships, flying cars */
         warPlanes = [];
         spaceships = [];
         flyingCars = [];
-        if (behRng() > 0.5) warPlanes.push(createWarPlane());
-        if (behRng() > 0.6) spaceships.push(createSpaceship());
-        for (var i = 0; i < bri(0, 2); i++) flyingCars.push(createFlyingCar());
 
         /* rain */
         raindrops = [];
@@ -3782,14 +4344,12 @@
         strikeTimer = br(1, 3);
         pendingDamage = null;
         damageTimer = 0;
-        alienTimer = br(2, 4);
-        asteroidTimer = br(2, 4);
-        aliens = [];
+        asteroidTimer = 1;
         asteroids = [];
         missiles = [];
         missileTimer = 0;
         missileExplosions = [];
-        alienDebris = [];
+        asteroidImpacts = [];
 
         dayPhase = 0;
     }
@@ -3823,6 +4383,9 @@
         updateStrikeSystem(dt);
         updateCrumbleDebris(dt);
         updateDefenseSystem(dt);
+        updateNukeDefense(dt);
+        updateAlienDebris(dt);
+        updateAsteroidImpacts(dt);
 
         /* ── UPDATE ── */
         /* construction */
@@ -3883,53 +4446,30 @@
             updateFlock(flocks[i], dt);
             if (!flocks[i].alive) flocks.splice(i, 1);
         }
-        if (flocks.length < MAX_FLOCKS && behRng() < 0.008) flocks.push(createFlock());
+        if (flocks.length < MAX_FLOCKS && behRng() < 0.03) flocks.push(createFlock());
 
         /* clouds */
         for (var i = 0; i < clouds.length; i++) updateCloud(clouds[i], dt);
 
-        /* planes */
-        for (var i = planes.length - 1; i >= 0; i--) {
-            updatePlane(planes[i], dt);
-            if (!planes[i].alive) planes.splice(i, 1);
-        }
-        if (planes.length < MAX_PLANES && behRng() < 0.0004) planes.push(createPlane());
+        /* (planes and helicopters removed) */
 
-        /* helicopters */
-        for (var i = helis.length - 1; i >= 0; i--) {
-            updateHeli(helis[i], dt);
-            if (!helis[i].alive) helis.splice(i, 1);
-        }
-        if (helis.length < MAX_HELIS && behRng() < 0.0003) helis.push(createHeli());
+        /* (war planes removed) */
 
-        /* war planes */
-        for (var i = warPlanes.length - 1; i >= 0; i--) {
-            updateWarPlane(warPlanes[i], dt);
-            if (!warPlanes[i].alive) warPlanes.splice(i, 1);
-        }
-        if (warPlanes.length < MAX_WARPLANES && behRng() < 0.0006) warPlanes.push(createWarPlane());
+        /* (spaceships removed) */
 
-        /* spaceships */
-        for (var i = spaceships.length - 1; i >= 0; i--) {
-            updateSpaceship(spaceships[i], dt);
-            if (!spaceships[i].alive) spaceships.splice(i, 1);
-        }
-        if (spaceships.length < MAX_SPACESHIPS && behRng() < 0.0002) spaceships.push(createSpaceship());
-
-        /* flying cars */
-        for (var i = flyingCars.length - 1; i >= 0; i--) {
-            updateFlyingCar(flyingCars[i], dt);
-            if (!flyingCars[i].alive) flyingCars.splice(i, 1);
-        }
-        if (flyingCars.length < MAX_FLYING_CARS && behRng() < 0.0008) flyingCars.push(createFlyingCar());
+        /* (flying cars removed) */
 
 
-        /* aliens */
+        /* alien defender drones */
         for (var i = aliens.length - 1; i >= 0; i--) {
             updateAlien(aliens[i], dt);
             if (!aliens[i].alive) aliens.splice(i, 1);
         }
-
+        alienTimer -= dt;
+        if (alienTimer <= 0 && aliens.length < MAX_ALIENS) {
+            aliens.push(createAlien());
+            alienTimer = br(6, 14);
+        }
         /* asteroids */
         for (var i = asteroids.length - 1; i >= 0; i--) {
             updateAsteroid(asteroids[i], dt);
@@ -4092,32 +4632,29 @@
         /* clouds */
         for (var i = 0; i < clouds.length; i++) drawCloud(dynC, clouds[i]);
 
-        /* planes */
-        for (var i = 0; i < planes.length; i++) drawPlane(dynC, planes[i]);
+        /* (planes and helicopters removed) */
 
-        /* helicopters */
-        for (var i = 0; i < helis.length; i++) drawHeli(dynC, helis[i]);
+        /* (war planes removed) */
 
-        /* war planes */
-        for (var i = 0; i < warPlanes.length; i++) drawWarPlane(dynC, warPlanes[i]);
+        /* (spaceships removed) */
 
-        /* spaceships */
-        for (var i = 0; i < spaceships.length; i++) drawSpaceship(dynC, spaceships[i]);
-
-        /* flying cars */
-        for (var i = 0; i < flyingCars.length; i++) drawFlyingCar(dynC, flyingCars[i]);
+        /* (flying cars removed) */
 
 
-        /* aliens */
+        /* alien defender drones */
         for (var i = 0; i < aliens.length; i++) drawAlien(dynC, aliens[i]);
-
         /* missiles */
         for (var i = 0; i < missiles.length; i++) drawMissile(dynC, missiles[i]);
         drawMissileExplosions(dynC);
+
+        /* nuclear missiles & explosions */
+        for (var i = 0; i < nukes.length; i++) drawNuke(dynC, nukes[i]);
+        drawNukeExplosions(dynC);
         drawAlienDebris(dynC);
 
         /* asteroids */
         for (var i = 0; i < asteroids.length; i++) drawAsteroid(dynC, asteroids[i]);
+        drawAsteroidImpacts(dynC);
 
         /* crumble debris */
         drawCrumbleDebris(dynC);
@@ -4208,15 +4745,19 @@
         /* beach people */
         for (var i = 0; i < beachPeople.length; i++) drawBeachPerson(dynC, beachPeople[i]);
 
-        /* ── REBAKE city if needed ── */
-        if (needsCityRebake) rebakeCity();
+        /* ── REBAKE city if needed (throttled) ── */
+        if (rebakeCooldown > 0) rebakeCooldown -= dt;
+        if (needsCityRebake && rebakeCooldown <= 0) {
+            rebakeCity();
+            rebakeCooldown = 0.8;
+        }
 
         /* ── FX LAYER (rain, lightning, flash) ── */
         fxC.clearRect(0, 0, W, H);
         drawRain(fxC);
         drawLightning(fxC);
         if (ATM.flashIntensity > 0) {
-            fxC.fillStyle = 'rgba(255,255,255,' + (ATM.flashIntensity * 0.35) + ')';
+            fxC.fillStyle = 'rgba(255,255,255,' + (ATM.flashIntensity * 0.1) + ')';
             fxC.fillRect(0, 0, W, H);
         }
 
