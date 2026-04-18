@@ -15,21 +15,22 @@
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
 
-    /* offscreen layers */
+    /* offscreen layers (5-layer composite: bg → city → dyn → fx → grain) */
     var bgCvs = document.createElement('canvas'), bgC = bgCvs.getContext('2d');
     var cityCvs = document.createElement('canvas'), cityC = cityCvs.getContext('2d');
     var dynCvs = document.createElement('canvas'), dynC = dynCvs.getContext('2d');
+    var fxCvs = document.createElement('canvas'), fxC = fxCvs.getContext('2d');
     var grainCvs = document.createElement('canvas'), grainC = grainCvs.getContext('2d');
 
     var W, H, GROUND, HORIZON, STREET_BOT, FORE_TOP, animId;
     var SIDEWALK_N, SIDEWALK_N_B, LANE_Y = [], CENTER_Y, SIDEWALK_S, SIDEWALK_S_B;
 
     function resize() {
-        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = grainCvs.width = window.innerWidth;
-        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = grainCvs.height = window.innerHeight;
-        HORIZON = H * 0.28;
-        GROUND = H * 0.76;
-        STREET_BOT = H * 0.92;
+        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = window.innerWidth;
+        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = window.innerHeight;
+        HORIZON = H * 0.12;
+        GROUND = H * 0.84;
+        STREET_BOT = H * 0.93;
         FORE_TOP = STREET_BOT;
         /* street layout */
         var roadH = STREET_BOT - GROUND;
@@ -57,16 +58,365 @@
     var MAX_PEDS = 32;
     var MAX_CONSTRUCTIONS = 5;
     var MAX_CRANES = 5;
-    var MAX_CLOUDS = 6;
-    var MAX_FLOCKS = 3;
+    var MAX_CLOUDS = 18;
+    var MAX_FLOCKS = 12;
     var MAX_SMOKE = 35;
     var MAX_PLANES = 2;
     var MAX_HELIS = 2;
-    var DAY_CYCLE = 600; /* seconds */
+    var DAY_CYCLE = 480; /* seconds — 8 minute full cycle */
     var MAX_BOATS = 4;
     var MAX_BEACH = 8;
     var MAX_DOLPHINS = 2;
     var MAX_FISH = 12;
+
+    /* ═══════════ ATMOSPHERE & WEATHER ═══════════ */
+    var ATM = {
+        dayT: 0,
+        rainIntensity: 0.95,
+        rainBase: 0.85,
+        windStrength: 0.5,
+        windAngle: 0.2,
+        flashIntensity: 0,
+        thunderTimer: 5,
+        paperDarken: 10
+    };
+    var MAX_RAIN = 900;
+    var MAX_HAIL = 200;
+    var MAX_SNOW = 300;
+    var MAX_METEORS = 8;
+    var MAX_DEBRIS = 25;
+    var MAX_JOGGERS = 6;
+    var MAX_BUSKERS = 3;
+    var MAX_VENDORS = 3;
+    var MAX_PIGEONS = 12;
+    var MAX_CATS = 3;
+    var MAX_SEAGULLS = 20;
+    var MAX_SWIMMERS = 5;
+    var MAX_SURFERS = 4;
+    var MAX_PADDLERS = 3;
+    var MAX_JETSKIS = 3;
+    var MAX_FISHERMEN = 2;
+    var MAX_SUNBATHERS = 7;
+    var MAX_BPLAYERS = 4;
+    var MAX_VOLUNTEERS = 4;
+    var MAX_CRIMINALS = 1;
+    var MAX_POLICE_FOOT = 1;
+
+    /* ═══════════ DISASTER SYSTEM ═══════════ */
+    var DISASTER = {
+        active: null,
+        timer: 0,
+        duration: 0,
+        nextIn: 120,
+        recentLog: [],
+        shakeX: 0, shakeY: 0,
+        floodLevel: 0,
+        fireIntensity: 0,
+        sinkholeX: 0, sinkholeR: 0,
+        tsunamiX: 0
+    };
+    var DISASTER_TYPES = [
+        { type: 'earthquake', weight: 8, dur: [10, 18] },
+        { type: 'tsunami', weight: 5, dur: [30, 45] },
+        { type: 'storm', weight: 15, dur: [40, 70] },
+        { type: 'wildfire', weight: 6, dur: [45, 80] },
+        { type: 'flood', weight: 10, dur: [50, 90] },
+        { type: 'hail', weight: 8, dur: [25, 50] },
+        { type: 'blizzard', weight: 6, dur: [60, 100] },
+        { type: 'hurricane', weight: 12, dur: [70, 110] },
+        { type: 'meteor', weight: 4, dur: [20, 40] },
+        { type: 'dust-storm', weight: 5, dur: [40, 65] },
+        { type: 'landslide', weight: 3, dur: [8, 14] },
+        { type: 'sinkhole', weight: 3, dur: [45, 70] }
+    ];
+
+    function pickDisaster() {
+        var total = 0, i;
+        for (i = 0; i < DISASTER_TYPES.length; i++) total += DISASTER_TYPES[i].weight;
+        var r = behRng() * total, acc = 0;
+        for (i = 0; i < DISASTER_TYPES.length; i++) {
+            acc += DISASTER_TYPES[i].weight;
+            if (r < acc) return DISASTER_TYPES[i];
+        }
+        return DISASTER_TYPES[0];
+    }
+
+    function triggerDisaster() {
+        var d = pickDisaster();
+        DISASTER.active = d.type;
+        DISASTER.duration = br(d.dur[0], d.dur[1]);
+        DISASTER.timer = 0;
+        DISASTER.recentLog.unshift(d.type);
+        if (DISASTER.recentLog.length > 3) DISASTER.recentLog.pop();
+        if (d.type === 'sinkhole') {
+            DISASTER.sinkholeX = br(W * 0.2, W * 0.8);
+            DISASTER.sinkholeR = 0;
+        }
+        if (d.type === 'tsunami') DISASTER.tsunamiX = W + 50;
+        if (d.type === 'flood') DISASTER.floodLevel = 0;
+        if (d.type === 'wildfire') DISASTER.fireIntensity = 0;
+    }
+
+    function updateDisaster(dt) {
+        ATM.rainIntensity = 0.95 + Math.sin(performance.now() * 0.0003) * 0.05;
+        ATM.windStrength = 0.6 + Math.sin(performance.now() * 0.0005) * 0.25;
+        ATM.windAngle = 0.2 + Math.sin(performance.now() * 0.0002) * 0.15;
+        ATM.paperDarken = 15 + Math.sin(performance.now() * 0.0004) * 5;
+    }
+
+    /* ═══════════ LIGHTNING STRIKE SYSTEM ═══════════ */
+    var strikeTimer = 2;
+    var pendingDamage = null;
+    var damageTimer = 0;
+
+    function createTargetedBolt(targetX, targetY) {
+        var x = targetX + br(-15, 15), y = 0;
+        var pts = [{ x: x, y: y }];
+        var cx = x, cy = y;
+        while (cy < targetY) {
+            cx += br(-20, 20);
+            cx = cx + (targetX - cx) * 0.15;
+            cy += br(15, 35);
+            pts.push({ x: cx, y: Math.min(cy, targetY) });
+            if (behRng() < 0.35 && pts.length > 2) {
+                var brPts = [{ x: cx, y: cy }];
+                var bx = cx, by = cy;
+                for (var b = 0; b < bri(2, 5); b++) {
+                    bx += br(-25, 25); by += br(10, 30);
+                    brPts.push({ x: bx, y: by });
+                }
+                pts.branches = pts.branches || [];
+                pts.branches.push(brPts);
+            }
+        }
+        pts.push({ x: targetX, y: targetY });
+        return { pts: pts, age: 0, maxAge: 0.25 };
+    }
+
+    function strikeBuildingWithLightning() {
+        var minBuildings = Math.max(5, Math.floor(buildings.length * 0.4));
+        if (buildings.length < minBuildings) return;
+        var idx = bri(0, buildings.length);
+        var target = buildings[idx];
+        lightningBolt = createTargetedBolt(target.x + target.w / 2, target.y);
+        ATM.flashIntensity = 1;
+        DISASTER.shakeX = br(-3, 3);
+        DISASTER.shakeY = br(-2, 2);
+        pendingDamage = target;
+        damageTimer = 0.3;
+    }
+
+    var needsCityRebake = false;
+    function damageBuilding(b) {
+        var idx = buildings.indexOf(b);
+        if (idx < 0) return;
+        if (buildings.length <= 5) return;
+        buildings.splice(idx, 1);
+        var con = {
+            x: b.x, w: b.w, floors: b.floors, floorH: b.floorH,
+            h: b.h, y: b.y,
+            curFloor: 0, buildTimer: 0,
+            floorInterval: br(2, 5),
+            g: b.g, done: false,
+            scaffolding: false, workers: []
+        };
+        constructions.push(con);
+        cranes.push(createCrane(con));
+        needsCityRebake = true;
+    }
+
+    function rebakeCity() {
+        var savedSeed = seed;
+        layoutRng = mulberry32(savedSeed);
+        chimneys = []; litWindows = [];
+        paintCity();
+        layoutRng = mulberry32(savedSeed);
+        needsCityRebake = false;
+    }
+
+    /* ── ALIEN ATTACKS ── */
+    var aliens = [];
+    var MAX_ALIENS = 5;
+    var alienTimer = 3;
+    function createAlien() {
+        return {
+            x: br(W * 0.1, W * 0.9), y: -20,
+            targetX: br(W * 0.1, W * 0.9), targetY: br(HORIZON * 0.3, HORIZON * 0.7),
+            speed: br(80, 160), g: bri(60, 100),
+            beamPhase: 0, beaming: false, beamTarget: null,
+            pulsePhase: br(0, Math.PI * 2),
+            alive: true, age: 0, maxAge: br(6, 12)
+        };
+    }
+    function updateAlien(a, dt) {
+        a.age += dt; a.pulsePhase += dt * 6;
+        var dx = a.targetX - a.x, dy = a.targetY - a.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 3) { a.x += dx / dist * a.speed * dt; a.y += dy / dist * a.speed * dt; }
+        else if (!a.beaming && buildings.length > 2) {
+            a.beaming = true; a.beamPhase = 0;
+            var idx = bri(0, buildings.length);
+            a.beamTarget = buildings[idx];
+        }
+        if (a.beaming) {
+            a.beamPhase += dt;
+            if (a.beamPhase > 1.5 && a.beamTarget) {
+                damageBuilding(a.beamTarget);
+                killNearbyPeds(a.beamTarget.x + a.beamTarget.w / 2);
+                a.beamTarget = null; a.beaming = false;
+                a.targetX = br(W * 0.1, W * 0.9); a.targetY = br(HORIZON * 0.2, HORIZON * 0.6);
+            }
+        }
+        if (a.age > a.maxAge) a.alive = false;
+    }
+    function drawAlien(c, a) {
+        var x = a.x, y = a.y, g = a.g;
+        var pulse = Math.sin(a.pulsePhase) * 0.2 + 0.7;
+        arcStr(c, x, y, 8, 3, 0, Math.PI * 2, 0.2, 0.4, g, pulse);
+        arcStr(c, x, y - 3, 4, 3, Math.PI, Math.PI * 2, 0.15, 0.35, g + 30, pulse * 0.8);
+        for (var li = 0; li < 5; li++) {
+            var lx = x - 6 + li * 3, ly = y + 1;
+            c.beginPath(); c.arc(lx, ly, 0.5, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + (pulse * 0.5) + ')';
+            c.fill();
+        }
+        if (a.beaming && a.beamTarget) {
+            var bx = a.beamTarget.x + a.beamTarget.w / 2;
+            var by = a.beamTarget.y;
+            var bAlpha = Math.min(0.4, a.beamPhase * 0.25);
+            c.beginPath(); c.moveTo(x - 3, y + 3); c.lineTo(bx - 8, by);
+            c.lineTo(bx + 8, by); c.lineTo(x + 3, y + 3); c.closePath();
+            c.fillStyle = 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + bAlpha + ')';
+            c.fill();
+        }
+    }
+
+    /* ── ASTEROIDS ── */
+    var asteroids = [];
+    var asteroidTimer = 3;
+    function createAsteroid() {
+        return {
+            x: br(W * 0.05, W * 0.95), y: -30,
+            vx: br(-30, 30), vy: br(150, 300),
+            r: br(4, 12), g: bri(70, 110), spin: br(-3, 3), angle: 0,
+            alive: true, exploded: false, explodeAge: 0
+        };
+    }
+    function updateAsteroid(a, dt) {
+        if (a.exploded) {
+            a.explodeAge += dt;
+            if (a.explodeAge > 0.8) a.alive = false;
+            return;
+        }
+        a.x += a.vx * dt; a.y += a.vy * dt; a.angle += a.spin * dt;
+        if (a.y > GROUND - 20) {
+            a.exploded = true; a.explodeAge = 0;
+            ATM.flashIntensity = Math.max(ATM.flashIntensity, 0.6);
+            DISASTER.shakeX += br(-4, 4); DISASTER.shakeY += br(-3, 3);
+            var closest = null, closestDist = 999;
+            for (var i = 0; i < buildings.length; i++) {
+                var bdist = Math.abs(buildings[i].x + buildings[i].w / 2 - a.x);
+                if (bdist < closestDist) { closestDist = bdist; closest = buildings[i]; }
+            }
+            if (closest && closestDist < closest.w + 30) {
+                damageBuilding(closest);
+            }
+            killNearbyPeds(a.x);
+        }
+    }
+    function drawAsteroid(c, a) {
+        if (a.exploded) {
+            var alpha = Math.max(0, 1 - a.explodeAge / 0.8);
+            for (var i = 0; i < 8; i++) {
+                var ex = a.x + br(-15, 15), ey = a.y + br(-10, 10);
+                var er = br(2, 6) * (1 + a.explodeAge * 2);
+                arcStr(c, ex, ey, er, er * 0.7, 0, Math.PI * 2, 0.4, 0.3, a.g + 30, alpha * 0.5);
+            }
+            return;
+        }
+        c.save(); c.translate(a.x, a.y); c.rotate(a.angle);
+        arcStr(c, 0, 0, a.r, a.r * 0.8, 0, Math.PI * 2, 0.25, 0.5, a.g, 0.8);
+        for (var cr = 0; cr < 3; cr++) {
+            arcStr(c, br(-a.r * 0.3, a.r * 0.3), br(-a.r * 0.3, a.r * 0.3),
+                a.r * br(0.15, 0.3), a.r * br(0.1, 0.2), 0, Math.PI * 2, 0.4, 0.15, a.g - 15, 0.4);
+        }
+        c.restore();
+        var trailLen = Math.min(a.y + 30, 50);
+        for (var t = 0; t < trailLen; t += 3) {
+            var ta = Math.max(0, 0.25 - t / trailLen * 0.25);
+            stk(c, a.x + br(-1, 1), a.y - t, a.x + br(-1, 1), a.y - t - 3, 0.3 + t * 0.02, a.g + 40, ta, 0);
+        }
+    }
+
+    function killNearbyPeds(x) {
+        for (var i = peds.length - 1; i >= 0; i--) {
+            if (Math.abs(peds[i].x - x) < 40) peds[i].alive = false;
+        }
+    }
+
+    /* ── DRAGON FIRE DESTRUCTION ── */
+    var dragonFireTimer = 3;
+
+    function dragonFireStrike() {
+        if (dragons.length === 0 || buildings.length < 3) return;
+        var dr = dragons[bri(0, dragons.length)];
+        dr.breathing = true; dr.breathAge = 0;
+        var nearestB = null, nearestDist = 999;
+        for (var i = 0; i < buildings.length; i++) {
+            var bdist = Math.abs(buildings[i].x + buildings[i].w / 2 - dr.x);
+            if (bdist < nearestDist) { nearestDist = bdist; nearestB = buildings[i]; }
+        }
+        if (nearestB && nearestDist < 200) {
+            damageBuilding(nearestB);
+            killNearbyPeds(nearestB.x + nearestB.w / 2);
+        }
+    }
+
+    function updateStrikeSystem(dt) {
+        strikeTimer -= dt;
+        if (strikeTimer <= 0) {
+            strikeBuildingWithLightning();
+            strikeTimer = br(3, 6);
+        }
+        if (damageTimer > 0) {
+            damageTimer -= dt;
+            if (damageTimer <= 0 && pendingDamage) {
+                damageBuilding(pendingDamage);
+                killNearbyPeds(pendingDamage.x + pendingDamage.w / 2);
+                pendingDamage = null;
+            }
+        }
+
+        var activeConstructions = 0;
+        for (var ci = 0; ci < constructions.length; ci++) {
+            if (!constructions[ci].done) activeConstructions++;
+        }
+        var canDestroy = buildings.length > 5 && activeConstructions < 6;
+
+        /* alien attacks */
+        alienTimer -= dt;
+        if (alienTimer <= 0) {
+            if (aliens.length < MAX_ALIENS) aliens.push(createAlien());
+            alienTimer = br(3, 6);
+        }
+
+        /* asteroid strikes */
+        asteroidTimer -= dt;
+        if (asteroidTimer <= 0 && canDestroy) {
+            asteroids.push(createAsteroid());
+            asteroidTimer = br(4, 8);
+        }
+
+        /* dragon fire */
+        dragonFireTimer -= dt;
+        if (dragonFireTimer <= 0 && canDestroy) {
+            dragonFireStrike();
+            dragonFireTimer = br(4, 8);
+        }
+
+        DISASTER.shakeX *= 0.92;
+        DISASTER.shakeY *= 0.92;
+    }
 
     /* ═══════════ SEEDED RNG ═══════════ */
     var seed = Date.now();
@@ -185,7 +535,7 @@
 
             /* reserve some gaps for construction */
             if (layoutRng() < 0.22 && conCount < MAX_CONSTRUCTIONS && x > W * 0.08 && x < W * 0.88) {
-                var cFloors = lri(8, 22), cFlH = lri(8, 13);
+                var cFloors = lri(18, 40), cFlH = lri(8, 13);
                 constructions.push({
                     x: x, w: bw, floors: cFloors, floorH: cFlH,
                     h: cFloors * cFlH, y: GROUND - cFloors * cFlH,
@@ -199,9 +549,9 @@
                 continue;
             }
 
-            var floors = lri(4, 25);
-            var centerBias = 1 - Math.abs(x / W - 0.5) * 1.6;
-            floors = Math.max(4, Math.floor(floors * (0.4 + centerBias * 0.8)));
+            var floors = lri(18, 50);
+            var centerBias = 1 - Math.abs(x / W - 0.5) * 1.2;
+            floors = Math.max(12, Math.floor(floors * (0.5 + centerBias * 0.7)));
             var flH = lri(8, 13), bh = floors * flH;
             var style = weightedPick(
                 ['block', 'setback', 'spire', 'wide', 'brownstone'],
@@ -385,12 +735,48 @@
             }
         }
 
-        /* distant building silhouettes */
-        var far = HORIZON + 10;
-        for (var x = 0; x < W; x += lr(8, 22)) {
-            var fh = lr(10, 45);
-            var fw = lr(5, 15);
-            stkFlat(c, x, far - fh, x, far, fw, lri(185, 205), 0.25);
+        /* ── COMPLEX SKY: stars, nebulae, constellations ── */
+        /* stars — scattered across the sky */
+        for (var i = 0; i < 250; i++) {
+            var sx = lr(0, W), sy = lr(2, HORIZON * 0.9);
+            var sr = lr(0.2, 1.2);
+            var sg = lri(170, 240);
+            var sa = lr(0.15, 0.55);
+            c.beginPath();
+            c.arc(sx, sy, sr, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + sg + ',' + sg + ',' + sg + ',' + sa + ')';
+            c.fill();
+            if (sr > 0.8 && layoutRng() < 0.2) {
+                for (var r = 0; r < 4; r++) {
+                    var a = r * Math.PI / 2;
+                    stk(c, sx + Math.cos(a) * sr, sy + Math.sin(a) * sr,
+                        sx + Math.cos(a) * (sr + 2.5), sy + Math.sin(a) * (sr + 2.5),
+                        0.08, sg, sa * 0.5, 0);
+                }
+            }
+        }
+        /* constellations — connect nearby bright stars */
+        var constellationStars = [];
+        for (var i = 0; i < 30; i++) {
+            constellationStars.push({ x: lr(20, W - 20), y: lr(5, HORIZON * 0.7) });
+        }
+        for (var i = 0; i < constellationStars.length - 1; i++) {
+            var s1 = constellationStars[i], s2 = constellationStars[i + 1];
+            var dist = Math.sqrt((s2.x - s1.x) * (s2.x - s1.x) + (s2.y - s1.y) * (s2.y - s1.y));
+            if (dist < 120) {
+                stk(c, s1.x, s1.y, s2.x, s2.y, 0.06, 195, 0.12, 0);
+            }
+        }
+        /* nebula clouds — subtle colored hazes */
+        for (var i = 0; i < 5; i++) {
+            var nx = lr(W * 0.1, W * 0.9), ny = lr(5, HORIZON * 0.6);
+            var nr = lr(25, 65);
+            var ng = c.createRadialGradient(nx, ny, 0, nx, ny, nr);
+            var nebG = lri(140, 190);
+            ng.addColorStop(0, 'rgba(' + nebG + ',' + nebG + ',' + (nebG + 10) + ',0.06)');
+            ng.addColorStop(1, 'rgba(' + nebG + ',' + nebG + ',' + nebG + ',0)');
+            c.fillStyle = ng;
+            c.fillRect(nx - nr, ny - nr, nr * 2, nr * 2);
         }
     }
 
@@ -1045,7 +1431,8 @@
             phaseDur: 9 / speed,
             pauseTimer: 0, paused: false,
             alive: true, far: far,
-            crossing: false, crossTarget: 0
+            crossing: false, crossTarget: 0,
+            hasUmbrella: behRng() < 0.75
         };
     }
 
@@ -1255,13 +1642,13 @@
 
     /* ═══════════ CLOUDS ═══════════ */
     function createCloud() {
-        var cx = br(-100, W + 100), cy = br(20, HORIZON * 0.65);
-        var np = bri(3, 6);
+        var cx = br(-100, W + 100), cy = br(10, HORIZON * 0.85);
+        var np = bri(4, 8);
         var puffs = [];
         for (var i = 0; i < np; i++) {
-            puffs.push({ ox: br(-20, 20), oy: br(-5, 5), rx: br(12, 30), ry: br(6, 14) });
+            puffs.push({ ox: br(-30, 30), oy: br(-8, 8), rx: br(18, 45), ry: br(8, 20) });
         }
-        return { x: cx, y: cy, speed: br(1.2, 3), puffs: puffs };
+        return { x: cx, y: cy, speed: br(2, 6), puffs: puffs };
     }
 
     function updateCloud(cl, dt) {
@@ -1272,19 +1659,17 @@
     function drawCloud(c, cl) {
         for (var i = 0; i < cl.puffs.length; i++) {
             var p = cl.puffs[i];
-            arcStr(c, cl.x + p.ox, cl.y + p.oy, p.rx, p.ry, 0, Math.PI * 2, 0.28, 0.15, 205, 0.2);
-            /* interior stipple */
+            arcStr(c, cl.x + p.ox, cl.y + p.oy, p.rx, p.ry, 0, Math.PI * 2, 0.28, 0.2, 155, 0.35);
             stipple(c, cl.x + p.ox - p.rx * 0.6, cl.y + p.oy - p.ry * 0.5,
-                p.rx * 1.2, p.ry, Math.floor(p.rx * 0.4), 0.2, 218, 0.15);
+                p.rx * 1.2, p.ry, Math.floor(p.rx * 0.6), 0.25, 170, 0.25);
         }
-        /* flat bottom */
         var maxR = 0, minOx = 999, maxOx = -999;
         for (var i = 0; i < cl.puffs.length; i++) {
             if (cl.puffs[i].oy + cl.puffs[i].ry > maxR) maxR = cl.puffs[i].oy + cl.puffs[i].ry;
             minOx = Math.min(minOx, cl.puffs[i].ox - cl.puffs[i].rx);
             maxOx = Math.max(maxOx, cl.puffs[i].ox + cl.puffs[i].rx);
         }
-        stk(c, cl.x + minOx, cl.y + maxR, cl.x + maxOx, cl.y + maxR, 0.2, 188, 0.25, 0);
+        stk(c, cl.x + minOx, cl.y + maxR, cl.x + maxOx, cl.y + maxR, 0.3, 140, 0.35, 0);
     }
 
     /* ═══════════ SMOKE ═══════════ */
@@ -1453,6 +1838,213 @@
             x + d * 1 - Math.cos(ra + Math.PI / 2) * rotorR, rotorY, 0.25, g - 15, 0.55, 0);
         /* rotor disc hint (faint circle) */
         arcStr(c, x + d * 1, rotorY, rotorR, 1.5, 0, Math.PI * 2, 0.3, 0.08, g + 20, 0.15);
+    }
+
+    /* ═══════════ WAR PLANES ═══════════ */
+    var warPlanes = [];
+    var MAX_WARPLANES = 3;
+    function createWarPlane() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        var formation = bri(0, 3);
+        return {
+            x: dir > 0 ? -60 : W + 60,
+            y: br(HORIZON * 0.1, HORIZON * 0.5),
+            dir: dir, speed: br(35, 65),
+            g: bri(55, 85), formation: formation,
+            wingmates: [], trailAge: 0, alive: true
+        };
+    }
+    function updateWarPlane(p, dt) {
+        p.x += p.dir * p.speed * dt;
+        p.trailAge += dt;
+        if ((p.dir > 0 && p.x > W + 80) || (p.dir < 0 && p.x < -80)) p.alive = false;
+    }
+    function drawWarPlane(c, p) {
+        var x = p.x, y = p.y, d = p.dir, g = p.g;
+        stk(c, x - d * 3, y, x + d * 18, y, 0.7, g, 0.85, 0);
+        stk(c, x + d * 18, y, x + d * 22, y - 0.8, 0.4, g, 0.7, 0);
+        stk(c, x + d * 7, y, x + d * 7, y - 9, 0.35, g, 0.7, 0);
+        stk(c, x + d * 7, y, x + d * 7, y + 9, 0.35, g, 0.7, 0);
+        stk(c, x + d * 6, y - 9, x + d * 9, y - 7, 0.15, g, 0.5, 0);
+        stk(c, x + d * 6, y + 9, x + d * 9, y + 7, 0.15, g, 0.5, 0);
+        stk(c, x - d * 2, y, x - d * 5, y - 5, 0.3, g, 0.6, 0);
+        stk(c, x - d * 2, y, x - d * 3, y + 2, 0.25, g, 0.55, 0);
+        stk(c, x + d * 12, y - 1, x + d * 15, y - 1, 0.5, g + 20, 0.4, 0);
+        stk(c, x + d * 12, y + 1, x + d * 15, y + 1, 0.5, g + 20, 0.4, 0);
+        var trailLen = Math.min(100, p.trailAge * 20);
+        for (var t = 0; t < trailLen; t += 4) {
+            var alpha = Math.max(0, 0.12 - t / trailLen * 0.12);
+            stk(c, x - d * (t + 3), y - 1, x - d * (t + 7), y - 1 + Math.sin(t * 0.15) * 0.4,
+                0.4 + t / trailLen, 180, alpha, 0);
+            stk(c, x - d * (t + 3), y + 1, x - d * (t + 7), y + 1 - Math.sin(t * 0.15) * 0.4,
+                0.4 + t / trailLen, 180, alpha, 0);
+        }
+    }
+
+    /* ═══════════ SPACESHIP ═══════════ */
+    var spaceships = [];
+    var MAX_SPACESHIPS = 2;
+    function createSpaceship() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: dir > 0 ? -50 : W + 50,
+            y: br(8, HORIZON * 0.35),
+            dir: dir, speed: br(15, 35),
+            g: bri(100, 150), pulsePhase: br(0, Math.PI * 2),
+            tilt: br(-0.15, 0.15), trailAge: 0, alive: true
+        };
+    }
+    function updateSpaceship(s, dt) {
+        s.x += s.dir * s.speed * dt;
+        s.y += Math.sin(s.pulsePhase) * 0.2;
+        s.pulsePhase += dt * 4;
+        s.trailAge += dt;
+        if ((s.dir > 0 && s.x > W + 80) || (s.dir < 0 && s.x < -80)) s.alive = false;
+    }
+    function drawSpaceship(c, s) {
+        var x = s.x, y = s.y, d = s.dir, g = s.g;
+        c.save();
+        c.translate(x, y);
+        c.rotate(s.tilt);
+        arcStr(c, 0, 0, 14, 4, 0, Math.PI * 2, 0.2, 0.4, g, 0.7);
+        arcStr(c, 0, -2, 6, 4, Math.PI, Math.PI * 2, 0.15, 0.35, g + 30, 0.5);
+        stk(c, 0, -6, 0, -3, 0.2, g + 20, 0.4, 0);
+        arcStr(c, 0, -6.5, 1.5, 1.5, 0, Math.PI * 2, 0.4, 0.2, g + 25, 0.5);
+        stk(c, -14, 0, -14, 2, 0.3, g - 10, 0.6, 0);
+        stk(c, 14, 0, 14, 2, 0.3, g - 10, 0.6, 0);
+        stk(c, -14, 2, -16, 3, 0.2, g, 0.5, 0);
+        stk(c, 14, 2, 16, 3, 0.2, g, 0.5, 0);
+        var pulse = Math.sin(s.pulsePhase) * 0.3 + 0.4;
+        for (var li = 0; li < 5; li++) {
+            var lx = -8 + li * 4;
+            c.beginPath();
+            c.arc(lx, 1, 0.6, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + pulse + ')';
+            c.fill();
+        }
+        c.restore();
+        var trailLen = Math.min(60, s.trailAge * 12);
+        for (var t = 0; t < trailLen; t += 3) {
+            var alpha = Math.max(0, 0.1 - t / trailLen * 0.1);
+            arcStr(c, x - d * (t + 16), y + 1, 2 + t * 0.08, 1, 0, Math.PI * 2, 0.4, 0.1, g + 40, alpha);
+        }
+    }
+
+    /* ═══════════ FLYING CARS ═══════════ */
+    var flyingCars = [];
+    var MAX_FLYING_CARS = 4;
+    function createFlyingCar() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        var lane = bri(0, 3);
+        return {
+            x: dir > 0 ? -25 : W + 25,
+            y: HORIZON * (0.2 + lane * 0.15) + br(-5, 5),
+            dir: dir, speed: br(20, 45),
+            g: bri(60, 110), bobPhase: br(0, Math.PI * 2),
+            thrusterPhase: br(0, Math.PI * 2), alive: true
+        };
+    }
+    function updateFlyingCar(fc, dt) {
+        fc.x += fc.dir * fc.speed * dt;
+        fc.bobPhase += dt * 2.5;
+        fc.thrusterPhase += dt * 15;
+        if ((fc.dir > 0 && fc.x > W + 40) || (fc.dir < 0 && fc.x < -40)) fc.alive = false;
+    }
+    function drawFlyingCar(c, fc) {
+        var x = fc.x, y = fc.y + Math.sin(fc.bobPhase) * 1.5, d = fc.dir, g = fc.g;
+        arcStr(c, x, y, 10, 4, 0, Math.PI, 0.2, 0.4, g, 0.7);
+        stk(c, x - 10, y, x + 10, y, 0.4, g - 8, 0.8, 0);
+        arcStr(c, x + d * 3, y - 2.5, 5, 3, Math.PI, Math.PI * 2, 0.2, 0.3, g + 15, 0.6);
+        stk(c, x + d * 1, y - 1.5, x + d * 6, y - 1.5, 1.2, g + 40, 0.3, 0);
+        stk(c, x + d * 8, y - 0.5, x + d * 10, y - 0.5, 0.3, 200, 0.4, 0);
+        stk(c, x - d * 8, y - 0.5, x - d * 10, y - 0.5, 0.3, 200, 0.4, 0);
+        var thrustFlicker = Math.sin(fc.thrusterPhase) * 0.15 + 0.3;
+        c.beginPath();
+        c.arc(x - 5, y + 3, 1.2, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + thrustFlicker + ')';
+        c.fill();
+        c.beginPath();
+        c.arc(x + 5, y + 3, 1.2, 0, Math.PI * 2);
+        c.fill();
+        stk(c, x - 5, y + 3, x - 5, y + 4 + Math.sin(fc.thrusterPhase) * 1.5, 0.15, g + 50, thrustFlicker * 0.6, 0);
+        stk(c, x + 5, y + 3, x + 5, y + 4 + Math.sin(fc.thrusterPhase + 1) * 1.5, 0.15, g + 50, thrustFlicker * 0.6, 0);
+    }
+
+    /* ═══════════ DRAGONS ═══════════ */
+    var dragons = [];
+    var MAX_DRAGONS = 4;
+    function createDragon() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: dir > 0 ? -80 : W + 80,
+            y: br(HORIZON * 0.2, HORIZON * 0.8),
+            dir: dir, speed: br(18, 35),
+            g: bri(40, 70),
+            wingPhase: br(0, Math.PI * 2),
+            breathTimer: br(2, 6), breathing: false, breathAge: 0,
+            tailPhase: br(0, Math.PI * 2),
+            size: br(1.2, 2.0),
+            alive: true
+        };
+    }
+    function updateDragon(dr, dt) {
+        dr.x += dr.dir * dr.speed * dt;
+        dr.wingPhase += dt * 4;
+        dr.tailPhase += dt * 3;
+        if (dr.breathing) {
+            dr.breathAge += dt;
+            if (dr.breathAge > 1.2) { dr.breathing = false; dr.breathTimer = br(3, 8); }
+        } else {
+            dr.breathTimer -= dt;
+            if (dr.breathTimer <= 0) { dr.breathing = true; dr.breathAge = 0; }
+        }
+        if ((dr.dir > 0 && dr.x > W + 100) || (dr.dir < 0 && dr.x < -100)) dr.alive = false;
+    }
+    function drawDragon(c, dr) {
+        var x = dr.x, y = dr.y, d = dr.dir, g = dr.g, s = dr.size;
+        var wingUp = Math.sin(dr.wingPhase) * 12 * s;
+        stk(c, x - d * 18 * s, y, x + d * 12 * s, y, 0.9 * s, g, 0.85, 0);
+        arcStr(c, x + d * 12 * s, y - 1 * s, 4 * s, 3 * s, 0, Math.PI * 2, 0.3, 0.35 * s, g - 10, 0.8);
+        stk(c, x + d * 16 * s, y - 1 * s, x + d * 20 * s, y - 2 * s, 0.3 * s, g, 0.6, 0);
+        stk(c, x + d * 13 * s, y - 3.5 * s, x + d * 11 * s, y - 6 * s, 0.2 * s, g - 5, 0.7, 0);
+        stk(c, x + d * 14.5 * s, y - 3.5 * s, x + d * 13 * s, y - 6 * s, 0.2 * s, g - 5, 0.7, 0);
+        stk(c, x + d * 15 * s, y - 0.5 * s, x + d * 15.3 * s, y - 0.5 * s, 0.35 * s, g - 20, 0.9, 0);
+        stk(c, x - d * 2 * s, y, x + d * 5 * s, y - wingUp, 0.5 * s, g, 0.7, 0);
+        stk(c, x + d * 5 * s, y - wingUp, x + d * 10 * s, y - wingUp * 0.6, 0.35 * s, g + 10, 0.6, 0);
+        for (var m = 0; m < 3; m++) {
+            var mx1 = x + d * (2 + m * 3) * s, mx2 = x + d * (5 + m * 2.5) * s;
+            var my = y - wingUp * (0.3 + m * 0.25);
+            stk(c, mx1, y - wingUp * 0.1 * m, mx2, my, 0.08 * s, g + 20, 0.3, 0);
+        }
+        stk(c, x - d * 2 * s, y, x + d * 5 * s, y + wingUp * 0.8, 0.45 * s, g + 5, 0.6, 0);
+        stk(c, x + d * 5 * s, y + wingUp * 0.8, x + d * 9 * s, y + wingUp * 0.5, 0.3 * s, g + 12, 0.5, 0);
+        var tailSwing = Math.sin(dr.tailPhase) * 8 * s;
+        stk(c, x - d * 18 * s, y, x - d * 28 * s, y + tailSwing * 0.5, 0.4 * s, g, 0.7, 0);
+        stk(c, x - d * 28 * s, y + tailSwing * 0.5, x - d * 35 * s, y + tailSwing, 0.3 * s, g + 5, 0.6, 0);
+        stk(c, x - d * 35 * s, y + tailSwing, x - d * 37 * s, y + tailSwing - 3 * s, 0.2 * s, g, 0.5, 0);
+        stk(c, x - d * 35 * s, y + tailSwing, x - d * 37 * s, y + tailSwing + 3 * s, 0.2 * s, g, 0.5, 0);
+        for (var sp = 0; sp < 6; sp++) {
+            var spx = x - d * (4 + sp * 3) * s;
+            stk(c, spx, y - 1 * s, spx, y - 3 * s, 0.15 * s, g - 10, 0.5, 0);
+        }
+        stk(c, x + d * 6 * s, y + 3 * s, x + d * 7 * s, y + 5 * s, 0.25 * s, g, 0.6, 0);
+        stk(c, x + d * 7 * s, y + 5 * s, x + d * 6.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
+        stk(c, x + d * 7 * s, y + 5 * s, x + d * 7.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
+        stk(c, x - d * 8 * s, y + 2 * s, x - d * 9 * s, y + 5 * s, 0.25 * s, g, 0.6, 0);
+        stk(c, x - d * 9 * s, y + 5 * s, x - d * 8.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
+        stk(c, x - d * 9 * s, y + 5 * s, x - d * 9.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
+        if (dr.breathing) {
+            var bLen = dr.breathAge * 40 * s;
+            var bAlpha = Math.max(0, 0.5 - dr.breathAge * 0.35);
+            for (var f = 0; f < bLen; f += 3) {
+                var fx = x + d * (20 * s + f);
+                var fy = y - 1 * s + Math.sin(f * 0.15) * (2 + f * 0.08) * s;
+                var fr = (1 + f * 0.06) * s;
+                var fAlpha = bAlpha * (1 - f / bLen);
+                var fg = Math.floor(130 + f * 0.5);
+                arcStr(c, fx, fy, fr, fr * 0.7, 0, Math.PI * 2, 0.4, 0.2 * s, fg, fAlpha);
+            }
+        }
     }
 
     /* ═══════════ TRAIN ═══════════ */
@@ -1766,6 +2358,833 @@
         stk(c, x - d * 2.5, y, x - d * 3.5 + tailW, y + 1, 0.15, g, 0.25, 0);
     }
 
+    /* ═══════════ RAIN ═══════════ */
+    var raindrops = [];
+    function createRaindrop() {
+        return {
+            x: br(-50, W + 50),
+            y: br(-40, -5),
+            speed: br(350, 600),
+            len: br(6, 18),
+            g: bri(110, 160),
+            alive: true
+        };
+    }
+    function updateRain(dt) {
+        var target = Math.floor(ATM.rainIntensity * MAX_RAIN);
+        while (raindrops.length < target) raindrops.push(createRaindrop());
+        var wind = ATM.windAngle * ATM.windStrength;
+        for (var i = raindrops.length - 1; i >= 0; i--) {
+            var r = raindrops[i];
+            r.y += r.speed * dt;
+            r.x += wind * r.speed * dt * 0.5;
+            if (r.y > H + 10) {
+                if (raindrops.length > target) { raindrops.splice(i, 1); }
+                else { r.y = br(-30, -5); r.x = br(-50, W + 50); }
+            }
+        }
+    }
+    function drawRain(c) {
+        var wind = ATM.windAngle * ATM.windStrength;
+        for (var i = 0; i < raindrops.length; i++) {
+            var r = raindrops[i];
+            var dx = wind * r.len * 0.5;
+            c.beginPath();
+            c.moveTo(r.x, r.y);
+            c.lineTo(r.x + dx, r.y + r.len);
+            c.strokeStyle = 'rgba(' + r.g + ',' + r.g + ',' + r.g + ',0.5)';
+            c.lineWidth = 0.9;
+            c.lineCap = 'round';
+            c.stroke();
+        }
+    }
+
+    /* ═══════════ LIGHTNING ═══════════ */
+    var lightningBolt = null;
+    function createLightningBolt() {
+        var x = br(W * 0.1, W * 0.9), y = 0;
+        var pts = [{ x: x, y: y }];
+        var cx = x, cy = y;
+        var targetY = br(HORIZON * 0.5, GROUND * 0.6);
+        while (cy < targetY) {
+            cx += br(-25, 25);
+            cy += br(15, 40);
+            pts.push({ x: cx, y: Math.min(cy, targetY) });
+            if (behRng() < 0.3 && pts.length > 2) {
+                var brPts = [{ x: cx, y: cy }];
+                var bx = cx, by = cy;
+                for (var b = 0; b < bri(2, 4); b++) {
+                    bx += br(-20, 20); by += br(10, 25);
+                    brPts.push({ x: bx, y: by });
+                }
+                pts.branches = pts.branches || [];
+                pts.branches.push(brPts);
+            }
+        }
+        return { pts: pts, age: 0, maxAge: 0.15 };
+    }
+    function drawLightning(c) {
+        if (!lightningBolt) return;
+        var alpha = Math.max(0, 1 - lightningBolt.age / lightningBolt.maxAge);
+        c.lineWidth = 2.5;
+        c.strokeStyle = 'rgba(240,240,245,' + alpha + ')';
+        c.lineCap = 'round';
+        c.shadowColor = 'rgba(200,200,210,0.8)';
+        c.shadowBlur = 8;
+        c.beginPath();
+        c.moveTo(lightningBolt.pts[0].x, lightningBolt.pts[0].y);
+        for (var i = 1; i < lightningBolt.pts.length; i++) {
+            c.lineTo(lightningBolt.pts[i].x, lightningBolt.pts[i].y);
+        }
+        c.stroke();
+        if (lightningBolt.pts.branches) {
+            c.lineWidth = 1.2;
+            c.strokeStyle = 'rgba(225,225,230,' + (alpha * 0.7) + ')';
+            for (var b = 0; b < lightningBolt.pts.branches.length; b++) {
+                var br2 = lightningBolt.pts.branches[b];
+                c.beginPath();
+                c.moveTo(br2[0].x, br2[0].y);
+                for (var j = 1; j < br2.length; j++) c.lineTo(br2[j].x, br2[j].y);
+                c.stroke();
+            }
+        }
+        c.shadowColor = 'transparent';
+        c.shadowBlur = 0;
+    }
+    function updateLightning(dt) {
+        ATM.thunderTimer -= dt;
+        if (ATM.thunderTimer <= 0) {
+            if (behRng() < 0.7) {
+                ATM.flashIntensity = br(0.4, 0.9);
+                if (behRng() < 0.6 && !lightningBolt) lightningBolt = createLightningBolt();
+            }
+            ATM.thunderTimer = br(1.5, 5);
+        }
+        if (ATM.flashIntensity > 0) ATM.flashIntensity *= Math.pow(0.03, dt);
+        if (ATM.flashIntensity < 0.01) ATM.flashIntensity = 0;
+        if (lightningBolt) {
+            lightningBolt.age += dt;
+            if (lightningBolt.age >= lightningBolt.maxAge) lightningBolt = null;
+        }
+    }
+
+    /* ═══════════ HAIL ═══════════ */
+    var hailstones = [];
+    function createHailstone() {
+        return { x: br(-20, W + 20), y: br(-30, -5), vy: br(200, 350), vx: ATM.windStrength * br(30, 80),
+                 r: br(1.5, 3.5), g: bri(180, 215), bounced: false, bounceY: 0, alive: true };
+    }
+    function updateHail(dt) {
+        if (DISASTER.active !== 'hail') { hailstones = []; return; }
+        while (hailstones.length < MAX_HAIL) hailstones.push(createHailstone());
+        for (var i = hailstones.length - 1; i >= 0; i--) {
+            var h = hailstones[i];
+            if (h.bounced) {
+                h.bounceY += h.vy * 0.3 * dt;
+                h.vy -= 600 * dt;
+                h.x += h.vx * 0.5 * dt;
+                h.y -= h.bounceY * dt;
+                if (h.y > H + 10) { hailstones.splice(i, 1); continue; }
+            } else {
+                h.y += h.vy * dt;
+                h.x += h.vx * dt;
+                if (h.y > GROUND - br(0, 30)) {
+                    h.bounced = true; h.bounceY = 0; h.vy = br(80, 160);
+                }
+            }
+        }
+    }
+    function drawHail(c) {
+        for (var i = 0; i < hailstones.length; i++) {
+            var h = hailstones[i];
+            c.beginPath();
+            c.arc(h.x, h.y, h.r, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + h.g + ',' + h.g + ',' + h.g + ',0.55)';
+            c.fill();
+        }
+    }
+
+    /* ═══════════ SNOW ═══════════ */
+    var snowflakes = [];
+    function createSnowflake() {
+        return { x: br(-20, W + 20), y: br(-20, -5), speed: br(25, 60), drift: br(-15, 15),
+                 phase: br(0, Math.PI * 2), r: br(1, 3), g: bri(210, 235), alive: true };
+    }
+    function updateSnow(dt) {
+        if (DISASTER.active !== 'blizzard') { snowflakes = []; return; }
+        while (snowflakes.length < MAX_SNOW) snowflakes.push(createSnowflake());
+        for (var i = snowflakes.length - 1; i >= 0; i--) {
+            var s = snowflakes[i];
+            s.y += s.speed * dt;
+            s.phase += dt * 2;
+            s.x += (s.drift + Math.sin(s.phase) * 12 + ATM.windStrength * 40) * dt;
+            if (s.y > H + 5) { snowflakes.splice(i, 1); }
+        }
+    }
+    function drawSnow(c) {
+        for (var i = 0; i < snowflakes.length; i++) {
+            var s = snowflakes[i];
+            c.beginPath();
+            c.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + s.g + ',' + s.g + ',' + s.g + ',0.6)';
+            c.fill();
+        }
+    }
+
+    /* ═══════════ METEORS ═══════════ */
+    var meteors = [];
+    function createMeteor() {
+        return { x: br(0, W), y: br(-20, HORIZON * 0.3), vx: br(-120, -40), vy: br(80, 200),
+                 len: br(15, 40), g: bri(160, 200), age: 0, maxAge: br(0.8, 2), alive: true };
+    }
+    function updateMeteors(dt) {
+        if (DISASTER.active !== 'meteor') { meteors = []; return; }
+        if (meteors.length < MAX_METEORS && behRng() < 0.08) meteors.push(createMeteor());
+        for (var i = meteors.length - 1; i >= 0; i--) {
+            var m = meteors[i];
+            m.x += m.vx * dt; m.y += m.vy * dt; m.age += dt;
+            if (m.age > m.maxAge || m.y > HORIZON) {
+                if (m.y >= HORIZON - 5) ATM.flashIntensity = Math.max(ATM.flashIntensity, 0.3);
+                meteors.splice(i, 1);
+            }
+        }
+    }
+    function drawMeteors(c) {
+        for (var i = 0; i < meteors.length; i++) {
+            var m = meteors[i];
+            var alpha = Math.max(0, 1 - m.age / m.maxAge) * 0.7;
+            var tx = m.x - m.vx * 0.1 * m.len / 30;
+            var ty = m.y - m.vy * 0.1 * m.len / 30;
+            c.beginPath(); c.moveTo(m.x, m.y); c.lineTo(tx, ty);
+            c.strokeStyle = 'rgba(' + m.g + ',' + m.g + ',' + m.g + ',' + alpha + ')';
+            c.lineWidth = 1.2; c.lineCap = 'round'; c.stroke();
+        }
+    }
+
+    /* ═══════════ DEBRIS (hurricane) ═══════════ */
+    var debris = [];
+    function createDebris() {
+        var types = ['leaf', 'paper', 'branch', 'sign'];
+        return { x: -20, y: br(HORIZON, GROUND), type: types[bri(0, types.length)],
+                 vx: br(100, 250), vy: br(-40, 40), spin: br(-5, 5),
+                 angle: br(0, Math.PI * 2), g: bri(80, 140), size: br(3, 8), alive: true };
+    }
+    function updateDebris(dt) {
+        if (DISASTER.active !== 'hurricane') { debris = []; return; }
+        if (debris.length < MAX_DEBRIS && behRng() < 0.15) debris.push(createDebris());
+        for (var i = debris.length - 1; i >= 0; i--) {
+            var d = debris[i];
+            d.x += d.vx * dt; d.y += d.vy * dt + Math.sin(d.angle) * 15 * dt;
+            d.angle += d.spin * dt;
+            if (d.x > W + 30) debris.splice(i, 1);
+        }
+    }
+    function drawDebris(c) {
+        for (var i = 0; i < debris.length; i++) {
+            var d = debris[i];
+            c.save(); c.translate(d.x, d.y); c.rotate(d.angle);
+            if (d.type === 'leaf') {
+                arcStr(c, 0, 0, d.size, d.size * 0.5, 0, Math.PI * 2, 0.3, 0.3, d.g, 0.6);
+            } else if (d.type === 'paper') {
+                rectStk(c, -d.size / 2, -d.size / 2, d.size, d.size * 0.7, 0.2, d.g + 30, 0.5);
+            } else if (d.type === 'branch') {
+                stk(c, -d.size, 0, d.size, 0, 0.4, d.g - 15, 0.6, 0);
+                stk(c, d.size * 0.3, 0, d.size * 0.6, -d.size * 0.4, 0.2, d.g, 0.5, 0);
+            } else {
+                rectStk(c, -d.size / 2, -d.size, d.size, d.size * 1.5, 0.3, d.g, 0.5);
+            }
+            c.restore();
+        }
+    }
+
+    /* ═══════════ DUST STORM FX ═══════════ */
+    function drawDustStorm(c) {
+        if (DISASTER.active !== 'dust-storm') return;
+        var prog = DISASTER.timer / DISASTER.duration;
+        var intensity = Math.sin(prog * Math.PI) * 0.25;
+        c.fillStyle = 'rgba(180,175,165,' + intensity + ')';
+        c.fillRect(0, 0, W, H);
+        for (var i = 0; i < 40; i++) {
+            var y = behRng() * H, x1 = behRng() * W, len = br(30, 120);
+            c.beginPath(); c.moveTo(x1, y); c.lineTo(x1 + len, y + br(-3, 3));
+            c.strokeStyle = 'rgba(165,160,150,' + (intensity * 0.5) + ')';
+            c.lineWidth = br(0.5, 1.5); c.stroke();
+        }
+    }
+
+    /* ═══════════ FLOOD FX ═══════════ */
+    function drawFloodFx(c) {
+        if (DISASTER.active !== 'flood' || DISASTER.floodLevel <= 0) return;
+        var floodH = DISASTER.floodLevel * (STREET_BOT - GROUND) * 0.6;
+        var floodY = STREET_BOT - floodH;
+        c.fillStyle = 'rgba(130,135,140,0.18)';
+        c.fillRect(0, floodY, W, floodH);
+        for (var x = 0; x < W; x += br(8, 20)) {
+            stk(c, x, floodY, x + br(4, 12), floodY + br(-1, 1), 0.08, 145, 0.2, 0);
+        }
+    }
+
+    /* ═══════════ WILDFIRE GLOW ═══════════ */
+    function drawWildfireFx(c) {
+        if (DISASTER.active !== 'wildfire' || DISASTER.fireIntensity <= 0) return;
+        var glow = DISASTER.fireIntensity;
+        for (var i = 0; i < 5; i++) {
+            var fx = br(W * 0.05, W * 0.95), fy = HORIZON + br(-15, 15);
+            var fr = br(15, 40);
+            var g2 = c.createRadialGradient(fx, fy, 0, fx, fy, fr);
+            g2.addColorStop(0, 'rgba(160,140,120,' + (glow * 0.15) + ')');
+            g2.addColorStop(1, 'rgba(160,140,120,0)');
+            c.fillStyle = g2;
+            c.fillRect(fx - fr, fy - fr, fr * 2, fr * 2);
+        }
+        c.fillStyle = 'rgba(150,140,130,' + (glow * 0.06) + ')';
+        c.fillRect(0, 0, W, HORIZON + 30);
+    }
+
+    /* ═══════════ LANDSLIDE FX ═══════════ */
+    var landslideRocks = [];
+    function updateLandslide(dt) {
+        if (DISASTER.active !== 'landslide') { landslideRocks = []; return; }
+        if (landslideRocks.length < 20 && DISASTER.timer < DISASTER.duration * 0.6) {
+            landslideRocks.push({ x: br(W * 0.1, W * 0.9), y: HORIZON + br(-10, 10),
+                vx: br(-20, 20), vy: br(40, 120), r: br(2, 6), g: bri(90, 130), alive: true });
+        }
+        for (var i = landslideRocks.length - 1; i >= 0; i--) {
+            var r = landslideRocks[i];
+            r.x += r.vx * dt; r.y += r.vy * dt; r.vy += 150 * dt;
+            if (r.y > GROUND + 10) landslideRocks.splice(i, 1);
+        }
+    }
+    function drawLandslide(c) {
+        for (var i = 0; i < landslideRocks.length; i++) {
+            var r = landslideRocks[i];
+            c.beginPath(); c.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + r.g + ',' + r.g + ',' + r.g + ',0.7)';
+            c.fill();
+        }
+    }
+
+    /* ═══════════ SINKHOLE FX ═══════════ */
+    function drawSinkhole(c) {
+        if (DISASTER.active !== 'sinkhole' || DISASTER.sinkholeR <= 0) return;
+        var sx = DISASTER.sinkholeX, sy = (GROUND + STREET_BOT) / 2, sr = DISASTER.sinkholeR;
+        arcStr(c, sx, sy, sr, sr * 0.5, 0, Math.PI * 2, 0.2, 0.8, 50, 0.7);
+        arcStr(c, sx, sy, sr * 0.7, sr * 0.35, 0, Math.PI * 2, 0.25, 0.5, 35, 0.5);
+        c.fillStyle = 'rgba(30,30,30,0.3)';
+        c.beginPath(); c.ellipse(sx, sy, sr * 0.6, sr * 0.3, 0, 0, Math.PI * 2); c.fill();
+        for (var a = 0; a < Math.PI * 2; a += 0.4) {
+            var cr2 = sr + br(2, 6);
+            stk(c, sx + Math.cos(a) * sr, sy + Math.sin(a) * sr * 0.5,
+                sx + Math.cos(a + br(-0.2, 0.2)) * cr2, sy + Math.sin(a + br(-0.2, 0.2)) * cr2 * 0.5,
+                0.15, 70, 0.4, 0);
+        }
+    }
+
+    /* ═══════════ TSUNAMI FX ═══════════ */
+    function drawTsunami(c) {
+        if (DISASTER.active !== 'tsunami') return;
+        var tx = DISASTER.tsunamiX;
+        if (tx > W + 100 || tx < -100) return;
+        for (var y = RIVER_TOP; y < H; y += 1.5) {
+            var waveX = tx + Math.sin(y * 0.05) * 8;
+            c.beginPath(); c.moveTo(waveX, y); c.lineTo(waveX + 25, y);
+            c.strokeStyle = 'rgba(100,105,110,0.3)';
+            c.lineWidth = 1.5; c.stroke();
+        }
+        for (var i = 0; i < 15; i++) {
+            var fy = RIVER_TOP + br(0, H - RIVER_TOP);
+            arcStr(c, tx + br(-5, 5), fy, br(3, 8), br(2, 5), Math.PI, Math.PI * 2, 0.3, 0.2, 195, 0.4);
+        }
+    }
+
+    /* ═══════════ JOGGER ═══════════ */
+    var joggers = [];
+    function createJogger() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        var far = behRng() > 0.5;
+        return { x: dir > 0 ? -10 : W + 10, y: far ? SIDEWALK_S - 2 : SIDEWALK_N_B - 2,
+                 dir: dir, speed: br(28, 48), g: bri(40, 75), scale: far ? 0.75 : 1,
+                 walkPhase: 0, phaseTimer: 0, alive: true };
+    }
+    function updateJogger(j, dt) {
+        j.x += j.dir * j.speed * dt;
+        j.phaseTimer += dt;
+        if (j.phaseTimer > 0.1) { j.phaseTimer = 0; j.walkPhase = (j.walkPhase + 1) % 4; }
+        if ((j.dir > 0 && j.x > W + 20) || (j.dir < 0 && j.x < -20)) j.alive = false;
+    }
+    function drawJogger(c, j) {
+        var x = j.x, y = j.y, g = j.g, s = j.scale, ph = j.walkPhase;
+        var h = 10 * s, bob = (ph === 1 || ph === 3) ? -0.6 * s : 0;
+        arcStr(c, x, y - h + bob, 1.4 * s, 1.4 * s, 0, Math.PI * 2, 0.45, 0.25 * s, g, 0.9);
+        stk(c, x - 1.2 * s, y - h + 0.3 + bob, x + 1.2 * s, y - h + 0.3 + bob, 0.3, g + 15, 0.6, 0);
+        stk(c, x, y - h + 2.2 * s + bob, x, y - h * 0.38, 0.35 * s, g, 0.9, 0);
+        var stride = (ph === 0 || ph === 2) ? 2.5 * s : 0.4 * s;
+        var legDir = (ph === 0) ? 1 : (ph === 2) ? -1 : 0;
+        stk(c, x, y - h * 0.38, x + legDir * stride * j.dir, y, 0.25 * s, g, 0.85, 0);
+        stk(c, x, y - h * 0.38, x - legDir * stride * j.dir, y, 0.25 * s, g + 12, 0.75, 0);
+        var armSwing = (ph === 0 || ph === 2) ? 3 * s : 0.6 * s;
+        var armDir = (ph === 0) ? -1 : 1;
+        stk(c, x, y - h + 3.2 * s + bob, x + armDir * armSwing * j.dir * 0.5, y - h * 0.45, 0.2 * s, g, 0.7, 0);
+        stk(c, x, y - h + 3.2 * s + bob, x - armDir * armSwing * j.dir * 0.5, y - h * 0.45, 0.2 * s, g, 0.7, 0);
+    }
+
+    /* ═══════════ BUSKER ═══════════ */
+    var buskers = [];
+    function createBusker() {
+        var instruments = ['guitar', 'sax', 'violin'];
+        return { x: br(W * 0.15, W * 0.85), y: SIDEWALK_N_B - 2, g: bri(38, 70),
+                 instrument: instruments[bri(0, 3)], noteTimer: 0, alive: true };
+    }
+    function updateBusker(b, dt) { b.noteTimer += dt; }
+    function drawBusker(c, b) {
+        var x = b.x, y = b.y, g = b.g;
+        arcStr(c, x, y - 9, 1.4, 1.4, 0, Math.PI * 2, 0.45, 0.25, g, 0.9);
+        stk(c, x, y - 7.5, x, y - 3.5, 0.35, g, 0.9, 0);
+        stk(c, x, y - 3.5, x - 1.2, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 3.5, x + 1.2, y, 0.25, g + 10, 0.7, 0);
+        if (b.instrument === 'guitar') {
+            stk(c, x + 1.5, y - 6, x + 1.5, y - 2, 0.3, 55, 0.7, 0);
+            arcStr(c, x + 1.5, y - 2, 1.8, 1.2, 0, Math.PI * 2, 0.4, 0.2, 60, 0.6);
+        } else if (b.instrument === 'sax') {
+            stk(c, x + 1, y - 7, x + 2.5, y - 3, 0.35, 50, 0.7, 0);
+            arcStr(c, x + 2.5, y - 2.5, 1, 1.5, 0, Math.PI, 0.3, 0.25, 55, 0.6);
+        } else {
+            stk(c, x - 2.5, y - 7, x + 0.5, y - 5, 0.3, 50, 0.7, 0);
+            stk(c, x - 2, y - 7, x - 3, y - 5.5, 0.15, 55, 0.5, 0);
+        }
+        if (ATM.rainIntensity < 0.5 && Math.sin(b.noteTimer * 3) > 0.5) {
+            var ny = y - 11 - Math.sin(b.noteTimer * 2) * 3;
+            stk(c, x + 1, ny, x + 2, ny - 1, 0.2, g + 30, 0.4, 0);
+            arcStr(c, x + 1, ny, 0.8, 0.8, 0, Math.PI * 2, 0.5, 0.15, g + 25, 0.35);
+        }
+    }
+
+    /* ═══════════ VENDOR ═══════════ */
+    var vendors = [];
+    function createVendor() {
+        return { x: br(W * 0.1, W * 0.9), y: SIDEWALK_N_B - 2, g: bri(45, 75),
+                 smokeTimer: 0, alive: true };
+    }
+    function updateVendor(v, dt) { v.smokeTimer += dt; }
+    function drawVendor(c, v) {
+        var x = v.x, y = v.y, g = v.g;
+        arcStr(c, x, y - 9, 1.4, 1.4, 0, Math.PI * 2, 0.45, 0.25, g, 0.9);
+        stk(c, x, y - 7.5, x, y - 3.5, 0.35, g, 0.85, 0);
+        stk(c, x, y - 3.5, x - 1, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 3.5, x + 1, y, 0.25, g + 10, 0.7, 0);
+        rectStk(c, x + 3, y - 6, 12, 6, 0.4, g + 20, 0.7);
+        stk(c, x + 3, y - 8, x + 15, y - 8, 0.6, g + 35, 0.5, 0);
+        stk(c, x + 3, y - 8, x + 3, y - 6, 0.25, g + 15, 0.5, 0);
+        stk(c, x + 15, y - 8, x + 15, y - 6, 0.25, g + 15, 0.5, 0);
+        for (var sx = x + 3; sx < x + 15; sx += 2.5) {
+            stk(c, sx, y - 8, sx + 1.2, y - 6, 0.06, g + 40, 0.35, 0);
+        }
+        if (Math.sin(v.smokeTimer * 1.5) > 0) {
+            for (var s = 0; s < 3; s++) {
+                var sy = y - 8 - s * 3 - Math.sin(v.smokeTimer * 2 + s) * 2;
+                arcStr(c, x + 9 + Math.sin(v.smokeTimer + s) * 1.5, sy, 1.5 + s * 0.5, 1 + s * 0.3,
+                    0, Math.PI * 2, 0.4, 0.12, 185, 0.2 - s * 0.05);
+            }
+        }
+    }
+
+    /* ═══════════ PIGEON ═══════════ */
+    var pigeons = [];
+    function createPigeon() {
+        return { x: br(20, W - 20), y: SIDEWALK_N_B - 1, g: bri(70, 110),
+                 state: 'walk', dir: behRng() > 0.5 ? 1 : -1, speed: br(5, 12),
+                 peckTimer: 0, walkPhase: 0, phaseTimer: 0, stateTimer: br(2, 8),
+                 flyY: 0, alive: true };
+    }
+    function updatePigeon(p, dt) {
+        p.stateTimer -= dt;
+        if (p.stateTimer <= 0) {
+            var states = ['walk', 'peck', 'idle'];
+            p.state = states[bri(0, states.length)];
+            p.stateTimer = br(2, 8);
+            if (p.state === 'walk') p.dir = behRng() > 0.5 ? 1 : -1;
+        }
+        if (p.state === 'walk') {
+            p.x += p.dir * p.speed * dt;
+            p.phaseTimer += dt;
+            if (p.phaseTimer > 0.2) { p.phaseTimer = 0; p.walkPhase = (p.walkPhase + 1) % 4; }
+            if (p.x < 5 || p.x > W - 5) p.dir = -p.dir;
+        } else if (p.state === 'peck') {
+            p.peckTimer += dt;
+        }
+        for (var i = 0; i < peds.length; i++) {
+            if (Math.abs(peds[i].x - p.x) < 12 && Math.abs(peds[i].y - p.y) < 8) {
+                p.state = 'fly'; p.flyY = p.y; p.stateTimer = 3;
+                break;
+            }
+        }
+        if (p.state === 'fly') {
+            p.flyY -= 40 * dt;
+            p.x += p.dir * 30 * dt;
+            if (p.flyY < HORIZON) p.alive = false;
+        }
+    }
+    function drawPigeon(c, p) {
+        var x = p.x, y = p.state === 'fly' ? p.flyY : p.y, g = p.g;
+        if (p.state === 'fly') {
+            stk(c, x - 3, y + Math.sin(p.phaseTimer * 20) * 2, x, y, 0.25, g, 0.7, 0);
+            stk(c, x + 3, y + Math.sin(p.phaseTimer * 20) * 2, x, y, 0.25, g, 0.7, 0);
+            stk(c, x, y, x - p.dir * 2, y + 1, 0.2, g, 0.6, 0);
+        } else {
+            arcStr(c, x, y - 2.5, 1.2, 1, 0, Math.PI * 2, 0.4, 0.2, g, 0.7);
+            stk(c, x, y - 1.5, x, y - 0.5, 0.3, g, 0.7, 0);
+            var headDip = p.state === 'peck' && Math.sin(p.peckTimer * 12) > 0 ? 1 : 0;
+            arcStr(c, x + p.dir * 1.2, y - 3 + headDip, 0.6, 0.5, 0, Math.PI * 2, 0.5, 0.15, g - 10, 0.7);
+            stk(c, x + p.dir * 1.8, y - 2.8 + headDip, x + p.dir * 2.3, y - 2.6 + headDip, 0.15, 50, 0.6, 0);
+            stk(c, x - 0.5, y - 0.5, x - 0.5, y, 0.12, g - 10, 0.6, 0);
+            stk(c, x + 0.5, y - 0.5, x + 0.5, y, 0.12, g - 10, 0.6, 0);
+        }
+    }
+
+    /* ═══════════ CAT ═══════════ */
+    var cats = [];
+    function createCat() {
+        return { x: br(30, W - 30), y: SIDEWALK_S - 1.5, g: bri(50, 90),
+                 state: 'sit', dir: behRng() > 0.5 ? 1 : -1, speed: br(6, 14),
+                 stateTimer: br(5, 20), tailPhase: br(0, Math.PI * 2), alive: true };
+    }
+    function updateCat(cat, dt) {
+        cat.tailPhase += dt * 2;
+        cat.stateTimer -= dt;
+        if (cat.stateTimer <= 0) {
+            cat.state = cat.state === 'sit' ? 'walk' : 'sit';
+            cat.stateTimer = br(5, 20);
+            cat.dir = behRng() > 0.5 ? 1 : -1;
+        }
+        if (cat.state === 'walk') {
+            cat.x += cat.dir * cat.speed * dt;
+            if (cat.x < 10 || cat.x > W - 10) cat.dir = -cat.dir;
+        }
+    }
+    function drawCat(c, cat) {
+        var x = cat.x, y = cat.y, g = cat.g;
+        if (cat.state === 'sit') {
+            arcStr(c, x, y - 2, 2, 1.5, 0, Math.PI * 2, 0.4, 0.25, g, 0.7);
+            arcStr(c, x + cat.dir * 1.8, y - 3.5, 0.8, 0.7, 0, Math.PI * 2, 0.45, 0.2, g, 0.7);
+            stk(c, x + cat.dir * 1.2, y - 4, x + cat.dir * 1.8, y - 4.8, 0.15, g - 5, 0.6, 0);
+            stk(c, x + cat.dir * 2.2, y - 4, x + cat.dir * 2.6, y - 4.8, 0.15, g - 5, 0.6, 0);
+            var tailTip = Math.sin(cat.tailPhase) * 2;
+            stk(c, x - cat.dir * 1.8, y - 1.5, x - cat.dir * 4, y - 2.5 + tailTip, 0.2, g, 0.6, 0);
+        } else {
+            stk(c, x - cat.dir * 2, y - 1.5, x + cat.dir * 2, y - 1.5, 0.35, g, 0.7, 0);
+            arcStr(c, x + cat.dir * 2.5, y - 2.5, 0.8, 0.7, 0, Math.PI * 2, 0.45, 0.2, g, 0.7);
+            stk(c, x - cat.dir * 0.8, y - 1, x - cat.dir * 0.8, y, 0.12, g - 5, 0.6, 0);
+            stk(c, x + cat.dir * 0.8, y - 1, x + cat.dir * 0.8, y, 0.12, g - 5, 0.6, 0);
+            var tailTip2 = Math.sin(cat.tailPhase) * 1.5;
+            stk(c, x - cat.dir * 2, y - 1.5, x - cat.dir * 4, y - 3 + tailTip2, 0.2, g, 0.5, 0);
+        }
+    }
+
+    /* ═══════════ SEAGULL ═══════════ */
+    var seagulls = [];
+    function createSeagull() {
+        return { x: br(-20, W + 20), y: br(HORIZON * 0.3, BEACH_Y - 10),
+                 dir: behRng() > 0.5 ? 1 : -1, speed: br(15, 30),
+                 flapPhase: br(0, Math.PI * 2), diving: false,
+                 diveTarget: 0, baseY: 0, g: bri(85, 120), alive: true };
+    }
+    function updateSeagull(s, dt) {
+        s.flapPhase += dt * 8;
+        s.x += s.dir * s.speed * dt;
+        if (!s.diving) {
+            s.y += Math.sin(s.flapPhase * 0.3) * 0.3;
+            if (behRng() < 0.002) {
+                s.diving = true; s.baseY = s.y;
+                s.diveTarget = RIVER_TOP + br(0, 15);
+            }
+        } else {
+            if (s.y < s.diveTarget) { s.y += 60 * dt; }
+            else { s.y -= 30 * dt; if (s.y <= s.baseY) { s.y = s.baseY; s.diving = false; } }
+        }
+        if ((s.dir > 0 && s.x > W + 30) || (s.dir < 0 && s.x < -30)) s.alive = false;
+    }
+    function drawSeagull(c, s) {
+        var x = s.x, y = s.y, wing = Math.sin(s.flapPhase) * 3.5;
+        stk(c, x - 5, y + wing, x, y, 0.3, s.g, 0.7, 0);
+        stk(c, x + 5, y + wing, x, y, 0.3, s.g, 0.7, 0);
+        stk(c, x, y, x + s.dir * 2, y + 0.5, 0.2, s.g - 15, 0.6, 0);
+    }
+
+    /* ═══════════ SWIMMER ═══════════ */
+    var swimmers = [];
+    function createSwimmer() {
+        return { x: br(W * 0.1, W * 0.9), y: RIVER_TOP + br(3, 15),
+                 dir: behRng() > 0.5 ? 1 : -1, speed: br(4, 10), g: bri(50, 85),
+                 splashPhase: br(0, Math.PI * 2), alive: true };
+    }
+    function updateSwimmer(s, dt) {
+        s.x += s.dir * s.speed * dt;
+        s.splashPhase += dt * 6;
+        if (s.x < W * 0.05 || s.x > W * 0.95) s.dir = -s.dir;
+    }
+    function drawSwimmer(c, s) {
+        var x = s.x, y = s.y, g = s.g;
+        arcStr(c, x, y - 1.2, 1.2, 1.2, 0, Math.PI * 2, 0.45, 0.2, g, 0.7);
+        var splash = Math.sin(s.splashPhase) * 1.5;
+        stk(c, x + s.dir * 2, y, x + s.dir * 3, y - 1 + splash, 0.15, g + 20, 0.4, 0);
+        stk(c, x - 1.5, y + 0.5, x + 1.5, y + 0.5, 0.1, 155, 0.25, 0);
+    }
+
+    /* ═══════════ SURFER ═══════════ */
+    var surfers = [];
+    function createSurfer() {
+        return { x: br(W * 0.1, W * 0.9), y: RIVER_TOP + br(2, 10),
+                 dir: behRng() > 0.5 ? 1 : -1, speed: br(8, 18), g: bri(45, 80),
+                 standing: behRng() > 0.4, bobPhase: br(0, Math.PI * 2), alive: true };
+    }
+    function updateSurfer(s, dt) {
+        s.x += s.dir * s.speed * dt;
+        s.bobPhase += dt * 2;
+        if (s.x < W * 0.05 || s.x > W * 0.95) s.dir = -s.dir;
+    }
+    function drawSurfer(c, s) {
+        var x = s.x, y = s.y + Math.sin(s.bobPhase) * 0.8, g = s.g;
+        stk(c, x - 5, y + 1, x + 5, y + 1, 0.5, g + 15, 0.6, 0);
+        if (s.standing) {
+            stk(c, x, y + 1, x, y - 5, 0.3, g, 0.8, 0);
+            arcStr(c, x, y - 6, 1, 1, 0, Math.PI * 2, 0.45, 0.2, g, 0.8);
+            stk(c, x, y - 3, x - 1, y, 0.2, g, 0.7, 0);
+            stk(c, x, y - 3, x + 1, y, 0.2, g + 8, 0.65, 0);
+        } else {
+            stk(c, x - 2, y - 0.5, x + 2, y - 0.5, 0.25, g, 0.7, 0);
+            arcStr(c, x + 2, y - 1.5, 0.7, 0.7, 0, Math.PI * 2, 0.45, 0.15, g, 0.7);
+        }
+        stk(c, x + s.dir * 4, y + 1.5, x + s.dir * 6, y + 2, 0.1, 155, 0.2, 0);
+    }
+
+    /* ═══════════ PADDLEBOARDER ═══════════ */
+    var paddlers = [];
+    function createPaddler() {
+        return { x: br(W * 0.1, W * 0.9), y: RIVER_TOP + br(5, 18),
+                 dir: behRng() > 0.5 ? 1 : -1, speed: br(5, 12), g: bri(50, 80),
+                 paddlePhase: br(0, Math.PI * 2), bobPhase: br(0, Math.PI * 2), alive: true };
+    }
+    function updatePaddler(p, dt) {
+        p.x += p.dir * p.speed * dt; p.paddlePhase += dt * 3; p.bobPhase += dt * 2;
+        if (p.x < W * 0.05 || p.x > W * 0.95) p.dir = -p.dir;
+    }
+    function drawPaddler(c, p) {
+        var x = p.x, y = p.y + Math.sin(p.bobPhase) * 0.6, g = p.g;
+        stk(c, x - 5, y + 0.5, x + 5, y + 0.5, 0.5, g + 15, 0.6, 0);
+        stk(c, x, y + 0.5, x, y - 6, 0.3, g, 0.8, 0);
+        arcStr(c, x, y - 7, 1, 1, 0, Math.PI * 2, 0.45, 0.2, g, 0.8);
+        var paddleSwing = Math.sin(p.paddlePhase) * 3;
+        var side = Math.sin(p.paddlePhase) > 0 ? 1 : -1;
+        stk(c, x, y - 4, x + side * 3, y - 1 + paddleSwing * 0.3, 0.2, 55, 0.6, 0);
+        stk(c, x + side * 3, y - 1 + paddleSwing * 0.3, x + side * 3.5, y + 0.5, 0.25, 50, 0.5, 0);
+    }
+
+    /* ═══════════ JET SKI ═══════════ */
+    var jetskis = [];
+    function createJetSki() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return { x: dir > 0 ? -15 : W + 15, y: RIVER_TOP + br(3, 12),
+                 dir: dir, speed: br(45, 80), g: bri(45, 75),
+                 bobPhase: br(0, Math.PI * 2), alive: true };
+    }
+    function updateJetSki(j, dt) {
+        j.x += j.dir * j.speed * dt; j.bobPhase += dt * 4;
+        if ((j.dir > 0 && j.x > W + 30) || (j.dir < 0 && j.x < -30)) j.alive = false;
+    }
+    function drawJetSki(c, j) {
+        var x = j.x, y = j.y + Math.sin(j.bobPhase) * 1.2, d = j.dir, g = j.g;
+        arcStr(c, x, y + 1, 6, 2.5, 0, Math.PI, 0.25, 0.45, g, 0.7);
+        stk(c, x - d * 5, y + 1, x + d * 5, y + 1, 0.4, g - 8, 0.8, 0);
+        stk(c, x, y + 0.5, x, y - 4, 0.3, g, 0.8, 0);
+        arcStr(c, x, y - 5, 0.8, 0.8, 0, Math.PI * 2, 0.45, 0.2, g, 0.8);
+        for (var w = 1; w < 6; w++) {
+            var wx = x - d * (w * 4 + 3);
+            var wa = Math.max(0, 0.3 - w * 0.05);
+            arcStr(c, wx, y + 2, w * 1.8, 1, d > 0 ? Math.PI * 0.7 : 0, d > 0 ? Math.PI : Math.PI * 0.3, 0.3, 0.12, 190, wa);
+        }
+    }
+
+    /* ═══════════ FISHERMAN ═══════════ */
+    var fishermen = [];
+    function createFisherman() {
+        return { x: br(W * 0.55, W * 0.75), y: RIVER_TOP - 5, g: bri(45, 70),
+                 bobberPhase: br(0, Math.PI * 2), alive: true };
+    }
+    function updateFisherman(f, dt) { f.bobberPhase += dt * 1.5; }
+    function drawFisherman(c, f) {
+        var x = f.x, y = f.y, g = f.g;
+        arcStr(c, x, y - 8, 1.3, 1.3, 0, Math.PI * 2, 0.45, 0.2, g, 0.8);
+        stk(c, x, y - 6.5, x, y - 2.5, 0.3, g, 0.85, 0);
+        stk(c, x, y - 2.5, x - 1, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 2.5, x + 1, y, 0.25, g + 10, 0.7, 0);
+        var rodTipX = x + 12, rodTipY = y - 14;
+        stk(c, x + 1, y - 5.5, rodTipX, rodTipY, 0.2, 65, 0.7, 0);
+        var bobberX = rodTipX + 3, bobberY = RIVER_TOP + 2 + Math.sin(f.bobberPhase) * 1;
+        stk(c, rodTipX, rodTipY, bobberX, bobberY, 0.08, 120, 0.3, 0);
+        arcStr(c, bobberX, bobberY, 0.8, 0.8, 0, Math.PI * 2, 0.5, 0.2, 70, 0.6);
+    }
+
+    /* ═══════════ SUNBATHER ═══════════ */
+    var sunbathers = [];
+    function createSunbather() {
+        return { x: br(40, W - 40), y: BEACH_Y + br(-2, 0), g: bri(55, 95),
+                 lying: behRng() > 0.3, alive: true };
+    }
+    function drawSunbather(c, s) {
+        var x = s.x, y = s.y, g = s.g;
+        stk(c, x - 4, y + 0.5, x + 5, y + 0.5, 0.8, g + 40, 0.3, 0);
+        if (s.lying) {
+            stk(c, x - 3, y - 0.5, x + 3, y - 0.5, 0.3, g, 0.7, 0);
+            arcStr(c, x - 3.5, y - 1, 0.8, 0.8, 0, Math.PI * 2, 0.45, 0.15, g, 0.7);
+        } else {
+            arcStr(c, x, y - 3, 1, 1, 0, Math.PI * 2, 0.45, 0.2, g, 0.7);
+            stk(c, x, y - 2, x, y - 0.5, 0.25, g, 0.7, 0);
+            stk(c, x, y - 0.5, x + 2, y, 0.2, g, 0.6, 0);
+        }
+    }
+
+    /* ═══════════ BEACH VOLLEYBALL PLAYER ═══════════ */
+    var bplayers = [];
+    function createBPlayer() {
+        var side = behRng() > 0.5 ? 1 : -1;
+        var netX = W * 0.4;
+        return { x: netX + side * br(5, 20), y: BEACH_Y - 1, g: bri(50, 80),
+                 armUp: false, armTimer: br(1, 4), alive: true };
+    }
+    function updateBPlayer(p, dt) {
+        p.armTimer -= dt;
+        if (p.armTimer <= 0) { p.armUp = !p.armUp; p.armTimer = br(0.5, 3); }
+    }
+    function drawBPlayer(c, p) {
+        var x = p.x, y = p.y, g = p.g;
+        arcStr(c, x, y - 8, 1.2, 1.2, 0, Math.PI * 2, 0.45, 0.2, g, 0.8);
+        stk(c, x, y - 6.5, x, y - 3, 0.3, g, 0.85, 0);
+        stk(c, x, y - 3, x - 1, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 3, x + 1, y, 0.25, g + 8, 0.7, 0);
+        if (p.armUp) {
+            stk(c, x, y - 5.5, x + 2, y - 8, 0.2, g, 0.7, 0);
+            stk(c, x, y - 5.5, x - 1.5, y - 4, 0.2, g, 0.7, 0);
+        } else {
+            stk(c, x, y - 5.5, x + 1.5, y - 3.5, 0.2, g, 0.7, 0);
+            stk(c, x, y - 5.5, x - 1.5, y - 3.5, 0.2, g, 0.7, 0);
+        }
+    }
+
+    /* ═══════════ VOLUNTEER ═══════════ */
+    var volunteers = [];
+    function createVolunteer() {
+        var roles = ['cleanup', 'gardener', 'foodline'];
+        var role = roles[bri(0, 3)];
+        var yPos = role === 'cleanup' ? BEACH_Y - 1 : SIDEWALK_N_B - 2;
+        return { x: br(30, W - 30), y: yPos, g: bri(40, 70), role: role,
+                 dir: behRng() > 0.5 ? 1 : -1, speed: br(4, 10),
+                 walkPhase: 0, phaseTimer: 0, alive: true };
+    }
+    function updateVolunteer(v, dt) {
+        v.x += v.dir * v.speed * dt;
+        v.phaseTimer += dt;
+        if (v.phaseTimer > 0.22) { v.phaseTimer = 0; v.walkPhase = (v.walkPhase + 1) % 4; }
+        if (v.x < 15 || v.x > W - 15) v.dir = -v.dir;
+    }
+    function drawVolunteer(c, v) {
+        var x = v.x, y = v.y, g = v.g, ph = v.walkPhase;
+        arcStr(c, x, y - 9, 1.4, 1.4, 0, Math.PI * 2, 0.45, 0.25, g, 0.9);
+        stk(c, x, y - 7.5, x, y - 3.5, 0.35, g, 0.85, 0);
+        stk(c, x - 1, y - 6, x + 1, y - 4.5, 0.12, 120, 0.5, 0);
+        stk(c, x + 1, y - 6, x - 1, y - 4.5, 0.12, 120, 0.5, 0);
+        var stride = (ph === 0 || ph === 2) ? 1.3 : 0.2;
+        var legDir = ph === 0 ? 1 : (ph === 2 ? -1 : 0);
+        stk(c, x, y - 3.5, x + legDir * stride * v.dir, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 3.5, x - legDir * stride * v.dir, y, 0.25, g + 10, 0.7, 0);
+        if (v.role === 'cleanup') {
+            stk(c, x + 1.5, y - 5, x + 3, y - 1, 0.2, 55, 0.6, 0);
+        } else if (v.role === 'gardener') {
+            stk(c, x + 1.5, y - 5, x + 2, y - 2, 0.3, 50, 0.5, 0);
+            stk(c, x + 2, y - 2, x + 2.5, y - 1, 0.4, 55, 0.5, 0);
+        }
+    }
+
+    /* ═══════════ CRIMINAL & POLICE ═══════════ */
+    var criminals = [];
+    var policeFoot = [];
+    function createCriminal() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return { x: br(W * 0.2, W * 0.8), y: SIDEWALK_N_B - 2, g: bri(30, 55),
+                 dir: dir, speed: br(8, 15), state: 'prowl', stateTimer: br(5, 15),
+                 walkPhase: 0, phaseTimer: 0, fleeSpeed: br(35, 55), alive: true };
+    }
+    function updateCriminal(cr, dt) {
+        cr.stateTimer -= dt;
+        cr.phaseTimer += dt;
+        if (cr.phaseTimer > 0.15) { cr.phaseTimer = 0; cr.walkPhase = (cr.walkPhase + 1) % 4; }
+        if (cr.state === 'prowl') {
+            cr.x += cr.dir * cr.speed * dt;
+            if (cr.x < 30 || cr.x > W - 30) cr.dir = -cr.dir;
+            if (cr.stateTimer <= 0) {
+                cr.state = 'flee'; cr.stateTimer = 10;
+                if (policeFoot.length < MAX_POLICE_FOOT) policeFoot.push(createPolice(cr));
+            }
+        } else if (cr.state === 'flee') {
+            cr.x += cr.dir * cr.fleeSpeed * dt;
+            if ((cr.dir > 0 && cr.x > W + 20) || (cr.dir < 0 && cr.x < -20)) cr.alive = false;
+        }
+    }
+    function drawCriminal(c, cr) {
+        var x = cr.x, y = cr.y, g = cr.g, ph = cr.walkPhase;
+        arcStr(c, x, y - 9, 1.4, 1.4, 0, Math.PI * 2, 0.45, 0.25, g, 0.9);
+        stk(c, x - 1.5, y - 9.8, x + 1.5, y - 9.8, 0.8, g - 5, 0.6, 0);
+        stk(c, x - 1.5, y - 9.8, x - 1.5, y - 8.5, 0.2, g - 5, 0.5, 0);
+        stk(c, x + 1.5, y - 9.8, x + 1.5, y - 8.5, 0.2, g - 5, 0.5, 0);
+        stk(c, x, y - 7.5, x, y - 3.5, 0.35, g, 0.85, 0);
+        var spd = cr.state === 'flee' ? 2.5 : 1.2;
+        var stride = (ph === 0 || ph === 2) ? spd : 0.2;
+        var legDir = ph === 0 ? 1 : (ph === 2 ? -1 : 0);
+        stk(c, x, y - 3.5, x + legDir * stride * cr.dir, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 3.5, x - legDir * stride * cr.dir, y, 0.25, g + 8, 0.7, 0);
+        stk(c, x, y - 6, x + 1.5, y - 4, 0.2, g, 0.7, 0);
+        stk(c, x, y - 6, x - 1.5, y - 4, 0.2, g, 0.7, 0);
+    }
+    function createPolice(target) {
+        return { x: target.x + (target.dir > 0 ? -80 : 80), y: SIDEWALK_N_B - 2,
+                 g: bri(30, 50), dir: target.dir, speed: br(40, 55),
+                 targetCriminal: target, walkPhase: 0, phaseTimer: 0, alive: true };
+    }
+    function updatePolice(p, dt) {
+        if (!p.targetCriminal || !p.targetCriminal.alive) { p.alive = false; return; }
+        var dx = p.targetCriminal.x - p.x;
+        p.dir = dx > 0 ? 1 : -1;
+        p.x += p.dir * p.speed * dt;
+        p.phaseTimer += dt;
+        if (p.phaseTimer > 0.1) { p.phaseTimer = 0; p.walkPhase = (p.walkPhase + 1) % 4; }
+        if (Math.abs(dx) < 8) { p.targetCriminal.alive = false; p.alive = false; }
+        if ((p.dir > 0 && p.x > W + 20) || (p.dir < 0 && p.x < -20)) p.alive = false;
+    }
+    function drawPolice(c, p) {
+        var x = p.x, y = p.y, g = p.g, ph = p.walkPhase;
+        arcStr(c, x, y - 9, 1.4, 1.4, 0, Math.PI * 2, 0.45, 0.25, g, 0.9);
+        stk(c, x - 1.8, y - 10, x + 1.8, y - 10, 0.6, 45, 0.7, 0);
+        stk(c, x - 1.8, y - 10.5, x + 1.8, y - 10.5, 0.3, 50, 0.5, 0);
+        stk(c, x, y - 7.5, x, y - 3.5, 0.35, g + 5, 0.85, 0);
+        var stride = (ph === 0 || ph === 2) ? 2.5 : 0.3;
+        var legDir = ph === 0 ? 1 : (ph === 2 ? -1 : 0);
+        stk(c, x, y - 3.5, x + legDir * stride * p.dir, y, 0.25, g, 0.8, 0);
+        stk(c, x, y - 3.5, x - legDir * stride * p.dir, y, 0.25, g + 8, 0.7, 0);
+        stk(c, x + 0.8, y - 7, x + 0.8, y - 6.5, 0.25, 200, 0.5, 0);
+    }
+
+    /* ═══════════ EMERGENCY VEHICLES ═══════════ */
+    var emTimers = { ambulance: 60, fire: 100, patrol: 35 };
+
+    /* ═══════════ UMBRELLA PEDESTRIANS ═══════════ */
+    function drawUmbrella(c, x, y, g) {
+        stk(c, x, y - 11, x, y - 3, 0.2, g + 20, 0.6, 0);
+        arcStr(c, x, y - 11.5, 4, 2.5, Math.PI, Math.PI * 2, 0.2, 0.3, g + 25, 0.55);
+        stk(c, x - 4, y - 11.5, x + 4, y - 11.5, 0.25, g + 20, 0.5, 0);
+        for (var ux = x - 3.5; ux < x + 4; ux += 2) {
+            stk(c, ux, y - 11.5, ux + 1, y - 10, 0.06, g + 30, 0.3, 0);
+        }
+    }
+
     /* ═══════════ WINDOW LIGHTS ═══════════ */
     function drawLitWindows(c, now) {
         for (var i = 0; i < litWindows.length; i++) {
@@ -1785,7 +3204,7 @@
 
     function paperColor() {
         var nightAmt = getDayAlpha();
-        var g = Math.floor(PAPER_BASE - nightAmt * 20);
+        var g = Math.floor(PAPER_BASE - nightAmt * 20 - ATM.paperDarken);
         return 'rgb(' + g + ',' + g + ',' + g + ')';
     }
 
@@ -1839,9 +3258,9 @@
         clouds = [];
         for (var i = 0; i < MAX_CLOUDS; i++) clouds.push(createCloud());
 
-        /* spawn flocks */
+        /* spawn flocks (many!) */
         flocks = [];
-        for (var i = 0; i < bri(1, MAX_FLOCKS + 1); i++) flocks.push(createFlock());
+        for (var i = 0; i < bri(6, MAX_FLOCKS); i++) flocks.push(createFlock());
 
         /* reset smoke */
         smokePuffs = [];
@@ -1882,6 +3301,88 @@
             fish.push(createFish());
         }
 
+        /* spawn joggers */
+        joggers = [];
+        for (var i = 0; i < bri(1, 3); i++) { var j = createJogger(); j.x = br(30, W - 30); joggers.push(j); }
+
+        /* spawn buskers */
+        buskers = [];
+        for (var i = 0; i < bri(1, MAX_BUSKERS); i++) buskers.push(createBusker());
+
+        /* spawn vendors */
+        vendors = [];
+        for (var i = 0; i < bri(1, MAX_VENDORS); i++) vendors.push(createVendor());
+
+        /* spawn pigeons */
+        pigeons = [];
+        for (var i = 0; i < bri(4, MAX_PIGEONS); i++) pigeons.push(createPigeon());
+
+        /* spawn cats */
+        cats = [];
+        for (var i = 0; i < bri(1, MAX_CATS); i++) cats.push(createCat());
+
+        /* spawn seagulls */
+        seagulls = [];
+        for (var i = 0; i < bri(2, MAX_SEAGULLS); i++) seagulls.push(createSeagull());
+
+        /* spawn swimmers */
+        swimmers = [];
+        for (var i = 0; i < bri(1, MAX_SWIMMERS); i++) swimmers.push(createSwimmer());
+
+        /* spawn surfers */
+        surfers = [];
+        for (var i = 0; i < bri(1, MAX_SURFERS); i++) surfers.push(createSurfer());
+
+        /* spawn paddleboarders */
+        paddlers = [];
+        for (var i = 0; i < bri(1, MAX_PADDLERS); i++) paddlers.push(createPaddler());
+
+        /* spawn jetskis */
+        jetskis = [];
+
+        /* spawn fishermen */
+        fishermen = [];
+        for (var i = 0; i < bri(1, MAX_FISHERMEN); i++) fishermen.push(createFisherman());
+
+        /* spawn sunbathers */
+        sunbathers = [];
+        for (var i = 0; i < bri(2, MAX_SUNBATHERS); i++) sunbathers.push(createSunbather());
+
+        /* spawn beach volleyball players */
+        bplayers = [];
+        for (var i = 0; i < bri(2, MAX_BPLAYERS); i++) bplayers.push(createBPlayer());
+
+        /* spawn volunteers */
+        volunteers = [];
+        for (var i = 0; i < bri(1, MAX_VOLUNTEERS); i++) volunteers.push(createVolunteer());
+
+        /* criminals & police */
+        criminals = [];
+        policeFoot = [];
+
+        /* war planes, spaceships, flying cars, dragons */
+        warPlanes = [];
+        spaceships = [];
+        flyingCars = [];
+        dragons = [];
+        if (behRng() > 0.5) warPlanes.push(createWarPlane());
+        if (behRng() > 0.6) spaceships.push(createSpaceship());
+        for (var i = 0; i < bri(0, 2); i++) flyingCars.push(createFlyingCar());
+        for (var i = 0; i < bri(1, 3); i++) dragons.push(createDragon());
+
+        /* rain */
+        raindrops = [];
+
+        /* reset strike system */
+        strikeTimer = br(1, 3);
+        pendingDamage = null;
+        damageTimer = 0;
+        alienTimer = br(2, 4);
+        asteroidTimer = br(2, 4);
+        dragonFireTimer = br(2, 4);
+        aliens = [];
+        asteroids = [];
+
         dayPhase = 0;
     }
 
@@ -1896,6 +3397,10 @@
     var boatSpawnTimer = 0;
     var dolphinSpawnTimer = 0;
     var fishSpawnTimer = 0;
+    var joggerSpawnTimer = 0;
+    var seagullSpawnTimer = 0;
+    var criminalSpawnTimer = br(15, 40);
+    var jetskiSpawnTimer = 0;
 
     function frame(now) {
         var dt = Math.min((now - lastNow) / 1000, 0.05);
@@ -1903,16 +3408,24 @@
         dayPhase += dt / DAY_CYCLE;
         if (dayPhase > 1) dayPhase -= 1;
 
+        /* ── WEATHER & DISASTER ── */
+        updateDisaster(dt);
+        updateRain(dt);
+        updateLightning(dt);
+        updateStrikeSystem(dt);
+
         /* ── UPDATE ── */
         /* construction */
-        var allDone = true;
-        for (var i = 0; i < constructions.length; i++) {
+        for (var i = constructions.length - 1; i >= 0; i--) {
             updateConstruction(constructions[i], dt);
-            if (!constructions[i].done) allDone = false;
         }
 
-        /* cranes */
-        for (var i = 0; i < cranes.length; i++) updateCrane(cranes[i], dt);
+        /* cranes — remove cranes for done constructions */
+        for (var i = cranes.length - 1; i >= 0; i--) {
+            var conRef = constructions[cranes[i].conIdx];
+            if (conRef && conRef.done) { cranes.splice(i, 1); continue; }
+            updateCrane(cranes[i], dt);
+        }
 
         /* vehicles */
         for (var i = vehicles.length - 1; i >= 0; i--) {
@@ -1960,7 +3473,7 @@
             updateFlock(flocks[i], dt);
             if (!flocks[i].alive) flocks.splice(i, 1);
         }
-        if (flocks.length < MAX_FLOCKS && behRng() < 0.001) flocks.push(createFlock());
+        if (flocks.length < MAX_FLOCKS && behRng() < 0.008) flocks.push(createFlock());
 
         /* clouds */
         for (var i = 0; i < clouds.length; i++) updateCloud(clouds[i], dt);
@@ -1978,6 +3491,46 @@
             if (!helis[i].alive) helis.splice(i, 1);
         }
         if (helis.length < MAX_HELIS && behRng() < 0.0003) helis.push(createHeli());
+
+        /* war planes */
+        for (var i = warPlanes.length - 1; i >= 0; i--) {
+            updateWarPlane(warPlanes[i], dt);
+            if (!warPlanes[i].alive) warPlanes.splice(i, 1);
+        }
+        if (warPlanes.length < MAX_WARPLANES && behRng() < 0.0006) warPlanes.push(createWarPlane());
+
+        /* spaceships */
+        for (var i = spaceships.length - 1; i >= 0; i--) {
+            updateSpaceship(spaceships[i], dt);
+            if (!spaceships[i].alive) spaceships.splice(i, 1);
+        }
+        if (spaceships.length < MAX_SPACESHIPS && behRng() < 0.0002) spaceships.push(createSpaceship());
+
+        /* flying cars */
+        for (var i = flyingCars.length - 1; i >= 0; i--) {
+            updateFlyingCar(flyingCars[i], dt);
+            if (!flyingCars[i].alive) flyingCars.splice(i, 1);
+        }
+        if (flyingCars.length < MAX_FLYING_CARS && behRng() < 0.0008) flyingCars.push(createFlyingCar());
+
+        /* dragons */
+        for (var i = dragons.length - 1; i >= 0; i--) {
+            updateDragon(dragons[i], dt);
+            if (!dragons[i].alive) dragons.splice(i, 1);
+        }
+        if (dragons.length < MAX_DRAGONS && behRng() < 0.002) dragons.push(createDragon());
+
+        /* aliens */
+        for (var i = aliens.length - 1; i >= 0; i--) {
+            updateAlien(aliens[i], dt);
+            if (!aliens[i].alive) aliens.splice(i, 1);
+        }
+
+        /* asteroids */
+        for (var i = asteroids.length - 1; i >= 0; i--) {
+            updateAsteroid(asteroids[i], dt);
+            if (!asteroids[i].alive) asteroids.splice(i, 1);
+        }
 
         /* trains */
         for (var i = trains.length - 1; i >= 0; i--) {
@@ -2027,6 +3580,90 @@
             fishSpawnTimer = 0;
         }
 
+        /* joggers */
+        for (var i = joggers.length - 1; i >= 0; i--) {
+            updateJogger(joggers[i], dt);
+            if (!joggers[i].alive) joggers.splice(i, 1);
+        }
+        joggerSpawnTimer += dt;
+        if (joggerSpawnTimer > br(5, 15) && joggers.length < MAX_JOGGERS) {
+            joggers.push(createJogger());
+            joggerSpawnTimer = 0;
+        }
+
+        /* buskers */
+        for (var i = 0; i < buskers.length; i++) updateBusker(buskers[i], dt);
+
+        /* vendors */
+        for (var i = 0; i < vendors.length; i++) updateVendor(vendors[i], dt);
+
+        /* pigeons */
+        for (var i = pigeons.length - 1; i >= 0; i--) {
+            updatePigeon(pigeons[i], dt);
+            if (!pigeons[i].alive) pigeons.splice(i, 1);
+        }
+        if (pigeons.length < MAX_PIGEONS && behRng() < 0.005) pigeons.push(createPigeon());
+
+        /* cats */
+        for (var i = 0; i < cats.length; i++) updateCat(cats[i], dt);
+
+        /* seagulls */
+        for (var i = seagulls.length - 1; i >= 0; i--) {
+            updateSeagull(seagulls[i], dt);
+            if (!seagulls[i].alive) seagulls.splice(i, 1);
+        }
+        seagullSpawnTimer += dt;
+        if (seagullSpawnTimer > br(4, 12) && seagulls.length < MAX_SEAGULLS) {
+            seagulls.push(createSeagull());
+            seagullSpawnTimer = 0;
+        }
+
+        /* swimmers */
+        for (var i = 0; i < swimmers.length; i++) updateSwimmer(swimmers[i], dt);
+
+        /* surfers */
+        for (var i = 0; i < surfers.length; i++) updateSurfer(surfers[i], dt);
+
+        /* paddlers */
+        for (var i = 0; i < paddlers.length; i++) updatePaddler(paddlers[i], dt);
+
+        /* jetskis */
+        for (var i = jetskis.length - 1; i >= 0; i--) {
+            updateJetSki(jetskis[i], dt);
+            if (!jetskis[i].alive) jetskis.splice(i, 1);
+        }
+        jetskiSpawnTimer += dt;
+        if (jetskiSpawnTimer > br(10, 25) && jetskis.length < MAX_JETSKIS) {
+            jetskis.push(createJetSki());
+            jetskiSpawnTimer = 0;
+        }
+
+        /* fishermen */
+        for (var i = 0; i < fishermen.length; i++) updateFisherman(fishermen[i], dt);
+
+        /* beach volleyball */
+        for (var i = 0; i < bplayers.length; i++) updateBPlayer(bplayers[i], dt);
+
+        /* volunteers */
+        for (var i = 0; i < volunteers.length; i++) updateVolunteer(volunteers[i], dt);
+
+        /* criminals */
+        for (var i = criminals.length - 1; i >= 0; i--) {
+            updateCriminal(criminals[i], dt);
+            if (!criminals[i].alive) criminals.splice(i, 1);
+        }
+        criminalSpawnTimer -= dt;
+        if (criminalSpawnTimer <= 0 && criminals.length < MAX_CRIMINALS) {
+            criminals.push(createCriminal());
+            criminalSpawnTimer = br(25, 60);
+        }
+
+        /* police */
+        for (var i = policeFoot.length - 1; i >= 0; i--) {
+            updatePolice(policeFoot[i], dt);
+            if (!policeFoot[i].alive) policeFoot.splice(i, 1);
+        }
+
         /* smoke */
         smokeTimer += dt;
         if (smokeTimer > br(0.5, 1.5)) {
@@ -2057,8 +3694,29 @@
         /* helicopters */
         for (var i = 0; i < helis.length; i++) drawHeli(dynC, helis[i]);
 
+        /* war planes */
+        for (var i = 0; i < warPlanes.length; i++) drawWarPlane(dynC, warPlanes[i]);
+
+        /* spaceships */
+        for (var i = 0; i < spaceships.length; i++) drawSpaceship(dynC, spaceships[i]);
+
+        /* flying cars */
+        for (var i = 0; i < flyingCars.length; i++) drawFlyingCar(dynC, flyingCars[i]);
+
+        /* dragons */
+        for (var i = 0; i < dragons.length; i++) drawDragon(dynC, dragons[i]);
+
+        /* aliens */
+        for (var i = 0; i < aliens.length; i++) drawAlien(dynC, aliens[i]);
+
+        /* asteroids */
+        for (var i = 0; i < asteroids.length; i++) drawAsteroid(dynC, asteroids[i]);
+
         /* flocks */
         for (var i = 0; i < flocks.length; i++) drawFlock(dynC, flocks[i]);
+
+        /* seagulls */
+        for (var i = 0; i < seagulls.length; i++) drawSeagull(dynC, seagulls[i]);
 
         /* smoke */
         for (var i = 0; i < smokePuffs.length; i++) drawSmoke(dynC, smokePuffs[i]);
@@ -2075,14 +3733,46 @@
         /* window lights */
         drawLitWindows(dynC, now);
 
+        /* buskers & vendors on sidewalk */
+        for (var i = 0; i < buskers.length; i++) drawBusker(dynC, buskers[i]);
+        for (var i = 0; i < vendors.length; i++) drawVendor(dynC, vendors[i]);
+
+        /* pigeons */
+        for (var i = 0; i < pigeons.length; i++) drawPigeon(dynC, pigeons[i]);
+
+        /* cats */
+        for (var i = 0; i < cats.length; i++) drawCat(dynC, cats[i]);
+
         /* vehicles (on street) */
         for (var i = 0; i < vehicles.length; i++) drawVehicle(dynC, vehicles[i]);
 
         /* pedestrians (on street) */
-        for (var i = 0; i < peds.length; i++) drawPedestrian(dynC, peds[i]);
+        for (var i = 0; i < peds.length; i++) {
+            drawPedestrian(dynC, peds[i]);
+            if (peds[i].hasUmbrella) drawUmbrella(dynC, peds[i].x, peds[i].y, peds[i].g);
+        }
+
+        /* joggers */
+        for (var i = 0; i < joggers.length; i++) drawJogger(dynC, joggers[i]);
+
+        /* criminals & police */
+        for (var i = 0; i < criminals.length; i++) drawCriminal(dynC, criminals[i]);
+        for (var i = 0; i < policeFoot.length; i++) drawPolice(dynC, policeFoot[i]);
+
+        /* volunteers */
+        for (var i = 0; i < volunteers.length; i++) drawVolunteer(dynC, volunteers[i]);
 
         /* trains (foreground, on tracks) */
         for (var i = 0; i < trains.length; i++) drawTrain(dynC, trains[i]);
+
+        /* sunbathers */
+        for (var i = 0; i < sunbathers.length; i++) drawSunbather(dynC, sunbathers[i]);
+
+        /* beach volleyball */
+        for (var i = 0; i < bplayers.length; i++) drawBPlayer(dynC, bplayers[i]);
+
+        /* fishermen */
+        for (var i = 0; i < fishermen.length; i++) drawFisherman(dynC, fishermen[i]);
 
         /* fish (underwater, subtle) */
         for (var i = 0; i < fish.length; i++) drawFish(dynC, fish[i]);
@@ -2090,30 +3780,49 @@
         /* boats (on water) */
         for (var i = 0; i < boats.length; i++) drawBoat(dynC, boats[i]);
 
+        /* jetskis */
+        for (var i = 0; i < jetskis.length; i++) drawJetSki(dynC, jetskis[i]);
+
+        /* swimmers */
+        for (var i = 0; i < swimmers.length; i++) drawSwimmer(dynC, swimmers[i]);
+
+        /* surfers */
+        for (var i = 0; i < surfers.length; i++) drawSurfer(dynC, surfers[i]);
+
+        /* paddlers */
+        for (var i = 0; i < paddlers.length; i++) drawPaddler(dynC, paddlers[i]);
+
         /* dolphins (jumping from water) */
         for (var i = 0; i < dolphins.length; i++) drawDolphin(dynC, dolphins[i]);
 
         /* beach people */
         for (var i = 0; i < beachPeople.length; i++) drawBeachPerson(dynC, beachPeople[i]);
 
+        /* ── REBAKE city if needed ── */
+        if (needsCityRebake) rebakeCity();
+
+        /* ── FX LAYER (rain, lightning, flash) ── */
+        fxC.clearRect(0, 0, W, H);
+        drawRain(fxC);
+        drawLightning(fxC);
+        if (ATM.flashIntensity > 0) {
+            fxC.fillStyle = 'rgba(255,255,255,' + (ATM.flashIntensity * 0.35) + ')';
+            fxC.fillRect(0, 0, W, H);
+        }
+
         /* ── COMPOSITE ── */
-        ctx.fillStyle = paperColor();
+        var paperG = Math.floor(PAPER_BASE - getDayAlpha() * 20 - ATM.paperDarken);
+        ctx.fillStyle = 'rgb(' + paperG + ',' + paperG + ',' + paperG + ')';
         ctx.fillRect(0, 0, W, H);
+        ctx.save();
+        ctx.translate(DISASTER.shakeX, DISASTER.shakeY);
         ctx.drawImage(bgCvs, 0, 0);
         ctx.drawImage(cityCvs, 0, 0);
         ctx.drawImage(dynCvs, 0, 0);
+        ctx.restore();
+        ctx.drawImage(fxCvs, 0, 0);
         ctx.drawImage(grainCvs, 0, 0);
         drawVignette(ctx);
-
-        /* ── REGENERATE when all construction done ── */
-        if (allDone && constructions.length > 0) {
-            /* try to find a new gap for construction */
-            var newZone = findBuildGap();
-            if (newZone) {
-                constructions.push(newZone);
-                cranes.push(createCrane(newZone));
-            }
-        }
 
         animId = requestAnimationFrame(frame);
     }
@@ -2140,7 +3849,7 @@
         if (gaps.length === 0) return null;
         var gap = gaps[bri(0, gaps.length)];
         var bw = Math.max(18, Math.min(gap.w, br(20, 55)));
-        var cFloors = bri(8, 20), cFlH = bri(8, 13);
+        var cFloors = bri(18, 40), cFlH = bri(8, 13);
         return {
             x: gap.x, w: bw, floors: cFloors, floorH: cFlH,
             h: cFloors * cFlH, y: GROUND - cFloors * cFlH,
