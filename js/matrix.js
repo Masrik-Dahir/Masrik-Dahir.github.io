@@ -63,6 +63,10 @@
     var MAX_PLANES = 2;
     var MAX_HELIS = 2;
     var DAY_CYCLE = 600; /* seconds */
+    var MAX_BOATS = 4;
+    var MAX_BEACH = 8;
+    var MAX_DOLPHINS = 2;
+    var MAX_FISH = 12;
 
     /* ═══════════ SEEDED RNG ═══════════ */
     var seed = Date.now();
@@ -1554,6 +1558,214 @@
         }
     }
 
+    /* ═══════════ BOATS ═══════════ */
+    function createBoat() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        var type = behRng() > 0.4 ? 'sail' : 'motor';
+        return {
+            x: dir > 0 ? -30 : W + 30,
+            y: RIVER_TOP + br(8, (RIVER_BOT - RIVER_TOP) * 0.55),
+            dir: dir,
+            speed: type === 'sail' ? br(3, 8) : br(8, 16),
+            type: type,
+            g: bri(55, 95),
+            bobPhase: br(0, Math.PI * 2),
+            alive: true
+        };
+    }
+
+    function updateBoat(b, dt) {
+        b.x += b.dir * b.speed * dt;
+        b.bobPhase += dt * 2.2;
+        if ((b.dir > 0 && b.x > W + 40) || (b.dir < 0 && b.x < -40)) b.alive = false;
+    }
+
+    function drawBoat(c, b) {
+        var x = b.x, y = b.y + Math.sin(b.bobPhase) * 0.8, d = b.dir, g = b.g;
+
+        if (b.type === 'sail') {
+            arcStr(c, x, y + 1.5, 10, 3, 0, Math.PI, 0.25, 0.5, g, 0.7);
+            stk(c, x - 9, y + 1.5, x + 9, y + 1.5, 0.4, g - 8, 0.8, 0);
+            stk(c, x + d * 1, y + 1, x + d * 1, y - 14, 0.35, g - 5, 0.8, 0);
+            stk(c, x + d * 1, y - 13, x + d * 8, y - 2, 0.3, g + 30, 0.6, 0);
+            stk(c, x + d * 1, y - 13, x + d * 1, y - 2, 0.15, g + 25, 0.5, 0);
+            for (var sy = y - 12; sy < y - 3; sy += 2) {
+                var t = (sy - (y - 13)) / 11;
+                stk(c, x + d * 1, sy, x + d * 1 + t * 7 * d, sy, 0.08, g + 40, 0.25, 0);
+            }
+            stk(c, x - 5, y + 4, x + 5, y + 4, 0.12, g + 30, 0.15, 0);
+        } else {
+            arcStr(c, x, y + 1, 8, 2.5, 0, Math.PI, 0.25, 0.45, g, 0.7);
+            stk(c, x - 7, y + 1, x + 7, y + 1, 0.4, g - 8, 0.8, 0);
+            rectStk(c, x - 2, y - 3.5, 5, 4, 0.3, g + 10, 0.7);
+            stk(c, x - 1, y - 3, x + 2, y - 3, 1, 160, 0.3, 0);
+            for (var w = 1; w < 5; w++) {
+                var wx = x - d * (w * 5 + 2);
+                var wa = Math.max(0, 0.25 - w * 0.05);
+                arcStr(c, wx, y + 2, w * 2.5, 1.5, d > 0 ? Math.PI * 0.7 : 0, d > 0 ? Math.PI : Math.PI * 0.3, 0.3, 0.12, 185, wa);
+            }
+        }
+        stk(c, x - 8, y + 3, x + 8, y + 3, 0.08, 155, 0.2, 0);
+    }
+
+    /* ═══════════ BEACH PEOPLE ═══════════ */
+    function createBeachPerson() {
+        var state = behRng() < 0.4 ? 'sitting' : (behRng() < 0.6 ? 'standing' : 'walking');
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: br(30, W - 30),
+            y: BEACH_Y + br(-2, 0),
+            state: state,
+            dir: dir,
+            speed: state === 'walking' ? br(4, 9) : 0,
+            g: bri(55, 100),
+            scale: 0.65,
+            walkPhase: 0, phaseTimer: 0,
+            stateTimer: br(8, 30),
+            alive: true
+        };
+    }
+
+    function updateBeachPerson(bp, dt) {
+        bp.stateTimer -= dt;
+        if (bp.stateTimer <= 0) {
+            var states = ['sitting', 'standing', 'walking'];
+            bp.state = states[bri(0, states.length)];
+            bp.speed = bp.state === 'walking' ? br(4, 9) : 0;
+            bp.stateTimer = br(8, 30);
+        }
+        if (bp.state === 'walking') {
+            bp.x += bp.dir * bp.speed * dt;
+            bp.phaseTimer += dt;
+            if (bp.phaseTimer > 0.25) { bp.phaseTimer = 0; bp.walkPhase = (bp.walkPhase + 1) % 4; }
+            if (bp.x < 10 || bp.x > W - 10) bp.dir = -bp.dir;
+        }
+    }
+
+    function drawBeachPerson(c, bp) {
+        var x = bp.x, y = bp.y, g = bp.g, s = bp.scale;
+        if (bp.state === 'sitting') {
+            arcStr(c, x, y - 3 * s, 1 * s, 1 * s, 0, Math.PI * 2, 0.45, 0.2 * s, g, 0.7);
+            stk(c, x, y - 2 * s, x, y - 0.5 * s, 0.25 * s, g, 0.7, 0);
+            stk(c, x, y - 0.5 * s, x + 2 * s, y, 0.2 * s, g, 0.6, 0);
+            stk(c, x - 3, y + 0.5, x + 4, y + 0.5, 0.8, g + 40, 0.3, 0);
+        } else if (bp.state === 'standing') {
+            arcStr(c, x, y - 6 * s, 1 * s, 1 * s, 0, Math.PI * 2, 0.45, 0.2 * s, g, 0.7);
+            stk(c, x, y - 5 * s, x, y - 2 * s, 0.25 * s, g, 0.7, 0);
+            stk(c, x, y - 2 * s, x - 1 * s, y, 0.2 * s, g, 0.6, 0);
+            stk(c, x, y - 2 * s, x + 1 * s, y, 0.2 * s, g + 8, 0.55, 0);
+        } else {
+            var ph = bp.walkPhase;
+            var bob = (ph === 1 || ph === 3) ? -0.3 * s : 0;
+            arcStr(c, x, y - 6 * s + bob, 1 * s, 1 * s, 0, Math.PI * 2, 0.45, 0.2 * s, g, 0.7);
+            stk(c, x, y - 5 * s + bob, x, y - 2 * s, 0.25 * s, g, 0.7, 0);
+            var stride = (ph === 0 || ph === 2) ? 1.2 * s : 0.2 * s;
+            var legDir = ph === 0 ? 1 : (ph === 2 ? -1 : 0);
+            stk(c, x, y - 2 * s, x + legDir * stride * bp.dir, y, 0.2 * s, g, 0.6, 0);
+            stk(c, x, y - 2 * s, x - legDir * stride * bp.dir, y, 0.2 * s, g + 8, 0.55, 0);
+        }
+    }
+
+    /* ═══════════ DOLPHINS ═══════════ */
+    function createDolphin() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        var baseY = RIVER_TOP + br(5, (RIVER_BOT - RIVER_TOP) * 0.45);
+        return {
+            x: br(W * 0.15, W * 0.85),
+            y: baseY,
+            baseY: baseY,
+            dir: dir,
+            speed: br(20, 35),
+            jumpPhase: 0,
+            jumping: false,
+            jumpHeight: br(14, 24),
+            jumpTimer: br(1, 4),
+            g: bri(70, 100),
+            alive: true,
+            age: 0,
+            maxAge: br(15, 35)
+        };
+    }
+
+    function updateDolphin(d, dt) {
+        d.age += dt;
+        d.x += d.dir * d.speed * dt;
+        if (d.jumping) {
+            d.jumpPhase += dt * 2.5;
+            d.y = d.baseY - Math.sin(d.jumpPhase) * d.jumpHeight;
+            if (d.jumpPhase >= Math.PI) {
+                d.jumping = false;
+                d.jumpPhase = 0;
+                d.y = d.baseY;
+                d.jumpTimer = br(3, 8);
+            }
+        } else {
+            d.jumpTimer -= dt;
+            if (d.jumpTimer <= 0) {
+                d.jumping = true;
+                d.jumpPhase = 0;
+                d.jumpHeight = br(14, 24);
+            }
+        }
+        if (d.x < -30 || d.x > W + 30 || d.age > d.maxAge) d.alive = false;
+    }
+
+    function drawDolphin(c, d) {
+        var x = d.x, y = d.y, dir = d.dir, g = d.g;
+        if (d.jumping && d.y < d.baseY - 2) {
+            stk(c, x - dir * 6, y + 2, x + dir * 6, y - 1, 0.6, g, 0.7, 0);
+            stk(c, x - dir * 4, y + 2.5, x + dir * 4, y + 0.5, 0.4, g + 30, 0.5, 0);
+            stk(c, x, y - 1, x - dir * 1, y - 4, 0.3, g - 5, 0.7, 0);
+            stk(c, x - dir * 1, y - 4, x - dir * 3, y - 1, 0.2, g, 0.6, 0);
+            stk(c, x - dir * 6, y + 2, x - dir * 9, y, 0.25, g, 0.6, 0);
+            stk(c, x - dir * 6, y + 2, x - dir * 9, y + 4, 0.25, g, 0.6, 0);
+            stk(c, x + dir * 6, y - 1, x + dir * 8, y - 0.5, 0.3, g, 0.6, 0);
+            stk(c, x + dir * 4, y - 0.5, x + dir * 4.3, y - 0.5, 0.3, g - 25, 0.8, 0);
+            if (d.jumpPhase < 0.5 || d.jumpPhase > Math.PI - 0.5) {
+                for (var s = 0; s < 4; s++) {
+                    var sx = x + br(-4, 4), sy = d.baseY + br(-1, 2);
+                    stk(c, sx, sy, sx + br(-2, 2), sy - br(1, 4), 0.15, 175, 0.35, 0);
+                }
+            }
+        } else if (!d.jumping) {
+            stk(c, x, d.baseY, x - dir * 1.5, d.baseY - 2.5, 0.2, g, 0.35, 0);
+            stk(c, x - dir * 1.5, d.baseY - 2.5, x - dir * 3, d.baseY, 0.15, g, 0.3, 0);
+        }
+    }
+
+    /* ═══════════ FISH ═══════════ */
+    function createFish() {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: br(20, W - 20),
+            y: RIVER_TOP + br(8, (RIVER_BOT - RIVER_TOP) * 0.7),
+            dir: dir,
+            speed: br(3, 10),
+            g: bri(100, 145),
+            tailPhase: br(0, Math.PI * 2),
+            alive: true,
+            age: 0,
+            maxAge: br(20, 60)
+        };
+    }
+
+    function updateFish(f, dt) {
+        f.age += dt;
+        f.x += f.dir * f.speed * dt;
+        f.tailPhase += dt * 8;
+        f.y += Math.sin(f.tailPhase * 0.3) * 0.05;
+        if (f.x < -10 || f.x > W + 10 || f.age > f.maxAge) f.alive = false;
+        if (behRng() < 0.001) f.dir = -f.dir;
+    }
+
+    function drawFish(c, f) {
+        var x = f.x, y = f.y, d = f.dir, g = f.g;
+        var tailW = Math.sin(f.tailPhase) * 1;
+        stk(c, x - d * 2.5, y, x + d * 2.5, y, 0.3, g, 0.3, 0);
+        stk(c, x - d * 2.5, y, x - d * 3.5 + tailW, y - 1, 0.15, g, 0.25, 0);
+        stk(c, x - d * 2.5, y, x - d * 3.5 + tailW, y + 1, 0.15, g, 0.25, 0);
+    }
+
     /* ═══════════ WINDOW LIGHTS ═══════════ */
     function drawLitWindows(c, now) {
         for (var i = 0; i < litWindows.length; i++) {
@@ -1646,6 +1858,30 @@
         t.x = br(W * 0.2, W * 0.6);
         trains.push(t);
 
+        /* spawn boats */
+        boats = [];
+        for (var i = 0; i < bri(1, 3); i++) {
+            var bt = createBoat();
+            bt.x = br(W * 0.1, W * 0.9);
+            boats.push(bt);
+        }
+
+        /* spawn beach people */
+        beachPeople = [];
+        for (var i = 0; i < bri(3, MAX_BEACH); i++) {
+            beachPeople.push(createBeachPerson());
+        }
+
+        /* spawn dolphins (rare — maybe 0 or 1) */
+        dolphins = [];
+        if (behRng() > 0.6) dolphins.push(createDolphin());
+
+        /* spawn fish */
+        fish = [];
+        for (var i = 0; i < bri(4, MAX_FISH); i++) {
+            fish.push(createFish());
+        }
+
         dayPhase = 0;
     }
 
@@ -1657,6 +1893,9 @@
     var spawnPedTimer = 0;
     var smokeTimer = 0;
     var workerSpawnTimer = 0;
+    var boatSpawnTimer = 0;
+    var dolphinSpawnTimer = 0;
+    var fishSpawnTimer = 0;
 
     function frame(now) {
         var dt = Math.min((now - lastNow) / 1000, 0.05);
@@ -1747,6 +1986,47 @@
         }
         if (trains.length === 0 && behRng() < 0.003) trains.push(createTrain());
 
+        /* boats */
+        for (var i = boats.length - 1; i >= 0; i--) {
+            updateBoat(boats[i], dt);
+            if (!boats[i].alive) boats.splice(i, 1);
+        }
+        boatSpawnTimer += dt;
+        if (boatSpawnTimer > br(8, 20) && boats.length < MAX_BOATS) {
+            boats.push(createBoat());
+            boatSpawnTimer = 0;
+        }
+
+        /* beach people */
+        for (var i = beachPeople.length - 1; i >= 0; i--) {
+            updateBeachPerson(beachPeople[i], dt);
+        }
+        if (beachPeople.length < MAX_BEACH && behRng() < 0.0008) {
+            beachPeople.push(createBeachPerson());
+        }
+
+        /* dolphins */
+        for (var i = dolphins.length - 1; i >= 0; i--) {
+            updateDolphin(dolphins[i], dt);
+            if (!dolphins[i].alive) dolphins.splice(i, 1);
+        }
+        dolphinSpawnTimer += dt;
+        if (dolphinSpawnTimer > br(15, 45) && dolphins.length < MAX_DOLPHINS) {
+            dolphins.push(createDolphin());
+            dolphinSpawnTimer = 0;
+        }
+
+        /* fish */
+        for (var i = fish.length - 1; i >= 0; i--) {
+            updateFish(fish[i], dt);
+            if (!fish[i].alive) fish.splice(i, 1);
+        }
+        fishSpawnTimer += dt;
+        if (fishSpawnTimer > br(3, 8) && fish.length < MAX_FISH) {
+            fish.push(createFish());
+            fishSpawnTimer = 0;
+        }
+
         /* smoke */
         smokeTimer += dt;
         if (smokeTimer > br(0.5, 1.5)) {
@@ -1803,6 +2083,18 @@
 
         /* trains (foreground, on tracks) */
         for (var i = 0; i < trains.length; i++) drawTrain(dynC, trains[i]);
+
+        /* fish (underwater, subtle) */
+        for (var i = 0; i < fish.length; i++) drawFish(dynC, fish[i]);
+
+        /* boats (on water) */
+        for (var i = 0; i < boats.length; i++) drawBoat(dynC, boats[i]);
+
+        /* dolphins (jumping from water) */
+        for (var i = 0; i < dolphins.length; i++) drawDolphin(dynC, dolphins[i]);
+
+        /* beach people */
+        for (var i = 0; i < beachPeople.length; i++) drawBeachPerson(dynC, beachPeople[i]);
 
         /* ── COMPOSITE ── */
         ctx.fillStyle = paperColor();
