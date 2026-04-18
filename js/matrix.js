@@ -42,11 +42,11 @@
         CENTER_Y = laneStart + laneH * 2;
         SIDEWALK_S = GROUND + roadH * 0.88;
         SIDEWALK_S_B = STREET_BOT;
-        TRACK_Y = STREET_BOT + (H - STREET_BOT) * 0.2;
         /* waterfront layout */
         RIVER_TOP = STREET_BOT + (H - STREET_BOT) * 0.35;
         RIVER_BOT = H;
         BEACH_Y = RIVER_TOP - 2;
+        TRACK_Y = BEACH_Y - 6;
         LIGHTHOUSE_X = W * 0.92;
     }
     var RIVER_TOP, RIVER_BOT, BEACH_Y, LIGHTHOUSE_X;
@@ -58,8 +58,8 @@
     var MAX_PEDS = 32;
     var MAX_CONSTRUCTIONS = 5;
     var MAX_CRANES = 5;
-    var MAX_CLOUDS = 18;
-    var MAX_FLOCKS = 30;
+    var MAX_CLOUDS = 12;
+    var MAX_FLOCKS = 15;
     var MAX_SMOKE = 15;
     var MAX_PLANES = 2;
     var MAX_HELIS = 2;
@@ -200,8 +200,6 @@
         var target = buildings[idx];
         lightningBolt = createTargetedBolt(target.x + target.w / 2, target.y);
         ATM.flashIntensity = 0.3;
-        DISASTER.shakeX = br(-2, 2);
-        DISASTER.shakeY = br(-1, 1);
         pendingDamage = target;
         damageTimer = 0.3;
     }
@@ -292,8 +290,7 @@
         if (buildings.length <= 5) return;
         spawnCrumbleDebris(b);
         buildings.splice(idx, 1);
-        /* erase just this building from city canvas instead of full rebake */
-        cityC.clearRect(b.x - 3, b.y - 30, b.w + 6, b.h + 32);
+        cityC.clearRect(b.x - 5, b.y - 35, b.w + 10, GROUND - b.y + 36);
         var con = {
             x: b.x, w: b.w, floors: b.floors, floorH: b.floorH,
             h: b.h, y: b.y,
@@ -306,19 +303,31 @@
         cranes.push(createCrane(con));
     }
 
+    var rebakePending = false;
     function rebakeCity() {
-        var savedSeed = seed;
-        layoutRng = mulberry32(savedSeed);
-        chimneys = []; litWindows = [];
-        paintCity();
-        layoutRng = mulberry32(savedSeed);
+        if (rebakePending) return;
+        rebakePending = true;
         needsCityRebake = false;
+        setTimeout(function () {
+            var savedSeed = seed;
+            layoutRng = mulberry32(savedSeed);
+            chimneys = []; litWindows = [];
+            paintCity();
+            layoutRng = mulberry32(savedSeed);
+            rebakePending = false;
+        }, 0);
     }
 
-    /* ── ALIEN ATTACK SAUCERS ── */
+    /* ── ALIEN ATTACK SAUCERS (wave system) ── */
     var aliens = [];
-    var MAX_ALIENS = 8;
+    var MAX_ALIENS = 30;
     var alienTimer = 1;
+    var waveTimer = 0;
+    var WAVE_DURATION = 60;
+    var waveSpawnCount = 0;
+    var WAVE_SPAWN_TARGET = 18;
+    var victoryBanner = { active: false, x: 0, y: 0, age: 0, helis: [], particles: [], triggered: false };
+
     function createAlien() {
         var patrolY = br(HORIZON + 25, HORIZON + 100);
         return {
@@ -554,7 +563,7 @@
     }
 
     function destroyAlien(a) {
-        for (var i = 0; i < 10; i++) {
+        for (var i = 0; i < 5; i++) {
             alienDebris.push({
                 x: a.x + (behRng() - 0.5) * 16 * a.size,
                 y: a.y + (behRng() - 0.5) * 8 * a.size,
@@ -564,11 +573,11 @@
                 g: a.g + bri(-15, 25),
                 spin: (behRng() - 0.5) * 12,
                 angle: behRng() * Math.PI * 2,
-                age: 0, life: 1.5 + behRng() * 2.5,
+                age: 0, life: 1.5 + behRng() * 2,
                 type: behRng() < 0.3 ? 'plate' : 'shard'
             });
         }
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 2; i++) {
             alienDebris.push({
                 x: a.x + (behRng() - 0.5) * 10,
                 y: a.y + (behRng() - 0.5) * 5,
@@ -577,7 +586,7 @@
                 r: 6 + behRng() * 12,
                 g: a.g + 40,
                 spin: 0, angle: 0,
-                age: 0, life: 2 + behRng() * 2.5,
+                age: 0, life: 1.5 + behRng() * 2,
                 type: 'smoke'
             });
         }
@@ -709,7 +718,6 @@
             var adx = ast.x - m.x, ady = ast.y - m.y;
             if (adx * adx + ady * ady < (ast.r + 8) * (ast.r + 8)) {
                 ast.exploded = true; ast.explodeAge = 0;
-                DISASTER.shakeX += br(-1, 1); DISASTER.shakeY += br(-1, 1);
                 spawnAsteroidImpact(ast);
                 missileExplosions.push({ x: m.x, y: m.y, age: 0, r: m.type.r * 4, g: m.type.g + 40 });
                 m.alive = false; return;
@@ -730,37 +738,37 @@
     }
     function drawMissile(c, m) {
         var ang = Math.atan2(m.vy, m.vx);
-        /* smoke trail */
+        /* smoke trail — greenish tint */
         for (var t = 0; t < m.trail.length; t++) {
             var tp = m.trail[t];
             var ta = Math.max(0, 0.4 - tp.age * 0.6);
             var tr = m.type.trailW * (1 + tp.age * 3);
-            var tg = m.type.g + 60 + Math.floor(tp.age * 40);
+            var tAge = Math.min(1, tp.age * 0.8);
             c.beginPath(); c.arc(tp.x, tp.y, tr, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + ta + ')';
+            c.fillStyle = 'rgba(' + Math.floor(100 + tAge * 80) + ',' + Math.floor(160 + tAge * 50) + ',' + Math.floor(90 + tAge * 60) + ',' + ta + ')';
             c.fill();
         }
-        /* missile body */
+        /* missile body — green defense */
         var tipX = m.x + Math.cos(ang) * m.type.r * 2.5;
         var tipY = m.y + Math.sin(ang) * m.type.r * 2.5;
         var tailX = m.x - Math.cos(ang) * m.type.r * 2;
         var tailY = m.y - Math.sin(ang) * m.type.r * 2;
-        stk(c, tailX, tailY, tipX, tipY, m.type.r * 0.7, m.type.g, 0.9, 0);
+        stkC(c, tailX, tailY, tipX, tipY, m.type.r * 0.7, 50, 120, 60, 0.9);
         /* nose cone */
-        stk(c, m.x, m.y, tipX, tipY, m.type.r * 0.4, m.type.g - 15, 0.95, 0);
+        stkC(c, m.x, m.y, tipX, tipY, m.type.r * 0.4, 40, 100, 50, 0.95);
         /* fins */
         var perpX = -Math.sin(ang) * m.type.r * 1.5;
         var perpY = Math.cos(ang) * m.type.r * 1.5;
-        stk(c, tailX, tailY, tailX + perpX, tailY + perpY, 0.2, m.type.g + 10, 0.6, 0);
-        stk(c, tailX, tailY, tailX - perpX, tailY - perpY, 0.2, m.type.g + 10, 0.6, 0);
-        /* exhaust flicker */
+        stkC(c, tailX, tailY, tailX + perpX, tailY + perpY, 0.2, 60, 130, 70, 0.6);
+        stkC(c, tailX, tailY, tailX - perpX, tailY - perpY, 0.2, 60, 130, 70, 0.6);
+        /* exhaust flicker — greenish glow */
         var exLen = m.type.r * (2 + Math.sin(m.exhaustPhase) * 0.8);
         var exX = tailX - Math.cos(ang) * exLen;
         var exY = tailY - Math.sin(ang) * exLen;
-        stk(c, tailX, tailY, exX, exY, m.type.r * 0.5, m.type.g + 70, 0.5, 0);
-        stk(c, tailX, tailY,
+        stkC(c, tailX, tailY, exX, exY, m.type.r * 0.5, 120, 220, 100, 0.5);
+        stkC(c, tailX, tailY,
             exX + (behRng() - 0.5) * 3, exY + (behRng() - 0.5) * 3,
-            m.type.r * 0.3, m.type.g + 90, 0.3, 0);
+            m.type.r * 0.3, 150, 240, 120, 0.3);
     }
     function drawMissileExplosions(c) {
         for (var i = 0; i < missileExplosions.length; i++) {
@@ -814,7 +822,7 @@
         var launchX = br(W * 0.1, W * 0.9);
         var launchY = GROUND;
         var ang = Math.atan2(targetAlien.y - launchY, targetAlien.x - launchX);
-        var spd = 150;
+        var spd = 400;
         return {
             x: launchX, y: launchY,
             vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
@@ -843,8 +851,6 @@
             if (dist < 30) {
                 destroyAlien(n.target);
                 nukeExplosions.push({ x: n.x, y: n.y, age: 0, maxR: 50 + n.r * 8, g: 70 });
-                DISASTER.shakeX += br(-4, 4);
-                DISASTER.shakeY += br(-3, 3);
                 ATM.flashIntensity = Math.min(ATM.flashIntensity + 0.3, 0.6);
                 n.alive = false;
                 return;
@@ -862,19 +868,18 @@
         var ang = Math.atan2(n.vy, n.vx);
         var len = n.r * 3;
         var wid = n.r * 0.8;
-        /* thick smoke trail */
+        /* thick smoke trail — greenish */
         for (var t = 0; t < n.trail.length; t++) {
             var tp = n.trail[t];
             var ta = Math.max(0, 0.5 - tp.age * 0.35);
             var tr = 2 + tp.age * 8;
-            var tg = n.g + 50 + Math.floor(tp.age * 30);
+            var tAge = Math.min(1, tp.age * 0.6);
             c.beginPath(); c.arc(tp.x, tp.y, tr, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + Math.min(200, tg) + ',' + Math.min(200, tg) + ',' + Math.min(200, tg) + ',' + (ta * 0.25) + ')';
+            c.fillStyle = 'rgba(' + Math.floor(80 + tAge * 60) + ',' + Math.floor(140 + tAge * 40) + ',' + Math.floor(70 + tAge * 50) + ',' + (ta * 0.25) + ')';
             c.fill();
         }
-        /* missile body — big and stocky */
+        /* missile body — big and stocky, olive green */
         c.save(); c.translate(n.x, n.y); c.rotate(ang);
-        /* main body */
         c.beginPath();
         c.moveTo(len * 1.2, 0);
         c.lineTo(len * 0.3, -wid);
@@ -884,9 +889,9 @@
         c.lineTo(-len, wid * 0.9);
         c.lineTo(len * 0.3, wid);
         c.closePath();
-        c.fillStyle = 'rgba(' + n.g + ',' + n.g + ',' + n.g + ',0.9)';
+        c.fillStyle = 'rgba(55,100,50,0.9)';
         c.fill();
-        c.strokeStyle = 'rgba(' + (n.g - 20) + ',' + (n.g - 20) + ',' + (n.g - 20) + ',0.8)';
+        c.strokeStyle = 'rgba(35,75,30,0.8)';
         c.lineWidth = 0.6; c.stroke();
         /* nose cone */
         c.beginPath();
@@ -894,26 +899,26 @@
         c.lineTo(len * 0.3, -wid * 0.6);
         c.lineTo(len * 0.3, wid * 0.6);
         c.closePath();
-        c.fillStyle = 'rgba(' + (n.g - 10) + ',' + (n.g - 10) + ',' + (n.g - 10) + ',0.9)';
+        c.fillStyle = 'rgba(45,90,40,0.9)';
         c.fill(); c.stroke();
         /* nuclear symbol — circle with arcs */
         c.beginPath(); c.arc(0, 0, wid * 0.5, 0, Math.PI * 2);
-        c.strokeStyle = 'rgba(' + (n.g + 40) + ',' + (n.g + 40) + ',' + (n.g + 40) + ',0.5)';
+        c.strokeStyle = 'rgba(120,200,100,0.5)';
         c.lineWidth = 0.3; c.stroke();
         for (var si = 0; si < 3; si++) {
             var sa = si * Math.PI * 2 / 3;
-            stk(c, 0, 0, Math.cos(sa) * wid * 0.5, Math.sin(sa) * wid * 0.5, 0.15, n.g + 40, 0.4, 0);
+            stkC(c, 0, 0, Math.cos(sa) * wid * 0.5, Math.sin(sa) * wid * 0.5, 0.15, 120, 200, 100, 0.4);
         }
         /* body bands */
-        stk(c, -len * 0.4, -wid * 0.85, -len * 0.4, wid * 0.85, 0.15, n.g + 15, 0.4, 0);
-        stk(c, -len * 0.7, -wid * 0.8, -len * 0.7, wid * 0.8, 0.12, n.g + 10, 0.35, 0);
+        stkC(c, -len * 0.4, -wid * 0.85, -len * 0.4, wid * 0.85, 0.15, 70, 120, 65, 0.4);
+        stkC(c, -len * 0.7, -wid * 0.8, -len * 0.7, wid * 0.8, 0.12, 65, 115, 60, 0.35);
         /* big tail fins */
         c.beginPath();
         c.moveTo(-len * 0.8, -wid * 0.8);
         c.lineTo(-len * 1.3, -wid * 2.5);
         c.lineTo(-len * 0.5, -wid * 0.9);
         c.closePath();
-        c.fillStyle = 'rgba(' + (n.g + 5) + ',' + (n.g + 5) + ',' + (n.g + 5) + ',0.7)';
+        c.fillStyle = 'rgba(60,105,55,0.7)';
         c.fill();
         c.beginPath();
         c.moveTo(-len * 0.8, wid * 0.8);
@@ -922,17 +927,17 @@
         c.closePath();
         c.fill();
         c.restore();
-        /* exhaust flame */
+        /* exhaust flame — green glow */
         var exLen = len * (1.5 + Math.sin(n.exhaustPhase) * 0.5);
         var exX = n.x - Math.cos(ang) * len * 1.1;
         var exY = n.y - Math.sin(ang) * len * 1.1;
-        stk(c, exX, exY,
+        stkC(c, exX, exY,
             exX - Math.cos(ang) * exLen, exY - Math.sin(ang) * exLen,
-            wid * 0.6, Math.min(210, n.g + 60), 0.5, 0);
-        stk(c, exX, exY,
+            wid * 0.6, 100, 220, 80, 0.5);
+        stkC(c, exX, exY,
             exX - Math.cos(ang) * exLen * 0.7 + (behRng() - 0.5) * 4,
             exY - Math.sin(ang) * exLen * 0.7 + (behRng() - 0.5) * 4,
-            wid * 0.35, Math.min(220, n.g + 80), 0.35, 0);
+            wid * 0.35, 130, 245, 110, 0.35);
     }
     function updateNukeExplosions(dt) {
         for (var i = nukeExplosions.length - 1; i >= 0; i--) {
@@ -967,14 +972,38 @@
     function updateNukeDefense(dt) {
         nukeTimer += dt;
         updateNukeExplosions(dt);
-        if (nukeTimer > br(8, 16) && aliens.length > 0) {
+        var wavePhase = waveTimer / WAVE_DURATION;
+        var fireInterval;
+        if (wavePhase < 0.25) {
+            fireInterval = br(2.5, 4);
+        } else if (wavePhase < 0.6) {
+            fireInterval = br(0.6, 1.2);
+        } else {
+            fireInterval = br(0.3, 0.7);
+        }
+        if (nukeTimer > fireInterval && aliens.length > 0) {
             nukeTimer = 0;
-            /* target the alien closest to the buildings (highest Y) */
             var bestAlien = null, bestY = -9999;
+            var targeted = {};
+            for (var ni = 0; ni < nukes.length; ni++) {
+                if (nukes[ni].target && nukes[ni].target.alive) {
+                    targeted[nukes[ni].target.x + '_' + nukes[ni].target.y] = true;
+                }
+            }
             for (var ai = 0; ai < aliens.length; ai++) {
-                if (aliens[ai].alive && aliens[ai].y > bestY) {
-                    bestY = aliens[ai].y;
-                    bestAlien = aliens[ai];
+                var a = aliens[ai];
+                var key = a.x + '_' + a.y;
+                if (a.alive && !targeted[key] && a.y > bestY) {
+                    bestY = a.y;
+                    bestAlien = a;
+                }
+            }
+            if (!bestAlien) {
+                for (var ai2 = 0; ai2 < aliens.length; ai2++) {
+                    if (aliens[ai2].alive && aliens[ai2].y > bestY) {
+                        bestY = aliens[ai2].y;
+                        bestAlien = aliens[ai2];
+                    }
                 }
             }
             if (bestAlien) {
@@ -1003,7 +1032,7 @@
     }
     function spawnAsteroidImpact(a) {
         var impactR = a.r * 2;
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 3; i++) {
             var ang = behRng() * Math.PI * 2;
             var spd = 40 + behRng() * 120;
             asteroidImpacts.push({
@@ -1014,35 +1043,33 @@
                 g: a.g + bri(-10, 20),
                 spin: (behRng() - 0.5) * 8,
                 angle: behRng() * Math.PI * 2,
-                age: 0, life: 0.8 + behRng() * 1.2,
+                age: 0, life: 0.8 + behRng() * 1,
                 type: 'rock'
             });
         }
-        for (var i = 0; i < 2; i++) {
-            asteroidImpacts.push({
-                x: a.x + (behRng() - 0.5) * impactR,
-                y: a.y - behRng() * 10,
-                vx: (behRng() - 0.5) * 40,
-                vy: -20 - behRng() * 50,
-                r: 4 + behRng() * 8,
-                g: a.g + 40 + bri(0, 20),
-                spin: 0, angle: 0,
-                age: 0, life: 1 + behRng() * 1.5,
-                type: 'dustball'
-            });
-        }
+        asteroidImpacts.push({
+            x: a.x + (behRng() - 0.5) * impactR,
+            y: a.y - behRng() * 10,
+            vx: (behRng() - 0.5) * 40,
+            vy: -20 - behRng() * 50,
+            r: 4 + behRng() * 8,
+            g: a.g + 40 + bri(0, 20),
+            spin: 0, angle: 0,
+            age: 0, life: 1 + behRng() * 1,
+            type: 'dustball'
+        });
         asteroidImpacts.push({
             x: a.x, y: a.y,
             vx: 0, vy: 0,
             r: 3, g: a.g + 20,
             spin: 0, angle: 0,
-            age: 0, life: 1,
+            age: 0, life: 0.8,
             type: 'shockwave',
             maxR: impactR * 3
         });
     }
     function updateAsteroidImpacts(dt) {
-        while (asteroidImpacts.length > 25) asteroidImpacts.shift();
+        while (asteroidImpacts.length > 15) asteroidImpacts.shift();
         for (var i = asteroidImpacts.length - 1; i >= 0; i--) {
             var d = asteroidImpacts[i];
             d.age += dt;
@@ -1118,9 +1145,6 @@
         a.fireTrailPhase += dt * 20;
         if (a.y > GROUND - 20) {
             a.exploded = true; a.explodeAge = 0;
-            var shakeStr = a.r * 0.3;
-            DISASTER.shakeX += br(-shakeStr, shakeStr);
-            DISASTER.shakeY += br(-shakeStr * 0.5, shakeStr * 0.5);
             spawnAsteroidImpact(a);
             var closest = null, closestDist = 999;
             for (var i = 0; i < buildings.length; i++) {
@@ -1139,7 +1163,7 @@
             var flashA = Math.max(0, 1 - a.explodeAge / 0.3);
             if (flashA > 0) {
                 c.beginPath(); c.arc(a.x, a.y, a.r * 4, 0, Math.PI * 2);
-                c.fillStyle = 'rgba(' + (a.g + 80) + ',' + (a.g + 80) + ',' + (a.g + 80) + ',' + (flashA * 0.3) + ')';
+                c.fillStyle = 'rgba(255,100,50,' + (flashA * 0.35) + ')';
                 c.fill();
             }
             return;
@@ -1149,7 +1173,7 @@
         var wid = a.r * 0.55;
         c.save(); c.translate(a.x, a.y); c.rotate(ang);
 
-        /* missile body — elongated cylinder */
+        /* missile body — elongated cylinder (reddish enemy) */
         c.beginPath();
         c.moveTo(len, 0);
         c.lineTo(len * 0.3, -wid);
@@ -1159,9 +1183,9 @@
         c.lineTo(-len * 0.7, wid * 0.9);
         c.lineTo(len * 0.3, wid);
         c.closePath();
-        c.fillStyle = 'rgba(' + a.g + ',' + a.g + ',' + a.g + ',0.85)';
+        c.fillStyle = 'rgba(160,40,35,0.85)';
         c.fill();
-        c.strokeStyle = 'rgba(' + (a.g - 20) + ',' + (a.g - 20) + ',' + (a.g - 20) + ',0.75)';
+        c.strokeStyle = 'rgba(120,25,20,0.75)';
         c.lineWidth = 0.4; c.stroke();
 
         /* nose cone — pointed tip */
@@ -1170,21 +1194,21 @@
         c.lineTo(len * 0.3, -wid * 0.7);
         c.lineTo(len * 0.3, wid * 0.7);
         c.closePath();
-        c.fillStyle = 'rgba(' + (a.g - 15) + ',' + (a.g - 15) + ',' + (a.g - 15) + ',0.9)';
+        c.fillStyle = 'rgba(200,50,40,0.9)';
         c.fill();
         c.stroke();
 
         /* body band details */
-        stk(c, -len * 0.2, -wid * 0.85, -len * 0.2, wid * 0.85, 0.12, a.g + 15, 0.4, 0);
-        stk(c, len * 0.1, -wid * 0.9, len * 0.1, wid * 0.9, 0.1, a.g + 10, 0.35, 0);
+        stkC(c, -len * 0.2, -wid * 0.85, -len * 0.2, wid * 0.85, 0.12, 180, 60, 50, 0.4);
+        stkC(c, len * 0.1, -wid * 0.9, len * 0.1, wid * 0.9, 0.1, 170, 55, 45, 0.35);
         /* warhead marking */
-        stk(c, len * 0.6, -wid * 0.4, len * 0.6, wid * 0.4, 0.08, a.g + 25, 0.3, 0);
+        stkC(c, len * 0.6, -wid * 0.4, len * 0.6, wid * 0.4, 0.08, 220, 80, 60, 0.3);
 
         /* tail fins — 4 stabilizers */
-        stk(c, -len * 0.8, -wid * 0.8, -len * 1.1, -wid * 2, 0.25, a.g - 10, 0.7, 0);
-        stk(c, -len * 1.1, -wid * 2, -len * 0.5, -wid * 0.9, 0.15, a.g - 10, 0.5, 0);
-        stk(c, -len * 0.8, wid * 0.8, -len * 1.1, wid * 2, 0.25, a.g - 10, 0.7, 0);
-        stk(c, -len * 1.1, wid * 2, -len * 0.5, wid * 0.9, 0.15, a.g - 10, 0.5, 0);
+        stkC(c, -len * 0.8, -wid * 0.8, -len * 1.1, -wid * 2, 0.25, 130, 30, 25, 0.7);
+        stkC(c, -len * 1.1, -wid * 2, -len * 0.5, -wid * 0.9, 0.15, 130, 30, 25, 0.5);
+        stkC(c, -len * 0.8, wid * 0.8, -len * 1.1, wid * 2, 0.25, 130, 30, 25, 0.7);
+        stkC(c, -len * 1.1, wid * 2, -len * 0.5, wid * 0.9, 0.15, 130, 30, 25, 0.5);
 
         c.restore();
 
@@ -1203,14 +1227,14 @@
             var ty = tailY - Math.sin(ang) * t + perpY * wobble;
             var tg = a.g + 40 + Math.floor(tFrac * 50);
             c.beginPath(); c.arc(tx, ty, tw, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + (ta * 0.3) + ')';
+            c.fillStyle = 'rgba(' + Math.min(220, tg + 80) + ',' + Math.min(100, tg + 20) + ',' + Math.min(60, tg) + ',' + (ta * 0.35) + ')';
             c.fill();
         }
-        /* exhaust core glow */
+        /* exhaust core glow — reddish-orange */
         var exLen = len * 0.8 + Math.sin(a.fireTrailPhase) * len * 0.3;
-        stk(c, tailX, tailY,
+        stkC(c, tailX, tailY,
             tailX - Math.cos(ang) * exLen, tailY - Math.sin(ang) * exLen,
-            wid * 0.4, Math.min(220, a.g + 60), 0.4, 0);
+            wid * 0.4, 255, 120, 40, 0.45);
     }
 
     function killNearbyPeds(x) {
@@ -1291,6 +1315,24 @@
         c.strokeStyle = 'rgba(' + g + ',' + g + ',' + g + ',' + a + ')';
         c.lineWidth = w; c.lineCap = 'round'; c.stroke();
     }
+    /* color stroke — accepts r,g,b separately */
+    function stkC(c, x1, y1, x2, y2, w, r, g, b, a, jit) {
+        if (a === undefined) a = 1;
+        if (jit === undefined) jit = 0.35;
+        var jx1 = x1 + hashJ(x1, y1) * jit;
+        var jy1 = y1 + hashJ(y1, x1) * jit;
+        var jx2 = x2 + hashJ(x2, y2) * jit;
+        var jy2 = y2 + hashJ(y2, x2) * jit;
+        c.beginPath(); c.moveTo(jx1, jy1); c.lineTo(jx2, jy2);
+        c.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+        c.lineWidth = w; c.lineCap = 'round'; c.stroke();
+    }
+    /* color flat stroke */
+    function stkFlatC(c, x1, y1, x2, y2, w, r, g, b, a) {
+        c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2);
+        c.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (a || 1) + ')';
+        c.lineWidth = w; c.lineCap = 'round'; c.stroke();
+    }
 
     /* no-jitter variant for fills */
     function stkFlat(c, x1, y1, x2, y2, w, g, a) {
@@ -1306,10 +1348,21 @@
                 cx + Math.cos(n) * rx, cy + Math.sin(n) * ry, w, g, a, 0.2);
         }
     }
+    function arcStrC(c, cx, cy, rx, ry, a1, a2, step, w, r, g, b, a) {
+        for (var t = a1; t < a2; t += step) {
+            var n = Math.min(t + step, a2);
+            stkC(c, cx + Math.cos(t) * rx, cy + Math.sin(t) * ry,
+                cx + Math.cos(n) * rx, cy + Math.sin(n) * ry, w, r, g, b, a, 0.2);
+        }
+    }
 
     function rectStk(c, x, y, w, h, lw, g, a) {
         stk(c, x, y, x + w, y, lw, g, a); stk(c, x + w, y, x + w, y + h, lw, g, a);
         stk(c, x + w, y + h, x, y + h, lw, g, a); stk(c, x, y + h, x, y, lw, g, a);
+    }
+    function rectStkC(c, x, y, w, h, lw, r, g, b, a) {
+        stkC(c, x, y, x + w, y, lw, r, g, b, a); stkC(c, x + w, y, x + w, y + h, lw, r, g, b, a);
+        stkC(c, x + w, y + h, x, y + h, lw, r, g, b, a); stkC(c, x, y + h, x, y, lw, r, g, b, a);
     }
 
     function hatch(c, x, y, w, h, angle, sp, lw, g, a) {
@@ -1323,11 +1376,28 @@
         }
         c.restore();
     }
+    function hatchC(c, x, y, w, h, angle, sp, lw, cr, cg, cb, a) {
+        if (a === undefined) a = 1;
+        var cos = Math.cos(angle), sin = Math.sin(angle);
+        var d = Math.sqrt(w * w + h * h);
+        c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
+        for (var t = -d; t < d * 2; t += sp) {
+            var ox = x + w / 2 + t * cos, oy = y + h / 2 + t * sin;
+            stkC(c, ox - d * sin, oy + d * cos, ox + d * sin, oy - d * cos, lw, cr, cg, cb, a, 0.15);
+        }
+        c.restore();
+    }
 
     function stipple(c, x, y, w, h, count, r, g, a) {
         for (var i = 0; i < count; i++) {
             var px = x + layoutRng() * w, py = y + layoutRng() * h;
             stk(c, px, py, px + 0.3, py + 0.3, r, g, a || 1, 0);
+        }
+    }
+    function stippleC(c, x, y, w, h, count, sz, cr, cg, cb, a) {
+        for (var i = 0; i < count; i++) {
+            var px = x + layoutRng() * w, py = y + layoutRng() * h;
+            stkC(c, px, py, px + 0.3, py + 0.3, sz, cr, cg, cb, a || 1, 0);
         }
     }
 
@@ -1388,13 +1458,22 @@
                 [0.4, 0.2, 0.15, 0.15, 0.1]);
 
             var chimney = layoutRng() < 0.12;
+            var bldColors = [
+                [90, 110, 150], [70, 100, 140], [80, 95, 135],
+                [100, 120, 155], [85, 105, 145], [110, 125, 160],
+                [95, 115, 150], [75, 95, 130], [105, 118, 148],
+                [120, 135, 165], [88, 108, 142], [78, 98, 138]
+            ];
+            var bc = bldColors[lri(0, bldColors.length)];
             buildings.push({
                 x: x, w: bw, floors: floors, floorH: flH,
                 h: bh, y: GROUND - bh, style: style,
                 g: lri(55, 130),
+                br: bc[0], bg: bc[1], bb: bc[2],
                 hasFireEscape: layoutRng() < 0.28,
                 chimney: chimney,
-                chimneyX: chimney ? x + lr(3, bw - 3) : 0
+                chimneyX: chimney ? x + lr(3, bw - 3) : 0,
+                hasRoofTrees: layoutRng() < 0.35
             });
 
             x += bw + lr(3, 14);
@@ -1403,54 +1482,56 @@
 
     /* ═══════════ DRAW A SINGLE BUILDING (to any ctx) ═══════════ */
     function drawBuilding(c, b) {
-        var x = b.x, y = b.y, w = b.w, h = b.h, g = b.g;
+        var x = b.x, y = b.y, w = b.w, h = b.h;
         var floors = b.floors, flH = b.floorH;
+        var bR = b.br || 90, bG = b.bg || 110, bB = b.bb || 150;
 
         /* atmospheric perspective — farther up = lighter */
         var depthFade = Math.max(0, (GROUND - y) / (GROUND - HORIZON) * 0.35);
-        var gAdj = Math.min(210, Math.floor(g + depthFade * 100));
+        var rAdj = Math.min(230, Math.floor(bR + depthFade * 80));
+        var gAdj = Math.min(235, Math.floor(bG + depthFade * 80));
+        var bAdj = Math.min(240, Math.floor(bB + depthFade * 60));
 
-        /* facade fill — hatching, not solid */
-        hatch(c, x, y, w, h, Math.PI * 0.48, 2, 0.08, gAdj + 25, 0.5);
+        /* facade fill — bluish hatching */
+        hatchC(c, x, y, w, h, Math.PI * 0.48, 2, 0.08, rAdj + 15, gAdj + 15, bAdj + 10, 0.5);
 
         /* brick texture for brick-style buildings */
         if (b.style === 'block' || b.style === 'brownstone') {
             for (var row = y + 1; row < y + h - 1; row += 2.8) {
                 var off = (Math.floor(row / 2.8) % 2) * 3.5;
                 for (var bx = x + 1 + off; bx < x + w - 1; bx += 7) {
-                    stk(c, bx, row, bx, row + 2.3, 0.06, gAdj + 20, 0.4);
+                    stkC(c, bx, row, bx, row + 2.3, 0.06, rAdj + 10, gAdj + 10, bAdj + 5, 0.4);
                 }
-                stk(c, x + 1, row, x + w - 1, row, 0.04, gAdj + 28, 0.3);
+                stkC(c, x + 1, row, x + w - 1, row, 0.04, rAdj + 18, gAdj + 18, bAdj + 12, 0.3);
             }
         }
 
         /* floor lines */
         for (var f = 0; f <= floors; f++) {
             var fy = y + f * flH;
-            stk(c, x, fy, x + w, fy, 0.25, gAdj - 10, 0.6);
+            stkC(c, x, fy, x + w, fy, 0.25, Math.max(0, rAdj - 15), Math.max(0, gAdj - 15), Math.max(0, bAdj - 10), 0.6);
         }
 
         /* outline */
-        rectStk(c, x, y, w, h, 0.6, Math.max(30, gAdj - 35));
+        rectStkC(c, x, y, w, h, 0.6, Math.max(20, rAdj - 40), Math.max(25, gAdj - 40), Math.max(30, bAdj - 35), 1);
 
-        /* windows */
+        /* windows — blue-tinted glass */
         var winW = b.style === 'wide' ? Math.min(w - 6, lri(8, 14)) : lri(4, 7);
         var winH = flH - 3.5;
         var winGap = lri(2, 5);
         for (var f = 0; f < floors; f++) {
             var fy = y + f * flH + 1.8;
             for (var wx = x + 3; wx + winW < x + w - 2; wx += winW + winGap) {
-                var wg = lri(165, 225);
-                rectStk(c, wx, fy, winW, winH, 0.3, gAdj + 8, 0.8);
-                /* glass — diagonal hatch */
-                hatch(c, wx + 0.5, fy + 0.5, winW - 1, winH - 1, 0.78, 1.5, 0.06, wg, 0.35);
+                rectStkC(c, wx, fy, winW, winH, 0.3, rAdj - 5, gAdj, bAdj + 10, 0.8);
+                /* glass — blue-sky reflection */
+                hatchC(c, wx + 0.5, fy + 0.5, winW - 1, winH - 1, 0.78, 1.5, 0.06, 140, 170, 210, 0.35);
                 /* sill */
-                stk(c, wx - 0.4, fy + winH, wx + winW + 0.4, fy + winH, 0.4, gAdj - 8);
+                stkC(c, wx - 0.4, fy + winH, wx + winW + 0.4, fy + winH, 0.4, Math.max(0, rAdj - 12), Math.max(0, gAdj - 12), Math.max(0, bAdj - 8), 1);
                 /* mullion */
                 if (winW > 5 && layoutRng() > 0.3) {
-                    stk(c, wx + winW / 2, fy, wx + winW / 2, fy + winH, 0.12, gAdj + 5, 0.6);
+                    stkC(c, wx + winW / 2, fy, wx + winW / 2, fy + winH, 0.12, rAdj - 5, gAdj, bAdj + 5, 0.6);
                 }
-                /* occasional lit window marker (for dynamic overlay) */
+                /* occasional lit window marker */
                 if (layoutRng() < 0.08) {
                     litWindows.push({ x: wx + 0.5, y: fy + 0.5, w: winW - 1, h: winH - 1,
                         phase: layoutRng() * Math.PI * 2, period: lr(20, 60) });
@@ -1459,94 +1540,113 @@
         }
 
         /* roof edge */
-        stk(c, x - 1.5, y, x + w + 1.5, y, 1.2, gAdj - 25);
+        stkC(c, x - 1.5, y, x + w + 1.5, y, 1.2, Math.max(0, rAdj - 30), Math.max(0, gAdj - 30), Math.max(0, bAdj - 25), 1);
         /* parapet */
-        stk(c, x - 1, y - 2.5, x + w + 1, y - 2.5, 0.5, gAdj - 5);
-        stk(c, x - 1, y, x - 1, y - 2.5, 0.35, gAdj);
-        stk(c, x + w + 1, y, x + w + 1, y - 2.5, 0.35, gAdj);
+        stkC(c, x - 1, y - 2.5, x + w + 1, y - 2.5, 0.5, rAdj - 5, gAdj - 5, bAdj, 1);
+        stkC(c, x - 1, y, x - 1, y - 2.5, 0.35, rAdj, gAdj, bAdj, 1);
+        stkC(c, x + w + 1, y, x + w + 1, y - 2.5, 0.35, rAdj, gAdj, bAdj, 1);
+
+        /* rooftop trees — vibrant green */
+        if (b.hasRoofTrees) {
+            var treeCount = lri(1, 4);
+            for (var ti = 0; ti < treeCount; ti++) {
+                var tx = x + lr(4, w - 4);
+                var treeH = lr(4, 10);
+                stkC(c, tx, y - 2, tx, y - 2 - treeH, 0.6, 90, 65, 40, 0.8, 0);
+                var tcr = lr(3, 6);
+                arcStrC(c, tx, y - 2 - treeH - tcr * 0.3, tcr, tcr * 0.6, 0, Math.PI * 2, 0.3, 0.3, 30 + lri(0, 40), 120 + lri(0, 60), 20 + lri(0, 30), 0.7);
+                stippleC(c, tx - tcr, y - 2 - treeH - tcr * 0.6, tcr * 2, tcr, lri(3, 8), 0.2, 25 + lri(0, 35), 100 + lri(0, 50), 15 + lri(0, 20), 0.3);
+            }
+        }
 
         /* rooftop equipment */
         if (layoutRng() > 0.55) {
             /* water tower */
             var wtx = x + lr(5, w - 15);
-            rectStk(c, wtx, y - 13, 10, 8, 0.4, gAdj + 5);
-            stk(c, wtx + 2, y - 5, wtx + 2, y - 2, 0.25, gAdj);
-            stk(c, wtx + 8, y - 5, wtx + 8, y - 2, 0.25, gAdj);
-            stk(c, wtx, y - 13, wtx + 5, y - 16, 0.35, gAdj + 5);
-            stk(c, wtx + 10, y - 13, wtx + 5, y - 16, 0.35, gAdj + 5);
-            stk(c, wtx, y - 10, wtx + 10, y - 10, 0.2, gAdj + 12);
+            rectStkC(c, wtx, y - 13, 10, 8, 0.4, rAdj + 5, gAdj + 5, bAdj + 3, 1);
+            stkC(c, wtx + 2, y - 5, wtx + 2, y - 2, 0.25, rAdj, gAdj, bAdj, 1);
+            stkC(c, wtx + 8, y - 5, wtx + 8, y - 2, 0.25, rAdj, gAdj, bAdj, 1);
+            stkC(c, wtx, y - 13, wtx + 5, y - 16, 0.35, rAdj + 5, gAdj + 5, bAdj + 3, 1);
+            stkC(c, wtx + 10, y - 13, wtx + 5, y - 16, 0.35, rAdj + 5, gAdj + 5, bAdj + 3, 1);
+            stkC(c, wtx, y - 10, wtx + 10, y - 10, 0.2, rAdj + 10, gAdj + 10, bAdj + 5, 1);
         }
         if (layoutRng() > 0.5) {
             /* antenna */
             var ax = x + lr(3, w - 3), ah = lr(10, 28);
-            stk(c, ax, y - 2, ax, y - 2 - ah, 0.35, gAdj + 12);
+            stkC(c, ax, y - 2, ax, y - 2 - ah, 0.35, 100, 100, 110, 1);
             for (var ay = y - 6; ay > y - 2 - ah; ay -= 7) {
-                stk(c, ax - 2.5, ay, ax + 2.5, ay, 0.15, gAdj + 18);
+                stkC(c, ax - 2.5, ay, ax + 2.5, ay, 0.15, 120, 120, 130, 1);
             }
         }
         if (layoutRng() > 0.55) {
             /* AC units */
             for (var i = 0; i < lri(1, 3); i++) {
                 var acx = x + lr(3, w - 10);
-                rectStk(c, acx, y - 4.5, 6, 3.5, 0.35, gAdj + 18);
-                arcStr(c, acx + 3, y - 2.5, 1.5, 1.5, 0, Math.PI * 2, 0.5, 0.15, gAdj + 25, 0.6);
+                rectStkC(c, acx, y - 4.5, 6, 3.5, 0.35, rAdj + 15, gAdj + 15, bAdj + 10, 1);
+                arcStrC(c, acx + 3, y - 2.5, 1.5, 1.5, 0, Math.PI * 2, 0.5, 0.15, rAdj + 25, gAdj + 25, bAdj + 18, 0.6);
             }
         }
-        /* chimney */
+        /* chimney — brick red */
         if (b.chimney) {
             var cx = b.chimneyX;
-            rectStk(c, cx - 2, y - 10, 4, 10, 0.5, gAdj - 5);
-            stk(c, cx - 2.5, y - 10, cx + 2.5, y - 10, 0.6, gAdj - 12);
+            rectStkC(c, cx - 2, y - 10, 4, 10, 0.5, 140, 70, 50, 1);
+            stkC(c, cx - 2.5, y - 10, cx + 2.5, y - 10, 0.6, 120, 55, 35, 1);
             chimneys.push({ x: cx, y: y - 10 });
         }
 
-        /* fire escape */
+        /* fire escape — dark iron */
         if (b.hasFireEscape && floors > 3) {
             var fex = layoutRng() > 0.5 ? x + 1.5 : x + w - 7;
             for (var f = 1; f < floors; f++) {
                 var fy = y + f * flH;
-                rectStk(c, fex, fy - 0.8, 5.5, 1.2, 0.2, 48, 0.7);
-                stk(c, fex + 1.5, fy + 0.5, fex + 1.5, fy + flH - 0.5, 0.12, 55, 0.6);
-                stk(c, fex + 4, fy + 0.5, fex + 4, fy + flH - 0.5, 0.12, 55, 0.6);
+                rectStkC(c, fex, fy - 0.8, 5.5, 1.2, 0.2, 45, 45, 50, 0.7);
+                stkC(c, fex + 1.5, fy + 0.5, fex + 1.5, fy + flH - 0.5, 0.12, 50, 50, 55, 0.6, 0);
+                stkC(c, fex + 4, fy + 0.5, fex + 4, fy + flH - 0.5, 0.12, 50, 50, 55, 0.6, 0);
                 for (var ry = fy + 1.5; ry < fy + flH; ry += 2.2) {
-                    stk(c, fex + 2, ry, fex + 3.5, ry, 0.1, 60, 0.5);
+                    stkC(c, fex + 2, ry, fex + 3.5, ry, 0.1, 55, 55, 60, 0.5);
                 }
             }
         }
 
         /* ground floor / storefront */
         var gfY = y + (floors - 1) * flH;
-        /* awning */
-        stk(c, x - 1.5, gfY + 1.2, x + w + 1.5, gfY + 1.2, 0.9, gAdj - 18);
-        stk(c, x - 2, gfY + 3, x + w + 2, gfY + 3, 0.25, gAdj);
+        /* awning — colored canopy */
+        var awnColors = [[160, 40, 40], [40, 80, 140], [50, 120, 60], [140, 100, 50], [120, 50, 100]];
+        var awn = awnColors[lri(0, awnColors.length)];
+        stkC(c, x - 1.5, gfY + 1.2, x + w + 1.5, gfY + 1.2, 0.9, awn[0], awn[1], awn[2], 1);
+        stkC(c, x - 2, gfY + 3, x + w + 2, gfY + 3, 0.25, awn[0] + 20, awn[1] + 20, awn[2] + 20, 1);
         for (var sx = x; sx < x + w; sx += 3.5) {
-            stk(c, sx, gfY + 1.2, sx + 1.8, gfY + 3, 0.08, gAdj + 25, 0.5);
+            stkC(c, sx, gfY + 1.2, sx + 1.8, gfY + 3, 0.08, awn[0] + 40, awn[1] + 40, awn[2] + 40, 0.5);
         }
         /* door */
         var dx = x + lr(w * 0.3, w * 0.65);
-        rectStk(c, dx, gfY + 3.5, 5.5, flH - 4.5, 0.45, gAdj - 5);
-        stk(c, dx + 4.5, gfY + flH * 0.55, dx + 4.5, gfY + flH * 0.55 + 1, 0.35, 100);
+        rectStkC(c, dx, gfY + 3.5, 5.5, flH - 4.5, 0.45, 80, 55, 35, 1);
+        stkC(c, dx + 4.5, gfY + flH * 0.55, dx + 4.5, gfY + flH * 0.55 + 1, 0.35, 180, 160, 60, 1);
         /* display window */
-        rectStk(c, x + 2.5, gfY + 3.5, dx - x - 4, flH - 4.5, 0.45, gAdj + 5, 0.8);
-        hatch(c, x + 3, gfY + 4, dx - x - 5, flH - 6, 0.7, 2, 0.05, 200, 0.25);
+        rectStkC(c, x + 2.5, gfY + 3.5, dx - x - 4, flH - 4.5, 0.45, rAdj + 5, gAdj + 5, bAdj + 8, 0.8);
+        hatchC(c, x + 3, gfY + 4, dx - x - 5, flH - 6, 0.7, 2, 0.05, 160, 190, 220, 0.25);
 
-        /* cornices every ~4 floors */
+        /* cornices — slightly darker */
         for (var f = 0; f < floors; f += lri(3, 5)) {
             var fy = y + f * flH;
-            stk(c, x - 1.2, fy, x + w + 1.2, fy, 0.65, gAdj - 12, 0.7);
+            stkC(c, x - 1.2, fy, x + w + 1.2, fy, 0.65, Math.max(0, rAdj - 15), Math.max(0, gAdj - 15), Math.max(0, bAdj - 10), 0.7);
         }
     }
 
     /* ═══════════ PAINT STATIC BACKGROUND ═══════════ */
     function paintBg() {
         var c = bgC;
-        /* sky — subtle gradient via horizontal strokes */
+        /* sky — white-ish gradient matching navbar */
         for (var y = 0; y < GROUND + 30; y += 1) {
-            var g = y < HORIZON ? 248 - Math.floor((y / HORIZON) * 12) : 242;
-            stkFlat(c, 0, y, W, y, 1.5, g);
+            var t = y < HORIZON ? y / HORIZON : 1;
+            var sr = Math.floor(210 + t * 35);
+            var sg = Math.floor(215 + t * 30);
+            var sb = Math.floor(225 + t * 20);
+            if (y >= HORIZON) { sr = 240; sg = 242; sb = 245; }
+            stkFlatC(c, 0, y, W, y, 1.5, sr, sg, sb, 1);
         }
         /* sky hatching (very faint) */
-        hatch(c, 0, 0, W, HORIZON, 0.15, 8, 0.06, 210, 0.08);
+        hatch(c, 0, 0, W, HORIZON, 0.15, 8, 0.06, 230, 0.04);
 
         /* ── MOUNTAINS ── */
         var mtnSegs = [];
@@ -1557,15 +1657,16 @@
                      + Math.sin(x * 0.031) * 5;
             mtnSegs.push({ x: x, y: HORIZON - peak - 10 });
         }
-        /* mountain fill — hatched rock face */
+        /* mountain fill — light whitish-grey tones */
         for (var i = 0; i < mtnSegs.length - 1; i++) {
             var s1 = mtnSegs[i], s2 = mtnSegs[i + 1];
-            stk(c, s1.x, s1.y, s2.x, s2.y, 0.5, 170, 0.65, 0.1);
+            stkC(c, s1.x, s1.y, s2.x, s2.y, 0.5, 185, 190, 200, 0.65, 0.1);
             for (var fy = s1.y; fy < HORIZON + 50; fy += 2) {
-                stk(c, s1.x, fy, s2.x, fy, 0.1, lri(180, 200), 0.3, 0.08);
+                var mr = 190 + lri(0, 15), mg = 195 + lri(0, 15), mb = 205 + lri(0, 10);
+                stkC(c, s1.x, fy, s2.x, fy, 0.1, mr, mg, mb, 0.3, 0.08);
             }
         }
-        /* mountain ridge hatching — diagonal strokes for texture */
+        /* mountain ridge hatching — subtle grey */
         for (var i = 0; i < mtnSegs.length - 1; i += 2) {
             var s1 = mtnSegs[i];
             var depth = HORIZON + 40 - s1.y;
@@ -1573,21 +1674,21 @@
                 var hy = s1.y + j;
                 var hx1 = s1.x + j * 0.3;
                 var hx2 = s1.x + j * 0.3 + 3;
-                stk(c, hx1, hy, hx2, hy + 3, 0.06, lri(165, 185), 0.25, 0.1);
+                stkC(c, hx1, hy, hx2, hy + 3, 0.06, 175 + lri(0, 15), 180 + lri(0, 15), 195 + lri(0, 15), 0.25, 0.1);
             }
         }
-        /* snow caps on peaks */
+        /* snow caps on peaks — bright white */
         for (var i = 1; i < mtnSegs.length - 1; i++) {
             var prev = mtnSegs[i - 1], cur = mtnSegs[i], next = mtnSegs[i + 1];
             if (cur.y < prev.y && cur.y < next.y && cur.y < HORIZON - 40) {
                 var snowH = Math.min(12, (HORIZON - 40 - cur.y) * 0.4);
                 for (var sy = cur.y; sy < cur.y + snowH; sy += 1.5) {
                     var sw = (sy - cur.y) * 1.2 + 2;
-                    stk(c, cur.x - sw, sy, cur.x + sw, sy, 0.15, lri(225, 240), 0.5, 0.05);
+                    stkC(c, cur.x - sw, sy, cur.x + sw, sy, 0.15, 245, 248, 252, 0.5, 0.05);
                 }
             }
         }
-        /* second mountain range — farther back, lighter */
+        /* second mountain range — farther back, very light */
         for (var x = 0; x < W; x += 3) {
             var peak2 = Math.sin(x * 0.0025 + 3) * 35
                       + Math.sin(x * 0.007 + 1.5) * 18
@@ -1599,44 +1700,48 @@
                        + Math.sin(nx * 0.018) * 8;
             var my2n = HORIZON - peak2n + 15;
             if (my2 < HORIZON + 20) {
-                stk(c, x, my2, nx, my2n, 0.3, 210, 0.45, 0.1);
+                stkC(c, x, my2, nx, my2n, 0.3, 205, 208, 218, 0.45, 0.1);
             }
         }
 
-        /* distant hills */
+        /* distant hills — white-ish, matching navbar */
         for (var x = 0; x < W; x += 2) {
             var hh = Math.sin(x * 0.003) * 28 + Math.sin(x * 0.0085) * 16 + Math.sin(x * 0.019) * 7;
             var nx = x + 2;
             var nh = Math.sin(nx * 0.003) * 28 + Math.sin(nx * 0.0085) * 16 + Math.sin(nx * 0.019) * 7;
-            stk(c, x, HORIZON + hh, nx, HORIZON + nh, 0.4, 195, 0.7, 0.15);
+            stkC(c, x, HORIZON + hh, nx, HORIZON + nh, 0.4, 200, 205, 210, 0.7, 0.15);
         }
         /* hill fill below */
         for (var y = HORIZON - 25; y < HORIZON + 55; y += 2.5) {
             for (var x = 0; x < W; x += 3) {
                 var hh = Math.sin(x * 0.003) * 28 + Math.sin(x * 0.0085) * 16 + Math.sin(x * 0.019) * 7;
                 if (y > HORIZON + hh) {
-                    stk(c, x, y, x + 3, y, 0.15, lri(200, 215), 0.35, 0.1);
+                    stkC(c, x, y, x + 3, y, 0.15, 215 + lri(0, 15), 218 + lri(0, 15), 222 + lri(0, 12), 0.35, 0.1);
                 }
             }
         }
 
         /* ── COMPLEX SKY: stars, nebulae, constellations ── */
-        /* stars — scattered across the sky */
+        /* stars — scattered across the sky (colored tints) */
         for (var i = 0; i < 250; i++) {
             var sx = lr(0, W), sy = lr(2, HORIZON * 0.9);
-            var sr = lr(0.2, 1.2);
-            var sg = lri(170, 240);
+            var sr2 = lr(0.2, 1.2);
+            var starType = layoutRng();
+            var sR, sG, sB;
+            if (starType < 0.3) { sR = lri(200, 255); sG = lri(200, 240); sB = lri(150, 200); }
+            else if (starType < 0.5) { sR = lri(150, 200); sG = lri(180, 220); sB = lri(220, 255); }
+            else { sR = lri(220, 255); sG = lri(220, 255); sB = lri(220, 255); }
             var sa = lr(0.15, 0.55);
             c.beginPath();
-            c.arc(sx, sy, sr, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + sg + ',' + sg + ',' + sg + ',' + sa + ')';
+            c.arc(sx, sy, sr2, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + sR + ',' + sG + ',' + sB + ',' + sa + ')';
             c.fill();
-            if (sr > 0.8 && layoutRng() < 0.2) {
+            if (sr2 > 0.8 && layoutRng() < 0.2) {
                 for (var r = 0; r < 4; r++) {
                     var a = r * Math.PI / 2;
-                    stk(c, sx + Math.cos(a) * sr, sy + Math.sin(a) * sr,
-                        sx + Math.cos(a) * (sr + 2.5), sy + Math.sin(a) * (sr + 2.5),
-                        0.08, sg, sa * 0.5, 0);
+                    stkC(c, sx + Math.cos(a) * sr2, sy + Math.sin(a) * sr2,
+                        sx + Math.cos(a) * (sr2 + 2.5), sy + Math.sin(a) * (sr2 + 2.5),
+                        0.08, sR, sG, sB, sa * 0.5, 0);
                 }
             }
         }
@@ -1649,17 +1754,18 @@
             var s1 = constellationStars[i], s2 = constellationStars[i + 1];
             var dist = Math.sqrt((s2.x - s1.x) * (s2.x - s1.x) + (s2.y - s1.y) * (s2.y - s1.y));
             if (dist < 120) {
-                stk(c, s1.x, s1.y, s2.x, s2.y, 0.06, 195, 0.12, 0);
+                stkC(c, s1.x, s1.y, s2.x, s2.y, 0.06, 140, 160, 200, 0.12, 0);
             }
         }
-        /* nebula clouds — subtle colored hazes */
+        /* nebula clouds — colored hazes (purple, teal, rose) */
+        var nebColors = [[120, 80, 160], [60, 140, 150], [160, 90, 120], [80, 100, 170], [150, 120, 80]];
         for (var i = 0; i < 5; i++) {
             var nx = lr(W * 0.1, W * 0.9), ny = lr(5, HORIZON * 0.6);
             var nr = lr(25, 65);
             var ng = c.createRadialGradient(nx, ny, 0, nx, ny, nr);
-            var nebG = lri(140, 190);
-            ng.addColorStop(0, 'rgba(' + nebG + ',' + nebG + ',' + (nebG + 10) + ',0.06)');
-            ng.addColorStop(1, 'rgba(' + nebG + ',' + nebG + ',' + nebG + ',0)');
+            var nc = nebColors[i % nebColors.length];
+            ng.addColorStop(0, 'rgba(' + nc[0] + ',' + nc[1] + ',' + nc[2] + ',0.08)');
+            ng.addColorStop(1, 'rgba(' + nc[0] + ',' + nc[1] + ',' + nc[2] + ',0)');
             c.fillStyle = ng;
             c.fillRect(nx - nr, ny - nr, nr * 2, nr * 2);
         }
@@ -1674,47 +1780,47 @@
         chimneys = []; litWindows = [];
         for (var i = 0; i < buildings.length; i++) drawBuilding(c, buildings[i]);
 
-        /* north sidewalk */
+        /* north sidewalk — warm concrete tan */
         for (var x = 0; x < W; x += 1.5) {
-            stkFlat(c, x, SIDEWALK_N, x, SIDEWALK_N_B, 1.2, lri(178, 192));
+            stkFlatC(c, x, SIDEWALK_N, x, SIDEWALK_N_B, 1.2, 185 + lri(-5, 5), 175 + lri(-5, 5), 160 + lri(-5, 5), 1);
         }
         /* sidewalk cracks */
         for (var x = lr(20, 60); x < W; x += lr(30, 80)) {
-            stk(c, x, SIDEWALK_N, x + lr(-3, 3), SIDEWALK_N_B, 0.08, 155, 0.5);
+            stkC(c, x, SIDEWALK_N, x + lr(-3, 3), SIDEWALK_N_B, 0.08, 140, 130, 115, 0.5);
         }
-        stk(c, 0, SIDEWALK_N_B, W, SIDEWALK_N_B, 0.8, 140); /* curb */
+        stkC(c, 0, SIDEWALK_N_B, W, SIDEWALK_N_B, 0.8, 130, 120, 105, 1); /* curb */
 
-        /* road surface */
+        /* road surface — dark asphalt grey */
         for (var x = 0; x < W; x += 1.5) {
-            stkFlat(c, x, SIDEWALK_N_B + 1, x, SIDEWALK_S - 1, 1.2, lri(130, 145));
+            stkFlatC(c, x, SIDEWALK_N_B + 1, x, SIDEWALK_S - 1, 1.2, 75 + lri(-5, 5), 75 + lri(-5, 5), 80 + lri(-5, 5), 1);
         }
         /* road texture — subtle grain */
         for (var y = SIDEWALK_N_B + 2; y < SIDEWALK_S; y += 4) {
             for (var x = 0; x < W; x += lr(8, 20)) {
-                stk(c, x, y, x + lr(1, 4), y + lr(-0.5, 0.5), 0.06, lri(115, 140), 0.3, 0.1);
+                stkC(c, x, y, x + lr(1, 4), y + lr(-0.5, 0.5), 0.06, 65 + lri(0, 15), 65 + lri(0, 15), 70 + lri(0, 15), 0.3, 0.1);
             }
         }
 
-        /* center line dashes */
+        /* center line dashes — yellow */
         for (var x = 0; x < W; x += 28) {
-            stk(c, x, CENTER_Y, x + 14, CENTER_Y, 1.2, 185, 0.8, 0);
+            stkC(c, x, CENTER_Y, x + 14, CENTER_Y, 1.2, 220, 200, 60, 0.8, 0);
         }
 
-        /* crosswalks */
+        /* crosswalks — white stripes */
         crosswalks = [];
         for (var cx = lr(100, 200); cx < W; cx += lr(200, 380)) {
             crosswalks.push(cx);
             for (var stripe = 0; stripe < 5; stripe++) {
                 var sy = SIDEWALK_N_B + 3 + stripe * (SIDEWALK_S - SIDEWALK_N_B - 6) / 5;
-                stk(c, cx - 9, sy, cx + 9, sy, 2.5, 195, 0.65, 0);
+                stkC(c, cx - 9, sy, cx + 9, sy, 2.5, 230, 230, 225, 0.65, 0);
             }
         }
 
-        /* south sidewalk */
+        /* south sidewalk — warm concrete tan */
         for (var x = 0; x < W; x += 1.5) {
-            stkFlat(c, x, SIDEWALK_S, x, SIDEWALK_S_B, 1.2, lri(178, 192));
+            stkFlatC(c, x, SIDEWALK_S, x, SIDEWALK_S_B, 1.2, 185 + lri(-5, 5), 175 + lri(-5, 5), 160 + lri(-5, 5), 1);
         }
-        stk(c, 0, SIDEWALK_S, W, SIDEWALK_S, 0.8, 140);
+        stkC(c, 0, SIDEWALK_S, W, SIDEWALK_S, 0.8, 130, 120, 105, 1);
 
         /* street lamps */
         for (var x = lr(35, 75); x < W; x += lr(80, 150)) {
@@ -1724,11 +1830,11 @@
             arcStr(c, x, GROUND - 27, 2.5, 2, 0, Math.PI * 2, 0.45, 0.25, 215, 0.5);
         }
 
-        /* fire hydrants */
+        /* fire hydrants — red */
         for (var x = lr(55, 120); x < W; x += lr(150, 280)) {
-            stk(c, x, GROUND, x, GROUND - 5, 1.8, 55);
-            stk(c, x - 2, GROUND - 5, x + 2, GROUND - 5, 0.8, 48);
-            stk(c, x - 1.5, GROUND - 3, x + 1.5, GROUND - 3, 0.4, 60);
+            stkC(c, x, GROUND, x, GROUND - 5, 1.8, 180, 40, 35, 1);
+            stkC(c, x - 2, GROUND - 5, x + 2, GROUND - 5, 0.8, 160, 30, 25, 1);
+            stkC(c, x - 1.5, GROUND - 3, x + 1.5, GROUND - 3, 0.4, 200, 50, 40, 1);
         }
 
         /* benches */
@@ -1741,16 +1847,22 @@
             stk(c, x, GROUND - 4.5, x + 11, GROUND - 4.5, 0.4, 78);
         }
 
-        /* trees */
+        /* trees — vibrant green foliage, brown trunk */
         for (var x = lr(28, 70); x < W; x += lr(55, 130)) {
             var th = lr(10, 19);
-            stk(c, x, GROUND, x, GROUND - th, 1.2, lri(55, 78));
+            stkC(c, x, GROUND, x, GROUND - th, 1.2, 95 + lri(-10, 10), 65 + lri(-10, 10), 30 + lri(-10, 10), 1);
             var cr = lr(5, 11);
-            arcStr(c, x, GROUND - th - cr * 0.45, cr, cr * 0.65, 0, Math.PI * 2, 0.25, 0.35, lri(72, 95), 0.7);
-            arcStr(c, x - cr * 0.3, GROUND - th - cr * 0.3, cr * 0.6, cr * 0.5, 0, Math.PI * 2, 0.3, 0.25, lri(78, 100), 0.5);
-            arcStr(c, x + cr * 0.3, GROUND - th - cr * 0.35, cr * 0.55, cr * 0.45, 0, Math.PI * 2, 0.3, 0.25, lri(75, 98), 0.5);
+            var treeType = layoutRng();
+            var tR, tG, tB;
+            if (treeType < 0.3) { tR = 20 + lri(0, 25); tG = 140 + lri(0, 50); tB = 20 + lri(0, 20); }
+            else if (treeType < 0.6) { tR = 50 + lri(0, 30); tG = 160 + lri(0, 40); tB = 30 + lri(0, 25); }
+            else if (treeType < 0.85) { tR = 30 + lri(0, 20); tG = 120 + lri(0, 50); tB = 40 + lri(0, 30); }
+            else { tR = 180 + lri(0, 40); tG = 60 + lri(0, 40); tB = 20 + lri(0, 20); }
+            arcStrC(c, x, GROUND - th - cr * 0.45, cr, cr * 0.65, 0, Math.PI * 2, 0.25, 0.35, tR, tG, tB, 0.8);
+            arcStrC(c, x - cr * 0.3, GROUND - th - cr * 0.3, cr * 0.6, cr * 0.5, 0, Math.PI * 2, 0.3, 0.25, tR + 10, tG + 10, tB + 5, 0.6);
+            arcStrC(c, x + cr * 0.3, GROUND - th - cr * 0.35, cr * 0.55, cr * 0.45, 0, Math.PI * 2, 0.3, 0.25, tR + 5, tG + 5, tB + 8, 0.6);
             /* foliage stipple */
-            stipple(c, x - cr, GROUND - th - cr, cr * 2, cr * 1.2, lri(8, 18), 0.3, lri(80, 105), 0.3);
+            stippleC(c, x - cr, GROUND - th - cr, cr * 2, cr * 1.2, lri(10, 22), 0.3, tR - 10, tG - 10, tB - 5, 0.4);
         }
 
         /* trash cans */
@@ -1764,46 +1876,47 @@
             arcStr(c, x, LANE_Y[1] + 3, 3.5, 2, 0, Math.PI * 2, 0.35, 0.25, 110, 0.5);
         }
 
-        /* train tracks */
-        var ty = TRACK_Y + 5;
-        /* rails */
-        stk(c, 0, ty, W, ty, 0.6, 90); stk(c, 0, ty + 5, W, ty + 5, 0.6, 90);
-        /* ties */
-        for (var tx = 0; tx < W; tx += 8) {
-            stk(c, tx, ty - 1, tx, ty + 6, 1.2, lri(100, 120), 0.5, 0);
-        }
-        /* gravel bed */
-        for (var tx = 0; tx < W; tx += 3) {
-            stk(c, tx, ty + 7, tx + lr(1, 2), ty + 7 + lr(0, 1.5), 0.15, lri(140, 165), 0.4, 0.1);
-        }
-
         /* ── WATERFRONT ── */
-        /* beach / shoreline */
+        /* beach / shoreline — warm sand */
         for (var bx = 0; bx < W; bx += 1.5) {
-            stkFlat(c, bx, BEACH_Y - 3, bx, RIVER_TOP, 1.2, lri(190, 210), 0.6);
+            stkFlatC(c, bx, BEACH_Y - 3, bx, RIVER_TOP, 1.2, 210 + lri(-8, 8), 190 + lri(-8, 8), 140 + lri(-10, 10), 0.6);
         }
         /* sand texture */
         for (var bx = 0; bx < W; bx += lr(3, 8)) {
-            stk(c, bx, BEACH_Y + lr(-3, 0), bx + lr(0.5, 2), BEACH_Y + lr(-3, 0), 0.1, lri(170, 195), 0.3, 0.1);
+            stkC(c, bx, BEACH_Y + lr(-3, 0), bx + lr(0.5, 2), BEACH_Y + lr(-3, 0), 0.1, 195 + lri(-10, 10), 175 + lri(-10, 10), 120 + lri(-10, 10), 0.3, 0.1);
         }
-        /* shoreline edge */
+        /* shoreline edge — foam white-blue */
         for (var bx = 0; bx < W; bx += 2) {
             var wave = Math.sin(bx * 0.03) * 1.5 + Math.sin(bx * 0.08) * 0.8;
-            stk(c, bx, RIVER_TOP + wave, bx + 2, RIVER_TOP + Math.sin((bx + 2) * 0.03) * 1.5 + Math.sin((bx + 2) * 0.08) * 0.8,
-                0.4, 140, 0.5, 0.1);
+            stkC(c, bx, RIVER_TOP + wave, bx + 2, RIVER_TOP + Math.sin((bx + 2) * 0.03) * 1.5 + Math.sin((bx + 2) * 0.08) * 0.8,
+                0.4, 180, 210, 230, 0.5, 0.1);
         }
 
-        /* river / water */
+        /* train tracks — on top of beach, full width edge to edge */
+        var ty = TRACK_Y;
+        /* gravel bed */
+        stkC(c, 0, ty + 2, W, ty + 2, 12, 140, 130, 110, 0.6);
+        /* ties */
+        for (var tx = 0; tx < W; tx += 10) {
+            stkC(c, tx, ty - 2, tx, ty + 8, 2, 100 + lri(-8, 8), 80 + lri(-5, 5), 50 + lri(-5, 5), 0.8);
+        }
+        /* rails — steel grey, thick and visible */
+        stkC(c, 0, ty, W, ty, 1.5, 90, 90, 100, 1);
+        stkC(c, 0, ty + 6, W, ty + 6, 1.5, 90, 90, 100, 1);
+
+        /* river / water — blue gradient */
         for (var wy = RIVER_TOP; wy < RIVER_BOT; wy += 1.5) {
             var depth = (wy - RIVER_TOP) / (RIVER_BOT - RIVER_TOP);
-            var wg = Math.floor(160 - depth * 40);
-            stkFlat(c, 0, wy, W, wy, 1.5, wg, 0.5);
+            var wr = Math.floor(40 + depth * 10);
+            var wgc = Math.floor(90 + depth * 20);
+            var wb = Math.floor(150 - depth * 20);
+            stkFlatC(c, 0, wy, W, wy, 1.5, wr, wgc, wb, 0.5);
         }
         /* water ripple hatching */
         for (var wy = RIVER_TOP + 3; wy < RIVER_BOT - 2; wy += lr(4, 8)) {
             for (var wx = 0; wx < W; wx += lr(10, 30)) {
                 var rw = lr(5, 18);
-                stk(c, wx, wy, wx + rw, wy + lr(-0.5, 0.5), 0.08, lri(130, 165), 0.3, 0.1);
+                stkC(c, wx, wy, wx + rw, wy + lr(-0.5, 0.5), 0.08, 60 + lri(0, 30), 100 + lri(0, 40), 160 + lri(0, 30), 0.3, 0.1);
             }
         }
 
@@ -1838,45 +1951,51 @@
         }
         stk(c, brX1 - 5, brY - 4, brX2 + 5, brY - 4, 0.3, 70, 0.5);
 
-        /* lighthouse (right side) */
+        /* lighthouse (right side) — red and white stripes */
         var lhx = LIGHTHOUSE_X, lhy = RIVER_TOP;
         /* base / rock */
-        arcStr(c, lhx, lhy + 2, 10, 4, Math.PI, Math.PI * 2, 0.2, 0.5, 95, 0.6);
-        stk(c, lhx - 8, lhy + 2, lhx + 8, lhy + 2, 0.4, 90, 0.5);
+        arcStrC(c, lhx, lhy + 2, 10, 4, Math.PI, Math.PI * 2, 0.2, 0.5, 100, 95, 85, 0.6);
+        stkC(c, lhx - 8, lhy + 2, lhx + 8, lhy + 2, 0.4, 90, 85, 75, 0.5);
         /* tower (tapers upward) */
-        stk(c, lhx - 4, lhy, lhx - 2.5, lhy - 32, 0.6, 80);
-        stk(c, lhx + 4, lhy, lhx + 2.5, lhy - 32, 0.6, 80);
-        /* fill */
+        stkC(c, lhx - 4, lhy, lhx - 2.5, lhy - 32, 0.6, 80, 30, 25, 1);
+        stkC(c, lhx + 4, lhy, lhx + 2.5, lhy - 32, 0.6, 80, 30, 25, 1);
+        /* fill — alternating red and white bands */
         for (var ly = lhy; ly > lhy - 32; ly -= 1.5) {
             var taper = 4 - (lhy - ly) / 32 * 1.5;
-            stkFlat(c, lhx - taper, ly, lhx + taper, ly, 1, 210, 0.45);
+            var band = Math.floor((lhy - ly) / 8) % 2;
+            if (band === 0) { stkFlatC(c, lhx - taper, ly, lhx + taper, ly, 1, 200, 45, 35, 0.45); }
+            else { stkFlatC(c, lhx - taper, ly, lhx + taper, ly, 1, 235, 235, 230, 0.45); }
         }
         /* horizontal bands */
-        stk(c, lhx - 3.5, lhy - 10, lhx + 3.5, lhy - 10, 0.5, 75, 0.6);
-        stk(c, lhx - 3, lhy - 20, lhx + 3, lhy - 20, 0.5, 75, 0.6);
+        stkC(c, lhx - 3.5, lhy - 10, lhx + 3.5, lhy - 10, 0.5, 60, 55, 50, 0.6);
+        stkC(c, lhx - 3, lhy - 20, lhx + 3, lhy - 20, 0.5, 60, 55, 50, 0.6);
         /* lantern room */
-        rectStk(c, lhx - 3, lhy - 36, 6, 4, 0.4, 65);
-        /* glass */
-        stkFlat(c, lhx - 2, lhy - 35.5, lhx + 2, lhy - 35.5, 3, 180, 0.4);
+        rectStkC(c, lhx - 3, lhy - 36, 6, 4, 0.4, 50, 50, 50, 1);
+        /* glass — warm yellow glow */
+        stkFlatC(c, lhx - 2, lhy - 35.5, lhx + 2, lhy - 35.5, 3, 255, 230, 100, 0.4);
         /* dome */
-        arcStr(c, lhx, lhy - 36, 3.5, 3, Math.PI, Math.PI * 2, 0.25, 0.4, 70, 0.7);
+        arcStrC(c, lhx, lhy - 36, 3.5, 3, Math.PI, Math.PI * 2, 0.25, 0.4, 60, 60, 60, 0.7);
         /* gallery rail */
-        stk(c, lhx - 4, lhy - 32, lhx + 4, lhy - 32, 0.4, 72);
+        stkC(c, lhx - 4, lhy - 32, lhx + 4, lhy - 32, 0.4, 55, 55, 55, 1);
         for (var rx = lhx - 3.5; rx < lhx + 4; rx += 1.5) {
-            stk(c, rx, lhy - 32, rx, lhy - 33.5, 0.12, 75, 0.5, 0);
+            stkC(c, rx, lhy - 32, rx, lhy - 33.5, 0.12, 60, 60, 60, 0.5, 0);
         }
-        stk(c, lhx - 4, lhy - 33.5, lhx + 4, lhy - 33.5, 0.25, 72, 0.5);
+        stkC(c, lhx - 4, lhy - 33.5, lhx + 4, lhy - 33.5, 0.25, 55, 55, 55, 0.5);
 
-        /* beach umbrellas & towels (static detail) */
+        /* beach umbrellas & towels (static detail) — colored */
+        var umbrellaColors = [[220, 60, 50], [50, 130, 200], [250, 200, 40], [60, 180, 80], [200, 80, 180]];
+        var towelColors = [[180, 60, 60], [60, 120, 180], [200, 180, 50], [80, 160, 100], [180, 100, 160]];
         for (var ux = lr(30, 80); ux < W * 0.85; ux += lr(50, 120)) {
             var uy = BEACH_Y + lr(-2, 0);
+            var uc = umbrellaColors[lri(0, umbrellaColors.length)];
+            var tc = towelColors[lri(0, towelColors.length)];
             /* umbrella pole */
-            stk(c, ux, uy, ux, uy - 8, 0.35, 70, 0.6, 0);
+            stkC(c, ux, uy, ux, uy - 8, 0.35, 90, 70, 50, 0.6, 0);
             /* canopy arcs */
-            arcStr(c, ux, uy - 8, 5, 2.5, Math.PI, Math.PI * 2, 0.25, 0.3, lri(90, 140), 0.5);
-            stk(c, ux - 5, uy - 8, ux + 5, uy - 8, 0.25, lri(85, 130), 0.5);
+            arcStrC(c, ux, uy - 8, 5, 2.5, Math.PI, Math.PI * 2, 0.25, 0.3, uc[0], uc[1], uc[2], 0.5);
+            stkC(c, ux - 5, uy - 8, ux + 5, uy - 8, 0.25, uc[0] - 20, uc[1] - 20, uc[2] - 20, 0.5);
             /* towel */
-            stk(c, ux + lr(3, 7), uy, ux + lr(9, 14), uy, 1.5, lri(140, 180), 0.4, 0);
+            stkC(c, ux + lr(3, 7), uy, ux + lr(9, 14), uy, 1.5, tc[0], tc[1], tc[2], 0.4, 0);
         }
 
         /* foreground haze */
@@ -1898,12 +2017,20 @@
         grainC.putImageData(id, 0, 0);
     }
 
+    var vignetteCvs = null, vignetteW = 0, vignetteH = 0;
     function drawVignette(c) {
-        var g = c.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.72);
-        g.addColorStop(0, 'rgba(0,0,0,0)');
-        g.addColorStop(1, 'rgba(0,0,0,0.045)');
-        c.fillStyle = g;
-        c.fillRect(0, 0, W, H);
+        if (!vignetteCvs || vignetteW !== W || vignetteH !== H) {
+            vignetteCvs = document.createElement('canvas');
+            vignetteCvs.width = vignetteW = W;
+            vignetteCvs.height = vignetteH = H;
+            var vc = vignetteCvs.getContext('2d');
+            var g = vc.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.72);
+            g.addColorStop(0, 'rgba(0,0,0,0)');
+            g.addColorStop(1, 'rgba(0,0,0,0.045)');
+            vc.fillStyle = g;
+            vc.fillRect(0, 0, W, H);
+        }
+        c.drawImage(vignetteCvs, 0, 0);
     }
 
     /* ═══════════ CRANES ═══════════ */
@@ -2189,15 +2316,22 @@
             if (con.curFloor >= con.floors) {
                 con.curFloor = con.floors;
                 con.done = true;
+                var conColors = [
+                    [90, 110, 150], [70, 100, 140], [80, 95, 135],
+                    [100, 120, 155], [85, 105, 145], [110, 125, 160]
+                ];
+                var cc = conColors[bri(0, conColors.length)];
                 var bld = {
                     x: con.x, w: con.w, floors: con.floors, floorH: con.floorH,
                     h: con.h, y: con.y, style: 'block',
-                    g: con.g, hasFireEscape: behRng() < 0.3,
+                    g: con.g, br: cc[0], bg: cc[1], bb: cc[2],
+                    hasFireEscape: behRng() < 0.3,
                     chimney: behRng() < 0.1,
-                    chimneyX: con.x + br(3, con.w - 3)
+                    chimneyX: con.x + br(3, con.w - 3),
+                    hasRoofTrees: behRng() < 0.35
                 };
                 buildings.push(bld);
-                drawBuilding(cityC, bld);
+                needsCityRebake = true;
             }
         }
     }
@@ -2212,7 +2346,8 @@
         { n: 'cmixer', w: 32, h: 12, cs: 0.08, ce: 0.45, flat: true, drum: true, wt: 0.05 },
         { n: 'dump', w: 28, h: 11, cs: 0.08, ce: 0.4, flat: true, wt: 0.05 },
         { n: 'bike', w: 10, h: 9, cs: 0.3, ce: 0.7, wt: 0.03 },
-        { n: 'moto', w: 14, h: 7, cs: 0.25, ce: 0.7, wt: 0.02 }
+        { n: 'moto', w: 14, h: 7, cs: 0.25, ce: 0.7, wt: 0.02 },
+        { n: 'police', w: 24, h: 8, cs: 0.18, ce: 0.7, wt: 0.08 }
     ];
 
     function createVehicle() {
@@ -2223,10 +2358,23 @@
         if (tp.n === 'bus' || tp.n === 'cmixer' || tp.n === 'dump') speed = br(18, 35);
         if (tp.n === 'bike') speed = br(14, 22);
         if (tp.n === 'moto') speed = br(35, 55);
+        if (tp.n === 'police') speed = br(40, 65);
+        var carColors = [
+            [180, 30, 30], [30, 60, 160], [40, 120, 50], [200, 180, 40],
+            [60, 60, 65], [140, 140, 145], [200, 200, 205], [100, 40, 120],
+            [200, 100, 30], [40, 40, 42], [170, 60, 30], [50, 100, 140]
+        ];
+        var vc = carColors[bri(0, carColors.length)];
+        if (tp.n === 'taxi') vc = [230, 200, 40];
+        if (tp.n === 'bus') vc = [200, 160, 30];
+        if (tp.n === 'police') vc = [40, 50, 60];
+        if (tp.n === 'ambu') vc = [220, 220, 225];
+        if (tp.n === 'fire') vc = [200, 40, 30];
         return {
             x: dir > 0 ? -tp.w - 10 : W + 10,
             y: LANE_Y[lane], lane: lane, dir: dir,
             tp: tp, speed: speed, g: bri(35, 120),
+            cr: vc[0], cg: vc[1], cb: vc[2],
             wheelAngle: 0, alive: true,
             drumAngle: 0
         };
@@ -2251,40 +2399,41 @@
     }
 
     function drawVehicle(c, v) {
-        var x = v.x, y = v.y, d = v.dir, g = v.g, tp = v.tp;
+        var x = v.x, y = v.y, d = v.dir, tp = v.tp;
         var w = tp.w * d, h = tp.h;
+        var vr = v.cr, vg = v.cg, vb = v.cb;
 
-        /* body */
-        stk(c, x, y, x + w, y, h * 0.5, g, 1, 0);
+        /* body — colored */
+        stkC(c, x, y, x + w, y, h * 0.5, vr, vg, vb, 1, 0);
         /* outline */
-        stk(c, x, y - h * 0.25, x + w, y - h * 0.25, 0.35, g - 15, 0.8, 0);
-        stk(c, x, y + h * 0.25, x + w, y + h * 0.25, 0.35, g - 15, 0.8, 0);
+        stkC(c, x, y - h * 0.25, x + w, y - h * 0.25, 0.35, Math.max(0, vr - 30), Math.max(0, vg - 30), Math.max(0, vb - 30), 0.8, 0);
+        stkC(c, x, y + h * 0.25, x + w, y + h * 0.25, 0.35, Math.max(0, vr - 30), Math.max(0, vg - 30), Math.max(0, vb - 30), 0.8, 0);
 
         /* cabin (if not flat-top) */
         if (!tp.flat) {
             var cs = tp.cs, ce = tp.ce;
-            stk(c, x + w * cs, y - h * 0.38, x + w * ce, y - h * 0.38, h * 0.25, g + 14, 1, 0);
-            /* windshield */
-            stk(c, x + w * cs, y - h * 0.25, x + w * (cs + 0.08), y - h * 0.05, 0.3, 145, 0.7, 0);
+            stkC(c, x + w * cs, y - h * 0.38, x + w * ce, y - h * 0.38, h * 0.25, Math.min(255, vr + 20), Math.min(255, vg + 20), Math.min(255, vb + 20), 1, 0);
+            /* windshield — light blue tint */
+            stkC(c, x + w * cs, y - h * 0.25, x + w * (cs + 0.08), y - h * 0.05, 0.3, 140, 170, 200, 0.7, 0);
         } else {
             /* truck bed / flatbed */
-            stk(c, x + w * tp.ce, y - h * 0.2, x + w * 0.95, y - h * 0.2, 0.3, g - 10, 0.7, 0);
+            stkC(c, x + w * tp.ce, y - h * 0.2, x + w * 0.95, y - h * 0.2, 0.3, Math.max(0, vr - 15), Math.max(0, vg - 15), Math.max(0, vb - 15), 0.7, 0);
         }
 
         /* cement mixer drum */
         if (tp.drum) {
             var dcx = x + w * 0.6, dcy = y - h * 0.15;
             var dr = h * 0.3;
-            arcStr(c, dcx, dcy, dr * 1.3, dr, 0, Math.PI * 2, 0.3, 0.3, g + 20, 0.7);
+            arcStrC(c, dcx, dcy, dr * 1.3, dr, 0, Math.PI * 2, 0.3, 0.3, 180, 180, 185, 0.7);
             /* spiral ridges */
             for (var r = 0; r < 3; r++) {
                 var a = v.drumAngle + r * Math.PI * 2 / 3;
-                stk(c, dcx + Math.cos(a) * dr * 1.1, dcy + Math.sin(a) * dr * 0.8,
-                    dcx + Math.cos(a + 0.6) * dr * 0.8, dcy + Math.sin(a + 0.6) * dr * 0.6, 0.15, g + 30, 0.5, 0);
+                stkC(c, dcx + Math.cos(a) * dr * 1.1, dcy + Math.sin(a) * dr * 0.8,
+                    dcx + Math.cos(a + 0.6) * dr * 0.8, dcy + Math.sin(a + 0.6) * dr * 0.6, 0.15, 190, 190, 195, 0.5, 0);
             }
         }
 
-        /* wheels */
+        /* wheels — dark rubber */
         var wy = y + h * 0.28;
         var wr = h * 0.2;
         var wx1 = x + w * 0.2, wx2 = x + w * 0.8;
@@ -2293,14 +2442,27 @@
         /* spokes */
         for (var s = 0; s < 4; s++) {
             var a = v.wheelAngle + s * Math.PI / 2;
-            stk(c, wx1 + Math.cos(a) * wr * 0.7, wy + Math.sin(a) * wr * 0.7,
-                wx1 - Math.cos(a) * wr * 0.7, wy - Math.sin(a) * wr * 0.7, 0.1, 42, 0.6, 0);
-            stk(c, wx2 + Math.cos(a) * wr * 0.7, wy + Math.sin(a) * wr * 0.7,
-                wx2 - Math.cos(a) * wr * 0.7, wy - Math.sin(a) * wr * 0.7, 0.1, 42, 0.6, 0);
+            stkC(c, wx1 + Math.cos(a) * wr * 0.7, wy + Math.sin(a) * wr * 0.7,
+                wx1 - Math.cos(a) * wr * 0.7, wy - Math.sin(a) * wr * 0.7, 0.1, 50, 50, 55, 0.6, 0);
+            stkC(c, wx2 + Math.cos(a) * wr * 0.7, wy + Math.sin(a) * wr * 0.7,
+                wx2 - Math.cos(a) * wr * 0.7, wy - Math.sin(a) * wr * 0.7, 0.1, 50, 50, 55, 0.6, 0);
         }
 
         /* undercarriage shadow */
         stk(c, x + w * 0.08, y + h * 0.32, x + w * 0.92, y + h * 0.32, 0.25, 135, 0.35, 0);
+
+        /* police light bar */
+        if (tp.n === 'police') {
+            var flashT = performance.now() * 0.008;
+            var lbx = x + w * 0.44, lby = y - h * 0.55;
+            stkC(c, lbx - d * 3, lby, lbx + d * 3, lby, h * 0.15, 30, 30, 35, 0.9, 0);
+            var redA = Math.sin(flashT) > 0 ? 0.9 : 0.15;
+            var blueA = Math.sin(flashT) > 0 ? 0.15 : 0.9;
+            c.beginPath(); c.arc(lbx - d * 2, lby, 2, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(255,30,20,' + redA + ')'; c.fill();
+            c.beginPath(); c.arc(lbx + d * 2, lby, 2, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(30,80,255,' + blueA + ')'; c.fill();
+        }
     }
 
     /* ═══════════ PEDESTRIANS ═══════════ */
@@ -2547,16 +2709,7 @@
         for (var i = 0; i < cl.puffs.length; i++) {
             var p = cl.puffs[i];
             arcStr(c, cl.x + p.ox, cl.y + p.oy, p.rx, p.ry, 0, Math.PI * 2, 0.28, 0.2, 155, 0.35);
-            stipple(c, cl.x + p.ox - p.rx * 0.6, cl.y + p.oy - p.ry * 0.5,
-                p.rx * 1.2, p.ry, Math.floor(p.rx * 0.6), 0.25, 170, 0.25);
         }
-        var maxR = 0, minOx = 999, maxOx = -999;
-        for (var i = 0; i < cl.puffs.length; i++) {
-            if (cl.puffs[i].oy + cl.puffs[i].ry > maxR) maxR = cl.puffs[i].oy + cl.puffs[i].ry;
-            minOx = Math.min(minOx, cl.puffs[i].ox - cl.puffs[i].rx);
-            maxOx = Math.max(maxOx, cl.puffs[i].ox + cl.puffs[i].rx);
-        }
-        stk(c, cl.x + minOx, cl.y + maxR, cl.x + maxOx, cl.y + maxR, 0.3, 140, 0.35, 0);
     }
 
     /* ═══════════ SMOKE ═══════════ */
@@ -2696,13 +2849,19 @@
     /* ═══════════ HELICOPTERS ═══════════ */
     function createHeli() {
         var dir = behRng() > 0.5 ? 1 : -1;
+        var heliColors = [
+            [45, 80, 130], [160, 40, 40], [30, 100, 60], [180, 140, 30],
+            [50, 50, 55], [20, 60, 110], [140, 60, 20], [100, 100, 110]
+        ];
+        var hc = heliColors[bri(0, heliColors.length)];
         return {
             x: dir > 0 ? -30 : W + 30,
-            y: br(HORIZON * 0.15, HORIZON * 0.65),
-            dir: dir, speed: br(8, 18),
+            y: br(-15, 12),
+            dir: dir, speed: br(55, 100),
             g: bri(55, 95), rotorAngle: 0,
             tailRotorAngle: 0, bobPhase: br(0, Math.PI * 2),
-            pitchAngle: 0, alive: true
+            pitchAngle: 0, alive: true,
+            cr: hc[0], cg: hc[1], cb: hc[2]
         };
     }
     function updateHeli(h, dt) {
@@ -2714,58 +2873,425 @@
         if ((h.dir > 0 && h.x > W + 60) || (h.dir < 0 && h.x < -60)) h.alive = false;
     }
     function drawHeli(c, h) {
-        var x = h.x, y = h.y + Math.sin(h.bobPhase) * 1.5, d = h.dir, g = h.g;
+        var x = h.x, y = h.y + Math.sin(h.bobPhase) * 1.5, d = h.dir;
+        var R = h.cr, G = h.cg, B = h.cb;
         var s = 1.3;
         c.save(); c.translate(x, y); c.rotate(h.pitchAngle);
-        /* main fuselage — rounded body */
-        arcStr(c, d * 2 * s, 0, 8 * s, 4 * s, 0, Math.PI * 2, 0.15, 0.5 * s, g - 8, 0.8);
-        /* cockpit — glass bubble */
-        arcStr(c, d * 7 * s, -1 * s, 4.5 * s, 3.5 * s, Math.PI, Math.PI * 2, 0.12, 0.35 * s, g + 20, 0.65);
-        /* windshield frame */
-        stk(c, d * 4 * s, -2.5 * s, d * 10 * s, -1.5 * s, 0.2 * s, g - 15, 0.7, 0);
-        /* windshield glass reflection */
-        stk(c, d * 6 * s, -2.5 * s, d * 9 * s, -2 * s, 1.8 * s, g + 45, 0.2, 0);
-        /* tail boom — tapered */
-        stk(c, -d * 6 * s, -0.5 * s, -d * 22 * s, -3 * s, 0.4 * s, g, 0.75, 0);
-        stk(c, -d * 6 * s, 0.5 * s, -d * 20 * s, -1.5 * s, 0.3 * s, g + 5, 0.6, 0);
-        /* tail boom detail stripes */
+        arcStrC(c, d * 2 * s, 0, 8 * s, 4 * s, 0, Math.PI * 2, 0.15, 0.5 * s, R, G, B, 0.8);
+        arcStrC(c, d * 7 * s, -s, 4.5 * s, 3.5 * s, Math.PI, Math.PI * 2, 0.12, 0.35 * s, 140, 180, 220, 0.65);
+        stkC(c, d * 4 * s, -2.5 * s, d * 10 * s, -1.5 * s, 0.2 * s, R - 15, G - 15, B - 15, 0.7);
+        stkC(c, d * 6 * s, -2.5 * s, d * 9 * s, -2 * s, 1.8 * s, 180, 210, 240, 0.2);
+        stkC(c, -d * 6 * s, -0.5 * s, -d * 22 * s, -3 * s, 0.4 * s, R, G, B, 0.75);
+        stkC(c, -d * 6 * s, 0.5 * s, -d * 20 * s, -1.5 * s, 0.3 * s, R + 10, G + 10, B + 10, 0.6);
         for (var ts = 0; ts < 3; ts++) {
             var tt = 0.3 + ts * 0.2;
             var tsx = -d * (6 + tt * 16) * s, tsy = -0.5 * s + (-3 + 0.5) * tt * s;
-            stk(c, tsx, tsy - 1 * s, tsx, tsy + 1 * s, 0.08 * s, g + 15, 0.3, 0);
+            stkC(c, tsx, tsy - s, tsx, tsy + s, 0.08 * s, 255, 255, 255, 0.3);
         }
-        /* vertical tail fin */
-        stk(c, -d * 22 * s, -3 * s, -d * 22 * s, -8 * s, 0.35 * s, g - 5, 0.7, 0);
-        stk(c, -d * 22 * s, -8 * s, -d * 18 * s, -6 * s, 0.25 * s, g, 0.55, 0);
-        /* horizontal stabilizer */
-        stk(c, -d * 20 * s, -2.5 * s, -d * 24 * s, -3.5 * s, 0.2 * s, g, 0.5, 0);
-        stk(c, -d * 20 * s, -1.5 * s, -d * 24 * s, -0.5 * s, 0.2 * s, g, 0.5, 0);
-        /* tail rotor */
+        stkC(c, -d * 22 * s, -3 * s, -d * 22 * s, -8 * s, 0.35 * s, R - 5, G - 5, B - 5, 0.7);
+        stkC(c, -d * 22 * s, -8 * s, -d * 18 * s, -6 * s, 0.25 * s, R, G, B, 0.55);
+        stkC(c, -d * 20 * s, -2.5 * s, -d * 24 * s, -3.5 * s, 0.2 * s, R, G, B, 0.5);
+        stkC(c, -d * 20 * s, -1.5 * s, -d * 24 * s, -0.5 * s, 0.2 * s, R, G, B, 0.5);
         var tra = h.tailRotorAngle;
         var trx = -d * 22 * s, trY = -5.5 * s;
-        stk(c, trx, trY + Math.sin(tra) * 3.5 * s, trx, trY - Math.sin(tra) * 3.5 * s, 0.2 * s, g - 10, 0.6, 0);
-        arcStr(c, trx, trY, 3.5 * s, 3.5 * s, 0, Math.PI * 2, 0.5, 0.05, g + 20, 0.12);
-        /* landing skids — with struts */
-        stk(c, -d * 5 * s, 3.5 * s, d * 7 * s, 3.5 * s, 0.35 * s, g - 8, 0.65, 0);
-        stk(c, -d * 3 * s, 1.5 * s, -d * 3 * s, 3.5 * s, 0.2 * s, g, 0.5, 0);
-        stk(c, d * 4 * s, 1 * s, d * 4 * s, 3.5 * s, 0.2 * s, g, 0.5, 0);
-        /* cross tubes */
-        stk(c, -d * 3 * s, 2.5 * s, d * 4 * s, 2.5 * s, 0.1 * s, g + 5, 0.35, 0);
-        /* rotor mast */
-        stk(c, d * 1 * s, -2 * s, d * 1 * s, -5 * s, 0.35 * s, g, 0.75, 0);
-        /* main rotor — 4 blades */
+        stkC(c, trx, trY + Math.sin(tra) * 3.5 * s, trx, trY - Math.sin(tra) * 3.5 * s, 0.2 * s, 60, 60, 65, 0.6);
+        arcStrC(c, trx, trY, 3.5 * s, 3.5 * s, 0, Math.PI * 2, 0.5, 0.05, 120, 120, 130, 0.12);
+        stkC(c, -d * 5 * s, 3.5 * s, d * 7 * s, 3.5 * s, 0.35 * s, 50, 50, 55, 0.65);
+        stkC(c, -d * 3 * s, 1.5 * s, -d * 3 * s, 3.5 * s, 0.2 * s, 60, 60, 65, 0.5);
+        stkC(c, d * 4 * s, s, d * 4 * s, 3.5 * s, 0.2 * s, 60, 60, 65, 0.5);
+        stkC(c, -d * 3 * s, 2.5 * s, d * 4 * s, 2.5 * s, 0.1 * s, 70, 70, 75, 0.35);
+        stkC(c, d * s, -2 * s, d * s, -5 * s, 0.35 * s, 60, 60, 65, 0.75);
         var ra = h.rotorAngle, rotorR = 18 * s, rotorY2 = -5 * s;
         for (var rb = 0; rb < 4; rb++) {
             var ba = ra + rb * Math.PI / 2;
-            stk(c, d * 1 * s + Math.cos(ba) * rotorR, rotorY2,
-                d * 1 * s - Math.cos(ba) * rotorR, rotorY2, 0.3 * s, g - 15, 0.6 - rb * 0.05, 0);
+            stkC(c, d * s + Math.cos(ba) * rotorR, rotorY2,
+                d * s - Math.cos(ba) * rotorR, rotorY2, 0.3 * s, 40, 40, 45, 0.6 - rb * 0.05);
         }
-        /* rotor disc */
-        arcStr(c, d * 1 * s, rotorY2, rotorR, 2 * s, 0, Math.PI * 2, 0.3, 0.06, g + 25, 0.1);
-        /* door outline */
-        stk(c, d * 0 * s, -2 * s, d * 0 * s, 2 * s, 0.1 * s, g - 15, 0.4, 0);
-        stk(c, d * 0 * s, -2 * s, d * 4 * s, -2 * s, 0.1 * s, g - 15, 0.35, 0);
+        arcStrC(c, d * s, rotorY2, rotorR, 2 * s, 0, Math.PI * 2, 0.3, 0.06, 120, 120, 130, 0.1);
+        stkC(c, 0, -2 * s, 0, 2 * s, 0.1 * s, R - 15, G - 15, B - 15, 0.4);
+        stkC(c, 0, -2 * s, d * 4 * s, -2 * s, 0.1 * s, R - 15, G - 15, B - 15, 0.35);
         c.restore();
+    }
+
+    /* ═══════════ VICTORY BANNER ═══════════ */
+    var VICTORY_LINES = [
+        'Victory will come with patience',
+        'Relief will come with affliction',
+        'And with hardship comes ease'
+    ];
+    var VICTORY_DURATION = 18;
+
+    function spawnVictoryBanner() {
+        var bannerY = H * 0.36;
+        var bw = Math.min(500, W * 0.55);
+        var heliColors = [
+            [45, 80, 130], [160, 40, 40], [30, 100, 60], [180, 140, 30],
+            [50, 50, 55], [20, 60, 110], [140, 60, 20], [100, 100, 110]
+        ];
+        var hc1 = heliColors[bri(0, heliColors.length)];
+        var hc2 = heliColors[bri(0, heliColors.length)];
+        victoryBanner = {
+            active: true, age: 0, triggered: true,
+            x: -bw - 60, y: bannerY,
+            bw: bw, bh: 120,
+            speed: 65,
+            helis: [
+                { xOff: -(bw / 2 + 50), yOff: -45, rotorAngle: 0, bobPhase: 0, cr: hc1[0], cg: hc1[1], cb: hc1[2] },
+                { xOff: (bw / 2 + 50), yOff: -45, rotorAngle: Math.PI * 0.5, bobPhase: Math.PI, cr: hc2[0], cg: hc2[1], cb: hc2[2] }
+            ],
+            particles: [],
+            fireworks: [],
+            fadeIn: 0, textGlow: 0,
+            windPhase: 0
+        };
+    }
+
+    function updateVictoryBanner(dt) {
+        if (!victoryBanner.active) return;
+        var vb = victoryBanner;
+        vb.age += dt;
+        vb.x += vb.speed * dt;
+        vb.fadeIn = Math.min(1, vb.age / 2.5);
+        vb.textGlow = (Math.sin(vb.age * 2.0) * 0.5 + 0.5);
+        vb.windPhase += dt * 3.5;
+        for (var i = 0; i < vb.helis.length; i++) {
+            vb.helis[i].rotorAngle += dt * 35;
+            vb.helis[i].bobPhase += dt * 1.8;
+        }
+        if (behRng() < 0.3) {
+            vb.particles.push({
+                x: vb.x + br(-vb.bw * 0.6, vb.bw * 0.6),
+                y: vb.y + br(-15, 25),
+                vx: br(-12, 12), vy: br(-20, -8),
+                life: br(0.6, 1.5), age: 0,
+                r: br(1.5, 4),
+                cr: bri(200, 255), cg: bri(180, 240), cb: bri(40, 130)
+            });
+        }
+        for (var i = vb.particles.length - 1; i >= 0; i--) {
+            var p = vb.particles[i];
+            p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt;
+            p.vy -= 5 * dt;
+            if (p.age > p.life) vb.particles.splice(i, 1);
+        }
+        while (vb.particles.length > 40) vb.particles.shift();
+
+        if (behRng() < 0.15 && vb.fireworks.length < 10) {
+            var fwColors = [
+                [255,50,50],[50,255,80],[80,120,255],[255,220,40],[255,100,220],
+                [0,255,255],[255,160,30],[180,80,255],[255,255,100],[100,255,200]
+            ];
+            var fc = fwColors[bri(0, fwColors.length)];
+            var explodeY = br(H * 0.05, HORIZON * 0.8);
+            vb.fireworks.push({
+                x: br(W * 0.05, W * 0.95),
+                y: GROUND - 5,
+                vx: br(-12, 12), vy: br(-500, -350),
+                exploded: false, explodeY: explodeY,
+                life: br(5.0, 8.0), age: 0,
+                cr: fc[0], cg: fc[1], cb: fc[2],
+                sparkles: [], trail: []
+            });
+        }
+        for (var i = vb.fireworks.length - 1; i >= 0; i--) {
+            var fw = vb.fireworks[i];
+            fw.age += dt;
+            if (!fw.exploded) {
+                fw.x += fw.vx * dt;
+                fw.y += fw.vy * dt;
+                fw.vy += 80 * dt;
+                if (fw.trail.length < 12) fw.trail.push({x: fw.x, y: fw.y});
+                else { fw.trail.shift(); fw.trail.push({x: fw.x, y: fw.y}); }
+                if (fw.y <= fw.explodeY) {
+                    fw.exploded = true;
+                    fw.explodeTime = fw.age;
+                    fw.popX = fw.x; fw.popY = fw.y;
+                    var shapes = ['star','heart','ring','doubleRing','chrysanthemum','palm','willow'];
+                    fw.shape = shapes[bri(0, shapes.length)];
+                    var n, j, a2, sp2, sc2 = br(80, 140);
+                    if (fw.shape === 'star') {
+                        n = bri(30, 45); var pts = bri(4, 7);
+                        for (j = 0; j < n; j++) {
+                            a2 = (j / n) * Math.PI * 2;
+                            var sR = (j % 2 === 0) ? sc2 : sc2 * 0.4;
+                            fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2 * pts / 2) * sR * br(0.9,1.1), vy: Math.sin(a2 * pts / 2) * sR * br(0.9,1.1), age: 0, life: br(1.2, 2.2), r: br(2.5, 5), cr: fw.cr + bri(-20,20), cg: fw.cg + bri(-20,20), cb: fw.cb + bri(-20,20) });
+                        }
+                    } else if (fw.shape === 'heart') {
+                        n = bri(35, 50);
+                        for (j = 0; j < n; j++) {
+                            a2 = (j / n) * Math.PI * 2;
+                            var hx2 = 16 * Math.pow(Math.sin(a2), 3);
+                            var hy2 = -(13 * Math.cos(a2) - 5 * Math.cos(2*a2) - 2 * Math.cos(3*a2) - Math.cos(4*a2));
+                            fw.sparkles.push({ x: fw.x, y: fw.y, vx: hx2 * sc2 * 0.07 * br(0.9,1.1), vy: hy2 * sc2 * 0.07 * br(0.9,1.1), age: 0, life: br(1.5, 2.8), r: br(3, 5.5), cr: Math.min(255, fw.cr + bri(0,40)), cg: Math.max(0, fw.cg - 20), cb: Math.max(0, fw.cb - 20) });
+                        }
+                    } else if (fw.shape === 'ring') {
+                        n = bri(30, 45);
+                        for (j = 0; j < n; j++) {
+                            a2 = (j / n) * Math.PI * 2; sp2 = sc2 * br(0.95, 1.05);
+                            fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.2, 2.2), r: br(2.5, 4.5), cr: fw.cr + bri(-15,15), cg: fw.cg + bri(-15,15), cb: fw.cb + bri(-15,15) });
+                        }
+                    } else if (fw.shape === 'doubleRing') {
+                        for (var ring = 0; ring < 2; ring++) {
+                            n = bri(22, 35); var rR = ring === 0 ? sc2 : sc2 * 0.5;
+                            for (j = 0; j < n; j++) {
+                                a2 = (j / n) * Math.PI * 2; sp2 = rR * br(0.9, 1.1);
+                                fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.3, 2.4), r: br(2, 4), cr: Math.min(255, fw.cr + ring * 50), cg: Math.min(255, fw.cg + ring * 40), cb: fw.cb + bri(-15,15) });
+                            }
+                        }
+                    } else if (fw.shape === 'chrysanthemum') {
+                        n = bri(40, 60);
+                        for (j = 0; j < n; j++) {
+                            a2 = br(0, Math.PI * 2); sp2 = br(25, sc2 * 1.2);
+                            fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2 * br(0.8,1.2), vy: Math.sin(a2) * sp2 * br(0.8,1.2), age: 0, life: br(1.5, 2.8), r: br(2, 4), cr: fw.cr + bri(-15,15), cg: fw.cg + bri(-15,15), cb: fw.cb + bri(-15,15) });
+                        }
+                    } else if (fw.shape === 'palm') {
+                        n = bri(25, 40);
+                        for (j = 0; j < n; j++) {
+                            a2 = br(-Math.PI * 0.7, Math.PI * 0.7) - Math.PI / 2; sp2 = br(60, sc2 * 1.1);
+                            fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.8, 3.0), r: br(2.5, 5), gravity: 80, cr: fw.cr + bri(-20,20), cg: fw.cg + bri(-20,20), cb: fw.cb + bri(-10,10) });
+                        }
+                    } else if (fw.shape === 'willow') {
+                        n = bri(35, 50);
+                        for (j = 0; j < n; j++) {
+                            a2 = br(0, Math.PI * 2); sp2 = br(20, sc2 * 0.6);
+                            fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(2.2, 3.5), r: br(1.5, 3), gravity: 90, cr: fw.cr + bri(-10,30), cg: fw.cg + bri(-10,30), cb: fw.cb + bri(-10,15) });
+                        }
+                    }
+                }
+            } else {
+                for (var sp = fw.sparkles.length - 1; sp >= 0; sp--) {
+                    var sk = fw.sparkles[sp];
+                    sk.age += dt;
+                    sk.x += sk.vx * dt;
+                    sk.y += sk.vy * dt;
+                    sk.vy += (sk.gravity || 35) * dt;
+                    sk.vx *= 0.985;
+                    if (sk.age > sk.life) fw.sparkles.splice(sp, 1);
+                }
+            }
+            if (fw.age > fw.life || (fw.exploded && fw.sparkles.length === 0)) vb.fireworks.splice(i, 1);
+        }
+
+        if (vb.x > W + vb.bw + 100) {
+            vb.active = false;
+        }
+    }
+
+    function drawVictoryBanner(c) {
+        if (!victoryBanner.active) return;
+        var vb = victoryBanner;
+        var alpha = vb.fadeIn;
+        var cx = vb.x, cy = vb.y;
+        var bw = vb.bw, bh = vb.bh;
+
+        for (var i = 0; i < vb.particles.length; i++) {
+            var p = vb.particles[i];
+            var pa = Math.max(0, 1 - p.age / p.life) * alpha;
+            c.beginPath();
+            c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + p.cr + ',' + p.cg + ',' + p.cb + ',' + (pa * 0.7) + ')';
+            c.fill();
+        }
+
+        var ropeAlpha = alpha * 0.75;
+        for (var hi = 0; hi < vb.helis.length; hi++) {
+            var h = vb.helis[hi];
+            var hx = cx + h.xOff;
+            var hy = cy + h.yOff + Math.sin(h.bobPhase) * 2;
+            var ropeSway = Math.sin(vb.age * 1.2 + hi * 2) * 4;
+            var attachX = hi === 0 ? cx - bw / 2 + 8 : cx + bw / 2 - 8;
+            c.beginPath();
+            c.moveTo(hx, hy + 5);
+            c.quadraticCurveTo(hx + ropeSway, (hy + 5 + cy - bh / 2) / 2, attachX, cy - bh / 2);
+            c.strokeStyle = 'rgba(70,50,30,' + ropeAlpha + ')';
+            c.lineWidth = 1.2;
+            c.stroke();
+        }
+
+        c.save();
+        c.translate(cx, cy);
+
+        var segments = 20;
+        var windAmp = 4 + Math.sin(vb.age * 0.8) * 2;
+
+        c.beginPath();
+        for (var si = 0; si <= segments; si++) {
+            var t = si / segments;
+            var sx = -bw / 2 + t * bw;
+            var topWave = -bh / 2 + Math.sin(vb.windPhase + t * Math.PI * 3) * windAmp * t * (1 - t) * 4;
+            if (si === 0) c.moveTo(sx, topWave);
+            else c.lineTo(sx, topWave);
+        }
+        for (var si = segments; si >= 0; si--) {
+            var t = si / segments;
+            var sx = -bw / 2 + t * bw;
+            var botWave = bh / 2 + Math.sin(vb.windPhase + t * Math.PI * 3 + 0.5) * windAmp * t * (1 - t) * 4;
+            c.lineTo(sx, botWave);
+        }
+        c.closePath();
+
+        c.fillStyle = 'rgba(255,252,245,' + (alpha * 0.94) + ')';
+        c.fill();
+
+        c.strokeStyle = 'rgba(180,145,60,' + (alpha * 0.7) + ')';
+        c.lineWidth = 1.5;
+        c.stroke();
+
+        c.strokeStyle = 'rgba(218,175,50,' + (alpha * 0.35) + ')';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        for (var si = 0; si <= segments; si++) {
+            var t = si / segments;
+            var sx = -bw / 2 + 4 + t * (bw - 8);
+            var topWave2 = -bh / 2 + 4 + Math.sin(vb.windPhase + t * Math.PI * 3) * windAmp * t * (1 - t) * 4;
+            if (si === 0) c.moveTo(sx, topWave2);
+            else c.lineTo(sx, topWave2);
+        }
+        c.stroke();
+        c.beginPath();
+        for (var si = 0; si <= segments; si++) {
+            var t = si / segments;
+            var sx = -bw / 2 + 4 + t * (bw - 8);
+            var botWave2 = bh / 2 - 4 + Math.sin(vb.windPhase + t * Math.PI * 3 + 0.5) * windAmp * t * (1 - t) * 4;
+            if (si === 0) c.moveTo(sx, botWave2);
+            else c.lineTo(sx, botWave2);
+        }
+        c.stroke();
+
+        var fontSize = Math.max(14, Math.min(22, bw / 18));
+        c.font = 'italic bold ' + fontSize + 'px Georgia, "Palatino Linotype", "Book Antiqua", Palatino, serif';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        var lineH = fontSize * 1.55;
+        var startY = -(VICTORY_LINES.length - 1) * lineH / 2;
+        for (var li = 0; li < VICTORY_LINES.length; li++) {
+            var ty = startY + li * lineH;
+            var lineWave = Math.sin(vb.windPhase + li * 0.7) * windAmp * 0.3;
+            var textAlpha = alpha * (0.8 + vb.textGlow * 0.2);
+            c.fillStyle = 'rgba(85,55,15,' + textAlpha + ')';
+            c.fillText(VICTORY_LINES[li], 0, ty + lineWave);
+        }
+
+        var foldAlpha = alpha * 0.08;
+        for (var fi = 1; fi < 6; fi++) {
+            var fx = -bw / 2 + fi * (bw / 6);
+            var fWave1 = Math.sin(vb.windPhase + (fi / 6) * Math.PI * 3) * windAmp * (fi / 6) * (1 - fi / 6) * 4;
+            c.beginPath();
+            c.moveTo(fx, -bh / 2 + fWave1);
+            c.lineTo(fx, bh / 2 + fWave1);
+            c.strokeStyle = 'rgba(0,0,0,' + foldAlpha + ')';
+            c.lineWidth = 0.5;
+            c.stroke();
+        }
+
+        c.restore();
+
+        for (var hi = 0; hi < vb.helis.length; hi++) {
+            var h = vb.helis[hi];
+            var hx = cx + h.xOff;
+            var hy = cy + h.yOff + Math.sin(h.bobPhase) * 2;
+            var d = hi === 0 ? 1 : -1;
+            var R = h.cr, G = h.cg, B = h.cb;
+            var s = 1.6;
+            c.save(); c.translate(hx, hy);
+            arcStrC(c, d * 2 * s, 0, 8 * s, 4 * s, 0, Math.PI * 2, 0.15, 0.5 * s, R, G, B, alpha * 0.8);
+            arcStrC(c, d * 7 * s, -1 * s, 4.5 * s, 3.5 * s, Math.PI, Math.PI * 2, 0.12, 0.35 * s, 140, 180, 220, alpha * 0.65);
+            stkC(c, d * 4 * s, -2.5 * s, d * 10 * s, -1.5 * s, 0.2 * s, R - 15, G - 15, B - 15, alpha * 0.7);
+            stkC(c, d * 6 * s, -2.5 * s, d * 9 * s, -2 * s, 1.8 * s, 180, 210, 240, alpha * 0.2);
+            stkC(c, -d * 6 * s, -0.5 * s, -d * 22 * s, -3 * s, 0.4 * s, R, G, B, alpha * 0.75);
+            stkC(c, -d * 6 * s, 0.5 * s, -d * 20 * s, -1.5 * s, 0.3 * s, R + 10, G + 10, B + 10, alpha * 0.6);
+            stkC(c, -d * 22 * s, -3 * s, -d * 22 * s, -8 * s, 0.35 * s, R - 5, G - 5, B - 5, alpha * 0.7);
+            stkC(c, -d * 22 * s, -8 * s, -d * 18 * s, -6 * s, 0.25 * s, R, G, B, alpha * 0.55);
+            stkC(c, -d * 20 * s, -2.5 * s, -d * 24 * s, -3.5 * s, 0.2 * s, R, G, B, alpha * 0.5);
+            stkC(c, -d * 20 * s, -1.5 * s, -d * 24 * s, -0.5 * s, 0.2 * s, R, G, B, alpha * 0.5);
+            stkC(c, -d * 5 * s, 3.5 * s, d * 7 * s, 3.5 * s, 0.35 * s, 50, 50, 55, alpha * 0.65);
+            stkC(c, -d * 3 * s, 1.5 * s, -d * 3 * s, 3.5 * s, 0.2 * s, 60, 60, 65, alpha * 0.5);
+            stkC(c, d * 4 * s, 1 * s, d * 4 * s, 3.5 * s, 0.2 * s, 60, 60, 65, alpha * 0.5);
+            stkC(c, -d * 3 * s, 2.5 * s, d * 4 * s, 2.5 * s, 0.1 * s, 70, 70, 75, alpha * 0.35);
+            stkC(c, d * 1 * s, -2 * s, d * 1 * s, -5 * s, 0.35 * s, 60, 60, 65, alpha * 0.75);
+            var ra = h.rotorAngle, rotorR = 18 * s, rotorY2 = -5 * s;
+            for (var rb = 0; rb < 4; rb++) {
+                var ba = ra + rb * Math.PI / 2;
+                stkC(c, d * 1 * s + Math.cos(ba) * rotorR, rotorY2,
+                    d * 1 * s - Math.cos(ba) * rotorR, rotorY2, 0.3 * s, 40, 40, 45, alpha * (0.6 - rb * 0.05));
+            }
+            arcStrC(c, d * 1 * s, rotorY2, rotorR, 2 * s, 0, Math.PI * 2, 0.3, 0.06, 120, 120, 130, alpha * 0.1);
+            var tra = h.rotorAngle * 1.4;
+            var trx = -d * 22 * s, trY = -5.5 * s;
+            stkC(c, trx, trY + Math.sin(tra) * 3.5 * s, trx, trY - Math.sin(tra) * 3.5 * s, 0.2 * s, 60, 60, 65, alpha * 0.6);
+            arcStrC(c, trx, trY, 3.5 * s, 3.5 * s, 0, Math.PI * 2, 0.5, 0.05, 120, 120, 130, alpha * 0.12);
+            stkC(c, 0, -2 * s, 0, 2 * s, 0.1 * s, R - 15, G - 15, B - 15, alpha * 0.4);
+            stkC(c, 0, -2 * s, d * 4 * s, -2 * s, 0.1 * s, R - 15, G - 15, B - 15, alpha * 0.35);
+            c.restore();
+        }
+
+        for (var fi = 0; fi < vb.fireworks.length; fi++) {
+            var fw = vb.fireworks[fi];
+            if (!fw.exploded) {
+                var tLen = fw.trail.length;
+                for (var tp = 0; tp < tLen; tp++) {
+                    var ta = (tp + 1) / tLen;
+                    c.beginPath();
+                    c.arc(fw.trail[tp].x, fw.trail[tp].y, 2 * ta, 0, Math.PI * 2);
+                    c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (ta * 0.7) + ')';
+                    c.fill();
+                }
+                c.beginPath();
+                c.arc(fw.x, fw.y, 3, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(255,255,240,0.95)';
+                c.fill();
+                c.beginPath();
+                c.arc(fw.x, fw.y, 8, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',0.25)';
+                c.fill();
+            } else {
+                var ea = fw.age - (fw.explodeTime || 0);
+                var px2 = fw.popX, py2 = fw.popY;
+                if (ea < 1.0) {
+                    var fa = Math.max(0, 1 - ea / 1.0);
+                    c.beginPath();
+                    c.arc(px2, py2, 12 + ea * 70, 0, Math.PI * 2);
+                    c.fillStyle = 'rgba(255,255,255,' + (fa * fa * 0.65) + ')';
+                    c.fill();
+                    c.beginPath();
+                    c.arc(px2, py2, 5 + ea * 35, 0, Math.PI * 2);
+                    c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * fa * 0.45) + ')';
+                    c.fill();
+                    c.beginPath();
+                    c.arc(px2, py2, 25 + ea * 300, 0, Math.PI * 2);
+                    c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * 0.5) + ')';
+                    c.lineWidth = 3 * fa;
+                    c.stroke();
+                    if (ea < 0.6) {
+                        c.beginPath();
+                        c.arc(px2, py2, 40 + ea * 400, 0, Math.PI * 2);
+                        c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * 0.3) + ')';
+                        c.lineWidth = 2 * fa;
+                        c.stroke();
+                    }
+                    c.beginPath();
+                    for (var ry = 0; ry < 10; ry++) {
+                        var rAng = (ry / 10) * Math.PI * 2 + ea * 3;
+                        var rIn = 10 + ea * 25;
+                        var rLen = (45 + ea * 200) * fa;
+                        c.moveTo(px2 + Math.cos(rAng) * rIn, py2 + Math.sin(rAng) * rIn);
+                        c.lineTo(px2 + Math.cos(rAng) * rLen, py2 + Math.sin(rAng) * rLen);
+                    }
+                    c.strokeStyle = 'rgba(255,255,255,' + (fa * 0.35) + ')';
+                    c.lineWidth = 1.8 * fa;
+                    c.stroke();
+                }
+                for (var sp = 0; sp < fw.sparkles.length; sp++) {
+                    var sk = fw.sparkles[sp];
+                    var sa = Math.max(0, 1 - sk.age / sk.life);
+                    if (sa < 0.05) continue;
+                    c.beginPath();
+                    c.arc(sk.x, sk.y, sk.r * sa * 1.3, 0, Math.PI * 2);
+                    c.fillStyle = 'rgba(' + Math.min(255,sk.cr) + ',' + Math.min(255,sk.cg) + ',' + Math.min(255,sk.cb) + ',' + (sa * 0.9) + ')';
+                    c.fill();
+                }
+            }
+        }
     }
 
     /* ═══════════ WAR PLANES ═══════════ */
@@ -2921,16 +3447,12 @@
         /* engine glow */
         var egFlick = Math.sin(s.engineGlow) * 0.15 + 0.3;
         var egR = (2 + Math.sin(s.engineGlow * 1.3) * 0.8) * sz;
-        var egGrad = c.createRadialGradient(-d * 17 * sz, -2 * sz, 0, -d * 17 * sz, -2 * sz, egR);
-        egGrad.addColorStop(0, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + egFlick + ')');
-        egGrad.addColorStop(1, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',0)');
-        c.fillStyle = egGrad;
-        c.fillRect(-d * 17 * sz - egR, -2 * sz - egR, egR * 2, egR * 2);
-        egGrad = c.createRadialGradient(-d * 17 * sz, 2 * sz, 0, -d * 17 * sz, 2 * sz, egR);
-        egGrad.addColorStop(0, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + egFlick + ')');
-        egGrad.addColorStop(1, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',0)');
-        c.fillStyle = egGrad;
-        c.fillRect(-d * 17 * sz - egR, 2 * sz - egR, egR * 2, egR * 2);
+        var egCol = g + 50;
+        c.beginPath(); c.arc(-d * 17 * sz, -2 * sz, egR, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + egCol + ',' + egCol + ',' + egCol + ',' + (egFlick * 0.5) + ')';
+        c.fill();
+        c.beginPath(); c.arc(-d * 17 * sz, 2 * sz, egR, 0, Math.PI * 2);
+        c.fill();
         /* shield shimmer */
         var shA = Math.sin(s.shieldPhase) * 0.04 + 0.04;
         if (shA > 0.02) {
@@ -2938,12 +3460,13 @@
         }
         c.restore();
         /* exhaust trail */
-        var trailLen = Math.min(80, s.trailAge * 14);
-        for (var t = 0; t < trailLen; t += 2.5) {
+        var trailLen = Math.min(40, s.trailAge * 14);
+        for (var t = 0; t < trailLen; t += 5) {
             var alpha = Math.max(0, 0.12 - t / trailLen * 0.12);
             var tr = (1.5 + t * 0.04) * sz;
-            arcStr(c, x - d * (t + 17 * sz), y - 2, tr, tr * 0.5, 0, Math.PI * 2, 0.5, 0.06, g + 45, alpha);
-            arcStr(c, x - d * (t + 17 * sz), y + 2, tr, tr * 0.5, 0, Math.PI * 2, 0.5, 0.06, g + 45, alpha);
+            var tx = x - d * (t + 17 * sz);
+            arcStr(c, tx, y - 2, tr, tr * 0.5, 0, Math.PI * 2, 0.5, 0.06, g + 45, alpha);
+            arcStr(c, tx, y + 2, tr, tr * 0.5, 0, Math.PI * 2, 0.5, 0.06, g + 45, alpha);
         }
     }
 
@@ -3019,10 +3542,9 @@
     /* ═══════════ TRAIN ═══════════ */
     function createTrain() {
         var dir = behRng() > 0.5 ? 1 : -1;
-        var nCars = bri(3, 7);
+        var nCars = bri(4, 8);
         var cars = [];
         var carW = 28, gap = 3;
-        /* locomotive */
         cars.push({ type: 'loco', w: 32 });
         for (var i = 0; i < nCars; i++) {
             var tp = behRng() > 0.3 ? 'passenger' : 'freight';
@@ -3031,10 +3553,10 @@
         var totalW = 0;
         for (var i = 0; i < cars.length; i++) totalW += cars[i].w + gap;
         return {
-            x: dir > 0 ? -totalW - 20 : W + 20,
+            x: dir > 0 ? -totalW - 40 : W + 40,
             y: TRACK_Y,
             dir: dir,
-            speed: br(22, 42),
+            speed: br(50, 90),
             g: bri(45, 85),
             cars: cars, carW: carW, gap: gap, totalW: totalW,
             wheelAngle: 0,
@@ -3045,13 +3567,8 @@
     function updateTrain(tr, dt) {
         tr.x += tr.dir * tr.speed * dt;
         tr.wheelAngle += tr.speed * dt * 0.15;
-        var front = tr.dir > 0 ? tr.x + tr.totalW : tr.x - tr.totalW;
-        if ((tr.dir > 0 && tr.x > W + 30) || (tr.dir < 0 && tr.x + tr.dir * tr.totalW < -30)) {
-            /* check if fully off screen */
-            var tail = tr.dir > 0 ? tr.x : tr.x;
-            if ((tr.dir > 0 && tail > W + tr.totalW + 30) || (tr.dir < 0 && tail < -tr.totalW - 30))
-                tr.alive = false;
-        }
+        if (tr.dir > 0 && tr.x - tr.totalW > W + 50) tr.alive = false;
+        if (tr.dir < 0 && tr.x + tr.totalW < -50) tr.alive = false;
     }
 
     function drawTrain(c, tr) {
@@ -3142,31 +3659,35 @@
     }
 
     function drawBoat(c, b) {
-        var x = b.x, y = b.y + Math.sin(b.bobPhase) * 0.8, d = b.dir, g = b.g;
+        var x = b.x, y = b.y + Math.sin(b.bobPhase) * 0.8, d = b.dir;
 
         if (b.type === 'sail') {
-            arcStr(c, x, y + 1.5, 10, 3, 0, Math.PI, 0.25, 0.5, g, 0.7);
-            stk(c, x - 9, y + 1.5, x + 9, y + 1.5, 0.4, g - 8, 0.8, 0);
-            stk(c, x + d * 1, y + 1, x + d * 1, y - 14, 0.35, g - 5, 0.8, 0);
-            stk(c, x + d * 1, y - 13, x + d * 8, y - 2, 0.3, g + 30, 0.6, 0);
-            stk(c, x + d * 1, y - 13, x + d * 1, y - 2, 0.15, g + 25, 0.5, 0);
+            /* hull — dark wood brown */
+            arcStrC(c, x, y + 1.5, 10, 3, 0, Math.PI, 0.25, 0.5, 100, 60, 30, 0.7);
+            stkC(c, x - 9, y + 1.5, x + 9, y + 1.5, 0.4, 80, 50, 25, 0.8, 0);
+            /* mast */
+            stkC(c, x + d * 1, y + 1, x + d * 1, y - 14, 0.35, 90, 65, 40, 0.8, 0);
+            /* sail — off-white */
+            stkC(c, x + d * 1, y - 13, x + d * 8, y - 2, 0.3, 235, 230, 220, 0.6, 0);
+            stkC(c, x + d * 1, y - 13, x + d * 1, y - 2, 0.15, 230, 225, 215, 0.5, 0);
             for (var sy = y - 12; sy < y - 3; sy += 2) {
                 var t = (sy - (y - 13)) / 11;
-                stk(c, x + d * 1, sy, x + d * 1 + t * 7 * d, sy, 0.08, g + 40, 0.25, 0);
+                stkC(c, x + d * 1, sy, x + d * 1 + t * 7 * d, sy, 0.08, 240, 235, 225, 0.25, 0);
             }
-            stk(c, x - 5, y + 4, x + 5, y + 4, 0.12, g + 30, 0.15, 0);
+            stkC(c, x - 5, y + 4, x + 5, y + 4, 0.12, 80, 120, 160, 0.15, 0);
         } else {
-            arcStr(c, x, y + 1, 8, 2.5, 0, Math.PI, 0.25, 0.45, g, 0.7);
-            stk(c, x - 7, y + 1, x + 7, y + 1, 0.4, g - 8, 0.8, 0);
-            rectStk(c, x - 2, y - 3.5, 5, 4, 0.3, g + 10, 0.7);
-            stk(c, x - 1, y - 3, x + 2, y - 3, 1, 160, 0.3, 0);
+            /* fishing boat — blue-white hull */
+            arcStrC(c, x, y + 1, 8, 2.5, 0, Math.PI, 0.25, 0.45, 50, 80, 140, 0.7);
+            stkC(c, x - 7, y + 1, x + 7, y + 1, 0.4, 40, 65, 120, 0.8, 0);
+            rectStkC(c, x - 2, y - 3.5, 5, 4, 0.3, 200, 200, 200, 0.7);
+            stkC(c, x - 1, y - 3, x + 2, y - 3, 1, 220, 220, 210, 0.3, 0);
             for (var w = 1; w < 5; w++) {
                 var wx = x - d * (w * 5 + 2);
                 var wa = Math.max(0, 0.25 - w * 0.05);
-                arcStr(c, wx, y + 2, w * 2.5, 1.5, d > 0 ? Math.PI * 0.7 : 0, d > 0 ? Math.PI : Math.PI * 0.3, 0.3, 0.12, 185, wa);
+                arcStrC(c, wx, y + 2, w * 2.5, 1.5, d > 0 ? Math.PI * 0.7 : 0, d > 0 ? Math.PI : Math.PI * 0.3, 0.3, 0.12, 180, 210, 235, wa);
             }
         }
-        stk(c, x - 8, y + 3, x + 8, y + 3, 0.08, 155, 0.2, 0);
+        stkC(c, x - 8, y + 3, x + 8, y + 3, 0.08, 80, 120, 170, 0.2, 0);
     }
 
     /* ═══════════ BEACH PEOPLE ═══════════ */
@@ -3361,7 +3882,7 @@
             c.beginPath();
             c.moveTo(r.x, r.y);
             c.lineTo(r.x + dx, r.y + r.len);
-            c.strokeStyle = 'rgba(' + r.g + ',' + r.g + ',' + r.g + ',0.5)';
+            c.strokeStyle = 'rgba(120,150,200,0.45)';
             c.lineWidth = 0.9;
             c.lineCap = 'round';
             c.stroke();
@@ -3398,8 +3919,6 @@
         c.lineWidth = 2.5;
         c.strokeStyle = 'rgba(240,240,245,' + alpha + ')';
         c.lineCap = 'round';
-        c.shadowColor = 'rgba(200,200,210,0.8)';
-        c.shadowBlur = 8;
         c.beginPath();
         c.moveTo(lightningBolt.pts[0].x, lightningBolt.pts[0].y);
         for (var i = 1; i < lightningBolt.pts.length; i++) {
@@ -3417,8 +3936,6 @@
                 c.stroke();
             }
         }
-        c.shadowColor = 'transparent';
-        c.shadowBlur = 0;
     }
     function updateLightning(dt) {
         if (ATM.flashIntensity > 0) ATM.flashIntensity *= Math.pow(0.03, dt);
@@ -3592,11 +4109,9 @@
         for (var i = 0; i < 5; i++) {
             var fx = br(W * 0.05, W * 0.95), fy = HORIZON + br(-15, 15);
             var fr = br(15, 40);
-            var g2 = c.createRadialGradient(fx, fy, 0, fx, fy, fr);
-            g2.addColorStop(0, 'rgba(160,140,120,' + (glow * 0.15) + ')');
-            g2.addColorStop(1, 'rgba(160,140,120,0)');
-            c.fillStyle = g2;
-            c.fillRect(fx - fr, fy - fr, fr * 2, fr * 2);
+            c.beginPath(); c.arc(fx, fy, fr, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(160,140,120,' + (glow * 0.08) + ')';
+            c.fill();
         }
         c.fillStyle = 'rgba(150,140,130,' + (glow * 0.06) + ')';
         c.fillRect(0, 0, W, HORIZON + 30);
@@ -4148,11 +4663,15 @@
 
     /* ═══════════ WINDOW LIGHTS ═══════════ */
     function drawLitWindows(c, now) {
+        var dayFade = getDayAlpha();
+        if (dayFade < 0.05) return;
+        var alpha = dayFade * 0.45;
+        var t = now / 1000;
         for (var i = 0; i < litWindows.length; i++) {
             var lw = litWindows[i];
-            var gOsc = 115 + Math.sin(now / 1000 / lw.period * Math.PI * 2 + lw.phase) * 25;
-            var dayFade = getDayAlpha();
-            c.fillStyle = 'rgba(' + Math.floor(gOsc) + ',' + Math.floor(gOsc) + ',' + Math.floor(gOsc - 5) + ',' + (dayFade * 0.45) + ')';
+            var gOsc = 115 + Math.sin(t / lw.period * Math.PI * 2 + lw.phase) * 25;
+            var g = Math.floor(gOsc);
+            c.fillStyle = 'rgba(' + g + ',' + g + ',' + (g - 5) + ',' + alpha + ')';
             c.fillRect(lw.x, lw.y, lw.w, lw.h);
         }
     }
@@ -4229,15 +4748,12 @@
         planes = [];
         helis = [];
 
-        /* spawn alien attack saucers */
+        /* spawn alien attack saucers — wave system */
         aliens = [];
         alienDebris = [];
-        alienTimer = br(1, 3);
-        for (var i = 0; i < bri(2, 10); i++) {
-            var al = createAlien();
-            al.y = al.targetY;
-            aliens.push(al);
-        }
+        alienTimer = 0.5;
+        waveTimer = 0;
+        waveSpawnCount = 0;
 
         /* reset nuclear defense */
         nukes = [];
@@ -4460,16 +4976,37 @@
         /* (flying cars removed) */
 
 
-        /* alien defender drones */
+        /* alien wave system — swarm at start of each minute, nukes clear them */
         for (var i = aliens.length - 1; i >= 0; i--) {
             updateAlien(aliens[i], dt);
             if (!aliens[i].alive) aliens.splice(i, 1);
         }
-        alienTimer -= dt;
-        if (alienTimer <= 0 && aliens.length < MAX_ALIENS) {
-            aliens.push(createAlien());
-            alienTimer = br(6, 14);
+        /* freeze wave timer while victory banner is flying */
+        if (!victoryBanner.active) {
+            waveTimer += dt;
+            if (waveTimer >= WAVE_DURATION) {
+                waveTimer = 0;
+                waveSpawnCount = 0;
+            }
         }
+        var wavePhase = waveTimer / WAVE_DURATION;
+        if (!victoryBanner.active && wavePhase < 0.3 && waveSpawnCount < WAVE_SPAWN_TARGET) {
+            alienTimer -= dt;
+            if (alienTimer <= 0) {
+                var burst = bri(2, 4);
+                for (var bi = 0; bi < burst && waveSpawnCount < WAVE_SPAWN_TARGET; bi++) {
+                    aliens.push(createAlien());
+                    waveSpawnCount++;
+                }
+                alienTimer = br(0.4, 1.2);
+            }
+        }
+        /* victory banner — trigger when all spawned aliens are destroyed */
+        if (waveSpawnCount >= WAVE_SPAWN_TARGET && aliens.length === 0 && !victoryBanner.active && !victoryBanner.triggered) {
+            spawnVictoryBanner();
+        }
+        if (!victoryBanner.active && waveTimer < dt * 2) victoryBanner.triggered = false;
+        updateVictoryBanner(dt);
         /* asteroids */
         for (var i = asteroids.length - 1; i >= 0; i--) {
             updateAsteroid(asteroids[i], dt);
@@ -4481,7 +5018,7 @@
             updateTrain(trains[i], dt);
             if (!trains[i].alive) trains.splice(i, 1);
         }
-        if (trains.length === 0 && behRng() < 0.003) trains.push(createTrain());
+        if (trains.length === 0) trains.push(createTrain());
 
         /* boats */
         for (var i = boats.length - 1; i >= 0; i--) {
@@ -4641,6 +5178,9 @@
         /* (flying cars removed) */
 
 
+        /* victory banner (behind aliens) */
+        drawVictoryBanner(dynC);
+
         /* alien defender drones */
         for (var i = 0; i < aliens.length; i++) drawAlien(dynC, aliens[i]);
         /* missiles */
@@ -4749,7 +5289,7 @@
         if (rebakeCooldown > 0) rebakeCooldown -= dt;
         if (needsCityRebake && rebakeCooldown <= 0) {
             rebakeCity();
-            rebakeCooldown = 0.8;
+            rebakeCooldown = 2;
         }
 
         /* ── FX LAYER (rain, lightning, flash) ── */
@@ -4765,12 +5305,9 @@
         var paperG = Math.floor(PAPER_BASE - getDayAlpha() * 20 - ATM.paperDarken);
         ctx.fillStyle = 'rgb(' + paperG + ',' + paperG + ',' + paperG + ')';
         ctx.fillRect(0, 0, W, H);
-        ctx.save();
-        ctx.translate(DISASTER.shakeX, DISASTER.shakeY);
         ctx.drawImage(bgCvs, 0, 0);
         ctx.drawImage(cityCvs, 0, 0);
         ctx.drawImage(dynCvs, 0, 0);
-        ctx.restore();
         ctx.drawImage(fxCvs, 0, 0);
         ctx.drawImage(grainCvs, 0, 0);
         drawVignette(ctx);
