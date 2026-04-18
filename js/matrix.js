@@ -207,16 +207,94 @@
     }
 
     var needsCityRebake = false;
+    var crumbleDebris = [];
+    function spawnCrumbleDebris(b) {
+        var cx = b.x + b.w / 2, topY = b.y;
+        for (var i = 0; i < 25; i++) {
+            crumbleDebris.push({
+                x: b.x + behRng() * b.w,
+                y: topY + behRng() * b.h * 0.6,
+                vx: (behRng() - 0.5) * 80,
+                vy: behRng() * -60 + 30,
+                r: 1 + behRng() * 4,
+                g: b.g + Math.floor((behRng() - 0.5) * 30),
+                spin: (behRng() - 0.5) * 8,
+                angle: behRng() * Math.PI * 2,
+                age: 0, life: 0.8 + behRng() * 1.5,
+                type: behRng() < 0.3 ? 'dust' : 'chunk'
+            });
+        }
+        for (var i = 0; i < 12; i++) {
+            crumbleDebris.push({
+                x: b.x + behRng() * b.w,
+                y: topY + behRng() * b.h * 0.3,
+                vx: (behRng() - 0.5) * 40,
+                vy: -20 - behRng() * 40,
+                r: 3 + behRng() * 8,
+                g: b.g + 40 + Math.floor(behRng() * 30),
+                spin: 0, angle: 0,
+                age: 0, life: 1.5 + behRng() * 2,
+                type: 'dustcloud'
+            });
+        }
+    }
+    function updateCrumbleDebris(dt) {
+        for (var i = crumbleDebris.length - 1; i >= 0; i--) {
+            var d = crumbleDebris[i];
+            d.age += dt;
+            if (d.age > d.life) { crumbleDebris.splice(i, 1); continue; }
+            if (d.type === 'chunk') {
+                d.x += d.vx * dt; d.vy += 180 * dt; d.y += d.vy * dt;
+                d.angle += d.spin * dt;
+                if (d.y > GROUND) { d.y = GROUND; d.vy *= -0.3; d.vx *= 0.7; }
+            } else if (d.type === 'dust') {
+                d.x += d.vx * dt; d.vy += 50 * dt; d.y += d.vy * dt;
+                d.r += dt * 2;
+            } else {
+                d.x += d.vx * dt * 0.3; d.y += d.vy * dt * 0.5;
+                d.r += dt * 6;
+                d.vx *= 0.97; d.vy *= 0.97;
+            }
+        }
+    }
+    function drawCrumbleDebris(c) {
+        for (var i = 0; i < crumbleDebris.length; i++) {
+            var d = crumbleDebris[i];
+            var alpha = Math.max(0, 1 - d.age / d.life);
+            if (d.type === 'chunk') {
+                c.save(); c.translate(d.x, d.y); c.rotate(d.angle);
+                var hw = d.r * 0.5, hh = d.r * 0.4;
+                c.beginPath();
+                c.moveTo(-hw, -hh); c.lineTo(hw * 0.8, -hh * 0.6);
+                c.lineTo(hw, hh * 0.7); c.lineTo(-hw * 0.5, hh);
+                c.closePath();
+                c.fillStyle = 'rgba(' + d.g + ',' + d.g + ',' + d.g + ',' + (alpha * 0.8) + ')';
+                c.fill();
+                c.strokeStyle = 'rgba(' + (d.g - 20) + ',' + (d.g - 20) + ',' + (d.g - 20) + ',' + (alpha * 0.6) + ')';
+                c.lineWidth = 0.3;
+                c.stroke();
+                c.restore();
+            } else if (d.type === 'dust') {
+                c.beginPath();
+                c.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + d.g + ',' + d.g + ',' + d.g + ',' + (alpha * 0.25) + ')';
+                c.fill();
+            } else {
+                arcStr(c, d.x, d.y, d.r, d.r * 0.7, 0, Math.PI * 2, 0.5, 0.08, d.g, alpha * 0.15);
+            }
+        }
+    }
     function damageBuilding(b) {
         var idx = buildings.indexOf(b);
         if (idx < 0) return;
         if (buildings.length <= 5) return;
+        spawnCrumbleDebris(b);
         buildings.splice(idx, 1);
         var con = {
             x: b.x, w: b.w, floors: b.floors, floorH: b.floorH,
             h: b.h, y: b.y,
             curFloor: 0, buildTimer: 0,
-            floorInterval: br(2, 5),
+            floorInterval: br(0.3, 0.8),
             g: b.g, done: false,
             scaffolding: false, workers: []
         };
@@ -241,53 +319,314 @@
     function createAlien() {
         return {
             x: br(W * 0.1, W * 0.9), y: -20,
-            targetX: br(W * 0.1, W * 0.9), targetY: br(HORIZON * 0.3, HORIZON * 0.7),
+            targetX: br(W * 0.1, W * 0.9), targetY: br(HORIZON + 20, GROUND * 0.5),
             speed: br(80, 160), g: bri(60, 100),
             beamPhase: 0, beaming: false, beamTarget: null,
             pulsePhase: br(0, Math.PI * 2),
-            alive: true, age: 0, maxAge: br(6, 12)
+            hoverPhase: br(0, Math.PI * 2),
+            tiltAngle: 0,
+            alive: true, age: 0, maxAge: br(8, 15),
+            size: br(1.2, 2.0),
+            hp: bri(2, 4),
+            hit: false, hitFlash: 0,
+            evading: false, evadeDir: 0
         };
     }
     function updateAlien(a, dt) {
-        a.age += dt; a.pulsePhase += dt * 6;
+        a.age += dt; a.pulsePhase += dt * 6; a.hoverPhase += dt * 2.5;
+        if (a.hitFlash > 0) a.hitFlash -= dt * 4;
+        if (a.evading) {
+            a.x += a.evadeDir * 120 * dt;
+            a.y -= 40 * dt;
+            a.evading = false;
+        }
         var dx = a.targetX - a.x, dy = a.targetY - a.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
+        a.tiltAngle = dx * 0.002;
         if (dist > 3) { a.x += dx / dist * a.speed * dt; a.y += dy / dist * a.speed * dt; }
         else if (!a.beaming && buildings.length > 2) {
             a.beaming = true; a.beamPhase = 0;
             var idx = bri(0, buildings.length);
             a.beamTarget = buildings[idx];
+            if (a.beamTarget) {
+                a.targetX = a.beamTarget.x + a.beamTarget.w / 2;
+                a.targetY = a.beamTarget.y - 25;
+            }
         }
         if (a.beaming) {
             a.beamPhase += dt;
+            if (a.beamTarget) {
+                var bx = a.beamTarget.x + a.beamTarget.w / 2;
+                var btY = a.beamTarget.y - 25;
+                a.x += (bx - a.x) * dt * 2;
+                a.y += (btY - a.y) * dt * 2;
+            }
             if (a.beamPhase > 1.5 && a.beamTarget) {
-                damageBuilding(a.beamTarget);
-                killNearbyPeds(a.beamTarget.x + a.beamTarget.w / 2);
+                var aCons = 0;
+                for (var ci = 0; ci < constructions.length; ci++) { if (!constructions[ci].done) aCons++; }
+                if (buildings.length > 5 && aCons < 4) {
+                    damageBuilding(a.beamTarget);
+                    killNearbyPeds(a.beamTarget.x + a.beamTarget.w / 2);
+                }
                 a.beamTarget = null; a.beaming = false;
-                a.targetX = br(W * 0.1, W * 0.9); a.targetY = br(HORIZON * 0.2, HORIZON * 0.6);
+                a.targetX = br(W * 0.1, W * 0.9);
+                a.targetY = br(HORIZON + 20, GROUND * 0.5);
             }
         }
+        a.y += Math.sin(a.hoverPhase) * 0.3;
         if (a.age > a.maxAge) a.alive = false;
     }
+    function destroyAlien(a) {
+        for (var i = 0; i < 18; i++) {
+            alienDebris.push({
+                x: a.x + (behRng() - 0.5) * 12 * a.size,
+                y: a.y + (behRng() - 0.5) * 6 * a.size,
+                vx: (behRng() - 0.5) * 120,
+                vy: behRng() * 40 - 20,
+                r: 1 + behRng() * 3.5 * a.size,
+                g: a.g + bri(-15, 25),
+                spin: (behRng() - 0.5) * 10,
+                angle: behRng() * Math.PI * 2,
+                age: 0, life: 1.2 + behRng() * 2,
+                type: behRng() < 0.3 ? 'plate' : 'shard'
+            });
+        }
+        for (var i = 0; i < 8; i++) {
+            alienDebris.push({
+                x: a.x + (behRng() - 0.5) * 8,
+                y: a.y + (behRng() - 0.5) * 4,
+                vx: (behRng() - 0.5) * 50,
+                vy: -20 - behRng() * 40,
+                r: 4 + behRng() * 8,
+                g: a.g + 40,
+                spin: 0, angle: 0,
+                age: 0, life: 1.5 + behRng() * 2,
+                type: 'smoke'
+            });
+        }
+        ATM.flashIntensity = Math.max(ATM.flashIntensity, 0.3);
+        a.alive = false;
+    }
     function drawAlien(c, a) {
-        var x = a.x, y = a.y, g = a.g;
+        var x = a.x, y = a.y, g = a.g, sz = a.size;
         var pulse = Math.sin(a.pulsePhase) * 0.2 + 0.7;
-        arcStr(c, x, y, 8, 3, 0, Math.PI * 2, 0.2, 0.4, g, pulse);
-        arcStr(c, x, y - 3, 4, 3, Math.PI, Math.PI * 2, 0.15, 0.35, g + 30, pulse * 0.8);
-        for (var li = 0; li < 5; li++) {
-            var lx = x - 6 + li * 3, ly = y + 1;
-            c.beginPath(); c.arc(lx, ly, 0.5, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + (pulse * 0.5) + ')';
+        var hover = Math.sin(a.hoverPhase) * 1.5;
+        if (a.hitFlash > 0) { g = Math.min(240, g + 80); pulse = 1; }
+        c.save(); c.translate(x, y + hover); c.rotate(a.tiltAngle);
+        arcStr(c, 0, 0, 14 * sz, 5 * sz, 0, Math.PI * 2, 0.15, 0.5 * sz, g, pulse);
+        arcStr(c, 0, -4 * sz, 7 * sz, 5 * sz, Math.PI, Math.PI * 2, 0.12, 0.4 * sz, g + 25, pulse * 0.85);
+        arcStr(c, 0, 1 * sz, 12 * sz, 2 * sz, 0, Math.PI, 0.2, 0.25 * sz, g - 10, pulse * 0.6);
+        for (var li = 0; li < 8; li++) {
+            var la = (li / 8) * Math.PI * 2 + a.pulsePhase * 0.5;
+            var lx = Math.cos(la) * 11 * sz, ly = Math.sin(la) * 3.5 * sz;
+            var lBright = (Math.sin(a.pulsePhase + li * 0.8) + 1) * 0.5;
+            c.beginPath(); c.arc(lx, ly, 0.7 * sz, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + (pulse * lBright * 0.7) + ')';
             c.fill();
         }
+        arcStr(c, 0, -5 * sz, 4 * sz, 2.5 * sz, Math.PI * 1.15, Math.PI * 1.85, 0.2, 0.15 * sz, g + 40, 0.5);
+        var glowR = 8 * sz + Math.sin(a.pulsePhase * 2) * 2 * sz;
+        var grad = c.createRadialGradient(0, 3 * sz, 0, 0, 3 * sz, glowR);
+        grad.addColorStop(0, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + (0.15 * pulse) + ')');
+        grad.addColorStop(1, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',0)');
+        c.fillStyle = grad;
+        c.fillRect(-glowR, 3 * sz - glowR * 0.3, glowR * 2, glowR);
+        c.restore();
         if (a.beaming && a.beamTarget) {
             var bx = a.beamTarget.x + a.beamTarget.w / 2;
             var by = a.beamTarget.y;
-            var bAlpha = Math.min(0.4, a.beamPhase * 0.25);
-            c.beginPath(); c.moveTo(x - 3, y + 3); c.lineTo(bx - 8, by);
-            c.lineTo(bx + 8, by); c.lineTo(x + 3, y + 3); c.closePath();
+            var bAlpha = Math.min(0.35, a.beamPhase * 0.2);
+            var beamW = 5 + a.beamPhase * 8;
+            c.beginPath();
+            c.moveTo(x - 4 * sz, y + 5 * sz);
+            c.lineTo(bx - beamW, by); c.lineTo(bx + beamW, by);
+            c.lineTo(x + 4 * sz, y + 5 * sz); c.closePath();
             c.fillStyle = 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + bAlpha + ')';
             c.fill();
+            for (var sl = 0; sl < 6; sl++) {
+                var st = (sl + 0.5) / 6;
+                var slY = (y + 5 * sz) + (by - y - 5 * sz) * st;
+                var slW = 4 * sz + (beamW - 4 * sz) * st;
+                var slX = x + (bx - x) * st;
+                var slA = bAlpha * 0.5 * (1 + Math.sin(a.pulsePhase * 3 + sl * 1.2));
+                stk(c, slX - slW, slY, slX + slW, slY, 0.12, g + 40, slA, 0);
+            }
+        }
+    }
+
+    /* ── ALIEN DEBRIS ── */
+    var alienDebris = [];
+    function updateAlienDebris(dt) {
+        for (var i = alienDebris.length - 1; i >= 0; i--) {
+            var d = alienDebris[i];
+            d.age += dt;
+            if (d.age > d.life) { alienDebris.splice(i, 1); continue; }
+            if (d.type === 'smoke') {
+                d.x += d.vx * dt * 0.3; d.y += d.vy * dt * 0.4;
+                d.r += dt * 5; d.vx *= 0.98; d.vy *= 0.98;
+            } else {
+                d.x += d.vx * dt; d.vy += 200 * dt; d.y += d.vy * dt;
+                d.angle += d.spin * dt;
+                if (d.y > GROUND) { d.y = GROUND; d.vy *= -0.25; d.vx *= 0.6; if (Math.abs(d.vy) < 5) d.vy = 0; }
+            }
+        }
+    }
+    function drawAlienDebris(c) {
+        for (var i = 0; i < alienDebris.length; i++) {
+            var d = alienDebris[i];
+            var alpha = Math.max(0, 1 - d.age / d.life);
+            if (d.type === 'smoke') {
+                arcStr(c, d.x, d.y, d.r, d.r * 0.7, 0, Math.PI * 2, 0.5, 0.08, d.g, alpha * 0.2);
+            } else if (d.type === 'plate') {
+                c.save(); c.translate(d.x, d.y); c.rotate(d.angle);
+                c.beginPath();
+                c.moveTo(-d.r, -d.r * 0.3); c.lineTo(d.r * 0.7, -d.r * 0.5);
+                c.lineTo(d.r, d.r * 0.4); c.lineTo(-d.r * 0.4, d.r * 0.6);
+                c.closePath();
+                c.fillStyle = 'rgba(' + d.g + ',' + d.g + ',' + d.g + ',' + (alpha * 0.75) + ')';
+                c.fill();
+                c.strokeStyle = 'rgba(' + (d.g - 25) + ',' + (d.g - 25) + ',' + (d.g - 25) + ',' + (alpha * 0.5) + ')';
+                c.lineWidth = 0.3; c.stroke();
+                c.restore();
+            } else {
+                c.save(); c.translate(d.x, d.y); c.rotate(d.angle);
+                stk(c, -d.r * 0.5, 0, d.r * 0.5, 0, 0.4, d.g, alpha * 0.7, 0);
+                stk(c, 0, -d.r * 0.3, 0, d.r * 0.3, 0.3, d.g - 10, alpha * 0.5, 0);
+                c.restore();
+            }
+        }
+    }
+
+    /* ═══════════ MISSILE DEFENSE SYSTEM ═══════════ */
+    var missiles = [];
+    var missileTimer = 0;
+    var MISSILE_TYPES = [
+        { name: 'sam', speed: 280, r: 1.5, trailW: 0.6, g: 80, dmg: 1, turnRate: 4 },
+        { name: 'interceptor', speed: 200, r: 2.5, trailW: 1.0, g: 60, dmg: 2, turnRate: 3 },
+        { name: 'heavy', speed: 140, r: 3.5, trailW: 1.5, g: 50, dmg: 3, turnRate: 2 }
+    ];
+
+    function createMissile(targetAlien) {
+        var mType = MISSILE_TYPES[bri(0, MISSILE_TYPES.length)];
+        var launchX, launchY;
+        if (buildings.length > 0 && behRng() < 0.7) {
+            var lb = buildings[bri(0, buildings.length)];
+            launchX = lb.x + lb.w * 0.5;
+            launchY = lb.y;
+        } else {
+            launchX = br(W * 0.05, W * 0.95);
+            launchY = GROUND;
+        }
+        var ang = Math.atan2(targetAlien.y - launchY, targetAlien.x - launchX);
+        return {
+            x: launchX, y: launchY,
+            vx: Math.cos(ang) * mType.speed,
+            vy: Math.sin(ang) * mType.speed,
+            targetId: targetAlien,
+            type: mType,
+            age: 0, alive: true,
+            trail: [],
+            exhaustPhase: br(0, Math.PI * 2)
+        };
+    }
+    function updateMissile(m, dt) {
+        m.age += dt;
+        m.exhaustPhase += dt * 25;
+        if (m.targetId && m.targetId.alive) {
+            var dx = m.targetId.x - m.x, dy = m.targetId.y - m.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > 0) {
+                var desVx = dx / dist * m.type.speed;
+                var desVy = dy / dist * m.type.speed;
+                m.vx += (desVx - m.vx) * m.type.turnRate * dt;
+                m.vy += (desVy - m.vy) * m.type.turnRate * dt;
+                var curSpd = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+                if (curSpd > 0) { m.vx = m.vx / curSpd * m.type.speed; m.vy = m.vy / curSpd * m.type.speed; }
+            }
+            if (dist < 12) {
+                m.targetId.hp -= m.type.dmg;
+                m.targetId.hitFlash = 1;
+                m.targetId.evading = true;
+                m.targetId.evadeDir = behRng() > 0.5 ? 1 : -1;
+                if (m.targetId.hp <= 0) destroyAlien(m.targetId);
+                missileExplosions.push({ x: m.x, y: m.y, age: 0, r: m.type.r * 3, g: m.type.g + 40 });
+                m.alive = false;
+                return;
+            }
+        } else {
+            m.vy -= 30 * dt;
+        }
+        m.x += m.vx * dt; m.y += m.vy * dt;
+        m.trail.push({ x: m.x, y: m.y, age: 0 });
+        if (m.trail.length > 25) m.trail.shift();
+        for (var t = 0; t < m.trail.length; t++) m.trail[t].age += dt;
+        if (m.age > 5 || m.x < -50 || m.x > W + 50 || m.y < -80 || m.y > H + 20) m.alive = false;
+    }
+    var missileExplosions = [];
+    function updateMissileExplosions(dt) {
+        for (var i = missileExplosions.length - 1; i >= 0; i--) {
+            missileExplosions[i].age += dt;
+            missileExplosions[i].r += dt * 25;
+            if (missileExplosions[i].age > 0.5) missileExplosions.splice(i, 1);
+        }
+    }
+    function drawMissile(c, m) {
+        var ang = Math.atan2(m.vy, m.vx);
+        /* smoke trail */
+        for (var t = 0; t < m.trail.length; t++) {
+            var tp = m.trail[t];
+            var ta = Math.max(0, 0.4 - tp.age * 0.6);
+            var tr = m.type.trailW * (1 + tp.age * 3);
+            var tg = m.type.g + 60 + Math.floor(tp.age * 40);
+            c.beginPath(); c.arc(tp.x, tp.y, tr, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + Math.min(220, tg) + ',' + ta + ')';
+            c.fill();
+        }
+        /* missile body */
+        var tipX = m.x + Math.cos(ang) * m.type.r * 2.5;
+        var tipY = m.y + Math.sin(ang) * m.type.r * 2.5;
+        var tailX = m.x - Math.cos(ang) * m.type.r * 2;
+        var tailY = m.y - Math.sin(ang) * m.type.r * 2;
+        stk(c, tailX, tailY, tipX, tipY, m.type.r * 0.7, m.type.g, 0.9, 0);
+        /* nose cone */
+        stk(c, m.x, m.y, tipX, tipY, m.type.r * 0.4, m.type.g - 15, 0.95, 0);
+        /* fins */
+        var perpX = -Math.sin(ang) * m.type.r * 1.5;
+        var perpY = Math.cos(ang) * m.type.r * 1.5;
+        stk(c, tailX, tailY, tailX + perpX, tailY + perpY, 0.2, m.type.g + 10, 0.6, 0);
+        stk(c, tailX, tailY, tailX - perpX, tailY - perpY, 0.2, m.type.g + 10, 0.6, 0);
+        /* exhaust flicker */
+        var exLen = m.type.r * (2 + Math.sin(m.exhaustPhase) * 0.8);
+        var exX = tailX - Math.cos(ang) * exLen;
+        var exY = tailY - Math.sin(ang) * exLen;
+        stk(c, tailX, tailY, exX, exY, m.type.r * 0.5, m.type.g + 70, 0.5, 0);
+        stk(c, tailX, tailY,
+            exX + (behRng() - 0.5) * 3, exY + (behRng() - 0.5) * 3,
+            m.type.r * 0.3, m.type.g + 90, 0.3, 0);
+    }
+    function drawMissileExplosions(c) {
+        for (var i = 0; i < missileExplosions.length; i++) {
+            var e = missileExplosions[i];
+            var alpha = Math.max(0, 1 - e.age / 0.5);
+            arcStr(c, e.x, e.y, e.r, e.r * 0.8, 0, Math.PI * 2, 0.3, 0.2, e.g, alpha * 0.5);
+            arcStr(c, e.x, e.y, e.r * 0.5, e.r * 0.4, 0, Math.PI * 2, 0.4, 0.15, e.g + 30, alpha * 0.7);
+        }
+    }
+    function updateDefenseSystem(dt) {
+        missileTimer += dt;
+        updateMissileExplosions(dt);
+        updateAlienDebris(dt);
+        if (missileTimer > 0.8 && aliens.length > 0) {
+            missileTimer = 0;
+            var target = aliens[bri(0, aliens.length)];
+            if (target.alive && target.y > 0) {
+                missiles.push(createMissile(target));
+                if (behRng() < 0.3) missiles.push(createMissile(target));
+            }
+        }
+        for (var i = missiles.length - 1; i >= 0; i--) {
+            updateMissile(missiles[i], dt);
+            if (!missiles[i].alive) missiles.splice(i, 1);
         }
     }
 
@@ -354,44 +693,29 @@
         }
     }
 
-    /* ── DRAGON FIRE DESTRUCTION ── */
-    var dragonFireTimer = 3;
-
-    function dragonFireStrike() {
-        if (dragons.length === 0 || buildings.length < 3) return;
-        var dr = dragons[bri(0, dragons.length)];
-        dr.breathing = true; dr.breathAge = 0;
-        var nearestB = null, nearestDist = 999;
-        for (var i = 0; i < buildings.length; i++) {
-            var bdist = Math.abs(buildings[i].x + buildings[i].w / 2 - dr.x);
-            if (bdist < nearestDist) { nearestDist = bdist; nearestB = buildings[i]; }
-        }
-        if (nearestB && nearestDist < 200) {
-            damageBuilding(nearestB);
-            killNearbyPeds(nearestB.x + nearestB.w / 2);
-        }
-    }
 
     function updateStrikeSystem(dt) {
+        var activeConstructions = 0;
+        for (var ci = 0; ci < constructions.length; ci++) {
+            if (!constructions[ci].done) activeConstructions++;
+        }
+        var canDestroy = buildings.length > 5 && activeConstructions < 4;
+
         strikeTimer -= dt;
         if (strikeTimer <= 0) {
-            strikeBuildingWithLightning();
+            if (canDestroy) strikeBuildingWithLightning();
             strikeTimer = br(3, 6);
         }
         if (damageTimer > 0) {
             damageTimer -= dt;
             if (damageTimer <= 0 && pendingDamage) {
-                damageBuilding(pendingDamage);
-                killNearbyPeds(pendingDamage.x + pendingDamage.w / 2);
+                if (canDestroy) {
+                    damageBuilding(pendingDamage);
+                    killNearbyPeds(pendingDamage.x + pendingDamage.w / 2);
+                }
                 pendingDamage = null;
             }
         }
-
-        var activeConstructions = 0;
-        for (var ci = 0; ci < constructions.length; ci++) {
-            if (!constructions[ci].done) activeConstructions++;
-        }
-        var canDestroy = buildings.length > 5 && activeConstructions < 6;
 
         /* alien attacks */
         alienTimer -= dt;
@@ -405,13 +729,6 @@
         if (asteroidTimer <= 0 && canDestroy) {
             asteroids.push(createAsteroid());
             asteroidTimer = br(4, 8);
-        }
-
-        /* dragon fire */
-        dragonFireTimer -= dt;
-        if (dragonFireTimer <= 0 && canDestroy) {
-            dragonFireStrike();
-            dragonFireTimer = br(4, 8);
         }
 
         DISASTER.shakeX *= 0.92;
@@ -1295,13 +1612,18 @@
 
     function updateConstruction(con, dt) {
         if (con.done) return;
-        con.buildTimer += dt;
+        var activeCount = 0;
+        for (var ci = 0; ci < constructions.length; ci++) {
+            if (!constructions[ci].done) activeCount++;
+        }
+        var speedMult = activeCount > 4 ? 3 + (activeCount - 4) * 1.5 : 1;
+        con.buildTimer += dt * speedMult;
         if (con.buildTimer >= con.floorInterval) {
             con.buildTimer = 0;
-            con.curFloor++;
+            con.curFloor += Math.max(1, Math.floor(speedMult));
             if (con.curFloor >= con.floors) {
+                con.curFloor = con.floors;
                 con.done = true;
-                /* promote to static city */
                 var bld = {
                     x: con.x, w: con.w, floors: con.floors, floorH: con.floorH,
                     h: con.h, y: con.y, style: 'block',
@@ -1741,42 +2063,71 @@
     function createPlane() {
         var dir = behRng() > 0.5 ? 1 : -1;
         return {
-            x: dir > 0 ? -40 : W + 40,
+            x: dir > 0 ? -60 : W + 60,
             y: br(12, HORIZON * 0.35),
-            dir: dir,
-            speed: br(12, 25),
-            g: bri(80, 130),
-            trailAge: 0,
+            dir: dir, speed: br(12, 25),
+            g: bri(80, 130), trailAge: 0,
+            bankAngle: 0, bankTarget: 0, bankTimer: br(3, 8),
+            flapPhase: br(0, Math.PI * 2),
             alive: true
         };
     }
-
     function updatePlane(p, dt) {
         p.x += p.dir * p.speed * dt;
         p.trailAge += dt;
-        if ((p.dir > 0 && p.x > W + 60) || (p.dir < 0 && p.x < -60)) p.alive = false;
+        p.flapPhase += dt * 0.8;
+        p.bankTimer -= dt;
+        if (p.bankTimer <= 0) { p.bankTarget = (behRng() - 0.5) * 0.12; p.bankTimer = br(3, 8); }
+        p.bankAngle += (p.bankTarget - p.bankAngle) * dt * 1.5;
+        if ((p.dir > 0 && p.x > W + 80) || (p.dir < 0 && p.x < -80)) p.alive = false;
     }
-
     function drawPlane(c, p) {
         var x = p.x, y = p.y, d = p.dir, g = p.g;
-        /* fuselage */
-        stk(c, x, y, x + d * 16, y, 0.5, g, 0.7, 0);
-        /* nose */
-        stk(c, x + d * 16, y, x + d * 19, y - 0.5, 0.3, g, 0.6, 0);
-        /* wings */
-        stk(c, x + d * 6, y, x + d * 6, y - 7, 0.3, g, 0.6, 0);
-        stk(c, x + d * 6, y, x + d * 6, y + 7, 0.3, g, 0.6, 0);
-        /* tail fin */
-        stk(c, x, y, x - d * 2, y - 4, 0.25, g, 0.55, 0);
-        stk(c, x, y, x - d * 2, y + 1.5, 0.2, g, 0.5, 0);
-        /* contrail */
-        var trailLen = Math.min(80, p.trailAge * 15);
-        for (var t = 0; t < trailLen; t += 3) {
-            var alpha = Math.max(0, 0.15 - t / trailLen * 0.15);
-            stk(c, x - d * t, y + 0.5, x - d * (t + 3), y + 0.5 + Math.sin(t * 0.2) * 0.3,
-                0.3 + t / trailLen * 0.8, 195, alpha, 0);
-            stk(c, x - d * t, y - 0.5, x - d * (t + 3), y - 0.5 - Math.sin(t * 0.2) * 0.3,
-                0.3 + t / trailLen * 0.8, 195, alpha, 0);
+        var s = 1.4;
+        c.save(); c.translate(x, y); c.rotate(p.bankAngle);
+        /* fuselage — tapered tube */
+        stk(c, -d * 4 * s, 0, d * 18 * s, 0, 0.8 * s, g - 10, 0.85, 0);
+        stk(c, -d * 4 * s, -0.8 * s, d * 16 * s, -0.6 * s, 0.3 * s, g, 0.5, 0);
+        stk(c, -d * 4 * s, 0.8 * s, d * 16 * s, 0.6 * s, 0.3 * s, g, 0.5, 0);
+        /* nose cone */
+        stk(c, d * 18 * s, 0, d * 22 * s, -0.3 * s, 0.5 * s, g - 5, 0.75, 0);
+        stk(c, d * 22 * s, -0.3 * s, d * 24 * s, -0.1 * s, 0.3 * s, g, 0.65, 0);
+        /* cockpit windows */
+        stk(c, d * 16 * s, -1.2 * s, d * 20 * s, -0.8 * s, 1.5 * s, g + 35, 0.3, 0);
+        /* main wings — swept with dihedral */
+        var flapOff = Math.sin(p.flapPhase) * 0.3 * s;
+        stk(c, d * 7 * s, -0.5 * s, d * 4 * s, -11 * s, 0.4 * s, g - 5, 0.7, 0);
+        stk(c, d * 7 * s, 0.5 * s, d * 4 * s, 11 * s, 0.4 * s, g - 5, 0.7, 0);
+        stk(c, d * 4 * s, -11 * s, d * 9 * s, -10 * s + flapOff, 0.25 * s, g, 0.55, 0);
+        stk(c, d * 4 * s, 11 * s, d * 9 * s, 10 * s - flapOff, 0.25 * s, g, 0.55, 0);
+        /* wing detail — engine nacelles */
+        arcStr(c, d * 5 * s, -6 * s, 2.5 * s, 1.2 * s, 0, Math.PI * 2, 0.3, 0.25 * s, g - 12, 0.6);
+        arcStr(c, d * 5 * s, 6 * s, 2.5 * s, 1.2 * s, 0, Math.PI * 2, 0.3, 0.25 * s, g - 12, 0.6);
+        /* horizontal stabilizer */
+        stk(c, -d * 3 * s, 0, -d * 5 * s, -4.5 * s, 0.3 * s, g, 0.6, 0);
+        stk(c, -d * 3 * s, 0, -d * 5 * s, 4.5 * s, 0.3 * s, g, 0.6, 0);
+        stk(c, -d * 5 * s, -4.5 * s, -d * 3 * s, -3.5 * s, 0.15 * s, g + 5, 0.45, 0);
+        stk(c, -d * 5 * s, 4.5 * s, -d * 3 * s, 3.5 * s, 0.15 * s, g + 5, 0.45, 0);
+        /* vertical tail */
+        stk(c, -d * 3 * s, 0, -d * 5 * s, -6 * s, 0.35 * s, g - 5, 0.7, 0);
+        stk(c, -d * 5 * s, -6 * s, -d * 2 * s, -5 * s, 0.2 * s, g, 0.5, 0);
+        /* fuselage windows */
+        for (var wi = 0; wi < 8; wi++) {
+            var wx = d * (2 + wi * 1.8) * s;
+            c.beginPath(); c.arc(wx, -0.5 * s, 0.35 * s, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 40) + ',' + (g + 40) + ',' + (g + 40) + ',0.35)';
+            c.fill();
+        }
+        c.restore();
+        /* contrails from engines */
+        var trailLen = Math.min(100, p.trailAge * 15);
+        for (var t = 0; t < trailLen; t += 2.5) {
+            var alpha = Math.max(0, 0.18 - t / trailLen * 0.18);
+            var tw = 0.4 + t / trailLen * 1.2;
+            stk(c, x - d * (t + 5), y - 6 + Math.sin(t * 0.12) * 0.4,
+                x - d * (t + 7.5), y - 6 + Math.sin((t + 2.5) * 0.12) * 0.4, tw, 200, alpha, 0);
+            stk(c, x - d * (t + 5), y + 6 + Math.sin(t * 0.15) * 0.3,
+                x - d * (t + 7.5), y + 6 + Math.sin((t + 2.5) * 0.15) * 0.3, tw, 200, alpha, 0);
         }
     }
 
@@ -1786,58 +2137,73 @@
         return {
             x: dir > 0 ? -30 : W + 30,
             y: br(HORIZON * 0.15, HORIZON * 0.65),
-            dir: dir,
-            speed: br(8, 18),
-            g: bri(55, 95),
-            rotorAngle: 0,
-            tailRotorAngle: 0,
-            bobPhase: br(0, Math.PI * 2),
-            alive: true
+            dir: dir, speed: br(8, 18),
+            g: bri(55, 95), rotorAngle: 0,
+            tailRotorAngle: 0, bobPhase: br(0, Math.PI * 2),
+            pitchAngle: 0, alive: true
         };
     }
-
     function updateHeli(h, dt) {
         h.x += h.dir * h.speed * dt;
         h.rotorAngle += dt * 35;
         h.tailRotorAngle += dt * 50;
         h.bobPhase += dt * 1.8;
+        h.pitchAngle = h.dir * 0.08 + Math.sin(h.bobPhase * 0.7) * 0.03;
         if ((h.dir > 0 && h.x > W + 60) || (h.dir < 0 && h.x < -60)) h.alive = false;
     }
-
     function drawHeli(c, h) {
-        var x = h.x, y = h.y + Math.sin(h.bobPhase) * 1.2, d = h.dir, g = h.g;
-        /* fuselage */
-        stk(c, x - d * 6, y, x + d * 8, y, 0.6, g, 0.8, 0);
-        /* cockpit bubble */
-        arcStr(c, x + d * 6, y - 0.5, 3.5, 3, Math.PI, Math.PI * 2, 0.3, 0.35, g + 15, 0.6);
-        /* windshield glass */
-        stk(c, x + d * 5, y - 1, x + d * 8, y - 1, 1.5, 160, 0.3, 0);
-        /* tail boom */
-        stk(c, x - d * 6, y, x - d * 18, y - 2, 0.35, g, 0.7, 0);
-        /* tail fin */
-        stk(c, x - d * 18, y - 2, x - d * 18, y - 6, 0.3, g, 0.65, 0);
-        stk(c, x - d * 18, y - 6, x - d * 15, y - 5, 0.25, g, 0.55, 0);
+        var x = h.x, y = h.y + Math.sin(h.bobPhase) * 1.5, d = h.dir, g = h.g;
+        var s = 1.3;
+        c.save(); c.translate(x, y); c.rotate(h.pitchAngle);
+        /* main fuselage — rounded body */
+        arcStr(c, d * 2 * s, 0, 8 * s, 4 * s, 0, Math.PI * 2, 0.15, 0.5 * s, g - 8, 0.8);
+        /* cockpit — glass bubble */
+        arcStr(c, d * 7 * s, -1 * s, 4.5 * s, 3.5 * s, Math.PI, Math.PI * 2, 0.12, 0.35 * s, g + 20, 0.65);
+        /* windshield frame */
+        stk(c, d * 4 * s, -2.5 * s, d * 10 * s, -1.5 * s, 0.2 * s, g - 15, 0.7, 0);
+        /* windshield glass reflection */
+        stk(c, d * 6 * s, -2.5 * s, d * 9 * s, -2 * s, 1.8 * s, g + 45, 0.2, 0);
+        /* tail boom — tapered */
+        stk(c, -d * 6 * s, -0.5 * s, -d * 22 * s, -3 * s, 0.4 * s, g, 0.75, 0);
+        stk(c, -d * 6 * s, 0.5 * s, -d * 20 * s, -1.5 * s, 0.3 * s, g + 5, 0.6, 0);
+        /* tail boom detail stripes */
+        for (var ts = 0; ts < 3; ts++) {
+            var tt = 0.3 + ts * 0.2;
+            var tsx = -d * (6 + tt * 16) * s, tsy = -0.5 * s + (-3 + 0.5) * tt * s;
+            stk(c, tsx, tsy - 1 * s, tsx, tsy + 1 * s, 0.08 * s, g + 15, 0.3, 0);
+        }
+        /* vertical tail fin */
+        stk(c, -d * 22 * s, -3 * s, -d * 22 * s, -8 * s, 0.35 * s, g - 5, 0.7, 0);
+        stk(c, -d * 22 * s, -8 * s, -d * 18 * s, -6 * s, 0.25 * s, g, 0.55, 0);
+        /* horizontal stabilizer */
+        stk(c, -d * 20 * s, -2.5 * s, -d * 24 * s, -3.5 * s, 0.2 * s, g, 0.5, 0);
+        stk(c, -d * 20 * s, -1.5 * s, -d * 24 * s, -0.5 * s, 0.2 * s, g, 0.5, 0);
         /* tail rotor */
         var tra = h.tailRotorAngle;
-        var trx = x - d * 18, try_ = y - 4;
-        stk(c, trx, try_ + Math.sin(tra) * 3, trx, try_ - Math.sin(tra) * 3, 0.2, g - 10, 0.6, 0);
-        /* skids */
-        stk(c, x - d * 4, y + 2, x + d * 5, y + 2, 0.3, g - 5, 0.6, 0);
-        stk(c, x - d * 2, y, x - d * 2, y + 2, 0.2, g, 0.5, 0);
-        stk(c, x + d * 3, y, x + d * 3, y + 2, 0.2, g, 0.5, 0);
-        /* mast */
-        stk(c, x + d * 1, y - 1, x + d * 1, y - 4, 0.3, g, 0.7, 0);
-        /* main rotor (spinning disc) */
-        var ra = h.rotorAngle;
-        var rotorR = 14;
-        var rotorY = y - 4;
-        /* draw 2 blades at current angle — they look like a spinning line */
-        stk(c, x + d * 1 + Math.cos(ra) * rotorR, rotorY,
-            x + d * 1 - Math.cos(ra) * rotorR, rotorY, 0.25, g - 15, 0.65, 0);
-        stk(c, x + d * 1 + Math.cos(ra + Math.PI / 2) * rotorR, rotorY,
-            x + d * 1 - Math.cos(ra + Math.PI / 2) * rotorR, rotorY, 0.25, g - 15, 0.55, 0);
-        /* rotor disc hint (faint circle) */
-        arcStr(c, x + d * 1, rotorY, rotorR, 1.5, 0, Math.PI * 2, 0.3, 0.08, g + 20, 0.15);
+        var trx = -d * 22 * s, trY = -5.5 * s;
+        stk(c, trx, trY + Math.sin(tra) * 3.5 * s, trx, trY - Math.sin(tra) * 3.5 * s, 0.2 * s, g - 10, 0.6, 0);
+        arcStr(c, trx, trY, 3.5 * s, 3.5 * s, 0, Math.PI * 2, 0.5, 0.05, g + 20, 0.12);
+        /* landing skids — with struts */
+        stk(c, -d * 5 * s, 3.5 * s, d * 7 * s, 3.5 * s, 0.35 * s, g - 8, 0.65, 0);
+        stk(c, -d * 3 * s, 1.5 * s, -d * 3 * s, 3.5 * s, 0.2 * s, g, 0.5, 0);
+        stk(c, d * 4 * s, 1 * s, d * 4 * s, 3.5 * s, 0.2 * s, g, 0.5, 0);
+        /* cross tubes */
+        stk(c, -d * 3 * s, 2.5 * s, d * 4 * s, 2.5 * s, 0.1 * s, g + 5, 0.35, 0);
+        /* rotor mast */
+        stk(c, d * 1 * s, -2 * s, d * 1 * s, -5 * s, 0.35 * s, g, 0.75, 0);
+        /* main rotor — 4 blades */
+        var ra = h.rotorAngle, rotorR = 18 * s, rotorY2 = -5 * s;
+        for (var rb = 0; rb < 4; rb++) {
+            var ba = ra + rb * Math.PI / 2;
+            stk(c, d * 1 * s + Math.cos(ba) * rotorR, rotorY2,
+                d * 1 * s - Math.cos(ba) * rotorR, rotorY2, 0.3 * s, g - 15, 0.6 - rb * 0.05, 0);
+        }
+        /* rotor disc */
+        arcStr(c, d * 1 * s, rotorY2, rotorR, 2 * s, 0, Math.PI * 2, 0.3, 0.06, g + 25, 0.1);
+        /* door outline */
+        stk(c, d * 0 * s, -2 * s, d * 0 * s, 2 * s, 0.1 * s, g - 15, 0.4, 0);
+        stk(c, d * 0 * s, -2 * s, d * 4 * s, -2 * s, 0.1 * s, g - 15, 0.35, 0);
+        c.restore();
     }
 
     /* ═══════════ WAR PLANES ═══════════ */
@@ -1845,39 +2211,78 @@
     var MAX_WARPLANES = 3;
     function createWarPlane() {
         var dir = behRng() > 0.5 ? 1 : -1;
-        var formation = bri(0, 3);
         return {
-            x: dir > 0 ? -60 : W + 60,
+            x: dir > 0 ? -80 : W + 80,
             y: br(HORIZON * 0.1, HORIZON * 0.5),
-            dir: dir, speed: br(35, 65),
-            g: bri(55, 85), formation: formation,
-            wingmates: [], trailAge: 0, alive: true
+            dir: dir, speed: br(45, 80),
+            g: bri(50, 80),
+            trailAge: 0, rollPhase: br(0, Math.PI * 2),
+            afterburner: behRng() < 0.4,
+            alive: true
         };
     }
     function updateWarPlane(p, dt) {
         p.x += p.dir * p.speed * dt;
         p.trailAge += dt;
-        if ((p.dir > 0 && p.x > W + 80) || (p.dir < 0 && p.x < -80)) p.alive = false;
+        p.rollPhase += dt * 0.5;
+        if ((p.dir > 0 && p.x > W + 100) || (p.dir < 0 && p.x < -100)) p.alive = false;
     }
     function drawWarPlane(c, p) {
         var x = p.x, y = p.y, d = p.dir, g = p.g;
-        stk(c, x - d * 3, y, x + d * 18, y, 0.7, g, 0.85, 0);
-        stk(c, x + d * 18, y, x + d * 22, y - 0.8, 0.4, g, 0.7, 0);
-        stk(c, x + d * 7, y, x + d * 7, y - 9, 0.35, g, 0.7, 0);
-        stk(c, x + d * 7, y, x + d * 7, y + 9, 0.35, g, 0.7, 0);
-        stk(c, x + d * 6, y - 9, x + d * 9, y - 7, 0.15, g, 0.5, 0);
-        stk(c, x + d * 6, y + 9, x + d * 9, y + 7, 0.15, g, 0.5, 0);
-        stk(c, x - d * 2, y, x - d * 5, y - 5, 0.3, g, 0.6, 0);
-        stk(c, x - d * 2, y, x - d * 3, y + 2, 0.25, g, 0.55, 0);
-        stk(c, x + d * 12, y - 1, x + d * 15, y - 1, 0.5, g + 20, 0.4, 0);
-        stk(c, x + d * 12, y + 1, x + d * 15, y + 1, 0.5, g + 20, 0.4, 0);
-        var trailLen = Math.min(100, p.trailAge * 20);
-        for (var t = 0; t < trailLen; t += 4) {
-            var alpha = Math.max(0, 0.12 - t / trailLen * 0.12);
-            stk(c, x - d * (t + 3), y - 1, x - d * (t + 7), y - 1 + Math.sin(t * 0.15) * 0.4,
-                0.4 + t / trailLen, 180, alpha, 0);
-            stk(c, x - d * (t + 3), y + 1, x - d * (t + 7), y + 1 - Math.sin(t * 0.15) * 0.4,
-                0.4 + t / trailLen, 180, alpha, 0);
+        var s = 1.5;
+        c.save(); c.translate(x, y);
+        /* fuselage — sleek fighter body */
+        stk(c, -d * 5 * s, 0, d * 22 * s, 0, 0.9 * s, g - 8, 0.9, 0);
+        stk(c, -d * 5 * s, -0.6 * s, d * 20 * s, -0.4 * s, 0.25 * s, g + 5, 0.5, 0);
+        /* nose — pointed radome */
+        stk(c, d * 22 * s, 0, d * 28 * s, -0.2 * s, 0.45 * s, g - 5, 0.85, 0);
+        stk(c, d * 28 * s, -0.2 * s, d * 32 * s, 0, 0.25 * s, g, 0.7, 0);
+        /* canopy — bubble */
+        arcStr(c, d * 16 * s, -1.8 * s, 4 * s, 2.5 * s, Math.PI, Math.PI * 2, 0.15, 0.3 * s, g + 30, 0.6);
+        stk(c, d * 13 * s, -1.5 * s, d * 19 * s, -1 * s, 1.8 * s, g + 50, 0.2, 0);
+        /* canopy frame */
+        stk(c, d * 15 * s, -2.5 * s, d * 15 * s, -0.5 * s, 0.1 * s, g - 10, 0.5, 0);
+        /* delta wings */
+        stk(c, d * 8 * s, 0, d * 2 * s, -12 * s, 0.45 * s, g - 5, 0.75, 0);
+        stk(c, d * 8 * s, 0, d * 2 * s, 12 * s, 0.45 * s, g - 5, 0.75, 0);
+        /* wing trailing edge */
+        stk(c, d * 2 * s, -12 * s, -d * 2 * s, -8 * s, 0.2 * s, g, 0.55, 0);
+        stk(c, d * 2 * s, 12 * s, -d * 2 * s, 8 * s, 0.2 * s, g, 0.55, 0);
+        /* wing tip missiles */
+        stk(c, d * 1 * s, -12.5 * s, d * 5 * s, -12 * s, 0.25 * s, g + 10, 0.5, 0);
+        stk(c, d * 1 * s, 12.5 * s, d * 5 * s, 12 * s, 0.25 * s, g + 10, 0.5, 0);
+        /* underwing pylons */
+        stk(c, d * 5 * s, -6 * s, d * 5 * s, -7.5 * s, 0.15 * s, g, 0.45, 0);
+        stk(c, d * 5 * s, 6 * s, d * 5 * s, 7.5 * s, 0.15 * s, g, 0.45, 0);
+        arcStr(c, d * 5 * s, -8 * s, 2 * s, 0.8 * s, 0, Math.PI * 2, 0.3, 0.15 * s, g - 5, 0.5);
+        arcStr(c, d * 5 * s, 8 * s, 2 * s, 0.8 * s, 0, Math.PI * 2, 0.3, 0.15 * s, g - 5, 0.5);
+        /* twin vertical tails */
+        stk(c, -d * 3 * s, -2 * s, -d * 6 * s, -7 * s, 0.3 * s, g - 5, 0.7, 0);
+        stk(c, -d * 3 * s, 2 * s, -d * 6 * s, 7 * s, 0.3 * s, g - 5, 0.7, 0);
+        stk(c, -d * 6 * s, -7 * s, -d * 3 * s, -5.5 * s, 0.15 * s, g, 0.45, 0);
+        stk(c, -d * 6 * s, 7 * s, -d * 3 * s, 5.5 * s, 0.15 * s, g, 0.45, 0);
+        /* horizontal stabilizers */
+        stk(c, -d * 4 * s, 0, -d * 7 * s, -4 * s, 0.25 * s, g, 0.55, 0);
+        stk(c, -d * 4 * s, 0, -d * 7 * s, 4 * s, 0.25 * s, g, 0.55, 0);
+        /* engine nozzles */
+        arcStr(c, -d * 5 * s, -1.5 * s, 1.8 * s, 1.5 * s, 0, Math.PI * 2, 0.3, 0.2 * s, g - 15, 0.65);
+        arcStr(c, -d * 5 * s, 1.5 * s, 1.8 * s, 1.5 * s, 0, Math.PI * 2, 0.3, 0.2 * s, g - 15, 0.65);
+        /* afterburner glow */
+        if (p.afterburner) {
+            var abFlick = Math.sin(p.trailAge * 30) * 0.15 + 0.35;
+            stk(c, -d * 6.5 * s, -1.5 * s, -d * (9 + Math.sin(p.trailAge * 25) * 2) * s, -1.5 * s, 0.5 * s, g + 60, abFlick, 0);
+            stk(c, -d * 6.5 * s, 1.5 * s, -d * (9 + Math.sin(p.trailAge * 28) * 2) * s, 1.5 * s, 0.5 * s, g + 60, abFlick, 0);
+        }
+        c.restore();
+        /* twin contrails */
+        var trailLen = Math.min(120, p.trailAge * 25);
+        for (var t = 0; t < trailLen; t += 3) {
+            var alpha = Math.max(0, 0.14 - t / trailLen * 0.14);
+            var tw = 0.3 + t / trailLen * 1.5;
+            stk(c, x - d * (t + 5), y - 1.5 + Math.sin(t * 0.1) * 0.3,
+                x - d * (t + 8), y - 1.5 + Math.sin((t + 3) * 0.1) * 0.3, tw, 185, alpha, 0);
+            stk(c, x - d * (t + 5), y + 1.5 + Math.sin(t * 0.12) * 0.3,
+                x - d * (t + 8), y + 1.5 + Math.sin((t + 3) * 0.12) * 0.3, tw, 185, alpha, 0);
         }
     }
 
@@ -1887,11 +2292,14 @@
     function createSpaceship() {
         var dir = behRng() > 0.5 ? 1 : -1;
         return {
-            x: dir > 0 ? -50 : W + 50,
+            x: dir > 0 ? -60 : W + 60,
             y: br(8, HORIZON * 0.35),
             dir: dir, speed: br(15, 35),
-            g: bri(100, 150), pulsePhase: br(0, Math.PI * 2),
-            tilt: br(-0.15, 0.15), trailAge: 0, alive: true
+            g: bri(90, 140), pulsePhase: br(0, Math.PI * 2),
+            tilt: br(-0.1, 0.1), trailAge: 0,
+            shieldPhase: br(0, Math.PI * 2),
+            engineGlow: br(0, Math.PI * 2),
+            alive: true
         };
     }
     function updateSpaceship(s, dt) {
@@ -1899,34 +2307,81 @@
         s.y += Math.sin(s.pulsePhase) * 0.2;
         s.pulsePhase += dt * 4;
         s.trailAge += dt;
-        if ((s.dir > 0 && s.x > W + 80) || (s.dir < 0 && s.x < -80)) s.alive = false;
+        s.shieldPhase += dt * 2;
+        s.engineGlow += dt * 12;
+        if ((s.dir > 0 && s.x > W + 100) || (s.dir < 0 && s.x < -100)) s.alive = false;
     }
     function drawSpaceship(c, s) {
         var x = s.x, y = s.y, d = s.dir, g = s.g;
-        c.save();
-        c.translate(x, y);
-        c.rotate(s.tilt);
-        arcStr(c, 0, 0, 14, 4, 0, Math.PI * 2, 0.2, 0.4, g, 0.7);
-        arcStr(c, 0, -2, 6, 4, Math.PI, Math.PI * 2, 0.15, 0.35, g + 30, 0.5);
-        stk(c, 0, -6, 0, -3, 0.2, g + 20, 0.4, 0);
-        arcStr(c, 0, -6.5, 1.5, 1.5, 0, Math.PI * 2, 0.4, 0.2, g + 25, 0.5);
-        stk(c, -14, 0, -14, 2, 0.3, g - 10, 0.6, 0);
-        stk(c, 14, 0, 14, 2, 0.3, g - 10, 0.6, 0);
-        stk(c, -14, 2, -16, 3, 0.2, g, 0.5, 0);
-        stk(c, 14, 2, 16, 3, 0.2, g, 0.5, 0);
-        var pulse = Math.sin(s.pulsePhase) * 0.3 + 0.4;
-        for (var li = 0; li < 5; li++) {
-            var lx = -8 + li * 4;
-            c.beginPath();
-            c.arc(lx, 1, 0.6, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + pulse + ')';
+        var sz = 1.6;
+        var pulse = Math.sin(s.pulsePhase) * 0.2 + 0.7;
+        c.save(); c.translate(x, y); c.rotate(s.tilt);
+        /* main hull — elongated with curves */
+        arcStr(c, 0, 0, 16 * sz, 5 * sz, 0, Math.PI * 2, 0.12, 0.5 * sz, g - 5, pulse * 0.85);
+        /* hull panel lines */
+        stk(c, -8 * sz, -2 * sz, -8 * sz, 2 * sz, 0.08 * sz, g + 10, 0.3, 0);
+        stk(c, 0, -3 * sz, 0, 3 * sz, 0.08 * sz, g + 10, 0.25, 0);
+        stk(c, 8 * sz, -2 * sz, 8 * sz, 2 * sz, 0.08 * sz, g + 10, 0.2, 0);
+        /* command dome */
+        arcStr(c, d * 2 * sz, -4 * sz, 7 * sz, 5 * sz, Math.PI, Math.PI * 2, 0.1, 0.4 * sz, g + 25, pulse * 0.8);
+        /* dome glass panels */
+        for (var wp = 0; wp < 4; wp++) {
+            var wa = Math.PI * 1.15 + wp * (Math.PI * 0.7 / 4);
+            var wx = d * 2 * sz + Math.cos(wa) * 5 * sz;
+            var wy = -4 * sz + Math.sin(wa) * 3.5 * sz;
+            c.beginPath(); c.arc(wx, wy, 0.8 * sz, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + (pulse * 0.4) + ')';
             c.fill();
         }
+        /* antenna spire */
+        stk(c, d * 2 * sz, -8.5 * sz, d * 2 * sz, -5 * sz, 0.15 * sz, g + 15, 0.5, 0);
+        c.beginPath(); c.arc(d * 2 * sz, -9 * sz, 0.6 * sz, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 40) + ',' + (g + 40) + ',' + (g + 40) + ',' + (pulse * 0.6) + ')';
+        c.fill();
+        /* lower hull detail */
+        arcStr(c, 0, 2 * sz, 14 * sz, 2.5 * sz, 0, Math.PI, 0.15, 0.2 * sz, g - 12, 0.55);
+        /* landing struts (retracted) */
+        stk(c, -10 * sz, 3 * sz, -11 * sz, 5 * sz, 0.2 * sz, g - 10, 0.5, 0);
+        stk(c, 10 * sz, 3 * sz, 11 * sz, 5 * sz, 0.2 * sz, g - 10, 0.5, 0);
+        stk(c, 0, 3.5 * sz, 0, 5.5 * sz, 0.2 * sz, g - 10, 0.5, 0);
+        /* running lights — animated chase */
+        for (var li = 0; li < 10; li++) {
+            var la = (li / 10) * Math.PI * 2 + s.pulsePhase * 0.6;
+            var lx = Math.cos(la) * 14 * sz, ly = Math.sin(la) * 4 * sz;
+            var lBright = (Math.sin(s.pulsePhase * 2 + li * 0.6) + 1) * 0.5;
+            c.beginPath(); c.arc(lx, ly, 0.6 * sz, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + (pulse * lBright * 0.6) + ')';
+            c.fill();
+        }
+        /* engine pods */
+        arcStr(c, -d * 14 * sz, -2 * sz, 3 * sz, 2 * sz, 0, Math.PI * 2, 0.2, 0.25 * sz, g - 15, 0.7);
+        arcStr(c, -d * 14 * sz, 2 * sz, 3 * sz, 2 * sz, 0, Math.PI * 2, 0.2, 0.25 * sz, g - 15, 0.7);
+        /* engine glow */
+        var egFlick = Math.sin(s.engineGlow) * 0.15 + 0.3;
+        var egR = (2 + Math.sin(s.engineGlow * 1.3) * 0.8) * sz;
+        var egGrad = c.createRadialGradient(-d * 17 * sz, -2 * sz, 0, -d * 17 * sz, -2 * sz, egR);
+        egGrad.addColorStop(0, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + egFlick + ')');
+        egGrad.addColorStop(1, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',0)');
+        c.fillStyle = egGrad;
+        c.fillRect(-d * 17 * sz - egR, -2 * sz - egR, egR * 2, egR * 2);
+        egGrad = c.createRadialGradient(-d * 17 * sz, 2 * sz, 0, -d * 17 * sz, 2 * sz, egR);
+        egGrad.addColorStop(0, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',' + egFlick + ')');
+        egGrad.addColorStop(1, 'rgba(' + (g + 50) + ',' + (g + 50) + ',' + (g + 50) + ',0)');
+        c.fillStyle = egGrad;
+        c.fillRect(-d * 17 * sz - egR, 2 * sz - egR, egR * 2, egR * 2);
+        /* shield shimmer */
+        var shA = Math.sin(s.shieldPhase) * 0.04 + 0.04;
+        if (shA > 0.02) {
+            arcStr(c, 0, 0, 20 * sz, 8 * sz, 0, Math.PI * 2, 0.25, 0.05 * sz, g + 40, shA);
+        }
         c.restore();
-        var trailLen = Math.min(60, s.trailAge * 12);
-        for (var t = 0; t < trailLen; t += 3) {
-            var alpha = Math.max(0, 0.1 - t / trailLen * 0.1);
-            arcStr(c, x - d * (t + 16), y + 1, 2 + t * 0.08, 1, 0, Math.PI * 2, 0.4, 0.1, g + 40, alpha);
+        /* exhaust trail */
+        var trailLen = Math.min(80, s.trailAge * 14);
+        for (var t = 0; t < trailLen; t += 2.5) {
+            var alpha = Math.max(0, 0.12 - t / trailLen * 0.12);
+            var tr = (1.5 + t * 0.04) * sz;
+            arcStr(c, x - d * (t + 17 * sz), y - 2, tr, tr * 0.5, 0, Math.PI * 2, 0.5, 0.06, g + 45, alpha);
+            arcStr(c, x - d * (t + 17 * sz), y + 2, tr, tr * 0.5, 0, Math.PI * 2, 0.5, 0.06, g + 45, alpha);
         }
     }
 
@@ -1937,113 +2392,65 @@
         var dir = behRng() > 0.5 ? 1 : -1;
         var lane = bri(0, 3);
         return {
-            x: dir > 0 ? -25 : W + 25,
+            x: dir > 0 ? -30 : W + 30,
             y: HORIZON * (0.2 + lane * 0.15) + br(-5, 5),
             dir: dir, speed: br(20, 45),
             g: bri(60, 110), bobPhase: br(0, Math.PI * 2),
-            thrusterPhase: br(0, Math.PI * 2), alive: true
+            thrusterPhase: br(0, Math.PI * 2),
+            headlightFlick: br(0, Math.PI * 2),
+            alive: true
         };
     }
     function updateFlyingCar(fc, dt) {
         fc.x += fc.dir * fc.speed * dt;
         fc.bobPhase += dt * 2.5;
         fc.thrusterPhase += dt * 15;
+        fc.headlightFlick += dt * 8;
         if ((fc.dir > 0 && fc.x > W + 40) || (fc.dir < 0 && fc.x < -40)) fc.alive = false;
     }
     function drawFlyingCar(c, fc) {
         var x = fc.x, y = fc.y + Math.sin(fc.bobPhase) * 1.5, d = fc.dir, g = fc.g;
-        arcStr(c, x, y, 10, 4, 0, Math.PI, 0.2, 0.4, g, 0.7);
-        stk(c, x - 10, y, x + 10, y, 0.4, g - 8, 0.8, 0);
-        arcStr(c, x + d * 3, y - 2.5, 5, 3, Math.PI, Math.PI * 2, 0.2, 0.3, g + 15, 0.6);
-        stk(c, x + d * 1, y - 1.5, x + d * 6, y - 1.5, 1.2, g + 40, 0.3, 0);
-        stk(c, x + d * 8, y - 0.5, x + d * 10, y - 0.5, 0.3, 200, 0.4, 0);
-        stk(c, x - d * 8, y - 0.5, x - d * 10, y - 0.5, 0.3, 200, 0.4, 0);
-        var thrustFlicker = Math.sin(fc.thrusterPhase) * 0.15 + 0.3;
-        c.beginPath();
-        c.arc(x - 5, y + 3, 1.2, 0, Math.PI * 2);
-        c.fillStyle = 'rgba(' + (g + 60) + ',' + (g + 60) + ',' + (g + 60) + ',' + thrustFlicker + ')';
+        var s = 1.3;
+        /* body — sleek car shape */
+        arcStr(c, x, y, 12 * s, 4 * s, 0, Math.PI, 0.15, 0.4 * s, g - 5, 0.75);
+        stk(c, x - 12 * s, y, x + 12 * s, y, 0.5 * s, g - 10, 0.85, 0);
+        /* roof / cabin */
+        arcStr(c, x + d * 3 * s, y - 3 * s, 6 * s, 3.5 * s, Math.PI, Math.PI * 2, 0.12, 0.35 * s, g + 12, 0.65);
+        /* windshield */
+        stk(c, x + d * 1 * s, y - 2 * s, x + d * 7 * s, y - 1.5 * s, 2 * s, g + 45, 0.25, 0);
+        /* rear window */
+        stk(c, x - d * 1 * s, y - 2 * s, x - d * 4 * s, y - 1.5 * s, 1.5 * s, g + 40, 0.2, 0);
+        /* headlights */
+        var hlBright = 0.4 + Math.sin(fc.headlightFlick) * 0.1;
+        c.beginPath(); c.arc(x + d * 11 * s, y - 0.5 * s, 0.8 * s, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 70) + ',' + (g + 70) + ',' + (g + 70) + ',' + hlBright + ')';
         c.fill();
-        c.beginPath();
-        c.arc(x + 5, y + 3, 1.2, 0, Math.PI * 2);
+        c.beginPath(); c.arc(x + d * 11 * s, y + 0.5 * s, 0.6 * s, 0, Math.PI * 2);
         c.fill();
-        stk(c, x - 5, y + 3, x - 5, y + 4 + Math.sin(fc.thrusterPhase) * 1.5, 0.15, g + 50, thrustFlicker * 0.6, 0);
-        stk(c, x + 5, y + 3, x + 5, y + 4 + Math.sin(fc.thrusterPhase + 1) * 1.5, 0.15, g + 50, thrustFlicker * 0.6, 0);
-    }
-
-    /* ═══════════ DRAGONS ═══════════ */
-    var dragons = [];
-    var MAX_DRAGONS = 4;
-    function createDragon() {
-        var dir = behRng() > 0.5 ? 1 : -1;
-        return {
-            x: dir > 0 ? -80 : W + 80,
-            y: br(HORIZON * 0.2, HORIZON * 0.8),
-            dir: dir, speed: br(18, 35),
-            g: bri(40, 70),
-            wingPhase: br(0, Math.PI * 2),
-            breathTimer: br(2, 6), breathing: false, breathAge: 0,
-            tailPhase: br(0, Math.PI * 2),
-            size: br(1.2, 2.0),
-            alive: true
-        };
-    }
-    function updateDragon(dr, dt) {
-        dr.x += dr.dir * dr.speed * dt;
-        dr.wingPhase += dt * 4;
-        dr.tailPhase += dt * 3;
-        if (dr.breathing) {
-            dr.breathAge += dt;
-            if (dr.breathAge > 1.2) { dr.breathing = false; dr.breathTimer = br(3, 8); }
-        } else {
-            dr.breathTimer -= dt;
-            if (dr.breathTimer <= 0) { dr.breathing = true; dr.breathAge = 0; }
+        /* tail lights */
+        c.beginPath(); c.arc(x - d * 11 * s, y - 0.3 * s, 0.5 * s, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(' + (g + 30) + ',' + (g + 30) + ',' + (g + 30) + ',0.5)';
+        c.fill();
+        /* side panels */
+        stk(c, x - 6 * s, y - 1 * s, x + 6 * s, y - 1 * s, 0.08 * s, g + 15, 0.3, 0);
+        /* hover pads */
+        var thrustFlicker = Math.sin(fc.thrusterPhase) * 0.15 + 0.35;
+        for (var tp = 0; tp < 4; tp++) {
+            var tpx = x + (-7.5 + tp * 5) * s;
+            c.beginPath(); c.arc(tpx, y + 3 * s, 1.3 * s, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(' + (g + 55) + ',' + (g + 55) + ',' + (g + 55) + ',' + thrustFlicker + ')';
+            c.fill();
+            /* thrust jet */
+            var jetLen = (1.5 + Math.sin(fc.thrusterPhase + tp * 1.5) * 1) * s;
+            stk(c, tpx, y + 3.5 * s, tpx, y + 3.5 * s + jetLen, 0.2 * s, g + 60, thrustFlicker * 0.5, 0);
         }
-        if ((dr.dir > 0 && dr.x > W + 100) || (dr.dir < 0 && dr.x < -100)) dr.alive = false;
-    }
-    function drawDragon(c, dr) {
-        var x = dr.x, y = dr.y, d = dr.dir, g = dr.g, s = dr.size;
-        var wingUp = Math.sin(dr.wingPhase) * 12 * s;
-        stk(c, x - d * 18 * s, y, x + d * 12 * s, y, 0.9 * s, g, 0.85, 0);
-        arcStr(c, x + d * 12 * s, y - 1 * s, 4 * s, 3 * s, 0, Math.PI * 2, 0.3, 0.35 * s, g - 10, 0.8);
-        stk(c, x + d * 16 * s, y - 1 * s, x + d * 20 * s, y - 2 * s, 0.3 * s, g, 0.6, 0);
-        stk(c, x + d * 13 * s, y - 3.5 * s, x + d * 11 * s, y - 6 * s, 0.2 * s, g - 5, 0.7, 0);
-        stk(c, x + d * 14.5 * s, y - 3.5 * s, x + d * 13 * s, y - 6 * s, 0.2 * s, g - 5, 0.7, 0);
-        stk(c, x + d * 15 * s, y - 0.5 * s, x + d * 15.3 * s, y - 0.5 * s, 0.35 * s, g - 20, 0.9, 0);
-        stk(c, x - d * 2 * s, y, x + d * 5 * s, y - wingUp, 0.5 * s, g, 0.7, 0);
-        stk(c, x + d * 5 * s, y - wingUp, x + d * 10 * s, y - wingUp * 0.6, 0.35 * s, g + 10, 0.6, 0);
-        for (var m = 0; m < 3; m++) {
-            var mx1 = x + d * (2 + m * 3) * s, mx2 = x + d * (5 + m * 2.5) * s;
-            var my = y - wingUp * (0.3 + m * 0.25);
-            stk(c, mx1, y - wingUp * 0.1 * m, mx2, my, 0.08 * s, g + 20, 0.3, 0);
-        }
-        stk(c, x - d * 2 * s, y, x + d * 5 * s, y + wingUp * 0.8, 0.45 * s, g + 5, 0.6, 0);
-        stk(c, x + d * 5 * s, y + wingUp * 0.8, x + d * 9 * s, y + wingUp * 0.5, 0.3 * s, g + 12, 0.5, 0);
-        var tailSwing = Math.sin(dr.tailPhase) * 8 * s;
-        stk(c, x - d * 18 * s, y, x - d * 28 * s, y + tailSwing * 0.5, 0.4 * s, g, 0.7, 0);
-        stk(c, x - d * 28 * s, y + tailSwing * 0.5, x - d * 35 * s, y + tailSwing, 0.3 * s, g + 5, 0.6, 0);
-        stk(c, x - d * 35 * s, y + tailSwing, x - d * 37 * s, y + tailSwing - 3 * s, 0.2 * s, g, 0.5, 0);
-        stk(c, x - d * 35 * s, y + tailSwing, x - d * 37 * s, y + tailSwing + 3 * s, 0.2 * s, g, 0.5, 0);
-        for (var sp = 0; sp < 6; sp++) {
-            var spx = x - d * (4 + sp * 3) * s;
-            stk(c, spx, y - 1 * s, spx, y - 3 * s, 0.15 * s, g - 10, 0.5, 0);
-        }
-        stk(c, x + d * 6 * s, y + 3 * s, x + d * 7 * s, y + 5 * s, 0.25 * s, g, 0.6, 0);
-        stk(c, x + d * 7 * s, y + 5 * s, x + d * 6.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
-        stk(c, x + d * 7 * s, y + 5 * s, x + d * 7.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
-        stk(c, x - d * 8 * s, y + 2 * s, x - d * 9 * s, y + 5 * s, 0.25 * s, g, 0.6, 0);
-        stk(c, x - d * 9 * s, y + 5 * s, x - d * 8.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
-        stk(c, x - d * 9 * s, y + 5 * s, x - d * 9.5 * s, y + 6 * s, 0.15 * s, g, 0.5, 0);
-        if (dr.breathing) {
-            var bLen = dr.breathAge * 40 * s;
-            var bAlpha = Math.max(0, 0.5 - dr.breathAge * 0.35);
-            for (var f = 0; f < bLen; f += 3) {
-                var fx = x + d * (20 * s + f);
-                var fy = y - 1 * s + Math.sin(f * 0.15) * (2 + f * 0.08) * s;
-                var fr = (1 + f * 0.06) * s;
-                var fAlpha = bAlpha * (1 - f / bLen);
-                var fg = Math.floor(130 + f * 0.5);
-                arcStr(c, fx, fy, fr, fr * 0.7, 0, Math.PI * 2, 0.4, 0.2 * s, fg, fAlpha);
-            }
+        /* heat distortion below */
+        for (var hd = 0; hd < 3; hd++) {
+            var hdx = x + (-5 + hd * 5) * s;
+            var hda = 0.06 * thrustFlicker;
+            stk(c, hdx - 2 * s, y + 5 * s + Math.sin(fc.thrusterPhase * 0.5 + hd) * s,
+                hdx + 2 * s, y + 5.5 * s + Math.cos(fc.thrusterPhase * 0.4 + hd) * s,
+                0.05 * s, g + 40, hda, 0);
         }
     }
 
@@ -3360,15 +3767,13 @@
         criminals = [];
         policeFoot = [];
 
-        /* war planes, spaceships, flying cars, dragons */
+        /* war planes, spaceships, flying cars */
         warPlanes = [];
         spaceships = [];
         flyingCars = [];
-        dragons = [];
         if (behRng() > 0.5) warPlanes.push(createWarPlane());
         if (behRng() > 0.6) spaceships.push(createSpaceship());
         for (var i = 0; i < bri(0, 2); i++) flyingCars.push(createFlyingCar());
-        for (var i = 0; i < bri(1, 3); i++) dragons.push(createDragon());
 
         /* rain */
         raindrops = [];
@@ -3379,9 +3784,12 @@
         damageTimer = 0;
         alienTimer = br(2, 4);
         asteroidTimer = br(2, 4);
-        dragonFireTimer = br(2, 4);
         aliens = [];
         asteroids = [];
+        missiles = [];
+        missileTimer = 0;
+        missileExplosions = [];
+        alienDebris = [];
 
         dayPhase = 0;
     }
@@ -3413,6 +3821,8 @@
         updateRain(dt);
         updateLightning(dt);
         updateStrikeSystem(dt);
+        updateCrumbleDebris(dt);
+        updateDefenseSystem(dt);
 
         /* ── UPDATE ── */
         /* construction */
@@ -3513,12 +3923,6 @@
         }
         if (flyingCars.length < MAX_FLYING_CARS && behRng() < 0.0008) flyingCars.push(createFlyingCar());
 
-        /* dragons */
-        for (var i = dragons.length - 1; i >= 0; i--) {
-            updateDragon(dragons[i], dt);
-            if (!dragons[i].alive) dragons.splice(i, 1);
-        }
-        if (dragons.length < MAX_DRAGONS && behRng() < 0.002) dragons.push(createDragon());
 
         /* aliens */
         for (var i = aliens.length - 1; i >= 0; i--) {
@@ -3703,14 +4107,20 @@
         /* flying cars */
         for (var i = 0; i < flyingCars.length; i++) drawFlyingCar(dynC, flyingCars[i]);
 
-        /* dragons */
-        for (var i = 0; i < dragons.length; i++) drawDragon(dynC, dragons[i]);
 
         /* aliens */
         for (var i = 0; i < aliens.length; i++) drawAlien(dynC, aliens[i]);
 
+        /* missiles */
+        for (var i = 0; i < missiles.length; i++) drawMissile(dynC, missiles[i]);
+        drawMissileExplosions(dynC);
+        drawAlienDebris(dynC);
+
         /* asteroids */
         for (var i = 0; i < asteroids.length; i++) drawAsteroid(dynC, asteroids[i]);
+
+        /* crumble debris */
+        drawCrumbleDebris(dynC);
 
         /* flocks */
         for (var i = 0; i < flocks.length; i++) drawFlock(dynC, flocks[i]);
