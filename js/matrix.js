@@ -18,6 +18,8 @@
     /* offscreen layers (5-layer composite: bg → city → dyn → fx → grain) */
     var bgCvs = document.createElement('canvas'), bgC = bgCvs.getContext('2d');
     var cityCvs = document.createElement('canvas'), cityC = cityCvs.getContext('2d');
+    var bldCvs = document.createElement('canvas'), bldC = bldCvs.getContext('2d');
+    var infraCvs = document.createElement('canvas'), infraC = infraCvs.getContext('2d');
     var dynCvs = document.createElement('canvas'), dynC = dynCvs.getContext('2d');
     var fxCvs = document.createElement('canvas'), fxC = fxCvs.getContext('2d');
     var grainCvs = document.createElement('canvas'), grainC = grainCvs.getContext('2d');
@@ -26,8 +28,8 @@
     var SIDEWALK_N, SIDEWALK_N_B, LANE_Y = [], CENTER_Y, SIDEWALK_S, SIDEWALK_S_B;
 
     function resize() {
-        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = Math.max(window.innerWidth, document.documentElement.clientWidth || 0);
-        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
+        W = canvas.width = bgCvs.width = cityCvs.width = bldCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = infraCvs.width = Math.max(window.innerWidth, document.documentElement.clientWidth || 0);
+        H = canvas.height = bgCvs.height = cityCvs.height = bldCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = infraCvs.height = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
         HORIZON = H * 0.12;
         GROUND = H * 0.84;
         STREET_BOT = H * 0.93;
@@ -48,15 +50,16 @@
         BEACH_Y = RIVER_TOP - 2;
         TRACK_Y = BEACH_Y - 6;
         LIGHTHOUSE_X = W * 0.92;
-        ctx.lineCap = 'round'; bgC.lineCap = 'round'; cityC.lineCap = 'round';
-        dynC.lineCap = 'round'; fxC.lineCap = 'round';
+        ctx.lineCap = 'round'; bgC.lineCap = 'round'; cityC.lineCap = 'round'; bldC.lineCap = 'round';
+        dynC.lineCap = 'round'; fxC.lineCap = 'round'; infraC.lineCap = 'round';
+        infraDirty = true;
     }
     var RIVER_TOP, RIVER_BOT, BEACH_Y, LIGHTHOUSE_X;
     resize();
 
     /* ═══════════ CONFIG ═══════════ */
     var PAPER_BASE = 249;
-    var MAX_VEHICLES = 22;
+    var MAX_VEHICLES = 40;
     var MAX_PEDS = 32;
     var MAX_CONSTRUCTIONS = 5;
     var MAX_CRANES = 5;
@@ -66,7 +69,7 @@
     var MAX_PLANES = 2;
     var MAX_HELIS = 2;
     var DAY_CYCLE = 480; /* seconds — 8 minute full cycle */
-    var MAX_BOATS = 8;
+    var MAX_BOATS = 50;
     var MAX_BEACH = 8;
     var MAX_DOLPHINS = 2;
     var MAX_FISH = 12;
@@ -206,8 +209,6 @@
         damageTimer = 0.3;
     }
 
-    var needsCityRebake = false;
-    var rebakeCooldown = 0;
     var crumbleDebris = [];
     function spawnCrumbleDebris(b) {
         var topY = b.y;
@@ -286,13 +287,128 @@
             }
         }
     }
+    function spawnWreckDebris(wx, wy, ww, wh) {
+        for (var i = 0; i < 4; i++) {
+            crumbleDebris.push({
+                x: wx + (behRng() - 0.5) * ww,
+                y: wy - behRng() * wh * 0.5,
+                vx: (behRng() - 0.5) * 80,
+                vy: -20 - behRng() * 60,
+                r: 1 + behRng() * 2,
+                g: 40 + Math.floor(behRng() * 30),
+                spin: (behRng() - 0.5) * 8,
+                angle: behRng() * Math.PI * 2,
+                age: 0, life: 0.5 + behRng() * 0.8,
+                type: 'chunk'
+            });
+        }
+        crumbleDebris.push({
+            x: wx, y: wy - wh * 0.3,
+            vx: (behRng() - 0.5) * 20,
+            vy: -10 - behRng() * 25,
+            r: 4 + behRng() * 6,
+            g: 60 + Math.floor(behRng() * 20),
+            spin: 0, angle: 0,
+            age: 0, life: 1 + behRng() * 1,
+            type: 'dustcloud'
+        });
+    }
+
+    function drawWreckFire(c, x, y, age, w) {
+        var f1 = Math.sin(age * 18) * 0.3 + 0.7;
+        var f2 = Math.sin(age * 25 + 1.3) * 0.25 + 0.75;
+        var f3 = Math.sin(age * 13 + 2.7) * 0.2 + 0.8;
+        var fh = w * 2.2 * f1;
+        var fade = Math.max(0, 1 - age * 0.015);
+
+        /* pulsing red glow on ground beneath fire */
+        var glowR = w * 1.5 + Math.sin(age * 10) * w * 0.3;
+        c.beginPath(); c.arc(x, y, glowR, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(255,20,0,' + (fade * 0.12 * f1) + ')'; c.fill();
+
+        /* wide base blaze — dark red */
+        for (var fi = 0; fi < 9; fi++) {
+            var fx = x + (fi - 4) * w * 0.18;
+            var fy = y - fh * (0.1 + Math.sin(age * 7 + fi * 1.1) * 0.08) * f2;
+            var fa = fade * (0.9 + Math.sin(age * 12 + fi * 1.9) * 0.1);
+            arcStrC(c, fx, fy, w * 0.28, fh * 0.5, 0, Math.PI * 2, 0.25, 0.3, 200, 10, 0, fa * 0.85);
+        }
+        /* dancing flame tongues — tall red columns that sway */
+        for (var fi = 0; fi < 6; fi++) {
+            var tongueX = x + Math.sin(age * 6 + fi * 2.1) * w * 0.4;
+            var tongueH = fh * (0.6 + Math.sin(age * 9 + fi * 3) * 0.3);
+            var tongueW = w * (0.12 + Math.sin(age * 11 + fi) * 0.04);
+            var ta = fade * (0.8 + Math.sin(age * 15 + fi * 2) * 0.15);
+            arcStrC(c, tongueX, y - tongueH, tongueW, tongueH * 0.5, 0, Math.PI * 2, 0.2, 0.3, 255, 30 + fi * 8, 0, ta * 0.9);
+        }
+        /* bright orange mid layer */
+        for (var fi = 0; fi < 7; fi++) {
+            var fx = x + (fi - 3) * w * 0.22 + Math.sin(age * 8 + fi) * w * 0.08;
+            var fy = y - fh * 0.35 * f1 - Math.sin(age * 14 + fi * 2.5) * fh * 0.1;
+            var fa = fade * (0.85 + Math.sin(age * 16 + fi * 1.5) * 0.12);
+            arcStrC(c, fx, fy, w * 0.22, fh * 0.45, 0, Math.PI * 2, 0.25, 0.2, 255, 80 + fi * 10, 0, fa * 0.8);
+        }
+        /* hot yellow flickering tips */
+        for (var fi = 0; fi < 5; fi++) {
+            var fx = x + (fi - 2) * w * 0.18 + Math.sin(age * 11 + fi * 3) * w * 0.1;
+            var fy = y - fh * (0.55 + Math.sin(age * 20 + fi * 2) * 0.12) * f3;
+            var fa = fade * 0.75 * f2;
+            arcStrC(c, fx, fy, w * 0.15, fh * 0.3, 0, Math.PI * 2, 0.25, 0.2, 255, 220, 30, fa * 0.85);
+        }
+        /* white-hot pulsing core */
+        var coreA = fade * 0.8 * f2;
+        var coreR = w * 0.2 + Math.sin(age * 20) * w * 0.06;
+        arcStrC(c, x, y - fh * 0.12, coreR, fh * 0.25, 0, Math.PI * 2, 0.3, 0.25, 255, 255, 200, coreA);
+        /* secondary core pulse */
+        arcStrC(c, x + Math.sin(age * 15) * w * 0.1, y - fh * 0.2, coreR * 0.7, fh * 0.18, 0, Math.PI * 2, 0.3, 0.2, 255, 255, 255, coreA * 0.5);
+
+        /* heat shimmer distortion lines */
+        for (var hi = 0; hi < 4; hi++) {
+            var hx = x + Math.sin(age * 5 + hi * 1.7) * w * 0.6;
+            var hy = y - fh * (0.8 + hi * 0.25) + Math.sin(age * 12 + hi * 3) * 3;
+            var hw = w * 0.3 + Math.sin(age * 9 + hi) * w * 0.1;
+            var ha = fade * (0.15 - hi * 0.03);
+            if (ha > 0) stkC(c, hx - hw, hy, hx + hw, hy + Math.sin(age * 7 + hi) * 2, 0.3, 255, 200, 150, ha, 0);
+        }
+        /* flying embers — many, rising and swirling */
+        for (var si = 0; si < 10; si++) {
+            var eAngle = age * (3 + si * 0.5) + si * 2.5;
+            var eRadius = w * (0.3 + si * 0.08);
+            var sx = x + Math.sin(eAngle) * eRadius;
+            var sy = y - fh * (0.3 + si * 0.12) - age * (2 + si * 0.5);
+            var sa = fade * Math.max(0, 0.8 - si * 0.07);
+            if (sa > 0 && sy > y - fh * 2.5) {
+                var eSize = 0.6 + Math.sin(age * 20 + si * 4) * 0.4;
+                c.beginPath(); c.arc(sx, sy, eSize, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(255,' + Math.max(0, 50 - si * 5) + ',0,' + sa + ')'; c.fill();
+            }
+        }
+        /* thick rolling smoke — multiple layers */
+        var smokeA = Math.max(0, 0.6 - age * 0.01);
+        for (var si = 0; si < 3; si++) {
+            var smX = x + Math.sin(age * (1.5 + si * 0.7) + si * 2) * w * (0.3 + si * 0.15);
+            var smY = y - fh * (1.1 + si * 0.35);
+            var smR = w * (0.5 + si * 0.15);
+            var smH = fh * (0.4 + si * 0.1);
+            var sma = smokeA * (0.7 - si * 0.15);
+            arcStrC(c, smX, smY, smR, smH, 0, Math.PI * 2, 0.3, 0.12, 30 + si * 10, 25 + si * 8, 25 + si * 8, sma);
+        }
+    }
+
+    function composeCityCvs() {
+        cityC.clearRect(0, 0, W, H);
+        cityC.drawImage(bldCvs, 0, 0);
+        cityC.drawImage(infraCvs, 0, 0);
+    }
+
     function damageBuilding(b) {
         var idx = buildings.indexOf(b);
         if (idx < 0) return;
         if (buildings.length <= 5) return;
         spawnCrumbleDebris(b);
         buildings.splice(idx, 1);
-        cityC.clearRect(b.x - 5, b.y - 35, b.w + 10, GROUND - b.y + 36);
+        bldC.clearRect(b.x - 5, b.y - 35, b.w + 10, GROUND - b.y + 36);
+        composeCityCvs();
         var con = {
             x: b.x, w: b.w, floors: b.floors, floorH: b.floorH,
             h: b.h, y: b.y,
@@ -305,19 +421,9 @@
         cranes.push(createCrane(con));
     }
 
-    var rebakePending = false;
-    function rebakeCity() {
-        if (rebakePending) return;
-        rebakePending = true;
-        needsCityRebake = false;
-        setTimeout(function () {
-            var savedSeed = seed;
-            layoutRng = mulberry32(savedSeed);
-            chimneys = []; litWindows = [];
-            paintCity();
-            layoutRng = mulberry32(savedSeed);
-            rebakePending = false;
-        }, 0);
+    function addBuildingIncremental(bld) {
+        drawBuilding(bldC, bld);
+        composeCityCvs();
     }
 
     /* ── ALIEN ATTACK SAUCERS (wave system) ── */
@@ -354,9 +460,15 @@
         };
     }
     function createAlienAsteroid(alien) {
-        var targetB = buildings.length > 0 ? buildings[bri(0, buildings.length)] : null;
-        var tx = targetB ? targetB.x + targetB.w / 2 : br(W * 0.1, W * 0.9);
-        var ty = GROUND - 20;
+        var tx, ty;
+        if (buildings.length > 0) {
+            var targetB = buildings[bri(0, buildings.length)];
+            tx = targetB.x + targetB.w / 2;
+            ty = GROUND - 20;
+        } else {
+            tx = br(W * 0.1, W * 0.9);
+            ty = GROUND - 20;
+        }
         var ang = Math.atan2(ty - alien.y, tx - alien.x);
         var spd = br(200, 320);
         return {
@@ -396,11 +508,12 @@
         }
         a.y += Math.sin(a.hoverPhase) * 0.4;
 
-        /* launch asteroids at the city */
-        if (a.fireCooldown <= 0 && buildings.length > 2) {
+        /* launch asteroids at the city, vehicles, trains, boats */
+        if (a.fireCooldown <= 0) {
+            var hasTargets = buildings.length > 2 || vehicles.length > 0 || trains.length > 0 || boats.length > 0;
             var aCons = 0;
             for (var ci = 0; ci < constructions.length; ci++) { if (!constructions[ci].done) aCons++; }
-            if (buildings.length > 5 && aCons < 10) {
+            if (hasTargets && aCons < 10) {
                 var newAst = createAlienAsteroid(a);
                 asteroids.push(newAst);
                 a.launchedAst = newAst;
@@ -408,7 +521,7 @@
                 a.launchFlash = 1;
                 a.shieldFlicker = 0.5;
             }
-            a.fireCooldown = br(4, 8);
+            a.fireCooldown = br(3, 6);
         }
 
         if (a.age > a.maxAge) a.alive = false;
@@ -1145,6 +1258,8 @@
         }
         a.x += a.vx * dt; a.y += a.vy * dt; a.angle += a.spin * dt;
         a.fireTrailPhase += dt * 20;
+
+        /* asteroids only hit buildings */
         if (a.y > GROUND - 20) {
             a.exploded = true; a.explodeAge = 0;
             spawnAsteroidImpact(a);
@@ -1158,6 +1273,7 @@
             }
             killNearbyPeds(a.x);
         }
+        if (a.y > H + 50 || a.x < -100 || a.x > W + 100) a.alive = false;
     }
     function drawAsteroid(c, a) {
         if (a.exploded) {
@@ -1751,13 +1867,10 @@
     }
 
     /* ═══════════ PAINT STATIC CITY ═══════════ */
-    function paintCity() {
-        var c = cityC;
+    var infraDirty = true;
+    function paintInfra() {
+        var c = infraC;
         c.clearRect(0, 0, W, H);
-
-        /* draw all complete buildings */
-        chimneys = []; litWindows = [];
-        for (var i = 0; i < buildings.length; i++) drawBuilding(c, buildings[i]);
 
         /* north sidewalk — warm concrete tan */
         for (var x = 0; x < W; x += 1.5) {
@@ -1982,6 +2095,15 @@
             var ga = 0.02 + (y - FORE_TOP) / (RIVER_TOP - FORE_TOP) * 0.04;
             stkFlat(c, 0, y, W, y, 1.5, 230, ga);
         }
+        infraDirty = false;
+    }
+
+    function paintCity() {
+        if (infraDirty) paintInfra();
+        bldC.clearRect(0, 0, W, H);
+        chimneys = []; litWindows = [];
+        for (var i = 0; i < buildings.length; i++) drawBuilding(bldC, buildings[i]);
+        composeCityCvs();
     }
 
     /* ═══════════ GRAIN & VIGNETTE ═══════════ */
@@ -2319,7 +2441,7 @@
                     hasRoofTrees: behRng() < 0.35
                 };
                 buildings.push(bld);
-                needsCityRebake = true;
+                addBuildingIncremental(bld);
             }
         }
     }
@@ -2361,7 +2483,7 @@
         return {
             x: dir > 0 ? -tp.w - 10 : W + 10,
             y: LANE_Y[lane], lane: lane, dir: dir,
-            tp: tp, speed: speed, g: bri(35, 120),
+            tp: tp, speed: speed, maxSpeed: speed, g: bri(35, 120),
             cr: vc[0], cg: vc[1], cb: vc[2],
             wheelAngle: 0, alive: true,
             drumAngle: 0
@@ -2369,21 +2491,50 @@
     }
 
     function updateVehicle(v, dt) {
-        v.x += v.dir * v.speed * dt;
-        v.wheelAngle += v.speed * dt * 0.18;
-        if (v.tp.drum) v.drumAngle += dt * 1.2;
+        if (v.wrecked) {
+            v.wreckedAge += dt;
+            if (v.fireAge !== undefined) v.fireAge += dt;
+            return;
+        }
 
-        /* simple collision avoidance */
+        /* collision avoidance — no overlapping, full stop behind wrecks */
+        var blocked = false;
         for (var i = 0; i < vehicles.length; i++) {
             var o = vehicles[i];
             if (o === v || o.lane !== v.lane) continue;
             var dist = (o.x - v.x) * v.dir;
-            if (dist > 0 && dist < 45) {
-                v.speed = Math.max(5, o.speed * 0.9);
+            if (dist > 0 && dist < 80) {
+                if (o.wrecked || o.speed === 0) {
+                    /* hard stop behind wreck or stopped car — keep gap */
+                    var gap = v.tp.w * 0.6 + 8;
+                    if (dist < gap) {
+                        v.x = o.x - v.dir * gap;
+                    }
+                    v.speed = 0;
+                    blocked = true;
+                } else if (dist < 45) {
+                    v.speed = Math.max(3, Math.min(v.speed, o.speed * 0.85));
+                }
             }
         }
+        if (!blocked && v.speed < v.maxSpeed) {
+            v.speed = Math.min(v.maxSpeed, v.speed + 30 * dt);
+        }
+
+        v.x += v.dir * v.speed * dt;
+        v.wheelAngle += v.speed * dt * 0.18;
+        if (v.tp.drum) v.drumAngle += dt * 1.2;
 
         if ((v.dir > 0 && v.x > W + 50) || (v.dir < 0 && v.x < -50)) v.alive = false;
+    }
+
+    function wreckVehicle(v) {
+        if (v.wrecked) return;
+        v.wrecked = true;
+        v.wreckedAge = 0;
+        v.speed = 0;
+        v.fireAge = 0;
+        spawnWreckDebris(v.x, v.y, v.tp.w, v.tp.h);
     }
 
     function drawVehicle(c, v) {
@@ -2450,6 +2601,13 @@
             c.fillStyle = 'rgba(255,30,20,' + redA + ')'; c.fill();
             c.beginPath(); c.arc(lbx + d * 2, lby, 2, 0, Math.PI * 2);
             c.fillStyle = 'rgba(30,80,255,' + blueA + ')'; c.fill();
+        }
+
+        /* wreck overlay — charred body, fire, smoke */
+        if (v.wrecked) {
+            stkC(c, x, y, x + w, y, h * 0.5, 30, 25, 20, 0.6, 0);
+            stkC(c, x + w * 0.2, y - h * 0.3, x + w * 0.6, y + h * 0.15, 0.15, 20, 20, 20, 0.5, 0);
+            if (v.fireAge < 25) drawWreckFire(c, x + w * 0.5, y - h * 0.3, v.fireAge, tp.w * 0.6);
         }
     }
 
@@ -2933,9 +3091,9 @@
             p.vy -= 5 * dt;
             if (p.age > p.life) vb.particles.splice(i, 1);
         }
-        while (vb.particles.length > 40) vb.particles.shift();
+        while (vb.particles.length > 20) vb.particles.shift();
 
-        if (behRng() < 0.15 && vb.fireworks.length < 10) {
+        if (behRng() < 0.15 && vb.fireworks.length < 5) {
             var fwColors = [
                 [255,50,50],[50,255,80],[80,120,255],[255,220,40],[255,100,220],
                 [0,255,255],[255,160,30],[180,80,255],[255,255,100],[100,255,200]
@@ -2969,14 +3127,14 @@
                     fw.shape = shapes[bri(0, shapes.length)];
                     var n, j, a2, sp2, sc2 = br(80, 140);
                     if (fw.shape === 'star') {
-                        n = bri(30, 45); var pts = bri(4, 7);
+                        n = bri(18, 25); var pts = bri(4, 7);
                         for (j = 0; j < n; j++) {
                             a2 = (j / n) * Math.PI * 2;
                             var sR = (j % 2 === 0) ? sc2 : sc2 * 0.4;
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2 * pts / 2) * sR * br(0.9,1.1), vy: Math.sin(a2 * pts / 2) * sR * br(0.9,1.1), age: 0, life: br(1.2, 2.2), r: br(2.5, 5), cr: fw.cr + bri(-20,20), cg: fw.cg + bri(-20,20), cb: fw.cb + bri(-20,20) });
                         }
                     } else if (fw.shape === 'heart') {
-                        n = bri(35, 50);
+                        n = bri(20, 30);
                         for (j = 0; j < n; j++) {
                             a2 = (j / n) * Math.PI * 2;
                             var hx2 = 16 * Math.pow(Math.sin(a2), 3);
@@ -2984,33 +3142,33 @@
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: hx2 * sc2 * 0.07 * br(0.9,1.1), vy: hy2 * sc2 * 0.07 * br(0.9,1.1), age: 0, life: br(1.5, 2.8), r: br(3, 5.5), cr: Math.min(255, fw.cr + bri(0,40)), cg: Math.max(0, fw.cg - 20), cb: Math.max(0, fw.cb - 20) });
                         }
                     } else if (fw.shape === 'ring') {
-                        n = bri(30, 45);
+                        n = bri(18, 28);
                         for (j = 0; j < n; j++) {
                             a2 = (j / n) * Math.PI * 2; sp2 = sc2 * br(0.95, 1.05);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.2, 2.2), r: br(2.5, 4.5), cr: fw.cr + bri(-15,15), cg: fw.cg + bri(-15,15), cb: fw.cb + bri(-15,15) });
                         }
                     } else if (fw.shape === 'doubleRing') {
                         for (var ring = 0; ring < 2; ring++) {
-                            n = bri(22, 35); var rR = ring === 0 ? sc2 : sc2 * 0.5;
+                            n = bri(12, 18); var rR = ring === 0 ? sc2 : sc2 * 0.5;
                             for (j = 0; j < n; j++) {
                                 a2 = (j / n) * Math.PI * 2; sp2 = rR * br(0.9, 1.1);
                                 fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.3, 2.4), r: br(2, 4), cr: Math.min(255, fw.cr + ring * 50), cg: Math.min(255, fw.cg + ring * 40), cb: fw.cb + bri(-15,15) });
                             }
                         }
                     } else if (fw.shape === 'chrysanthemum') {
-                        n = bri(40, 60);
+                        n = bri(22, 35);
                         for (j = 0; j < n; j++) {
                             a2 = br(0, Math.PI * 2); sp2 = br(25, sc2 * 1.2);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2 * br(0.8,1.2), vy: Math.sin(a2) * sp2 * br(0.8,1.2), age: 0, life: br(1.5, 2.8), r: br(2, 4), cr: fw.cr + bri(-15,15), cg: fw.cg + bri(-15,15), cb: fw.cb + bri(-15,15) });
                         }
                     } else if (fw.shape === 'palm') {
-                        n = bri(25, 40);
+                        n = bri(15, 25);
                         for (j = 0; j < n; j++) {
                             a2 = br(-Math.PI * 0.7, Math.PI * 0.7) - Math.PI / 2; sp2 = br(60, sc2 * 1.1);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.8, 3.0), r: br(2.5, 5), gravity: 80, cr: fw.cr + bri(-20,20), cg: fw.cg + bri(-20,20), cb: fw.cb + bri(-10,10) });
                         }
                     } else if (fw.shape === 'willow') {
-                        n = bri(35, 50);
+                        n = bri(20, 30);
                         for (j = 0; j < n; j++) {
                             a2 = br(0, Math.PI * 2); sp2 = br(20, sc2 * 0.6);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(2.2, 3.5), r: br(1.5, 3), gravity: 90, cr: fw.cr + bri(-10,30), cg: fw.cg + bri(-10,30), cb: fw.cb + bri(-10,15) });
@@ -3018,6 +3176,7 @@
                     }
                 }
             } else {
+                while (fw.sparkles.length > 30) fw.sparkles.shift();
                 for (var sp = fw.sparkles.length - 1; sp >= 0; sp--) {
                     var sk = fw.sparkles[sp];
                     sk.age += dt;
@@ -3043,13 +3202,16 @@
         var cx = vb.x, cy = vb.y;
         var bw = vb.bw, bh = vb.bh;
 
-        for (var i = 0; i < vb.particles.length; i++) {
-            var p = vb.particles[i];
-            var pa = Math.max(0, 1 - p.age / p.life) * alpha;
-            c.beginPath();
-            c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + p.cr + ',' + p.cg + ',' + p.cb + ',' + (pa * 0.7) + ')';
-            c.fill();
+        if (vb.particles.length > 0) {
+            for (var i = 0; i < vb.particles.length; i++) {
+                var p = vb.particles[i];
+                var pa = Math.max(0, 1 - p.age / p.life) * alpha;
+                if (pa < 0.05) continue;
+                c.beginPath();
+                c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + p.cr + ',' + p.cg + ',' + p.cb + ',' + (pa * 0.7) + ')';
+                c.fill();
+            }
         }
 
         var ropeAlpha = alpha * 0.75;
@@ -3187,57 +3349,39 @@
         for (var fi = 0; fi < vb.fireworks.length; fi++) {
             var fw = vb.fireworks[fi];
             if (!fw.exploded) {
-                var tLen = fw.trail.length;
-                for (var tp = 0; tp < tLen; tp++) {
-                    var ta = (tp + 1) / tLen;
+                if (fw.trail.length > 1) {
                     c.beginPath();
-                    c.arc(fw.trail[tp].x, fw.trail[tp].y, 2 * ta, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (ta * 0.7) + ')';
-                    c.fill();
+                    c.moveTo(fw.trail[0].x, fw.trail[0].y);
+                    for (var tp = 1; tp < fw.trail.length; tp++) {
+                        c.lineTo(fw.trail[tp].x, fw.trail[tp].y);
+                    }
+                    c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',0.5)';
+                    c.lineWidth = 2;
+                    c.stroke();
                 }
                 c.beginPath();
                 c.arc(fw.x, fw.y, 3, 0, Math.PI * 2);
                 c.fillStyle = 'rgba(255,255,240,0.95)';
                 c.fill();
-                c.beginPath();
-                c.arc(fw.x, fw.y, 8, 0, Math.PI * 2);
-                c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',0.25)';
-                c.fill();
             } else {
                 var ea = fw.age - (fw.explodeTime || 0);
                 var px2 = fw.popX, py2 = fw.popY;
-                if (ea < 1.0) {
-                    var fa = Math.max(0, 1 - ea / 1.0);
+                if (ea < 0.5) {
+                    var fa = Math.max(0, 1 - ea / 0.5);
                     c.beginPath();
-                    c.arc(px2, py2, 12 + ea * 70, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(255,255,255,' + (fa * fa * 0.65) + ')';
+                    c.arc(px2, py2, 8 + ea * 40, 0, Math.PI * 2);
+                    c.fillStyle = 'rgba(255,255,255,' + (fa * fa * 0.5) + ')';
                     c.fill();
                     c.beginPath();
-                    c.arc(px2, py2, 5 + ea * 35, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * fa * 0.45) + ')';
-                    c.fill();
-                    c.beginPath();
-                    c.arc(px2, py2, 25 + ea * 300, 0, Math.PI * 2);
-                    c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * 0.5) + ')';
-                    c.lineWidth = 3 * fa;
-                    c.stroke();
-                    if (ea < 0.6) {
-                        c.beginPath();
-                        c.arc(px2, py2, 40 + ea * 400, 0, Math.PI * 2);
-                        c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * 0.3) + ')';
-                        c.lineWidth = 2 * fa;
-                        c.stroke();
-                    }
-                    c.beginPath();
-                    for (var ry = 0; ry < 10; ry++) {
-                        var rAng = (ry / 10) * Math.PI * 2 + ea * 3;
-                        var rIn = 10 + ea * 25;
-                        var rLen = (45 + ea * 200) * fa;
+                    for (var ry = 0; ry < 8; ry++) {
+                        var rAng = (ry / 8) * Math.PI * 2 + ea * 3;
+                        var rIn = 8 + ea * 20;
+                        var rLen = (30 + ea * 100) * fa;
                         c.moveTo(px2 + Math.cos(rAng) * rIn, py2 + Math.sin(rAng) * rIn);
                         c.lineTo(px2 + Math.cos(rAng) * rLen, py2 + Math.sin(rAng) * rLen);
                     }
-                    c.strokeStyle = 'rgba(255,255,255,' + (fa * 0.35) + ')';
-                    c.lineWidth = 1.8 * fa;
+                    c.strokeStyle = 'rgba(255,255,255,' + (fa * 0.3) + ')';
+                    c.lineWidth = 1.5 * fa;
                     c.stroke();
                 }
                 for (var sp = 0; sp < fw.sparkles.length; sp++) {
@@ -3524,10 +3668,34 @@
     }
 
     function updateTrain(tr, dt) {
+        if (tr.wrecked) {
+            tr.wreckedAge += dt;
+            if (tr.fireAge !== undefined) tr.fireAge += dt;
+            return;
+        }
+        /* stop behind wrecked trains */
+        for (var i = 0; i < trains.length; i++) {
+            var ot = trains[i];
+            if (ot === tr || !ot.wrecked) continue;
+            var dist = (ot.x - tr.x) * tr.dir;
+            if (dist > 0 && dist < ot.totalW + 30) {
+                tr.speed = Math.max(0, tr.speed - 80 * dt);
+                return;
+            }
+        }
         tr.x += tr.dir * tr.speed * dt;
         tr.wheelAngle += tr.speed * dt * 0.15;
         if (tr.dir > 0 && tr.x - tr.totalW > W + 50) tr.alive = false;
         if (tr.dir < 0 && tr.x + tr.totalW < -50) tr.alive = false;
+    }
+
+    function wreckTrain(tr) {
+        if (tr.wrecked) return;
+        tr.wrecked = true;
+        tr.wreckedAge = 0;
+        tr.speed = 0;
+        tr.fireAge = 0;
+        spawnWreckDebris(tr.x, tr.y, tr.totalW * 0.3, 10);
     }
 
     function drawTrain(c, tr) {
@@ -3593,6 +3761,18 @@
 
             cx += (car.w + tr.gap) * d;
         }
+
+        /* wreck overlay */
+        if (tr.wrecked) {
+            var wcx = tr.x;
+            for (var wi = 0; wi < tr.cars.length; wi++) {
+                var wcar = tr.cars[wi];
+                var wcw = wcar.w * d;
+                stkC(c, wcx, y, wcx + wcw, y, 9, 25, 20, 15, 0.5, 0);
+                wcx += (wcar.w + tr.gap) * d;
+            }
+            if (tr.fireAge < 30) drawWreckFire(c, tr.x, y - 6, tr.fireAge, 20);
+        }
     }
 
     /* ═══════════ BOATS ═══════════ */
@@ -3629,6 +3809,13 @@
     }
 
     function updateBoat(b, dt) {
+        if (b.wrecked) {
+            b.wreckedAge += dt;
+            if (b.fireAge !== undefined) b.fireAge += dt;
+            b.bobPhase += dt * 1.5;
+            b.sinkPhase = Math.min(1, (b.wreckedAge) / 12);
+            return;
+        }
         b.x += b.dir * b.speed * dt;
         b.bobPhase += dt * 2.2;
         b.smokePhase += dt * 3;
@@ -3637,11 +3824,24 @@
         if ((b.dir > 0 && b.x > W + margin) || (b.dir < 0 && b.x < -margin)) b.alive = false;
     }
 
+    function wreckBoat(b) {
+        if (b.wrecked) return;
+        b.wrecked = true;
+        b.wreckedAge = 0;
+        b.speed = 0;
+        b.fireAge = 0;
+        b.sinkPhase = 0;
+        spawnWreckDebris(b.x, b.y, b.type === 'ship' ? 40 : 12, 6);
+    }
+
     function drawBoat(c, b) {
         var x = b.x, y = b.y + Math.sin(b.bobPhase) * 0.8, d = b.dir;
+        var sinkOff = b.wrecked ? (b.sinkPhase || 0) * 8 : 0;
+        y += sinkOff;
 
         if (b.type === 'ship') {
             drawShip(c, b, x, y, d);
+            if (b.wrecked && b.fireAge < 30) drawWreckFire(c, x, y - 8, b.fireAge, 28);
             return;
         }
 
@@ -3660,6 +3860,10 @@
             stkC(c, x - 7, y + 1, x + 7, y + 1, 0.4, 40, 65, 120, 0.8, 0);
             rectStkC(c, x - 2, y - 3.5, 5, 4, 0.3, 200, 200, 200, 0.7);
             stkC(c, x - 1, y - 3, x + 2, y - 3, 1, 220, 220, 210, 0.3, 0);
+        }
+        if (b.wrecked) {
+            arcStrC(c, x, y + 1, b.type === 'sail' ? 10 : 8, 3, 0, Math.PI, 0.3, 0.4, 30, 25, 20, 0.5);
+            if (b.fireAge < 25) drawWreckFire(c, x, y - 4, b.fireAge, 10);
         }
     }
 
@@ -3758,6 +3962,638 @@
 
         /* water line reflection */
         stkC(c, x - hw, y + hh + 1, x + hw, y + hh + 1, 0.15, R, G, B, 0.15, 0);
+    }
+
+    /* ═══════════ REPAIR ENTITIES ═══════════ */
+    var repairTrucks = [];
+    var repairTrolleys = [];
+    var repairShips = [];
+
+    function createRepairTruck(target) {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: dir > 0 ? -40 : W + 40,
+            y: target.y, lane: target.lane, dir: dir,
+            speed: br(35, 55), target: target,
+            alive: true, repairing: false, repairTimer: 0,
+            flashPhase: 0
+        };
+    }
+    function updateRepairTruck(rt, dt) {
+        rt.flashPhase += dt * 6;
+        if (!rt.target || !rt.target.wrecked) { rt.alive = false; return; }
+        var dx = rt.target.x - rt.x;
+        if (!rt.repairing && Math.abs(dx) > 30) {
+            rt.x += (dx > 0 ? 1 : -1) * rt.speed * dt;
+            rt.dir = dx > 0 ? 1 : -1;
+        } else {
+            rt.repairing = true;
+            rt.repairTimer += dt;
+            if (rt.repairTimer > 4) {
+                rt.target.wrecked = false;
+                rt.target.speed = rt.target.maxSpeed || br(20, 45);
+                rt.target.fireAge = 99;
+                rt.alive = false;
+            }
+        }
+    }
+    function drawRepairTruck(c, rt) {
+        var x = rt.x, y = rt.y, d = rt.dir;
+        stkC(c, x, y, x + 28 * d, y, 5, 230, 160, 30, 1, 0);
+        stkC(c, x + 2 * d, y - 4, x + 10 * d, y - 4, 3, 240, 180, 40, 1, 0);
+        stkC(c, x + 12 * d, y - 3, x + 26 * d, y - 3, 2, 200, 140, 20, 0.8, 0);
+        arcStr(c, x + 6 * d, y + 3, 2, 2, 0, Math.PI * 2, 0.4, 0.3, 32, 0.9);
+        arcStr(c, x + 22 * d, y + 3, 2, 2, 0, Math.PI * 2, 0.4, 0.3, 32, 0.9);
+        if (rt.repairing) {
+            var fa = Math.sin(rt.flashPhase) > 0 ? 0.8 : 0.2;
+            c.beginPath(); c.arc(x + 14 * d, y - 6, 2, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(255,180,0,' + fa + ')'; c.fill();
+        }
+    }
+
+    function createRepairTrolley(target) {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: dir > 0 ? -50 : W + 50,
+            y: TRACK_Y, dir: dir,
+            speed: br(45, 70), target: target,
+            alive: true, repairing: false, repairTimer: 0,
+            flashPhase: 0
+        };
+    }
+    function updateRepairTrolley(rt, dt) {
+        rt.flashPhase += dt * 5;
+        if (!rt.target || !rt.target.wrecked) { rt.alive = false; return; }
+        var dx = rt.target.x - rt.x;
+        if (!rt.repairing && Math.abs(dx) > 40) {
+            rt.x += (dx > 0 ? 1 : -1) * rt.speed * dt;
+            rt.dir = dx > 0 ? 1 : -1;
+        } else {
+            rt.repairing = true;
+            rt.repairTimer += dt;
+            if (rt.repairTimer > 5) {
+                rt.target.wrecked = false;
+                rt.target.speed = br(40, 70);
+                rt.target.fireAge = 99;
+                rt.alive = false;
+            }
+        }
+    }
+    function drawRepairTrolley(c, rt) {
+        var x = rt.x, y = rt.y, d = rt.dir;
+        stkC(c, x, y, x + 24 * d, y, 6, 230, 120, 20, 1, 0);
+        stkC(c, x + 3 * d, y - 4, x + 12 * d, y - 4, 3, 250, 200, 50, 1, 0);
+        stkC(c, x + 14 * d, y - 2, x + 22 * d, y - 2, 2, 200, 100, 15, 0.8, 0);
+        arcStr(c, x + 5 * d, y + 4, 2, 2, 0, Math.PI * 2, 0.4, 0.3, 35, 0.9);
+        arcStr(c, x + 19 * d, y + 4, 2, 2, 0, Math.PI * 2, 0.4, 0.3, 35, 0.9);
+        /* crane arm */
+        stkC(c, x + 18 * d, y - 3, x + 18 * d, y - 12, 0.5, 80, 80, 85, 0.8, 0);
+        stkC(c, x + 18 * d, y - 12, x + 24 * d, y - 10, 0.4, 80, 80, 85, 0.7, 0);
+        if (rt.repairing) {
+            var fa = Math.sin(rt.flashPhase) > 0 ? 0.8 : 0.2;
+            c.beginPath(); c.arc(x + 8 * d, y - 7, 2.5, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(255,160,0,' + fa + ')'; c.fill();
+            /* sparks */
+            for (var si = 0; si < 3; si++) {
+                var sa = behRng() * Math.PI * 2;
+                var sr = 4 + behRng() * 6;
+                stkC(c, rt.target.x, rt.target.y - 3,
+                    rt.target.x + Math.cos(sa) * sr, rt.target.y - 3 + Math.sin(sa) * sr,
+                    0.1, 255, 200, 50, 0.6, 0);
+            }
+        }
+    }
+
+    function createRepairShip(target) {
+        var dir = behRng() > 0.5 ? 1 : -1;
+        return {
+            x: dir > 0 ? -80 : W + 80,
+            y: target.y - 3, dir: dir,
+            speed: br(15, 30), target: target,
+            alive: true, repairing: false, repairTimer: 0,
+            bobPhase: br(0, Math.PI * 2), flashPhase: 0
+        };
+    }
+    function updateRepairShip(rs, dt) {
+        rs.bobPhase += dt * 2;
+        rs.flashPhase += dt * 4;
+        if (!rs.target || !rs.target.wrecked) { rs.alive = false; return; }
+        var dx = rs.target.x - rs.x;
+        if (!rs.repairing && Math.abs(dx) > 50) {
+            rs.x += (dx > 0 ? 1 : -1) * rs.speed * dt;
+            rs.dir = dx > 0 ? 1 : -1;
+        } else {
+            rs.repairing = true;
+            rs.repairTimer += dt;
+            if (rs.repairTimer > 6) {
+                rs.target.wrecked = false;
+                rs.target.speed = br(5, 15);
+                rs.target.fireAge = 99;
+                rs.target.sinkPhase = 0;
+                rs.alive = false;
+            }
+        }
+    }
+    function drawRepairShip(c, rs) {
+        var x = rs.x, y = rs.y + Math.sin(rs.bobPhase) * 0.6, d = rs.dir;
+        arcStrC(c, x, y + 2, 25, 5, 0, Math.PI, 0.2, 1, 220, 220, 220, 0.9);
+        stkC(c, x - 24, y + 2, x + 24, y + 2, 0.5, 200, 200, 200, 1, 0);
+        stkC(c, x + d * 24, y + 2, x + d * 28, y, 0.6, 210, 210, 210, 0.8, 0);
+        rectStkC(c, x - 8, y - 5, 16, 5, 0.3, 240, 240, 240, 0.8);
+        stkC(c, x - 6, y - 3.5, x + 6, y - 3.5, 0.8, 255, 50, 50, 0.6, 0);
+        /* crane */
+        stkC(c, x + d * 10, y - 5, x + d * 10, y - 16, 0.6, 70, 70, 75, 0.8, 0);
+        stkC(c, x + d * 10, y - 16, x + d * 20, y - 12, 0.5, 70, 70, 75, 0.7, 0);
+        if (rs.repairing) {
+            var fa = Math.sin(rs.flashPhase) > 0 ? 0.7 : 0.2;
+            c.beginPath(); c.arc(x, y - 8, 3, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(255,100,0,' + fa + ')'; c.fill();
+        }
+    }
+
+    /* ═══════════ ALIEN AIRCRAFT CARRIERS ═══════════ */
+    var alienCarriers = [];
+    var carrierMissiles = [];
+    var torpedoes = [];
+    var carrierSpawnTimer = 0;
+    var torpedoTimer = 0;
+    var MAX_CARRIERS = 2;
+
+    function createAlienCarrier() {
+        var cx = br(W * 0.15, W * 0.85);
+        var targetY = RIVER_TOP + br(15, (RIVER_BOT - RIVER_TOP) * 0.5);
+        return {
+            x: cx,
+            y: H + 60,
+            targetY: targetY,
+            dir: behRng() > 0.5 ? 1 : -1,
+            speed: br(50, 80),
+            alive: true,
+            hp: 3,
+            age: 0,
+            bobPhase: br(0, Math.PI * 2),
+            fireCooldown: br(0.5, 1.5),
+            engineGlow: br(0, Math.PI * 2),
+            shieldFlash: 0,
+            explosionAge: -1,
+            wakePhase: 0,
+            arrived: false
+        };
+    }
+
+    function createCarrierMissile(carrier) {
+        var tx, ty, mTargetType = 'building', mTargetRef = null;
+        /* count wrecks to enforce quotas: 2 cars, 1 train, 3 ships */
+        var wCars = 0, wTrains = 0, wBoats = 0;
+        for (var qi = 0; qi < vehicles.length; qi++) if (vehicles[qi].wrecked) wCars++;
+        for (var qi = 0; qi < trains.length; qi++) if (trains[qi].wrecked) wTrains++;
+        for (var qi = 0; qi < boats.length; qi++) if (boats[qi].wrecked) wBoats++;
+        var needCars = wCars < 2, needTrains = wTrains < 1, needBoats = wBoats < 3;
+
+        var picked = false;
+        if (needBoats && boats.length > wBoats) {
+            var tb = boats[bri(0, boats.length)];
+            for (var tries = 0; tries < 8 && tb.wrecked; tries++) tb = boats[bri(0, boats.length)];
+            if (!tb.wrecked) { tx = tb.x; ty = tb.y; mTargetType = 'boat'; mTargetRef = tb; picked = true; }
+        }
+        if (!picked && needCars && vehicles.length > wCars) {
+            var tv = vehicles[bri(0, vehicles.length)];
+            for (var tries = 0; tries < 8 && tv.wrecked; tries++) tv = vehicles[bri(0, vehicles.length)];
+            if (!tv.wrecked) { tx = tv.x; ty = tv.y; mTargetType = 'vehicle'; mTargetRef = tv; picked = true; }
+        }
+        if (!picked && needTrains && trains.length > wTrains) {
+            var tt = trains[bri(0, trains.length)];
+            for (var tries = 0; tries < 8 && tt.wrecked; tries++) tt = trains[bri(0, trains.length)];
+            if (!tt.wrecked) { tx = tt.x; ty = tt.y; mTargetType = 'train'; mTargetRef = tt; picked = true; }
+        }
+        if (!picked) {
+            var roll = behRng();
+            if (roll < 0.4 && boats.length > wBoats) {
+                var tb = boats[bri(0, boats.length)];
+                if (!tb.wrecked) { tx = tb.x; ty = tb.y; mTargetType = 'boat'; mTargetRef = tb; picked = true; }
+            } else if (roll < 0.65 && vehicles.length > wCars) {
+                var tv = vehicles[bri(0, vehicles.length)];
+                if (!tv.wrecked) { tx = tv.x; ty = tv.y; mTargetType = 'vehicle'; mTargetRef = tv; picked = true; }
+            } else if (roll < 0.8 && trains.length > wTrains) {
+                var tt = trains[bri(0, trains.length)];
+                if (!tt.wrecked) { tx = tt.x; ty = tt.y; mTargetType = 'train'; mTargetRef = tt; picked = true; }
+            }
+        }
+        if (!picked) {
+            tx = br(W * 0.1, W * 0.9); ty = GROUND - 50;
+        }
+        var ang = Math.atan2(ty - carrier.y, tx - carrier.x);
+        var spd = br(180, 280);
+        return {
+            x: carrier.x, y: carrier.y - 8,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd,
+            alive: true, exploded: false, explodeAge: 0,
+            age: 0,
+            targetType: mTargetType,
+            targetRef: mTargetRef
+        };
+    }
+
+    function updateAlienCarrier(ac, dt) {
+        ac.age += dt;
+        ac.bobPhase += dt * 2;
+        ac.engineGlow += dt * 6;
+        ac.wakePhase += dt * 4;
+        if (ac.shieldFlash > 0) ac.shieldFlash -= dt * 3;
+
+        if (ac.explosionAge >= 0) {
+            ac.explosionAge += dt;
+            if (ac.explosionAge > 3) ac.alive = false;
+            return;
+        }
+
+        /* rise from below until reaching target Y */
+        if (!ac.arrived) {
+            ac.y -= ac.speed * dt;
+            if (ac.y <= ac.targetY) {
+                ac.y = ac.targetY;
+                ac.arrived = true;
+            }
+        } else {
+            ac.y = ac.targetY + Math.sin(ac.bobPhase) * 1.5;
+            ac.x += Math.sin(ac.age * 0.3) * 0.4;
+        }
+
+        /* only fire once arrived */
+        if (ac.arrived) {
+            ac.fireCooldown -= dt;
+            if (ac.fireCooldown <= 0) {
+                carrierMissiles.push(createCarrierMissile(ac));
+                ac.fireCooldown = br(1, 2.5);
+            }
+        }
+
+        if (ac.age > 60) ac.alive = false;
+    }
+
+    function drawAlienCarrier(c, ac) {
+        var x = ac.x, y = ac.y + (ac.arrived ? Math.sin(ac.bobPhase) * 1.2 : 0), d = ac.dir;
+
+        if (ac.explosionAge >= 0) {
+            var ea = ac.explosionAge;
+            var ea1 = Math.max(0, 1 - ea / 3);
+            for (var ei = 0; ei < 5; ei++) {
+                var ex = x + (ei - 2) * 18;
+                var ey = y - 4 + Math.sin(ea * 3 + ei) * 5;
+                var er = 6 + ea * 8 + ei * 2;
+                c.beginPath(); c.arc(ex, ey, er, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(255,' + Math.floor(120 - ea * 30) + ',20,' + (ea1 * 0.5) + ')';
+                c.fill();
+            }
+            arcStrC(c, x, y, 60, 15, 0, Math.PI, 0.3, 0.8, 40, 35, 30, ea1 * 0.6);
+            return;
+        }
+
+        /* rising wake trail — below the ship when coming up */
+        if (!ac.arrived) {
+            for (var w = 1; w < 6; w++) {
+                var wy = y + 10 + w * 10;
+                var wa = Math.max(0, 0.3 - w * 0.05);
+                var ww = Math.sin(ac.wakePhase + w * 0.5) * 3;
+                arcStrC(c, x + ww, wy, w * 5 + 8, 3, 0, Math.PI, 0.2, 0.15, 180, 210, 230, wa);
+            }
+            /* engine thrust glow below */
+            var thrustA = 0.4 + Math.sin(ac.engineGlow) * 0.2;
+            arcStrC(c, x, y + 12, 20, 6, 0, Math.PI, 0.3, 0.4, 50, 255, 100, thrustA);
+        } else {
+            /* gentle side wake when arrived */
+            for (var w = 1; w < 4; w++) {
+                var wx = x + (w * 8 + 20);
+                var wx2 = x - (w * 8 + 20);
+                var wa = Math.max(0, 0.15 - w * 0.04);
+                var ww = Math.sin(ac.wakePhase + w) * 1.5;
+                arcStrC(c, wx, y + 5 + ww, w * 4, 2, 0, Math.PI, 0.2, 0.1, 180, 210, 230, wa);
+                arcStrC(c, wx2, y + 5 - ww, w * 4, 2, 0, Math.PI, 0.2, 0.1, 180, 210, 230, wa);
+            }
+        }
+
+        /* hull — dark menacing */
+        arcStrC(c, x, y + 3, 55, 8, 0, Math.PI, 0.2, 1.5, 50, 55, 65, 0.9);
+        stkC(c, x - 55, y + 3, x + 55, y + 3, 0.7, 35, 40, 50, 1, 0);
+        /* bow — points upward (toward city) */
+        stkC(c, x, y + 3, x, y - 5, 1.2, 60, 65, 75, 0.8, 0);
+        /* waterline stripe — glowing green */
+        var glowA = 0.4 + Math.sin(ac.engineGlow) * 0.2;
+        stkC(c, x - 50, y + 2, x + 50, y + 2, 0.8, 50, 255, 80, glowA, 0);
+
+        /* deck — flat dark */
+        stkC(c, x - 48, y - 2, x + 48, y - 2, 5, 45, 50, 60, 0.9, 0);
+
+        /* flight deck markings */
+        for (var mi = -3; mi <= 3; mi++) {
+            stkC(c, x + mi * 12, y - 4, x + mi * 12, y, 0.15, 80, 250, 100, 0.3, 0);
+        }
+
+        /* superstructure / island */
+        rectStkC(c, x - 10, y - 14, 20, 12, 0.3, 55, 60, 70, 0.9);
+        /* bridge windows — red menacing */
+        stkC(c, x - 8, y - 12, x + 8, y - 12, 1.2, 255, 40, 40, 0.7, 0);
+
+        /* antennae/masts */
+        stkC(c, x, y - 14, x, y - 24, 0.4, 70, 75, 85, 0.8, 0);
+        stkC(c, x, y - 24, x - 8, y - 20, 0.2, 70, 75, 85, 0.6, 0);
+        stkC(c, x, y - 22, x + 6, y - 19, 0.2, 70, 75, 85, 0.6, 0);
+
+        /* radar dish rotating */
+        var rAngle = ac.age * 2;
+        var rdx = Math.cos(rAngle) * 4, rdy = Math.sin(rAngle) * 1.5;
+        stkC(c, x - rdx, y - 24 - rdy, x + rdx, y - 24 + rdy, 0.6, 100, 255, 120, 0.5, 0);
+
+        /* alien energy core glow */
+        var coreA = 0.3 + Math.sin(ac.engineGlow * 1.5) * 0.2;
+        c.beginPath(); c.arc(x, y - 4, 4, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(80,255,100,' + coreA + ')'; c.fill();
+
+        /* shield flash when hit */
+        if (ac.shieldFlash > 0) {
+            var sa = ac.shieldFlash * 0.3;
+            arcStrC(c, x, y - 2, 60, 15, 0, Math.PI * 2, 0.2, 0.6, 100, 255, 150, sa);
+        }
+
+        /* small alien fighters on deck */
+        for (var fi = 0; fi < 3; fi++) {
+            var fx = x + (fi - 1) * 16;
+            stkC(c, fx - 3, y - 3, fx + 3, y - 3, 1.5, 60, 65, 75, 0.6, 0);
+            stkC(c, fx, y - 4, fx, y - 6, 0.4, 80, 255, 100, 0.4, 0);
+        }
+    }
+
+    function updateCarrierMissile(m, dt) {
+        if (m.exploded) {
+            m.explodeAge += dt;
+            if (m.explodeAge > 2) m.alive = false;
+            return;
+        }
+        m.age += dt;
+        /* homing */
+        if (m.targetRef && !m.targetRef.wrecked) {
+            var hx = m.targetRef.x - m.x, hy = m.targetRef.y - m.y;
+            var hd = Math.sqrt(hx * hx + hy * hy);
+            if (hd > 1) {
+                var spd = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+                var desAng = Math.atan2(hy, hx);
+                var curAng = Math.atan2(m.vy, m.vx);
+                var diff = desAng - curAng;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                var steer = Math.max(-4, Math.min(4, diff * 5));
+                var newAng = curAng + steer * dt;
+                m.vx = Math.cos(newAng) * spd;
+                m.vy = Math.sin(newAng) * spd;
+            }
+        }
+        m.x += m.vx * dt; m.y += m.vy * dt;
+
+        /* hit vehicles */
+        if (m.y > GROUND - 25 && m.y < SIDEWALK_S_B + 5) {
+            for (var i = 0; i < vehicles.length; i++) {
+                var v = vehicles[i]; if (v.wrecked) continue;
+                if (Math.abs(v.x - m.x) < v.tp.w && Math.abs(v.y - m.y) < v.tp.h * 2) {
+                    m.exploded = true; m.explodeAge = 0; wreckVehicle(v); killNearbyPeds(m.x); return;
+                }
+            }
+        }
+        /* hit trains */
+        if (m.y > TRACK_Y - 20 && m.y < TRACK_Y + 20) {
+            for (var i = 0; i < trains.length; i++) {
+                var tr = trains[i]; if (tr.wrecked) continue;
+                if (Math.abs(tr.x - m.x) < tr.totalW * 0.5) {
+                    m.exploded = true; m.explodeAge = 0; wreckTrain(tr); return;
+                }
+            }
+        }
+        /* hit boats */
+        if (m.y > RIVER_TOP - 10) {
+            for (var i = 0; i < boats.length; i++) {
+                var bt = boats[i]; if (bt.wrecked) continue;
+                var bw = bt.type === 'ship' ? 50 : 18;
+                if (Math.abs(bt.x - m.x) < bw && Math.abs(bt.y - m.y) < 15) {
+                    m.exploded = true; m.explodeAge = 0; wreckBoat(bt); return;
+                }
+            }
+        }
+        /* hit buildings */
+        if (m.y > GROUND - 20 && m.y < GROUND + 5) {
+            m.exploded = true; m.explodeAge = 0;
+            if (m.targetType === 'building') {
+                var closest = null, closestDist = 999;
+                for (var i = 0; i < buildings.length; i++) {
+                    var bdist = Math.abs(buildings[i].x + buildings[i].w / 2 - m.x);
+                    if (bdist < closestDist) { closestDist = bdist; closest = buildings[i]; }
+                }
+                if (closest && closestDist < closest.w + 40) damageBuilding(closest);
+            }
+            killNearbyPeds(m.x); return;
+        }
+        if (m.y < -50 || m.x < -100 || m.x > W + 100) m.alive = false;
+    }
+
+    function drawCarrierMissile(c, m) {
+        if (m.exploded) {
+            var flashA = Math.max(0, 1 - m.explodeAge / 0.3);
+            if (flashA > 0) {
+                c.beginPath(); c.arc(m.x, m.y, 8, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(255,100,50,' + (flashA * 0.4) + ')'; c.fill();
+            }
+            return;
+        }
+        var ang = Math.atan2(m.vy, m.vx);
+        var r = 2.5;
+        var len = r * 2.5;
+        var wid = r * 0.55;
+        c.save(); c.translate(m.x, m.y); c.rotate(ang);
+
+        /* missile body — same style as alien asteroid */
+        c.beginPath();
+        c.moveTo(len, 0);
+        c.lineTo(len * 0.3, -wid);
+        c.lineTo(-len * 0.7, -wid * 0.9);
+        c.lineTo(-len, -wid * 0.5);
+        c.lineTo(-len, wid * 0.5);
+        c.lineTo(-len * 0.7, wid * 0.9);
+        c.lineTo(len * 0.3, wid);
+        c.closePath();
+        c.fillStyle = 'rgba(160,40,35,0.85)';
+        c.fill();
+        c.strokeStyle = 'rgba(120,25,20,0.75)';
+        c.lineWidth = 0.4; c.stroke();
+
+        /* nose cone */
+        c.beginPath();
+        c.moveTo(len * 1.5, 0);
+        c.lineTo(len * 0.3, -wid * 0.7);
+        c.lineTo(len * 0.3, wid * 0.7);
+        c.closePath();
+        c.fillStyle = 'rgba(200,50,40,0.9)';
+        c.fill(); c.stroke();
+
+        /* body bands */
+        stkC(c, -len * 0.2, -wid * 0.85, -len * 0.2, wid * 0.85, 0.12, 180, 60, 50, 0.4);
+        stkC(c, len * 0.1, -wid * 0.9, len * 0.1, wid * 0.9, 0.1, 170, 55, 45, 0.35);
+        stkC(c, len * 0.6, -wid * 0.4, len * 0.6, wid * 0.4, 0.08, 220, 80, 60, 0.3);
+
+        /* tail fins */
+        stkC(c, -len * 0.8, -wid * 0.8, -len * 1.1, -wid * 2, 0.25, 130, 30, 25, 0.7);
+        stkC(c, -len * 1.1, -wid * 2, -len * 0.5, -wid * 0.9, 0.15, 130, 30, 25, 0.5);
+        stkC(c, -len * 0.8, wid * 0.8, -len * 1.1, wid * 2, 0.25, 130, 30, 25, 0.7);
+        stkC(c, -len * 1.1, wid * 2, -len * 0.5, wid * 0.9, 0.15, 130, 30, 25, 0.5);
+
+        c.restore();
+
+        /* exhaust trail */
+        var tailX = m.x - Math.cos(ang) * len;
+        var tailY = m.y - Math.sin(ang) * len;
+        var perpX = -Math.sin(ang);
+        var perpY = Math.cos(ang);
+        var trailLen = 40;
+        for (var t = 0; t < trailLen; t += 3) {
+            var tFrac = t / trailLen;
+            var ta = Math.max(0, 0.4 - tFrac * 0.4);
+            var tw = wid * 0.6 * (1 + tFrac * 2);
+            var wobble = Math.sin(t * 0.4 + m.age * 20) * (1 + t * 0.04);
+            var tx = tailX - Math.cos(ang) * t + perpX * wobble;
+            var ty = tailY - Math.sin(ang) * t + perpY * wobble;
+            c.beginPath(); c.arc(tx, ty, tw, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(220,90,30,' + (ta * 0.35) + ')'; c.fill();
+        }
+        /* exhaust core glow */
+        var exLen = len * 0.8 + Math.sin(m.age * 20) * len * 0.3;
+        stkC(c, tailX, tailY,
+            tailX - Math.cos(ang) * exLen, tailY - Math.sin(ang) * exLen,
+            wid * 0.4, 255, 120, 40, 0.45);
+    }
+
+    /* ═══════════ TORPEDOES (defense against carriers) ═══════════ */
+    function createTorpedo(target) {
+        var launchX = br(W * 0.05, W * 0.95);
+        var launchY = RIVER_TOP + 3;
+        var ang = Math.atan2(target.y - launchY, target.x - launchX);
+        var spd = br(100, 160);
+        return {
+            x: launchX, y: launchY,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd,
+            alive: true, exploded: false, explodeAge: 0,
+            target: target,
+            age: 0, bubblePhase: br(0, Math.PI * 2)
+        };
+    }
+
+    function updateTorpedo(tp, dt) {
+        if (tp.exploded) {
+            tp.explodeAge += dt;
+            if (tp.explodeAge > 2) tp.alive = false;
+            return;
+        }
+        tp.age += dt;
+        tp.bubblePhase += dt * 10;
+        /* homing toward carrier */
+        if (tp.target && tp.target.alive && tp.target.explosionAge < 0) {
+            var hx = tp.target.x - tp.x, hy = tp.target.y - tp.y;
+            var hd = Math.sqrt(hx * hx + hy * hy);
+            if (hd > 1) {
+                var spd = Math.sqrt(tp.vx * tp.vx + tp.vy * tp.vy);
+                var desAng = Math.atan2(hy, hx);
+                var curAng = Math.atan2(tp.vy, tp.vx);
+                var diff = desAng - curAng;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                var steer = Math.max(-5, Math.min(5, diff * 6));
+                var newAng = curAng + steer * dt;
+                tp.vx = Math.cos(newAng) * spd;
+                tp.vy = Math.sin(newAng) * spd;
+            }
+        }
+        tp.x += tp.vx * dt; tp.y += tp.vy * dt;
+
+        /* hit carrier */
+        for (var i = 0; i < alienCarriers.length; i++) {
+            var ac = alienCarriers[i];
+            if (ac.explosionAge >= 0) continue;
+            if (Math.abs(ac.x - tp.x) < 60 && Math.abs(ac.y - tp.y) < 12) {
+                tp.exploded = true; tp.explodeAge = 0;
+                ac.hp--;
+                ac.shieldFlash = 1;
+                if (ac.hp <= 0) {
+                    ac.explosionAge = 0;
+                    ac.speed = 0;
+                }
+                return;
+            }
+        }
+        if (tp.x < -50 || tp.x > W + 50 || tp.y > H + 20 || tp.age > 10) tp.alive = false;
+    }
+
+    function drawTorpedo(c, tp) {
+        if (tp.exploded) {
+            var ea = tp.explodeAge;
+            var fa = Math.max(0, 1 - ea / 2);
+            c.beginPath(); c.arc(tp.x, tp.y, 8 + ea * 15, 0, Math.PI * 2);
+            c.fillStyle = 'rgba(255,200,80,' + (fa * 0.4) + ')'; c.fill();
+            /* water splash */
+            for (var si = 0; si < 5; si++) {
+                var sa = si * Math.PI * 0.4;
+                var sr = 5 + ea * 20;
+                stkC(c, tp.x, tp.y, tp.x + Math.cos(sa) * sr, tp.y + Math.sin(sa) * sr * 0.4,
+                    0.3, 180, 220, 255, fa * 0.5, 0);
+            }
+            return;
+        }
+        var ang = Math.atan2(tp.vy, tp.vx);
+        c.save(); c.translate(tp.x, tp.y); c.rotate(ang);
+        /* torpedo body */
+        c.beginPath();
+        c.moveTo(6, 0); c.lineTo(2, -2); c.lineTo(-6, -1.5); c.lineTo(-7, 0);
+        c.lineTo(-6, 1.5); c.lineTo(2, 2); c.closePath();
+        c.fillStyle = 'rgba(60,70,80,0.9)'; c.fill();
+        /* propeller */
+        c.beginPath(); c.arc(-7, 0, 1.5, 0, Math.PI * 2);
+        c.fillStyle = 'rgba(150,160,170,0.7)'; c.fill();
+        c.restore();
+        /* bubble trail */
+        for (var bi = 1; bi < 5; bi++) {
+            var bx = tp.x - Math.cos(ang) * bi * 5 + (behRng() - 0.5) * 3;
+            var by = tp.y - Math.sin(ang) * bi * 5 + (behRng() - 0.5) * 2;
+            var ba = 0.3 / bi;
+            c.beginPath(); c.arc(bx, by, 1 + behRng(), 0, Math.PI * 2);
+            c.fillStyle = 'rgba(200,230,255,' + ba + ')'; c.fill();
+        }
+    }
+
+    /* ═══════════ DYNAMIC SEA WAVES ═══════════ */
+    var waveTime = 0;
+    function drawSeaWaves(c) {
+        waveTime += 0.016;
+        /* animated wave crests on top of the static water */
+        for (var wy = RIVER_TOP + 2; wy < RIVER_BOT - 3; wy += br(6, 12)) {
+            var depth = (wy - RIVER_TOP) / (RIVER_BOT - RIVER_TOP);
+            var waveA = Math.max(0.05, 0.2 - depth * 0.12);
+            var waveSpeed = 30 + depth * 20;
+            var waveLen = 0.04 + depth * 0.02;
+            for (var wx = 0; wx < W; wx += br(15, 35)) {
+                var ph = wx * waveLen + waveTime * waveSpeed * 0.1 + wy * 0.1;
+                var amp = Math.sin(ph) * (1.5 + depth * 1.5);
+                var crestW = 8 + behRng() * 12;
+                if (amp > 0.5) {
+                    stkC(c, wx, wy + amp, wx + crestW, wy + Math.sin(ph + crestW * waveLen) * (1.5 + depth * 1.5),
+                        0.2, 200 + Math.floor(amp * 20), 220 + Math.floor(amp * 10), 245, waveA * amp * 0.5, 0);
+                }
+            }
+        }
+        /* foam along shoreline — animated */
+        for (var fx = 0; fx < W; fx += 3) {
+            var foamPh = fx * 0.05 + waveTime * 2;
+            var foamAmp = Math.sin(foamPh) * 2 + Math.sin(foamPh * 2.3 + 1) * 1;
+            var foamA = (Math.sin(foamPh * 0.7) * 0.15 + 0.2);
+            stkC(c, fx, RIVER_TOP + foamAmp, fx + 3, RIVER_TOP + Math.sin((fx + 3) * 0.05 + waveTime * 2) * 2 + Math.sin(((fx + 3) * 0.05 + waveTime * 2) * 2.3 + 1),
+                0.5, 220, 235, 250, foamA, 0);
+        }
     }
 
     /* ═══════════ BEACH PEOPLE ═══════════ */
@@ -4924,6 +5760,16 @@
         warPlanes = [];
         spaceships = [];
         flyingCars = [];
+        repairTrucks = [];
+        repairTrolleys = [];
+        repairShips = [];
+
+        alienCarriers = [];
+        carrierMissiles = [];
+        torpedoes = [];
+        carrierSpawnTimer = 0;
+        torpedoTimer = 0;
+        waveTime = 0;
 
         /* rain */
         raindrops = [];
@@ -5070,10 +5916,18 @@
                     waveSpawnCount++;
                 }
                 alienTimer = br(0.4, 1.2);
+                /* spawn carriers with the drone wave */
+                if (alienCarriers.length < MAX_CARRIERS) {
+                    alienCarriers.push(createAlienCarrier());
+                }
             }
         }
-        /* victory banner — trigger when all spawned aliens are destroyed */
-        if (waveSpawnCount >= WAVE_SPAWN_TARGET && aliens.length === 0 && !victoryBanner.active && !victoryBanner.triggered) {
+        /* victory banner — trigger when all spawned aliens AND carriers are destroyed */
+        var carriersCleared = true;
+        for (var ci = 0; ci < alienCarriers.length; ci++) {
+            if (alienCarriers[ci].explosionAge < 0) { carriersCleared = false; break; }
+        }
+        if (waveSpawnCount >= WAVE_SPAWN_TARGET && aliens.length === 0 && carriersCleared && alienCarriers.length === 0 && !victoryBanner.active && !victoryBanner.triggered) {
             spawnVictoryBanner();
         }
         if (!victoryBanner.active && waveTimer < dt * 2) victoryBanner.triggered = false;
@@ -5232,6 +6086,86 @@
             if (!smokePuffs[i].alive) smokePuffs.splice(i, 1);
         }
 
+        /* repair entities — spawn when wrecks exist, update & clean up */
+        for (var i = repairTrucks.length - 1; i >= 0; i--) {
+            updateRepairTruck(repairTrucks[i], dt);
+            if (!repairTrucks[i].alive) repairTrucks.splice(i, 1);
+        }
+        for (var i = repairTrolleys.length - 1; i >= 0; i--) {
+            updateRepairTrolley(repairTrolleys[i], dt);
+            if (!repairTrolleys[i].alive) repairTrolleys.splice(i, 1);
+        }
+        for (var i = repairShips.length - 1; i >= 0; i--) {
+            updateRepairShip(repairShips[i], dt);
+            if (!repairShips[i].alive) repairShips.splice(i, 1);
+        }
+        /* spawn repair for wrecked vehicles */
+        for (var i = 0; i < vehicles.length; i++) {
+            if (vehicles[i].wrecked && vehicles[i].wreckedAge > 2) {
+                var hasRepair = false;
+                for (var j = 0; j < repairTrucks.length; j++) {
+                    if (repairTrucks[j].target === vehicles[i]) { hasRepair = true; break; }
+                }
+                if (!hasRepair && repairTrucks.length < 3) repairTrucks.push(createRepairTruck(vehicles[i]));
+            }
+        }
+        /* spawn repair for wrecked trains */
+        for (var i = 0; i < trains.length; i++) {
+            if (trains[i].wrecked && trains[i].wreckedAge > 2) {
+                var hasRepair = false;
+                for (var j = 0; j < repairTrolleys.length; j++) {
+                    if (repairTrolleys[j].target === trains[i]) { hasRepair = true; break; }
+                }
+                if (!hasRepair && repairTrolleys.length < 2) repairTrolleys.push(createRepairTrolley(trains[i]));
+            }
+        }
+        /* spawn repair for wrecked boats */
+        for (var i = 0; i < boats.length; i++) {
+            if (boats[i].wrecked && boats[i].wreckedAge > 3) {
+                var hasRepair = false;
+                for (var j = 0; j < repairShips.length; j++) {
+                    if (repairShips[j].target === boats[i]) { hasRepair = true; break; }
+                }
+                if (!hasRepair && repairShips.length < 2) repairShips.push(createRepairShip(boats[i]));
+            }
+        }
+        /* remove wrecks that sank (boats only) */
+        for (var i = boats.length - 1; i >= 0; i--) {
+            if (boats[i].wrecked && boats[i].wreckedAge > 25) boats[i].alive = false;
+        }
+        /* remove car wrecks that burned out and were never repaired */
+        for (var i = vehicles.length - 1; i >= 0; i--) {
+            if (vehicles[i].wrecked && vehicles[i].wreckedAge > 30) vehicles[i].alive = false;
+        }
+
+        /* alien aircraft carriers — update, spawn, clean up */
+        for (var i = alienCarriers.length - 1; i >= 0; i--) {
+            updateAlienCarrier(alienCarriers[i], dt);
+            if (!alienCarriers[i].alive) alienCarriers.splice(i, 1);
+        }
+        /* carriers spawn with drone waves, not on separate timer */
+        /* carrier missiles */
+        for (var i = carrierMissiles.length - 1; i >= 0; i--) {
+            updateCarrierMissile(carrierMissiles[i], dt);
+            if (!carrierMissiles[i].alive) carrierMissiles.splice(i, 1);
+        }
+        /* torpedoes — auto-launch against carriers */
+        torpedoTimer += dt;
+        if (torpedoTimer > br(2, 4) && alienCarriers.length > 0) {
+            var tgt = null;
+            for (var i = 0; i < alienCarriers.length; i++) {
+                if (alienCarriers[i].explosionAge < 0) { tgt = alienCarriers[i]; break; }
+            }
+            if (tgt && torpedoes.length < 5) {
+                torpedoes.push(createTorpedo(tgt));
+                torpedoTimer = 0;
+            }
+        }
+        for (var i = torpedoes.length - 1; i >= 0; i--) {
+            updateTorpedo(torpedoes[i], dt);
+            if (!torpedoes[i].alive) torpedoes.splice(i, 1);
+        }
+
         /* ── DRAW DYNAMIC LAYER ── */
         dynC.clearRect(0, 0, W, H);
 
@@ -5304,6 +6238,8 @@
 
         /* vehicles (on street) */
         for (var i = 0; i < vehicles.length; i++) drawVehicle(dynC, vehicles[i]);
+        /* repair tow trucks */
+        for (var i = 0; i < repairTrucks.length; i++) drawRepairTruck(dynC, repairTrucks[i]);
 
         /* pedestrians (on street) */
         for (var i = 0; i < peds.length; i++) {
@@ -5323,6 +6259,8 @@
 
         /* trains (foreground, on tracks) */
         for (var i = 0; i < trains.length; i++) drawTrain(dynC, trains[i]);
+        /* repair trolleys */
+        for (var i = 0; i < repairTrolleys.length; i++) drawRepairTrolley(dynC, repairTrolleys[i]);
 
         /* sunbathers */
         for (var i = 0; i < sunbathers.length; i++) drawSunbather(dynC, sunbathers[i]);
@@ -5336,8 +6274,20 @@
         /* fish (underwater, subtle) */
         for (var i = 0; i < fish.length; i++) drawFish(dynC, fish[i]);
 
+        /* animated sea waves */
+        drawSeaWaves(dynC);
+
         /* boats (on water) */
         for (var i = 0; i < boats.length; i++) drawBoat(dynC, boats[i]);
+        /* repair ships */
+        for (var i = 0; i < repairShips.length; i++) drawRepairShip(dynC, repairShips[i]);
+
+        /* alien aircraft carriers */
+        for (var i = 0; i < alienCarriers.length; i++) drawAlienCarrier(dynC, alienCarriers[i]);
+        /* carrier missiles */
+        for (var i = 0; i < carrierMissiles.length; i++) drawCarrierMissile(dynC, carrierMissiles[i]);
+        /* torpedoes */
+        for (var i = 0; i < torpedoes.length; i++) drawTorpedo(dynC, torpedoes[i]);
 
         /* jetskis */
         for (var i = 0; i < jetskis.length; i++) drawJetSki(dynC, jetskis[i]);
@@ -5356,13 +6306,6 @@
 
         /* beach people */
         for (var i = 0; i < beachPeople.length; i++) drawBeachPerson(dynC, beachPeople[i]);
-
-        /* ── REBAKE city if needed (throttled) ── */
-        if (rebakeCooldown > 0) rebakeCooldown -= dt;
-        if (needsCityRebake && rebakeCooldown <= 0) {
-            rebakeCity();
-            rebakeCooldown = 2;
-        }
 
         /* ── FX LAYER (rain, lightning, flash) ── */
         fxC.clearRect(0, 0, W, H);
