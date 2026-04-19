@@ -18,6 +18,7 @@
     /* offscreen layers (5-layer composite: bg → city → dyn → fx → grain) */
     var bgCvs = document.createElement('canvas'), bgC = bgCvs.getContext('2d');
     var cityCvs = document.createElement('canvas'), cityC = cityCvs.getContext('2d');
+    var infraCvs = document.createElement('canvas'), infraC = infraCvs.getContext('2d');
     var dynCvs = document.createElement('canvas'), dynC = dynCvs.getContext('2d');
     var fxCvs = document.createElement('canvas'), fxC = fxCvs.getContext('2d');
     var grainCvs = document.createElement('canvas'), grainC = grainCvs.getContext('2d');
@@ -26,8 +27,8 @@
     var SIDEWALK_N, SIDEWALK_N_B, LANE_Y = [], CENTER_Y, SIDEWALK_S, SIDEWALK_S_B;
 
     function resize() {
-        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = Math.max(window.innerWidth, document.documentElement.clientWidth || 0);
-        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
+        W = canvas.width = bgCvs.width = cityCvs.width = dynCvs.width = fxCvs.width = grainCvs.width = infraCvs.width = Math.max(window.innerWidth, document.documentElement.clientWidth || 0);
+        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = fxCvs.height = grainCvs.height = infraCvs.height = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
         HORIZON = H * 0.12;
         GROUND = H * 0.84;
         STREET_BOT = H * 0.93;
@@ -49,7 +50,8 @@
         TRACK_Y = BEACH_Y - 6;
         LIGHTHOUSE_X = W * 0.92;
         ctx.lineCap = 'round'; bgC.lineCap = 'round'; cityC.lineCap = 'round';
-        dynC.lineCap = 'round'; fxC.lineCap = 'round';
+        dynC.lineCap = 'round'; fxC.lineCap = 'round'; infraC.lineCap = 'round';
+        infraDirty = true;
     }
     var RIVER_TOP, RIVER_BOT, BEACH_Y, LIGHTHOUSE_X;
     resize();
@@ -1751,13 +1753,10 @@
     }
 
     /* ═══════════ PAINT STATIC CITY ═══════════ */
-    function paintCity() {
-        var c = cityC;
+    var infraDirty = true;
+    function paintInfra() {
+        var c = infraC;
         c.clearRect(0, 0, W, H);
-
-        /* draw all complete buildings */
-        chimneys = []; litWindows = [];
-        for (var i = 0; i < buildings.length; i++) drawBuilding(c, buildings[i]);
 
         /* north sidewalk — warm concrete tan */
         for (var x = 0; x < W; x += 1.5) {
@@ -1982,6 +1981,16 @@
             var ga = 0.02 + (y - FORE_TOP) / (RIVER_TOP - FORE_TOP) * 0.04;
             stkFlat(c, 0, y, W, y, 1.5, 230, ga);
         }
+        infraDirty = false;
+    }
+
+    function paintCity() {
+        if (infraDirty) paintInfra();
+        var c = cityC;
+        c.clearRect(0, 0, W, H);
+        chimneys = []; litWindows = [];
+        for (var i = 0; i < buildings.length; i++) drawBuilding(c, buildings[i]);
+        c.drawImage(infraCvs, 0, 0);
     }
 
     /* ═══════════ GRAIN & VIGNETTE ═══════════ */
@@ -2933,9 +2942,9 @@
             p.vy -= 5 * dt;
             if (p.age > p.life) vb.particles.splice(i, 1);
         }
-        while (vb.particles.length > 40) vb.particles.shift();
+        while (vb.particles.length > 20) vb.particles.shift();
 
-        if (behRng() < 0.15 && vb.fireworks.length < 10) {
+        if (behRng() < 0.15 && vb.fireworks.length < 5) {
             var fwColors = [
                 [255,50,50],[50,255,80],[80,120,255],[255,220,40],[255,100,220],
                 [0,255,255],[255,160,30],[180,80,255],[255,255,100],[100,255,200]
@@ -2969,14 +2978,14 @@
                     fw.shape = shapes[bri(0, shapes.length)];
                     var n, j, a2, sp2, sc2 = br(80, 140);
                     if (fw.shape === 'star') {
-                        n = bri(30, 45); var pts = bri(4, 7);
+                        n = bri(18, 25); var pts = bri(4, 7);
                         for (j = 0; j < n; j++) {
                             a2 = (j / n) * Math.PI * 2;
                             var sR = (j % 2 === 0) ? sc2 : sc2 * 0.4;
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2 * pts / 2) * sR * br(0.9,1.1), vy: Math.sin(a2 * pts / 2) * sR * br(0.9,1.1), age: 0, life: br(1.2, 2.2), r: br(2.5, 5), cr: fw.cr + bri(-20,20), cg: fw.cg + bri(-20,20), cb: fw.cb + bri(-20,20) });
                         }
                     } else if (fw.shape === 'heart') {
-                        n = bri(35, 50);
+                        n = bri(20, 30);
                         for (j = 0; j < n; j++) {
                             a2 = (j / n) * Math.PI * 2;
                             var hx2 = 16 * Math.pow(Math.sin(a2), 3);
@@ -2984,33 +2993,33 @@
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: hx2 * sc2 * 0.07 * br(0.9,1.1), vy: hy2 * sc2 * 0.07 * br(0.9,1.1), age: 0, life: br(1.5, 2.8), r: br(3, 5.5), cr: Math.min(255, fw.cr + bri(0,40)), cg: Math.max(0, fw.cg - 20), cb: Math.max(0, fw.cb - 20) });
                         }
                     } else if (fw.shape === 'ring') {
-                        n = bri(30, 45);
+                        n = bri(18, 28);
                         for (j = 0; j < n; j++) {
                             a2 = (j / n) * Math.PI * 2; sp2 = sc2 * br(0.95, 1.05);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.2, 2.2), r: br(2.5, 4.5), cr: fw.cr + bri(-15,15), cg: fw.cg + bri(-15,15), cb: fw.cb + bri(-15,15) });
                         }
                     } else if (fw.shape === 'doubleRing') {
                         for (var ring = 0; ring < 2; ring++) {
-                            n = bri(22, 35); var rR = ring === 0 ? sc2 : sc2 * 0.5;
+                            n = bri(12, 18); var rR = ring === 0 ? sc2 : sc2 * 0.5;
                             for (j = 0; j < n; j++) {
                                 a2 = (j / n) * Math.PI * 2; sp2 = rR * br(0.9, 1.1);
                                 fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.3, 2.4), r: br(2, 4), cr: Math.min(255, fw.cr + ring * 50), cg: Math.min(255, fw.cg + ring * 40), cb: fw.cb + bri(-15,15) });
                             }
                         }
                     } else if (fw.shape === 'chrysanthemum') {
-                        n = bri(40, 60);
+                        n = bri(22, 35);
                         for (j = 0; j < n; j++) {
                             a2 = br(0, Math.PI * 2); sp2 = br(25, sc2 * 1.2);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2 * br(0.8,1.2), vy: Math.sin(a2) * sp2 * br(0.8,1.2), age: 0, life: br(1.5, 2.8), r: br(2, 4), cr: fw.cr + bri(-15,15), cg: fw.cg + bri(-15,15), cb: fw.cb + bri(-15,15) });
                         }
                     } else if (fw.shape === 'palm') {
-                        n = bri(25, 40);
+                        n = bri(15, 25);
                         for (j = 0; j < n; j++) {
                             a2 = br(-Math.PI * 0.7, Math.PI * 0.7) - Math.PI / 2; sp2 = br(60, sc2 * 1.1);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(1.8, 3.0), r: br(2.5, 5), gravity: 80, cr: fw.cr + bri(-20,20), cg: fw.cg + bri(-20,20), cb: fw.cb + bri(-10,10) });
                         }
                     } else if (fw.shape === 'willow') {
-                        n = bri(35, 50);
+                        n = bri(20, 30);
                         for (j = 0; j < n; j++) {
                             a2 = br(0, Math.PI * 2); sp2 = br(20, sc2 * 0.6);
                             fw.sparkles.push({ x: fw.x, y: fw.y, vx: Math.cos(a2) * sp2, vy: Math.sin(a2) * sp2, age: 0, life: br(2.2, 3.5), r: br(1.5, 3), gravity: 90, cr: fw.cr + bri(-10,30), cg: fw.cg + bri(-10,30), cb: fw.cb + bri(-10,15) });
@@ -3018,6 +3027,7 @@
                     }
                 }
             } else {
+                while (fw.sparkles.length > 30) fw.sparkles.shift();
                 for (var sp = fw.sparkles.length - 1; sp >= 0; sp--) {
                     var sk = fw.sparkles[sp];
                     sk.age += dt;
@@ -3043,13 +3053,16 @@
         var cx = vb.x, cy = vb.y;
         var bw = vb.bw, bh = vb.bh;
 
-        for (var i = 0; i < vb.particles.length; i++) {
-            var p = vb.particles[i];
-            var pa = Math.max(0, 1 - p.age / p.life) * alpha;
-            c.beginPath();
-            c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            c.fillStyle = 'rgba(' + p.cr + ',' + p.cg + ',' + p.cb + ',' + (pa * 0.7) + ')';
-            c.fill();
+        if (vb.particles.length > 0) {
+            for (var i = 0; i < vb.particles.length; i++) {
+                var p = vb.particles[i];
+                var pa = Math.max(0, 1 - p.age / p.life) * alpha;
+                if (pa < 0.05) continue;
+                c.beginPath();
+                c.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                c.fillStyle = 'rgba(' + p.cr + ',' + p.cg + ',' + p.cb + ',' + (pa * 0.7) + ')';
+                c.fill();
+            }
         }
 
         var ropeAlpha = alpha * 0.75;
@@ -3187,57 +3200,39 @@
         for (var fi = 0; fi < vb.fireworks.length; fi++) {
             var fw = vb.fireworks[fi];
             if (!fw.exploded) {
-                var tLen = fw.trail.length;
-                for (var tp = 0; tp < tLen; tp++) {
-                    var ta = (tp + 1) / tLen;
+                if (fw.trail.length > 1) {
                     c.beginPath();
-                    c.arc(fw.trail[tp].x, fw.trail[tp].y, 2 * ta, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (ta * 0.7) + ')';
-                    c.fill();
+                    c.moveTo(fw.trail[0].x, fw.trail[0].y);
+                    for (var tp = 1; tp < fw.trail.length; tp++) {
+                        c.lineTo(fw.trail[tp].x, fw.trail[tp].y);
+                    }
+                    c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',0.5)';
+                    c.lineWidth = 2;
+                    c.stroke();
                 }
                 c.beginPath();
                 c.arc(fw.x, fw.y, 3, 0, Math.PI * 2);
                 c.fillStyle = 'rgba(255,255,240,0.95)';
                 c.fill();
-                c.beginPath();
-                c.arc(fw.x, fw.y, 8, 0, Math.PI * 2);
-                c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',0.25)';
-                c.fill();
             } else {
                 var ea = fw.age - (fw.explodeTime || 0);
                 var px2 = fw.popX, py2 = fw.popY;
-                if (ea < 1.0) {
-                    var fa = Math.max(0, 1 - ea / 1.0);
+                if (ea < 0.5) {
+                    var fa = Math.max(0, 1 - ea / 0.5);
                     c.beginPath();
-                    c.arc(px2, py2, 12 + ea * 70, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(255,255,255,' + (fa * fa * 0.65) + ')';
+                    c.arc(px2, py2, 8 + ea * 40, 0, Math.PI * 2);
+                    c.fillStyle = 'rgba(255,255,255,' + (fa * fa * 0.5) + ')';
                     c.fill();
                     c.beginPath();
-                    c.arc(px2, py2, 5 + ea * 35, 0, Math.PI * 2);
-                    c.fillStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * fa * 0.45) + ')';
-                    c.fill();
-                    c.beginPath();
-                    c.arc(px2, py2, 25 + ea * 300, 0, Math.PI * 2);
-                    c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * 0.5) + ')';
-                    c.lineWidth = 3 * fa;
-                    c.stroke();
-                    if (ea < 0.6) {
-                        c.beginPath();
-                        c.arc(px2, py2, 40 + ea * 400, 0, Math.PI * 2);
-                        c.strokeStyle = 'rgba(' + fw.cr + ',' + fw.cg + ',' + fw.cb + ',' + (fa * 0.3) + ')';
-                        c.lineWidth = 2 * fa;
-                        c.stroke();
-                    }
-                    c.beginPath();
-                    for (var ry = 0; ry < 10; ry++) {
-                        var rAng = (ry / 10) * Math.PI * 2 + ea * 3;
-                        var rIn = 10 + ea * 25;
-                        var rLen = (45 + ea * 200) * fa;
+                    for (var ry = 0; ry < 8; ry++) {
+                        var rAng = (ry / 8) * Math.PI * 2 + ea * 3;
+                        var rIn = 8 + ea * 20;
+                        var rLen = (30 + ea * 100) * fa;
                         c.moveTo(px2 + Math.cos(rAng) * rIn, py2 + Math.sin(rAng) * rIn);
                         c.lineTo(px2 + Math.cos(rAng) * rLen, py2 + Math.sin(rAng) * rLen);
                     }
-                    c.strokeStyle = 'rgba(255,255,255,' + (fa * 0.35) + ')';
-                    c.lineWidth = 1.8 * fa;
+                    c.strokeStyle = 'rgba(255,255,255,' + (fa * 0.3) + ')';
+                    c.lineWidth = 1.5 * fa;
                     c.stroke();
                 }
                 for (var sp = 0; sp < fw.sparkles.length; sp++) {
