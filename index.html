@@ -46,8 +46,8 @@
     <script src="js/vendor/bootstrap-tooltip-3.4.1.min.js"></script>
     <script src="js/random.js" defer></script>
 
-    <!--    Matrix animation -->
-    <script src="js/matrix.js" defer></script>
+    <!--    NYC city canvas animation (matrix.js archived as dead code) -->
+    <script src="js/nyc-city.js" defer></script>
 
     <link rel="stylesheet" href="css/index.css">
 
@@ -819,11 +819,19 @@
 
         <canvas id='canv'></canvas>
 
-        <div class="container2" style="margin: 10px; position: relative;">
+        <div class="city-switcher-wrap">
+            <button id="citySwitchBtn" class="city-switch-btn" onclick="switchCity()" title="Fly to CHICAGO">
+                <span class="csb-plane">✈</span>
+                <span class="csb-label" id="cityLabel">NEW YORK</span>
+                <span class="csb-next" id="cityNext">→ CHICAGO</span>
+            </button>
+        </div>
+
+        <div class="container2 glass-panel" style="margin: 10px; position: relative;">
             <div class="stack" style="--stacks: 3;">
-                <span style="--index: 0; color: #000">MASRIK&nbsp;DAHIR</span>
-                <span style="--index: 1; color: #000">MASRIK&nbsp;DAHIR</span>
-                <span style="--index: 2; color: #000">MASRIK&nbsp;DAHIR</span>
+                <span style="--index: 0; color: rgba(10,10,20,0.92)">MASRIK&nbsp;DAHIR</span>
+                <span style="--index: 1; color: rgba(10,10,20,0.92)">MASRIK&nbsp;DAHIR</span>
+                <span style="--index: 2; color: rgba(10,10,20,0.92)">MASRIK&nbsp;DAHIR</span>
             </div>
             <span>
 
@@ -853,5 +861,24 @@
 
     </div>
 
+    <script>
+    (function(){
+        function pollCity(){
+            if(window.getCityName){
+                var el=document.getElementById('cityLabel');
+                if(el) el.textContent=window.getCityName();
+            }
+            if(window.getNextCityName){
+                var nx=document.getElementById('cityNext');
+                var btn=document.getElementById('citySwitchBtn');
+                var nxt=window.getNextCityName();
+                if(nx) nx.textContent='→ '+nxt;
+                if(btn) btn.setAttribute('title','Fly to '+nxt);
+            }
+            setTimeout(pollCity,350);
+        }
+        pollCity();
+    })();
+    </script>
 </body>
 </html>

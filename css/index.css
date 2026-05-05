@@ -77,3 +77,230 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* ── Liquid glass hero panel ─────────────────────────────────── */
+
+.glass-panel {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.01) 60%,
+        rgba(200, 220, 255, 0.02) 100%
+    );
+    backdrop-filter: blur(28px) saturate(160%) brightness(1.08);
+    -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.08);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+    border-right-color:  rgba(255, 255, 255, 0.10);
+    border-radius: 32px;
+    box-shadow:
+        0 1px 0   rgba(255, 255, 255, 0.55) inset,
+        0 -1px 0  rgba(0,   0,   0,   0.04) inset,
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        0 2px 8px  rgba(0, 0, 0, 0.04);
+    padding: 22px 30px 18px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── City switcher button ──────────────────────── */
+.city-switcher-wrap {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-start;
+    margin: 0 10px 6px;
+}
+
+.city-switch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px 8px 12px;
+    background: linear-gradient(135deg,
+        rgba(255,255,255,0.12) 0%,
+        rgba(200,220,255,0.06) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-bottom-color: rgba(255,255,255,0.12);
+    border-radius: 50px;
+    color: rgba(10,10,25,0.90);
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.70) inset,
+        0 4px 18px rgba(0,0,0,0.10),
+        0 1px 4px  rgba(0,0,0,0.06);
+    transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.city-switch-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50px;
+    background: linear-gradient(175deg,
+        rgba(255,255,255,0.38) 0%,
+        rgba(255,255,255,0.06) 30%,
+        transparent 55%);
+    pointer-events: none;
+}
+
+.city-switch-btn:hover {
+    background: linear-gradient(135deg,
+        rgba(255,255,255,0.22) 0%,
+        rgba(180,210,255,0.14) 100%);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.90) inset,
+        0 6px 24px rgba(0,0,0,0.14),
+        0 2px 8px  rgba(80,140,255,0.12);
+    transform: translateY(-1px);
+}
+
+.city-switch-btn:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+/* rainbow animated border on hover */
+.city-switch-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 52px;
+    background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+    background-size: 300%;
+    z-index: -1;
+    opacity: 0;
+    filter: blur(4px);
+    animation: csb-glow 4s linear infinite;
+    transition: opacity 0.3s ease;
+}
+.city-switch-btn:hover::after { opacity: 1; }
+
+@keyframes csb-glow {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.csb-plane {
+    font-size: 16px;
+    display: inline-block;
+    animation: csb-float 2.4s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@keyframes csb-float {
+    0%,100% { transform: translateY(0) rotate(-8deg); }
+    40%     { transform: translateY(-3px) rotate(2deg); }
+    70%     { transform: translateY(1px) rotate(-4deg); }
+}
+
+.city-switch-btn:hover .csb-plane {
+    animation: csb-zoom 0.55s ease forwards;
+}
+
+@keyframes csb-zoom {
+    0%   { transform: translateX(0) rotate(-8deg); opacity:1; }
+    55%  { transform: translateX(60px) rotate(4deg) scale(0.8); opacity:0; }
+    56%  { transform: translateX(-40px) rotate(-8deg) scale(0.8); opacity:0; }
+    100% { transform: translateX(0) rotate(-8deg) scale(1); opacity:1; }
+}
+
+.csb-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    transition: opacity 0.2s;
+}
+
+.csb-next {
+    font-size: 9px;
+    letter-spacing: 0.10em;
+    opacity: 0.70;
+    color: rgba(10,10,25,0.60);
+    white-space: nowrap;
+}
+
+/* Top-edge specular sheen */
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background: linear-gradient(
+        175deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.10) 18%,
+        rgba(255, 255, 255, 0.00) 40%
+    );
+    pointer-events: none;
+}
+
+/* Bottom inner glow for depth */
+.glass-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.00) 60%,
+        rgba(180, 210, 255, 0.08) 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Name text — black on light sky */
+.glass-panel .stack span {
+    color: rgba(10, 10, 20, 0.92) !important;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.40);
+}
+
+/* Glass-style social buttons inside the panel */
+.glass-panel .glow-on-hover12 {
+    background: transparent;
+    border-color: rgba(0, 0, 0, 0.14) !important;
+    box-shadow:
+        0 1px 0  rgba(255, 255, 255, 0.90) inset,
+        0 0  12px rgba(0,   0,   0,   0.06);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Button face — very lightly frosted */
+.glass-panel .glow-on-hover12:after {
+    background: rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.glass-panel .glow-on-hover12:hover {
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow:
+        0 1px 0  rgba(255, 255, 255, 0.95) inset,
+        0 4px 18px rgba(0, 0, 0, 0.10);
+}
+
+.glass-panel .glow-on-hover12:hover:after {
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Icon + text colours — black on light canvas */
+.glass-panel .glow-on-hover12 i {
+    color: rgba(10, 10, 20, 0.88) !important;
+}
+
+.glass-panel .glow-on-hover12 span {
+    color: rgba(10, 10, 20, 0.88) !important;
+}
+
+/* Images (ORCID, Web3) stay full-brightness */
+.glass-panel .glow-on-hover12 img {
+    filter: brightness(0.95);
+}
