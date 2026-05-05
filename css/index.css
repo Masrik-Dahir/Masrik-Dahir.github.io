@@ -77,3 +77,107 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* ── Liquid glass hero panel ─────────────────────────────────── */
+
+.glass-panel {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.03) 60%,
+        rgba(200, 220, 255, 0.05) 100%
+    );
+    backdrop-filter: blur(40px) saturate(200%) brightness(1.04);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.04);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-bottom-color: rgba(255, 255, 255, 0.20);
+    border-right-color:  rgba(255, 255, 255, 0.20);
+    border-radius: 32px;
+    box-shadow:
+        0 2px 0   rgba(255, 255, 255, 0.80) inset,
+        0 -1px 0  rgba(0,   0,   0,   0.06) inset,
+        1px 0 0   rgba(255, 255, 255, 0.40) inset,
+        0 12px 48px rgba(0, 0, 0, 0.12),
+        0 2px  12px rgba(0, 0, 0, 0.06);
+    padding: 22px 30px 18px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Top-edge specular sheen */
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background: linear-gradient(
+        175deg,
+        rgba(255, 255, 255, 0.45) 0%,
+        rgba(255, 255, 255, 0.10) 18%,
+        rgba(255, 255, 255, 0.00) 40%
+    );
+    pointer-events: none;
+}
+
+/* Bottom inner glow for depth */
+.glass-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.00) 60%,
+        rgba(180, 210, 255, 0.08) 100%
+    );
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Name text — black on light sky */
+.glass-panel .stack span {
+    color: rgba(10, 10, 20, 0.92) !important;
+    text-shadow: 0 1px 4px rgba(255, 255, 255, 0.40);
+}
+
+/* Glass-style social buttons inside the panel */
+.glass-panel .glow-on-hover12 {
+    background: transparent;
+    border-color: rgba(0, 0, 0, 0.14) !important;
+    box-shadow:
+        0 1px 0  rgba(255, 255, 255, 0.90) inset,
+        0 0  12px rgba(0,   0,   0,   0.06);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Button face — very lightly frosted */
+.glass-panel .glow-on-hover12:after {
+    background: rgba(255, 255, 255, 0.30) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.glass-panel .glow-on-hover12:hover {
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow:
+        0 1px 0  rgba(255, 255, 255, 0.95) inset,
+        0 4px 18px rgba(0, 0, 0, 0.10);
+}
+
+.glass-panel .glow-on-hover12:hover:after {
+    background: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Icon + text colours — black on light canvas */
+.glass-panel .glow-on-hover12 i {
+    color: rgba(10, 10, 20, 0.88) !important;
+}
+
+.glass-panel .glow-on-hover12 span {
+    color: rgba(10, 10, 20, 0.88) !important;
+}
+
+/* Images (ORCID, Web3) stay full-brightness */
+.glass-panel .glow-on-hover12 img {
+    filter: brightness(0.95);
+}
