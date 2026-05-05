@@ -31,7 +31,7 @@
   display:inline-flex; align-items:center; gap:8px;
   padding:10px 22px; border-radius:10px;
   background:transparent; border:1.5px solid transparent;
-  font-size:14px; font-weight:600; color:#64748b;
+  font-size:15px; font-weight:600; color:#64748b;
   cursor:pointer; position:relative; overflow:hidden;
   transition:color 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(.34,1.56,.64,1);
 }
@@ -69,7 +69,7 @@
   padding:18px 0 12px; margin-bottom:16px;
   border-bottom:1px solid #e5e7eb;
 }
-.sw-section-title { font-size:20px; font-weight:800; color:#0f172a; letter-spacing:-.02em; }
+.sw-section-title { font-size:calc(12px + 0.4vw); font-weight:800; color:#0f172a; letter-spacing:-.02em; }
 .sw-section-count { font-size:13px; color:#94a3b8; font-weight:600; margin-left:auto; }
 
 /* ── Cards grid ── */
@@ -141,7 +141,7 @@
   margin-bottom:10px;
 }
 .sw-card-title {
-  font-size:18px; font-weight:800; color:#0f172a; margin:0;
+  font-size:calc(12px + 0.4vw); font-weight:800; color:#0f172a; margin:0;
   letter-spacing:-.01em;
   transition:color 0.3s ease;
 }
@@ -161,7 +161,7 @@
 .sw-card[data-cat="app"]:hover .sw-card-cat-badge { background:#d1fae5; color:#047857; box-shadow:0 2px 8px rgba(16,185,129,.15); }
 
 .sw-card-desc {
-  font-size:14px; color:#64748b; margin:0 0 14px; line-height:1.65;
+  font-size:15px; color:#64748b; margin:0 0 14px; line-height:1.65;
   display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
   transition:color 0.3s ease;
 }
@@ -243,7 +243,7 @@
 .sw-action-link {
   display:inline-flex; align-items:center; gap:6px;
   padding:7px 14px; border-radius:8px;
-  font-size:13px; font-weight:600; color:#475569;
+  font-size:15px; font-weight:600; color:#475569;
   text-decoration:none;
   background:#fff; border:1px solid #e5e7eb;
   position:relative; overflow:hidden;
@@ -271,7 +271,7 @@
 /* ── Empty state ── */
 .sw-empty { text-align:center; padding:80px 20px; color:#94a3b8; }
 .sw-empty-icon { font-size:42px; margin-bottom:16px; opacity:.4; }
-.sw-empty-text { font-size:16px; font-weight:600; color:#64748b; }
+.sw-empty-text { font-size:15px; font-weight:600; color:#64748b; }
 
 /* ── Override global icons.css for sw-page ── */
 .sw-page .fa,
