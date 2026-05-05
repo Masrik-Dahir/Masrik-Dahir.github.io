@@ -1328,9 +1328,9 @@
         c.strokeStyle = gold2; c.lineWidth = 0.8;
         c.beginPath(); c.arc(cx, gy - bH * 0.05, 8, Math.PI, 0, false); c.stroke();
 
-        /* THREE-TIER MARBLE CIRCULAR TERRACES */
+        /* THREE-TIER MARBLE CIRCULAR TERRACES — each tier sits on the one below, bottom tier on the surrounding wall */
         var tierW = [52, 38, 24];
-        var tierY = [gy - bH * 0.09, gy - bH * 0.25, gy - bH * 0.40];
+        var tierY = [gy - bH * 0.18, gy - bH * 0.31, gy - bH * 0.44];
         for (var tier = 0; tier < 3; tier++) {
             var tr = tierW[tier], tBase = tierY[tier];
             c.fillStyle = marble; c.strokeStyle = marbleD; c.lineWidth = 1;
@@ -1348,8 +1348,8 @@
             c.fillStyle = marble; c.strokeStyle = marbleD; c.lineWidth = 1;
         }
 
-        /* CIRCULAR PRAYER HALL DRUM — on top terrace */
-        var hallTop = gy - bH * 0.54;
+        /* CIRCULAR PRAYER HALL DRUM — sits directly on top terrace */
+        var hallTop = gy - bH * 0.57;
         c.fillStyle = red2; c.strokeStyle = '#601010'; c.lineWidth = 1;
         c.fillRect(cx - 20, hallTop, 40, bH * 0.13); c.strokeRect(cx - 20, hallTop, 40, bH * 0.13);
         /* circular drum ellipse cap */
@@ -1479,8 +1479,8 @@
 
         /* MASSIVE RED OUTER WALLS */
         c.fillStyle = red3; c.strokeStyle = redD3; c.lineWidth = 1;
-        c.fillRect(cx - 84, gy - bH * 0.58, 168, bH * 0.55); c.strokeRect(cx - 84, gy - bH * 0.58, 168, bH * 0.55);
-        c.fillStyle = redD3; c.fillRect(cx - 84, gy - bH * 0.12, 168, bH * 0.09);
+        c.fillRect(cx - 84, gy - bH * 0.58, 168, bH * 0.58); c.strokeRect(cx - 84, gy - bH * 0.58, 168, bH * 0.58);
+        c.fillStyle = redD3; c.fillRect(cx - 84, gy - bH * 0.12, 168, bH * 0.12);
 
         /* 5 arched gates */
         c.fillStyle = '#060408';
@@ -1503,10 +1503,10 @@
         for (var ct = -1; ct <= 1; ct += 2) {
             var ctx2 = cx + ct * 78;
             c.fillStyle = red3; c.strokeStyle = redD3; c.lineWidth = 1;
-            c.fillRect(ctx2 - 10, gy - bH * 0.76, 20, bH * 0.53); c.strokeRect(ctx2 - 10, gy - bH * 0.76, 20, bH * 0.53);
+            c.fillRect(ctx2 - 10, gy - bH * 0.76, 20, bH * 0.76); c.strokeRect(ctx2 - 10, gy - bH * 0.76, 20, bH * 0.76);
             /* column detail on corner tower */
             c.fillStyle = '#881010';
-            for (var cc = -1; cc <= 1; cc++) { c.fillRect(ctx2 + cc * 6 - 2, gy - bH * 0.76, 4, bH * 0.53); }
+            for (var cc = -1; cc <= 1; cc++) { c.fillRect(ctx2 + cc * 6 - 2, gy - bH * 0.76, 4, bH * 0.76); }
             /* yellow roof */
             c.fillStyle = yellow2; c.strokeStyle = '#a07008'; c.lineWidth = 1;
             c.beginPath(); c.moveTo(ctx2 - 14, gy - bH * 0.76); c.lineTo(ctx2, gy - bH * 0.88); c.lineTo(ctx2 + 14, gy - bH * 0.76); c.closePath(); c.fill(); c.stroke();
@@ -2102,328 +2102,1460 @@
        PARIS LANDMARKS  (warm wrought iron / cream limestone / romantic palette)
     ══════════════════════════════════════════════ */
     function drawEiffelTower(c, cx, gy) {
-        var bH = H * 0.64;
-        var iron = '#7a5830', ironD = '#5a3818', ironL = '#9a7048';
+        var bH = H * 0.70;
+        var iron = '#7a5c30', ironD = '#52380e', ironL = '#a07840', ironHL = '#c09848';
 
-        radialGlow(c, cx, gy, 90, 255, 200, 100, 0.18);
+        /* golden ground uplights */
+        radialGlow(c, cx, gy, 100, 255, 180, 60, 0.20);
+        radialGlow(c, cx - 58, gy - 2, 42, 255, 160, 40, 0.16);
+        radialGlow(c, cx + 58, gy - 2, 42, 255, 160, 40, 0.16);
 
-        /* four spreading foundation legs */
-        c.strokeStyle = iron; c.lineWidth = 1.8;
-        c.beginPath(); c.moveTo(cx - 52, gy); c.lineTo(cx - 10, gy - bH * 0.40); c.stroke();
-        c.beginPath(); c.moveTo(cx + 52, gy); c.lineTo(cx + 10, gy - bH * 0.40); c.stroke();
-        c.beginPath(); c.moveTo(cx - 52, gy); c.lineTo(cx - 2, gy - bH * 0.72); c.stroke();
-        c.beginPath(); c.moveTo(cx + 52, gy); c.lineTo(cx + 2, gy - bH * 0.72); c.stroke();
+        /* ── CURVING BASE LEGS (catenary shape) ── */
+        c.strokeStyle = iron; c.lineWidth = 4;
+        /* front-left leg */
+        c.beginPath(); c.moveTo(cx - 66, gy); c.bezierCurveTo(cx - 66, gy - bH * 0.08, cx - 16, gy - bH * 0.36, cx - 13, gy - bH * 0.46); c.stroke();
+        /* front-right leg */
+        c.beginPath(); c.moveTo(cx + 66, gy); c.bezierCurveTo(cx + 66, gy - bH * 0.08, cx + 16, gy - bH * 0.36, cx + 13, gy - bH * 0.46); c.stroke();
+        /* rear-left leg (slightly thinner / darker) */
+        c.strokeStyle = ironD; c.lineWidth = 2.5;
+        c.beginPath(); c.moveTo(cx - 48, gy - 3); c.bezierCurveTo(cx - 48, gy - bH * 0.06, cx - 10, gy - bH * 0.34, cx - 8, gy - bH * 0.44); c.stroke();
+        /* rear-right leg */
+        c.beginPath(); c.moveTo(cx + 48, gy - 3); c.bezierCurveTo(cx + 48, gy - bH * 0.06, cx + 10, gy - bH * 0.34, cx + 8, gy - bH * 0.44); c.stroke();
 
-        /* iconic curved arch between legs */
-        c.strokeStyle = ironL; c.lineWidth = 1.4;
-        c.beginPath(); c.moveTo(cx - 52, gy); c.quadraticCurveTo(cx, gy - bH * 0.32, cx + 52, gy); c.stroke();
+        /* iconic parabolic arch between front legs at ground */
+        c.strokeStyle = ironL; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(cx - 66, gy); c.quadraticCurveTo(cx, gy - bH * 0.34, cx + 66, gy); c.stroke();
+        /* inner arch */
+        c.strokeStyle = 'rgba(160,120,64,0.45)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 52, gy - 2); c.quadraticCurveTo(cx, gy - bH * 0.27, cx + 52, gy - 2); c.stroke();
 
-        /* first-floor platform */
-        c.fillStyle = iron; c.strokeStyle = ironD; c.lineWidth = 1;
-        c.fillRect(cx - 14, gy - bH * 0.40, 28, 7); c.strokeRect(cx - 14, gy - bH * 0.40, 28, 7);
-        /* first-floor cross arch */
-        c.strokeStyle = ironL; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(cx - 14, gy - bH * 0.40 + 7); c.quadraticCurveTo(cx, gy - bH * 0.52, cx + 14, gy - bH * 0.40 + 7); c.stroke();
-
-        /* lattice diagonals — lower section */
-        c.strokeStyle = 'rgba(110,80,40,0.55)'; c.lineWidth = 0.9;
-        for (var ld = 0; ld < 5; ld++) {
-            var ldf = ld / 5, ldf2 = (ld + 1) / 5;
-            var lw1 = 52 * (1 - ldf * 0.73), lw2 = 52 * (1 - ldf2 * 0.73);
-            c.beginPath(); c.moveTo(cx - lw1, gy - bH * ldf * 0.72); c.lineTo(cx + lw2, gy - bH * ldf2 * 0.72); c.stroke();
-            c.beginPath(); c.moveTo(cx + lw1, gy - bH * ldf * 0.72); c.lineTo(cx - lw2, gy - bH * ldf2 * 0.72); c.stroke();
+        /* ── LOWER SECTION DENSE LATTICE (ground → first floor) ── */
+        /* horizontal girder rings */
+        c.strokeStyle = ironD; c.lineWidth = 1.4;
+        for (var hg = 1; hg <= 7; hg++) {
+            var hgf = hg / 8;
+            var hgw = 66 * (1 - hgf * 0.80);
+            c.beginPath(); c.moveTo(cx - hgw, gy - bH * 0.46 * hgf); c.lineTo(cx + hgw, gy - bH * 0.46 * hgf); c.stroke();
         }
-        c.strokeStyle = 'rgba(110,80,40,0.40)'; c.lineWidth = 0.7;
-        for (var ht = 1; ht < 4; ht++) {
-            var hty = gy - bH * 0.72 * ht / 4;
-            var htw = 52 * (1 - ht / 4 * 0.73);
-            c.beginPath(); c.moveTo(cx - htw, hty); c.lineTo(cx + htw, hty); c.stroke();
+        /* X-cross diagonals in each panel */
+        c.strokeStyle = 'rgba(120,88,40,0.58)'; c.lineWidth = 1.0;
+        for (var ld = 0; ld < 8; ld++) {
+            var ldf = ld / 8, ldf2 = (ld + 1) / 8;
+            var lw1 = 66 * (1 - ldf * 0.80), lw2 = 66 * (1 - ldf2 * 0.80);
+            var ly1 = gy - bH * 0.46 * ldf, ly2 = gy - bH * 0.46 * ldf2;
+            c.beginPath(); c.moveTo(cx - lw1, ly1); c.lineTo(cx + lw2, ly2); c.stroke();
+            c.beginPath(); c.moveTo(cx + lw1, ly1); c.lineTo(cx - lw2, ly2); c.stroke();
+            /* secondary V-diagonals */
+            c.strokeStyle = 'rgba(120,88,40,0.32)'; c.lineWidth = 0.7;
+            var mx = (lw1 + lw2) * 0.5;
+            c.beginPath(); c.moveTo(cx - lw1, ly1); c.lineTo(cx - mx * 0.5, (ly1 + ly2) * 0.5); c.stroke();
+            c.beginPath(); c.moveTo(cx + lw1, ly1); c.lineTo(cx + mx * 0.5, (ly1 + ly2) * 0.5); c.stroke();
+            c.strokeStyle = 'rgba(120,88,40,0.58)'; c.lineWidth = 1.0;
+        }
+        /* vertical struts */
+        c.strokeStyle = 'rgba(100,70,28,0.40)'; c.lineWidth = 0.6;
+        for (var vs = -3; vs <= 3; vs++) {
+            var vx = cx + vs * 18;
+            if (Math.abs(vs) > 0) { c.beginPath(); c.moveTo(vx, gy); c.lineTo(vx * 0.5 + cx * 0.5, gy - bH * 0.40); c.stroke(); }
         }
 
-        /* second-floor platform */
-        c.fillStyle = iron; c.strokeStyle = ironD; c.lineWidth = 1;
-        c.fillRect(cx - 9, gy - bH * 0.72, 18, 6); c.strokeRect(cx - 9, gy - bH * 0.72, 18, 6);
+        /* ── FIRST FLOOR (57 m) ── */
+        var f1Y = gy - bH * 0.46;
+        c.fillStyle = iron; c.strokeStyle = ironD; c.lineWidth = 1.5;
+        c.fillRect(cx - 22, f1Y - 8, 44, 12); c.strokeRect(cx - 22, f1Y - 8, 44, 12);
+        /* observation railing lines */
+        c.strokeStyle = ironL; c.lineWidth = 0.9;
+        c.beginPath(); c.moveTo(cx - 24, f1Y - 2); c.lineTo(cx + 24, f1Y - 2); c.stroke();
+        c.beginPath(); c.moveTo(cx - 24, f1Y + 3); c.lineTo(cx + 24, f1Y + 3); c.stroke();
+        /* balustrade posts */
+        for (var bp = -4; bp <= 4; bp++) { c.beginPath(); c.moveTo(cx + bp * 5, f1Y - 8); c.lineTo(cx + bp * 5, f1Y + 4); c.stroke(); }
+        /* restaurant amber glow */
+        radialGlow(c, cx, f1Y - 2, 38, 255, 200, 100, 0.30);
+        c.fillStyle = 'rgba(255,200,80,0.55)';
+        for (var fw1 = -3; fw1 <= 3; fw1++) { c.fillRect(cx + fw1 * 6 - 2, f1Y - 6, 4, 8); }
 
-        /* upper mast */
-        c.strokeStyle = iron; c.lineWidth = 1.8;
-        c.beginPath(); c.moveTo(cx - 8, gy - bH * 0.72); c.lineTo(cx - 2, gy - bH * 0.88); c.stroke();
-        c.beginPath(); c.moveTo(cx + 8, gy - bH * 0.72); c.lineTo(cx + 2, gy - bH * 0.88); c.stroke();
-        c.lineWidth = 1.2;
-        c.beginPath(); c.moveTo(cx - 2, gy - bH * 0.88); c.lineTo(cx, gy - bH); c.stroke();
-        c.beginPath(); c.moveTo(cx + 2, gy - bH * 0.88); c.lineTo(cx, gy - bH); c.stroke();
-        /* upper lattice */
-        c.strokeStyle = 'rgba(110,80,40,0.45)'; c.lineWidth = 0.7;
-        for (var ul = 0; ul < 3; ul++) {
-            var ulf = ul / 3, ulf2 = (ul + 1) / 3;
-            var uw1 = 8 * (1 - ulf * 0.75), uw2 = 8 * (1 - ulf2 * 0.75);
-            c.beginPath(); c.moveTo(cx - uw1, gy - bH * (0.72 + ulf * 0.16)); c.lineTo(cx + uw2, gy - bH * (0.72 + ulf2 * 0.16)); c.stroke();
-            c.beginPath(); c.moveTo(cx + uw1, gy - bH * (0.72 + ulf * 0.16)); c.lineTo(cx - uw2, gy - bH * (0.72 + ulf2 * 0.16)); c.stroke();
+        /* ── MIDDLE SECTION (first → second floor) ── */
+        /* main chords */
+        c.strokeStyle = iron; c.lineWidth = 3;
+        c.beginPath(); c.moveTo(cx - 14, f1Y); c.lineTo(cx - 3, gy - bH * 0.74); c.stroke();
+        c.beginPath(); c.moveTo(cx + 14, f1Y); c.lineTo(cx + 3, gy - bH * 0.74); c.stroke();
+        /* middle lattice */
+        c.strokeStyle = 'rgba(120,88,40,0.52)'; c.lineWidth = 0.9;
+        for (var ms = 0; ms < 7; ms++) {
+            var mf1 = ms / 7, mf2 = (ms + 1) / 7;
+            var mw1 = 14 * (1 - mf1 * 0.78), mw2 = 14 * (1 - mf2 * 0.78);
+            var my1 = f1Y - bH * 0.28 * mf1, my2 = f1Y - bH * 0.28 * mf2;
+            c.beginPath(); c.moveTo(cx - mw1, my1); c.lineTo(cx + mw2, my2); c.stroke();
+            c.beginPath(); c.moveTo(cx + mw1, my1); c.lineTo(cx - mw2, my2); c.stroke();
+            c.strokeStyle = 'rgba(100,70,28,0.32)'; c.lineWidth = 0.6;
+            c.beginPath(); c.moveTo(cx - mw1, my1); c.lineTo(cx + mw1, my1); c.stroke();
+            c.strokeStyle = 'rgba(120,88,40,0.52)'; c.lineWidth = 0.9;
         }
 
-        /* broadcast antenna */
-        c.strokeStyle = '#b0a090'; c.lineWidth = 2;
-        c.beginPath(); c.moveTo(cx, gy - bH); c.lineTo(cx, gy - bH * 1.08); c.stroke();
+        /* ── SECOND FLOOR (115 m) ── */
+        var f2Y = gy - bH * 0.74;
+        c.fillStyle = iron; c.strokeStyle = ironD; c.lineWidth = 1.3;
+        c.fillRect(cx - 13, f2Y - 6, 26, 9); c.strokeRect(cx - 13, f2Y - 6, 26, 9);
+        /* balcony rail */
+        c.strokeStyle = ironL; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(cx - 15, f2Y - 1); c.lineTo(cx + 15, f2Y - 1); c.stroke();
+        for (var bp2 = -3; bp2 <= 3; bp2++) { c.beginPath(); c.moveTo(cx + bp2 * 4.5, f2Y - 6); c.lineTo(cx + bp2 * 4.5, f2Y + 3); c.stroke(); }
+        radialGlow(c, cx, f2Y - 2, 26, 255, 190, 90, 0.32);
+        c.fillStyle = 'rgba(255,195,75,0.58)';
+        for (var fw2 = -2; fw2 <= 2; fw2++) { c.fillRect(cx + fw2 * 5 - 2, f2Y - 5, 4, 7); }
 
-        /* beacon */
-        radialGlow(c, cx, gy - bH * 1.08, 26, 255, 240, 120, 0.48);
-        c.fillStyle = '#ffffc0'; c.beginPath(); c.arc(cx, gy - bH * 1.08, 3.5, 0, Math.PI * 2); c.fill();
+        /* ── UPPER SECTION (second → third floor) ── */
+        c.strokeStyle = iron; c.lineWidth = 2.2;
+        c.beginPath(); c.moveTo(cx - 11, f2Y); c.lineTo(cx - 3, gy - bH * 0.88); c.stroke();
+        c.beginPath(); c.moveTo(cx + 11, f2Y); c.lineTo(cx + 3, gy - bH * 0.88); c.stroke();
+        c.strokeStyle = 'rgba(120,88,40,0.50)'; c.lineWidth = 0.9;
+        for (var us = 0; us < 5; us++) {
+            var uf1 = us / 5, uf2 = (us + 1) / 5;
+            var uw1 = 11 * (1 - uf1 * 0.72), uw2 = 11 * (1 - uf2 * 0.72);
+            var uy1 = f2Y - bH * 0.14 * uf1, uy2 = f2Y - bH * 0.14 * uf2;
+            c.beginPath(); c.moveTo(cx - uw1, uy1); c.lineTo(cx + uw2, uy2); c.stroke();
+            c.beginPath(); c.moveTo(cx + uw1, uy1); c.lineTo(cx - uw2, uy2); c.stroke();
+            c.strokeStyle = 'rgba(100,70,28,0.30)'; c.lineWidth = 0.6;
+            c.beginPath(); c.moveTo(cx - uw1, uy1); c.lineTo(cx + uw1, uy1); c.stroke();
+            c.strokeStyle = 'rgba(120,88,40,0.50)'; c.lineWidth = 0.9;
+        }
 
-        /* golden uplights at base legs */
-        radialGlow(c, cx - 35, gy - bH * 0.08, 35, 255, 180, 60, 0.20);
-        radialGlow(c, cx + 35, gy - bH * 0.08, 35, 255, 180, 60, 0.20);
+        /* ── THIRD FLOOR (276 m) ── */
+        var f3Y = gy - bH * 0.88;
+        c.fillStyle = iron; c.strokeStyle = ironD; c.lineWidth = 1.2;
+        c.fillRect(cx - 6, f3Y - 5, 12, 7); c.strokeRect(cx - 6, f3Y - 5, 12, 7);
+        radialGlow(c, cx, f3Y - 2, 20, 255, 180, 80, 0.38);
+        /* railing */
+        for (var bp3 = -2; bp3 <= 2; bp3++) { c.beginPath(); c.moveTo(cx + bp3 * 3, f3Y - 5); c.lineTo(cx + bp3 * 3, f3Y + 2); c.stroke(); }
+
+        /* ── TAPERING MAST above third floor ── */
+        c.strokeStyle = iron; c.lineWidth = 2.8;
+        c.beginPath(); c.moveTo(cx - 5, f3Y); c.lineTo(cx, gy - bH * 0.97); c.stroke();
+        c.beginPath(); c.moveTo(cx + 5, f3Y); c.lineTo(cx, gy - bH * 0.97); c.stroke();
+        c.lineWidth = 2;
+        c.beginPath(); c.moveTo(cx, gy - bH * 0.97); c.lineTo(cx, gy - bH * 1.02); c.stroke();
+
+        /* radio antennae */
+        c.strokeStyle = '#c0b0a0'; c.lineWidth = 2.5;
+        c.beginPath(); c.moveTo(cx, gy - bH * 1.02); c.lineTo(cx, gy - bH * 1.09); c.stroke();
+        c.strokeStyle = '#a09080'; c.lineWidth = 1.5;
+        /* antenna guywires */
+        c.strokeStyle = 'rgba(160,140,100,0.35)'; c.lineWidth = 0.7;
+        c.beginPath(); c.moveTo(cx, gy - bH * 1.06); c.lineTo(cx - 5, gy - bH * 1.01); c.stroke();
+        c.beginPath(); c.moveTo(cx, gy - bH * 1.06); c.lineTo(cx + 5, gy - bH * 1.01); c.stroke();
+
+        /* ── BEACON + ROTATING LIGHT ── */
+        var beaconY = gy - bH * 1.09;
+        radialGlow(c, cx, beaconY, 40, 255, 230, 80, 0.55);
+        radialGlow(c, cx, beaconY, 18, 255, 255, 180, 0.65);
+        c.fillStyle = '#fffff8'; c.beginPath(); c.arc(cx, beaconY, 3.8, 0, Math.PI * 2); c.fill();
+
+        /* LED light ring at second floor level */
+        c.strokeStyle = 'rgba(255,220,60,0.35)'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 13, f2Y - 3); c.lineTo(cx + 13, f2Y - 3); c.stroke();
+
+        /* golden uplights at base corner piers */
+        for (var ul = -1; ul <= 1; ul += 2) {
+            c.fillStyle = ironHL;
+            c.fillRect(cx + ul * 68 - 4, gy - 6, 8, 10);
+            radialGlow(c, cx + ul * 65, gy - 3, 28, 255, 200, 80, 0.20);
+        }
     }
     function drawArcDeTriomphe(c, cx, gy) {
-        var bH = H * 0.26;
-        var lime2 = '#e8dfc0', limeD2 = '#c0b090', limeSh = '#b09878';
+        var bH = H * 0.30;
+        var lime2 = '#e0d4a8', limeD2 = '#b8a870', limeL2 = '#f0e8c0', limeSh = '#a89060';
 
-        radialGlow(c, cx, gy, 70, 255, 220, 160, 0.16);
+        radialGlow(c, cx, gy, 90, 255, 220, 160, 0.18);
 
-        /* main block — cream Lutetian limestone */
+        /* ── WIDE LIMESTONE BASE ── */
+        c.fillStyle = limeD2; c.strokeStyle = '#988050'; c.lineWidth = 1;
+        c.fillRect(cx - 42, gy - bH * 0.06, 84, bH * 0.06); c.strokeRect(cx - 42, gy - bH * 0.06, 84, bH * 0.06);
+
+        /* main block */
         c.fillStyle = lime2; c.strokeStyle = limeD2; c.lineWidth = 1;
-        c.fillRect(cx - 38, gy - bH, 76, bH); c.strokeRect(cx - 38, gy - bH, 76, bH);
+        c.fillRect(cx - 40, gy - bH, 80, bH * 0.94); c.strokeRect(cx - 40, gy - bH, 80, bH * 0.94);
 
-        /* vertical grooves */
-        c.strokeStyle = 'rgba(160,130,80,0.30)'; c.lineWidth = 0.7;
-        for (var vg = -1; vg <= 1; vg += 2) { c.beginPath(); c.moveTo(cx + vg * 16, gy - bH); c.lineTo(cx + vg * 16, gy); c.stroke(); }
+        /* deep stone courses */
+        c.strokeStyle = 'rgba(150,120,70,0.28)'; c.lineWidth = 0.6;
+        for (var sc4 = 1; sc4 < 10; sc4++) {
+            var scy4 = gy - bH * sc4 * 0.095;
+            c.beginPath(); c.moveTo(cx - 40, scy4); c.lineTo(cx + 40, scy4); c.stroke();
+        }
 
-        /* main central arch */
-        c.fillStyle = '#0e0e10';
-        c.beginPath(); c.arc(cx, gy - bH * 0.44, 22, Math.PI, 0, false);
-        c.rect(cx - 22, gy - bH * 0.44, 44, bH * 0.44); c.fill();
+        /* MAIN CENTRAL ARCH — tall round arch */
+        c.fillStyle = '#080808';
+        c.beginPath(); c.arc(cx, gy - bH * 0.47, 25, Math.PI, 0, false);
+        c.rect(cx - 25, gy - bH * 0.47, 50, bH * 0.47); c.fill();
+        /* arch intrados moulding */
+        c.strokeStyle = limeD2; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, gy - bH * 0.47, 27, Math.PI, 0, false); c.stroke();
+        c.beginPath(); c.arc(cx, gy - bH * 0.47, 23, Math.PI, 0, false); c.stroke();
 
-        /* two flanking arches */
+        /* TWO FLANKING SMALLER ARCHES */
         for (var sa = -1; sa <= 1; sa += 2) {
-            c.beginPath(); c.arc(cx + sa * 28, gy - bH * 0.32, 10, Math.PI, 0, false);
-            c.rect(cx + sa * 28 - 10, gy - bH * 0.32, 20, bH * 0.32); c.fill();
+            var sax = cx + sa * 30;
+            c.fillStyle = '#080808';
+            c.beginPath(); c.arc(sax, gy - bH * 0.34, 11, Math.PI, 0, false);
+            c.rect(sax - 11, gy - bH * 0.34, 22, bH * 0.34); c.fill();
+            /* arch moulding */
+            c.strokeStyle = limeD2; c.lineWidth = 0.8;
+            c.beginPath(); c.arc(sax, gy - bH * 0.34, 13, Math.PI, 0, false); c.stroke();
         }
 
-        /* attic inscription band */
-        c.fillStyle = limeD2; c.fillRect(cx - 38, gy - bH * 0.88, 76, bH * 0.08);
-        c.strokeStyle = limeSh; c.lineWidth = 0.6;
-        c.beginPath(); c.moveTo(cx - 38, gy - bH * 0.88); c.lineTo(cx + 38, gy - bH * 0.88); c.stroke();
-        c.beginPath(); c.moveTo(cx - 38, gy - bH * 0.80); c.lineTo(cx + 38, gy - bH * 0.80); c.stroke();
+        /* ATTIC ZONE — inscription band */
+        c.fillStyle = limeL2; c.strokeStyle = limeD2; c.lineWidth = 0.8;
+        c.fillRect(cx - 40, gy - bH * 0.96, 80, bH * 0.16); c.strokeRect(cx - 40, gy - bH * 0.96, 80, bH * 0.16);
+        /* inscription lines */
+        c.strokeStyle = 'rgba(160,130,80,0.45)'; c.lineWidth = 0.7;
+        for (var il = 0; il < 3; il++) { c.beginPath(); c.moveTo(cx - 32, gy - bH * 0.91 + il * bH * 0.04); c.lineTo(cx + 32, gy - bH * 0.91 + il * bH * 0.04); c.stroke(); }
 
-        /* relief sculpture panels */
-        for (var rp = -1; rp <= 1; rp += 2) {
-            var rpx = cx + rp * 30;
-            c.fillStyle = 'rgba(190,155,100,0.25)'; c.fillRect(rpx - 6, gy - bH * 0.78, 12, bH * 0.30);
-            c.strokeStyle = limeSh; c.lineWidth = 0.6; c.strokeRect(rpx - 6, gy - bH * 0.78, 12, bH * 0.30);
-            c.fillStyle = 'rgba(160,130,80,0.35)';
-            c.beginPath(); c.arc(rpx, gy - bH * 0.60, 3, 0, Math.PI * 2); c.fill();
-            c.fillRect(rpx - 2, gy - bH * 0.57, 4, 9);
+        /* FOUR CORNER PILASTERS */
+        for (var cp = -1; cp <= 1; cp += 2) {
+            c.fillStyle = limeD2; c.strokeStyle = limeSh; c.lineWidth = 1;
+            c.fillRect(cx + cp * 40 - cp * 7, gy - bH, 7, bH * 0.94); c.strokeRect(cx + cp * 40 - cp * 7, gy - bH, 7, bH * 0.94);
+            /* capital at top */
+            c.fillStyle = limeL2;
+            c.fillRect(cx + cp * 40 - cp * 8, gy - bH, 9, 5);
         }
 
-        /* corner pilasters */
-        c.strokeStyle = limeD2; c.lineWidth = 2.5;
-        for (var cp = -1; cp <= 1; cp += 2) { c.beginPath(); c.moveTo(cx + cp * 38, gy - bH); c.lineTo(cx + cp * 38, gy); c.stroke(); }
-        c.fillStyle = 'rgba(220,200,140,0.22)'; c.fillRect(cx - 39, gy - bH, 78, 4);
+        /* RELIEF SCULPTURE PANELS — four high-relief panels
+           Left: "La Marseillaise" (Rude's famous group) */
+        var panels = [
+            { x: cx - 32, w: 12, label: 'MARS' },
+            { x: cx + 20, w: 12, label: 'TRPH' }
+        ];
+        for (var pn = 0; pn < panels.length; pn++) {
+            var pnx = panels[pn].x, pnw = panels[pn].w;
+            c.fillStyle = 'rgba(200,165,100,0.22)'; c.fillRect(pnx, gy - bH * 0.90, pnw, bH * 0.44);
+            c.strokeStyle = limeSh; c.lineWidth = 0.6; c.strokeRect(pnx, gy - bH * 0.90, pnw, bH * 0.44);
+            /* figure group — simplified sculptural relief */
+            c.fillStyle = 'rgba(180,145,80,0.42)';
+            /* winged figure at top */
+            c.beginPath(); c.arc(pnx + pnw * 0.5, gy - bH * 0.80, 3.5, 0, Math.PI * 2); c.fill();
+            c.fillRect(pnx + pnw * 0.5 - 2, gy - bH * 0.77, 4, 12);
+            /* wing suggestion */
+            c.strokeStyle = 'rgba(180,145,80,0.50)'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(pnx + pnw * 0.5 - 2, gy - bH * 0.78); c.lineTo(pnx + 1, gy - bH * 0.75); c.stroke();
+            c.beginPath(); c.moveTo(pnx + pnw * 0.5 + 2, gy - bH * 0.78); c.lineTo(pnx + pnw - 1, gy - bH * 0.75); c.stroke();
+            /* soldiers below */
+            for (var fig = 0; fig < 3; fig++) {
+                var figx = pnx + 2 + fig * 3.8;
+                c.fillStyle = 'rgba(170,135,72,0.40)';
+                c.beginPath(); c.arc(figx, gy - bH * 0.64, 1.8, 0, Math.PI * 2); c.fill();
+                c.fillRect(figx - 1.2, gy - bH * 0.62, 2.4, 9);
+                /* sword/spear */
+                c.strokeStyle = 'rgba(200,160,80,0.50)'; c.lineWidth = 0.7;
+                c.beginPath(); c.moveTo(figx + 2, gy - bH * 0.62); c.lineTo(figx + 5, gy - bH * 0.68); c.stroke();
+            }
+        }
 
-        /* eternal flame */
-        radialGlow(c, cx, gy - 6, 14, 255, 140, 40, 0.48);
-        c.fillStyle = '#ff8020'; c.beginPath(); c.arc(cx, gy - 6, 3, 0, Math.PI * 2); c.fill();
-        c.fillStyle = '#ffe060'; c.beginPath(); c.arc(cx, gy - 8, 1.5, 0, Math.PI * 2); c.fill();
+        /* CORNICE at very top */
+        c.fillStyle = limeL2; c.strokeStyle = limeD2; c.lineWidth = 1;
+        c.fillRect(cx - 42, gy - bH, 84, 6); c.strokeRect(cx - 42, gy - bH, 84, 6);
+        /* corona moulding */
+        c.fillStyle = 'rgba(240,230,190,0.35)'; c.fillRect(cx - 42, gy - bH, 84, 2);
+
+        /* TOP ATTIC inscription text suggestion */
+        c.strokeStyle = 'rgba(150,120,70,0.50)'; c.lineWidth = 0.6;
+        c.beginPath(); c.moveTo(cx - 20, gy - bH * 0.985); c.lineTo(cx + 20, gy - bH * 0.985); c.stroke();
+
+        /* ── ETERNAL FLAME (Tomb of Unknown Soldier) ── */
+        /* stone slab */
+        c.fillStyle = limeD2; c.strokeStyle = limeSh; c.lineWidth = 0.8;
+        c.fillRect(cx - 10, gy - bH * 0.08, 20, 5); c.strokeRect(cx - 10, gy - bH * 0.08, 20, 5);
+        /* flame */
+        radialGlow(c, cx, gy - bH * 0.11, 22, 255, 140, 30, 0.55);
+        radialGlow(c, cx, gy - bH * 0.12, 10, 255, 220, 80, 0.65);
+        c.fillStyle = '#ff7010'; c.beginPath(); c.arc(cx, gy - bH * 0.11, 3.5, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffe050'; c.beginPath(); c.arc(cx, gy - bH * 0.13, 1.8, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#ffffff'; c.beginPath(); c.arc(cx, gy - bH * 0.14, 0.8, 0, Math.PI * 2); c.fill();
+
+        /* uplights at base */
+        radialGlow(c, cx - 30, gy - 4, 30, 255, 210, 120, 0.18);
+        radialGlow(c, cx + 30, gy - 4, 30, 255, 210, 120, 0.18);
     }
     function drawNotreDame(c, cx, gy) {
-        var bH = H * 0.32;
-        var stone2 = '#9a9080', stoneD2 = '#7a7060', stoneL2 = '#b4a898';
+        var bH = H * 0.36;
+        var stone2 = '#9a9282', stoneD2 = '#726a5a', stoneL2 = '#b8b0a0', stoneHL = '#c8c0b0';
 
-        radialGlow(c, cx, gy, 80, 200, 180, 220, 0.14);
+        radialGlow(c, cx, gy, 100, 180, 160, 220, 0.14);
 
-        /* nave body — aged Gothic grey */
+        /* ── ÎLE DE LA CITÉ — Seine island shimmer ── */
+        c.fillStyle = 'rgba(14,28,52,0.30)'; c.fillRect(cx - 70, gy - bH * 0.03, 140, bH * 0.03);
+        c.strokeStyle = 'rgba(40,80,140,0.20)'; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(cx - 70, gy - bH * 0.015); c.lineTo(cx + 70, gy - bH * 0.015); c.stroke();
+
+        /* ── NAVE BODY ── */
         c.fillStyle = stone2; c.strokeStyle = stoneD2; c.lineWidth = 1;
-        c.fillRect(cx - 52, gy - bH * 0.58, 104, bH * 0.58); c.strokeRect(cx - 52, gy - bH * 0.58, 104, bH * 0.58);
+        c.fillRect(cx - 55, gy - bH * 0.60, 110, bH * 0.57); c.strokeRect(cx - 55, gy - bH * 0.60, 110, bH * 0.57);
+        /* vertical buttress ribs on nave */
+        c.strokeStyle = 'rgba(100,90,70,0.35)'; c.lineWidth = 1;
+        for (var nvb = -4; nvb <= 4; nvb++) { c.beginPath(); c.moveTo(cx + nvb * 12, gy); c.lineTo(cx + nvb * 12, gy - bH * 0.60); c.stroke(); }
 
-        /* flying buttresses */
-        c.strokeStyle = 'rgba(100,90,75,0.50)'; c.lineWidth = 1.2;
-        for (var fb = -3; fb <= 3; fb += 2) {
-            var fbx = cx + fb * 16;
-            c.beginPath(); c.moveTo(fbx, gy); c.lineTo(fbx - 4, gy - bH * 0.38); c.stroke();
-            c.beginPath(); c.moveTo(fbx - 4, gy - bH * 0.38); c.quadraticCurveTo(fbx - 2, gy - bH * 0.42, fbx - 2, gy - bH * 0.40); c.stroke();
+        /* ── DENSE FLYING BUTTRESSES ── */
+        for (var fb = -3; fb <= 3; fb++) {
+            var fbx = cx + fb * 17;
+            /* outer pier column */
+            c.fillStyle = stoneD2; c.fillRect(fbx - 2, gy, 5, -bH * 0.22);
+            /* upper flying arc */
+            c.strokeStyle = 'rgba(110,100,80,0.55)'; c.lineWidth = 1.4;
+            c.beginPath(); c.moveTo(fbx + 2, gy - bH * 0.22); c.quadraticCurveTo(fbx - 5, gy - bH * 0.44, cx + fb * 12, gy - bH * 0.46); c.stroke();
+            /* lower flying arc */
+            c.lineWidth = 1;
+            c.beginPath(); c.moveTo(fbx + 2, gy - bH * 0.16); c.quadraticCurveTo(fbx - 4, gy - bH * 0.34, cx + fb * 12, gy - bH * 0.36); c.stroke();
+            /* pinnacle on outer pier */
+            c.fillStyle = stoneL2;
+            c.beginPath(); c.moveTo(fbx - 2, gy - bH * 0.22); c.lineTo(fbx + 1.5, gy - bH * 0.26); c.lineTo(fbx + 5, gy - bH * 0.22); c.closePath(); c.fill();
         }
 
-        /* three portal doorways */
-        c.fillStyle = '#0e0c0a';
-        c.fillRect(cx - 8, gy - bH * 0.35, 16, bH * 0.35);
-        c.beginPath(); c.arc(cx, gy - bH * 0.35, 8, Math.PI, 0, false); c.fill();
-        for (var sp3 = -1; sp3 <= 1; sp3 += 2) {
-            c.fillRect(cx + sp3 * 26 - 5, gy - bH * 0.24, 10, bH * 0.24);
-            c.beginPath(); c.arc(cx + sp3 * 26, gy - bH * 0.24, 5, Math.PI, 0, false); c.fill();
-        }
-        c.strokeStyle = stoneD2; c.lineWidth = 0.7;
-        c.beginPath(); c.arc(cx, gy - bH * 0.35, 10, Math.PI, 0, false); c.stroke();
-
-        /* twin towers */
-        for (var tw2 = -1; tw2 <= 1; tw2 += 2) {
-            c.fillStyle = stone2; c.strokeStyle = stoneD2; c.lineWidth = 1;
-            c.fillRect(cx + tw2 * 37 - 10, gy - bH * 0.95, 20, bH * 0.37); c.strokeRect(cx + tw2 * 37 - 10, gy - bH * 0.95, 20, bH * 0.37);
-            c.fillStyle = '#0e0c0a';
-            for (var tw3 = 0; tw3 < 3; tw3++) {
-                var twy2 = gy - bH * (0.62 + tw3 * 0.12);
-                c.fillRect(cx + tw2 * 37 - 4, twy2, 8, 12);
-                c.beginPath(); c.arc(cx + tw2 * 37, twy2, 4, Math.PI, 0, false); c.fill();
-            }
-            c.fillStyle = stoneD2; c.fillRect(cx + tw2 * 37 - 11, gy - bH * 0.95, 22, 3);
+        /* ── WEST FACADE — three portals + Gallery of Kings ── */
+        /* Gallery of Kings — 28 statues band */
+        c.fillStyle = stoneL2; c.strokeStyle = stoneD2; c.lineWidth = 0.8;
+        c.fillRect(cx - 55, gy - bH * 0.66, 110, bH * 0.06); c.strokeRect(cx - 55, gy - bH * 0.66, 110, bH * 0.06);
+        /* king statue silhouettes */
+        c.fillStyle = 'rgba(180,170,150,0.55)';
+        for (var kg = -6; kg <= 6; kg++) {
+            var kgx = cx + kg * 8.5;
+            c.beginPath(); c.arc(kgx, gy - bH * 0.67, 2, 0, Math.PI * 2); c.fill();
+            c.fillRect(kgx - 1.5, gy - bH * 0.65, 3, 6);
         }
 
-        /* rose window — purple/blue glow */
-        var rwY = gy - bH * 0.72;
-        radialGlow(c, cx, rwY, 30, 140, 80, 220, 0.38);
-        radialGlow(c, cx, rwY, 18, 220, 120, 255, 0.48);
-        c.strokeStyle = stoneD2; c.lineWidth = 1;
-        c.beginPath(); c.arc(cx, rwY, 16, 0, Math.PI * 2); c.stroke();
-        c.strokeStyle = 'rgba(100,80,130,0.55)'; c.lineWidth = 0.7;
-        for (var rsp = 0; rsp < 8; rsp++) {
-            var rspa = rsp * Math.PI / 4;
-            c.beginPath(); c.moveTo(cx, rwY); c.lineTo(cx + Math.cos(rspa) * 15, rwY + Math.sin(rspa) * 15); c.stroke();
-        }
-        c.beginPath(); c.arc(cx, rwY, 8, 0, Math.PI * 2); c.stroke();
-
-        /* rebuilt octagonal spire (post-2019 Notre-Dame) */
-        c.fillStyle = stone2; c.strokeStyle = stoneD2; c.lineWidth = 1;
+        /* Three main portal doorways */
+        c.fillStyle = '#0a0806';
+        /* centre portal — pointed Gothic arch */
         c.beginPath();
-        c.moveTo(cx - 6, gy - bH * 0.58); c.lineTo(cx - 4, gy - bH * 0.75);
-        c.lineTo(cx, gy - bH); c.lineTo(cx + 4, gy - bH * 0.75); c.lineTo(cx + 6, gy - bH * 0.58);
+        c.moveTo(cx - 10, gy - bH * 0.37);
+        c.lineTo(cx - 10, gy - bH * 0.50);
+        c.quadraticCurveTo(cx - 10, gy - bH * 0.57, cx, gy - bH * 0.58);
+        c.quadraticCurveTo(cx + 10, gy - bH * 0.57, cx + 10, gy - bH * 0.50);
+        c.lineTo(cx + 10, gy - bH * 0.37); c.closePath(); c.fill();
+        /* flanking portals */
+        for (var sp3 = -1; sp3 <= 1; sp3 += 2) {
+            var spx3 = cx + sp3 * 30;
+            c.beginPath();
+            c.moveTo(spx3 - 7, gy - bH * 0.28);
+            c.lineTo(spx3 - 7, gy - bH * 0.40);
+            c.quadraticCurveTo(spx3 - 7, gy - bH * 0.46, spx3, gy - bH * 0.47);
+            c.quadraticCurveTo(spx3 + 7, gy - bH * 0.46, spx3 + 7, gy - bH * 0.40);
+            c.lineTo(spx3 + 7, gy - bH * 0.28); c.closePath(); c.fill();
+        }
+        /* portal moulding archivolts */
+        c.strokeStyle = stoneD2; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(cx - 12, gy - bH * 0.37); c.quadraticCurveTo(cx - 12, gy - bH * 0.60, cx, gy - bH * 0.61); c.quadraticCurveTo(cx + 12, gy - bH * 0.60, cx + 12, gy - bH * 0.37); c.stroke();
+        c.beginPath(); c.moveTo(cx - 14, gy - bH * 0.37); c.quadraticCurveTo(cx - 14, gy - bH * 0.62, cx, gy - bH * 0.63); c.quadraticCurveTo(cx + 14, gy - bH * 0.62, cx + 14, gy - bH * 0.37); c.stroke();
+
+        /* ── TWIN TOWERS ── */
+        for (var tw2 = -1; tw2 <= 1; tw2 += 2) {
+            var twx = cx + tw2 * 40;
+            c.fillStyle = stone2; c.strokeStyle = stoneD2; c.lineWidth = 1;
+            c.fillRect(twx - 12, gy - bH * 0.98, 24, bH * 0.38); c.strokeRect(twx - 12, gy - bH * 0.98, 24, bH * 0.38);
+            /* tower stone courses */
+            c.strokeStyle = 'rgba(100,90,70,0.28)'; c.lineWidth = 0.5;
+            for (var tc3 = 1; tc3 < 6; tc3++) { c.beginPath(); c.moveTo(twx - 12, gy - bH * (0.60 + tc3 * 0.06)); c.lineTo(twx + 12, gy - bH * (0.60 + tc3 * 0.06)); c.stroke(); }
+            /* twin tower lancet windows */
+            c.fillStyle = '#0a0806';
+            for (var tw3 = 0; tw3 < 4; tw3++) {
+                var twy2 = gy - bH * (0.66 + tw3 * 0.08);
+                c.fillRect(twx - 5, twy2, 10, 14);
+                c.beginPath(); c.moveTo(twx - 5, twy2); c.lineTo(twx, twy2 - 6); c.lineTo(twx + 5, twy2); c.closePath(); c.fill();
+                if (tw3 < 2) radialGlow(c, twx, twy2 + 6, 6, 255, 200, 80, 0.14);
+            }
+            /* tower top arcade belfry */
+            c.strokeStyle = 'rgba(100,90,70,0.45)'; c.lineWidth = 0.8;
+            for (var bl2 = -1; bl2 <= 1; bl2++) { c.beginPath(); c.moveTo(twx + bl2 * 6, gy - bH * 0.98); c.lineTo(twx + bl2 * 6, gy - bH * 0.96); c.stroke(); }
+            /* crenellated parapet */
+            c.fillStyle = stone2;
+            for (var cr2 = -2; cr2 <= 2; cr2++) { c.fillRect(twx + cr2 * 5 - 2, gy - bH * 0.98, 4, 5); }
+        }
+
+        /* ── GREAT ROSE WINDOW ── */
+        var rwY = gy - bH * 0.76;
+        radialGlow(c, cx, rwY, 36, 120, 60, 220, 0.42);
+        radialGlow(c, cx, rwY, 22, 200, 100, 255, 0.50);
+        /* outer ring */
+        c.strokeStyle = stoneD2; c.lineWidth = 1.2;
+        c.beginPath(); c.arc(cx, rwY, 18, 0, Math.PI * 2); c.stroke();
+        /* stone tracery rings */
+        c.beginPath(); c.arc(cx, rwY, 12, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx, rwY, 6, 0, Math.PI * 2); c.stroke();
+        /* radial tracery spokes */
+        c.strokeStyle = 'rgba(100,70,140,0.60)'; c.lineWidth = 0.8;
+        for (var rsp = 0; rsp < 12; rsp++) {
+            var rspa = rsp * Math.PI / 6;
+            c.beginPath(); c.moveTo(cx + Math.cos(rspa) * 6, rwY + Math.sin(rspa) * 6);
+            c.lineTo(cx + Math.cos(rspa) * 18, rwY + Math.sin(rspa) * 18); c.stroke();
+        }
+        /* oculus jewel */
+        c.fillStyle = 'rgba(140,80,220,0.40)'; c.beginPath(); c.arc(cx, rwY, 5, 0, Math.PI * 2); c.fill();
+
+        /* ── REBUILT OCTAGONAL SPIRE (2024 reconstruction, copper) ── */
+        var spireBase = gy - bH * 0.60;
+        c.fillStyle = '#4a7050'; c.strokeStyle = '#3a5840'; c.lineWidth = 1;
+        /* spire shaft — octagonal */
+        c.beginPath();
+        c.moveTo(cx - 8, spireBase);
+        c.lineTo(cx - 6, gy - bH * 0.78);
+        c.lineTo(cx - 3, gy - bH * 0.88);
+        c.lineTo(cx, gy - bH);
+        c.lineTo(cx + 3, gy - bH * 0.88);
+        c.lineTo(cx + 6, gy - bH * 0.78);
+        c.lineTo(cx + 8, spireBase);
         c.closePath(); c.fill(); c.stroke();
-        radialGlow(c, cx, gy - bH, 10, 255, 220, 140, 0.30);
-        c.fillStyle = '#c0a840'; c.beginPath(); c.arc(cx, gy - bH, 2, 0, Math.PI * 2); c.fill();
+        /* spire highlight */
+        c.strokeStyle = '#6a9070'; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(cx - 1, spireBase); c.lineTo(cx, gy - bH); c.stroke();
+        /* crockets */
+        c.fillStyle = '#3a5840';
+        for (var crk = 1; crk < 4; crk++) {
+            var crkf = crk / 4;
+            c.fillRect(cx - 6 * (1 - crkf) - 2, gy - bH * (0.60 + 0.40 * crkf) - 2, 4, 4);
+            c.fillRect(cx + 6 * (1 - crkf) - 2, gy - bH * (0.60 + 0.40 * crkf) - 2, 4, 4);
+        }
+        /* golden cockerel weathervane at tip */
+        radialGlow(c, cx, gy - bH, 12, 255, 220, 100, 0.35);
+        c.fillStyle = '#d4a830'; c.beginPath(); c.arc(cx, gy - bH, 2.5, 0, Math.PI * 2); c.fill();
     }
 
     /* ══════════════════════════════════════════════
        PRAGUE LANDMARKS  (vivid ochre / terracotta / medieval palette)
     ══════════════════════════════════════════════ */
     function drawPragueCastle(c, cx, gy) {
-        var bH = H * 0.38;
-        var ochre = '#d4a840', ochreD = '#b08828', ochreL = '#e8c060';
-        var terra = '#a03020', terraD = '#803020';
+        var bH = H * 0.46;
+        var ochre = '#d4a840', ochreD = '#a87e1c', ochreL = '#f0c860';
+        var terra = '#9a3022', terraD = '#722210', terraL = '#c05030';
+        var stone5 = '#a09880', stoneD5 = '#787060';
+        var dark7 = '#0c0a08';
 
-        radialGlow(c, cx, gy, 100, 255, 200, 100, 0.14);
+        radialGlow(c, cx, gy, 120, 255, 200, 100, 0.14);
 
-        /* castle hill / base rampart */
-        c.fillStyle = '#3a3020'; c.strokeStyle = '#5a5030'; c.lineWidth = 0.8;
+        /* ── HRADČANY HILL ── */
+        c.fillStyle = '#3a3520'; c.strokeStyle = '#2a2510'; c.lineWidth = 0.8;
         c.beginPath();
-        c.moveTo(cx - 75, gy); c.lineTo(cx - 75, gy - bH * 0.22);
-        c.lineTo(cx - 55, gy - bH * 0.26); c.lineTo(cx + 55, gy - bH * 0.26);
-        c.lineTo(cx + 75, gy - bH * 0.22); c.lineTo(cx + 75, gy);
-        c.closePath(); c.fill(); c.stroke();
+        c.moveTo(cx - 90, gy); c.lineTo(cx - 90, gy - bH * 0.18);
+        c.quadraticCurveTo(cx - 70, gy - bH * 0.28, cx - 40, gy - bH * 0.30);
+        c.lineTo(cx + 40, gy - bH * 0.30);
+        c.quadraticCurveTo(cx + 70, gy - bH * 0.28, cx + 90, gy - bH * 0.18);
+        c.lineTo(cx + 90, gy); c.closePath(); c.fill(); c.stroke();
 
-        /* palace wing — vivid ochre */
+        /* Rampart wall with battlements */
+        c.fillStyle = stone5; c.strokeStyle = stoneD5; c.lineWidth = 1;
+        c.fillRect(cx - 88, gy - bH * 0.34, 176, bH * 0.04); c.strokeRect(cx - 88, gy - bH * 0.34, 176, bH * 0.04);
+        /* Merlons (battlements) */
+        c.fillStyle = stone5;
+        for (var bm3 = -11; bm3 <= 11; bm3++) { c.fillRect(cx + bm3 * 8 - 3, gy - bH * 0.34 - 7, 5, 7); }
+
+        /* ── OLD ROYAL PALACE WING ── */
         c.fillStyle = ochre; c.strokeStyle = ochreD; c.lineWidth = 1;
-        c.fillRect(cx - 55, gy - bH * 0.55, 110, bH * 0.29); c.strokeRect(cx - 55, gy - bH * 0.55, 110, bH * 0.29);
-
-        /* terracotta pitched roof */
+        c.fillRect(cx - 80, gy - bH * 0.56, 160, bH * 0.22); c.strokeRect(cx - 80, gy - bH * 0.56, 160, bH * 0.22);
+        /* window arcade — arched windows */
+        c.fillStyle = dark7;
+        for (var pw = -6; pw <= 6; pw++) {
+            var pwx = cx + pw * 11;
+            c.fillRect(pwx - 3, gy - bH * 0.52, 6, 11);
+            c.beginPath(); c.arc(pwx, gy - bH * 0.52, 3, Math.PI, 0, false); c.fill();
+            if (Math.abs(pw) <= 4) radialGlow(c, pwx, gy - bH * 0.48, 7, 255, 220, 150, 0.16);
+        }
+        /* Mansard / pitched roof with dormer windows */
         c.fillStyle = terra; c.strokeStyle = terraD; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(cx - 57, gy - bH * 0.55); c.lineTo(cx, gy - bH * 0.67); c.lineTo(cx + 57, gy - bH * 0.55); c.closePath(); c.fill(); c.stroke();
+        c.fillRect(cx - 82, gy - bH * 0.62, 164, bH * 0.06); c.strokeRect(cx - 82, gy - bH * 0.62, 164, bH * 0.06);
+        /* dormers */
+        c.fillStyle = ochreD;
+        for (var dm = -4; dm <= 4; dm += 2) {
+            c.beginPath(); c.moveTo(cx + dm * 18 - 7, gy - bH * 0.62); c.lineTo(cx + dm * 18, gy - bH * 0.68); c.lineTo(cx + dm * 18 + 7, gy - bH * 0.62); c.closePath(); c.fill();
+            c.fillStyle = dark7; c.fillRect(cx + dm * 18 - 3, gy - bH * 0.65, 6, 5);
+            c.fillStyle = ochreD;
+        }
+        /* ornamental urns on roofline */
+        c.fillStyle = stoneD5;
+        for (var urn = -5; urn <= 5; urn += 2) { c.beginPath(); c.arc(cx + urn * 15, gy - bH * 0.62, 2, 0, Math.PI * 2); c.fill(); c.fillRect(cx + urn * 15 - 1.5, gy - bH * 0.62, 3, 4); }
 
-        /* palace windows — arched, warm lit */
-        c.fillStyle = 'rgba(255,240,200,0.80)';
-        for (var pw = -4; pw <= 4; pw++) {
-            if (pw === 0) continue;
-            var pwx = cx + pw * 12;
-            c.fillRect(pwx - 3, gy - bH * 0.50, 6, 10);
-            c.beginPath(); c.arc(pwx, gy - bH * 0.50, 3, Math.PI, 0, false); c.fill();
-            radialGlow(c, pwx, gy - bH * 0.46, 8, 255, 240, 180, 0.18);
+        /* ── ST. GEORGE BASILICA (Romanesque) — right side ── */
+        c.fillStyle = stone5; c.strokeStyle = stoneD5; c.lineWidth = 1;
+        c.fillRect(cx + 42, gy - bH * 0.54, 36, bH * 0.20); c.strokeRect(cx + 42, gy - bH * 0.54, 36, bH * 0.20);
+        /* twin Romanesque towers */
+        for (var rt = -1; rt <= 1; rt += 2) {
+            var rtx = cx + 60 + rt * 12;
+            c.fillRect(rtx - 5, gy - bH * 0.70, 10, bH * 0.16); c.strokeRect(rtx - 5, gy - bH * 0.70, 10, bH * 0.16);
+            c.fillStyle = terra;
+            c.beginPath(); c.arc(rtx, gy - bH * 0.70, 6, Math.PI, 0, false); c.fill();
+            c.strokeStyle = terraD; c.stroke();
+            c.fillStyle = stone5; c.strokeStyle = stoneD5;
+            /* round Romanesque windows */
+            c.fillStyle = dark7; c.beginPath(); c.arc(rtx, gy - bH * 0.64, 3, 0, Math.PI * 2); c.fill();
         }
 
-        /* St. Vitus Cathedral — twin Gothic spires */
+        /* ── ST. VITUS CATHEDRAL — the crown jewel ── */
+        /* Cathedral nave body */
+        c.fillStyle = '#787268'; c.strokeStyle = '#504840'; c.lineWidth = 1;
+        c.fillRect(cx - 34, gy - bH * 0.76, 68, bH * 0.44); c.strokeRect(cx - 34, gy - bH * 0.76, 68, bH * 0.44);
+        /* Cathedral flying buttresses */
+        c.strokeStyle = 'rgba(90,80,60,0.50)'; c.lineWidth = 1;
+        for (var cfb = -3; cfb <= 3; cfb++) {
+            var cfbx = cx + cfb * 10;
+            c.beginPath(); c.moveTo(cfbx + 3, gy - bH * 0.54); c.quadraticCurveTo(cfbx - 4, gy - bH * 0.68, cfbx - 2, gy - bH * 0.70); c.stroke();
+        }
+        /* Rose window of cathedral */
+        var rwY2 = gy - bH * 0.82;
+        radialGlow(c, cx, rwY2, 22, 140, 80, 220, 0.40);
+        c.strokeStyle = '#504840'; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, rwY2, 14, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx, rwY2, 8, 0, Math.PI * 2); c.stroke();
+        c.strokeStyle = 'rgba(120,80,180,0.55)'; c.lineWidth = 0.7;
+        for (var rws = 0; rws < 8; rws++) {
+            var rwsa = rws * Math.PI / 4;
+            c.beginPath(); c.moveTo(cx + Math.cos(rwsa) * 8, rwY2 + Math.sin(rwsa) * 8);
+            c.lineTo(cx + Math.cos(rwsa) * 14, rwY2 + Math.sin(rwsa) * 14); c.stroke();
+        }
+        /* Cathedral windows */
+        c.fillStyle = dark7;
+        for (var cw = -2; cw <= 2; cw++) {
+            var cwx = cx + cw * 14;
+            c.fillRect(cwx - 4, gy - bH * 0.70, 8, 16);
+            c.beginPath(); c.moveTo(cwx - 4, gy - bH * 0.70); c.lineTo(cwx, gy - bH * 0.75); c.lineTo(cwx + 4, gy - bH * 0.70); c.closePath(); c.fill();
+            if (Math.abs(cw) <= 1) radialGlow(c, cwx, gy - bH * 0.65, 8, 140, 80, 220, 0.22);
+        }
+
+        /* TWIN GOTHIC SPIRES of St. Vitus */
         for (var sp2 = -1; sp2 <= 1; sp2 += 2) {
-            var spx = cx + sp2 * 22;
-            c.fillStyle = ochre; c.strokeStyle = ochreD; c.lineWidth = 1;
-            c.fillRect(spx - 9, gy - bH * 0.96, 18, bH * 0.41); c.strokeRect(spx - 9, gy - bH * 0.96, 18, bH * 0.41);
-            /* terracotta spire roof */
-            c.fillStyle = terra; c.strokeStyle = terraD; c.lineWidth = 1;
-            c.beginPath(); c.moveTo(spx - 9, gy - bH * 0.96); c.lineTo(spx, gy - bH); c.lineTo(spx + 9, gy - bH * 0.96); c.closePath(); c.fill(); c.stroke();
-            /* Gothic lancet windows */
-            c.fillStyle = '#0e0c08';
-            for (var spl = 0; spl < 3; spl++) {
-                var sply = gy - bH * (0.62 + spl * 0.12);
-                c.fillRect(spx - 3, sply, 6, 12);
-                c.beginPath(); c.arc(spx, sply, 3, Math.PI, 0, false); c.fill();
+            var spx = cx + sp2 * 24;
+            /* tower body */
+            c.fillStyle = '#6a6258'; c.strokeStyle = '#484038'; c.lineWidth = 1;
+            c.fillRect(spx - 11, gy - bH * 0.97, 22, bH * 0.21); c.strokeRect(spx - 11, gy - bH * 0.97, 22, bH * 0.21);
+            /* tower Gothic windows */
+            c.fillStyle = dark7;
+            for (var spw = 0; spw < 4; spw++) {
+                var spwy = gy - bH * (0.78 + spw * 0.05);
+                c.fillRect(spx - 4, spwy, 8, 11);
+                c.beginPath(); c.moveTo(spx - 4, spwy); c.lineTo(spx, spwy - 5); c.lineTo(spx + 4, spwy); c.closePath(); c.fill();
             }
-            radialGlow(c, spx, gy - bH, 10, 255, 220, 140, 0.18);
+            /* decorative stone tracery ring below spire */
+            c.strokeStyle = '#a09078'; c.lineWidth = 0.8;
+            c.beginPath(); c.arc(spx, gy - bH * 0.97, 8, Math.PI, 0, false); c.stroke();
+            /* SPIRE — tall and graceful */
+            c.fillStyle = '#5a5248'; c.strokeStyle = '#383028'; c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(spx - 11, gy - bH * 0.97);
+            c.lineTo(spx - 4, gy - bH * 0.99);
+            c.lineTo(spx, gy - bH);
+            c.lineTo(spx + 4, gy - bH * 0.99);
+            c.lineTo(spx + 11, gy - bH * 0.97);
+            c.closePath(); c.fill(); c.stroke();
+            /* spire crockets */
+            for (var spc = 1; spc < 4; spc++) {
+                var spcf = spc / 4;
+                var spcW = 11 * (1 - spcf);
+                c.fillRect(spx - spcW - 2, gy - bH * (0.97 + spcf * 0.03) - 2, 4, 4);
+                c.fillRect(spx + spcW - 2, gy - bH * (0.97 + spcf * 0.03) - 2, 4, 4);
+            }
+            /* gold cross finial */
+            radialGlow(c, spx, gy - bH, 12, 220, 180, 60, 0.25);
+            c.fillStyle = '#d4a820'; c.beginPath(); c.arc(spx, gy - bH, 2.5, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#e8c040'; c.lineWidth = 1.5;
+            c.beginPath(); c.moveTo(spx, gy - bH - 2.5); c.lineTo(spx, gy - bH - 8); c.stroke();
+            c.beginPath(); c.moveTo(spx - 3, gy - bH - 6); c.lineTo(spx + 3, gy - bH - 6); c.stroke();
         }
 
-        /* rose window — warm purple glow */
-        radialGlow(c, cx, gy - bH * 0.74, 20, 180, 140, 220, 0.30);
-        c.strokeStyle = ochreD; c.lineWidth = 1;
-        c.beginPath(); c.arc(cx, gy - bH * 0.74, 12, 0, Math.PI * 2); c.stroke();
-        c.strokeStyle = 'rgba(160,120,200,0.48)'; c.lineWidth = 0.7;
-        for (var rwsp = 0; rwsp < 6; rwsp++) {
-            var rwspa = rwsp * Math.PI / 3;
-            c.beginPath(); c.moveTo(cx, gy - bH * 0.74); c.lineTo(cx + Math.cos(rwspa) * 11, gy - bH * 0.74 + Math.sin(rwspa) * 11); c.stroke();
+        /* ── CORNER DEFENSIVE TOWERS ── */
+        for (var ct2 = -1; ct2 <= 1; ct2 += 2) {
+            var ctX2 = cx + ct2 * 82;
+            c.fillStyle = stone5; c.strokeStyle = stoneD5; c.lineWidth = 1;
+            c.fillRect(ctX2 - 8, gy - bH * 0.50, 16, bH * 0.50); c.strokeRect(ctX2 - 8, gy - bH * 0.50, 16, bH * 0.50);
+            /* tower windows */
+            c.fillStyle = dark7;
+            for (var ctw = 0; ctw < 3; ctw++) {
+                c.fillRect(ctX2 - 3, gy - bH * (0.15 + ctw * 0.12), 6, 9);
+                c.beginPath(); c.arc(ctX2, gy - bH * (0.15 + ctw * 0.12), 3, Math.PI, 0, false); c.fill();
+            }
+            /* conical tower roof */
+            c.fillStyle = terra; c.strokeStyle = terraD; c.lineWidth = 1;
+            c.beginPath(); c.moveTo(ctX2 - 10, gy - bH * 0.50); c.lineTo(ctX2, gy - bH * 0.60); c.lineTo(ctX2 + 10, gy - bH * 0.50); c.closePath(); c.fill(); c.stroke();
+            /* upturned eave tips */
+            c.strokeStyle = terraL; c.lineWidth = 1.2;
+            c.beginPath(); c.moveTo(ctX2 - 10, gy - bH * 0.50); c.quadraticCurveTo(ctX2 - 16, gy - bH * 0.46, ctX2 - 18, gy - bH * 0.38); c.stroke();
+            c.beginPath(); c.moveTo(ctX2 + 10, gy - bH * 0.50); c.quadraticCurveTo(ctX2 + 16, gy - bH * 0.46, ctX2 + 18, gy - bH * 0.38); c.stroke();
+            radialGlow(c, ctX2, gy - bH * 0.58, 12, 255, 200, 100, 0.16);
         }
 
-        /* battlements along rampart */
-        c.fillStyle = '#3a3020';
-        for (var bm3 = -6; bm3 <= 6; bm3++) { c.fillRect(cx + bm3 * 11 - 3, gy - bH * 0.26 - 8, 6, 7); }
-
-        /* corner defensive tower */
-        c.fillStyle = ochre; c.strokeStyle = ochreD; c.lineWidth = 1;
-        c.fillRect(cx - 58, gy - bH * 0.42, 10, bH * 0.42); c.strokeRect(cx - 58, gy - bH * 0.42, 10, bH * 0.42);
-        c.fillStyle = terra;
-        c.beginPath(); c.moveTo(cx - 59, gy - bH * 0.42); c.lineTo(cx - 53, gy - bH * 0.53); c.lineTo(cx - 47, gy - bH * 0.42); c.closePath(); c.fill(); c.stroke();
+        /* Uplights on cathedral facade */
+        radialGlow(c, cx, gy - bH * 0.54, 50, 255, 200, 100, 0.16);
+        radialGlow(c, cx - 30, gy - bH * 0.38, 30, 255, 180, 80, 0.12);
+        radialGlow(c, cx + 30, gy - bH * 0.38, 30, 255, 180, 80, 0.12);
     }
     function drawCharlesBridge(c, cx, gy) {
-        var span2 = W * 0.24;
-        var deckY2 = gy - H * 0.052;
-        var amber = '#c89030', amberD = '#a07020', amberL = '#e0aa40';
+        var span2 = W * 0.26;
+        var deckY2 = gy - H * 0.058;
+        var amber = '#c8922a', amberD = '#9a6e18', amberL = '#e8b840';
+        var dark8 = '#0e0a06';
 
-        /* Vltava river shimmer */
-        c.fillStyle = 'rgba(18,30,55,0.30)'; c.fillRect(cx - span2, gy - H * 0.04, span2 * 2, H * 0.04);
-        c.strokeStyle = 'rgba(50,90,150,0.18)'; c.lineWidth = 1;
-        for (var rv = 0; rv < 3; rv++) { c.beginPath(); c.moveTo(cx - span2, gy - H * 0.02 + rv * 5); c.lineTo(cx + span2, gy - H * 0.02 + rv * 5); c.stroke(); }
+        /* ── VLTAVA RIVER ── */
+        c.fillStyle = 'rgba(14,26,52,0.35)'; c.fillRect(cx - span2, gy - H * 0.05, span2 * 2, H * 0.05);
+        c.strokeStyle = 'rgba(30,70,140,0.22)'; c.lineWidth = 1;
+        for (var rv = 0; rv < 4; rv++) { c.beginPath(); c.moveTo(cx - span2, gy - H * 0.03 + rv * 4); c.lineTo(cx + span2, gy - H * 0.03 + rv * 4); c.stroke(); }
+        /* boat reflections on water */
+        c.fillStyle = 'rgba(60,50,30,0.28)';
+        c.beginPath(); c.ellipse(cx - span2 * 0.4, gy - H * 0.03, 10, 3, 0, 0, Math.PI * 2); c.fill();
 
-        /* bridge deck — amber sandstone */
+        /* ── BRIDGE DECK — Bohemian sandstone ── */
         c.fillStyle = amber; c.strokeStyle = amberD; c.lineWidth = 1;
-        c.fillRect(cx - span2, deckY2, span2 * 2, 11); c.strokeRect(cx - span2, deckY2, span2 * 2, 11);
+        c.fillRect(cx - span2, deckY2, span2 * 2, 13); c.strokeRect(cx - span2, deckY2, span2 * 2, 13);
+        /* cobble texture suggestion */
+        c.strokeStyle = 'rgba(140,100,30,0.25)'; c.lineWidth = 0.5;
+        for (var cob = -5; cob <= 5; cob++) { c.beginPath(); c.moveTo(cx + cob * span2 / 5.5, deckY2); c.lineTo(cx + cob * span2 / 5.5, deckY2 + 13); c.stroke(); }
 
-        /* parapet low wall */
-        c.fillStyle = amber; c.strokeStyle = amberD; c.lineWidth = 0.8;
-        c.fillRect(cx - span2, deckY2 - 6, span2 * 2, 6); c.strokeRect(cx - span2, deckY2 - 6, span2 * 2, 6);
+        /* PARAPETS — thick sandstone walls both sides */
+        c.fillStyle = amber; c.strokeStyle = amberD; c.lineWidth = 1;
+        c.fillRect(cx - span2, deckY2 - 9, span2 * 2, 9); c.strokeRect(cx - span2, deckY2 - 9, span2 * 2, 9);
+        /* stone block courses on parapet */
+        c.strokeStyle = 'rgba(140,100,30,0.28)'; c.lineWidth = 0.5;
+        c.beginPath(); c.moveTo(cx - span2, deckY2 - 5); c.lineTo(cx + span2, deckY2 - 5); c.stroke();
+        c.beginPath(); c.moveTo(cx - span2, deckY2 - 3); c.lineTo(cx + span2, deckY2 - 3); c.stroke();
 
-        /* Gothic pointed arch piers */
-        c.fillStyle = '#0e0a06';
-        for (var arch2 = -4; arch2 <= 4; arch2++) {
-            var ax2 = cx + arch2 * (span2 * 2 / 9);
-            var archW = span2 / 9 * 0.72;
-            c.beginPath(); c.arc(ax2, deckY2 + 11, archW, Math.PI, 0, false);
-            c.rect(ax2 - archW, deckY2 + 11, archW * 2, H * 0.035); c.fill();
-            /* pier pillar */
-            c.fillStyle = amberD; c.fillRect(ax2 - 5, deckY2 + 11, 10, H * 0.04 - 5);
-            c.fillStyle = '#0e0a06';
+        /* ── 16 GOTHIC POINTED ARCHES beneath deck ── */
+        c.fillStyle = dark8;
+        var archCount = 9;
+        for (var arch2 = -archCount / 2; arch2 <= archCount / 2; arch2++) {
+            var ax2 = cx + arch2 * (span2 * 2 / archCount);
+            var archW = span2 / archCount * 0.78;
+            c.beginPath(); c.arc(ax2, deckY2 + 13, archW, Math.PI, 0, false);
+            c.rect(ax2 - archW, deckY2 + 13, archW * 2, H * 0.04); c.fill();
+            /* pier between arches */
+            c.fillStyle = amberD;
+            c.fillRect(ax2 - 6, deckY2 + 13, 12, H * 0.04 + 4);
+            /* cutwater on pier nose */
+            c.beginPath(); c.moveTo(ax2 - 4, deckY2 + H * 0.05 + 13); c.lineTo(ax2, deckY2 + H * 0.055 + 13); c.lineTo(ax2 + 4, deckY2 + H * 0.05 + 13); c.closePath(); c.fill();
+            c.fillStyle = dark8;
         }
 
-        /* Baroque statue groups — 7 positions */
-        for (var st2 = -3; st2 <= 3; st2++) {
-            var sx2 = cx + st2 * (span2 * 2 / 7.5);
-            /* pedestal */
-            c.fillStyle = amberD; c.fillRect(sx2 - 4, deckY2 - 14, 8, 8);
-            /* figure */
-            c.fillStyle = '#c0a040'; c.fillRect(sx2 - 3, deckY2 - 22, 6, 8);
-            c.beginPath(); c.arc(sx2, deckY2 - 24, 3, 0, Math.PI * 2); c.fill();
-            /* arm gesture */
-            c.strokeStyle = '#c0a040'; c.lineWidth = 1;
-            c.beginPath(); c.moveTo(sx2, deckY2 - 20); c.lineTo(sx2 + 5, deckY2 - 24); c.stroke();
-            /* halo on central saints */
-            if (Math.abs(st2) <= 1) {
-                c.strokeStyle = 'rgba(200,160,60,0.42)'; c.lineWidth = 0.7;
-                c.beginPath(); c.arc(sx2, deckY2 - 28, 3, 0, Math.PI * 2); c.stroke();
+        /* ── 30 BAROQUE STATUES (15 per side, but simplified to 7+7 visible) ── */
+        for (var st2 = -4; st2 <= 4; st2++) {
+            var sx2 = cx + st2 * (span2 * 1.8 / 8);
+            /* tall stone pedestal */
+            c.fillStyle = amberD; c.strokeStyle = '#7a5010'; c.lineWidth = 0.7;
+            c.fillRect(sx2 - 5, deckY2 - 22, 10, 13); c.strokeRect(sx2 - 5, deckY2 - 22, 10, 13);
+            /* pedestal base moulding */
+            c.fillStyle = amberL; c.fillRect(sx2 - 6, deckY2 - 22, 12, 2);
+            c.fillRect(sx2 - 6, deckY2 - 10, 12, 2);
+            /* Baroque figure — detailed */
+            c.fillStyle = '#c8a84a'; c.strokeStyle = '#a07828'; c.lineWidth = 0.8;
+            /* body */
+            c.fillRect(sx2 - 3.5, deckY2 - 33, 7, 11);
+            /* head with halo-like disc */
+            c.beginPath(); c.arc(sx2, deckY2 - 35, 3.5, 0, Math.PI * 2); c.fill();
+            /* robes flow */
+            c.beginPath(); c.moveTo(sx2 - 3, deckY2 - 22); c.lineTo(sx2 - 6, deckY2 - 26); c.lineTo(sx2 - 4, deckY2 - 31); c.stroke();
+            c.beginPath(); c.moveTo(sx2 + 3, deckY2 - 22); c.lineTo(sx2 + 6, deckY2 - 26); c.lineTo(sx2 + 4, deckY2 - 31); c.stroke();
+            /* arm outstretched */
+            c.strokeStyle = '#c8a84a'; c.lineWidth = 1;
+            var armDir = (st2 % 2 === 0) ? 1 : -1;
+            c.beginPath(); c.moveTo(sx2, deckY2 - 30); c.lineTo(sx2 + armDir * 7, deckY2 - 33); c.stroke();
+            /* attribute (cross, book, palm) */
+            c.strokeStyle = '#e0c060'; c.lineWidth = 1.2;
+            c.beginPath(); c.moveTo(sx2 + armDir * 7, deckY2 - 36); c.lineTo(sx2 + armDir * 7, deckY2 - 30); c.stroke();
+            if (st2 % 3 === 0) { c.beginPath(); c.moveTo(sx2 + armDir * 5, deckY2 - 34); c.lineTo(sx2 + armDir * 9, deckY2 - 34); c.stroke(); }
+            /* glow for key saints */
+            if (Math.abs(st2) <= 1) { radialGlow(c, sx2, deckY2 - 32, 12, 200, 160, 60, 0.18); }
+        }
+
+        /* ── OLD TOWN BRIDGE TOWER (east end) ── */
+        var tE = cx + span2 - 14;
+        c.fillStyle = amber; c.strokeStyle = amberD; c.lineWidth = 1;
+        c.fillRect(tE - 13, gy - H * 0.30, 26, H * 0.30 - 13); c.strokeRect(tE - 13, gy - H * 0.30, 26, H * 0.30 - 13);
+        /* stone courses */
+        c.strokeStyle = 'rgba(140,100,30,0.28)'; c.lineWidth = 0.6;
+        for (var tc5 = 1; tc5 < 6; tc5++) { c.beginPath(); c.moveTo(tE - 13, gy - H * 0.05 * tc5); c.lineTo(tE + 13, gy - H * 0.05 * tc5); c.stroke(); }
+        /* lancet windows */
+        c.fillStyle = dark8;
+        for (var tw6 = 0; tw6 < 3; tw6++) {
+            var twy6 = gy - H * (0.08 + tw6 * 0.07);
+            c.fillRect(tE - 4, twy6, 8, 14);
+            c.beginPath(); c.moveTo(tE - 4, twy6); c.lineTo(tE, twy6 - 5); c.lineTo(tE + 4, twy6); c.closePath(); c.fill();
+        }
+        /* tower roof */
+        c.fillStyle = '#8a3a1a'; c.strokeStyle = '#6a2a0a'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(tE - 15, gy - H * 0.30); c.lineTo(tE, gy - H * 0.38); c.lineTo(tE + 15, gy - H * 0.30); c.closePath(); c.fill(); c.stroke();
+        radialGlow(c, tE, gy - H * 0.38, 12, 255, 200, 100, 0.22);
+        c.fillStyle = amberL; c.beginPath(); c.arc(tE, gy - H * 0.38, 2, 0, Math.PI * 2); c.fill();
+
+        /* ── MALÁ STRANA BRIDGE TOWERS (west end) ── */
+        var tW = cx - span2 + 10;
+        /* short Romanesque tower */
+        c.fillStyle = stone5; c.strokeStyle = stoneD5; c.lineWidth = 1;
+        var stone5 = '#a09880', stoneD5 = '#787060';
+        c.fillRect(tW - 9, gy - H * 0.18, 18, H * 0.18 - 13); c.strokeRect(tW - 9, gy - H * 0.18, 18, H * 0.18 - 13);
+        c.fillStyle = '#7a3818'; c.beginPath(); c.moveTo(tW - 10, gy - H * 0.18); c.lineTo(tW, gy - H * 0.22); c.lineTo(tW + 10, gy - H * 0.18); c.closePath(); c.fill();
+        /* tall Gothic tower adjacent */
+        c.fillStyle = amber; c.strokeStyle = amberD; c.lineWidth = 1;
+        c.fillRect(tW + 10, gy - H * 0.28, 22, H * 0.28 - 13); c.strokeRect(tW + 10, gy - H * 0.28, 22, H * 0.28 - 13);
+        c.fillStyle = dark8;
+        for (var wtw = 0; wtw < 3; wtw++) {
+            var wtwy = gy - H * (0.07 + wtw * 0.07);
+            c.fillRect(tW + 15, wtwy, 8, 12);
+            c.beginPath(); c.arc(tW + 19, wtwy, 4, Math.PI, 0, false); c.fill();
+        }
+        c.fillStyle = '#8a3a1a'; c.strokeStyle = '#6a2a0a'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(tW + 8, gy - H * 0.28); c.lineTo(tW + 21, gy - H * 0.36); c.lineTo(tW + 34, gy - H * 0.28); c.closePath(); c.fill(); c.stroke();
+        radialGlow(c, tW + 21, gy - H * 0.36, 10, 255, 200, 100, 0.18);
+
+        /* lamposts on bridge */
+        c.strokeStyle = '#4a3820'; c.lineWidth = 1.2;
+        for (var lp = -3; lp <= 3; lp++) {
+            var lpx = cx + lp * span2 / 4;
+            c.beginPath(); c.moveTo(lpx, deckY2 - 9); c.lineTo(lpx, deckY2 - 22); c.stroke();
+            c.beginPath(); c.moveTo(lpx, deckY2 - 22); c.lineTo(lpx + 5, deckY2 - 24); c.stroke();
+            radialGlow(c, lpx + 5, deckY2 - 24, 6, 255, 210, 100, 0.22);
+            c.fillStyle = 'rgba(255,210,100,0.90)'; c.beginPath(); c.arc(lpx + 5, deckY2 - 24, 2, 0, Math.PI * 2); c.fill();
+        }
+    }
+
+    /* ══════════════════════════════════════════════
+       PARIS EXTRA LANDMARKS
+    ══════════════════════════════════════════════ */
+    function drawLouvre(c, cx, gy) {
+        var bH = H * 0.28;
+        var stone6 = '#d0c490', stoneD6 = '#a89e60', stoneL6 = '#e8dca8';
+        var dark9 = '#0a0806';
+
+        radialGlow(c, cx, gy, 120, 255, 220, 140, 0.14);
+
+        /* NORTH WING (Richelieu) */
+        c.fillStyle = stone6; c.strokeStyle = stoneD6; c.lineWidth = 1;
+        c.fillRect(cx - 82, gy - bH * 0.70, 52, bH * 0.70); c.strokeRect(cx - 82, gy - bH * 0.70, 52, bH * 0.70);
+        /* SOUTH WING (Denon) */
+        c.fillRect(cx + 30, gy - bH * 0.70, 52, bH * 0.70); c.strokeRect(cx + 30, gy - bH * 0.70, 52, bH * 0.70);
+        /* EAST WING (Sully) — deeper in composition */
+        c.fillStyle = '#c8bc88'; c.strokeStyle = stoneD6;
+        c.fillRect(cx - 28, gy - bH * 0.55, 56, bH * 0.55); c.strokeRect(cx - 28, gy - bH * 0.55, 56, bH * 0.55);
+
+        /* MANSARD ROOFS — zinc grey-green French style */
+        c.fillStyle = '#6e7e68'; c.strokeStyle = '#4e5e48'; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(cx - 84, gy - bH * 0.70); c.lineTo(cx - 58, gy - bH * 0.84); c.lineTo(cx - 32, gy - bH * 0.70); c.closePath(); c.fill(); c.stroke();
+        c.beginPath(); c.moveTo(cx + 28, gy - bH * 0.70); c.lineTo(cx + 56, gy - bH * 0.84); c.lineTo(cx + 84, gy - bH * 0.70); c.closePath(); c.fill(); c.stroke();
+        c.beginPath(); c.moveTo(cx - 30, gy - bH * 0.55); c.lineTo(cx, gy - bH * 0.70); c.lineTo(cx + 30, gy - bH * 0.55); c.closePath(); c.fill(); c.stroke();
+
+        /* DORMER WINDOWS on mansard roofs */
+        c.fillStyle = dark9;
+        for (var dm2 = -3; dm2 <= 3; dm2 += 2) {
+            var dmy = gy - bH * 0.77 + Math.abs(dm2) * bH * 0.02;
+            c.fillRect(cx + dm2 * 14 - 3, dmy, 6, 7);
+            c.beginPath(); c.moveTo(cx + dm2 * 14 - 3, dmy); c.lineTo(cx + dm2 * 14, dmy - 4); c.lineTo(cx + dm2 * 14 + 3, dmy); c.closePath(); c.fill();
+        }
+
+        /* COLONNADED FACADE — Corinthian columns */
+        c.strokeStyle = 'rgba(150,135,85,0.40)'; c.lineWidth = 0.9;
+        for (var nc6 = 0; nc6 < 9; nc6++) { var ncx6 = cx - 80 + nc6 * 5.8; c.beginPath(); c.moveTo(ncx6, gy); c.lineTo(ncx6, gy - bH * 0.70); c.stroke(); }
+        for (var sc6 = 0; sc6 < 9; sc6++) { var scx6 = cx + 32 + sc6 * 5.8; c.beginPath(); c.moveTo(scx6, gy); c.lineTo(scx6, gy - bH * 0.70); c.stroke(); }
+
+        /* ARCHED WINDOWS — three floors */
+        c.fillStyle = dark9;
+        for (var nwf6 = 0; nwf6 < 7; nwf6++) {
+            var nwfx = cx - 79 + nwf6 * 7;
+            for (var fl6 = 0; fl6 < 3; fl6++) {
+                var nwfy = gy - bH * (0.15 + fl6 * 0.20);
+                c.fillRect(nwfx - 2.5, nwfy, 5, 12);
+                c.beginPath(); c.arc(nwfx, nwfy, 2.5, Math.PI, 0, false); c.fill();
+                if (fl6 === 1) radialGlow(c, nwfx, nwfy + 5, 6, 255, 210, 100, 0.14);
             }
-            radialGlow(c, sx2, deckY2 - 22, 8, 200, 160, 60, 0.12);
+        }
+        for (var swf6 = 0; swf6 < 7; swf6++) {
+            var swfx = cx + 33 + swf6 * 7;
+            for (var sfl6 = 0; sfl6 < 3; sfl6++) {
+                var swfy = gy - bH * (0.15 + sfl6 * 0.20);
+                c.fillRect(swfx - 2.5, swfy, 5, 12);
+                c.beginPath(); c.arc(swfx, swfy, 2.5, Math.PI, 0, false); c.fill();
+                if (sfl6 === 1) radialGlow(c, swfx, swfy + 5, 6, 255, 210, 100, 0.14);
+            }
         }
 
-        /* central Gothic bridge tower */
-        c.fillStyle = amber; c.strokeStyle = amberD; c.lineWidth = 1;
-        c.fillRect(cx - 11, gy - H * 0.24, 22, H * 0.24 - 11); c.strokeRect(cx - 11, gy - H * 0.24, 22, H * 0.24 - 11);
-        c.fillStyle = '#0e0a06';
-        for (var tw4 = 0; tw4 < 3; tw4++) {
-            var twy4 = gy - H * 0.10 - tw4 * H * 0.06;
-            c.fillRect(cx - 4, twy4, 8, 12);
-            c.beginPath(); c.arc(cx, twy4, 4, Math.PI, 0, false); c.fill();
+        /* COURTYARD COBBLESTONE */
+        c.fillStyle = '#a89c6a'; c.fillRect(cx - 28, gy - bH * 0.08, 56, bH * 0.08);
+        c.strokeStyle = 'rgba(120,110,60,0.30)'; c.lineWidth = 0.5;
+        for (var cb2 = -3; cb2 <= 3; cb2++) { c.beginPath(); c.moveTo(cx + cb2 * 9, gy - bH * 0.08); c.lineTo(cx + cb2 * 9, gy); c.stroke(); }
+
+        /* I.M. PEI GLASS PYRAMID */
+        /* Blue glass panels */
+        c.fillStyle = 'rgba(80,140,220,0.06)';
+        c.beginPath(); c.moveTo(cx - 22, gy - bH * 0.08); c.lineTo(cx, gy - bH * 0.44); c.lineTo(cx + 22, gy - bH * 0.08); c.closePath(); c.fill();
+        /* Glass structure lines */
+        c.strokeStyle = 'rgba(100,170,255,0.75)'; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(cx - 22, gy - bH * 0.08); c.lineTo(cx, gy - bH * 0.44); c.stroke();
+        c.beginPath(); c.moveTo(cx + 22, gy - bH * 0.08); c.lineTo(cx, gy - bH * 0.44); c.stroke();
+        c.beginPath(); c.moveTo(cx - 22, gy - bH * 0.08); c.lineTo(cx + 22, gy - bH * 0.08); c.stroke();
+        /* glass panel grid */
+        c.strokeStyle = 'rgba(80,150,230,0.45)'; c.lineWidth = 0.8;
+        for (var gp6 = 1; gp6 < 5; gp6++) {
+            var gpf6 = gp6 / 5, gpW = 22 * (1 - gpf6);
+            var gpY6 = gy - bH * (0.08 + 0.36 * gpf6);
+            c.beginPath(); c.moveTo(cx - gpW, gpY6); c.lineTo(cx + gpW, gpY6); c.stroke();
+            c.beginPath(); c.moveTo(cx - 22 + gp6 * 8, gy - bH * 0.08); c.lineTo(cx, gy - bH * 0.44); c.stroke();
+            c.beginPath(); c.moveTo(cx + 22 - gp6 * 8, gy - bH * 0.08); c.lineTo(cx, gy - bH * 0.44); c.stroke();
         }
-        /* tower terracotta roof */
-        c.fillStyle = '#8a3a20'; c.strokeStyle = '#6a2a10'; c.lineWidth = 1;
-        c.beginPath(); c.moveTo(cx - 11, gy - H * 0.24); c.lineTo(cx, gy - H * 0.32); c.lineTo(cx + 11, gy - H * 0.24); c.closePath(); c.fill(); c.stroke();
-        radialGlow(c, cx, gy - H * 0.32, 10, 255, 200, 100, 0.20);
+        /* pyramid apex glow */
+        radialGlow(c, cx, gy - bH * 0.44, 18, 150, 200, 255, 0.30);
+        c.fillStyle = 'rgba(180,220,255,0.80)'; c.beginPath(); c.arc(cx, gy - bH * 0.44, 2, 0, Math.PI * 2); c.fill();
+
+        /* uplights */
+        radialGlow(c, cx - 40, gy - 4, 28, 255, 220, 140, 0.18);
+        radialGlow(c, cx + 40, gy - 4, 28, 255, 220, 140, 0.18);
+    }
+
+    function drawSacreCoeur(c, cx, gy) {
+        var bH = H * 0.46;
+        var white8 = '#f6f2ec', whiteD8 = '#d4ccc0', whiteL8 = '#fefcf8';
+        var gray8 = '#b8b0a0';
+        var dark10 = '#0a0806';
+
+        radialGlow(c, cx, gy, 110, 255, 245, 225, 0.14);
+
+        /* MONTMARTRE HILL */
+        c.fillStyle = '#3a3520'; c.strokeStyle = '#2a2510'; c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(cx - 72, gy); c.lineTo(cx - 72, gy - bH * 0.10);
+        c.quadraticCurveTo(cx - 45, gy - bH * 0.20, cx, gy - bH * 0.18);
+        c.quadraticCurveTo(cx + 45, gy - bH * 0.16, cx + 72, gy - bH * 0.10);
+        c.lineTo(cx + 72, gy); c.closePath(); c.fill(); c.stroke();
+        /* vineyard lines */
+        c.strokeStyle = 'rgba(60,70,30,0.40)'; c.lineWidth = 0.6;
+        for (var vl = -3; vl <= 3; vl++) { c.beginPath(); c.moveTo(cx + vl * 22, gy - bH * 0.10); c.lineTo(cx + vl * 18, gy - bH * 0.16); c.stroke(); }
+
+        /* WIDE STONE STEPS — narrow at top (facade base), widen going down to hill */
+        for (var step = 0; step < 5; step++) {
+            var stW2 = 58 + step * 7, stY2 = gy - bH * 0.20 + step * bH * 0.02;
+            c.fillStyle = whiteD8; c.strokeStyle = '#b0a898'; c.lineWidth = 0.6;
+            c.fillRect(cx - stW2, stY2, stW2 * 2, bH * 0.02); c.strokeRect(cx - stW2, stY2, stW2 * 2, bH * 0.02);
+        }
+
+        /* BASE FACADE PORTICO — triple arcade */
+        var baseY8 = gy - bH * 0.36;
+        c.fillStyle = white8; c.strokeStyle = whiteD8; c.lineWidth = 1;
+        c.fillRect(cx - 50, baseY8, 100, bH * 0.16); c.strokeRect(cx - 50, baseY8, 100, bH * 0.16);
+        /* three large arched bays */
+        c.fillStyle = dark10;
+        for (var bay8 = -1; bay8 <= 1; bay8++) {
+            var bayX8 = cx + bay8 * 28;
+            c.beginPath(); c.arc(bayX8, baseY8, 15, Math.PI, 0, false); c.fill();
+            c.fillRect(bayX8 - 15, baseY8, 30, bH * 0.12); c.fill();
+            /* arch moulding */
+            c.strokeStyle = whiteD8; c.lineWidth = 0.8;
+            c.beginPath(); c.arc(bayX8, baseY8, 17, Math.PI, 0, false); c.stroke();
+        }
+        /* facade Corinthian columns */
+        c.strokeStyle = 'rgba(200,190,170,0.45)'; c.lineWidth = 1;
+        for (var fc8 = -5; fc8 <= 5; fc8++) {
+            var fcx8 = cx + fc8 * 9.5;
+            c.beginPath(); c.moveTo(fcx8, baseY8); c.lineTo(fcx8, baseY8 + bH * 0.16); c.stroke();
+            /* capital */
+            c.fillStyle = whiteL8; c.fillRect(fcx8 - 3, baseY8 + bH * 0.155, 6, 2);
+        }
+
+        /* TWO FLANKING SQUARE TOWERS */
+        for (var bt8 = -1; bt8 <= 1; bt8 += 2) {
+            var btX8 = cx + bt8 * 54;
+            c.fillStyle = white8; c.strokeStyle = whiteD8; c.lineWidth = 1;
+            c.fillRect(btX8 - 12, gy - bH * 0.68, 24, bH * 0.32); c.strokeRect(btX8 - 12, gy - bH * 0.68, 24, bH * 0.32);
+            /* stone courses */
+            c.strokeStyle = 'rgba(190,180,160,0.30)'; c.lineWidth = 0.5;
+            for (var tc8 = 1; tc8 < 5; tc8++) { c.beginPath(); c.moveTo(btX8 - 12, gy - bH * (0.36 + tc8 * 0.065)); c.lineTo(btX8 + 12, gy - bH * (0.36 + tc8 * 0.065)); c.stroke(); }
+            /* arched belfry windows */
+            c.fillStyle = dark10;
+            for (var btw = 0; btw < 3; btw++) {
+                var btwY = gy - bH * (0.42 + btw * 0.09);
+                c.fillRect(btX8 - 5, btwY, 10, 14);
+                c.beginPath(); c.arc(btX8, btwY, 5, Math.PI, 0, false); c.fill();
+                radialGlow(c, btX8, btwY + 6, 6, 255, 230, 180, 0.12);
+            }
+            /* onion dome atop tower */
+            c.fillStyle = gray8; c.strokeStyle = '#988880'; c.lineWidth = 1;
+            c.beginPath(); c.arc(btX8, gy - bH * 0.68, 14, Math.PI, 0, false); c.fill(); c.stroke();
+            c.fillStyle = white8; c.beginPath(); c.arc(btX8, gy - bH * 0.68, 10, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = whiteD8; c.stroke();
+            /* dome rib lines */
+            c.strokeStyle = 'rgba(200,190,170,0.35)'; c.lineWidth = 0.7;
+            for (var dr8 = 0; dr8 < 8; dr8++) { var dra8 = dr8 * Math.PI / 4; c.beginPath(); c.moveTo(btX8, gy - bH * 0.68); c.lineTo(btX8 + Math.cos(dra8) * 10, gy - bH * 0.68 + Math.sin(dra8) * 10); c.stroke(); }
+            /* lantern finial */
+            c.strokeStyle = whiteD8; c.lineWidth = 1.2;
+            c.beginPath(); c.moveTo(btX8, gy - bH * 0.68 - 10); c.lineTo(btX8, gy - bH * 0.75); c.stroke();
+            c.fillStyle = '#ccc090'; c.beginPath(); c.arc(btX8, gy - bH * 0.75, 2, 0, Math.PI * 2); c.fill();
+            radialGlow(c, btX8, gy - bH * 0.74, 7, 255, 240, 190, 0.18);
+        }
+
+        /* MAIN DOME — Romano-Byzantine */
+        var domeY8 = gy - bH * 0.71;
+        /* drum */
+        c.fillStyle = gray8; c.strokeStyle = '#989080'; c.lineWidth = 1;
+        c.fillRect(cx - 24, domeY8, 48, bH * 0.07); c.strokeRect(cx - 24, domeY8, 48, bH * 0.07);
+        /* drum colonnaded gallery */
+        c.strokeStyle = 'rgba(180,170,150,0.45)'; c.lineWidth = 0.9;
+        for (var dc8 = -4; dc8 <= 4; dc8++) { c.beginPath(); c.moveTo(cx + dc8 * 5.5, domeY8); c.lineTo(cx + dc8 * 5.5, domeY8 + bH * 0.07); c.stroke(); }
+        /* drum windows */
+        c.fillStyle = dark10;
+        for (var dw8 = -2; dw8 <= 2; dw8 += 2) { c.fillRect(cx + dw8 * 9 - 3, domeY8 + 3, 6, 8); c.beginPath(); c.arc(cx + dw8 * 9, domeY8 + 3, 3, Math.PI, 0, false); c.fill(); }
+        /* main dome body */
+        c.fillStyle = gray8; c.strokeStyle = '#989080'; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, domeY8, 32, Math.PI, 0, false); c.fill(); c.stroke();
+        c.fillStyle = white8; c.strokeStyle = whiteD8; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, domeY8, 25, Math.PI, 0, false); c.fill(); c.stroke();
+        /* dome ribs */
+        c.strokeStyle = 'rgba(210,200,180,0.40)'; c.lineWidth = 0.9;
+        for (var dr9 = 0; dr9 < 10; dr9++) { var dra9 = dr9 * Math.PI / 10; c.beginPath(); c.moveTo(cx - 25, domeY8); c.lineTo(cx + Math.cos(Math.PI - dra9) * 25, domeY8 - Math.sin(dra9) * 25); c.stroke(); }
+        /* dome highlight */
+        c.fillStyle = whiteL8; c.beginPath(); c.arc(cx - 6, domeY8 - 18, 9, 0, Math.PI * 2); c.fill();
+        radialGlow(c, cx, domeY8, 44, 255, 248, 238, 0.22);
+
+        /* TWO FLANKING SECONDARY DOMES */
+        for (var sd8 = -1; sd8 <= 1; sd8 += 2) {
+            var sdX8 = cx + sd8 * 40;
+            c.fillStyle = gray8; c.strokeStyle = '#989080'; c.lineWidth = 0.8;
+            c.beginPath(); c.arc(sdX8, gy - bH * 0.52, 13, Math.PI, 0, false); c.fill(); c.stroke();
+            c.fillStyle = whiteD8; c.beginPath(); c.arc(sdX8, gy - bH * 0.52, 9, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = whiteD8; c.lineWidth = 1;
+            c.beginPath(); c.moveTo(sdX8, gy - bH * 0.52 - 9); c.lineTo(sdX8, gy - bH * 0.58); c.stroke();
+            c.fillStyle = '#c8bc90'; c.beginPath(); c.arc(sdX8, gy - bH * 0.58, 1.5, 0, Math.PI * 2); c.fill();
+        }
+
+        /* MAIN LANTERN + CROSS */
+        var lanY8 = domeY8 - 25;
+        c.fillStyle = white8; c.strokeStyle = whiteD8; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, lanY8, 9, 0, Math.PI * 2); c.fill(); c.stroke();
+        c.strokeStyle = whiteD8; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(cx, lanY8 - 9); c.lineTo(cx, lanY8 - 20); c.stroke();
+        /* cross */
+        c.strokeStyle = '#c0b480'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(cx, lanY8 - 20); c.lineTo(cx, lanY8 - 28); c.stroke();
+        c.beginPath(); c.moveTo(cx - 5, lanY8 - 25); c.lineTo(cx + 5, lanY8 - 25); c.stroke();
+        radialGlow(c, cx, lanY8, 40, 255, 248, 238, 0.28);
+    }
+
+    function drawPantheon(c, cx, gy) {
+        var bH = H * 0.38;
+        var stone7 = '#c4bc9a', stoneD7 = '#a09876', stoneL7 = '#dcd4b0';
+        var dark11 = '#0c0a06';
+
+        radialGlow(c, cx, gy, 90, 220, 200, 150, 0.12);
+
+        /* WIDE STEPPED BASE (stylobate) */
+        c.fillStyle = stoneD7; c.strokeStyle = '#888458'; c.lineWidth = 0.8;
+        c.fillRect(cx - 58, gy - bH * 0.08, 116, bH * 0.08); c.strokeRect(cx - 58, gy - bH * 0.08, 116, bH * 0.08);
+        c.fillRect(cx - 50, gy - bH * 0.12, 100, bH * 0.04); c.strokeRect(cx - 50, gy - bH * 0.12, 100, bH * 0.04);
+
+        /* MAIN RECTANGULAR BODY */
+        c.fillStyle = stone7; c.strokeStyle = stoneD7; c.lineWidth = 1;
+        c.fillRect(cx - 46, gy - bH * 0.54, 92, bH * 0.42); c.strokeRect(cx - 46, gy - bH * 0.54, 92, bH * 0.42);
+        /* stone block courses */
+        c.strokeStyle = 'rgba(140,125,80,0.28)'; c.lineWidth = 0.6;
+        for (var sc7 = 1; sc7 < 7; sc7++) { c.beginPath(); c.moveTo(cx - 46, gy - bH * sc7 * 0.075); c.lineTo(cx + 46, gy - bH * sc7 * 0.075); c.stroke(); }
+
+        /* CORINTHIAN COLONNADE — 6 columns */
+        c.strokeStyle = 'rgba(150,135,88,0.45)'; c.lineWidth = 1.1;
+        for (var col7 = -5; col7 <= 5; col7++) {
+            c.beginPath(); c.moveTo(cx + col7 * 8.5, gy - bH * 0.12); c.lineTo(cx + col7 * 8.5, gy - bH * 0.54); c.stroke();
+            /* capital */
+            c.fillStyle = stoneL7; c.fillRect(cx + col7 * 8.5 - 3.5, gy - bH * 0.535, 7, 2.5);
+            /* base */
+            c.fillRect(cx + col7 * 8.5 - 3, gy - bH * 0.12, 6, 2.5);
+        }
+
+        /* TRIANGULAR PEDIMENT */
+        c.fillStyle = stone7; c.strokeStyle = stoneD7; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 48, gy - bH * 0.54); c.lineTo(cx, gy - bH * 0.66); c.lineTo(cx + 48, gy - bH * 0.54); c.closePath(); c.fill(); c.stroke();
+        /* pediment relief — "Glorification of France" */
+        c.fillStyle = 'rgba(180,160,110,0.28)'; c.fillRect(cx - 34, gy - bH * 0.59, 68, bH * 0.08);
+        /* central figure */
+        c.strokeStyle = stoneD7; c.lineWidth = 0.7;
+        c.beginPath(); c.arc(cx, gy - bH * 0.60, 3, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.moveTo(cx, gy - bH * 0.57); c.lineTo(cx, gy - bH * 0.54); c.stroke();
+        /* flanking allegories */
+        for (var af = -1; af <= 1; af += 2) {
+            c.beginPath(); c.arc(cx + af * 18, gy - bH * 0.58, 2.5, 0, Math.PI * 2); c.stroke();
+            c.beginPath(); c.moveTo(cx + af * 18, gy - bH * 0.555); c.lineTo(cx + af * 18, gy - bH * 0.54); c.stroke();
+            c.beginPath(); c.moveTo(cx + af * 18, gy - bH * 0.57); c.lineTo(cx + af * 18 + af * 8, gy - bH * 0.57); c.stroke();
+        }
+
+        /* SQUARE DRUM */
+        c.fillStyle = stone7; c.strokeStyle = stoneD7; c.lineWidth = 1;
+        c.fillRect(cx - 28, gy - bH * 0.76, 56, bH * 0.10); c.strokeRect(cx - 28, gy - bH * 0.76, 56, bH * 0.10);
+        /* drum colonnettes */
+        c.strokeStyle = 'rgba(150,135,88,0.42)'; c.lineWidth = 0.9;
+        for (var dc7 = -4; dc7 <= 4; dc7++) { c.beginPath(); c.moveTo(cx + dc7 * 7, gy - bH * 0.66); c.lineTo(cx + dc7 * 7, gy - bH * 0.76); c.stroke(); }
+
+        /* MAIN DOME */
+        c.fillStyle = stone7; c.strokeStyle = stoneD7; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, gy - bH * 0.76, 30, Math.PI, 0, false); c.closePath(); c.fill(); c.stroke();
+        /* dome ribs */
+        c.strokeStyle = 'rgba(150,135,88,0.38)'; c.lineWidth = 0.8;
+        for (var dr7 = 1; dr7 <= 6; dr7++) {
+            var dra7 = dr7 * Math.PI / 7;
+            c.beginPath(); c.moveTo(cx - 30, gy - bH * 0.76); c.lineTo(cx + Math.cos(Math.PI - dra7) * 30, gy - bH * 0.76 - Math.sin(dra7) * 30); c.stroke();
+            c.beginPath(); c.moveTo(cx + 30, gy - bH * 0.76); c.lineTo(cx + Math.cos(dra7) * 30, gy - bH * 0.76 - Math.sin(dra7) * 30); c.stroke();
+        }
+        /* dome specular highlight */
+        c.fillStyle = 'rgba(240,230,200,0.12)'; c.beginPath(); c.arc(cx - 8, gy - bH * 0.84, 16, 0, Math.PI * 2); c.fill();
+        radialGlow(c, cx, gy - bH * 0.76, 38, 220, 200, 150, 0.16);
+
+        /* LANTERN */
+        c.fillStyle = stoneL7; c.strokeStyle = stoneD7; c.lineWidth = 1;
+        c.fillRect(cx - 6, gy - bH * 0.92, 12, bH * 0.08); c.strokeRect(cx - 6, gy - bH * 0.92, 12, bH * 0.08);
+        /* cross/finial */
+        c.strokeStyle = '#a09870'; c.lineWidth = 1.8;
+        c.beginPath(); c.moveTo(cx, gy - bH * 0.92); c.lineTo(cx, gy - bH); c.stroke();
+        c.beginPath(); c.moveTo(cx - 4, gy - bH * 0.97); c.lineTo(cx + 4, gy - bH * 0.97); c.stroke();
+        radialGlow(c, cx, gy - bH * 0.92, 20, 220, 200, 150, 0.22);
+    }
+
+    /* ══════════════════════════════════════════════
+       PRAGUE EXTRA LANDMARKS
+    ══════════════════════════════════════════════ */
+    function drawTynChurch(c, cx, gy) {
+        var bH = H * 0.58;
+        var dark12 = '#161210', darkM2 = '#222018', darkL2 = '#302e20';
+        var gold6 = '#c8a020', goldL6 = '#e8c040';
+
+        radialGlow(c, cx, gy, 80, 160, 130, 70, 0.12);
+
+        /* WIDE NAVE BODY — dark Gothic brick */
+        c.fillStyle = darkM2; c.strokeStyle = dark12; c.lineWidth = 1;
+        c.fillRect(cx - 46, gy - bH * 0.40, 92, bH * 0.40); c.strokeRect(cx - 46, gy - bH * 0.40, 92, bH * 0.40);
+        /* brick coursing */
+        c.strokeStyle = 'rgba(40,36,22,0.55)'; c.lineWidth = 0.5;
+        for (var bc = 1; bc < 7; bc++) { c.beginPath(); c.moveTo(cx - 46, gy - bH * bc / 7 * 0.40); c.lineTo(cx + 46, gy - bH * bc / 7 * 0.40); c.stroke(); }
+        /* nave clerestory windows */
+        c.fillStyle = 'rgba(50,35,15,0.80)';
+        for (var nw3 = -4; nw3 <= 4; nw3++) {
+            var nwx3 = cx + nw3 * 11;
+            c.fillRect(nwx3 - 3.5, gy - bH * 0.30, 7, 16);
+            c.beginPath(); c.moveTo(nwx3 - 3.5, gy - bH * 0.30); c.lineTo(nwx3, gy - bH * 0.35); c.lineTo(nwx3 + 3.5, gy - bH * 0.30); c.closePath(); c.fill();
+            if (Math.abs(nw3) <= 2) radialGlow(c, nwx3, gy - bH * 0.26, 6, 255, 175, 50, 0.16);
+        }
+
+        /* CENTRAL GABLE — with golden Madonna */
+        c.fillStyle = darkL2; c.strokeStyle = dark12; c.lineWidth = 1;
+        c.fillRect(cx - 20, gy - bH * 0.54, 40, bH * 0.14); c.strokeRect(cx - 20, gy - bH * 0.54, 40, bH * 0.14);
+        /* pointed gable apex */
+        c.beginPath(); c.moveTo(cx - 20, gy - bH * 0.54); c.lineTo(cx, gy - bH * 0.64); c.lineTo(cx + 20, gy - bH * 0.54); c.closePath(); c.fill(); c.stroke();
+        /* gold finial at gable tip */
+        c.fillStyle = gold6; c.beginPath(); c.arc(cx, gy - bH * 0.64, 3, 0, Math.PI * 2); c.fill();
+        radialGlow(c, cx, gy - bH * 0.64, 10, 200, 160, 50, 0.28);
+        /* GOLDEN MADONNA STATUE on gable */
+        c.fillStyle = gold6;
+        c.beginPath(); c.arc(cx, gy - bH * 0.58, 4.5, 0, Math.PI * 2); c.fill(); /* head */
+        c.fillRect(cx - 3.5, gy - bH * 0.54, 7, 12); /* body */
+        c.strokeStyle = gold6; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 3, gy - bH * 0.52); c.lineTo(cx - 9, gy - bH * 0.56); c.stroke();
+        c.beginPath(); c.moveTo(cx + 3, gy - bH * 0.52); c.lineTo(cx + 9, gy - bH * 0.56); c.stroke();
+        radialGlow(c, cx, gy - bH * 0.56, 18, 220, 180, 60, 0.32);
+        /* Rose window */
+        radialGlow(c, cx, gy - bH * 0.48, 16, 160, 90, 220, 0.28);
+        c.strokeStyle = '#4a3820'; c.lineWidth = 0.9;
+        c.beginPath(); c.arc(cx, gy - bH * 0.48, 10, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx, gy - bH * 0.48, 6, 0, Math.PI * 2); c.stroke();
+        c.strokeStyle = 'rgba(110,70,160,0.55)'; c.lineWidth = 0.7;
+        for (var rw3 = 0; rw3 < 8; rw3++) {
+            var rwa3 = rw3 * Math.PI / 4;
+            c.beginPath(); c.moveTo(cx + Math.cos(rwa3) * 6, gy - bH * 0.48 + Math.sin(rwa3) * 6);
+            c.lineTo(cx + Math.cos(rwa3) * 10, gy - bH * 0.48 + Math.sin(rwa3) * 10); c.stroke();
+        }
+
+        /* TWO TALL GOTHIC SPIRES */
+        for (var sp4 = -1; sp4 <= 1; sp4 += 2) {
+            var spX4 = cx + sp4 * 32;
+
+            /* tower body */
+            c.fillStyle = dark12; c.strokeStyle = darkM2; c.lineWidth = 1;
+            c.fillRect(spX4 - 17, gy - bH * 0.94, 34, bH * 0.54); c.strokeRect(spX4 - 17, gy - bH * 0.94, 34, bH * 0.54);
+            /* brick texture on tower */
+            c.strokeStyle = 'rgba(40,36,22,0.45)'; c.lineWidth = 0.5;
+            for (var tbc = 1; tbc < 9; tbc++) { c.beginPath(); c.moveTo(spX4 - 17, gy - bH * (0.40 + tbc * 0.06)); c.lineTo(spX4 + 17, gy - bH * (0.40 + tbc * 0.06)); c.stroke(); }
+
+            /* Blind tracery niches */
+            c.strokeStyle = 'rgba(60,50,28,0.50)'; c.lineWidth = 0.8;
+            for (var tn = -1; tn <= 1; tn++) {
+                var tnx = spX4 + tn * 8;
+                c.beginPath(); c.moveTo(tnx - 4, gy - bH * 0.62); c.lineTo(tnx - 4, gy - bH * 0.76); c.lineTo(tnx + 4, gy - bH * 0.76); c.lineTo(tnx + 4, gy - bH * 0.62); c.stroke();
+                c.beginPath(); c.moveTo(tnx - 4, gy - bH * 0.76); c.quadraticCurveTo(tnx, gy - bH * 0.80, tnx + 4, gy - bH * 0.76); c.stroke();
+            }
+
+            /* GOTHIC LANCET WINDOWS */
+            c.fillStyle = 'rgba(55,38,14,0.78)';
+            for (var tw7 = 0; tw7 < 6; tw7++) {
+                var twy7 = gy - bH * (0.46 + tw7 * 0.08);
+                c.fillRect(spX4 - 5, twy7, 10, 15);
+                c.beginPath(); c.moveTo(spX4 - 5, twy7); c.lineTo(spX4, twy7 - 6); c.lineTo(spX4 + 5, twy7); c.closePath(); c.fill();
+                if (tw7 < 4) radialGlow(c, spX4, twy7 + 6, 5, 255, 170, 50, 0.12);
+            }
+
+            /* Belfry storey with paired arches */
+            c.fillStyle = 'rgba(45,30,10,0.85)';
+            for (var ba = -1; ba <= 1; ba++) {
+                c.fillRect(spX4 + ba * 7 - 3, gy - bH * 0.94, 7, 14);
+                c.beginPath(); c.arc(spX4 + ba * 7, gy - bH * 0.94, 3.5, Math.PI, 0, false); c.fill();
+            }
+
+            /* Octagonal spire base collar */
+            c.fillStyle = darkL2; c.strokeStyle = dark12; c.lineWidth = 1;
+            c.fillRect(spX4 - 18, gy - bH * 0.94, 36, 6); c.strokeRect(spX4 - 18, gy - bH * 0.94, 36, 6);
+
+            /* SPIRE — tall, tapering black Gothic */
+            c.fillStyle = dark12; c.strokeStyle = darkM2; c.lineWidth = 0.8;
+            c.beginPath();
+            c.moveTo(spX4 - 17, gy - bH * 0.94);
+            c.lineTo(spX4 - 6, gy - bH * 0.97);
+            c.lineTo(spX4 - 2, gy - bH * 0.99);
+            c.lineTo(spX4, gy - bH);
+            c.lineTo(spX4 + 2, gy - bH * 0.99);
+            c.lineTo(spX4 + 6, gy - bH * 0.97);
+            c.lineTo(spX4 + 17, gy - bH * 0.94);
+            c.closePath(); c.fill(); c.stroke();
+            /* spire crockets */
+            c.fillStyle = darkL2;
+            for (var crt = 1; crt < 5; crt++) {
+                var crtf = crt / 5, crtW = 17 * (1 - crtf);
+                var crtY = gy - bH * (0.94 + crtf * 0.06);
+                c.fillRect(spX4 - crtW - 3, crtY - 3, 5, 5);
+                c.fillRect(spX4 + crtW - 2, crtY - 3, 5, 5);
+            }
+            /* GOLDEN FINIAL CROSS */
+            var finY2 = gy - bH;
+            c.fillStyle = gold6; c.beginPath(); c.arc(spX4, finY2, 3.5, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = goldL6; c.lineWidth = 2;
+            c.beginPath(); c.moveTo(spX4, finY2 - 3.5); c.lineTo(spX4, finY2 - 11); c.stroke();
+            c.beginPath(); c.moveTo(spX4 - 4, finY2 - 8); c.lineTo(spX4 + 4, finY2 - 8); c.stroke();
+            radialGlow(c, spX4, finY2, 14, 200, 160, 50, 0.28);
+        }
+
+        /* MAIN PORTAL — large pointed arch */
+        c.fillStyle = '#0a0806';
+        c.beginPath();
+        c.moveTo(cx - 15, gy); c.lineTo(cx - 15, gy - bH * 0.28);
+        c.quadraticCurveTo(cx - 15, gy - bH * 0.36, cx, gy - bH * 0.38);
+        c.quadraticCurveTo(cx + 15, gy - bH * 0.36, cx + 15, gy - bH * 0.28);
+        c.lineTo(cx + 15, gy); c.closePath(); c.fill();
+        /* portal tracery archivolts */
+        c.strokeStyle = '#4a3818'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 17, gy - bH * 0.22); c.quadraticCurveTo(cx - 17, gy - bH * 0.38, cx, gy - bH * 0.40); c.quadraticCurveTo(cx + 17, gy - bH * 0.38, cx + 17, gy - bH * 0.22); c.stroke();
+    }
+
+    function drawAstronomicalClock(c, cx, gy) {
+        var bH = H * 0.52;
+        var stone8 = '#c4b070', stoneD8 = '#9e8c48', stoneL8 = '#e0cc88';
+        var gold7 = '#d4a820', goldL7 = '#f0c840';
+        var dark13 = '#0e0c08';
+
+        radialGlow(c, cx, gy, 80, 200, 170, 80, 0.12);
+
+        /* OLD TOWN HALL TOWER BODY */
+        c.fillStyle = stone8; c.strokeStyle = stoneD8; c.lineWidth = 1;
+        c.fillRect(cx - 22, gy - bH * 0.90, 44, bH * 0.90); c.strokeRect(cx - 22, gy - bH * 0.90, 44, bH * 0.90);
+        /* stone ashlar courses */
+        c.strokeStyle = 'rgba(140,115,50,0.32)'; c.lineWidth = 0.6;
+        for (var sc9 = 1; sc9 < 14; sc9++) { c.beginPath(); c.moveTo(cx - 22, gy - bH * sc9 / 14 * 0.90); c.lineTo(cx + 22, gy - bH * sc9 / 14 * 0.90); c.stroke(); }
+        /* corner quoins */
+        c.strokeStyle = stoneL8; c.lineWidth = 1.4;
+        c.beginPath(); c.moveTo(cx - 22, gy); c.lineTo(cx - 22, gy - bH * 0.90); c.stroke();
+        c.beginPath(); c.moveTo(cx + 22, gy); c.lineTo(cx + 22, gy - bH * 0.90); c.stroke();
+
+        /* HIGH WINDOWS (upper half) */
+        c.fillStyle = dark13;
+        for (var wh = 0; wh < 3; wh++) {
+            var why = gy - bH * (0.12 + wh * 0.16);
+            c.fillRect(cx - 8, why, 16, 20);
+            c.beginPath(); c.moveTo(cx - 8, why); c.lineTo(cx, why - 7); c.lineTo(cx + 8, why); c.closePath(); c.fill();
+            radialGlow(c, cx, why + 8, 9, 255, 200, 80, 0.15);
+        }
+        /* side lancet windows */
+        for (var whs = -1; whs <= 1; whs += 2) {
+            var whsx = cx + whs * 14;
+            c.fillRect(whsx - 4, gy - bH * 0.18, 8, 14);
+            c.beginPath(); c.arc(whsx, gy - bH * 0.18, 4, Math.PI, 0, false); c.fill();
+        }
+
+        /* GOTHIC POINTED ROOF */
+        c.fillStyle = '#8a3018'; c.strokeStyle = '#6a2210'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 24, gy - bH * 0.90); c.lineTo(cx, gy - bH); c.lineTo(cx + 24, gy - bH * 0.90); c.closePath(); c.fill(); c.stroke();
+        /* gable tracery */
+        c.strokeStyle = stoneD8; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(cx - 14, gy - bH * 0.90); c.lineTo(cx, gy - bH * 0.96); c.lineTo(cx + 14, gy - bH * 0.90); c.stroke();
+        /* roof finial */
+        c.fillStyle = gold7; c.beginPath(); c.arc(cx, gy - bH, 3.5, 0, Math.PI * 2); c.fill();
+        radialGlow(c, cx, gy - bH, 10, 210, 170, 50, 0.26);
+
+        /* ════ ASTRONOMICAL CLOCK DIAL ════ */
+        var clkY = gy - bH * 0.58;
+        var clkR = 19;
+
+        /* outermost stone frame ring */
+        c.fillStyle = stone8; c.strokeStyle = stoneD8; c.lineWidth = 1.5;
+        c.beginPath(); c.arc(cx, clkY, clkR + 4, 0, Math.PI * 2); c.fill(); c.stroke();
+
+        /* OUTER ZODIAC RING — deep midnight blue */
+        c.fillStyle = '#08122a';
+        c.beginPath(); c.arc(cx, clkY, clkR, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = gold7; c.lineWidth = 1.8;
+        c.beginPath(); c.arc(cx, clkY, clkR, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx, clkY, clkR - 5, 0, Math.PI * 2); c.stroke();
+
+        /* 24-hour marks on outer ring */
+        c.strokeStyle = gold7; c.lineWidth = 0.9;
+        for (var hr2 = 0; hr2 < 24; hr2++) {
+            var hra2 = hr2 * Math.PI / 12 - Math.PI / 2;
+            var hR3 = (hr2 % 6 === 0) ? clkR - 7 : clkR - 9;
+            c.beginPath(); c.moveTo(cx + Math.cos(hra2) * clkR, clkY + Math.sin(hra2) * clkR); c.lineTo(cx + Math.cos(hra2) * hR3, clkY + Math.sin(hra2) * hR3); c.stroke();
+        }
+
+        /* MIDDLE RING — dark blue horizon sphere (Earth/cosmos) */
+        c.fillStyle = '#102060';
+        c.beginPath(); c.arc(cx, clkY, clkR - 5, 0, Math.PI * 2); c.fill();
+        /* gold inner ring */
+        c.strokeStyle = gold7; c.lineWidth = 1;
+        c.beginPath(); c.arc(cx, clkY, clkR - 5, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx, clkY, clkR - 10, 0, Math.PI * 2); c.stroke();
+
+        /* Zodiac glyphs around outer blue zone */
+        c.fillStyle = goldL7; c.font = 'bold 5.5px serif';
+        var zodiac2 = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+        for (var z2 = 0; z2 < 12; z2++) {
+            var za2 = z2 * Math.PI / 6 - Math.PI / 2;
+            var zr2 = clkR - 7.5;
+            c.fillText(zodiac2[z2], cx + Math.cos(za2) * zr2 - 3.5, clkY + Math.sin(za2) * zr2 + 2);
+        }
+
+        /* INNER GOLD SUN DISK */
+        c.fillStyle = '#10204a';
+        c.beginPath(); c.arc(cx, clkY, clkR - 10, 0, Math.PI * 2); c.fill();
+        radialGlow(c, cx, clkY, 12, 255, 200, 60, 0.40);
+        c.fillStyle = goldL7;
+        c.beginPath(); c.arc(cx, clkY, 5.5, 0, Math.PI * 2); c.fill();
+        /* sun rays */
+        c.strokeStyle = gold7; c.lineWidth = 0.8;
+        for (var sr2 = 0; sr2 < 12; sr2++) {
+            var sra2 = sr2 * Math.PI / 6;
+            c.beginPath(); c.moveTo(cx + Math.cos(sra2) * 5.5, clkY + Math.sin(sra2) * 5.5); c.lineTo(cx + Math.cos(sra2) * 9, clkY + Math.sin(sra2) * 9); c.stroke();
+        }
+
+        /* CLOCK HANDS */
+        c.strokeStyle = goldL7; c.lineWidth = 1.6;
+        c.beginPath(); c.moveTo(cx, clkY); c.lineTo(cx, clkY - clkR * 0.58); c.stroke();
+        c.strokeStyle = gold7; c.lineWidth = 1.2;
+        c.beginPath(); c.moveTo(cx, clkY); c.lineTo(cx + clkR * 0.45, clkY + clkR * 0.18); c.stroke();
+        c.fillStyle = goldL7; c.beginPath(); c.arc(cx, clkY, 2.5, 0, Math.PI * 2); c.fill();
+
+        /* ════ CALENDAR DIAL ════ */
+        var calY2 = gy - bH * 0.34;
+        var calR2 = 13;
+        c.fillStyle = '#1a1408';
+        c.beginPath(); c.arc(cx, calY2, calR2, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = gold7; c.lineWidth = 1.4;
+        c.beginPath(); c.arc(cx, calY2, calR2, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.arc(cx, calY2, calR2 - 4, 0, Math.PI * 2); c.stroke();
+        /* month segments */
+        c.strokeStyle = '#a08020'; c.lineWidth = 0.8;
+        for (var mo = 0; mo < 12; mo++) {
+            var moa = mo * Math.PI / 6 - Math.PI / 2;
+            c.beginPath(); c.moveTo(cx + Math.cos(moa) * (calR2 - 4), calY2 + Math.sin(moa) * (calR2 - 4));
+            c.lineTo(cx + Math.cos(moa) * calR2, calY2 + Math.sin(moa) * calR2); c.stroke();
+        }
+        c.fillStyle = goldL7; c.beginPath(); c.arc(cx, calY2, 3, 0, Math.PI * 2); c.fill();
+
+        /* DEATH FIGURE on right side */
+        var skX2 = cx + 26, skY2 = gy - bH * 0.46;
+        c.fillStyle = '#c8c0a0';
+        c.beginPath(); c.arc(skX2, skY2 - 2, 3.5, 0, Math.PI * 2); c.fill(); /* skull */
+        c.fillRect(skX2 - 2.5, skY2 + 1.5, 5, 10); /* ribcage */
+        c.strokeStyle = '#b8b090'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(skX2, skY2 + 5); c.lineTo(skX2 + 8, skY2 + 2); c.stroke(); /* arm with bell */
+        c.beginPath(); c.arc(skX2 + 9, skY2 + 1, 2, 0, Math.PI * 2); c.fill(); /* bell */
+        c.strokeStyle = '#b0a880'; c.lineWidth = 0.8;
+        c.beginPath(); c.moveTo(skX2, skY2 + 5); c.lineTo(skX2 - 7, skY2 + 3); c.stroke(); /* other arm, hourglass */
+        c.fillRect(skX2 - 10, skY2 + 1, 3, 5);
+
+        /* VANITY/ROOSTER on left side */
+        var vnX = cx - 26, vnY = gy - bH * 0.46;
+        c.fillStyle = '#c0a840';
+        c.beginPath(); c.arc(vnX, vnY, 3, 0, Math.PI * 2); c.fill(); /* mirror */
+        c.fillRect(vnX - 2, vnY + 3, 4, 8);
+        c.strokeStyle = '#b09830'; c.lineWidth = 0.8;
+        c.beginPath(); c.arc(vnX, vnY - 5, 4, 0, Math.PI * 2); c.stroke(); /* crown on mirror */
+
+        /* APOSTLE WINDOWS above clock face */
+        c.fillStyle = dark13;
+        for (var ap2 = -1; ap2 <= 1; ap2 += 2) {
+            var apX2 = cx + ap2 * 15;
+            c.fillRect(apX2 - 4, gy - bH * 0.74, 8, 10);
+            c.beginPath(); c.arc(apX2, gy - bH * 0.74, 4, Math.PI, 0, false); c.fill();
+        }
+    }
+
+    /* ══════════════════════════════════════════════
+       BEIJING EXTRA LANDMARKS
+    ══════════════════════════════════════════════ */
+    function drawBirdsNest(c, cx, gy) {
+        var bH = H * 0.36;
+        var steel3 = '#b8943a', steelD3 = '#906a18', steelL3 = '#deb850';
+        var red6 = '#c41818';
+
+        radialGlow(c, cx, gy - bH * 0.22, 110, 255, 120, 40, 0.18);
+
+        /* concrete base plinth */
+        c.fillStyle = '#302820'; c.strokeStyle = '#201810'; c.lineWidth = 1;
+        c.fillRect(cx - 70, gy - bH * 0.06, 140, bH * 0.06); c.strokeRect(cx - 70, gy - bH * 0.06, 140, bH * 0.06);
+
+        /* OVAL STADIUM BOWL */
+        c.fillStyle = '#1e1008'; c.strokeStyle = '#120804'; c.lineWidth = 1;
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 64, bH * 0.30, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+        /* red seating tiers */
+        c.fillStyle = red6;
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 52, bH * 0.24, 0, 0, Math.PI * 2); c.fill();
+        /* seating tier bands */
+        c.strokeStyle = '#aa1010'; c.lineWidth = 1;
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 44, bH * 0.20, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 36, bH * 0.16, 0, 0, Math.PI * 2); c.stroke();
+        /* playing field — natural grass */
+        c.fillStyle = '#1e5012';
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 32, bH * 0.14, 0, 0, Math.PI * 2); c.fill();
+        /* field markings */
+        c.strokeStyle = '#2e7020'; c.lineWidth = 0.8;
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 22, bH * 0.09, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.moveTo(cx - 32, gy - bH * 0.30); c.lineTo(cx + 32, gy - bH * 0.30); c.stroke();
+
+        /* ── INTERLOCKED STEEL NEST STRUCTURE ── */
+        /* outer structural ring */
+        c.strokeStyle = steel3; c.lineWidth = 4;
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 67, bH * 0.33, 0, 0, Math.PI * 2); c.stroke();
+        c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 62, bH * 0.29, 0, Math.PI, false); c.stroke();
+
+        /* primary lattice beams — main nest elements */
+        c.lineWidth = 2.8;
+        for (var nb4 = 0; nb4 < 20; nb4++) {
+            var nba4 = nb4 * Math.PI / 10;
+            var nx4a = cx + Math.cos(nba4) * 67, ny4a = gy - bH * 0.30 + Math.sin(nba4) * bH * 0.33;
+            var nx4b = cx + Math.cos(nba4 + Math.PI * 0.65) * 52, ny4b = gy - bH * 0.30 + Math.sin(nba4 + Math.PI * 0.65) * bH * 0.24;
+            c.strokeStyle = nb4 % 2 === 0 ? steel3 : steelD3;
+            c.beginPath(); c.moveTo(nx4a, ny4a); c.lineTo(nx4b, ny4b); c.stroke();
+        }
+        /* secondary crossing beams */
+        c.lineWidth = 2;
+        for (var nb5 = 0; nb5 < 16; nb5++) {
+            var nba5 = nb5 * Math.PI / 8 + Math.PI / 16;
+            var nx5a = cx + Math.cos(nba5) * 64, ny5a = gy - bH * 0.30 + Math.sin(nba5) * bH * 0.31;
+            var nx5b = cx + Math.cos(nba5 + Math.PI * 0.52) * 56, ny5b = gy - bH * 0.30 + Math.sin(nba5 + Math.PI * 0.52) * bH * 0.26;
+            c.strokeStyle = 'rgba(184,148,58,0.65)';
+            c.beginPath(); c.moveTo(nx5a, ny5a); c.lineTo(nx5b, ny5b); c.stroke();
+        }
+        /* tertiary fine mesh */
+        c.lineWidth = 1.2;
+        for (var nb6 = 0; nb6 < 24; nb6++) {
+            var nba6 = nb6 * Math.PI / 12 + Math.PI / 24;
+            var nx6a = cx + Math.cos(nba6) * 60, ny6a = gy - bH * 0.30 + Math.sin(nba6) * bH * 0.28;
+            var nx6b = cx + Math.cos(nba6 + Math.PI * 0.38) * 50, ny6b = gy - bH * 0.30 + Math.sin(nba6 + Math.PI * 0.38) * bH * 0.22;
+            c.strokeStyle = 'rgba(184,148,58,0.40)';
+            c.beginPath(); c.moveTo(nx6a, ny6a); c.lineTo(nx6b, ny6b); c.stroke();
+        }
+        /* inner horizontal rings */
+        c.strokeStyle = 'rgba(144,106,24,0.55)'; c.lineWidth = 1.5;
+        for (var hr3 = 0; hr3 < 4; hr3++) {
+            var hrf3 = 0.85 - hr3 * 0.18;
+            c.beginPath(); c.ellipse(cx, gy - bH * 0.30, 67 * hrf3, bH * 0.33 * hrf3, 0, 0, Math.PI * 2); c.stroke();
+        }
+
+        /* ROOF ACCENT LIGHTS */
+        for (var rl2 = 0; rl2 < 10; rl2++) {
+            var rla2 = rl2 * Math.PI / 5;
+            var rlX2 = cx + Math.cos(rla2) * 65, rlY2 = gy - bH * 0.30 + Math.sin(rla2) * bH * 0.32;
+            radialGlow(c, rlX2, rlY2, 8, 255, 225, 180, 0.20);
+            c.fillStyle = '#fff8e0'; c.beginPath(); c.arc(rlX2, rlY2, 1.5, 0, Math.PI * 2); c.fill();
+        }
+        /* interior flood glow */
+        radialGlow(c, cx, gy - bH * 0.30, 55, 255, 120, 40, 0.16);
+    }
+
+    function drawSummerPalace(c, cx, gy) {
+        var bH = H * 0.38;
+        var red7 = '#aa1414', redD7 = '#840e0e';
+        var gold8 = '#d4a020', goldL8 = '#f0c030';
+        var yellow3 = '#c4900a';
+        var marble3 = '#dcd4bc', marbleD3 = '#bcb498';
+        var teal2 = '#1e5858';
+
+        radialGlow(c, cx, gy, 100, 80, 140, 180, 0.14);
+
+        /* KUNMING LAKE */
+        c.fillStyle = 'rgba(14,44,76,0.40)'; c.fillRect(cx - 84, gy - bH * 0.07, 168, bH * 0.07);
+        c.strokeStyle = 'rgba(30,80,140,0.22)'; c.lineWidth = 1;
+        for (var rip2 = 0; rip2 < 4; rip2++) { c.beginPath(); c.moveTo(cx - 80, gy - bH * 0.04 + rip2 * 4); c.lineTo(cx + 80, gy - bH * 0.04 + rip2 * 4); c.stroke(); }
+
+        /* MARBLE BOAT (Qingyan Zhou) */
+        /* hull — white marble */
+        c.fillStyle = marble3; c.strokeStyle = marbleD3; c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(cx - 55, gy - bH * 0.07);
+        c.lineTo(cx - 52, gy - bH * 0.18);
+        c.lineTo(cx + 52, gy - bH * 0.18);
+        c.lineTo(cx + 55, gy - bH * 0.07);
+        c.closePath(); c.fill(); c.stroke();
+        /* hull marble panels */
+        c.strokeStyle = 'rgba(180,168,136,0.40)'; c.lineWidth = 0.6;
+        for (var hp = -4; hp <= 4; hp++) { c.beginPath(); c.moveTo(cx + hp * 12, gy - bH * 0.07); c.lineTo(cx + hp * 12, gy - bH * 0.18); c.stroke(); }
+        /* paddlewheel slots on side */
+        c.fillStyle = marbleD3;
+        c.beginPath(); c.arc(cx, gy - bH * 0.12, 10, 0, Math.PI * 2); c.stroke();
+        for (var pw3 = 0; pw3 < 6; pw3++) { var pwa = pw3 * Math.PI / 3; c.beginPath(); c.moveTo(cx, gy - bH * 0.12); c.lineTo(cx + Math.cos(pwa) * 10, gy - bH * 0.12 + Math.sin(pwa) * 10); c.stroke(); }
+
+        /* UPPER DECK — white marble */
+        c.fillStyle = marble3; c.strokeStyle = marbleD3; c.lineWidth = 1;
+        c.fillRect(cx - 46, gy - bH * 0.28, 92, bH * 0.10); c.strokeRect(cx - 46, gy - bH * 0.28, 92, bH * 0.10);
+        /* deck columns */
+        c.strokeStyle = 'rgba(180,168,136,0.42)'; c.lineWidth = 0.9;
+        for (var mbc = -5; mbc <= 5; mbc++) { c.beginPath(); c.moveTo(cx + mbc * 8.5, gy - bH * 0.18); c.lineTo(cx + mbc * 8.5, gy - bH * 0.28); c.stroke(); }
+
+        /* AFT PAVILION (right end) — imperial red + yellow roof */
+        c.fillStyle = red7; c.strokeStyle = redD7; c.lineWidth = 1;
+        c.fillRect(cx + 18, gy - bH * 0.38, 30, bH * 0.10); c.strokeRect(cx + 18, gy - bH * 0.38, 30, bH * 0.10);
+        c.fillStyle = yellow3; c.strokeStyle = '#9a7008'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx + 16, gy - bH * 0.38); c.lineTo(cx + 33, gy - bH * 0.46); c.lineTo(cx + 50, gy - bH * 0.38); c.closePath(); c.fill(); c.stroke();
+        /* eave tips */
+        c.strokeStyle = '#c07010'; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(cx + 16, gy - bH * 0.38); c.quadraticCurveTo(cx + 10, gy - bH * 0.34, cx + 8, gy - bH * 0.28); c.stroke();
+        c.beginPath(); c.moveTo(cx + 50, gy - bH * 0.38); c.quadraticCurveTo(cx + 56, gy - bH * 0.34, cx + 58, gy - bH * 0.28); c.stroke();
+        radialGlow(c, cx + 33, gy - bH * 0.44, 14, 255, 190, 60, 0.20);
+
+        /* FORE PAVILION (left end) */
+        c.fillStyle = red7; c.strokeStyle = redD7; c.lineWidth = 1;
+        c.fillRect(cx - 48, gy - bH * 0.38, 30, bH * 0.10); c.strokeRect(cx - 48, gy - bH * 0.38, 30, bH * 0.10);
+        c.fillStyle = yellow3; c.strokeStyle = '#9a7008'; c.lineWidth = 1;
+        c.beginPath(); c.moveTo(cx - 50, gy - bH * 0.38); c.lineTo(cx - 33, gy - bH * 0.46); c.lineTo(cx - 16, gy - bH * 0.38); c.closePath(); c.fill(); c.stroke();
+        c.strokeStyle = '#c07010'; c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(cx - 50, gy - bH * 0.38); c.quadraticCurveTo(cx - 56, gy - bH * 0.34, cx - 58, gy - bH * 0.28); c.stroke();
+        c.beginPath(); c.moveTo(cx - 16, gy - bH * 0.38); c.quadraticCurveTo(cx - 10, gy - bH * 0.34, cx - 8, gy - bH * 0.28); c.stroke();
+        radialGlow(c, cx - 33, gy - bH * 0.44, 14, 255, 190, 60, 0.20);
+
+        /* LONGEVITY HILL PAGODA (background) */
+        var pgX2 = cx + 58;
+        /* hill */
+        c.fillStyle = '#363220'; c.strokeStyle = '#262210'; c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(pgX2 - 26, gy); c.lineTo(pgX2 - 26, gy - bH * 0.24);
+        c.quadraticCurveTo(pgX2, gy - bH * 0.40, pgX2 + 26, gy - bH * 0.24);
+        c.lineTo(pgX2 + 26, gy); c.closePath(); c.fill(); c.stroke();
+        /* five-tier pagoda */
+        for (var pt2 = 0; pt2 < 5; pt2++) {
+            var pW2 = 17 - pt2 * 2.8, pY2 = gy - bH * (0.40 + pt2 * 0.10);
+            c.fillStyle = red7; c.strokeStyle = redD7; c.lineWidth = 0.8;
+            c.fillRect(pgX2 - pW2, pY2, pW2 * 2, bH * 0.10); c.strokeRect(pgX2 - pW2, pY2, pW2 * 2, bH * 0.10);
+            /* yellow eave */
+            c.fillStyle = yellow3; c.strokeStyle = '#9a7008'; c.lineWidth = 0.8;
+            c.beginPath(); c.moveTo(pgX2 - pW2 - 5, pY2); c.lineTo(pgX2, pY2 - bH * 0.06); c.lineTo(pgX2 + pW2 + 5, pY2); c.closePath(); c.fill(); c.stroke();
+            c.strokeStyle = '#c07010'; c.lineWidth = 1;
+            c.beginPath(); c.moveTo(pgX2 - pW2 - 5, pY2); c.quadraticCurveTo(pgX2 - pW2 - 9, pY2 + 4, pgX2 - pW2 - 11, pY2 - 5); c.stroke();
+            c.beginPath(); c.moveTo(pgX2 + pW2 + 5, pY2); c.quadraticCurveTo(pgX2 + pW2 + 9, pY2 + 4, pgX2 + pW2 + 11, pY2 - 5); c.stroke();
+            radialGlow(c, pgX2, pY2 - bH * 0.04, 8, 255, 180, 60, 0.14);
+        }
+        /* pagoda spire */
+        c.strokeStyle = gold8; c.lineWidth = 2.5;
+        c.beginPath(); c.moveTo(pgX2, gy - bH * 0.86); c.lineTo(pgX2, gy - bH); c.stroke();
+        c.fillStyle = goldL8; c.beginPath(); c.arc(pgX2, gy - bH, 3.5, 0, Math.PI * 2); c.fill();
+        radialGlow(c, pgX2, gy - bH * 0.93, 22, 220, 180, 60, 0.28);
+
+        /* lake reflection of pagoda */
+        c.fillStyle = 'rgba(180,130,40,0.14)';
+        c.beginPath(); c.ellipse(pgX2, gy - bH * 0.04, 14, 5, 0, 0, Math.PI * 2); c.fill();
     }
 
     /* ══════════════════════════════════════════════
@@ -2536,34 +3668,34 @@
         c.fillStyle = marble; c.strokeStyle = marbleD; c.lineWidth = 1;
         c.beginPath(); c.moveTo(cx - 34, gy - bH * 0.46); c.lineTo(cx, gy - bH * 0.55); c.lineTo(cx + 34, gy - bH * 0.46); c.closePath(); c.fill(); c.stroke();
 
-        /* drum */
+        /* drum — proportional radius: bottom=pediment peak (bH*0.55), top=dome base (bH*0.69) */
         c.fillStyle = marbleD; c.strokeStyle = '#a09070'; c.lineWidth = 1;
-        c.beginPath(); c.arc(cx, gy - bH * 0.62, 24, 0, Math.PI * 2); c.fill(); c.stroke();
+        c.beginPath(); c.arc(cx, gy - bH * 0.62, bH * 0.07, 0, Math.PI * 2); c.fill(); c.stroke();
         /* drum windows — warm glow */
         for (var dw = 0; dw < 6; dw++) {
             var dwa = dw * Math.PI / 3;
-            radialGlow(c, cx + Math.cos(dwa) * 20, gy - bH * 0.62 + Math.sin(dwa) * 12, 8, 255, 230, 180, 0.22);
+            radialGlow(c, cx + Math.cos(dwa) * bH * 0.055, gy - bH * 0.62 + Math.sin(dwa) * bH * 0.04, 8, 255, 230, 180, 0.22);
         }
 
-        /* main dome */
+        /* main dome — flat base at drum top (gy-bH*0.69), top at gy-bH*0.79 */
         c.fillStyle = marble; c.strokeStyle = marbleD; c.lineWidth = 1.2;
-        c.beginPath(); c.arc(cx, gy - bH * 0.77, 34, Math.PI, 0, false); c.closePath(); c.fill(); c.stroke();
+        c.beginPath(); c.arc(cx, gy - bH * 0.69, bH * 0.10, Math.PI, 0, false); c.closePath(); c.fill(); c.stroke();
         /* golden dome ribs */
         c.strokeStyle = gold; c.lineWidth = 1.3;
         for (var rib3 = -4; rib3 <= 4; rib3++) {
             var ra3 = rib3 * Math.PI / 10;
-            c.beginPath(); c.moveTo(cx, gy - bH * 0.77); c.lineTo(cx + Math.cos(ra3) * 34, gy - bH * 0.77 - Math.sin(Math.abs(ra3)) * 34); c.stroke();
+            c.beginPath(); c.moveTo(cx, gy - bH * 0.69); c.lineTo(cx + Math.cos(ra3) * bH * 0.10, gy - bH * 0.69 - Math.sin(Math.abs(ra3)) * bH * 0.10); c.stroke();
         }
         /* specular highlight */
         c.fillStyle = 'rgba(255,240,200,0.14)';
-        c.beginPath(); c.arc(cx - 10, gy - bH * 0.84, 14, Math.PI, 0, false); c.fill();
-        radialGlow(c, cx, gy - bH * 0.77, 40, 220, 200, 160, 0.14);
+        c.beginPath(); c.arc(cx - bH * 0.03, gy - bH * 0.76, bH * 0.04, Math.PI, 0, false); c.fill();
+        radialGlow(c, cx, gy - bH * 0.69, bH * 0.12, 220, 200, 160, 0.14);
 
-        /* lantern */
+        /* lantern — bottom at dome top (gy-bH*0.79) */
         c.fillStyle = marble; c.strokeStyle = marbleD; c.lineWidth = 1;
-        c.fillRect(cx - 6, gy - bH * 0.96, 12, bH * 0.20); c.strokeRect(cx - 6, gy - bH * 0.96, 12, bH * 0.20);
+        c.fillRect(cx - 6, gy - bH * 0.96, 12, bH * 0.17); c.strokeRect(cx - 6, gy - bH * 0.96, 12, bH * 0.17);
         c.strokeStyle = 'rgba(160,140,100,0.35)'; c.lineWidth = 0.7;
-        for (var lc2 = -2; lc2 <= 2; lc2++) { c.beginPath(); c.moveTo(cx + lc2 * 3, gy - bH * 0.77); c.lineTo(cx + lc2 * 3, gy - bH * 0.96); c.stroke(); }
+        for (var lc2 = -2; lc2 <= 2; lc2++) { c.beginPath(); c.moveTo(cx + lc2 * 3, gy - bH * 0.79); c.lineTo(cx + lc2 * 3, gy - bH * 0.96); c.stroke(); }
         /* gold cross */
         c.strokeStyle = gold; c.lineWidth = 2.5;
         c.beginPath(); c.moveTo(cx, gy - bH * 0.96); c.lineTo(cx, gy - bH); c.stroke();
@@ -2605,12 +3737,13 @@
             {fn:drawPagoda,         x:W*0.88,wins:null}
         ];}},
         { name:'BEIJING',   build:function(){ LM=[
-            {fn:drawTempleOfHeaven, x:W*0.10,wins:null},
-            {fn:drawTiananmen,      x:W*0.26,wins:null},
-            {fn:drawForbiddenCity,  x:W*0.44,wins:null},
-            {fn:drawCCTV,           x:W*0.62,wins:genWins(40)},
-            {fn:drawTempleOfHeaven, x:W*0.80,wins:null},
-            {fn:drawTiananmen,      x:W*0.94,wins:null}
+            {fn:drawSummerPalace,   x:W*0.08,wins:null},
+            {fn:drawTempleOfHeaven, x:W*0.22,wins:null},
+            {fn:drawTiananmen,      x:W*0.36,wins:null},
+            {fn:drawForbiddenCity,  x:W*0.52,wins:null},
+            {fn:drawCCTV,           x:W*0.66,wins:genWins(40)},
+            {fn:drawBirdsNest,      x:W*0.80,wins:null},
+            {fn:drawTempleOfHeaven, x:W*0.93,wins:null}
         ];}},
         { name:'LONDON',    build:function(){ LM=[
             {fn:drawBigBen,         x:W*0.14,wins:null},
@@ -2630,17 +3763,21 @@
             {fn:drawDubaiFrame,     x:W*0.90,wins:null}
         ];}},
         { name:'PARIS',     build:function(){ LM=[
-            {fn:drawNotreDame,      x:W*0.14,wins:null},
-            {fn:drawArcDeTriomphe,  x:W*0.32,wins:null},
-            {fn:drawEiffelTower,    x:W*0.52,wins:null},
-            {fn:drawArcDeTriomphe,  x:W*0.72,wins:null},
-            {fn:drawNotreDame,      x:W*0.88,wins:null}
+            {fn:drawLouvre,         x:W*0.07,wins:null},
+            {fn:drawNotreDame,      x:W*0.20,wins:null},
+            {fn:drawSacreCoeur,     x:W*0.34,wins:null},
+            {fn:drawPantheon,       x:W*0.48,wins:null},
+            {fn:drawEiffelTower,    x:W*0.63,wins:null},
+            {fn:drawArcDeTriomphe,  x:W*0.78,wins:null},
+            {fn:drawNotreDame,      x:W*0.92,wins:null}
         ];}},
         { name:'PRAGUE',    build:function(){ LM=[
-            {fn:drawCharlesBridge,  x:W*0.18,wins:null},
-            {fn:drawPragueCastle,   x:W*0.42,wins:null},
-            {fn:drawCharlesBridge,  x:W*0.68,wins:null},
-            {fn:drawPragueCastle,   x:W*0.88,wins:null}
+            {fn:drawTynChurch,          x:W*0.09,wins:null},
+            {fn:drawAstronomicalClock,  x:W*0.24,wins:null},
+            {fn:drawCharlesBridge,      x:W*0.44,wins:null},
+            {fn:drawPragueCastle,       x:W*0.64,wins:null},
+            {fn:drawTynChurch,          x:W*0.79,wins:null},
+            {fn:drawAstronomicalClock,  x:W*0.93,wins:null}
         ];}}
     ];
 

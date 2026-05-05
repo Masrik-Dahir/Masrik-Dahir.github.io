@@ -83,21 +83,21 @@
 .glass-panel {
     background: linear-gradient(
         135deg,
-        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.05) 0%,
         rgba(255, 255, 255, 0.01) 60%,
         rgba(200, 220, 255, 0.02) 100%
     );
-    backdrop-filter: blur(28px) saturate(160%) brightness(1.08);
-    -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.08);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    border-bottom-color: rgba(255, 255, 255, 0.10);
-    border-right-color:  rgba(255, 255, 255, 0.10);
+    backdrop-filter: blur(10px) saturate(130%) brightness(1.04);
+    -webkit-backdrop-filter: blur(10px) saturate(130%) brightness(1.04);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom-color: rgba(255, 255, 255, 0.07);
+    border-right-color:  rgba(255, 255, 255, 0.07);
     border-radius: 32px;
     box-shadow:
-        0 1px 0   rgba(255, 255, 255, 0.55) inset,
-        0 -1px 0  rgba(0,   0,   0,   0.04) inset,
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        0 2px 8px  rgba(0, 0, 0, 0.04);
+        0 1px 0   rgba(255, 255, 255, 0.35) inset,
+        0 -1px 0  rgba(0,   0,   0,   0.03) inset,
+        0 8px 32px rgba(0, 0, 0, 0.06),
+        0 2px 8px  rgba(0, 0, 0, 0.03);
     padding: 22px 30px 18px;
     position: relative;
     z-index: 1;
