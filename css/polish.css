@@ -1,0 +1,110 @@
+/**
+ * polish.css — minimal site-wide polish that DOES NOT reshape layout.
+ *
+ * Strict rule: do not touch `position`, `padding`, `margin`, `width`, or
+ * `border-radius` on structural elements (`.topnav`, `.topnav-2`,
+ * `.w3-content`, `.search_bar`). Hover-only enhancements and an opt-in
+ * `.page-hero` block are the only changes.
+ */
+
+/* ── Card hover lift (subtle) ────────────────────────────────── */
+
+body.polish .w3-card,
+body.polish .w3-card-2,
+body.polish .w3-card-4 {
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+body.polish .w3-card:hover,
+body.polish .w3-card-2:hover,
+body.polish .w3-card-4:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15, 30, 60, 0.10);
+}
+
+/* ── Image / logo hover glow ─────────────────────────────────── */
+
+body.polish .box,
+body.polish .box2 {
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+body.polish .box:hover,
+body.polish .box2:hover {
+    filter: drop-shadow(0 3px 10px rgba(255, 178, 70, 0.35));
+}
+
+/* ── Footer social-icon lift ─────────────────────────────────── */
+
+body.polish footer a {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+body.polish footer a:hover {
+    transform: translateY(-3px);
+}
+
+/* ── Page-graphics canvas (sits behind page content) ─────────── */
+
+body.polish #page-graphics-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Lift the main page content above the canvas. We use a direct-child
+ * selector so the rule does NOT apply to the wrapper that
+ * `components.js` builds around the fixed topnav (which is itself a
+ * `.w3-content`). If both wrappers got the same z-index, the page
+ * content would paint on top of the nav and cover it on scroll. */
+
+body.polish > .w3-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Optional `.page-hero` block (only renders when added explicitly) ── */
+
+body.polish .page-hero {
+    position: relative;
+    margin: 14px 0 16px;
+    padding: 22px 26px 18px;
+    border-radius: 18px;
+    background: rgba(245, 250, 255, 0.55);
+    border: 1px solid rgba(15, 30, 60, 0.06);
+    box-shadow: 0 6px 18px rgba(15, 30, 60, 0.05);
+}
+
+body.polish .page-hero h1,
+body.polish .page-hero h2,
+body.polish .page-hero h3 {
+    margin: 0 0 6px;
+    color: #1a1f3d;
+}
+
+body.polish .page-hero p {
+    margin: 0;
+    color: rgba(15, 30, 60, 0.7);
+    font-style: italic;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    body.polish .w3-card,
+    body.polish .w3-card-2,
+    body.polish .w3-card-4,
+    body.polish .box,
+    body.polish .box2,
+    body.polish footer a {
+        transition: none !important;
+    }
+    body.polish #page-graphics-canvas {
+        display: none;
+    }
+}

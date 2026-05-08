@@ -6,21 +6,11 @@
  */
 
 /* ── Page Load Fade-in ─────────────────────────────────────────── */
-
-@keyframes pageEntrance {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-body {
-    animation: pageEntrance 1.8s ease-out both;
-}
+/* No animation on <body>. Browsers retain the animated `transform`
+ * keyframe property in computed style, creating a containing block for
+ * fixed-positioned descendants — which breaks `.navbar-fixed-top` (the
+ * top nav scrolls with the page instead of staying pinned).
+ * The eagle loader provides the entrance visual instead. */
 
 /* ── Button Click Ripple ───────────────────────────────────────── */
 
@@ -270,7 +260,5 @@ footer a:hover > i,
         transform: none;
     }
 
-    body {
-        animation: none;
-    }
+    /* body has no animation — see top of file */
 }
