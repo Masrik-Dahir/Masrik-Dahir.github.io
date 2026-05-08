@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.0] - 2026-05-07
+### Added
+- **Eagle Loader** — trademark site-wide loading screen with an SVG bald eagle flying in a circle (`js/eagle-loader.js`, `css/eagle-loader.css`). Auto-shows on initial paint, auto-hides 280 ms after `window.load`, and is exposed as `window.EagleLoader.show()/.hide()/.isVisible()` for any in-page navigation or long task. Internal links auto-bind to re-show the loader on click.
+- **Site-wide polish stylesheet** (`css/polish.css`) — animated page-background gradient, glass-card hover glow, animated nav underlines, hero block with gradient-shift heading, animated section divider, search-bar gradient border, footer icon lift, image hover glow. Opt-in via `body.polish`.
+- **Per-page decorative canvas backdrop** (`js/page-graphics.js`) with five themes:
+  - `aurora` (work) — three drifting gradient ribbons
+  - `constellation` (academia) — moving stars with nearest-neighbour lines
+  - `confetti` (milestone) — slow-falling colored rectangles
+  - `retro-stars` (games) — 8-bit 3-layer parallax star field
+  - `world-dots` (map) — pulsing world-map-style dot grid
+- Playwright integration test suite at `tests/eagle-loader.spec.js` verifying loader presence, hide-on-load, public API round-trip, and per-page graphics on every top-level page.
+- `docs/SPEC_v1.1.0.md` — full spec for this release.
+
+### Changed
+- `animations.css` and `animations.js` (existing site-wide animation engine — ripple, scroll-reveal, card-lift, stagger) are now loaded by every top-level page. Previously only `software.html` loaded them.
+- All seven top-level pages (`index.html`, `work.html`, `academia.html`, `software.html`, `milestone.html`, `games.html`, `map.html`) opt into polish via `body.polish` and pick a per-page graphics theme via `data-page-graphics`.
+- `package.json` version bumped from `1.0.0` to `1.1.0`.
+
+### Fixed
+- Initial-paint white-flash on slow connections — the eagle loader now covers the viewport from the first byte of HTML until the page finishes loading.
+
 ## [Unreleased]
 ### Fixed
 - Java API documentation data file: added 51 missing record models across 11 modules (ai_ml_pipelines +11, cost_optimization +8, deployment +8, security_ops +6, data_flow_etl +5, networking +4, observability +4, config_loader +2, lambda_middleware +1, resilience +1, resource_ops +1); totalModels updated from 5,571 to 5,622; modelAnchors updated

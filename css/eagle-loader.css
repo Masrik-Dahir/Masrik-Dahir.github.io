@@ -1,0 +1,224 @@
+/**
+ * eagle-loader.css — small centered loader: detailed top-down bald eagle
+ * with both wings flapping. While the loader is on screen the rest of the
+ * page is gently blurred; the blur clears slowly as the loader fades.
+ */
+
+/* ── Root widget ──────────────────────────────────────────────── */
+
+.eagle-loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999999;
+    width: 140px;
+    pointer-events: none;
+    text-align: center;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.42s ease, visibility 0s linear 0s;
+}
+
+.eagle-loader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.42s ease, visibility 0s linear 0.42s;
+}
+
+/* ── Lane (positioning box for the SVG) ──────────────────────── */
+
+.eagle-loader__lane {
+    width: 140px;
+    height: 118px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* ── SVG canvas ──────────────────────────────────────────────── */
+
+.eagle-loader__orbit {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22));
+}
+
+/* ── Wind streaks — sky rushing past, north → south ──────────── */
+
+.eagle-loader__streak {
+    animation: el-streak 0.95s linear infinite;
+}
+
+@keyframes el-streak {
+    0%   { transform: translateY(0);    opacity: 0; }
+    14%  {                              opacity: 1; }
+    86%  {                              opacity: 1; }
+    100% { transform: translateY(58px); opacity: 0; }
+}
+
+/* ── Speed dust particles — small dots blasting past the bird ── */
+
+.eagle-loader__dust {
+    animation: el-dust 0.9s linear infinite;
+}
+
+@keyframes el-dust {
+    0%   { transform: translateY(0)    scale(1);   opacity: 0; }
+    20%  {                                          opacity: 1; }
+    80%  { transform: translateY(50px) scale(0.6); opacity: 0.6; }
+    100% { transform: translateY(60px) scale(0.4); opacity: 0; }
+}
+
+/* ── Vapor contrails — long thin trails behind each wing tip ─── */
+
+.eagle-loader__vapor-streak {
+    animation: el-vapor 0.7s linear infinite;
+    transform-origin: 50% 0%;
+}
+
+@keyframes el-vapor {
+    0%   { transform: translateY(0)    scaleY(0.4); opacity: 0;   }
+    25%  { transform: translateY(2px)  scaleY(1);   opacity: 0.85; }
+    75%  { transform: translateY(10px) scaleY(1.2); opacity: 0.55; }
+    100% { transform: translateY(18px) scaleY(0.6); opacity: 0;   }
+}
+
+/* ── Drop shadow under the bird — pulses with the body bob ────── */
+
+.eagle-loader__shadow {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: el-shadow-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes el-shadow-pulse {
+    0%, 100% { transform: scale(1.00);  opacity: 0.20; }
+    50%      { transform: scale(0.88);  opacity: 0.14; }
+}
+
+/* ── Speed haze — soft contrail behind the body ─────────────── */
+
+.eagle-loader__haze {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: el-haze 1.4s ease-in-out infinite;
+}
+
+@keyframes el-haze {
+    0%, 100% { transform: translateY(0)    scaleY(1);    opacity: 0.55; }
+    50%      { transform: translateY(2px)  scaleY(1.18); opacity: 0.30; }
+}
+
+/* ── Wing-tip vortex swirls — small spirals at each wing tip ─── */
+
+.eagle-loader__vortex--left {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: el-vortex-l 0.55s linear infinite;
+}
+.eagle-loader__vortex--right {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    animation: el-vortex-r 0.55s linear infinite;
+}
+
+@keyframes el-vortex-l {
+    0%   { transform: translateY(0)   rotate(0deg);   opacity: 0.85; }
+    50%  {                                            opacity: 0.45; }
+    100% { transform: translateY(6px) rotate(-30deg); opacity: 0;    }
+}
+@keyframes el-vortex-r {
+    0%   { transform: translateY(0)   rotate(0deg);   opacity: 0.85; }
+    50%  {                                            opacity: 0.45; }
+    100% { transform: translateY(6px) rotate(30deg);  opacity: 0;    }
+}
+
+/* ── Eagle host — gentle vertical bob (whole bird drifts in air) ── */
+
+.eagle-loader__eagle-host {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: el-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes el-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+}
+
+/* ── Wing flap — both wings rotate around their shoulder joints ── */
+
+.eagle-loader__wing--left {
+    transform-box: fill-box;
+    transform-origin: 100% 50%;
+    animation: el-wing-flap-left 0.50s ease-in-out infinite;
+}
+
+.eagle-loader__wing--right {
+    transform-box: fill-box;
+    transform-origin: 0% 50%;
+    animation: el-wing-flap-right 0.50s ease-in-out infinite;
+}
+
+@keyframes el-wing-flap-left {
+    0%, 100% { transform: rotate(-16deg); }
+    50%      { transform: rotate(10deg); }
+}
+
+@keyframes el-wing-flap-right {
+    0%, 100% { transform: rotate(16deg); }
+    50%      { transform: rotate(-10deg); }
+}
+
+/* ── Tail — subtle steering wag ──────────────────────────────── */
+
+.eagle-loader__tail {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: el-tail-wag 1.6s ease-in-out infinite;
+}
+
+@keyframes el-tail-wag {
+    0%, 100% { transform: rotate(-2deg); }
+    50%      { transform: rotate(2deg); }
+}
+
+/* ── Caption beneath the lane ─────────────────────────────────── */
+
+.eagle-loader__caption {
+    margin-top: 6px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11px;
+    letter-spacing: 0.34em;
+    color: rgba(15, 30, 60, 0.62);
+    text-transform: uppercase;
+    animation: el-tag-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes el-tag-pulse {
+    0%, 100% { opacity: 0.45; letter-spacing: 0.34em; }
+    50%      { opacity: 0.95; letter-spacing: 0.42em; }
+}
+
+/* ── Reduced motion fallback ─────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .eagle-loader__eagle-host,
+    .eagle-loader__wing--left,
+    .eagle-loader__wing--right,
+    .eagle-loader__tail,
+    .eagle-loader__caption,
+    .eagle-loader__streak,
+    .eagle-loader__dust,
+    .eagle-loader__vapor-streak,
+    .eagle-loader__shadow,
+    .eagle-loader__haze,
+    .eagle-loader__vortex--left,
+    .eagle-loader__vortex--right {
+        animation: none !important;
+        transition: none !important;
+    }
+    .eagle-loader__wing--left  { transform: rotate(-12deg); }
+    .eagle-loader__wing--right { transform: rotate(12deg);  }
+}

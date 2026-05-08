@@ -1,6 +1,6 @@
 {
   "name": "masrik-dahir.github.io",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "<!-- README auto-maintained. Update this file whenever: code structure changes,      new env vars added, commands change, new workflows added, or deps updated. -->",
   "main": "index.js",
   "directories": {
