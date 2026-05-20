@@ -22,14 +22,31 @@
 
     var SVG_NS = "http://www.w3.org/2000/svg";
 
+    // Properties that some pages style via global SVG `<style>` blocks
+    // (e.g., the travel page sets `path { stroke: #000; stroke-width: 1 }`
+    // inside inline SVG defs). Move them into inline `style="…"` so they
+    // win against any author-stylesheet type selector.
+    var STYLE_PROPS = {
+        "fill": 1, "stroke": 1, "stroke-width": 1, "stroke-linecap": 1,
+        "stroke-linejoin": 1, "stroke-dasharray": 1, "stroke-miterlimit": 1,
+        "opacity": 1, "fill-opacity": 1, "stroke-opacity": 1,
+        "fill-rule": 1
+    };
+
     function el(name, attrs) {
         var n = document.createElementNS(SVG_NS, name);
         if (attrs) {
+            var inline = "";
             for (var k in attrs) {
                 if (Object.prototype.hasOwnProperty.call(attrs, k)) {
-                    n.setAttribute(k, attrs[k]);
+                    if (STYLE_PROPS[k]) {
+                        inline += k + ":" + attrs[k] + ";";
+                    } else {
+                        n.setAttribute(k, attrs[k]);
+                    }
                 }
             }
+            if (inline) n.setAttribute("style", inline);
         }
         return n;
     }

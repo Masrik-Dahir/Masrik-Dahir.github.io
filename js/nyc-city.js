@@ -35,7 +35,9 @@
         { type:'bloodmoon', sky0:'#1a0404', sky1:'#2a0808' },
         { type:'nebula',    sky0:'#0a0218', sky1:'#180830' }
     ];
-    var eventIndex = 0, eventTimer = 0, EVENT_DURATION = 12000;
+    /* start on a real weather/disaster event (skip index 0 = 'clear') */
+    var eventIndex = 1 + Math.floor(Math.random() * (EVENTS.length - 1));
+    var eventTimer = 0, EVENT_DURATION = 12000;
 
     var particles = [], POOL = 360, splashes = [];
     var ltTimer = 0, ltActive = false, ltPts = [], ltFlash = 0;
@@ -3797,18 +3799,19 @@
         var ev=EVENTS[eventIndex];
         var rdH=H-GROUND;
 
-        /* sky */
+        /* sky — ALWAYS light blue regardless of weather event.
+           Weather elements (clouds, rain, lightning, meteors, etc.) still
+           render on top in drawDynamic. */
         var sky=bgC.createLinearGradient(0,0,0,GROUND);
-        sky.addColorStop(0,ev.sky0); sky.addColorStop(1,ev.sky1);
+        sky.addColorStop(0, '#a8d6ff');
+        sky.addColorStop(1, '#e6f3ff');
         bgC.fillStyle=sky; bgC.fillRect(0,0,W,H);
 
-        /* sun disk — clear sky */
-        if(ev.type==='clear') {
-            radialGlow(bgC, W*0.82,H*0.12, 90, 255,240,180, 0.30);
-            radialGlow(bgC, W*0.82,H*0.12, 44, 255,250,210, 0.55);
-            bgC.fillStyle='rgba(255,252,230,0.98)';
-            bgC.beginPath(); bgC.arc(W*0.82,H*0.12,22,0,Math.PI*2); bgC.fill();
-        }
+        /* sun is always present on the light blue sky */
+        radialGlow(bgC, W*0.82,H*0.12, 90, 255,240,180, 0.30);
+        radialGlow(bgC, W*0.82,H*0.12, 44, 255,250,210, 0.55);
+        bgC.fillStyle='rgba(255,252,230,0.98)';
+        bgC.beginPath(); bgC.arc(W*0.82,H*0.12,22,0,Math.PI*2); bgC.fill();
 
         /* overcast cloud wisps */
         if(ev.type==='snow'||ev.type==='blizzard'||ev.type==='rain') {
@@ -3901,22 +3904,61 @@
         return {
             type: type, x: rng(-200,W+200), dir: dir,
             speed: (type==='bus'||type==='truck') ? rng(0.5,1.4) : rng(1.0,2.8),
+            baseSpeed: 0,
             lit: rng(0,1)<0.75,
             col: (type==='sedan') ? SEDAN_COLS[rngI(0,SEDAN_COLS.length)] : null,
-            lightPhase: rng(0,Math.PI*2)
+            lightPhase: rng(0,Math.PI*2),
+            wiperT: rng(0,Math.PI*2),
+            hazT: rng(0,Math.PI*2),
+            drift: 0,
+            yOff: 0
         };
     }
 
     function initVehicles() {
         vehicles=[];
-        for(var i=0;i<22;i++) vehicles.push(makeVehicle());
+        for(var i=0;i<22;i++) {
+            var v=makeVehicle();
+            v.baseSpeed=v.speed;
+            vehicles.push(v);
+        }
     }
 
     function updateVehicles(dt) {
+        var type=EVENTS[eventIndex].type;
+        /* speed multiplier — bad weather slows traffic */
+        var spMul = 1;
+        if(type==='rain') spMul=0.65;
+        else if(type==='storm') spMul=0.45;
+        else if(type==='snow') spMul=0.55;
+        else if(type==='blizzard') spMul=0.30;
+        else if(type==='hail') spMul=0.45;
+        else if(type==='flood') spMul=0.25;
+        else if(type==='tornado') spMul=0.20;
+        else if(type==='earthquake') spMul=0.15;
+        else if(type==='meteor') spMul=0.35;
+        else if(type==='bloodmoon') spMul=0.55;
+        else if(type==='heat') spMul=0.75;
+        else if(type==='wind') spMul=1.2;
         for(var i=0;i<vehicles.length;i++) {
             var v=vehicles[i];
-            v.x+=v.dir*v.speed*dt*0.055;
+            v.x+=v.dir*v.speed*spMul*dt*0.055;
             v.lightPhase+=dt*0.005;
+            v.wiperT+=dt*0.012;
+            v.hazT+=dt*0.008;
+            /* lateral drift in tornado / wind / earthquake */
+            if(type==='tornado') {
+                var dist=v.x-tX;
+                v.drift += -Math.sign(dist)*Math.max(0,(200-Math.abs(dist))/200)*0.4*dt*0.02;
+                v.x+=v.drift*dt*0.02;
+            } else if(type==='wind') {
+                v.drift = Math.sin(performance.now()*0.001 + v.x*0.01)*1.2;
+            } else if(type==='earthquake') {
+                v.yOff = Math.sin(performance.now()*0.025 + v.x*0.02)*1.4;
+                v.xShake = Math.cos(performance.now()*0.030 + v.x*0.015)*1.2;
+            } else {
+                v.drift *= 0.95; v.yOff *= 0.9; v.xShake *= 0.9;
+            }
             if(v.x>W+220) v.x=-220;
             if(v.x<-220)  v.x=W+220;
         }
@@ -3987,14 +4029,16 @@
         var rdH = H-GROUND;
         var s   = Math.max(5, rdH*0.12);    /* scale unit */
         var wr  = Math.max(3, s*0.30);      /* wheel radius */
-        var by  = GROUND + rdH*0.10;        /* body bottom */
+        /* lane split by direction so opposite-direction cars don't drive through each other */
+        var laneOff = (v.dir===1) ? rdH*0.06 : -rdH*0.06;
+        var by  = GROUND + rdH*0.10 + laneOff; /* body bottom */
         var wy  = by + wr*0.52;             /* wheel centre (half-embedded) */
         var d   = v.dir, x = v.x;
 
         if (v.type==='taxi') {
             var p = carProfile(c,x,by,d, s*0.96,s*0.96, s*0.42,s*0.46,
                                s*0.28,s*0.30, s*0.16,s*0.14,
-                               '#f5c518','rgba(150,210,245,0.62)','#b89000');
+                               '#f5c518','rgba(80,135,180,0.96)','#b89000');
             /* taxi roof sign */
             var sW=s*0.40, sH=s*0.17, sY=p.rY-sH-1;
             c.fillStyle='#fff'; c.fillRect(x-sW/2,sY,sW,sH);
@@ -4012,7 +4056,7 @@
         } else if (v.type==='sedan') {
             var p = carProfile(c,x,by,d, s*0.90,s*0.90, s*0.36,s*0.44,
                                s*0.24,s*0.32, s*0.20,s*0.18,
-                               v.col,'rgba(140,200,238,0.58)','rgba(0,0,0,0.36)');
+                               v.col,'rgba(60,115,170,0.95)','rgba(0,0,0,0.36)');
             c.fillStyle='#fffce0'; c.fillRect(Math.min(p.xF,p.xF-d*2),by-s*0.26,2,s*0.16);
             if(v.lit) radialGlow(c,p.xF+d*2,by-s*0.18,s*0.78,255,248,200,0.28);
             c.fillStyle='#ff1000'; c.fillRect(Math.min(p.xR,p.xR+d*2),by-s*0.28,2,s*0.16);
@@ -4022,7 +4066,7 @@
         } else if (v.type==='nypd') {
             var p = carProfile(c,x,by,d, s*0.94,s*0.94, s*0.40,s*0.44,
                                s*0.26,s*0.30, s*0.15,s*0.13,
-                               '#141418','rgba(110,175,215,0.55)','rgba(0,0,0,0.50)');
+                               '#141418','rgba(45,90,140,0.95)','rgba(0,0,0,0.50)');
             /* white door panel */
             var dL=Math.min(p.xCF,p.xCR), dR=Math.max(p.xCF,p.xCR);
             c.fillStyle='#d8dcea'; c.fillRect(dL,p.hY,dR-dL,s*0.22);
@@ -4065,7 +4109,7 @@
             c.lineTo(frontX+d*s*0.12,by); c.lineTo(frontX,by);
             c.closePath(); c.fill();
             /* windows — 7 evenly spaced */
-            c.fillStyle='rgba(120,185,235,0.68)';
+            c.fillStyle='rgba(55,110,165,0.96)';
             var nw=7, wWin=(xR2-xL-s*0.50)/nw, wGap=s*0.10;
             for(var bi2=0;bi2<nw;bi2++) {
                 var wx4=xL+s*0.25+bi2*(wWin+wGap);
@@ -4147,23 +4191,40 @@
 
     function initPeds() {
         peds=[];
-        for(var i=0;i<28;i++) {
+        for(var i=0;i<32;i++) {
             peds.push({
                 x:   rng(0,W),
                 dir: rngI(0,2)===0?1:-1,
                 speed:rng(0.22,0.65),
+                baseSpeed:0,
                 t:   rng(0,Math.PI*2),
                 coat:rngI(0,5),
-                row: rngI(0,2) /* sidewalk row variation */
+                umbrellaCol: rngI(0,6),
+                row: rngI(0,2),
+                slipT: 0,
+                fallT: 0,
+                hat: rng(0,1)<0.35
             });
         }
+        for(var pi=0;pi<peds.length;pi++) peds[pi].baseSpeed=peds[pi].speed;
     }
 
     function updatePeds(dt) {
+        var type=EVENTS[eventIndex].type;
+        /* pedestrians ALWAYS walk at normal speed — only outfit changes by weather */
+        var sm = 1;
         for(var i=0;i<peds.length;i++) {
             var p=peds[i];
-            p.x+=p.dir*p.speed*dt*0.038;
+            p.x+=p.dir*p.speed*sm*dt*0.038;
             p.t+=dt*0.003;
+            if(type==='earthquake') {
+                p.eqX = Math.cos(performance.now()*0.040 + p.x*0.05)*1.0;
+                p.eqY = Math.sin(performance.now()*0.050 + p.x*0.04)*0.7;
+            } else if(p.eqX||p.eqY) {
+                p.eqX *= 0.85; p.eqY *= 0.85;
+                if(Math.abs(p.eqX)<0.05) p.eqX=0;
+                if(Math.abs(p.eqY)<0.05) p.eqY=0;
+            }
             if(p.x>W+20) p.x=-20;
             if(p.x<-20)  p.x=W+20;
         }
@@ -4171,19 +4232,86 @@
 
     function drawPeds(c) {
         var rdH=H-GROUND;
+        var type=EVENTS[eventIndex].type;
         var COATS=['#c8cce0','#e0e4f0','#8898b0','#a0a8c0','#e8d0b0'];
+        var UMB=['#c83838','#1e6cb8','#1e8c3c','#444444','#c0a020','#7030a0'];
+        /* outfit-only changes — body pose & walking speed stay normal */
+        var isWet=(type==='rain'||type==='storm');
+        var isCold=(type==='snow'||type==='blizzard');
+        var isHot=(type==='heat');
         for(var i=0;i<peds.length;i++) {
             var p=peds[i];
             var rowOff=p.row*6;
+            /* earthquake per-ped jitter */
+            var eqX = p.eqX||0, eqY = p.eqY||0;
+            if(eqX||eqY) { c.save(); c.translate(eqX, eqY); }
             var pedY=GROUND+rdH*0.58+rowOff;
-            var swing=Math.sin(p.t*4.5)*3;
             var col=COATS[p.coat];
+
+            var swing=Math.sin(p.t*4.5)*3;
+
+            /* body */
             c.fillStyle=col;
             c.fillRect(p.x-2, pedY-13, 4, 8);
-            c.beginPath(); c.arc(p.x,pedY-16,3,0,Math.PI*2); c.fill();
+            /* head */
+            var headX=p.x, headY=pedY-16;
+            c.beginPath(); c.arc(headX,headY,3,0,Math.PI*2); c.fill();
+
+            /* hat / hood in cold (outfit) */
+            if(isCold || p.hat) {
+                c.fillStyle = isCold ? '#5a3020' : '#222';
+                c.fillRect(headX-3, headY-3, 6, 2);
+            }
+
+            /* scarf in cold (outfit) */
+            if(isCold) {
+                c.strokeStyle = '#c84050';
+                c.lineWidth = 1.4;
+                c.beginPath();
+                c.moveTo(headX, headY+2);
+                c.lineTo(headX - p.dir*5 + Math.sin(p.t*5)*1.5, headY+5);
+                c.stroke();
+            }
+
+            /* arms — neutral walking pose */
             c.strokeStyle=col; c.lineWidth=1.4;
+            if(isWet) {
+                /* one arm up holding umbrella */
+                c.beginPath(); c.moveTo(p.x,pedY-10); c.lineTo(p.x,pedY-15); c.stroke();
+                c.beginPath(); c.moveTo(p.x,pedY-10); c.lineTo(p.x+2-swing,pedY-5); c.stroke();
+            } else {
+                c.beginPath(); c.moveTo(p.x,pedY-10); c.lineTo(p.x-2+swing*0.5,pedY-6); c.stroke();
+                c.beginPath(); c.moveTo(p.x,pedY-10); c.lineTo(p.x+2-swing*0.5,pedY-6); c.stroke();
+            }
+
+            /* legs — always walking */
             c.beginPath(); c.moveTo(p.x,pedY-5); c.lineTo(p.x-2+swing,pedY); c.stroke();
             c.beginPath(); c.moveTo(p.x,pedY-5); c.lineTo(p.x+2-swing,pedY); c.stroke();
+
+            /* umbrella (outfit) in wet weather */
+            if(isWet) {
+                var ux=p.x, uy=headY-6;
+                c.fillStyle=UMB[p.umbrellaCol];
+                c.beginPath();
+                c.ellipse(ux, uy, 8, 4, 0, Math.PI, 0);
+                c.fill();
+                /* umbrella ribs */
+                c.strokeStyle='rgba(0,0,0,0.4)'; c.lineWidth=0.6;
+                c.beginPath(); c.moveTo(ux-8,uy); c.lineTo(ux-4,uy-2); c.stroke();
+                c.beginPath(); c.moveTo(ux-4,uy-2); c.lineTo(ux,uy-3); c.stroke();
+                c.beginPath(); c.moveTo(ux,uy-3); c.lineTo(ux+4,uy-2); c.stroke();
+                c.beginPath(); c.moveTo(ux+4,uy-2); c.lineTo(ux+8,uy); c.stroke();
+                /* shaft to hand */
+                c.strokeStyle='#222'; c.lineWidth=0.8;
+                c.beginPath(); c.moveTo(ux,uy); c.lineTo(p.x,pedY-10); c.stroke();
+            }
+
+            /* heat sweat drops (outfit-ish atmospheric) */
+            if(isHot && Math.random()<0.04) {
+                c.fillStyle='rgba(120,180,220,0.7)';
+                c.beginPath(); c.arc(headX+3, headY+2, 1, 0, Math.PI*2); c.fill();
+            }
+            if(eqX||eqY) c.restore();
         }
     }
 
@@ -4296,7 +4424,7 @@
 
         if(type==='flood'&&floodRising&&floodY>GROUND-H*0.26) floodY-=0.065*k;
         if(type==='tornado'){tSwayT+=0.0010*dt;tX=W*0.5+Math.sin(tSwayT)*W*0.20;}
-        if(type==='earthquake'){eqTimer+=dt; eqShakeX=Math.sin(eqTimer*0.18)*8*(1-Math.min(1,eqTimer/8000)); eqShakeY=Math.cos(eqTimer*0.24)*5*(1-Math.min(1,eqTimer/8000));}
+        if(type==='earthquake'){eqTimer+=dt; eqShakeX=Math.sin(eqTimer*0.18)*3*(1-Math.min(1,eqTimer/8000)); eqShakeY=Math.cos(eqTimer*0.24)*2*(1-Math.min(1,eqTimer/8000));}
         if(type==='aurora') auroraT+=0.0004*dt;
         if(type==='nebula') nebulaT+=0.0003*dt;
         if(type==='bloodmoon') bloodMoonT+=0.0006*dt;
@@ -4398,6 +4526,90 @@
     }
 
     /* ══════════════════════════════════════════════
+       VEHICLE WEATHER-IMPACT OVERLAY
+    ══════════════════════════════════════════════ */
+
+    function _carScale(v) {
+        var rdH=H-GROUND;
+        return Math.max(5, rdH*0.12);
+    }
+    function _carBodyBottom(v) {
+        var rdH=H-GROUND;
+        var laneOff = (v.dir===1) ? rdH*0.06 : -rdH*0.06;
+        return GROUND + rdH*0.10 + laneOff;
+    }
+    /* dark/night-like events where headlights are visible */
+    function _headlightsOn(type) {
+        return type==='storm'||type==='tornado'||type==='earthquake'||type==='meteor'||
+               type==='blizzard'||type==='bloodmoon'||type==='starry'||type==='shooting'||
+               type==='nebula'||type==='flood'||type==='rain';
+    }
+    /* Draw the forward beam BEFORE the car so cars in front occlude beams behind them */
+    function drawCarBeam(c, v, type) {
+        if(!_headlightsOn(type)) return;
+        var s = _carScale(v);
+        var by = _carBodyBottom(v) + (v.yOff||0);
+        /* anchor on the front bumper, at hood-front level (not wheel level) */
+        var s0 = (v.type==='bus') ? s*2.05 : (v.type==='truck') ? s*1.25 : s*0.96;
+        var bumperX = v.x + v.dir*s0 + (v.xShake||0);
+        var headHt = (v.type==='bus') ? by - s*1.10 : (v.type==='truck') ? by - s*0.95 : by - s*0.30;
+        var beamLen = 80 + (type==='storm'||type==='blizzard'?28:0);
+        var bg = c.createLinearGradient(bumperX, headHt, bumperX + v.dir*beamLen, headHt);
+        bg.addColorStop(0,   'rgba(255,250,220,0.70)');
+        bg.addColorStop(0.5, 'rgba(255,240,180,0.22)');
+        bg.addColorStop(1,   'rgba(255,220,140,0)');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(bumperX, headHt-3);
+        c.lineTo(bumperX + v.dir*beamLen, headHt-16);
+        c.lineTo(bumperX + v.dir*beamLen, headHt+16);
+        c.lineTo(bumperX, headHt+3);
+        c.closePath();
+        c.fill();
+        /* hot bulb glow at the bumper, also drawn before the car so it sits "in" the headlight */
+        radialGlow(c, bumperX, headHt, 7, 255, 245, 210, 0.55);
+    }
+    /* Wipers, spray, hazards, accumulation — drawn AFTER the car so they sit on it */
+    function drawCarExtras(c, v, type) {
+        var s = _carScale(v);
+        var by = _carBodyBottom(v) + (v.yOff||0);
+        var rainy = (type==='rain'||type==='storm'||type==='flood');
+        var hazardy = (type==='tornado'||type==='earthquake'||type==='meteor'||type==='blizzard'||type==='flood');
+        var s0 = (v.type==='bus') ? s*2.05 : (v.type==='truck') ? s*1.25 : s*0.96;
+        /* hazard tail-light blink at rear bumper, hood-line height */
+        if(hazardy) {
+            var on = Math.sin(v.hazT*4) > 0;
+            if(on) {
+                var rearX = v.x - v.dir*s0 + (v.xShake||0);
+                var tailY = (v.type==='bus') ? by - s*1.10 : (v.type==='truck') ? by - s*0.95 : by - s*0.30;
+                radialGlow(c, rearX, tailY, 7, 255, 140, 20, 0.78);
+            }
+        }
+        if(rainy) {
+            /* wiper sweeping windshield in rain */
+            var wx = v.x + v.dir*s*0.18 + (v.xShake||0);
+            var wy = by - s*0.62;
+            var ang = Math.sin(v.wiperT*3)*0.5;
+            c.strokeStyle='rgba(30,30,30,0.7)'; c.lineWidth=1.2;
+            c.beginPath();
+            c.moveTo(wx, wy);
+            c.lineTo(wx + Math.cos(ang)*s*0.30, wy - Math.sin(ang)*s*0.18);
+            c.stroke();
+            /* spray from wheels */
+            c.fillStyle='rgba(200,220,240,0.35)';
+            for(var sp=0;sp<3;sp++) {
+                var sx = v.x - v.dir*s*0.45 + rng(-2,2) + (v.xShake||0);
+                var sy = by + s*0.55 + rng(-1,1);
+                c.beginPath(); c.arc(sx, sy, rng(0.8,2.2), 0, Math.PI*2); c.fill();
+            }
+        }
+        if(type==='snow'||type==='blizzard'||type==='meteor') {
+            c.fillStyle = (type==='meteor') ? 'rgba(50,40,30,0.85)' : 'rgba(245,250,255,0.95)';
+            c.fillRect(v.x - s*0.45 + (v.xShake||0), by - s*0.62, s*0.9, 1.6);
+        }
+    }
+
+    /* ══════════════════════════════════════════════
        DYNAMIC LAYER
     ══════════════════════════════════════════════ */
 
@@ -4405,6 +4617,14 @@
         dynC.clearRect(0,0,W,H);
         var type=EVENTS[eventIndex].type;
         var i,p;
+
+        /* ── DESTROYED-BUILDING / WRECKAGE LAYER ──────────────────────────
+           Drawn FIRST in dynC so weather (rain, snow, lightning, fog…) and
+           the rest of the scene layer above it. This keeps destroyed buildings
+           at the same logical z as the live city silhouette. */
+        if(typeof drawWreckageLayer==='function') drawWreckageLayer(dynC);
+        /* ── AIR-DEFENCE BATTERIES on the ground (low z, cars pass over) ── */
+        if(typeof drawAirDefence==='function') drawAirDefence(dynC);
 
         /* wet pavement reflections */
         if(type==='rain'||type==='storm'||type==='flood'){
@@ -4682,8 +4902,20 @@
             radialGlow(dynC, esbX,esbY, 22, bc2[0],bc2[1],bc2[2], 0.50);
         }
 
-        /* vehicles and pedestrians */
-        for(var vi=0;vi<vehicles.length;vi++) drawVehicle(dynC,vehicles[vi]);
+        /* sort vehicles back-to-front so closer cars occlude farther ones:
+           upper lane (dir=-1) drawn first; within a lane, the "back" of the lane drawn first */
+        var sortedV = vehicles.slice().sort(function(a,b){
+            if(a.dir!==b.dir) return (a.dir===1?1:-1) - (b.dir===1?1:-1);
+            return a.dir===1 ? a.x-b.x : b.x-a.x;
+        });
+        for(var vi=0;vi<sortedV.length;vi++) {
+            var V=sortedV[vi];
+            var off = (V.xShake||0)||(V.yOff||0);
+            if(off) { dynC.save(); dynC.translate(V.xShake||0, V.yOff||0); }
+            drawVehicle(dynC,V);
+            drawCarExtras(dynC, V, type);
+            if(off) dynC.restore();
+        }
         drawPeds(dynC);
 
         /* airplane transition */
@@ -4962,7 +5194,7 @@
         var dt=Math.min(ts-lastTime,50);
         lastTime=ts;
 
-        eventTimer+=dt;
+        if(!(typeof weatherPinned!=='undefined'&&weatherPinned)) eventTimer+=dt;
         if(eventTimer>=EVENT_DURATION){
             eventTimer=0;
             eventIndex=(eventIndex+1)%EVENTS.length;
@@ -4997,6 +5229,28 @@
                 buildLandmarks();
                 cityBuilt=false;
                 cityLabelTimer=3000;
+                /* fresh city — wipe every trace of prior destruction */
+                wreckage=[];
+                craters=[];
+                debrisParts=[];
+                explosions=[];
+                smokePlumes=[];
+                missiles=[];
+                interceptors=[];
+                laserBeams=[];
+                targetLocks=[];
+                mushroomClouds=[];
+                fireFields=[];
+                gasClouds=[];
+                empPulses=[];
+                gravityWells=[];
+                neutronPulses=[];
+                antimatterBursts=[];
+                photonStrikes=[];
+                screenFlash=0;
+                initVehicles();
+                initPeds();
+                initAirDefence();
                 airplane.switched=true;
             }
             if(airplane.x>W+200||airplane.x<-200) airplane=null;
@@ -5008,8 +5262,15 @@
         drawDynamic();
 
         ctx.clearRect(0,0,W,H);
+        var evType=EVENTS[eventIndex].type;
         ctx.drawImage(bgCvs,0,0);
-        ctx.drawImage(cityCvs,0,0);
+        /* Earthquake shakes the BUILDINGS (cityCvs) but not the sky.
+           Vehicles + peds shake individually inside dynCvs via their own xShake/yOff. */
+        if(evType==='earthquake') {
+            ctx.drawImage(cityCvs, eqShakeX, eqShakeY);
+        } else {
+            ctx.drawImage(cityCvs,0,0);
+        }
         ctx.drawImage(dynCvs,0,0);
 
         /* film grain */
@@ -5026,13 +5287,15 @@
     buildLandmarks();
     initVehicles();
     initPeds();
-    initEvent(EVENTS[0].type);
+    initAirDefence();
+    initEvent(EVENTS[eventIndex].type);
 
     window.addEventListener('resize',function(){
         resize();
         buildBgBuildings();
         buildStarField();
         buildLandmarks();
+        initAirDefence();   /* keep batteries positioned at current width */
         cityBuilt=false;
     });
 
@@ -5045,8 +5308,3303 @@
         airplane={x:-160,y:baseY,dir:1,nextCity:next,switched:false,
                   t:0, baseY:baseY, strobT:0, trail:[]};
         var btn=document.getElementById('citySwitchBtn');
-        if(btn) btn.setAttribute('title','Fly to '+CITIES[next].name);
+        if(btn) btn.removeAttribute('title');
     };
     window.getCityName=function(){ return CITIES[currentCityIndex].name; };
     window.getNextCityName=function(){ return CITIES[(currentCityIndex+1)%CITIES.length].name; };
+    window.getCurrentCityIndex=function(){ return currentCityIndex; };
+    window.getAllCities=function(){
+        return CITIES.map(function(c,i){ return { index:i, name:c.name }; });
+    };
+    /* fly to a specific city by index */
+    window.flyToCity=function(targetIdx){
+        if(airplane) return;
+        if(typeof targetIdx!=='number' || targetIdx<0 || targetIdx>=CITIES.length) return;
+        if(targetIdx===currentCityIndex) return;
+        var baseY=GROUND*0.22;
+        airplane={x:-160,y:baseY,dir:1,nextCity:targetIdx,switched:false,
+                  t:0, baseY:baseY, strobT:0, trail:[]};
+        var btn=document.getElementById('citySwitchBtn');
+        if(btn) btn.removeAttribute('title');
+    };
+
+    /* ── weather widget API ── */
+    var weatherPinned=false;
+    var WEATHER_LABELS={
+        clear:'Clear',  rain:'Rain',     storm:'Thunderstorm', snow:'Snow',
+        blizzard:'Blizzard', tornado:'Tornado', flood:'Flood', hail:'Hail',
+        wind:'Wind', heat:'Heatwave', earthquake:'Earthquake', meteor:'Meteor Shower',
+        aurora:'Aurora', starry:'Starry Night', shooting:'Shooting Stars',
+        fireworks:'Fireworks', bloodmoon:'Blood Moon', nebula:'Nebula'
+    };
+    /* black-and-white Font Awesome 4.7 icons (filled variants only — safer) */
+    var WEATHER_ICONS={
+        clear:'fa-sun-o', rain:'fa-tint', storm:'fa-bolt',
+        snow:'fa-snowflake-o', blizzard:'fa-snowflake-o', tornado:'fa-life-ring',
+        flood:'fa-tint', hail:'fa-asterisk', wind:'fa-flag',
+        heat:'fa-fire', earthquake:'fa-exclamation-triangle', meteor:'fa-rocket',
+        aurora:'fa-magic', starry:'fa-star', shooting:'fa-asterisk',
+        fireworks:'fa-bullseye', bloodmoon:'fa-moon-o', nebula:'fa-cloud'
+    };
+    function setEvent(idx){
+        eventIndex=((idx%EVENTS.length)+EVENTS.length)%EVENTS.length;
+        eventTimer=0;
+        initEvent(EVENTS[eventIndex].type);
+        cityBuilt=false;
+    }
+    window.getWeatherEventType=function(){ return EVENTS[eventIndex].type; };
+    window.getWeatherEventName=function(){
+        var t=EVENTS[eventIndex].type;
+        return WEATHER_LABELS[t]||t;
+    };
+    window.getWeatherEventIcon=function(){
+        var t=EVENTS[eventIndex].type;
+        return WEATHER_ICONS[t]||'•';
+    };
+    window.nextWeatherEvent=function(){ setEvent(eventIndex+1); };
+    window.prevWeatherEvent=function(){ setEvent(eventIndex-1); };
+    window.getWeatherEventIndex=function(){ return eventIndex; };
+    window.setWeatherEvent=function(i){ setEvent(i); };
+    window.getAllWeatherEvents=function(){
+        return EVENTS.map(function(e,i){
+            return {
+                index:i, type:e.type,
+                name: WEATHER_LABELS[e.type]||e.type,
+                icon: WEATHER_ICONS[e.type]||'fa-circle'
+            };
+        });
+    };
+    window.toggleWeatherPin=function(){
+        weatherPinned=!weatherPinned;
+        return weatherPinned;
+    };
+    window.isWeatherPinned=function(){ return weatherPinned; };
+
+    window._weatherIsPinned=function(){ return weatherPinned; };
+
+    /* ══════════════════════════════════════════════
+       MISSILE STRIKE SYSTEM
+    ══════════════════════════════════════════════ */
+    var missiles = [];       /* in-flight missiles */
+    var explosions = [];     /* expanding fireballs / shockwaves */
+    var debrisParts = [];    /* flying fragments */
+    var craters = [];        /* lingering scorched ground */
+    var smokePlumes = [];    /* smoke rising after impact */
+    var wreckage = [];       /* PERSISTENT wreck objects: broken cars, rubble, twisted lamps, broken buildings */
+    var missileArmed = false;
+    var screenFlash = 0;
+
+    /* ── UNIQUE BLAST EFFECTS ── */
+    var mushroomClouds = [];  /* nuclear / hydrogen */
+    var fireFields = [];      /* thermobaric */
+    var gasClouds = [];       /* bio / chemical */
+    var empPulses = [];       /* emp expanding ring with arcs */
+    var gravityWells = [];    /* gravity inward suck + outward burst */
+    var neutronPulses = [];   /* neutron green radiation pulse */
+    var antimatterBursts = [];/* antimatter spherical burst with rays */
+    var photonStrikes = [];   /* vertical white beam */
+
+    /* ── AIR DEFENCE ── */
+    var airDefence = [];     /* batteries on the ground */
+    var interceptors = [];   /* in-flight interceptors */
+    var laserBeams = [];     /* instant laser strikes (for hypersonic) */
+    var targetLocks = [];    /* red crosshair ring shown briefly on a locked missile */
+    var INTERCEPT_RATE = 0.90;
+    /* mapping: missile.kind → interceptor kind */
+    var INTERCEPT_FOR = {
+        standard:'sam', cluster:'multi', plasma:'emp',
+        cruise:'patriot', hypersonic:'laser',
+        nuclear:'laser', hydrogen:'laser', thermobaric:'patriot',
+        bunker:'patriot', mirv:'multi',
+        stealth:'emp', railgun:'laser', drone:'sam',
+        icbm:'patriot', tactical:'sam',
+        antimatter:'emp',
+        decoy:'sam', swarm:'multi',
+        photon:'laser', gravity:'emp', neutron:'patriot',
+        emp:'sam', saturation:'multi',
+        '_bomblet':'sam'
+    };
+    /* ── DEFENCE control ── */
+    var DEFENCE_TYPES  = ['auto','sam','patriot','multi','laser','emp'];
+    var DEFENCE_LABELS = {
+        auto:'AUTO',     sam:'SAM',     patriot:'PATRIOT',
+        multi:'MULTI',   laser:'LASER', emp:'EMP'
+    };
+    var DEFENCE_ICONS  = {
+        auto:'fa-magic',     sam:'fa-rocket',     patriot:'fa-paper-plane',
+        multi:'fa-cubes',    laser:'fa-bolt',     emp:'fa-bullseye'
+    };
+    var defenceTypeIdx = 0;     /* 0 = AUTO */
+    var defenceActive  = true;  /* automatic interceptor batteries (on by default) */
+    var defenceMode    = false; /* user-driven defence game: AI fires, user clicks to intercept */
+    var defenceModeTimer = 0;   /* ms until next AI missile */
+
+    /* ── STRATEGY (queue up to 50 missiles, execute as one salvo) ── */
+    var STRATEGY_MAX = 50;
+    var strategyMode  = false;
+    var strategyQueue = [];     /* [{ kind, tx, ty }] */
+    var strategyStats = { fired:0, hits:0, intercepted:0, total:0, success:0 };
+    var strategyRunning = false;
+    function initAirDefence() {
+        airDefence = [];
+        var xs = [W*0.12, W*0.32, W*0.50, W*0.70, W*0.90];
+        for (var i=0; i<xs.length; i++) {
+            airDefence.push({
+                x: xs[i], y: GROUND-2,
+                cooldown: 0,
+                flashT: 0
+            });
+        }
+    }
+
+    /* ── missile types ────────────────────────────────────────────────── */
+    var MISSILE_TYPES = [
+        'standard','cluster','plasma','cruise','hypersonic',
+        /* ── new heavy-arsenal types ── */
+        'nuclear','hydrogen','thermobaric','bunker','mirv',
+        'stealth','railgun','drone','icbm','tactical',
+        'antimatter','decoy','swarm',
+        'photon','gravity','neutron','emp','saturation'
+    ];
+    var MISSILE_LABELS = {
+        standard:'STANDARD', cluster:'CLUSTER',
+        plasma:'PLASMA',     cruise:'CRUISE',
+        hypersonic:'HYPER',
+        nuclear:'NUCLEAR',   hydrogen:'HYDROGEN', thermobaric:'THERMOBARIC',
+        bunker:'BUNKER BUSTER', mirv:'MIRV',
+        stealth:'STEALTH',   railgun:'RAILGUN',   drone:'DRONE',
+        icbm:'ICBM',         tactical:'TACTICAL',
+        antimatter:'ANTIMATTER',
+        decoy:'DECOY',       swarm:'SWARM',
+        photon:'PHOTON',     gravity:'GRAVITY',   neutron:'NEUTRON',
+        emp:'EMP',           saturation:'SATURATION'
+    };
+    var MISSILE_ICONS = {
+        standard:'fa-rocket',   cluster:'fa-cubes',
+        plasma:'fa-bolt',       cruise:'fa-paper-plane',
+        hypersonic:'fa-fighter-jet',
+        nuclear:'fa-bomb',      hydrogen:'fa-fire',  thermobaric:'fa-fire-extinguisher',
+        bunker:'fa-gavel',      mirv:'fa-th',
+        stealth:'fa-eye-slash', railgun:'fa-bolt',   drone:'fa-plane',
+        icbm:'fa-arrow-circle-up', tactical:'fa-dot-circle-o',
+        antimatter:'fa-asterisk',
+        decoy:'fa-question-circle', swarm:'fa-th-large',
+        photon:'fa-sun-o',      gravity:'fa-circle',   neutron:'fa-times-circle',
+        emp:'fa-bolt',          saturation:'fa-th-list'
+    };
+    var missileTypeIdx = 0;
+
+    function fireMissile(tx, ty, kindOverride) {
+        var kind = kindOverride || MISSILE_TYPES[missileTypeIdx];
+        /* swarm/saturation/mirv: spawn many at launch site, each tracking offsets */
+        if (kind==='swarm') {
+            for (var sw=0; sw<10; sw++) {
+                fireMissile(tx + rng(-80,80), ty + rng(-30,30), '_swarmer');
+            }
+            return;
+        }
+        if (kind==='saturation') {
+            for (var st=0; st<20; st++) {
+                fireMissile(tx + rng(-120,120), ty + rng(-60,60), '_bomblet');
+            }
+            return;
+        }
+        var sx, sy, spd;
+        if(kind==='cruise') {
+            var fromLeft = Math.random()<0.5;
+            sx = fromLeft ? -60 : W+60;
+            sy = ty + rng(-30, -10);
+            spd = 0.70;
+        } else if(kind==='hypersonic') {
+            var fL = Math.random()<0.5;
+            sx = fL ? -120 : W+120;
+            sy = rng(-80, H*0.2);
+            spd = 1.40;
+        } else if(kind==='plasma') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -60;
+            spd = 0.38;
+        } else if(kind==='cluster' || kind==='mirv') {
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = -80;
+            spd = 0.48;
+        } else if(kind==='nuclear' || kind==='hydrogen' || kind==='thermobaric') {
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = -100;
+            spd = 0.40;
+        } else if(kind==='icbm') {
+            sx = tx + rng(-40, 40);
+            sy = -200;
+            spd = 0.95;
+        } else if(kind==='bunker') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -60;
+            spd = 0.75;
+        } else if(kind==='drone') {
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = H * 0.20;
+            spd = 0.30;
+        } else if(kind==='stealth') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 0.55;
+        } else if(kind==='railgun' || kind==='photon') {
+            sx = tx + rng(-20, 20);
+            sy = -300;
+            spd = 2.20;
+        } else if(kind==='antimatter' || kind==='gravity' || kind==='neutron') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -60;
+            spd = 0.50;
+        } else if(kind==='bio' || kind==='chemical') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 0.55;
+        } else if(kind==='emp') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -60;
+            spd = 0.55;
+        } else if(kind==='tactical' || kind==='decoy' || kind==='_swarmer') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 0.62;
+        } else {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 0.62;
+        }
+        var dxN = tx - sx, dyN = ty - sy;
+        var dist = Math.sqrt(dxN*dxN+dyN*dyN);
+        var m = {
+            kind: kind,
+            x:sx, y:sy, sx:sx, sy:sy, tx:tx, ty:ty,
+            vx:(dxN/dist)*spd, vy:(dyN/dist)*spd,
+            angle:Math.atan2(dyN,dxN),
+            trail:[],
+            life:0,
+            maxLife: dist/spd,
+            spd: spd,
+            wobbleT: rng(0, Math.PI*2),
+            boomT: 0,
+            boomRings: [],
+            sparks: []
+        };
+        if(kind==='cluster') {
+            m.splitFrac = rng(0.45, 0.58);
+            m.split = false;
+            m.bomblets = [];
+        }
+        if(kind==='plasma') {
+            m.arcs = [];
+            m.orbits = [];
+            for(var oi=0;oi<8;oi++) {
+                m.orbits.push({
+                    ang: rng(0, Math.PI*2),
+                    rad: rng(10, 22),
+                    spd: rng(0.005, 0.015) * (Math.random()<0.5?1:-1),
+                    size: rng(1.5, 3.5),
+                    hue: rngI(180, 260)
+                });
+            }
+        }
+        if(kind==='cruise') {
+            m.wingT = 0;
+            m.diveStart = 0.80; /* dive in last 20% */
+        }
+        if(kind==='hypersonic') {
+            m.shockCones = [];
+        }
+        /* tag the missile as user-fired so defence batteries
+           get 100% intercept when in attack mode */
+        m.userFired = !!missileArmed;
+        missiles.push(m);
+        tryIntercept(m);
+    }
+
+    /* schedule an interceptor for this missile.
+       - Strategy missiles: 90% (so user can craft a salvo that evades defence)
+       - Single attack missiles: 100% (always intercepted)
+       - AI / spawned (defenceMode): 90% */
+    function tryIntercept(m) {
+        if (!defenceActive) return;           /* defence is offline */
+        if (!airDefence.length) return;
+        if (m.userFired && !m.strategy) {
+            /* attackDifficulty: 0 = easy (50% intercepted), 1 = hard (100% intercepted) */
+            var userIRate = 0.5 + 0.5*attackDifficulty;
+            if (Math.random() > userIRate) return;
+        } else if (Math.random() > INTERCEPT_RATE) return;
+        /* pick the closest battery to the missile's target */
+        var best = airDefence[0], bestD = Infinity;
+        for (var i=0;i<airDefence.length;i++) {
+            var d = Math.abs(airDefence[i].x - m.tx);
+            if (d < bestD) { bestD = d; best = airDefence[i]; }
+        }
+        /* AUTO = smart-pick by missile type; otherwise force the selected defence */
+        var defSel = DEFENCE_TYPES[defenceTypeIdx];
+        var iKind = (defSel === 'auto')
+            ? (INTERCEPT_FOR[m.kind] || 'sam')
+            : defSel;
+        /* launch delay — short so user sees the response quickly */
+        var delay = (iKind==='laser') ? 500 : 180 + Math.random()*180;
+        best.cooldown = 240;
+        best.alertT = delay;  /* show pre-launch warning blink */
+        setTimeout(function(){
+            /* missile may have already exploded — abort if so */
+            if (missiles.indexOf(m) === -1) return;
+            best.flashT = 220;
+            if (iKind === 'laser') {
+                /* instant beam strike */
+                laserBeams.push({
+                    x1: best.x, y1: best.y - 14,
+                    x2: m.x,   y2: m.y,
+                    life: 0, maxLife: 260
+                });
+                killMissile(m, true);
+                return;
+            }
+            var startX = best.x, startY = best.y - 14;
+            var dx = m.x - startX, dy = m.y - startY;
+            var dist = Math.sqrt(dx*dx + dy*dy) || 1;
+            var spd = (iKind==='patriot') ? 1.10 :
+                      (iKind==='emp')     ? 0.85 :
+                      (iKind==='multi')   ? 0.95 :
+                      0.95;
+            interceptors.push({
+                kind: iKind,
+                x: startX, y: startY,
+                vx: dx/dist*spd, vy: dy/dist*spd,
+                angle: Math.atan2(dy,dx),
+                spd: spd,
+                target: m,
+                trail: [],
+                life: 0,
+                arcs: (iKind==='emp') ? [] : null,
+                spinT: 0
+            });
+            /* launch smoke puff at the battery */
+            for (var pi=0; pi<10; pi++) {
+                debrisParts.push({
+                    x: best.x + rng(-3,3), y: best.y - 8,
+                    vx: rng(-2,2), vy: -rng(2,5),
+                    rot:0, spin:0, size: rng(1.5,3),
+                    shade: 99,
+                    life:0, maxLife: rng(400,800)
+                });
+            }
+        }, delay);
+    }
+
+    /* destroy a missile without it impacting (intercepted) */
+    function killMissile(m, midairExplosion) {
+        var idx = missiles.indexOf(m);
+        if (idx === -1) return;
+        if (m.strategy) strategyStats.intercepted++;
+        missiles.splice(idx, 1);
+        if (midairExplosion) {
+            /* small mid-air detonation */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:40, life:0, maxLife:420, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:70, life:0, maxLife:320, kind:'shock' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:22, life:0, maxLife:180, kind:'flash' });
+            for (var i=0;i<20;i++) {
+                var a = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:m.x, y:m.y,
+                    vx:Math.cos(a)*rng(1.5,4), vy:Math.sin(a)*rng(1.5,4),
+                    rot:rng(0,Math.PI*2), spin:rng(-0.3,0.3),
+                    size:rng(1.5,3.5), shade:rngI(0,4),
+                    life:0, maxLife:rng(500,1000)
+                });
+            }
+        }
+    }
+
+    function updateMissileSystem(dt) {
+        /* defensive — make sure batteries exist (handles deferred canvas sizing) */
+        if (!airDefence || airDefence.length===0) initAirDefence();
+        /* DEFENCE MODE — AI spawns hostile missiles for the user to intercept */
+        if (defenceMode) {
+            defenceModeTimer -= dt;
+            if (defenceModeTimer <= 0) {
+                /* defenceDifficulty: 0 = slow (4–6.5s), 1 = fast (0.5–2s) */
+                var base   = 4000 - 3500*defenceDifficulty;
+                var jitter = 2500 - 1000*defenceDifficulty;
+                defenceModeTimer = base + Math.random()*jitter;
+                spawnAIMissile();
+            }
+        }
+        /* missiles */
+        for(var i=missiles.length-1;i>=0;i--) {
+            var m=missiles[i];
+            m.life+=dt;
+            m.wobbleT += dt*0.006;
+            var lifeFrac = m.life/m.maxLife;
+
+            /* per-kind motion */
+            if(m.kind==='cruise') {
+                /* horizontal cruise, then dive */
+                if(lifeFrac < m.diveStart) {
+                    /* fly mostly horizontal toward target x */
+                    var dxC = m.tx - m.x;
+                    var dyC = (m.ty - 80) - m.y;
+                    var dC = Math.sqrt(dxC*dxC+dyC*dyC);
+                    m.vx = dxC/dC * m.spd;
+                    m.vy = dyC/dC * m.spd * 0.4;
+                } else {
+                    /* dive: aim straight at target */
+                    var dxD = m.tx - m.x, dyD = m.ty - m.y;
+                    var dD = Math.sqrt(dxD*dxD+dyD*dyD) || 1;
+                    m.vx = dxD/dD * m.spd*1.4;
+                    m.vy = dyD/dD * m.spd*1.4;
+                }
+                m.angle = Math.atan2(m.vy, m.vx);
+                m.wingT += dt*0.005;
+            } else {
+                /* keep tracking target angle for smooth aim */
+                var dxR = m.tx - m.x, dyR = m.ty - m.y;
+                var dR = Math.sqrt(dxR*dxR+dyR*dyR) || 1;
+                m.vx = dxR/dR * m.spd;
+                m.vy = dyR/dR * m.spd;
+                m.angle = Math.atan2(m.vy, m.vx) + Math.sin(m.wobbleT)*0.04;
+            }
+            m.x += m.vx*dt;
+            m.y += m.vy*dt;
+            m.trail.push({x:m.x,y:m.y,age:0,jitter:rng(-1.5,1.5)});
+            for(var ti=0;ti<m.trail.length;ti++) m.trail[ti].age+=dt;
+            var trailLife = (m.kind==='hypersonic')?1400 : (m.kind==='plasma')?700 : 900;
+            while(m.trail.length>0 && m.trail[0].age>trailLife) m.trail.shift();
+
+            /* sonic boom rings */
+            m.boomT += dt;
+            var boomInt = (m.kind==='hypersonic')?90 : (m.kind==='cruise')?200 : 220;
+            if(m.boomT>boomInt && m.kind!=='plasma') {
+                m.boomT = 0;
+                m.boomRings.push({x:m.x, y:m.y, r:0, maxR:rng(28, 42), life:0, maxLife:rng(380,640)});
+            }
+            for(var br=m.boomRings.length-1;br>=0;br--) {
+                m.boomRings[br].life+=dt;
+                m.boomRings[br].r = m.boomRings[br].maxR * (m.boomRings[br].life/m.boomRings[br].maxLife);
+                if(m.boomRings[br].life>=m.boomRings[br].maxLife) m.boomRings.splice(br,1);
+            }
+
+            /* exhaust sparks */
+            var sparkRate = (m.kind==='hypersonic')?5 : (m.kind==='plasma')?2 : 3;
+            for(var sk=0;sk<sparkRate;sk++) {
+                m.sparks.push({
+                    x: m.x - Math.cos(m.angle)*10 + rng(-2,2),
+                    y: m.y - Math.sin(m.angle)*10 + rng(-2,2),
+                    vx: -Math.cos(m.angle)*rng(0.5,2) + rng(-0.5,0.5),
+                    vy: -Math.sin(m.angle)*rng(0.5,2) + rng(-0.5,0.5),
+                    life:0, maxLife:rng(250, 600),
+                    size: rng(0.6, 1.8),
+                    hue: (m.kind==='plasma') ? rngI(180,280) : (m.kind==='hypersonic') ? rngI(0,40) : rngI(20, 50)
+                });
+            }
+            for(var skj=m.sparks.length-1;skj>=0;skj--) {
+                var sp2=m.sparks[skj];
+                sp2.life+=dt; sp2.x+=sp2.vx*dt*0.05; sp2.y+=sp2.vy*dt*0.05;
+                if(sp2.life>=sp2.maxLife) m.sparks.splice(skj,1);
+            }
+
+            /* plasma orbits & arcs */
+            if(m.kind==='plasma') {
+                for(var oi=0;oi<m.orbits.length;oi++) m.orbits[oi].ang += m.orbits[oi].spd*dt;
+                if(Math.random()<0.18 && m.arcs.length<6) {
+                    var a1 = rng(0, Math.PI*2), a2 = a1 + rng(0.5, Math.PI*1.5);
+                    var r1 = rng(8, 26),       r2 = rng(8, 26);
+                    var pts=[];
+                    var segs = rngI(4,7);
+                    for(var ps=0;ps<=segs;ps++) {
+                        var ang = a1 + (a2-a1)*(ps/segs);
+                        var rd = r1 + (r2-r1)*(ps/segs) + rng(-3,3);
+                        pts.push({dx:Math.cos(ang)*rd, dy:Math.sin(ang)*rd});
+                    }
+                    m.arcs.push({pts:pts, life:0, maxLife:rng(120,260), hue:rngI(180,280)});
+                }
+                for(var ai=m.arcs.length-1;ai>=0;ai--) {
+                    m.arcs[ai].life+=dt;
+                    if(m.arcs[ai].life>=m.arcs[ai].maxLife) m.arcs.splice(ai,1);
+                }
+            }
+
+            /* hypersonic shock cones */
+            if(m.kind==='hypersonic' && Math.random()<0.3) {
+                m.shockCones.push({x:m.x, y:m.y, angle:m.angle, life:0, maxLife:rng(300,500)});
+            }
+            if(m.shockCones) {
+                for(var sc=m.shockCones.length-1;sc>=0;sc--) {
+                    m.shockCones[sc].life+=dt;
+                    if(m.shockCones[sc].life>=m.shockCones[sc].maxLife) m.shockCones.splice(sc,1);
+                }
+            }
+
+            /* cluster split at midpoint — spawn bomblets at THIS position
+               (not from a screen corner) so they look like the warhead opened */
+            if(m.kind==='cluster' && !m.split && lifeFrac>=m.splitFrac) {
+                m.split = true;
+                /* small "pop" flash at split point */
+                explosions.push({ x:m.x, y:m.y, r:0, maxR:36, life:0, maxLife:280, kind:'flash' });
+                /* eject 5 bomblets from current position, each tracking an offset target */
+                for(var bb=0;bb<5;bb++) {
+                    var oxB = rng(-50, 50), oyB = rng(-20, 20);
+                    var btx = m.tx + oxB, bty = m.ty + oyB;
+                    var bSx = m.x, bSy = m.y;
+                    /* give the bomblets a small ejection velocity spread */
+                    var ejAng = rng(-Math.PI*0.18, Math.PI*0.18);
+                    var bDx = btx - bSx, bDy = bty - bSy;
+                    var bDist = Math.sqrt(bDx*bDx + bDy*bDy) || 1;
+                    var bSpd = 0.55;
+                    var baseAng = Math.atan2(bDy, bDx) + ejAng;
+                    missiles.push({
+                        kind:'_bomblet',
+                        x: bSx, y: bSy,
+                        sx: bSx, sy: bSy,
+                        tx: btx, ty: bty,
+                        vx: Math.cos(baseAng)*bSpd,
+                        vy: Math.sin(baseAng)*bSpd,
+                        angle: baseAng,
+                        trail: [],
+                        life: 0,
+                        maxLife: bDist/bSpd,
+                        spd: bSpd,
+                        wobbleT: rng(0, Math.PI*2),
+                        boomT: 0,
+                        boomRings: [],
+                        sparks: []
+                    });
+                }
+                missiles.splice(i,1);
+                continue;
+            }
+
+            /* impact */
+            if(m.life>=m.maxLife) {
+                /* hypersonic and standard get a full blast; bomblets get a smaller one */
+                if(m.kind==='_bomblet') {
+                    /* mini explosion */
+                    var bR = 50;
+                    screenFlash = Math.max(screenFlash, 0.55);
+                    explosions.push({ x:m.tx, y:m.ty, r:0, maxR:bR*1.4, life:0, maxLife:550, kind:'fire' });
+                    explosions.push({ x:m.tx, y:m.ty, r:0, maxR:bR*2.4, life:0, maxLife:430, kind:'shock' });
+                    explosions.push({ x:m.tx, y:m.ty, r:0, maxR:bR*0.55,life:0, maxLife:200, kind:'flash' });
+                    for(var dd=0;dd<20;dd++) {
+                        var ang2=Math.random()*Math.PI*2, sp3=rng(2,6);
+                        debrisParts.push({x:m.tx,y:m.ty,vx:Math.cos(ang2)*sp3,vy:Math.sin(ang2)*sp3-rng(1,4),
+                            rot:rng(0,Math.PI*2),spin:rng(-0.4,0.4),size:rng(1.5,5),shade:rngI(0,4),
+                            life:0,maxLife:rng(600,1500)});
+                    }
+                    /* small destruction check */
+                    triggerSmallExplosion(m.tx, m.ty, bR);
+                } else {
+                    triggerExplosion(m.tx, m.ty, m.kind);
+                }
+                if (m.strategy) strategyStats.hits++;
+                missiles.splice(i,1);
+            }
+        }
+        /* interceptors — chase their target missile and kill on contact */
+        for(var I=interceptors.length-1;I>=0;I--) {
+            var ic=interceptors[I];
+            ic.life+=dt; ic.spinT+=dt;
+            /* re-aim at target if still alive */
+            if (ic.target && missiles.indexOf(ic.target)===-1) {
+                /* original target gone — pick nearest in-flight missile */
+                var closest=null, closestD=Infinity;
+                for (var mi=0;mi<missiles.length;mi++) {
+                    var mm=missiles[mi];
+                    var dxx=mm.x-ic.x, dyy=mm.y-ic.y;
+                    var dd=dxx*dxx+dyy*dyy;
+                    if (dd<closestD) { closestD=dd; closest=mm; }
+                }
+                ic.target = closest;
+            }
+            if (ic.target) {
+                var tdx=ic.target.x-ic.x, tdy=ic.target.y-ic.y;
+                var tdist=Math.sqrt(tdx*tdx+tdy*tdy)||1;
+                /* homing — re-aim every frame */
+                ic.vx = tdx/tdist*ic.spd;
+                ic.vy = tdy/tdist*ic.spd;
+                ic.angle = Math.atan2(ic.vy, ic.vx);
+            }
+            ic.x += ic.vx*dt; ic.y += ic.vy*dt;
+            ic.trail.push({x:ic.x, y:ic.y, age:0});
+            for (var ti=0;ti<ic.trail.length;ti++) ic.trail[ti].age+=dt;
+            while (ic.trail.length>0 && ic.trail[0].age>500) ic.trail.shift();
+            /* EMP electric arcs */
+            if (ic.kind==='emp' && ic.arcs && Math.random()<0.20 && ic.arcs.length<4) {
+                var pts=[]; var a1=rng(0,Math.PI*2);
+                for (var ps=0;ps<5;ps++) {
+                    pts.push({dx:Math.cos(a1+ps*0.5)*rng(4,10), dy:Math.sin(a1+ps*0.5)*rng(4,10)});
+                }
+                ic.arcs.push({pts:pts, life:0, maxLife:180});
+            }
+            if (ic.arcs) {
+                for (var ai=ic.arcs.length-1;ai>=0;ai--) {
+                    ic.arcs[ai].life+=dt;
+                    if (ic.arcs[ai].life>=ic.arcs[ai].maxLife) ic.arcs.splice(ai,1);
+                }
+            }
+            /* contact check */
+            if (ic.target) {
+                var hx=ic.target.x-ic.x, hy=ic.target.y-ic.y;
+                var hitR2 = ic.enhanced ? 600 : 220;  /* ~24px vs 15px */
+                if (hx*hx+hy*hy < hitR2) {
+                    if (ic.enhanced) killMissileBig(ic.target);
+                    else killMissile(ic.target, true);
+                    interceptors.splice(I,1);
+                    continue;
+                }
+            }
+            /* off-screen or stale — drop */
+            if (ic.life>8000 || ic.y<-40 || ic.y>H+40 || ic.x<-40 || ic.x>W+40) {
+                interceptors.splice(I,1);
+            }
+        }
+        /* target locks track the missile until they expire */
+        for (var tl=targetLocks.length-1; tl>=0; tl--) {
+            var TL = targetLocks[tl];
+            TL.life += dt;
+            if (TL.targetM && missiles.indexOf(TL.targetM) !== -1) {
+                TL.x = TL.targetM.x; TL.y = TL.targetM.y;
+            }
+            if (TL.life >= TL.maxLife) targetLocks.splice(tl,1);
+        }
+        /* laser beams fade */
+        for (var lb=laserBeams.length-1;lb>=0;lb--) {
+            laserBeams[lb].life+=dt;
+            if (laserBeams[lb].life>=laserBeams[lb].maxLife) laserBeams.splice(lb,1);
+        }
+        /* battery animation cooldown */
+        for (var ab=0;ab<airDefence.length;ab++) {
+            if (airDefence[ab].cooldown>0) airDefence[ab].cooldown -= dt;
+            if (airDefence[ab].flashT>0)   airDefence[ab].flashT   -= dt;
+            if (airDefence[ab].alertT>0)   airDefence[ab].alertT   -= dt;
+        }
+        /* explosions */
+        for(var e=explosions.length-1;e>=0;e--) {
+            var ex=explosions[e];
+            ex.life+=dt;
+            ex.r = ex.maxR * Math.pow(ex.life/ex.maxLife, 0.55);
+            if(ex.life>ex.maxLife) explosions.splice(e,1);
+        }
+        /* debris */
+        for(var d=debrisParts.length-1;d>=0;d--) {
+            var p=debrisParts[d];
+            p.life+=dt; p.x+=p.vx*dt*0.06; p.y+=p.vy*dt*0.06;
+            p.vy += 0.04*dt*0.06 * 9.0;
+            p.rot += p.spin*dt*0.06;
+            if(p.y>GROUND+rng(0,30)) {
+                p.vy*=-0.3; p.vx*=0.6; p.y=GROUND;
+                if(p.life>p.maxLife*0.4) { debrisParts.splice(d,1); continue; }
+            }
+            if(p.life>p.maxLife) debrisParts.splice(d,1);
+        }
+        /* craters persist forever — just advance time for any subtle anim */
+        for(var cr=0;cr<craters.length;cr++) craters[cr].life+=dt;
+        /* wreckage fire timer */
+        for(var wi=0;wi<wreckage.length;wi++) {
+            if(wreckage[wi].fireT!==undefined) wreckage[wi].fireT += dt;
+            if(wreckage[wi].smokeT!==undefined) wreckage[wi].smokeT += dt;
+        }
+        /* smoke plumes rise */
+        for(var sp=smokePlumes.length-1;sp>=0;sp--) {
+            var s=smokePlumes[sp];
+            s.life+=dt;
+            s.y -= s.vy*dt*0.06;
+            s.r += 0.03*dt*0.06;
+            if(s.life>s.maxLife) smokePlumes.splice(sp,1);
+        }
+        /* mushroom clouds */
+        for (var mc=mushroomClouds.length-1; mc>=0; mc--) {
+            var M=mushroomClouds[mc];
+            M.life += dt;
+            var p = M.life/M.maxLife;
+            M.capR = Math.min(M.capMaxR, M.capR + (M.capMaxR/2200)*dt);
+            M.stemTop -= 0.025 * dt;
+            if (M.life >= M.maxLife) mushroomClouds.splice(mc,1);
+        }
+        /* fire fields — flame instances */
+        for (var ff=fireFields.length-1; ff>=0; ff--) {
+            fireFields[ff].life += dt;
+            if (fireFields[ff].life >= fireFields[ff].maxLife) fireFields.splice(ff,1);
+        }
+        /* gas clouds expand and drift */
+        for (var gc=gasClouds.length-1; gc>=0; gc--) {
+            var G=gasClouds[gc];
+            G.life += dt;
+            var gp = G.life/G.maxLife;
+            G.r = Math.min(G.maxR, G.r + (G.maxR/1800)*dt);
+            G.x += G.vx * dt * 0.04;
+            G.y += G.vy * dt * 0.04;
+            if (G.life >= G.maxLife) gasClouds.splice(gc,1);
+        }
+        /* emp pulses */
+        for (var ep=empPulses.length-1; ep>=0; ep--) {
+            var EP = empPulses[ep];
+            EP.life += dt;
+            EP.r = EP.maxR * Math.pow(EP.life/EP.maxLife, 0.5);
+            if (Math.random()<0.4 && EP.arcs.length<10) {
+                var pts=[];
+                var a0=rng(0,Math.PI*2);
+                var rs=EP.r*0.6;
+                pts.push({x:EP.x+Math.cos(a0)*rs, y:EP.y+Math.sin(a0)*rs});
+                for (var pp=1; pp<6; pp++) {
+                    var rs2=EP.r*(0.6+pp*0.07);
+                    pts.push({x:EP.x+Math.cos(a0+pp*0.4)*rs2+rng(-6,6),
+                              y:EP.y+Math.sin(a0+pp*0.4)*rs2+rng(-6,6)});
+                }
+                EP.arcs.push({pts:pts, life:0, maxLife:200});
+            }
+            for (var ai=EP.arcs.length-1; ai>=0; ai--) {
+                EP.arcs[ai].life += dt;
+                if (EP.arcs[ai].life >= EP.arcs[ai].maxLife) EP.arcs.splice(ai,1);
+            }
+            if (EP.life >= EP.maxLife) empPulses.splice(ep,1);
+        }
+        /* gravity wells — pull debris toward center, then release */
+        for (var gw=gravityWells.length-1; gw>=0; gw--) {
+            var GW = gravityWells[gw];
+            GW.life += dt;
+            /* pull existing debris and embers toward center */
+            if (GW.phase==='pull') {
+                for (var dpi=0; dpi<debrisParts.length; dpi++) {
+                    var dp2=debrisParts[dpi];
+                    var dxg = GW.x-dp2.x, dyg = GW.y-dp2.y;
+                    var dg = Math.sqrt(dxg*dxg+dyg*dyg) || 1;
+                    if (dg < GW.innerR) {
+                        var pull = 0.04 * dt;
+                        dp2.vx += (dxg/dg) * pull;
+                        dp2.vy += (dyg/dg) * pull;
+                    }
+                }
+            }
+            if (GW.life >= GW.maxLife) gravityWells.splice(gw,1);
+        }
+        /* neutron pulse expands fast and fades */
+        for (var np=neutronPulses.length-1; np>=0; np--) {
+            var NP=neutronPulses[np];
+            NP.life += dt;
+            NP.r = NP.maxR * Math.pow(NP.life/NP.maxLife, 0.5);
+            if (NP.life >= NP.maxLife) neutronPulses.splice(np,1);
+        }
+        /* antimatter bursts */
+        for (var am=antimatterBursts.length-1; am>=0; am--) {
+            var AM=antimatterBursts[am];
+            AM.life += dt;
+            AM.r = AM.maxR * Math.pow(AM.life/AM.maxLife, 0.4);
+            AM.rayPhase += dt * 0.005;
+            if (AM.life >= AM.maxLife) antimatterBursts.splice(am,1);
+        }
+        /* photon strikes — vertical beam fades quickly */
+        for (var ph=photonStrikes.length-1; ph>=0; ph--) {
+            photonStrikes[ph].life += dt;
+            if (photonStrikes[ph].life >= photonStrikes[ph].maxLife) photonStrikes.splice(ph,1);
+        }
+
+        /* screen flash decays */
+        if(screenFlash>0) screenFlash = Math.max(0, screenFlash - dt*0.0025);
+    }
+
+    /* small bomblet explosion — lighter destruction */
+    function triggerSmallExplosion(x, y, blastR) {
+        var hitV=[];
+        for(var vh=0;vh<vehicles.length;vh++) {
+            var vv=vehicles[vh];
+            var loff = (vv.dir===1) ? (H-GROUND)*0.06 : -(H-GROUND)*0.06;
+            var yy = GROUND + (H-GROUND)*0.10 + loff;
+            var dxx=vv.x-x, dyy=yy-y;
+            if(dxx*dxx+dyy*dyy < blastR*blastR) hitV.push(vh);
+        }
+        var hitB = isBuildingAt(x, y);
+        if(!hitV.length && !hitB) return;
+        /* light wreckage */
+        if(hitB) {
+            var bbW = blastR*1.2;
+            var bbL = x-bbW/2, bbR2 = x+bbW/2;
+            var edge=[];
+            for(var jj=0;jj<=14;jj++) {
+                edge.push({x:bbL+(jj/14)*bbW, y:y+rng(-8,8)});
+            }
+            wreckage.push({kind:'brokenBuilding', x:x, leftX:bbL, rightX:bbR2,
+                breakY:y, edge:edge,
+                rebar:(function(){var r=[];for(var i=0;i<4;i++)r.push({x:x+rng(-bbW*0.4,bbW*0.4),y0:y+rng(-3,5),y1:y-rng(10,25),bend:rng(-5,5)});return r;})(),
+                fires:[{x:x,y:y,scale:0.55,phase:rng(0,500)}],
+                smokeT:0});
+        }
+        for(var vi2=0;vi2<hitV.length;vi2++) {
+            var vv2=vehicles[hitV[vi2]];
+            var loff2=(vv2.dir===1)?(H-GROUND)*0.06:-(H-GROUND)*0.06;
+            wreckage.push({kind:'carWreck', x:vv2.x, y:GROUND+(H-GROUND)*0.10+loff2,
+                type:vv2.type, dir:vv2.dir, col:vv2.col,
+                tilt:rng(-0.2,0.2), sinkY:rng(1,3),
+                cracks:(function(){var c=[];for(var i=0;i<4;i++)c.push({a:rng(0,Math.PI*2),len:rng(3,9)});return c;})(),
+                burning:true, fireT:0});
+            vv2.x = vv2.dir===1 ? -200 : W+200;
+        }
+    }
+
+    /* Is there a still-standing building at (x, y)?
+       Samples cityCvs (transparent where there's only sky) and rules out areas
+       already destroyed by previous strikes. */
+    function isBuildingAt(x, y) {
+        if(y >= GROUND-2) return false;
+        /* already-destroyed column? */
+        for(var wi=0;wi<wreckage.length;wi++) {
+            var w=wreckage[wi];
+            if(w.kind==='brokenBuilding' &&
+               x>=w.leftX && x<=w.rightX && y<=w.breakY) return false;
+        }
+        try {
+            var d = cityC.getImageData(Math.max(0,Math.floor(x)),
+                                       Math.max(0,Math.floor(y)), 1, 1).data;
+            return d[3] > 30;
+        } catch(e) { return true; /* fall back to treat as hit */ }
+    }
+
+    /* ── kill all live entities (vehicles + peds) within radius, push wrecks ── */
+    function _shredInRadius(x, y, r, opts) {
+        opts = opts || {};
+        for (var vi=vehicles.length-1; vi>=0; vi--) {
+            var v=vehicles[vi];
+            var lo=(v.dir===1)?(H-GROUND)*0.06:-(H-GROUND)*0.06;
+            var vy_=GROUND+(H-GROUND)*0.10+lo;
+            var dx=v.x-x, dy=vy_-y;
+            if (dx*dx+dy*dy < r*r) {
+                if (opts.keepVehicleVisible !== true) {
+                    wreckage.push({
+                        kind:'carWreck', x:v.x, y:vy_,
+                        type:v.type, dir:v.dir, col:v.col,
+                        tilt:rng(-0.3,0.3), sinkY:rng(2,6),
+                        cracks:(function(){var c=[];for(var i=0;i<rngI(4,8);i++)c.push({a:rng(0,Math.PI*2),len:rng(4,12)});return c;})(),
+                        burning: opts.fire !== false,
+                        fireT:rng(0,100)
+                    });
+                }
+                v.x = v.dir===1 ? -200 : W+200;
+            }
+        }
+        for (var pi=peds.length-1; pi>=0; pi--) {
+            var p=peds[pi];
+            var pdy=GROUND+(H-GROUND)*0.58;
+            var ddx=p.x-x, ddy=pdy-y;
+            if (ddx*ddx+ddy*ddy < r*r) {
+                for (var dq=0; dq<3; dq++) {
+                    debrisParts.push({ x:p.x, y:pdy,
+                        vx:rng(-5,5), vy:rng(-6,-2),
+                        rot:rng(0,Math.PI*2), spin:rng(-0.3,0.3),
+                        size:rng(1.5,3), shade:99,
+                        life:0, maxLife:rng(700,1400) });
+                }
+                p.x = p.dir===1 ? -30 : W+30;
+            }
+        }
+    }
+    function _flattenBuilding(x, y, r) {
+        if (y >= GROUND-10) return;
+        if (!isBuildingAt(x, y)) return;
+        var bbW = r*1.6;
+        var bbL = x-bbW/2, bbR2 = x+bbW/2;
+        var edge=[];
+        for (var jj=0; jj<=16; jj++) {
+            edge.push({ x:bbL+(jj/16)*bbW, y:y+rng(-10,8) });
+        }
+        wreckage.push({
+            kind:'brokenBuilding', x:x,
+            leftX:bbL, rightX:bbR2, breakY:y,
+            edge:edge,
+            rebar:(function(){
+                var rb=[];
+                for (var ri=0;ri<8;ri++) rb.push({x:x+rng(-bbW*0.45,bbW*0.45),y0:y+rng(-4,6),y1:y-rng(14,38),bend:rng(-7,7)});
+                return rb;
+            })(),
+            fires:(function(){
+                var fs=[];
+                for (var fi=0;fi<3;fi++) {
+                    var pf = edge[Math.floor((fi+1)*edge.length/4)];
+                    if (pf) fs.push({x:pf.x, y:pf.y, scale:rng(0.55,0.95), phase:rng(0,1000)});
+                }
+                return fs;
+            })(),
+            smokeT:0
+        });
+    }
+
+    /* ──── NUCLEAR / HYDROGEN ─────────────────────────────────────────── */
+    function triggerNuclear(x, y, scale) {
+        scale = scale || 1.0;
+        var blastR = 220 * scale;
+        screenFlash = 1.4;
+        eqShakeX = (Math.random()-0.5)*30*scale;
+        eqShakeY = (Math.random()-0.5)*22*scale;
+        /* triple flash bloom (white-hot core, mid, far) */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.6, life:0, maxLife:400, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.0, life:0, maxLife:900, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.8, life:0, maxLife:700, kind:'shock' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*3.2, life:0, maxLife:1400, kind:'shock' });
+        /* mushroom cloud */
+        mushroomClouds.push({
+            x:x, gy: (y<GROUND? y : GROUND),
+            stemTop: y - blastR*0.4, stemBot: GROUND,
+            capR: 0, capMaxR: blastR*1.4,
+            life:0, maxLife: 18000 * scale,
+            scale: scale
+        });
+        /* heavy embers + debris */
+        for (var i=0; i<120*scale; i++) {
+            var a=Math.random()*Math.PI*2, sp=rng(3,12);
+            debrisParts.push({
+                x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-rng(2,8),
+                rot:rng(0,Math.PI*2), spin:rng(-0.5,0.5),
+                size:rng(2,8), shade:rngI(0,4),
+                life:0, maxLife:rng(1200,2600)
+            });
+            debrisParts.push({
+                x:x, y:y, vx:Math.cos(a+0.4)*sp*1.2, vy:Math.sin(a+0.4)*sp*1.2-rng(1,5),
+                rot:0, spin:0, size:rng(1,2.5), shade:99,
+                life:0, maxLife:rng(700,1500)
+            });
+        }
+        /* large persistent smoke plumes */
+        for (var sp1=0; sp1<10; sp1++) {
+            smokePlumes.push({
+                x:x+rng(-blastR*0.3,blastR*0.3),
+                y:y+rng(-20,30),
+                r:rng(40,80)*scale, vy:rng(0.5,1.5),
+                life:0, maxLife:rng(8000,14000),
+                op:rng(0.55,0.85)
+            });
+        }
+        /* devastating destruction across a HUGE radius */
+        _shredInRadius(x, y, blastR);
+        _shredInRadius(x, y, blastR*1.5, {fire:true});
+        if (y < GROUND-10) {
+            _flattenBuilding(x, y, blastR);
+            /* secondary flatten on neighboring columns */
+            _flattenBuilding(x - blastR*0.7, y, blastR*0.7);
+            _flattenBuilding(x + blastR*0.7, y, blastR*0.7);
+        }
+    }
+
+    /* ──── THERMOBARIC ────────────────────────────────────────────────── */
+    function triggerThermobaric(x, y) {
+        var blastR = 160;
+        screenFlash = 1;
+        eqShakeX = (Math.random()-0.5)*18;
+        eqShakeY = (Math.random()-0.5)*12;
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.5, life:0, maxLife:900, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*2.4, life:0, maxLife:600, kind:'shock' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.6, life:0, maxLife:300, kind:'flash' });
+        /* persistent fire field on the ground */
+        var fireCount = 9;
+        for (var fc=0; fc<fireCount; fc++) {
+            fireFields.push({
+                x: x + rng(-blastR*0.85, blastR*0.85),
+                y: GROUND - rng(0, 6),
+                scale: rng(0.8, 1.6),
+                phase: rng(0, 2000),
+                life: 0, maxLife: rng(8000, 14000)
+            });
+        }
+        /* sparks */
+        for (var i=0; i<70; i++) {
+            var a=Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx:Math.cos(a)*rng(3,10), vy:Math.sin(a)*rng(3,7)-rng(1,4),
+                rot:0, spin:0, size:rng(1,2.5), shade:99,
+                life:0, maxLife:rng(700,1500)
+            });
+        }
+        for (var sp=0; sp<6; sp++) {
+            smokePlumes.push({ x:x+rng(-30,30),y:y+rng(-10,10),
+                r:rng(30,60), vy:rng(0.5,1.4),
+                life:0, maxLife:rng(5000,9000), op:rng(0.55,0.80) });
+        }
+        _shredInRadius(x, y, blastR, {fire:true});
+        if (y < GROUND-10) _flattenBuilding(x, y, blastR);
+    }
+
+    /* ──── BUNKER BUSTER (delayed secondary blast) ────────────────────── */
+    function triggerBunker(x, y) {
+        var blastR = 130;
+        screenFlash = 0.6;
+        eqShakeX = (Math.random()-0.5)*10;
+        eqShakeY = (Math.random()-0.5)*8;
+        /* small initial penetration burst */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.4, life:0, maxLife:300, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.7, life:0, maxLife:500, kind:'fire' });
+        /* secondary deep blast after a delay */
+        setTimeout(function(){
+            screenFlash = 1;
+            eqShakeX = (Math.random()-0.5)*20;
+            eqShakeY = (Math.random()-0.5)*16;
+            explosions.push({ x:x, y:y, r:0, maxR:blastR*1.6, life:0, maxLife:850, kind:'fire' });
+            explosions.push({ x:x, y:y, r:0, maxR:blastR*2.6, life:0, maxLife:650, kind:'shock' });
+            for (var i=0; i<60; i++) {
+                var a=Math.random()*Math.PI*2, sp=rng(4,9);
+                debrisParts.push({ x:x,y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-rng(3,7),
+                    rot:rng(0,Math.PI*2), spin:rng(-0.4,0.4),
+                    size:rng(3,8), shade:rngI(0,4),
+                    life:0, maxLife:rng(1000,2200) });
+            }
+            for (var sp2=0; sp2<5; sp2++) {
+                smokePlumes.push({ x:x+rng(-25,25),y:y+rng(-10,10),
+                    r:rng(30,50), vy:rng(0.5,1.2),
+                    life:0, maxLife:rng(4000,7000), op:rng(0.5,0.75) });
+            }
+            _shredInRadius(x, y, blastR);
+            if (y < GROUND-10) _flattenBuilding(x, y, blastR);
+        }, 450);
+    }
+
+    /* ──── BIO / CHEMICAL (gas cloud, kills peds, leaves buildings) ──── */
+    function triggerGas(x, y, type) {
+        var gasR = 180;
+        var color = (type==='bio')
+            ? {core:'rgba(120,255,80,', edge:'rgba(20,80,20,'}
+            : {core:'rgba(255,220,40,', edge:'rgba(140,80,0,'};
+        /* small initial puff */
+        explosions.push({ x:x, y:y, r:0, maxR:30, life:0, maxLife:300, kind:'flash' });
+        for (var i=0; i<8; i++) {
+            gasClouds.push({
+                x: x + rng(-20,20), y: y + rng(-15,15),
+                r: rng(20,40), maxR: gasR + rng(-30,30),
+                vy: rng(-0.3, 0.05),
+                vx: rng(-0.4, 0.4),
+                life:0, maxLife: rng(14000, 22000),
+                core: color.core, edge: color.edge,
+                op: rng(0.55, 0.80)
+            });
+        }
+        /* peds killed silently within radius (no fire) */
+        for (var pi=peds.length-1; pi>=0; pi--) {
+            var p=peds[pi];
+            var pdy=GROUND+(H-GROUND)*0.58;
+            var ddx=p.x-x, ddy=pdy-y;
+            if (ddx*ddx+ddy*ddy < gasR*gasR) {
+                for (var dq=0; dq<2; dq++) {
+                    debrisParts.push({ x:p.x, y:pdy,
+                        vx:rng(-1,1), vy:rng(-2,-1),
+                        rot:0, spin:0, size:rng(0.8,1.5), shade:99,
+                        life:0, maxLife:rng(500,1000) });
+                }
+                p.x = p.dir===1 ? -30 : W+30;
+            }
+        }
+        /* vehicles abandoned (stopped, not destroyed) — leave them */
+    }
+
+    /* ──── ANTIMATTER ─────────────────────────────────────────────────── */
+    function triggerAntimatter(x, y) {
+        var blastR = 200;
+        screenFlash = 1.6;
+        eqShakeX = (Math.random()-0.5)*24;
+        eqShakeY = (Math.random()-0.5)*18;
+        /* signature antimatter sphere + radial rays */
+        antimatterBursts.push({
+            x:x, y:y, r:0, maxR: blastR*2.2,
+            life:0, maxLife: 1600,
+            rayPhase: 0
+        });
+        /* layered fireball + shockwave for actual blast feel */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.55, life:0, maxLife:380, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.2, life:0, maxLife:850, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*2.2, life:0, maxLife:700, kind:'shock' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*3.4, life:0, maxLife:900, kind:'shock' });
+        /* white-blue tinted debris streaks */
+        for (var i=0; i<90; i++) {
+            var a=Math.random()*Math.PI*2, sp=rng(4,13);
+            debrisParts.push({
+                x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-rng(1,6),
+                rot:rng(0,Math.PI*2), spin:rng(-0.4,0.4),
+                size:rng(2,5), shade:rngI(0,4),
+                life:0, maxLife:rng(900,1800)
+            });
+            debrisParts.push({
+                x:x, y:y, vx:Math.cos(a+0.5)*sp*1.3, vy:Math.sin(a+0.5)*sp*1.3-rng(0,3),
+                rot:0, spin:0, size:rng(1,2), shade:99,
+                life:0, maxLife:rng(600,1300)
+            });
+        }
+        /* smoke plumes */
+        for (var sp=0; sp<6; sp++) {
+            smokePlumes.push({
+                x:x+rng(-25,25), y:y+rng(-15,15),
+                r:rng(30,55), vy:rng(0.5,1.2),
+                life:0, maxLife:rng(4000,8000),
+                op:rng(0.45,0.70)
+            });
+        }
+        /* clean annihilation across a wide zone */
+        _shredInRadius(x, y, blastR*1.3, {fire:true});
+        if (y < GROUND-10) {
+            _flattenBuilding(x, y, blastR);
+            _flattenBuilding(x - blastR*0.6, y, blastR*0.55);
+            _flattenBuilding(x + blastR*0.6, y, blastR*0.55);
+        }
+    }
+
+    /* ──── GRAVITY (inward implosion, then outward burst) ─────────────── */
+    function triggerGravity(x, y) {
+        var blastR = 180;
+        eqShakeX = (Math.random()-0.5)*10;
+        eqShakeY = (Math.random()-0.5)*8;
+        gravityWells.push({
+            x:x, y:y, r:0,
+            phase:'pull',
+            life:0, maxLife:2000,
+            innerR: blastR*1.5
+        });
+        /* after 1.2s, trigger outward burst */
+        setTimeout(function(){
+            screenFlash = 1.2;
+            eqShakeX = (Math.random()-0.5)*22;
+            eqShakeY = (Math.random()-0.5)*16;
+            explosions.push({ x:x, y:y, r:0, maxR:blastR*1.6, life:0, maxLife:800, kind:'fire' });
+            explosions.push({ x:x, y:y, r:0, maxR:blastR*3.0, life:0, maxLife:700, kind:'shock' });
+            for (var i=0; i<80; i++) {
+                var a=Math.random()*Math.PI*2, sp=rng(5,14);
+                debrisParts.push({ x:x,y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
+                    rot:rng(0,Math.PI*2), spin:rng(-0.4,0.4),
+                    size:rng(2,6), shade:rngI(0,4),
+                    life:0, maxLife:rng(1000,2200) });
+            }
+            _shredInRadius(x, y, blastR*1.3);
+            if (y < GROUND-10) {
+                _flattenBuilding(x, y, blastR);
+                _flattenBuilding(x - blastR*0.7, y, blastR*0.6);
+                _flattenBuilding(x + blastR*0.7, y, blastR*0.6);
+            }
+        }, 1200);
+    }
+
+    /* ──── NEUTRON (green radiation blast — full destruction) ────────── */
+    function triggerNeutron(x, y) {
+        var blastR = 140;
+        screenFlash = 1.0;
+        eqShakeX = (Math.random()-0.5)*18;
+        eqShakeY = (Math.random()-0.5)*14;
+        /* signature green radiation pulse */
+        neutronPulses.push({
+            x:x, y:y, r:0, maxR:blastR*2.4,
+            life:0, maxLife:1200
+        });
+        /* layered green-tinted fireball + shockwave for actual blast feel */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.5, life:0, maxLife:350, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.0, life:0, maxLife:700, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*2.0, life:0, maxLife:600, kind:'shock' });
+        /* heavy debris — chunks plus glowing green sparks */
+        for (var i=0; i<70; i++) {
+            var a=Math.random()*Math.PI*2, sp=rng(3,11);
+            debrisParts.push({
+                x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-rng(2,6),
+                rot:rng(0,Math.PI*2), spin:rng(-0.4,0.4),
+                size:rng(2,6), shade:rngI(0,4),
+                life:0, maxLife:rng(1000,2000)
+            });
+            debrisParts.push({
+                x:x, y:y, vx:Math.cos(a+0.3)*sp*1.1, vy:Math.sin(a+0.3)*sp*1.1-rng(1,4),
+                rot:0, spin:0, size:rng(1,2.2), shade:99,
+                life:0, maxLife:rng(600,1200)
+            });
+        }
+        /* smoke plumes */
+        for (var sp2=0; sp2<5; sp2++) {
+            smokePlumes.push({
+                x:x+rng(-25,25), y:y+rng(-10,15),
+                r:rng(28,50), vy:rng(0.5,1.2),
+                life:0, maxLife:rng(4000,7000),
+                op:rng(0.45,0.70)
+            });
+        }
+        /* full destruction — cars wrecked, peds gone, buildings collapsed */
+        _shredInRadius(x, y, blastR, {fire:true});
+        if (y < GROUND-10) _flattenBuilding(x, y, blastR);
+    }
+
+    /* ──── EMP (electric arcs, no fireball, disables nothing physical) ── */
+    function triggerEMP(x, y) {
+        var blastR = 150;
+        screenFlash = 0.4;
+        empPulses.push({
+            x:x, y:y, r:0, maxR:blastR*2.6,
+            life:0, maxLife:1100,
+            arcs: []
+        });
+        explosions.push({ x:x, y:y, r:0, maxR:30, life:0, maxLife:240, kind:'flash' });
+        /* no shred — EMP doesn't physically destroy */
+    }
+
+    /* ──── PHOTON (vertical white beam) ──────────────────────────────── */
+    function triggerPhoton(x, y) {
+        var blastR = 120;
+        screenFlash = 1.4;
+        photonStrikes.push({
+            x: x, ty: y,
+            life:0, maxLife: 600,
+            width: 24
+        });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.5, life:0, maxLife:300, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.2, life:0, maxLife:600, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*2.0, life:0, maxLife:500, kind:'shock' });
+        for (var i=0; i<30; i++) {
+            var a=Math.random()*Math.PI*2;
+            debrisParts.push({ x:x, y:y,
+                vx:Math.cos(a)*rng(3,8), vy:Math.sin(a)*rng(3,7)-rng(1,4),
+                rot:0, spin:0, size:rng(1,2), shade:99,
+                life:0, maxLife:rng(500,1000) });
+        }
+        _shredInRadius(x, y, blastR);
+        if (y < GROUND-10) _flattenBuilding(x, y, blastR);
+    }
+
+    function triggerExplosion(x, y, kindOverride) {
+        var kind = kindOverride || 'standard';
+        /* ── special unique blast handlers ── */
+        if (kind==='nuclear')      return triggerNuclear(x, y, 1.0);
+        if (kind==='hydrogen')     return triggerNuclear(x, y, 1.6);
+        if (kind==='thermobaric')  return triggerThermobaric(x, y);
+        if (kind==='antimatter')   return triggerAntimatter(x, y);
+        if (kind==='gravity')      return triggerGravity(x, y);
+        if (kind==='neutron')      return triggerNeutron(x, y);
+        if (kind==='emp')          return triggerEMP(x, y);
+        if (kind==='photon')       return triggerPhoton(x, y);
+        if (kind==='decoy') {
+            for (var dp=0; dp<14; dp++) {
+                debrisParts.push({ x:x,y:y, vx:rng(-2,2),vy:rng(-3,1),
+                    rot:0,spin:0,size:rng(1,2),shade:99,
+                    life:0,maxLife:rng(400,700) });
+            }
+            return;
+        }
+        if (kind==='bunker') return triggerBunker(x, y);
+        /* per-kind blast scaling */
+        var blastR = 90;
+        var flashIntensity = 1;
+        if (kind==='tactical')    blastR = 55;
+        else if (kind==='railgun')blastR = 70;
+        else if (kind==='icbm')   blastR = 160;
+        else if (kind==='drone')  blastR = 75;
+        else if (kind==='stealth')blastR = 100;
+        screenFlash = flashIntensity;
+        eqShakeX = (Math.random()-0.5) * 14;
+        eqShakeY = (Math.random()-0.5) * 10;
+        /* main fireball */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.4, life:0, maxLife:700, kind:'fire' });
+        /* shock ring (faster, expanding outline) */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*2.6, life:0, maxLife:550, kind:'shock' });
+        /* secondary flash */
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.55, life:0, maxLife:260, kind:'flash' });
+        /* debris fragments */
+        for(var i=0;i<48;i++) {
+            var ang=Math.random()*Math.PI*2;
+            var spd=rng(2.5, 8.5);
+            debrisParts.push({
+                x:x, y:y,
+                vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd - rng(2, 6),
+                rot:rng(0,Math.PI*2), spin:rng(-0.4,0.4),
+                size:rng(2,7),
+                shade:rngI(0,4),
+                life:0, maxLife:rng(900,2200)
+            });
+        }
+        /* embers / sparks */
+        for(var k=0;k<60;k++) {
+            var a2=Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx:Math.cos(a2)*rng(3,12), vy:Math.sin(a2)*rng(3,9)-rng(1,4),
+                rot:0, spin:0, size:rng(0.8,1.8),
+                shade:99, /* ember marker */
+                life:0, maxLife:rng(500,1300)
+            });
+        }
+        /* ── HIT DETECTION ───────────────────────────────────────────────── */
+        var hitVehicleIdxs = [];
+        for(var vh=0;vh<vehicles.length;vh++) {
+            var vv=vehicles[vh];
+            var laneOffH = (vv.dir===1) ? (H-GROUND)*0.06 : -(H-GROUND)*0.06;
+            var vyH=GROUND + (H-GROUND)*0.10 + laneOffH;
+            var dxH=vv.x-x, dyH=vyH-y;
+            if(dxH*dxH+dyH*dyH < blastR*blastR) hitVehicleIdxs.push(vh);
+        }
+        var hitPedIdxs = [];
+        for(var ph=0;ph<peds.length;ph++) {
+            var pp=peds[ph];
+            var pyH=GROUND+(H-GROUND)*0.58;
+            var dxp=pp.x-x, dyp=pyH-y;
+            if(dxp*dxp+dyp*dyp < blastR*blastR) hitPedIdxs.push(ph);
+        }
+        var hitBuilding = isBuildingAt(x, y);
+        var hitSomething = hitBuilding || hitVehicleIdxs.length>0 || hitPedIdxs.length>0;
+
+        /* short-lived smoke plumes — ONLY when something was actually destroyed.
+           Empty-air hits get blast animation only, no smoke aftermath. */
+        if(hitSomething) {
+            for(var sp=0;sp<5;sp++) {
+                smokePlumes.push({
+                    x:x+rng(-20,20), y:y+rng(-10,10),
+                    r:rng(20,40), vy:rng(0.4,1.2),
+                    life:0, maxLife:rng(4000,7000),
+                    op:rng(0.45,0.75)
+                });
+            }
+        }
+
+        /* ── EARLY EXIT: nothing to destroy → blast animation only ───────── */
+        if(!hitSomething) return;
+
+        /* ── PERSISTENT WRECKAGE ─────────────────────────────────────────── */
+        /* broken building: only if we actually hit a building */
+        if(hitBuilding && y < GROUND-10) {
+            var bbW = blastR*1.6;
+            var bbLeft  = x - bbW/2;
+            var bbRight = x + bbW/2;
+            var breakY  = y;                   /* shear line = impact y */
+            /* jagged horizontal edge along the break */
+            var edgePts = [];
+            var edgeN = 16;
+            for(var jj=0;jj<=edgeN;jj++) {
+                var fx2 = bbLeft + (jj/edgeN)*bbW;
+                /* edge dips up (toward sky) in the middle, more jagged near center */
+                var jitter = rng(-12, 8) - (1 - Math.abs((jj/edgeN)-0.5)*2)*8;
+                edgePts.push({x:fx2, y: breakY + jitter});
+            }
+            wreckage.push({
+                kind:'brokenBuilding',
+                x:x,
+                leftX: bbLeft,
+                rightX: bbRight,
+                breakY: breakY,
+                edge: edgePts,
+                rebar: (function(){
+                    var rb=[];
+                    for(var ri=0;ri<7;ri++) {
+                        var rx2 = x + rng(-bbW*0.45, bbW*0.45);
+                        rb.push({x:rx2, y0:breakY+rng(-4,6), y1:breakY-rng(14,38), bend:rng(-7,7)});
+                    }
+                    return rb;
+                })(),
+                /* small flames + smoke positions along the break edge */
+                fires: (function(){
+                    var fs=[];
+                    for(var fi=0;fi<3;fi++) {
+                        var pf = edgePts[Math.floor((fi+1)*edgePts.length/4)];
+                        if(pf) fs.push({x: pf.x, y: pf.y, scale: rng(0.55, 0.95), phase: rng(0,1000)});
+                    }
+                    return fs;
+                })(),
+                smokeT: 0
+            });
+        }
+        /* rubble piles — only on ground-level hits or building hits */
+        var groundLevelHit = (y > GROUND - 30);
+        var rubCount = (hitBuilding || hitVehicleIdxs.length>0 || groundLevelHit) ? rngI(3, 6) : 0;
+        for(var rp=0;rp<rubCount;rp++) {
+            var rrx = x + rng(-blastR*0.9, blastR*0.9);
+            var rry = GROUND;
+            var rrw = rng(30, 60);
+            var rrh = rng(10, 22);
+            var chunks=[];
+            for(var ch=0;ch<rngI(5,9);ch++) {
+                chunks.push({
+                    dx: rng(-rrw/2, rrw/2),
+                    dy: -rng(0, rrh),
+                    w: rng(4, 12),
+                    h: rng(3, 9),
+                    rot: rng(-0.4, 0.4),
+                    shade: rngI(0,4)
+                });
+            }
+            wreckage.push({ kind:'rubble', x:rrx, y:rry, w:rrw, h:rrh, chunks:chunks });
+        }
+        /* twisted lamp post — only on ground-level hits */
+        if(groundLevelHit && Math.random() < 0.65) {
+            wreckage.push({
+                kind:'twistedLamp',
+                x: x + rng(-blastR*0.7, blastR*0.7),
+                y: GROUND,
+                bend: rng(-0.9, 0.9),
+                broken: Math.random()<0.5
+            });
+        }
+        /* destroy entities in blast radius → leave PERSISTENT WRECKS */
+        for(var vi=vehicles.length-1;vi>=0;vi--) {
+            var v=vehicles[vi];
+            var laneOff = (v.dir===1) ? (H-GROUND)*0.06 : -(H-GROUND)*0.06;
+            var vy_=GROUND + (H-GROUND)*0.10 + laneOff;
+            var dx=v.x-x, dy=vy_-y;
+            if(dx*dx+dy*dy < blastR*blastR) {
+                /* spawn a wrecked-car hulk that stays forever */
+                wreckage.push({
+                    kind:'carWreck',
+                    x: v.x, y: vy_,
+                    type: v.type, dir: v.dir, col: v.col,
+                    tilt: rng(-0.30, 0.30),
+                    sinkY: rng(2, 6),
+                    cracks: (function(){
+                        var cr=[];
+                        for(var ci=0;ci<rngI(4,8);ci++) {
+                            cr.push({a: rng(0, Math.PI*2), len: rng(4, 12)});
+                        }
+                        return cr;
+                    })(),
+                    burning: true,
+                    fireT: rng(0, 100)
+                });
+                /* immediate fragments */
+                for(var dk=0;dk<8;dk++) {
+                    var aD=Math.random()*Math.PI*2;
+                    debrisParts.push({
+                        x:v.x, y:vy_,
+                        vx:Math.cos(aD)*rng(2,7), vy:Math.sin(aD)*rng(2,6)-rng(2,5),
+                        rot:rng(0,Math.PI*2), spin:rng(-0.5,0.5),
+                        size:rng(4,10), shade:rngI(0,4),
+                        life:0, maxLife:rng(1200,2400)
+                    });
+                }
+                /* respawn the live vehicle elsewhere so traffic continues */
+                v.x = v.dir===1 ? -200 : W+200;
+            }
+        }
+        for(var pi=peds.length-1;pi>=0;pi--) {
+            var p=peds[pi];
+            var pdy=GROUND+(H-GROUND)*0.58;
+            var ddx=p.x-x, ddy=pdy-y;
+            if(ddx*ddx+ddy*ddy < blastR*blastR) {
+                for(var dq=0;dq<3;dq++) {
+                    debrisParts.push({
+                        x:p.x, y:pdy,
+                        vx:rng(-5,5), vy:rng(-6,-2),
+                        rot:rng(0,Math.PI*2), spin:rng(-0.3,0.3),
+                        size:rng(1.5,3), shade:99,
+                        life:0, maxLife:rng(700,1400)
+                    });
+                }
+                p.x = p.dir===1 ? -30 : W+30;
+            }
+        }
+    }
+
+    function drawWreck(c, w) {
+        if(w.kind==='carWreck') {
+            var s = Math.max(5, (H-GROUND)*0.12);
+            var by = w.y + (w.sinkY||0);
+            c.save();
+            c.translate(w.x, by);
+            c.rotate(w.tilt||0);
+            /* charred hulk silhouette — flatter and crumpled */
+            var carW = (w.type==='bus') ? s*1.90 : (w.type==='truck') ? s*1.50 : s*0.96;
+            var carH = (w.type==='bus') ? s*0.95 : (w.type==='truck') ? s*0.85 : s*0.42;
+            /* main body — dark scorched */
+            c.fillStyle='#1a1410';
+            c.beginPath();
+            c.moveTo(-carW, 0);
+            c.lineTo(carW, 0);
+            c.lineTo(carW*0.95, -carH*0.55);
+            c.lineTo(carW*0.40, -carH*0.85);
+            c.lineTo(-carW*0.35, -carH*0.95); /* crumpled roof */
+            c.lineTo(-carW*0.90, -carH*0.50);
+            c.closePath(); c.fill();
+            /* original color peeking through (rust patches) */
+            if(w.col) {
+                c.fillStyle = w.col;
+                c.globalAlpha = 0.32;
+                c.fillRect(-carW*0.3, -carH*0.5, carW*0.5, carH*0.3);
+                c.globalAlpha = 1;
+            }
+            /* dark outline */
+            c.strokeStyle='#0a0805'; c.lineWidth=1.2;
+            c.beginPath();
+            c.moveTo(-carW, 0);
+            c.lineTo(carW, 0);
+            c.lineTo(carW*0.95, -carH*0.55);
+            c.lineTo(carW*0.40, -carH*0.85);
+            c.lineTo(-carW*0.35, -carH*0.95);
+            c.lineTo(-carW*0.90, -carH*0.50);
+            c.closePath(); c.stroke();
+            /* shattered window — jagged dark patch */
+            c.fillStyle='#000';
+            c.beginPath();
+            c.moveTo(-carW*0.1, -carH*0.55);
+            c.lineTo( carW*0.3, -carH*0.70);
+            c.lineTo( carW*0.25,-carH*0.45);
+            c.lineTo(-carW*0.05,-carH*0.40);
+            c.closePath(); c.fill();
+            /* glass crack lines */
+            c.strokeStyle='rgba(220,230,255,0.45)';
+            c.lineWidth=0.6;
+            if(w.cracks) {
+                for(var cri=0;cri<w.cracks.length;cri++) {
+                    var crk=w.cracks[cri];
+                    var ccx = carW*0.05, ccy = -carH*0.55;
+                    c.beginPath();
+                    c.moveTo(ccx, ccy);
+                    c.lineTo(ccx + Math.cos(crk.a)*crk.len, ccy + Math.sin(crk.a)*crk.len);
+                    c.stroke();
+                }
+            }
+            /* twisted/missing wheels */
+            c.fillStyle='#0a0a0a';
+            var wr=s*0.28;
+            c.beginPath(); c.arc(carW*0.55, wr*0.3, wr*0.85, 0, Math.PI*2); c.fill();
+            /* missing rear wheel — just a black gash */
+            c.fillStyle='#000';
+            c.fillRect(-carW*0.65, -wr*0.2, wr*1.2, wr*0.6);
+            c.restore();
+            /* engine bay smoke wisp */
+            var fT = w.fireT||0;
+            var smokeY = by - (Math.sin(fT*0.001)*4 + 18);
+            var sg = c.createRadialGradient(w.x, smokeY, 0, w.x, smokeY, 22);
+            sg.addColorStop(0,'rgba(45,38,32,0.55)');
+            sg.addColorStop(1,'rgba(80,68,60,0)');
+            c.fillStyle = sg;
+            c.beginPath(); c.arc(w.x, smokeY, 22, 0, Math.PI*2); c.fill();
+            /* flickering fire on the hood */
+            if(w.burning) {
+                drawFireLick(c, w.x + (carW*0.1), by - carH*0.6, 1, fT);
+                drawFireLick(c, w.x - (carW*0.2), by - carH*0.4, 0.7, fT*1.3);
+            }
+        }
+        else if(w.kind==='rubble') {
+            for(var rk=0;rk<w.chunks.length;rk++) {
+                var ch=w.chunks[rk];
+                var cols=['#3a3a40','#5a5258','#7a7068','#a8632a'];
+                c.save();
+                c.translate(w.x + ch.dx, w.y + ch.dy);
+                c.rotate(ch.rot);
+                c.fillStyle = cols[ch.shade];
+                c.beginPath();
+                c.moveTo(-ch.w, ch.h*0.5);
+                c.lineTo(ch.w, ch.h*0.5);
+                c.lineTo(ch.w*0.7, -ch.h*0.5);
+                c.lineTo(-ch.w*0.6, -ch.h*0.4);
+                c.closePath(); c.fill();
+                c.strokeStyle='rgba(0,0,0,0.55)'; c.lineWidth=0.7; c.stroke();
+                c.restore();
+            }
+        }
+        else if(w.kind==='twistedLamp') {
+            c.save();
+            c.translate(w.x, w.y);
+            /* base — broken concrete */
+            c.fillStyle='#2a2a30';
+            c.fillRect(-4, -4, 8, 4);
+            /* bent post */
+            c.strokeStyle='#22222e'; c.lineWidth=2.5;
+            c.beginPath();
+            c.moveTo(0, -4);
+            c.bezierCurveTo(0, -20, w.bend*16, -34, w.bend*22, -50);
+            c.stroke();
+            /* broken end */
+            if(w.broken) {
+                c.strokeStyle='#1a1a1a'; c.lineWidth=1.2;
+                c.beginPath();
+                c.moveTo(w.bend*22, -50);
+                c.lineTo(w.bend*22+rng(-3,3), -52);
+                c.lineTo(w.bend*22+rng(-4,4), -48);
+                c.stroke();
+            } else {
+                /* shattered bulb */
+                c.fillStyle='rgba(40,40,40,0.85)';
+                c.beginPath(); c.arc(w.bend*22, -52, 3, 0, Math.PI*2); c.fill();
+                c.strokeStyle='rgba(0,0,0,0.7)'; c.lineWidth=0.7;
+                for(var sh=0;sh<3;sh++) {
+                    c.beginPath();
+                    c.moveTo(w.bend*22, -52);
+                    c.lineTo(w.bend*22+rng(-5,5), -52+rng(-5,5));
+                    c.stroke();
+                }
+            }
+            c.restore();
+        }
+        else if(w.kind==='brokenBuilding') {
+            /* Mask the column above the impact with the SKY GRADIENT so the
+               original building's upper floors visually collapse / disappear. */
+            c.save();
+            /* clip to a polygon: top of canvas across the column, then down to
+               the jagged broken edge — only above the break is replaced with sky. */
+            c.beginPath();
+            c.moveTo(w.leftX, 0);
+            c.lineTo(w.rightX, 0);
+            for(var ep=w.edge.length-1;ep>=0;ep--) c.lineTo(w.edge[ep].x, w.edge[ep].y);
+            c.closePath();
+            c.clip();
+            /* paint the full-height sky gradient inside the clip */
+            var sg2 = c.createLinearGradient(0, 0, 0, GROUND);
+            sg2.addColorStop(0, '#a8d6ff');
+            sg2.addColorStop(1, '#e6f3ff');
+            c.fillStyle = sg2;
+            c.fillRect(w.leftX-2, 0, (w.rightX-w.leftX)+4, w.breakY+50);
+            c.restore();
+
+            /* draw the jagged broken-edge "stump" right below the cut line so
+               the silhouette of the remaining building gets a charred ragged top */
+            c.save();
+            c.fillStyle='#1a1410';
+            c.beginPath();
+            c.moveTo(w.edge[0].x, w.edge[0].y);
+            for(var ep2=1;ep2<w.edge.length;ep2++) c.lineTo(w.edge[ep2].x, w.edge[ep2].y);
+            /* go down a bit to give the broken edge some thickness on the building */
+            for(var ep3=w.edge.length-1;ep3>=0;ep3--) {
+                c.lineTo(w.edge[ep3].x, w.edge[ep3].y + 6 + Math.sin(ep3*1.3)*3);
+            }
+            c.closePath(); c.fill();
+            /* burn highlight along the edge */
+            c.strokeStyle='rgba(255,90,30,0.55)';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(w.edge[0].x, w.edge[0].y);
+            for(var ep4=1;ep4<w.edge.length;ep4++) c.lineTo(w.edge[ep4].x, w.edge[ep4].y);
+            c.stroke();
+            /* dark outline */
+            c.strokeStyle='rgba(0,0,0,0.85)'; c.lineWidth=1.2;
+            c.beginPath();
+            c.moveTo(w.edge[0].x, w.edge[0].y);
+            for(var ep5=1;ep5<w.edge.length;ep5++) c.lineTo(w.edge[ep5].x, w.edge[ep5].y);
+            c.stroke();
+            /* exposed rebar — twisted thin lines poking up from the break */
+            c.strokeStyle='#5a3018'; c.lineWidth=1.1;
+            for(var rb=0;rb<w.rebar.length;rb++) {
+                var R=w.rebar[rb];
+                c.beginPath();
+                c.moveTo(R.x, R.y0);
+                c.quadraticCurveTo(R.x+R.bend, (R.y0+R.y1)/2, R.x+R.bend*1.4, R.y1);
+                c.stroke();
+            }
+            c.restore();
+
+            /* lingering smoke rising from the break line */
+            var tT = w.smokeT||0;
+            for(var sm=0;sm<2;sm++) {
+                var smkY = w.breakY - 25 - sm*18 - (Math.sin(tT*0.0005+sm)*6);
+                var smkR = 32 + sm*10;
+                var smG = c.createRadialGradient(w.x+Math.sin(tT*0.0008+sm)*8, smkY, 0,
+                                                  w.x+Math.sin(tT*0.0008+sm)*8, smkY, smkR);
+                smG.addColorStop(0,'rgba(50,42,38,'+(0.55-sm*0.18)+')');
+                smG.addColorStop(1,'rgba(90,80,70,0)');
+                c.fillStyle = smG;
+                c.beginPath(); c.arc(w.x+Math.sin(tT*0.0008+sm)*8, smkY, smkR, 0, Math.PI*2); c.fill();
+            }
+            /* flickering flames along the broken top */
+            for(var fi3=0;fi3<w.fires.length;fi3++) {
+                var f=w.fires[fi3];
+                drawFireLick(c, f.x, f.y, f.scale, tT+f.phase);
+            }
+        }
+    }
+
+    function drawFireLick(c, x, y, scale, t) {
+        var amp = 6*scale;
+        var h = 14*scale;
+        var sway = Math.sin((t||0)*0.012 + x*0.05) * 2;
+        /* outer red */
+        c.fillStyle='rgba(200,40,0,0.85)';
+        c.beginPath();
+        c.moveTo(x-amp, y);
+        c.quadraticCurveTo(x-amp*0.4+sway, y-h*0.6, x+sway, y-h);
+        c.quadraticCurveTo(x+amp*0.4+sway, y-h*0.6, x+amp, y);
+        c.closePath(); c.fill();
+        /* inner orange */
+        c.fillStyle='rgba(255,140,30,0.95)';
+        c.beginPath();
+        c.moveTo(x-amp*0.6, y);
+        c.quadraticCurveTo(x-amp*0.2+sway, y-h*0.55, x+sway, y-h*0.85);
+        c.quadraticCurveTo(x+amp*0.2+sway, y-h*0.55, x+amp*0.6, y);
+        c.closePath(); c.fill();
+        /* core yellow */
+        c.fillStyle='rgba(255,235,150,0.95)';
+        c.beginPath();
+        c.moveTo(x-amp*0.25, y);
+        c.quadraticCurveTo(x+sway, y-h*0.5, x+sway, y-h*0.65);
+        c.quadraticCurveTo(x+sway, y-h*0.5, x+amp*0.25, y);
+        c.closePath(); c.fill();
+        /* glow */
+        var fg = c.createRadialGradient(x, y-h*0.5, 0, x, y-h*0.5, amp*3);
+        fg.addColorStop(0,'rgba(255,160,40,0.25)');
+        fg.addColorStop(1,'rgba(255,80,20,0)');
+        c.fillStyle = fg;
+        c.beginPath(); c.arc(x, y-h*0.5, amp*3, 0, Math.PI*2); c.fill();
+    }
+
+    /* Wreckage & lingering smoke — drawn BEFORE cars/peds so they pass over it.
+       Called from drawDynamic just before the vehicle loop. */
+    function drawWreckageLayer(c) {
+        for(var wi=0;wi<wreckage.length;wi++) {
+            drawWreck(c, wreckage[wi]);
+        }
+        for(var si=0;si<smokePlumes.length;si++) {
+            var s=smokePlumes[si];
+            var sf = 1 - s.life/s.maxLife;
+            var sg = c.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r);
+            sg.addColorStop(0,'rgba(40,32,28,'+(s.op*sf*0.85)+')');
+            sg.addColorStop(0.55,'rgba(80,68,60,'+(s.op*sf*0.45)+')');
+            sg.addColorStop(1,'rgba(120,100,90,0)');
+            c.fillStyle = sg;
+            c.beginPath(); c.arc(s.x, s.y, s.r, 0, Math.PI*2); c.fill();
+        }
+    }
+
+    function drawMissileTrail(c, m) {
+        var n = m.trail.length; if(n<2) return;
+        var trailLife = (m.kind==='hypersonic')?1400 : (m.kind==='plasma')?700 : 900;
+        if(m.kind==='hypersonic') {
+            /* triple-band white-hot vapor streak */
+            for(var band=0; band<3; band++) {
+                c.beginPath();
+                for(var i=0;i<n;i++) {
+                    var tp=m.trail[i];
+                    var jx=tp.jitter*(0.6+band*0.6), jy=tp.jitter*(0.6+band*0.6);
+                    if(i===0) c.moveTo(tp.x+jx, tp.y+jy);
+                    else c.lineTo(tp.x+jx, tp.y+jy);
+                }
+                var alpha = [0.85,0.55,0.30][band];
+                var col = band===0 ? 'rgba(255,255,255,' : (band===1? 'rgba(255,210,140,' : 'rgba(255,120,40,');
+                c.strokeStyle = col+alpha+')';
+                c.lineWidth = (band===0?2.4 : band===1?5 : 9);
+                c.lineCap='round';
+                c.stroke();
+            }
+            return;
+        }
+        if(m.kind==='plasma') {
+            /* lightning-streak trail */
+            for(var ti=0;ti<n-1;ti++) {
+                var t1=m.trail[ti], t2=m.trail[ti+1];
+                var a = 1 - (t1.age/trailLife);
+                c.strokeStyle = 'hsla('+((ti*10)%360)+',95%,75%,'+(a*0.85)+')';
+                c.lineWidth = 2.5*a;
+                c.shadowColor = 'rgba(140,80,255,0.9)'; c.shadowBlur=10;
+                c.beginPath(); c.moveTo(t1.x,t1.y); c.lineTo(t2.x+rng(-2,2),t2.y+rng(-2,2)); c.stroke();
+            }
+            c.shadowBlur=0;
+            return;
+        }
+        if(m.kind==='cruise') {
+            /* thin twin contrail */
+            for(var ti2=0;ti2<n-1;ti2++) {
+                var p1=m.trail[ti2], p2=m.trail[ti2+1];
+                var aa = 1 - (p1.age/trailLife);
+                /* twin lanes */
+                for(var lane=-1;lane<=1;lane+=2) {
+                    var nx = -Math.sin(m.angle)*lane*2, ny=Math.cos(m.angle)*lane*2;
+                    c.strokeStyle = 'rgba(120,180,255,'+(aa*0.55)+')';
+                    c.lineWidth = 1.8;
+                    c.beginPath(); c.moveTo(p1.x+nx,p1.y+ny); c.lineTo(p2.x+nx,p2.y+ny); c.stroke();
+                }
+            }
+            return;
+        }
+        /* standard / cluster / bomblet — multilayer smoke + fire core */
+        for(var t=0;t<n;t++) {
+            var pt=m.trail[t], frac=t/n;
+            var af=pt.age/trailLife;
+            var op=(1-af)*0.7*frac;
+            var rad = 4 + af*16;
+            var tg = c.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,rad);
+            tg.addColorStop(0,'rgba(255,210,90,'+(op*1.2)+')');
+            tg.addColorStop(0.4,'rgba(255,90,30,'+op+')');
+            tg.addColorStop(1,'rgba(50,40,35,0)');
+            c.fillStyle = tg;
+            c.beginPath(); c.arc(pt.x, pt.y, rad, 0, Math.PI*2); c.fill();
+        }
+        /* fire-core stripe */
+        c.beginPath();
+        for(var ti3=0;ti3<n;ti3++) {
+            var p=m.trail[ti3];
+            if(ti3===0) c.moveTo(p.x,p.y); else c.lineTo(p.x,p.y);
+        }
+        c.strokeStyle = 'rgba(255,240,180,0.55)';
+        c.lineWidth = 1.4; c.lineCap='round';
+        c.stroke();
+    }
+
+    function drawStandardBody(c, m) {
+        var t = performance.now();
+        var pulse = 0.5+0.5*Math.sin(t*0.04);
+        /* heat shimmer halo */
+        var hg = c.createRadialGradient(0,0,4,0,0,28);
+        hg.addColorStop(0,'rgba(255,180,60,0.30)');
+        hg.addColorStop(1,'rgba(255,80,20,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(0,0,28,0,Math.PI*2); c.fill();
+        /* main body (cylindrical, panel lines) */
+        var grad = c.createLinearGradient(0,-4,0,4);
+        grad.addColorStop(0,'#f4f6fb');
+        grad.addColorStop(0.5,'#b8bec8');
+        grad.addColorStop(1,'#5e6470');
+        c.fillStyle = grad;
+        c.beginPath();
+        c.moveTo(13,0); c.lineTo(6,-4); c.lineTo(-12,-4); c.lineTo(-12,4); c.lineTo(6,4);
+        c.closePath(); c.fill();
+        c.strokeStyle='#2a2e38'; c.lineWidth=0.7; c.stroke();
+        /* panel lines + rivets */
+        c.strokeStyle='rgba(40,40,55,0.45)'; c.lineWidth=0.4;
+        for(var pl=-9;pl<=2;pl+=3) { c.beginPath(); c.moveTo(pl,-4); c.lineTo(pl,4); c.stroke(); }
+        c.fillStyle='rgba(40,40,55,0.55)';
+        for(var rv=-10;rv<=4;rv+=2.5) { c.fillRect(rv-0.4,-3.5,0.8,0.8); c.fillRect(rv-0.4,2.7,0.8,0.8); }
+        /* warhead nose */
+        var ng = c.createLinearGradient(6,0,13,0);
+        ng.addColorStop(0,'#c8302a'); ng.addColorStop(1,'#7c1a14');
+        c.fillStyle = ng;
+        c.beginPath(); c.moveTo(13,0); c.lineTo(6,-4); c.lineTo(6,4); c.closePath(); c.fill();
+        c.strokeStyle='#3a0808'; c.lineWidth=0.6; c.stroke();
+        /* nose ring */
+        c.strokeStyle='rgba(255,255,255,0.7)'; c.lineWidth=0.6;
+        c.beginPath(); c.moveTo(8,-4); c.lineTo(8,4); c.stroke();
+        /* fins (swept) */
+        c.fillStyle='#7c8290';
+        c.beginPath(); c.moveTo(-12,-4); c.lineTo(-17,-8); c.lineTo(-12,-4); c.lineTo(-9,-4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-12,4);  c.lineTo(-17,8);  c.lineTo(-12,4);  c.lineTo(-9,4);  c.closePath(); c.fill();
+        c.strokeStyle='#3a3e48'; c.lineWidth=0.5;
+        c.beginPath(); c.moveTo(-12,-4); c.lineTo(-17,-8); c.lineTo(-9,-4); c.stroke();
+        c.beginPath(); c.moveTo(-12,4);  c.lineTo(-17,8);  c.lineTo(-9,4);  c.stroke();
+        /* exhaust — multi-layer flame */
+        var flick = 7 + pulse*5;
+        var fg = c.createLinearGradient(-12,0,-12-flick*2.2,0);
+        fg.addColorStop(0,'rgba(255,255,255,1)');
+        fg.addColorStop(0.2,'rgba(180,220,255,0.95)');
+        fg.addColorStop(0.5,'rgba(255,200,80,0.85)');
+        fg.addColorStop(0.85,'rgba(255,90,30,0.6)');
+        fg.addColorStop(1,'rgba(120,30,10,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-12,-3.5); c.lineTo(-12-flick*2.2, 0); c.lineTo(-12,3.5);
+        c.closePath(); c.fill();
+        /* inner cyan core */
+        var ic = c.createLinearGradient(-12,0,-12-flick,0);
+        ic.addColorStop(0,'rgba(180,230,255,1)');
+        ic.addColorStop(1,'rgba(60,140,255,0)');
+        c.fillStyle = ic;
+        c.beginPath();
+        c.moveTo(-12,-1.5); c.lineTo(-12-flick, 0); c.lineTo(-12,1.5);
+        c.closePath(); c.fill();
+    }
+
+    function drawClusterBody(c, m) {
+        /* fatter, bigger missile */
+        c.fillStyle='#48505c';
+        c.beginPath();
+        c.moveTo(16,0); c.lineTo(8,-6); c.lineTo(-16,-6); c.lineTo(-16,6); c.lineTo(8,6);
+        c.closePath(); c.fill();
+        c.strokeStyle='#1c2028'; c.lineWidth=0.8; c.stroke();
+        /* yellow hazard stripes */
+        c.fillStyle='#ffb820';
+        for(var s=-12;s<=4;s+=6) {
+            c.beginPath();
+            c.moveTo(s,-6); c.lineTo(s+3,-6); c.lineTo(s+1,6); c.lineTo(s-2,6);
+            c.closePath(); c.fill();
+        }
+        /* warning text band */
+        c.fillStyle='rgba(0,0,0,0.55)';
+        c.fillRect(-12, -1, 18, 2);
+        /* dome nose */
+        c.fillStyle='#883020';
+        c.beginPath();
+        c.moveTo(16,0); c.lineTo(8,-6); c.lineTo(8,6); c.closePath(); c.fill();
+        /* fins */
+        c.fillStyle='#3a3e48';
+        c.beginPath(); c.moveTo(-16,-6); c.lineTo(-22,-12); c.lineTo(-14,-6); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-16, 6); c.lineTo(-22, 12); c.lineTo(-14, 6); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-16,0);  c.lineTo(-24,0);   c.lineTo(-14,2);  c.closePath(); c.fill();
+        /* exhaust */
+        var pul = 0.5+0.5*Math.sin(performance.now()*0.03);
+        var flick2 = 9+pul*5;
+        var fg2 = c.createLinearGradient(-16,0,-16-flick2*2,0);
+        fg2.addColorStop(0,'rgba(255,255,200,1)');
+        fg2.addColorStop(0.4,'rgba(255,150,40,0.9)');
+        fg2.addColorStop(1,'rgba(120,30,10,0)');
+        c.fillStyle = fg2;
+        c.beginPath();
+        c.moveTo(-16,-5); c.lineTo(-16-flick2*2,0); c.lineTo(-16,5);
+        c.closePath(); c.fill();
+    }
+
+    function drawBombletBody(c, m) {
+        c.fillStyle='#3e4450';
+        c.beginPath();
+        c.moveTo(7,0); c.lineTo(3,-3); c.lineTo(-6,-3); c.lineTo(-6,3); c.lineTo(3,3);
+        c.closePath(); c.fill();
+        c.strokeStyle='#1a1d24'; c.lineWidth=0.5; c.stroke();
+        /* nose */
+        c.fillStyle='#b02020';
+        c.beginPath(); c.moveTo(7,0); c.lineTo(3,-3); c.lineTo(3,3); c.closePath(); c.fill();
+        /* small fins */
+        c.fillStyle='#444a54';
+        c.beginPath(); c.moveTo(-6,-3); c.lineTo(-9,-5); c.lineTo(-5,-3); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-6,3);  c.lineTo(-9,5);  c.lineTo(-5,3);  c.closePath(); c.fill();
+        /* flame */
+        var ff = c.createLinearGradient(-6,0,-12,0);
+        ff.addColorStop(0,'rgba(255,240,160,1)');
+        ff.addColorStop(1,'rgba(180,40,10,0)');
+        c.fillStyle = ff;
+        c.beginPath();
+        c.moveTo(-6,-2); c.lineTo(-12,0); c.lineTo(-6,2);
+        c.closePath(); c.fill();
+    }
+
+    function drawPlasmaBody(c, m) {
+        var t = performance.now();
+        /* outer halo */
+        var og = c.createRadialGradient(0,0,2,0,0,40);
+        og.addColorStop(0,'rgba(220,170,255,0.95)');
+        og.addColorStop(0.4,'rgba(140,80,255,0.55)');
+        og.addColorStop(1,'rgba(40,0,80,0)');
+        c.fillStyle = og;
+        c.beginPath(); c.arc(0,0,40,0,Math.PI*2); c.fill();
+        /* electric arcs around the body */
+        if(m.arcs) {
+            for(var ai=0;ai<m.arcs.length;ai++) {
+                var A=m.arcs[ai], af=A.life/A.maxLife;
+                c.strokeStyle = 'hsla('+A.hue+',100%,80%,'+((1-af))+')';
+                c.lineWidth = 2;
+                c.shadowColor = 'hsl('+A.hue+',100%,70%)'; c.shadowBlur=14;
+                c.beginPath();
+                c.moveTo(A.pts[0].dx, A.pts[0].dy);
+                for(var pi=1;pi<A.pts.length;pi++) c.lineTo(A.pts[pi].dx, A.pts[pi].dy);
+                c.stroke();
+                c.shadowBlur=0;
+                /* white core */
+                c.strokeStyle = 'rgba(255,255,255,'+((1-af)*0.9)+')';
+                c.lineWidth = 0.9;
+                c.beginPath();
+                c.moveTo(A.pts[0].dx, A.pts[0].dy);
+                for(var pi2=1;pi2<A.pts.length;pi2++) c.lineTo(A.pts[pi2].dx, A.pts[pi2].dy);
+                c.stroke();
+            }
+        }
+        /* orbiting particles */
+        if(m.orbits) {
+            for(var oi=0;oi<m.orbits.length;oi++) {
+                var O=m.orbits[oi];
+                var ox=Math.cos(O.ang)*O.rad, oy=Math.sin(O.ang)*O.rad;
+                var pg = c.createRadialGradient(ox,oy,0,ox,oy,O.size*3);
+                pg.addColorStop(0,'hsla('+O.hue+',100%,80%,1)');
+                pg.addColorStop(1,'hsla('+O.hue+',100%,50%,0)');
+                c.fillStyle = pg;
+                c.beginPath(); c.arc(ox,oy,O.size*3,0,Math.PI*2); c.fill();
+            }
+        }
+        /* core orb */
+        var cg = c.createRadialGradient(0,0,0,0,0,8);
+        cg.addColorStop(0,'rgba(255,255,255,1)');
+        cg.addColorStop(0.5,'rgba(220,180,255,1)');
+        cg.addColorStop(1,'rgba(140,80,255,0.85)');
+        c.fillStyle = cg;
+        c.beginPath(); c.arc(0,0,8+Math.sin(t*0.012)*1.5,0,Math.PI*2); c.fill();
+        /* pulsing inner highlight */
+        c.fillStyle = 'rgba(255,255,255,'+(0.6+0.4*Math.sin(t*0.025))+')';
+        c.beginPath(); c.arc(-2,-2,3,0,Math.PI*2); c.fill();
+    }
+
+    function drawCruiseBody(c, m) {
+        /* sleek elongated body */
+        var grad = c.createLinearGradient(0,-3,0,3);
+        grad.addColorStop(0,'#e8ecf2');
+        grad.addColorStop(0.5,'#a8aebc');
+        grad.addColorStop(1,'#444a58');
+        c.fillStyle = grad;
+        c.beginPath();
+        c.moveTo(20,0); c.lineTo(14,-3); c.lineTo(-14,-3); c.lineTo(-14,3); c.lineTo(14,3);
+        c.closePath(); c.fill();
+        c.strokeStyle='#23262e'; c.lineWidth=0.6; c.stroke();
+        /* nose tip */
+        c.fillStyle='#202830';
+        c.beginPath(); c.moveTo(20,0); c.lineTo(14,-3); c.lineTo(14,3); c.closePath(); c.fill();
+        /* canard / wing */
+        c.fillStyle='#787e8a';
+        c.beginPath();
+        c.moveTo(0,-3); c.lineTo(-2,-9); c.lineTo(4,-9); c.lineTo(6,-3); c.closePath(); c.fill();
+        c.beginPath();
+        c.moveTo(0,3); c.lineTo(-2,9); c.lineTo(4,9); c.lineTo(6,3); c.closePath(); c.fill();
+        c.strokeStyle='#23262e'; c.lineWidth=0.5;
+        c.beginPath(); c.moveTo(0,-3); c.lineTo(-2,-9); c.lineTo(4,-9); c.lineTo(6,-3); c.stroke();
+        c.beginPath(); c.moveTo(0,3); c.lineTo(-2,9); c.lineTo(4,9); c.lineTo(6,3); c.stroke();
+        /* tail fin */
+        c.fillStyle='#5a606c';
+        c.beginPath();
+        c.moveTo(-10,-3); c.lineTo(-15,-7); c.lineTo(-10,-3); c.lineTo(-8,-3); c.closePath(); c.fill();
+        /* blue plasma exhaust */
+        var bg = c.createLinearGradient(-14,0,-14-12,0);
+        bg.addColorStop(0,'rgba(220,240,255,1)');
+        bg.addColorStop(0.4,'rgba(80,160,255,0.85)');
+        bg.addColorStop(1,'rgba(20,30,120,0)');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(-14,-2.5); c.lineTo(-14-12,0); c.lineTo(-14,2.5);
+        c.closePath(); c.fill();
+    }
+
+    function drawHypersonicBody(c, m) {
+        var t = performance.now();
+        /* glowing red-hot heat halo */
+        var hh = c.createRadialGradient(0,0,0,0,0,22);
+        hh.addColorStop(0,'rgba(255,180,80,0.95)');
+        hh.addColorStop(0.5,'rgba(255,80,30,0.55)');
+        hh.addColorStop(1,'rgba(160,0,0,0)');
+        c.fillStyle = hh;
+        c.beginPath(); c.arc(0,0,22,0,Math.PI*2); c.fill();
+        /* sleek dart body — incandescent */
+        var bg = c.createLinearGradient(0,-2,0,2);
+        bg.addColorStop(0,'#ffe0a0');
+        bg.addColorStop(0.5,'#ff7030');
+        bg.addColorStop(1,'#a01000');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(16,0); c.lineTo(10,-2); c.lineTo(-12,-2); c.lineTo(-12,2); c.lineTo(10,2);
+        c.closePath(); c.fill();
+        c.strokeStyle='rgba(255,255,180,0.85)'; c.lineWidth=0.7; c.stroke();
+        /* tiny canard fins */
+        c.fillStyle='#552010';
+        c.beginPath(); c.moveTo(-8,-2); c.lineTo(-11,-4); c.lineTo(-6,-2); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-8, 2); c.lineTo(-11, 4); c.lineTo(-6, 2); c.closePath(); c.fill();
+        /* white-hot plasma trail behind */
+        var pg = c.createLinearGradient(-12,0,-12-22,0);
+        pg.addColorStop(0,'rgba(255,255,255,1)');
+        pg.addColorStop(0.4,'rgba(255,200,120,0.85)');
+        pg.addColorStop(1,'rgba(255,60,20,0)');
+        c.fillStyle = pg;
+        c.beginPath();
+        c.moveTo(-12,-2); c.lineTo(-12-22,0); c.lineTo(-12,2);
+        c.closePath(); c.fill();
+        /* nose glow */
+        c.fillStyle='rgba(255,255,200,'+(0.6+0.4*Math.sin(t*0.05))+')';
+        c.beginPath(); c.arc(16,0,3,0,Math.PI*2); c.fill();
+    }
+
+    /* ── new heavy body draw functions ─────────────────────────────────── */
+    function _coloredBody(c, m, bodyA, bodyB, noseCol, finCol, stripeCol) {
+        var grad = c.createLinearGradient(0,-4,0,4);
+        grad.addColorStop(0, bodyA);
+        grad.addColorStop(1, bodyB);
+        c.fillStyle = grad;
+        c.beginPath();
+        c.moveTo(13,0); c.lineTo(6,-4); c.lineTo(-12,-4); c.lineTo(-12,4); c.lineTo(6,4);
+        c.closePath(); c.fill();
+        c.strokeStyle='rgba(0,0,0,0.45)'; c.lineWidth=0.7; c.stroke();
+        /* nose */
+        c.fillStyle = noseCol;
+        c.beginPath(); c.moveTo(13,0); c.lineTo(6,-4); c.lineTo(6,4); c.closePath(); c.fill();
+        /* fins */
+        c.fillStyle = finCol;
+        c.beginPath(); c.moveTo(-12,-4); c.lineTo(-17,-8); c.lineTo(-9,-4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-12, 4); c.lineTo(-17, 8); c.lineTo(-9, 4); c.closePath(); c.fill();
+        /* optional accent stripe */
+        if (stripeCol) {
+            c.fillStyle = stripeCol;
+            c.fillRect(-9, -0.8, 14, 1.6);
+        }
+        /* exhaust */
+        var fl = 6 + Math.sin(performance.now()*0.04)*3;
+        var fg = c.createLinearGradient(-12,0,-12-fl*2,0);
+        fg.addColorStop(0,'rgba(255,250,180,1)');
+        fg.addColorStop(0.5,'rgba(255,140,40,0.85)');
+        fg.addColorStop(1,'rgba(120,30,10,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-12,-3); c.lineTo(-12-fl*2,0); c.lineTo(-12,3);
+        c.closePath(); c.fill();
+    }
+
+    function drawNuclearBody(c, m) {
+        /* heavy black warhead with yellow trefoil */
+        _coloredBody(c, m, '#222a36','#0a0d14','#ffd040','#1a1d24','#ffd040');
+        /* trefoil symbol on side */
+        c.fillStyle = '#000';
+        c.beginPath(); c.arc(-3,0,1.8,0,Math.PI*2); c.fill();
+        for (var a=0;a<3;a++) {
+            var ang = a*(Math.PI*2/3) - Math.PI/2;
+            c.beginPath();
+            c.arc(-3+Math.cos(ang)*3, Math.sin(ang)*3, 1.4, 0, Math.PI*2);
+            c.fill();
+        }
+    }
+    function drawHydrogenBody(c, m) {
+        /* larger silver-blue warhead */
+        c.save(); c.scale(1.15,1.15);
+        _coloredBody(c, m, '#cfd6e2','#5a6a82','#2080ff','#384458','#2080ff');
+        c.restore();
+        /* "H" label */
+        c.fillStyle='#000'; c.font='bold 7px sans-serif'; c.textAlign='center';
+        c.fillText('H', -3, 2);
+    }
+    function drawThermobaricBody(c, m) {
+        _coloredBody(c, m, '#ff8030','#a02000','#ffd040','#5a2010','#ffe000');
+    }
+    function drawBunkerBody(c, m) {
+        _coloredBody(c, m, '#6a6e7c','#2a2d36','#404858','#1a1d24',null);
+        /* deep ridges */
+        c.strokeStyle='rgba(0,0,0,0.55)'; c.lineWidth=0.5;
+        for (var i=-9;i<=3;i+=3) {
+            c.beginPath(); c.moveTo(i,-4); c.lineTo(i,4); c.stroke();
+        }
+    }
+    function drawStealthBody(c, m) {
+        c.globalAlpha = 0.32;
+        _coloredBody(c, m, '#2a3340','#0a0d14','#1a1d24','#0a0d14',null);
+        c.globalAlpha = 1;
+    }
+    function drawRailgunBody(c, m) {
+        /* slim white-hot dart */
+        var bg = c.createLinearGradient(0,-2,0,2);
+        bg.addColorStop(0,'#ffffff'); bg.addColorStop(1,'#a0e0ff');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(14,0); c.lineTo(8,-2); c.lineTo(-10,-2); c.lineTo(-10,2); c.lineTo(8,2);
+        c.closePath(); c.fill();
+        /* glow halo */
+        var hg = c.createRadialGradient(0,0,2,0,0,20);
+        hg.addColorStop(0,'rgba(180,220,255,0.6)');
+        hg.addColorStop(1,'rgba(60,140,255,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(0,0,20,0,Math.PI*2); c.fill();
+    }
+    function drawDroneBody(c, m) {
+        /* small drone with wings */
+        c.fillStyle='#444a58';
+        c.fillRect(-8, -2, 16, 4);
+        c.fillStyle='#5a606c';
+        c.fillRect(-2, -10, 4, 8);   /* top wing */
+        c.fillRect(-2,  2, 4, 8);    /* bottom wing */
+        c.fillStyle='#1a1d24';
+        c.beginPath(); c.arc(7,0,2,0,Math.PI*2); c.fill();
+        /* propeller blur */
+        c.strokeStyle='rgba(160,170,190,0.65)'; c.lineWidth=1;
+        c.beginPath(); c.arc(-8,-6, 4, 0, Math.PI*2); c.stroke();
+        c.beginPath(); c.arc(-8, 6, 4, 0, Math.PI*2); c.stroke();
+    }
+    function drawICBMBody(c, m) {
+        /* large white missile with red stripes */
+        c.save(); c.scale(1.10,1.10);
+        _coloredBody(c, m, '#f4f6fb','#a0a8b8','#c0202a','#5a606c','#c0202a');
+        c.restore();
+    }
+    function drawAntimatterBody(c, m) {
+        /* bright blue-white orb with rays */
+        var t = performance.now();
+        var hg = c.createRadialGradient(0,0,2,0,0,18);
+        hg.addColorStop(0,'rgba(255,255,255,1)');
+        hg.addColorStop(0.4,'rgba(160,200,255,0.85)');
+        hg.addColorStop(1,'rgba(40,80,200,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(0,0,18,0,Math.PI*2); c.fill();
+        /* radiating rays */
+        c.strokeStyle='rgba(220,240,255,0.85)'; c.lineWidth=1;
+        for (var r=0;r<8;r++) {
+            var ang = r*(Math.PI/4) + t*0.001;
+            c.beginPath();
+            c.moveTo(Math.cos(ang)*6, Math.sin(ang)*6);
+            c.lineTo(Math.cos(ang)*16, Math.sin(ang)*16);
+            c.stroke();
+        }
+    }
+    function drawBioBody(c, m) {
+        _coloredBody(c, m, '#5ad04a','#1c5a18','#ffd040','#0a3a08','#a8ff80');
+        /* biohazard glow */
+        var bg = c.createRadialGradient(0,0,1,0,0,12);
+        bg.addColorStop(0,'rgba(180,255,140,0.5)');
+        bg.addColorStop(1,'rgba(40,120,30,0)');
+        c.fillStyle = bg;
+        c.beginPath(); c.arc(0,0,12,0,Math.PI*2); c.fill();
+    }
+    function drawChemicalBody(c, m) {
+        _coloredBody(c, m, '#f0d020','#7a6400','#ff8000','#3a3000','#ffe060');
+    }
+    function drawPhotonBody(c, m) {
+        /* pure white beam dart */
+        c.fillStyle = '#ffffff';
+        c.fillRect(-12, -1, 26, 2);
+        var hg = c.createRadialGradient(0,0,0,0,0,16);
+        hg.addColorStop(0,'rgba(255,255,255,0.95)');
+        hg.addColorStop(1,'rgba(255,240,180,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(0,0,16,0,Math.PI*2); c.fill();
+    }
+    function drawGravityBody(c, m) {
+        /* swirling dark orb with distortion ring */
+        var t = performance.now();
+        c.fillStyle='#000';
+        c.beginPath(); c.arc(0,0,9,0,Math.PI*2); c.fill();
+        c.strokeStyle='rgba(180,120,255,0.55)'; c.lineWidth=1.5;
+        c.save(); c.rotate(t*0.002);
+        c.beginPath(); c.ellipse(0,0,16,6,0,0,Math.PI*2); c.stroke();
+        c.restore();
+        c.save(); c.rotate(-t*0.003);
+        c.beginPath(); c.ellipse(0,0,18,4,0,0,Math.PI*2); c.stroke();
+        c.restore();
+    }
+    function drawNeutronBody(c, m) {
+        _coloredBody(c, m, '#d8e0f0','#5a6a82','#00d090','#384458','#80ffe0');
+        /* radiation halo */
+        var hg = c.createRadialGradient(0,0,2,0,0,16);
+        hg.addColorStop(0,'rgba(120,255,200,0.55)');
+        hg.addColorStop(1,'rgba(0,180,120,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(0,0,16,0,Math.PI*2); c.fill();
+    }
+
+    /* ── DRAW UNIQUE BLASTS ───────────────────────────────────────────── */
+    function drawMushroomClouds(c) {
+        for (var i=0; i<mushroomClouds.length; i++) {
+            var M = mushroomClouds[i];
+            var prog = M.life / M.maxLife;
+            var alpha = (prog<0.7) ? 1 : 1 - (prog-0.7)/0.3;
+            /* stem — muted dark greys */
+            var stemW = 30 * M.scale + prog*15;
+            var stemH = M.gy - M.stemTop;
+            if (stemH > 0) {
+                var sg = c.createLinearGradient(M.x, M.gy, M.x, M.stemTop);
+                sg.addColorStop(0,   'rgba(55,55,55,'+(0.75*alpha)+')');
+                sg.addColorStop(0.4, 'rgba(110,105,100,'+(0.55*alpha)+')');
+                sg.addColorStop(1,   'rgba(150,145,140,0)');
+                c.fillStyle = sg;
+                c.beginPath();
+                c.moveTo(M.x - stemW*0.4, M.gy);
+                c.bezierCurveTo(M.x - stemW*0.7, M.gy-stemH*0.4, M.x - stemW*0.6, M.stemTop+30, M.x - stemW, M.stemTop+10);
+                c.lineTo(M.x + stemW, M.stemTop+10);
+                c.bezierCurveTo(M.x + stemW*0.6, M.stemTop+30, M.x + stemW*0.7, M.gy-stemH*0.4, M.x + stemW*0.4, M.gy);
+                c.closePath();
+                c.fill();
+            }
+            /* cap — muted monochrome billowing mushroom */
+            var capX = M.x, capY = M.stemTop;
+            var layers = 5;
+            for (var ly=0; ly<layers; ly++) {
+                var R = M.capR * (1 - ly*0.18);
+                var dy = -R*0.35 + ly*8;
+                var cg = c.createRadialGradient(capX, capY+dy, 0, capX, capY+dy, R);
+                if (prog < 0.15) {
+                    /* bright but desaturated flash — neutral cream → grey */
+                    cg.addColorStop(0,   'rgba(245,242,235,'+alpha+')');
+                    cg.addColorStop(0.3, 'rgba(190,185,178,'+(0.85*alpha)+')');
+                    cg.addColorStop(0.7, 'rgba(110,105,100,'+(0.55*alpha)+')');
+                    cg.addColorStop(1,   'rgba(60,58,55,0)');
+                } else if (prog < 0.45) {
+                    cg.addColorStop(0,   'rgba(190,185,178,'+(0.85*alpha)+')');
+                    cg.addColorStop(0.4, 'rgba(130,124,118,'+(0.70*alpha)+')');
+                    cg.addColorStop(0.8, 'rgba(75,72,68,'+(0.50*alpha)+')');
+                    cg.addColorStop(1,   'rgba(50,48,45,0)');
+                } else {
+                    cg.addColorStop(0,   'rgba(115,112,108,'+(0.65*alpha)+')');
+                    cg.addColorStop(0.5, 'rgba(78,75,72,'+(0.55*alpha)+')');
+                    cg.addColorStop(1,   'rgba(50,48,45,0)');
+                }
+                c.fillStyle = cg;
+                c.beginPath();
+                c.ellipse(capX, capY+dy, R, R*0.85, 0, 0, Math.PI*2);
+                c.fill();
+            }
+            /* base ring of dust — desaturated */
+            if (prog < 0.5) {
+                var ringR = M.capR * 1.8 * (prog*2);
+                c.strokeStyle = 'rgba(150,145,138,'+((1-prog*2)*0.5)+')';
+                c.lineWidth = 6;
+                c.beginPath(); c.ellipse(M.x, M.gy, ringR, ringR*0.25, 0, 0, Math.PI*2); c.stroke();
+            }
+        }
+    }
+    function drawFireFields(c) {
+        for (var i=0; i<fireFields.length; i++) {
+            var F = fireFields[i];
+            var p = F.life / F.maxLife;
+            var alpha = (p<0.85) ? 1 : 1 - (p-0.85)/0.15;
+            c.save();
+            c.globalAlpha = alpha;
+            drawFireLick(c, F.x, F.y, F.scale, F.life + F.phase);
+            c.restore();
+        }
+    }
+    function drawGasClouds(c) {
+        for (var i=0; i<gasClouds.length; i++) {
+            var G = gasClouds[i];
+            var p = G.life / G.maxLife;
+            var fade = (p<0.7) ? 1 : 1 - (p-0.7)/0.3;
+            var gg = c.createRadialGradient(G.x, G.y, 0, G.x, G.y, G.r);
+            gg.addColorStop(0, G.core + (G.op*fade*0.85) + ')');
+            gg.addColorStop(0.55, G.core + (G.op*fade*0.40) + ')');
+            gg.addColorStop(1, G.edge + '0)');
+            c.fillStyle = gg;
+            c.beginPath(); c.arc(G.x, G.y, G.r, 0, Math.PI*2); c.fill();
+        }
+    }
+    function drawEMPPulses(c) {
+        for (var i=0; i<empPulses.length; i++) {
+            var E = empPulses[i];
+            var p = E.life / E.maxLife;
+            /* expanding ring */
+            c.strokeStyle = 'rgba(180,120,255,'+((1-p)*0.85)+')';
+            c.lineWidth = 4 * (1-p) + 1;
+            c.shadowColor = 'rgba(140,80,255,0.95)';
+            c.shadowBlur = 14;
+            c.beginPath(); c.arc(E.x, E.y, E.r, 0, Math.PI*2); c.stroke();
+            c.shadowBlur = 0;
+            /* inner brighter ring */
+            c.strokeStyle = 'rgba(255,255,255,'+((1-p)*0.7)+')';
+            c.lineWidth = 1.2;
+            c.beginPath(); c.arc(E.x, E.y, E.r*0.95, 0, Math.PI*2); c.stroke();
+            /* lightning arcs */
+            for (var ai=0; ai<E.arcs.length; ai++) {
+                var A = E.arcs[ai], ap = A.life/A.maxLife;
+                c.strokeStyle = 'rgba(220,180,255,'+(1-ap)+')';
+                c.lineWidth = 2;
+                c.shadowColor = 'rgba(180,120,255,0.95)'; c.shadowBlur = 10;
+                c.beginPath();
+                c.moveTo(A.pts[0].x, A.pts[0].y);
+                for (var pi=1; pi<A.pts.length; pi++) c.lineTo(A.pts[pi].x, A.pts[pi].y);
+                c.stroke();
+                c.shadowBlur = 0;
+                c.strokeStyle = 'rgba(255,255,255,'+((1-ap)*0.9)+')';
+                c.lineWidth = 0.9;
+                c.beginPath();
+                c.moveTo(A.pts[0].x, A.pts[0].y);
+                for (var pi2=1; pi2<A.pts.length; pi2++) c.lineTo(A.pts[pi2].x, A.pts[pi2].y);
+                c.stroke();
+            }
+        }
+    }
+    function drawGravityWells(c) {
+        for (var i=0; i<gravityWells.length; i++) {
+            var G = gravityWells[i];
+            var p = G.life / G.maxLife;
+            /* swirling dark vortex with violet rings */
+            var R = G.innerR * (1 - p*0.5);
+            var t = performance.now();
+            /* spiraling rings */
+            c.save();
+            c.translate(G.x, G.y);
+            c.rotate(t*0.003);
+            for (var r=0; r<5; r++) {
+                c.strokeStyle = 'rgba(180,120,255,'+((1-p)*0.55*(1-r*0.15))+')';
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.ellipse(0, 0, R*(0.4+r*0.15), R*(0.15+r*0.05), r*0.3, 0, Math.PI*2);
+                c.stroke();
+            }
+            c.restore();
+            /* dark core */
+            var dg = c.createRadialGradient(G.x, G.y, 0, G.x, G.y, R*0.3);
+            dg.addColorStop(0, 'rgba(0,0,0,0.95)');
+            dg.addColorStop(1, 'rgba(0,0,0,0)');
+            c.fillStyle = dg;
+            c.beginPath(); c.arc(G.x, G.y, R*0.3, 0, Math.PI*2); c.fill();
+            /* accretion glow */
+            var ag = c.createRadialGradient(G.x, G.y, R*0.15, G.x, G.y, R*0.6);
+            ag.addColorStop(0, 'rgba(220,180,255,0.65)');
+            ag.addColorStop(0.6, 'rgba(140,80,255,0.40)');
+            ag.addColorStop(1, 'rgba(60,0,100,0)');
+            c.fillStyle = ag;
+            c.beginPath(); c.arc(G.x, G.y, R*0.6, 0, Math.PI*2); c.fill();
+        }
+    }
+    function drawNeutronPulses(c) {
+        for (var i=0; i<neutronPulses.length; i++) {
+            var N = neutronPulses[i];
+            var p = N.life / N.maxLife;
+            /* expanding bright green ring */
+            c.strokeStyle = 'rgba(140,255,180,'+((1-p))+')';
+            c.lineWidth = 3*(1-p) + 1;
+            c.shadowColor = 'rgba(80,255,160,0.95)'; c.shadowBlur = 16;
+            c.beginPath(); c.arc(N.x, N.y, N.r, 0, Math.PI*2); c.stroke();
+            c.shadowBlur = 0;
+            /* fading glow inside */
+            var ng = c.createRadialGradient(N.x, N.y, 0, N.x, N.y, N.r);
+            ng.addColorStop(0, 'rgba(160,255,200,'+((1-p)*0.4)+')');
+            ng.addColorStop(0.8, 'rgba(60,200,140,'+((1-p)*0.2)+')');
+            ng.addColorStop(1, 'rgba(0,120,80,0)');
+            c.fillStyle = ng;
+            c.beginPath(); c.arc(N.x, N.y, N.r, 0, Math.PI*2); c.fill();
+        }
+    }
+    function drawAntimatterBursts(c) {
+        for (var i=0; i<antimatterBursts.length; i++) {
+            var A = antimatterBursts[i];
+            var p = A.life / A.maxLife;
+            /* spherical white-blue burst */
+            var bg = c.createRadialGradient(A.x, A.y, 0, A.x, A.y, A.r);
+            bg.addColorStop(0, 'rgba(255,255,255,'+((1-p))+')');
+            bg.addColorStop(0.3, 'rgba(220,230,255,'+((1-p)*0.85)+')');
+            bg.addColorStop(0.7, 'rgba(140,180,255,'+((1-p)*0.45)+')');
+            bg.addColorStop(1, 'rgba(20,40,160,0)');
+            c.fillStyle = bg;
+            c.beginPath(); c.arc(A.x, A.y, A.r, 0, Math.PI*2); c.fill();
+            /* radial rays */
+            c.save();
+            c.translate(A.x, A.y);
+            c.rotate(A.rayPhase);
+            c.strokeStyle = 'rgba(255,255,255,'+((1-p)*0.7)+')';
+            c.lineWidth = 1.5;
+            for (var r=0; r<16; r++) {
+                var ang = r * (Math.PI/8);
+                c.beginPath();
+                c.moveTo(Math.cos(ang)*A.r*0.4, Math.sin(ang)*A.r*0.4);
+                c.lineTo(Math.cos(ang)*A.r, Math.sin(ang)*A.r);
+                c.stroke();
+            }
+            c.restore();
+        }
+    }
+    function drawPhotonStrikes(c) {
+        for (var i=0; i<photonStrikes.length; i++) {
+            var P = photonStrikes[i];
+            var p = P.life / P.maxLife;
+            var alpha = (p<0.3) ? 1 : 1 - (p-0.3)/0.7;
+            /* vertical white beam from top of screen to target */
+            var bg = c.createLinearGradient(P.x, 0, P.x, P.ty);
+            bg.addColorStop(0, 'rgba(255,255,255,0)');
+            bg.addColorStop(0.5, 'rgba(255,255,255,'+(alpha*0.6)+')');
+            bg.addColorStop(1, 'rgba(255,255,255,'+alpha+')');
+            c.fillStyle = bg;
+            c.fillRect(P.x - P.width/2, 0, P.width, P.ty);
+            /* bright core line */
+            c.strokeStyle = 'rgba(255,255,220,'+alpha+')';
+            c.lineWidth = 3;
+            c.shadowColor = 'rgba(255,255,200,0.95)'; c.shadowBlur = 16;
+            c.beginPath(); c.moveTo(P.x, 0); c.lineTo(P.x, P.ty); c.stroke();
+            c.shadowBlur = 0;
+        }
+    }
+
+    function drawAirDefence(c) {
+        for (var i=0;i<airDefence.length;i++) {
+            var b=airDefence[i];
+            /* base platform */
+            c.fillStyle='#3a4050';
+            c.fillRect(b.x-14, b.y-9, 28, 11);
+            c.strokeStyle='#1a1d24'; c.lineWidth=1;
+            c.strokeRect(b.x-14, b.y-9, 28, 11);
+            /* armoured plating ridges */
+            c.strokeStyle='rgba(0,0,0,0.45)'; c.lineWidth=0.6;
+            c.beginPath(); c.moveTo(b.x-14,b.y-4); c.lineTo(b.x+14,b.y-4); c.stroke();
+            /* launch tube (taller, with stripes) */
+            c.fillStyle='#5a606e';
+            c.fillRect(b.x-5, b.y-22, 10, 13);
+            c.strokeStyle='#222630'; c.lineWidth=0.8;
+            c.strokeRect(b.x-5, b.y-22, 10, 13);
+            c.fillStyle='#c0202a';
+            c.fillRect(b.x-5, b.y-18, 10, 1.5);
+            c.fillRect(b.x-5, b.y-13, 10, 1.5);
+            /* radar dish + antenna */
+            c.strokeStyle='#7a8290'; c.lineWidth=1.4;
+            c.beginPath();
+            c.arc(b.x+10, b.y-12, 4, Math.PI, 0);
+            c.stroke();
+            c.beginPath(); c.moveTo(b.x+10,b.y-12); c.lineTo(b.x+10,b.y-9); c.stroke();
+            /* warning light + alert blink */
+            var alertOn = (b.alertT && b.alertT>0) && (Math.floor(performance.now()/80)%2===0);
+            var lightCol = alertOn ? '#ffe040'
+                         : (b.cooldown>0) ? '#ff5030'
+                         : '#30c050';
+            c.fillStyle = lightCol;
+            c.beginPath(); c.arc(b.x-10, b.y-4, 1.8, 0, Math.PI*2); c.fill();
+            /* alert glow halo when about to fire */
+            if (alertOn) {
+                var lg = c.createRadialGradient(b.x, b.y-12, 0, b.x, b.y-12, 18);
+                lg.addColorStop(0,'rgba(255,224,80,0.55)');
+                lg.addColorStop(1,'rgba(255,180,40,0)');
+                c.fillStyle = lg;
+                c.beginPath(); c.arc(b.x, b.y-12, 18, 0, Math.PI*2); c.fill();
+            }
+            /* muzzle flash on fire (larger) */
+            if (b.flashT > 0) {
+                var f = Math.min(1, b.flashT/220);
+                var fg = c.createRadialGradient(b.x, b.y-22, 0, b.x, b.y-22, 36);
+                fg.addColorStop(0,'rgba(255,250,200,'+f+')');
+                fg.addColorStop(0.4,'rgba(255,160,60,'+(f*0.85)+')');
+                fg.addColorStop(1,'rgba(255,40,0,0)');
+                c.fillStyle = fg;
+                c.beginPath(); c.arc(b.x, b.y-22, 36, 0, Math.PI*2); c.fill();
+            }
+        }
+    }
+
+    function drawInterceptors(c) {
+        for (var i=0;i<interceptors.length;i++) {
+            var ic=interceptors[i];
+            var enh = ic.enhanced;
+            /* trail */
+            for (var ti=0;ti<ic.trail.length;ti++) {
+                var tp=ic.trail[ti];
+                var af=tp.age/500;
+                var op=(1-af)*(enh?1.0:0.7)*(ti/ic.trail.length);
+                var rad=(enh?4:2)+af*(enh?14:8);
+                var trailCol = ic.kind==='emp'   ? 'rgba(200,140,255,'
+                              : ic.kind==='patriot' ? 'rgba(180,220,255,'
+                              : ic.kind==='multi' ? 'rgba(255,220,80,'
+                              : 'rgba(255,220,140,';
+                var tg = c.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,rad);
+                tg.addColorStop(0, trailCol+(op*1.3)+')');
+                tg.addColorStop(1, trailCol+'0)');
+                c.fillStyle = tg;
+                c.beginPath(); c.arc(tp.x, tp.y, rad, 0, Math.PI*2); c.fill();
+            }
+            /* enhanced — bright body halo */
+            if (enh) {
+                var hg = c.createRadialGradient(ic.x, ic.y, 0, ic.x, ic.y, 22);
+                var haloCol = ic.kind==='emp'   ? 'rgba(220,160,255,'
+                            : ic.kind==='patriot' ? 'rgba(140,200,255,'
+                            : ic.kind==='multi' ? 'rgba(255,220,100,'
+                            : 'rgba(255,200,120,';
+                hg.addColorStop(0, haloCol+'0.65)');
+                hg.addColorStop(1, haloCol+'0)');
+                c.fillStyle = hg;
+                c.beginPath(); c.arc(ic.x, ic.y, 22, 0, Math.PI*2); c.fill();
+            }
+            /* body */
+            c.save();
+            c.translate(ic.x, ic.y);
+            c.rotate(ic.angle);
+            if (ic.kind==='emp') {
+                /* glowing energy orb */
+                var og = c.createRadialGradient(0,0,0,0,0,16);
+                og.addColorStop(0,'rgba(255,255,255,1)');
+                og.addColorStop(0.4,'rgba(220,180,255,0.9)');
+                og.addColorStop(1,'rgba(120,40,200,0)');
+                c.fillStyle = og;
+                c.beginPath(); c.arc(0,0,16,0,Math.PI*2); c.fill();
+                /* lightning arcs */
+                if (ic.arcs) {
+                    for (var ai=0;ai<ic.arcs.length;ai++) {
+                        var A=ic.arcs[ai], af2=A.life/A.maxLife;
+                        c.strokeStyle = 'rgba(220,180,255,'+(1-af2)+')';
+                        c.lineWidth = 1.4;
+                        c.beginPath();
+                        c.moveTo(A.pts[0].dx, A.pts[0].dy);
+                        for (var pi=1;pi<A.pts.length;pi++) c.lineTo(A.pts[pi].dx, A.pts[pi].dy);
+                        c.stroke();
+                    }
+                }
+            } else {
+                /* small white SAM body */
+                c.fillStyle = '#e8ecf2';
+                c.beginPath();
+                c.moveTo(8,0); c.lineTo(3,-2); c.lineTo(-7,-2); c.lineTo(-7,2); c.lineTo(3,2);
+                c.closePath(); c.fill();
+                c.strokeStyle='#404858'; c.lineWidth=0.6; c.stroke();
+                /* nose */
+                c.fillStyle = ic.kind==='multi'   ? '#ffd040'
+                            : ic.kind==='patriot' ? '#3060e0'
+                            : '#c0202a';
+                c.beginPath(); c.moveTo(8,0); c.lineTo(3,-2); c.lineTo(3,2); c.closePath(); c.fill();
+                /* fins */
+                c.fillStyle='#5a606c';
+                c.beginPath(); c.moveTo(-7,-2); c.lineTo(-10,-4); c.lineTo(-5,-2); c.closePath(); c.fill();
+                c.beginPath(); c.moveTo(-7,2);  c.lineTo(-10,4);  c.lineTo(-5,2);  c.closePath(); c.fill();
+                /* exhaust */
+                var fl = 5 + Math.sin(ic.spinT*0.04)*2;
+                var fg2 = c.createLinearGradient(-7,0,-7-fl*1.8,0);
+                fg2.addColorStop(0,'rgba(255,240,180,1)');
+                fg2.addColorStop(0.5,'rgba(255,140,40,0.7)');
+                fg2.addColorStop(1,'rgba(120,30,10,0)');
+                c.fillStyle = fg2;
+                c.beginPath();
+                c.moveTo(-7,-1.5); c.lineTo(-7-fl*1.8,0); c.lineTo(-7,1.5);
+                c.closePath(); c.fill();
+            }
+            c.restore();
+        }
+    }
+
+    function drawLaserBeams(c) {
+        for (var i=0;i<laserBeams.length;i++) {
+            var b=laserBeams[i];
+            var p=b.life/b.maxLife;
+            var op=1-p;
+            if (b.enhanced) {
+                /* ultra-thick double-glow beam for user-triggered laser */
+                c.strokeStyle='rgba(255,80,40,'+(op*0.45)+')';
+                c.lineWidth=18;
+                c.beginPath(); c.moveTo(b.x1,b.y1); c.lineTo(b.x2,b.y2); c.stroke();
+                c.strokeStyle='rgba(255,200,120,'+(op*0.75)+')';
+                c.lineWidth=10;
+                c.beginPath(); c.moveTo(b.x1,b.y1); c.lineTo(b.x2,b.y2); c.stroke();
+                c.strokeStyle='rgba(255,255,255,'+op+')';
+                c.lineWidth=3.5;
+                c.beginPath(); c.moveTo(b.x1,b.y1); c.lineTo(b.x2,b.y2); c.stroke();
+                /* glow ball at impact end */
+                var ig = c.createRadialGradient(b.x2, b.y2, 0, b.x2, b.y2, 24);
+                ig.addColorStop(0,'rgba(255,255,255,'+op+')');
+                ig.addColorStop(1,'rgba(255,80,40,0)');
+                c.fillStyle = ig;
+                c.beginPath(); c.arc(b.x2,b.y2,24,0,Math.PI*2); c.fill();
+                continue;
+            }
+            /* outer glow */
+            c.strokeStyle='rgba(255,120,80,'+(op*0.55)+')';
+            c.lineWidth=8;
+            c.beginPath(); c.moveTo(b.x1,b.y1); c.lineTo(b.x2,b.y2); c.stroke();
+            /* core */
+            c.strokeStyle='rgba(255,255,255,'+op+')';
+            c.lineWidth=2;
+            c.beginPath(); c.moveTo(b.x1,b.y1); c.lineTo(b.x2,b.y2); c.stroke();
+        }
+    }
+
+    function drawTargetLocks(c) {
+        for (var i=0; i<targetLocks.length; i++) {
+            var T = targetLocks[i];
+            var p = T.life / T.maxLife;
+            var fade = (p < 0.7) ? 1 : 1 - (p-0.7)/0.3;
+            /* contracting ring */
+            var r = 28 - p * 14;
+            /* pulsing brackets */
+            var brP = 0.5 + 0.5*Math.sin(T.life*0.025);
+            c.strokeStyle = 'rgba(255,60,60,'+(fade*0.95)+')';
+            c.lineWidth = 2.2;
+            /* outer pulsing ring */
+            c.beginPath(); c.arc(T.x, T.y, r, 0, Math.PI*2); c.stroke();
+            /* 4 corner brackets */
+            var br = r + 4 + brP*3;
+            var arms = 6;
+            c.lineWidth = 2.6;
+            [[-1,-1],[1,-1],[1,1],[-1,1]].forEach(function(dir){
+                c.beginPath();
+                c.moveTo(T.x + dir[0]*br, T.y + dir[1]*(br-arms));
+                c.lineTo(T.x + dir[0]*br, T.y + dir[1]*br);
+                c.lineTo(T.x + dir[0]*(br-arms), T.y + dir[1]*br);
+                c.stroke();
+            });
+            /* center dot */
+            c.fillStyle = 'rgba(255,255,255,'+(fade*0.95)+')';
+            c.beginPath(); c.arc(T.x, T.y, 1.5, 0, Math.PI*2); c.fill();
+            /* radial sweeps */
+            c.strokeStyle = 'rgba(255,80,80,'+(fade*0.55)+')';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(T.x - r - 8, T.y); c.lineTo(T.x - r - 2, T.y); c.stroke();
+            c.beginPath();
+            c.moveTo(T.x + r + 2, T.y); c.lineTo(T.x + r + 8, T.y); c.stroke();
+            c.beginPath();
+            c.moveTo(T.x, T.y - r - 8); c.lineTo(T.x, T.y - r - 2); c.stroke();
+            c.beginPath();
+            c.moveTo(T.x, T.y + r + 2); c.lineTo(T.x, T.y + r + 8); c.stroke();
+        }
+    }
+
+    function drawMissileSystem(c) {
+        /* (batteries are drawn early in drawDynamic so cars pass over them) */
+        /* missiles — fully per-kind rendering */
+        for(var mi=0;mi<missiles.length;mi++) {
+            var m=missiles[mi];
+
+            /* ── shared: trail (per kind) ───────────────────────────────── */
+            drawMissileTrail(c, m);
+
+            /* ── sonic boom rings ───────────────────────────────────────── */
+            if(m.boomRings && m.boomRings.length) {
+                for(var br=0;br<m.boomRings.length;br++) {
+                    var R=m.boomRings[br];
+                    var bp = R.life/R.maxLife;
+                    c.strokeStyle = (m.kind==='hypersonic')
+                        ? 'rgba(255,200,120,'+((1-bp)*0.55)+')'
+                        : 'rgba(220,235,255,'+((1-bp)*0.45)+')';
+                    c.lineWidth = 2*(1-bp);
+                    c.beginPath(); c.arc(R.x, R.y, R.r, 0, Math.PI*2); c.stroke();
+                }
+            }
+
+            /* ── shock cones (hypersonic) ───────────────────────────────── */
+            if(m.shockCones) {
+                for(var sci=0;sci<m.shockCones.length;sci++) {
+                    var SC=m.shockCones[sci];
+                    var sp=SC.life/SC.maxLife;
+                    c.save();
+                    c.translate(SC.x, SC.y);
+                    c.rotate(SC.angle);
+                    c.strokeStyle = 'rgba(255,240,200,'+((1-sp)*0.50)+')';
+                    c.lineWidth = 1.8*(1-sp);
+                    var coneLen = 50+sp*80;
+                    var coneSpread = 22+sp*30;
+                    c.beginPath();
+                    c.moveTo(0,0); c.lineTo(-coneLen, -coneSpread); c.stroke();
+                    c.beginPath();
+                    c.moveTo(0,0); c.lineTo(-coneLen,  coneSpread); c.stroke();
+                    c.restore();
+                }
+            }
+
+            /* ── exhaust sparks ─────────────────────────────────────────── */
+            if(m.sparks) {
+                for(var sk=0;sk<m.sparks.length;sk++) {
+                    var SP=m.sparks[sk], spf=SP.life/SP.maxLife;
+                    var sg = c.createRadialGradient(SP.x,SP.y,0,SP.x,SP.y,SP.size*4);
+                    sg.addColorStop(0,'hsla('+SP.hue+',95%,75%,'+((1-spf)*1.0)+')');
+                    sg.addColorStop(1,'hsla('+SP.hue+',95%,50%,0)');
+                    c.fillStyle = sg;
+                    c.beginPath(); c.arc(SP.x,SP.y,SP.size*4,0,Math.PI*2); c.fill();
+                }
+            }
+
+            /* ── body per kind ──────────────────────────────────────────── */
+            c.save();
+            c.translate(m.x, m.y);
+            c.rotate(m.angle);
+            if(m.kind==='plasma')          drawPlasmaBody(c, m);
+            else if(m.kind==='cruise')     drawCruiseBody(c, m);
+            else if(m.kind==='hypersonic') drawHypersonicBody(c, m);
+            else if(m.kind==='cluster')    drawClusterBody(c, m);
+            else if(m.kind==='_bomblet')   drawBombletBody(c, m);
+            else if(m.kind==='_swarmer')   drawBombletBody(c, m);
+            else if(m.kind==='nuclear')    drawNuclearBody(c, m);
+            else if(m.kind==='hydrogen')   drawHydrogenBody(c, m);
+            else if(m.kind==='thermobaric')drawThermobaricBody(c, m);
+            else if(m.kind==='bunker')     drawBunkerBody(c, m);
+            else if(m.kind==='mirv')       drawClusterBody(c, m);
+            else if(m.kind==='stealth')    drawStealthBody(c, m);
+            else if(m.kind==='railgun')    drawRailgunBody(c, m);
+            else if(m.kind==='drone')      drawDroneBody(c, m);
+            else if(m.kind==='icbm')       drawICBMBody(c, m);
+            else if(m.kind==='tactical')   drawStandardBody(c, m);
+            else if(m.kind==='antimatter') drawAntimatterBody(c, m);
+            else if(m.kind==='decoy')      drawStandardBody(c, m);
+            else if(m.kind==='photon')     drawPhotonBody(c, m);
+            else if(m.kind==='gravity')    drawGravityBody(c, m);
+            else if(m.kind==='neutron')    drawNeutronBody(c, m);
+            else if(m.kind==='emp')        drawPlasmaBody(c, m);
+            else                           drawStandardBody(c, m);
+            c.restore();
+        }
+        /* explosions */
+        for(var ei=0;ei<explosions.length;ei++) {
+            var ex=explosions[ei];
+            var prog=ex.life/ex.maxLife;
+            if(ex.kind==='fire') {
+                var eg = c.createRadialGradient(ex.x,ex.y,0,ex.x,ex.y,ex.r);
+                eg.addColorStop(0,'rgba(255,255,230,'+(1-prog)+')');
+                eg.addColorStop(0.25,'rgba(255,220,80,'+(0.95-prog*0.95)+')');
+                eg.addColorStop(0.55,'rgba(255,90,20,'+(0.80-prog*0.80)+')');
+                eg.addColorStop(0.85,'rgba(120,30,5,'+(0.50-prog*0.50)+')');
+                eg.addColorStop(1,'rgba(40,10,0,0)');
+                c.fillStyle = eg;
+                c.beginPath(); c.arc(ex.x, ex.y, ex.r, 0, Math.PI*2); c.fill();
+                /* dark smoke ball */
+                if(prog>0.3) {
+                    var dg = c.createRadialGradient(ex.x,ex.y-ex.r*0.2,0,ex.x,ex.y-ex.r*0.2,ex.r*0.85);
+                    dg.addColorStop(0,'rgba(40,30,25,'+(prog-0.3)*0.7+')');
+                    dg.addColorStop(1,'rgba(40,30,25,0)');
+                    c.fillStyle = dg;
+                    c.beginPath(); c.arc(ex.x, ex.y-ex.r*0.2, ex.r*0.85, 0, Math.PI*2); c.fill();
+                }
+            } else if(ex.kind==='shock') {
+                c.strokeStyle = 'rgba(255,250,220,'+(1-prog)+')';
+                c.lineWidth = 3*(1-prog);
+                c.beginPath(); c.arc(ex.x, ex.y, ex.r, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,180,80,'+((1-prog)*0.6)+')';
+                c.lineWidth = 8*(1-prog);
+                c.beginPath(); c.arc(ex.x, ex.y, ex.r*0.92, 0, Math.PI*2); c.stroke();
+            } else if(ex.kind==='flash') {
+                var fgFlash = c.createRadialGradient(ex.x,ex.y,0,ex.x,ex.y,ex.r*3);
+                fgFlash.addColorStop(0,'rgba(255,255,255,'+(1-prog)+')');
+                fgFlash.addColorStop(0.4,'rgba(255,240,180,'+((1-prog)*0.5)+')');
+                fgFlash.addColorStop(1,'rgba(255,200,80,0)');
+                c.fillStyle = fgFlash;
+                c.beginPath(); c.arc(ex.x, ex.y, ex.r*3, 0, Math.PI*2); c.fill();
+            }
+        }
+        /* debris & embers */
+        for(var di=0;di<debrisParts.length;di++) {
+            var p=debrisParts[di];
+            var prog2=p.life/p.maxLife;
+            if(p.shade===99) {
+                /* ember */
+                var emg=c.createRadialGradient(p.x,p.y,0,p.x,p.y,p.size*3);
+                emg.addColorStop(0,'rgba(255,240,150,'+(1-prog2)+')');
+                emg.addColorStop(0.4,'rgba(255,120,30,'+(1-prog2)*0.7+')');
+                emg.addColorStop(1,'rgba(200,40,0,0)');
+                c.fillStyle = emg;
+                c.beginPath(); c.arc(p.x,p.y,p.size*3,0,Math.PI*2); c.fill();
+            } else {
+                /* concrete / metal fragment */
+                var cols=['#3a3a40','#5a5258','#8a847a','#a8632a'];
+                c.save();
+                c.translate(p.x, p.y);
+                c.rotate(p.rot);
+                c.fillStyle = cols[p.shade];
+                c.fillRect(-p.size, -p.size*0.5, p.size*2, p.size);
+                c.strokeStyle = 'rgba(0,0,0,0.55)';
+                c.lineWidth = 0.6;
+                c.strokeRect(-p.size, -p.size*0.5, p.size*2, p.size);
+                c.restore();
+            }
+        }
+        /* strategy queue markers (when in strategy mode) */
+        if (strategyMode && strategyQueue.length) {
+            var t = performance.now();
+            var pulse = 0.55 + 0.45*Math.sin(t*0.005);
+            for (var sq=0; sq<strategyQueue.length; sq++) {
+                var Q = strategyQueue[sq];
+                /* outer ring */
+                c.strokeStyle = 'rgba(120,80,255,'+(0.85*pulse)+')';
+                c.lineWidth = 1.5;
+                c.beginPath(); c.arc(Q.tx, Q.ty, 12, 0, Math.PI*2); c.stroke();
+                /* crosshair */
+                c.strokeStyle = 'rgba(220,200,255,0.9)';
+                c.lineWidth = 1;
+                c.beginPath();
+                c.moveTo(Q.tx-10, Q.ty); c.lineTo(Q.tx-3, Q.ty); c.stroke();
+                c.beginPath();
+                c.moveTo(Q.tx+3, Q.ty); c.lineTo(Q.tx+10, Q.ty); c.stroke();
+                c.beginPath();
+                c.moveTo(Q.tx, Q.ty-10); c.lineTo(Q.tx, Q.ty-3); c.stroke();
+                c.beginPath();
+                c.moveTo(Q.tx, Q.ty+3); c.lineTo(Q.tx, Q.ty+10); c.stroke();
+                /* center dot */
+                c.fillStyle = 'rgba(220,180,255,1)';
+                c.beginPath(); c.arc(Q.tx, Q.ty, 2, 0, Math.PI*2); c.fill();
+                /* index label */
+                c.fillStyle = 'rgba(20,10,40,0.95)';
+                c.font = 'bold 9px "Arial Black",sans-serif';
+                c.textAlign = 'center';
+                c.fillText(String(sq+1), Q.tx, Q.ty-14);
+                c.textAlign = 'left';
+            }
+        }
+        /* interceptors on top of missiles */
+        drawInterceptors(c);
+        drawLaserBeams(c);
+        drawTargetLocks(c);
+        /* unique blast visuals */
+        drawMushroomClouds(c);
+        drawFireFields(c);
+        drawGasClouds(c);
+        drawEMPPulses(c);
+        drawGravityWells(c);
+        drawNeutronPulses(c);
+        drawAntimatterBursts(c);
+        drawPhotonStrikes(c);
+        /* screen flash overlay (post-explosion white-out) */
+        if(screenFlash>0) {
+            c.fillStyle = 'rgba(255,250,220,'+(screenFlash*0.55)+')';
+            c.fillRect(0,0,W,H);
+        }
+    }
+
+    /* canvas click handler.
+       - Defence mode: click intercepts the nearest in-flight missile (manual intercept game)
+       - Attack mode: click fires a missile at that spot
+       Stays in mode across multiple clicks; only the widget buttons toggle modes. */
+    canvas.addEventListener('click', function(ev){
+        if(!defenceMode && !missileArmed && !strategyMode) return;
+        var rect = canvas.getBoundingClientRect();
+        var sx = (ev.clientX - rect.left) * (canvas.width / rect.width);
+        var sy = (ev.clientY - rect.top)  * (canvas.height/ rect.height);
+        if (strategyMode) {
+            if (strategyQueue.length >= STRATEGY_MAX) return;
+            var kind = MISSILE_TYPES[missileTypeIdx];
+            strategyQueue.push({ kind:kind, tx:sx, ty:sy });
+            return;
+        }
+        if (defenceMode) {
+            interceptByClick(sx, sy);
+            return;
+        }
+        if (missileArmed) {
+            fireMissile(sx, sy);
+        }
+    });
+
+    window.armMissile = function(){
+        missileArmed = !missileArmed;
+        if (missileArmed) {
+            /* attack mode requires auto-defence active; also exit defence mode */
+            defenceActive = true;
+            if (defenceMode) defenceMode = false;
+        }
+        canvas.style.cursor = missileArmed ? 'crosshair' : '';
+        return missileArmed;
+    };
+    window.isMissileArmed = function(){ return missileArmed; };
+    window.fireMissileAt = fireMissile;
+
+    /* ── missile type API ─────────────────────────────────────────────── */
+    window.cycleMissileType = function(dir){
+        var n = MISSILE_TYPES.length;
+        missileTypeIdx = ((missileTypeIdx + (dir||1)) % n + n) % n;
+        return MISSILE_TYPES[missileTypeIdx];
+    };
+    window.getMissileType = function(){ return MISSILE_TYPES[missileTypeIdx]; };
+    window.getMissileTypeName = function(){ return MISSILE_LABELS[MISSILE_TYPES[missileTypeIdx]]; };
+    window.getMissileTypeIcon = function(){ return MISSILE_ICONS[MISSILE_TYPES[missileTypeIdx]]; };
+    window.getMissileTypeIndex = function(){ return missileTypeIdx; };
+    window.setMissileTypeIndex = function(i){
+        var n = MISSILE_TYPES.length;
+        if(typeof i!=='number') return;
+        missileTypeIdx = ((i%n)+n)%n;
+    };
+    window.getAllMissileTypes = function(){
+        return MISSILE_TYPES.map(function(t,i){
+            return { index:i, type:t, name: MISSILE_LABELS[t], icon: MISSILE_ICONS[t] };
+        });
+    };
+
+    /* ── DEFENCE API ───────────────────────────────────────────────────── */
+    /* AI fires a random missile at an ACTUAL destructible target
+       (a building, vehicle, or pedestrian) so misses always cause damage. */
+    function spawnAIMissile() {
+        var picks = MISSILE_TYPES.filter(function(t){
+            return t!=='swarm' && t!=='saturation' && t!=='cluster'
+                && t!=='mirv' && t!=='decoy';
+        });
+        var kind = picks[Math.floor(Math.random()*picks.length)];
+
+        /* build a list of valid live targets */
+        var targets = [];
+        /* landmarks (LM) */
+        if (typeof LM !== 'undefined' && LM && LM.length) {
+            for (var li=0; li<LM.length; li++) {
+                var lm = LM[li];
+                var lx = (typeof lm.x === 'number') ? lm.x : W*0.5;
+                targets.push({ x: lx, y: GROUND - rng(40, GROUND*0.55) });
+            }
+        }
+        /* bg buildings — most common */
+        if (typeof BGBUILDS !== 'undefined' && BGBUILDS && BGBUILDS.length) {
+            for (var bi=0; bi<BGBUILDS.length; bi++) {
+                var b = BGBUILDS[bi];
+                if (b.x > -50 && b.x < W+50 && b.h > 30) {
+                    targets.push({
+                        x: b.x + b.w/2,
+                        y: GROUND - b.h*rng(0.30, 0.85)
+                    });
+                }
+            }
+        }
+        /* moving vehicles */
+        for (var vi2=0; vi2<vehicles.length; vi2++) {
+            var v = vehicles[vi2];
+            if (v.x > 20 && v.x < W-20) {
+                targets.push({ x: v.x, y: GROUND + (H-GROUND)*0.10 });
+            }
+        }
+        /* pedestrians */
+        for (var pi2=0; pi2<peds.length; pi2++) {
+            var p = peds[pi2];
+            if (p.x > 20 && p.x < W-20) {
+                targets.push({ x: p.x, y: GROUND + (H-GROUND)*0.58 });
+            }
+        }
+        /* fallback */
+        var t;
+        if (targets.length) {
+            t = targets[Math.floor(Math.random()*targets.length)];
+        } else {
+            t = { x: rng(W*0.1, W*0.9), y: GROUND - rng(20, GROUND*0.4) };
+        }
+        /* fire without the user's defence batteries auto-intercepting */
+        var savedActive = defenceActive;
+        defenceActive = false;
+        fireMissile(t.x, t.y, kind);
+        defenceActive = savedActive;
+    }
+    /* User clicked at (sx, sy) in defence mode — launch a CINEMATIC interceptor at
+       the nearest in-flight missile (type-specific animation, target-lock, big hit). */
+    function interceptByClick(sx, sy) {
+        var clickR = 90, clickR2 = clickR*clickR;
+        var nearest = null, nearestD = clickR2;
+        for (var i=0; i<missiles.length; i++) {
+            var m = missiles[i];
+            var dx = m.x - sx, dy = m.y - sy;
+            var d  = dx*dx + dy*dy;
+            if (d < nearestD) { nearestD = d; nearest = m; }
+        }
+        if (!nearest) return false;
+        return launchUserInterceptor(nearest);
+    }
+
+    function launchUserInterceptor(m) {
+        if (!airDefence || !airDefence.length) return false;
+        /* pick closest battery to the missile (not the target) */
+        var best = airDefence[0], bestD = Infinity;
+        for (var i=0; i<airDefence.length; i++) {
+            var d = Math.abs(airDefence[i].x - m.x);
+            if (d < bestD) { bestD = d; best = airDefence[i]; }
+        }
+        var defSel = DEFENCE_TYPES[defenceTypeIdx];
+        var iKind  = (defSel === 'auto') ? (INTERCEPT_FOR[m.kind] || 'sam') : defSel;
+
+        /* RED TARGET-LOCK ring at the missile */
+        targetLocks.push({
+            x: m.x, y: m.y,
+            targetM: m,
+            life: 0, maxLife: 850
+        });
+
+        /* big battery muzzle flash + alert */
+        best.flashT = 360;
+        best.alertT = 0;
+
+        if (iKind === 'laser') {
+            /* INSTANT laser strike — bright, thick beam */
+            laserBeams.push({
+                x1: best.x, y1: best.y - 14,
+                x2: m.x,    y2: m.y,
+                life: 0, maxLife: 420,
+                enhanced: true
+            });
+            killMissileBig(m);
+            return true;
+        }
+
+        /* kinetic interceptor — faster than auto-fire and visually enhanced */
+        var startX = best.x, startY = best.y - 14;
+        var dxN = m.x - startX, dyN = m.y - startY;
+        var dist = Math.sqrt(dxN*dxN + dyN*dyN) || 1;
+        var spd = (iKind==='patriot') ? 1.70 :
+                  (iKind==='emp')     ? 1.30 :
+                  (iKind==='multi')   ? 1.55 :
+                  1.55;
+        interceptors.push({
+            kind: iKind,
+            x: startX, y: startY,
+            vx: dxN/dist*spd, vy: dyN/dist*spd,
+            angle: Math.atan2(dyN, dxN),
+            spd: spd,
+            target: m,
+            trail: [],
+            life: 0,
+            arcs: (iKind==='emp') ? [] : null,
+            spinT: 0,
+            enhanced: true,    /* render brighter / thicker */
+            userTriggered: true
+        });
+
+        /* fat launch puff at the battery */
+        for (var pi=0; pi<20; pi++) {
+            debrisParts.push({
+                x: best.x + rng(-5,5), y: best.y - 8,
+                vx: rng(-3.5,3.5), vy: -rng(3,7),
+                rot:0, spin:0, size: rng(1.8,4),
+                shade: 99,
+                life:0, maxLife: rng(500,1100)
+            });
+        }
+        return true;
+    }
+
+    /* enhanced mid-air explosion used when user-triggered interceptor connects */
+    function killMissileBig(m) {
+        var idx = missiles.indexOf(m);
+        if (idx === -1) return;
+        if (m.strategy) strategyStats.intercepted++;
+        missiles.splice(idx, 1);
+        /* big explosion — larger fireball, double shock, bright flash */
+        explosions.push({ x:m.x, y:m.y, r:0, maxR:60, life:0, maxLife:520, kind:'fire' });
+        explosions.push({ x:m.x, y:m.y, r:0, maxR:110, life:0, maxLife:480, kind:'shock' });
+        explosions.push({ x:m.x, y:m.y, r:0, maxR:170, life:0, maxLife:560, kind:'shock' });
+        explosions.push({ x:m.x, y:m.y, r:0, maxR:35, life:0, maxLife:240, kind:'flash' });
+        screenFlash = Math.max(screenFlash, 0.55);
+        for (var i=0; i<32; i++) {
+            var a = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:m.x, y:m.y,
+                vx:Math.cos(a)*rng(2.5,7), vy:Math.sin(a)*rng(2.5,6)-rng(1,4),
+                rot:rng(0,Math.PI*2), spin:rng(-0.4,0.4),
+                size:rng(1.5,4), shade:rngI(0,4),
+                life:0, maxLife:rng(600,1300)
+            });
+        }
+        for (var k=0; k<16; k++) {
+            var a2 = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:m.x, y:m.y,
+                vx:Math.cos(a2)*rng(3,9), vy:Math.sin(a2)*rng(2,6)-rng(1,3),
+                rot:0, spin:0, size:rng(1,2),
+                shade:99,
+                life:0, maxLife:rng(500,1000)
+            });
+        }
+    }
+    window.toggleDefence = function(){
+        defenceActive = !defenceActive;
+        return defenceActive;
+    };
+    window.isDefenceActive   = function(){ return defenceActive; };
+    /* mode toggle — DEFENCE GAME: AI fires, user clicks to intercept */
+    window.toggleDefenceMode = function(){
+        defenceMode = !defenceMode;
+        if (defenceMode) {
+            /* disable auto-intercept — user is the defender */
+            defenceActive = false;
+            defenceModeTimer = 600;     /* first shot soon */
+            /* disarm attack mode if it was on */
+            if (missileArmed) {
+                missileArmed = false;
+            }
+            canvas.style.cursor = 'crosshair';
+        } else {
+            /* exit defence mode — restore auto-intercept */
+            defenceActive = true;
+            canvas.style.cursor = '';
+        }
+        return defenceMode;
+    };
+    window.isDefenceMode = function(){ return defenceMode; };
+
+    /* ── STRATEGY API ──────────────────────────────────────────────────── */
+    window.toggleStrategyMode = function(){
+        strategyMode = !strategyMode;
+        if (strategyMode) {
+            /* mutual exclusion */
+            if (missileArmed)   missileArmed = false;
+            if (defenceMode)    defenceMode  = false;
+            defenceActive = true;
+            canvas.style.cursor = 'crosshair';
+        } else {
+            canvas.style.cursor = '';
+        }
+        return strategyMode;
+    };
+    window.isStrategyMode = function(){ return strategyMode; };
+    window.getStrategyQueue = function(){
+        return strategyQueue.map(function(q){
+            return { kind:q.kind, name:MISSILE_LABELS[q.kind], icon:MISSILE_ICONS[q.kind], tx:q.tx, ty:q.ty };
+        });
+    };
+    window.getStrategyCount = function(){ return strategyQueue.length; };
+    window.getStrategyMax = function(){ return STRATEGY_MAX; };
+    window.getStrategyStats = function(){
+        return {
+            fired: strategyStats.fired,
+            hits: strategyStats.hits,
+            intercepted: strategyStats.intercepted,
+            total: strategyStats.total,
+            success: strategyStats.total>0
+                ? Math.round(strategyStats.hits/strategyStats.total*100)
+                : 0,
+            running: strategyRunning
+        };
+    };
+    window.clearStrategy = function(){
+        strategyQueue = [];
+        strategyStats = { fired:0, hits:0, intercepted:0, total:0, success:0 };
+    };
+    window.executeStrategy = function(){
+        if (strategyRunning) return false;
+        if (strategyQueue.length === 0) return false;
+        var queue = strategyQueue.slice();
+        strategyStats = { fired:0, hits:0, intercepted:0, total:queue.length, success:0 };
+        strategyRunning = true;
+        /* fire ALL missiles SIMULTANEOUSLY (no delay) — one massive salvo */
+        var savedArmed = missileArmed;
+        missileArmed = true;
+        for (var i=0; i<queue.length; i++) {
+            var item = queue[i];
+            fireMissile(item.tx, item.ty, item.kind);
+            var m = missiles[missiles.length - 1];
+            if (m) { m.strategy = true; m.userFired = true; }
+            strategyStats.fired++;
+        }
+        missileArmed = savedArmed;
+        /* allow time for all impacts before clearing the running flag */
+        setTimeout(function(){ strategyRunning = false; }, 8000);
+        return true;
+    };
+    window.getDefenceType    = function(){ return DEFENCE_TYPES[defenceTypeIdx]; };
+    window.getDefenceTypeName= function(){ return DEFENCE_LABELS[DEFENCE_TYPES[defenceTypeIdx]]; };
+    window.getDefenceTypeIcon= function(){ return DEFENCE_ICONS[DEFENCE_TYPES[defenceTypeIdx]]; };
+    window.getDefenceTypeIndex = function(){ return defenceTypeIdx; };
+    window.setDefenceTypeIndex = function(i){
+        var n = DEFENCE_TYPES.length;
+        if (typeof i!=='number') return;
+        defenceTypeIdx = ((i%n)+n)%n;
+    };
+    window.getAllDefenceTypes = function(){
+        return DEFENCE_TYPES.map(function(t,i){
+            return { index:i, type:t, name: DEFENCE_LABELS[t], icon: DEFENCE_ICONS[t] };
+        });
+    };
+
+    /* ── SEVERITY / DIFFICULTY sliders (0..1) ────────────────────────────
+       weatherSeverity   — multiplies intensity of active weather event
+       attackDifficulty  — higher = lower intercept rate (missiles get through)
+       defenceDifficulty — higher = AI fires faster, more often (defence-mode) */
+    var weatherSeverity   = 0.5;
+    var attackDifficulty  = 0.5;
+    var defenceDifficulty = 0.5;
+    window.getWeatherSeverity   = function(){ return weatherSeverity; };
+    window.setWeatherSeverity   = function(v){
+        v = +v; if (!isFinite(v)) return;
+        weatherSeverity = Math.max(0, Math.min(1, v));
+    };
+    window.getAttackDifficulty  = function(){ return attackDifficulty; };
+    window.setAttackDifficulty  = function(v){
+        v = +v; if (!isFinite(v)) return;
+        attackDifficulty = Math.max(0, Math.min(1, v));
+    };
+    window.getDefenceDifficulty = function(){ return defenceDifficulty; };
+    window.setDefenceDifficulty = function(v){
+        v = +v; if (!isFinite(v)) return;
+        defenceDifficulty = Math.max(0, Math.min(1, v));
+    };
+
+    /* ── AUTO toggles: cycle through ALL missile / interceptor types ──
+       autoAttackOn  — when true, fires missiles cycling through MISSILE_TYPES
+       autoDefenceOn — when true, cycles DEFENCE_TYPES (and enables defence-mode
+                       so AI launches targets to intercept).
+       Cadence is scaled by the matching difficulty slider. */
+    var autoAttackOn  = false, autoAttackTimer  = 0, autoAttackCyc  = 0;
+    var autoDefenceOn = false, autoDefenceTimer = 0, autoDefenceCyc = 0;
+    window.isAutoAttackOn   = function(){ return autoAttackOn; };
+    window.setAutoAttackEnabled = function(on){
+        autoAttackOn = !!on;
+        autoAttackTimer = 0;  /* fire immediately on enable */
+    };
+    window.isAutoDefenceOn  = function(){ return autoDefenceOn; };
+    window.setAutoDefenceEnabled = function(on){
+        autoDefenceOn = !!on;
+        autoDefenceTimer = 0;
+        if (autoDefenceOn && !defenceMode) defenceMode = true;
+    };
+
+    function pickAutoAttackTarget(){
+        var targets = [];
+        if (typeof LM !== 'undefined' && LM && LM.length) {
+            for (var li=0; li<LM.length; li++) {
+                var lx = (typeof LM[li].x === 'number') ? LM[li].x : W*0.5;
+                targets.push({ x: lx, y: GROUND - rng(40, GROUND*0.55) });
+            }
+        }
+        if (typeof BGBUILDS !== 'undefined' && BGBUILDS && BGBUILDS.length) {
+            for (var bi=0; bi<BGBUILDS.length; bi++) {
+                var b = BGBUILDS[bi];
+                if (b.x > -50 && b.x < W+50 && b.h > 30) {
+                    targets.push({ x: b.x + b.w/2, y: GROUND - b.h*rng(0.30, 0.85) });
+                }
+            }
+        }
+        if (targets.length) return targets[Math.floor(Math.random()*targets.length)];
+        return { x: rng(W*0.1, W*0.9), y: GROUND - rng(20, GROUND*0.4) };
+    }
+
+    function updateAutoSliders(dt){
+        /* AUTO-ATTACK: cycle every missile kind, fire at city targets.
+           interval ≈ 1500ms easy → 750ms hard (scaled by attack difficulty) */
+        if (autoAttackOn) {
+            autoAttackTimer -= dt;
+            if (autoAttackTimer <= 0) {
+                autoAttackTimer = 1500 - 750*attackDifficulty;
+                autoAttackCyc = (autoAttackCyc + 1) % MISSILE_TYPES.length;
+                missileTypeIdx = autoAttackCyc;  /* sync the visible chip so user sees the rotation */
+                var kind = MISSILE_TYPES[autoAttackCyc];
+                var tgt = pickAutoAttackTarget();
+                var savedArmed = missileArmed;
+                missileArmed = true; /* counts as user-fired — attack difficulty applies */
+                fireMissile(tgt.x, tgt.y, kind);
+                missileArmed = savedArmed;
+            }
+        }
+        /* AUTO-DEFENCE: rotate the active interceptor type so every combo is exercised */
+        if (autoDefenceOn) {
+            autoDefenceTimer -= dt;
+            if (autoDefenceTimer <= 0) {
+                autoDefenceTimer = 1500 - 750*defenceDifficulty;
+                autoDefenceCyc = (autoDefenceCyc + 1) % DEFENCE_TYPES.length;
+                defenceTypeIdx = autoDefenceCyc;
+            }
+        }
+    }
+
+    /* hook update + draw into the existing loop */
+    var _origUpd = updateParticles;
+    updateParticles = function(dt){ _origUpd(dt); updateMissileSystem(dt); updateAutoSliders(dt); };
+    var _origDrw = drawDynamic;
+    drawDynamic = function(){ _origDrw(); drawMissileSystem(dynC); };
 })();

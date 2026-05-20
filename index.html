@@ -829,12 +829,1670 @@
         <canvas id='canv'></canvas>
 
         <div class="city-switcher-wrap">
-            <button id="citySwitchBtn" class="city-switch-btn" onclick="switchCity()" title="Fly to CHICAGO">
-                <span class="csb-plane">✈</span>
-                <span class="csb-label" id="cityLabel">NEW YORK</span>
-                <span class="csb-next" id="cityNext">→ CHICAGO</span>
-            </button>
+            <div class="flight-wrap widget-host">
+                <button id="citySwitchBtn" class="city-switch-btn icon-only" onclick="switchCity()">
+                    <span class="csb-plane">✈</span>
+                </button>
+                <div class="widget-tooltip tt-flight" role="tooltip">
+                    <div class="tt-title tt-title-flight">Flight Control</div>
+                    <div class="tt-row">
+                        <span class="tt-label">From</span>
+                        <span class="tt-value tt-from" id="ttCityFrom">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttCityHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-to" id="ttCityHover">—</span>
+                    </div>
+                    <div class="tt-grid" id="ttCityGrid"></div>
+                    <div class="tt-hint">Tap a city to fly there</div>
+                </div>
+            </div>
+
+            <div id="weatherWidget" class="weather-widget icon-only">
+                <button class="ww-icon-btn" id="wwIconBtn" onclick="
+                    if(window.toggleWeatherPin){
+                        var pinned=window.toggleWeatherPin();
+                        var w=document.getElementById('weatherWidget');
+                        if(w) w.classList.toggle('pinned', pinned);
+                        this.classList.remove('clicked');
+                        void this.offsetWidth;
+                        this.classList.add('clicked');
+                    }
+                ">
+                    <i class="fa fa-sun-o ww-icon" id="wwIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-weather" role="tooltip">
+                    <div class="tt-title tt-title-weather">Weather</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Now</span>
+                        <span class="tt-value tt-weather" id="ttWeatherName">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-status" id="ttWeatherStatus">AUTO</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttWeatherHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-weather" id="ttWeatherHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons" id="ttWeatherGrid"></div>
+                    <div class="tt-slider-row">
+                        <span class="tt-slider-label tt-slider-label-weather">Severity</span>
+                        <input type="range" min="0" max="100" value="50" class="tt-slider tt-slider-weather" id="ttWeatherSlider"
+                               oninput="if(window.setWeatherSeverity)window.setWeatherSeverity(this.value/100); document.getElementById('ttWeatherSliderVal').textContent=this.value+'%';">
+                        <span class="tt-slider-val tt-slider-val-weather" id="ttWeatherSliderVal">50%</span>
+                    </div>
+                    <div class="tt-hint">Tap an icon to switch • Tap icon below to pin</div>
+                </div>
+            </div>
+
+            <div id="missileBtn" class="missile-btn icon-only">
+                <button class="msl-core"
+                    onclick="
+                        if(window.armMissile){
+                            var armed=window.armMissile();
+                            var wrap=document.getElementById('missileBtn');
+                            if(wrap) wrap.classList.toggle('armed', armed);
+                            /* mutual exclusion — arming attack exits defence-mode (the game),
+                               but auto-intercept stays ON so every user missile gets shot down */
+                            if(armed){
+                                var dWrap=document.getElementById('defenceBtn');
+                                if(dWrap) dWrap.classList.add('offline');
+                            }
+                        }
+                    ">
+                    <i class="fa fa-rocket missile-icon" id="missileIcon" aria-hidden="true"></i>
+                </button>
+                <span class="missile-pulse"></span>
+                <div class="widget-tooltip tt-attack" role="tooltip">
+                    <div class="tt-title tt-title-attack">Attack Control</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Missile</span>
+                        <span class="tt-value tt-msl" id="ttMissileType">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-status" id="ttMissileStatus">IDLE</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttMissileHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-msl" id="ttMissileHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons" id="ttMissileGrid"></div>
+                    <div class="tt-slider-row">
+                        <span class="tt-slider-label tt-slider-label-attack">Difficulty</span>
+                        <input type="range" min="0" max="100" value="50" class="tt-slider tt-slider-attack" id="ttAttackSlider" aria-label="Attack difficulty"
+                               oninput="if(window.setAttackDifficulty)window.setAttackDifficulty(this.value/100); document.getElementById('ttAttackSliderVal').textContent=this.value+'%';">
+                        <span class="tt-slider-val tt-slider-val-attack" id="ttAttackSliderVal">50%</span>
+                    </div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-attack">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-attack" id="ttAttackAutoBtn" aria-pressed="false"
+                                onclick="
+                                    var on = this.getAttribute('aria-pressed') !== 'true';
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                    this.textContent = on ? 'ON' : 'OFF';
+                                    if(window.setAutoAttackEnabled) window.setAutoAttackEnabled(on);
+                                ">OFF</button>
+                    </div>
+                    <div class="tt-hint">Auto: cycles all missile types • Difficulty scales intercept rate</div>
+                </div>
+            </div>
+
+            <div id="defenceBtn" class="defence-btn icon-only offline">
+                <button class="dfn-core" onclick="
+                    if(window.toggleDefenceMode){
+                        var dm=window.toggleDefenceMode();
+                        var wrap=document.getElementById('defenceBtn');
+                        if(wrap) wrap.classList.toggle('offline', !dm);
+                        /* mutual exclusion — entering defence-mode disarms attack */
+                        if(dm){
+                            var mWrap=document.getElementById('missileBtn');
+                            if(mWrap) mWrap.classList.remove('armed');
+                        }
+                    }
+                ">
+                    <i class="fa fa-shield defence-icon" id="defenceIcon" aria-hidden="true"></i>
+                </button>
+                <span class="defence-pulse"></span>
+                <div class="widget-tooltip tt-defence" role="tooltip">
+                    <div class="tt-title tt-title-defence">Defence Control</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Mode</span>
+                        <span class="tt-value tt-dfn" id="ttDefenceType">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-status" id="ttDefenceStatus">ARMED</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttDefenceHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-dfn" id="ttDefenceHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons" id="ttDefenceGrid"></div>
+                    <div class="tt-slider-row">
+                        <span class="tt-slider-label tt-slider-label-defence">Difficulty</span>
+                        <input type="range" min="0" max="100" value="50" class="tt-slider tt-slider-defence" id="ttDefenceSlider" aria-label="Defence difficulty"
+                               oninput="if(window.setDefenceDifficulty)window.setDefenceDifficulty(this.value/100); document.getElementById('ttDefenceSliderVal').textContent=this.value+'%';">
+                        <span class="tt-slider-val tt-slider-val-defence" id="ttDefenceSliderVal">50%</span>
+                    </div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-defence">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-defence" id="ttDefenceAutoBtn" aria-pressed="false"
+                                onclick="
+                                    var on = this.getAttribute('aria-pressed') !== 'true';
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                    this.textContent = on ? 'ON' : 'OFF';
+                                    if(window.setAutoDefenceEnabled) window.setAutoDefenceEnabled(on);
+                                ">OFF</button>
+                    </div>
+                    <div class="tt-hint">Auto: cycles all interceptor types • Difficulty scales AI fire rate</div>
+                </div>
+            </div>
         </div>
+
+        <style>
+            .city-switcher-wrap {
+                display: flex;
+                gap: 10px;
+                align-items: stretch;
+                flex-wrap: wrap;
+            }
+            /* icon-only mode — hide all text labels on the widgets */
+            .city-switch-btn.icon-only .csb-label,
+            .city-switch-btn.icon-only .csb-next {
+                display: none;
+            }
+            .city-switch-btn.icon-only {
+                width: 44px;
+                padding: 0;
+                justify-content: center;
+            }
+            .city-switch-btn.icon-only .csb-plane {
+                font-size: 18px;
+            }
+            /* unify height of all row controls */
+            .city-switcher-wrap > .city-switch-btn,
+            .city-switcher-wrap > .weather-widget,
+            .city-switcher-wrap > .missile-btn,
+            .city-switcher-wrap > .strategy-btn,
+            .city-switcher-wrap > .defence-btn,
+            .city-switcher-wrap > .flight-wrap {
+                height: 44px;
+                box-sizing: border-box;
+                line-height: 1;
+            }
+            /* missile group — wraps prev/arm/next together with cohesive look */
+            .missile-group {
+                display: inline-flex;
+                align-items: stretch;
+                gap: 4px;
+            }
+            .missile-group .missile-btn {
+                height: 100%;
+                min-width: 150px;
+                justify-content: center;
+            }
+            .missile-cycle {
+                width: 32px;
+                height: 100%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(255,200,180,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.85);
+                cursor: pointer;
+                font-size: 11px;
+                transition: background 0.18s ease, transform 0.14s ease;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 2px 8px rgba(0,0,0,0.08);
+                position: relative;
+                overflow: hidden;
+            }
+            .missile-cycle::before {
+                content:'';
+                position:absolute;
+                inset:0;
+                border-radius:50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events:none;
+            }
+            .missile-cycle:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,220,180,0.30) 0%,
+                    rgba(255,140,80,0.18) 100%);
+                transform: translateY(-1px);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 4px 12px rgba(255,80,30,0.20);
+            }
+            .missile-cycle:active { transform: scale(0.92); }
+            .missile-cycle i { position:relative; z-index:1; }
+            /* ── liquid-glass weather widget (icon-only) ── */
+            .weather-widget {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                /* compact icon-only square */
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(200,220,255,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                position: relative;
+                /* visible so the ::after rainbow halo can glow OUTSIDE on hover */
+                overflow: visible;
+                user-select: none;
+            }
+            /* same diagonal sheen as the city switcher */
+            .weather-widget::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            /* rainbow animated border — identical to flight (.city-switch-btn::after) */
+            .weather-widget::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            /* second deeper halo for a layered "missile-grade" glow */
+            .weather-widget {
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease;
+            }
+            /* Flight-style hover: lift + blue bg tint + shadow + rainbow halo */
+            .weather-widget:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(180,210,255,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 6px 24px rgba(0,0,0,0.14),
+                    0 2px 8px  rgba(80,140,255,0.12);
+                transform: translateY(-1px);
+            }
+            .weather-widget:hover::after { opacity: 1; }
+            .weather-widget:active { transform: translateY(0) scale(0.97); }
+            /* animate the central weather icon on hover (like csb-plane) */
+            .weather-widget .ww-icon-wrap i {
+                display: inline-block;
+                transition: transform 0.25s ease, filter 0.25s ease;
+            }
+            .weather-widget:hover .ww-icon-wrap i {
+                animation: ww-icon-spin 0.6s ease;
+                filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
+            }
+            @keyframes ww-icon-spin {
+                0%   { transform: rotate(0deg) scale(1); }
+                55%  { transform: rotate(180deg) scale(1.25); }
+                100% { transform: rotate(360deg) scale(1); }
+            }
+            /* tiny float idle on the icon */
+            .weather-widget .ww-icon-wrap i {
+                animation: ww-icon-float 2.6s ease-in-out infinite;
+            }
+            @keyframes ww-icon-float {
+                0%,100% { transform: translateY(0); }
+                50%     { transform: translateY(-1.5px); }
+            }
+            /* arrow & pin presses */
+            .weather-widget .ww-btn:active {
+                transform: scale(0.86);
+                background: rgba(255,255,255,0.35);
+            }
+            .weather-widget .ww-btn:hover i {
+                animation: ww-btn-pop 0.35s ease;
+            }
+            @keyframes ww-btn-pop {
+                0%   { transform: scale(1); }
+                55%  { transform: scale(1.30); }
+                100% { transform: scale(1); }
+            }
+            /* pinned button gets a continual subtle glow */
+            .weather-widget .ww-pin.pinned {
+                animation: ww-pin-glow 1.6s ease-in-out infinite;
+            }
+            @keyframes ww-pin-glow {
+                0%,100% { box-shadow: 0 0 0 1px rgba(255,180,40,0.55) inset, 0 0 8px rgba(255,180,40,0.30); }
+                50%     { box-shadow: 0 0 0 1px rgba(255,200,80,0.85) inset, 0 0 14px rgba(255,180,40,0.55); }
+            }
+
+            /* ── missile widget (icon-only "Attack" control) ───────────────── */
+            .missile-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(255,200,180,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+            }
+            .missile-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .missile-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .missile-btn:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(180,210,255,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 6px 24px rgba(0,0,0,0.14),
+                    0 2px 8px  rgba(80,140,255,0.12);
+                transform: translateY(-1px);
+            }
+            .missile-btn:hover::after { opacity: 1; }
+            .missile-btn:active { transform: translateY(0) scale(0.97); }
+            /* internal arrows (◀ ▶) — match .ww-btn style */
+            .missile-btn .msl-arrow {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                width: 26px;
+                height: 26px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                color: rgba(10,10,25,0.85);
+                font-size: 12px;
+                padding: 0;
+                transition: background 0.18s ease, transform 0.14s ease;
+                position: relative;
+                z-index: 1;
+            }
+            .missile-btn .msl-arrow:hover {
+                background: rgba(255,255,255,0.22);
+                transform: scale(1.10);
+            }
+            .missile-btn .msl-arrow:active {
+                transform: scale(0.86);
+                background: rgba(255,255,255,0.35);
+            }
+            .missile-btn .msl-arrow:hover i {
+                animation: ww-btn-pop 0.35s ease;
+            }
+            /* central armable core (icon-only) */
+            .missile-btn .msl-core {
+                flex: 1 1 auto;
+                min-width: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                height: 30px;
+                border-radius: 999px;
+                color: rgba(10,10,25,0.90);
+                position: relative;
+                z-index: 1;
+                transition: background 0.18s ease, transform 0.14s ease, color 0.22s ease;
+            }
+            .missile-btn .missile-label { display: none; }
+            /* no inner hover bg — the outer widget pill handles the hover look */
+            .missile-btn .msl-core:hover {
+                background: transparent;
+            }
+            .missile-btn .msl-core:active {
+                background: transparent;
+            }
+            .missile-btn .missile-icon {
+                font-size: 14px;
+                display: inline-block;
+                transform: rotate(-45deg);
+                transition: transform 0.30s ease, color 0.22s ease;
+                color: rgba(10,10,25,0.88);
+            }
+            .missile-btn .msl-core:hover .missile-icon {
+                animation: msl-wiggle 0.55s ease;
+            }
+            @keyframes msl-wiggle {
+                0%   { transform: rotate(-45deg) translateX(0); }
+                30%  { transform: rotate(-35deg) translateX(-2px); }
+                70%  { transform: rotate(-55deg) translateX(2px); }
+                100% { transform: rotate(-45deg) translateX(0); }
+            }
+            .missile-btn .missile-label {
+                font-size: 11px;
+                letter-spacing: 0.14em;
+                position: relative;
+                z-index: 1;
+            }
+            .missile-btn .missile-pulse {
+                display: none;
+            }
+            /* ARMED — red liquid-glass with pulse */
+            .missile-btn.armed {
+                background: linear-gradient(135deg,
+                    rgba(255,80,40,0.55) 0%,
+                    rgba(220,30,30,0.40) 100%);
+                color: #fff;
+                border-color: rgba(255,160,120,0.85);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.45) inset,
+                    0 4px 22px rgba(255,40,20,0.50),
+                    0 0 30px rgba(255,80,40,0.55);
+                animation: msl-armed-glow 1.0s ease-in-out infinite;
+            }
+            .missile-btn.armed .msl-core,
+            .missile-btn.armed .msl-arrow {
+                color: #fff;
+            }
+            .missile-btn.armed .missile-icon {
+                color: #fff;
+                text-shadow: 0 0 8px rgba(255,255,255,0.95), 0 0 16px rgba(255,180,80,0.85);
+                animation: msl-arm-shake 0.5s ease-in-out infinite;
+            }
+            .missile-btn.armed .missile-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(255,80,40,0.85);
+                animation: msl-pulse 1.2s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes msl-armed-glow {
+                0%,100% { box-shadow:
+                    0 1px 0 rgba(255,255,255,0.45) inset,
+                    0 4px 22px rgba(255,40,20,0.50),
+                    0 0 22px rgba(255,80,40,0.45); }
+                50%     { box-shadow:
+                    0 1px 0 rgba(255,255,255,0.65) inset,
+                    0 4px 26px rgba(255,40,20,0.75),
+                    0 0 38px rgba(255,120,60,0.75); }
+            }
+            @keyframes msl-arm-shake {
+                0%,100% { transform: rotate(-45deg) translate(0,0); }
+                20%     { transform: rotate(-48deg) translate(-1px,1px); }
+                50%     { transform: rotate(-42deg) translate(1px,-1px); }
+                80%     { transform: rotate(-46deg) translate(-1px,0); }
+            }
+            @keyframes msl-pulse {
+                0%   { transform: scale(0.92); opacity: 0.85; }
+                100% { transform: scale(1.35); opacity: 0; }
+            }
+            /* legacy classes used by older missile-group layout — no longer present */
+            .missile-group, .missile-cycle { display: none; }
+
+            /* legacy strategy-btn rules (kept for safety — the standalone widget was merged into Attack tooltip) */
+            .strategy-btn { display: none !important; }
+            .__legacy-strategy-btn-styles {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(200,180,255,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+            }
+            .strategy-btn::before {
+                content: '';
+                position: absolute; inset: 0; border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .strategy-btn::after {
+                content: '';
+                position: absolute; inset: -2px; border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .strategy-btn:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(180,210,255,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 6px 24px rgba(0,0,0,0.14),
+                    0 2px 8px  rgba(80,140,255,0.12);
+                transform: translateY(-1px);
+            }
+            .strategy-btn:hover::after { opacity: 1; }
+            .strategy-btn:active { transform: translateY(0) scale(0.97); }
+            .strategy-btn .stg-core {
+                flex: 1 1 auto;
+                min-width: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                height: 30px;
+                border-radius: 999px;
+                color: rgba(10,10,25,0.90);
+                position: relative;
+                z-index: 1;
+            }
+            .strategy-btn .strategy-icon {
+                font-size: 16px;
+                color: rgba(10,10,25,0.88);
+                transition: color 0.22s ease;
+            }
+            .strategy-btn .strategy-count {
+                position: absolute;
+                top: 1px;
+                right: 1px;
+                min-width: 14px;
+                height: 14px;
+                padding: 0 3px;
+                background: #7030c0;
+                color: #fff;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                line-height: 14px;
+                text-align: center;
+                border-radius: 999px;
+                box-shadow: 0 0 0 1.5px rgba(255,255,255,0.85);
+                pointer-events: none;
+                display: none;
+            }
+            .strategy-btn .strategy-count.has { display: block; }
+            /* ACTIVE — purple tint + sticky tooltip (so Execute / Clear are reachable) */
+            .strategy-btn:not(.offline) {
+                background: linear-gradient(135deg,
+                    rgba(170,110,255,0.28) 0%,
+                    rgba(100,40,200,0.18) 100%);
+                border-color: rgba(190,140,255,0.55);
+            }
+            .strategy-btn:not(.offline) .strategy-icon {
+                color: #5a20a0;
+                text-shadow: 0 0 6px rgba(170,80,220,0.45);
+            }
+            .strategy-btn:not(.offline) .widget-tooltip {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transform: translate(-50%, 0) !important;
+            }
+            /* in-tooltip section divider for the Strategy block inside Attack control */
+            .widget-tooltip .tt-section {
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 1px solid rgba(10,20,40,0.10);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: #5a20a0;
+            }
+            .widget-tooltip .tt-stg { color: #5a20a0; }
+            /* action chips look just like the weather/defence icon chips */
+            .tt-stg-actions {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 4px !important;
+                margin-top: 6px !important;
+            }
+            /* PLAN active state — sky-blue highlight (same family as weather active) */
+            .tt-stg-actions .tt-stg-plan.active {
+                background: linear-gradient(135deg,#2480e0,#1e6fd0) !important;
+                border-color:#1856a8 !important;
+            }
+            .tt-stg-actions .tt-stg-plan.active i,
+            .tt-stg-actions .tt-stg-plan.active .chip-name { color: #fff !important; }
+            /* tighten the tooltip padding when it goes wide to free up horizontal space */
+            .tt-attack-wide { padding: 10px 12px 8px; }
+            /* keep all icon chips at the same size as weather/defence — no shrinking */
+            .tt-stg-actions .tt-stg-plan {
+                background: rgba(255,255,255,0.65);
+                color: #5a20a0;
+                border-color: rgba(120,60,180,0.35);
+            }
+            .tt-stg-actions .tt-stg-plan.active {
+                background: linear-gradient(135deg,#aa6eff,#7030c0);
+                color: #fff;
+                border-color: #4a1880;
+                box-shadow: 0 0 0 1px rgba(120,60,200,0.45) inset, 0 0 12px rgba(170,80,220,0.45);
+            }
+            .tt-stg-actions .tt-stg-exec {
+                background: linear-gradient(135deg,#7030c0,#5a20a0);
+                color: #fff;
+                border-color: #4a1880;
+            }
+            .tt-stg-actions .tt-stg-exec:hover {
+                background: linear-gradient(135deg,#8040d0,#6a30b0);
+            }
+            .tt-stg-actions .tt-stg-clear {
+                background: rgba(255,255,255,0.65);
+                color: #5a20a0;
+                border-color: rgba(120,60,180,0.35);
+            }
+
+            /* ── DEFENCE widget (mirrors missile widget, green theme) ────────── */
+            .defence-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(180,255,200,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+            }
+            .defence-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .defence-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .defence-btn:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(180,210,255,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 6px 24px rgba(0,0,0,0.14),
+                    0 2px 8px  rgba(80,140,255,0.12);
+                transform: translateY(-1px);
+            }
+            .defence-btn:hover::after { opacity: 1; }
+            .defence-btn:active { transform: translateY(0) scale(0.97); }
+            .defence-btn .dfn-core {
+                flex: 1 1 auto;
+                min-width: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                height: 30px;
+                border-radius: 999px;
+                color: rgba(10,10,25,0.90);
+                position: relative;
+                z-index: 1;
+                transition: background 0.18s ease, transform 0.14s ease, color 0.22s ease;
+            }
+            .defence-btn .dfn-core:hover {
+                background: transparent;
+            }
+            .defence-btn .defence-icon {
+                font-size: 16px;
+                display: inline-block;
+                color: rgba(10,10,25,0.88);
+                transition: color 0.22s ease, transform 0.30s ease;
+            }
+            .defence-btn .dfn-core:hover .defence-icon {
+                animation: dfn-shield-pulse 0.55s ease;
+            }
+            @keyframes dfn-shield-pulse {
+                0%   { transform: scale(1); }
+                40%  { transform: scale(1.18); }
+                100% { transform: scale(1); }
+            }
+            .defence-btn .defence-pulse {
+                display: none;
+            }
+            /* DEFAULT / OFFLINE — same neutral liquid-glass look as other widgets */
+            .defence-btn .defence-icon {
+                color: rgba(10,10,25,0.88);
+                text-shadow: none;
+            }
+            .defence-btn .defence-pulse {
+                display: none;
+            }
+            /* ACTIVE — green tint, glowing shield, pulsing ring */
+            .defence-btn:not(.offline) {
+                background: linear-gradient(135deg,
+                    rgba(80,200,120,0.28) 0%,
+                    rgba(40,140,80,0.18) 100%);
+                border-color: rgba(120,220,140,0.55);
+            }
+            .defence-btn:not(.offline) .defence-icon {
+                color: #1e7838;
+                text-shadow: 0 0 6px rgba(60,180,90,0.45);
+            }
+            .defence-btn:not(.offline) .defence-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(60,180,90,0.55);
+                animation: dfn-pulse 2.0s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes dfn-pulse {
+                0%   { transform: scale(0.94); opacity: 0.75; }
+                100% { transform: scale(1.30); opacity: 0; }
+            }
+            /* tooltip green title accent */
+            .widget-tooltip .tt-title-defence  { color: #1e7838; }
+            .widget-tooltip .tt-dfn { color: #1e7838; }
+            .tt-defence .tt-row-hover .tt-label { color: #1e7838; }
+            .tt-defence .tt-grid.tt-grid-icons {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 3px;
+            }
+            .tt-defence .tt-grid.tt-grid-icons .tt-chip {
+                width: 30px;
+                height: 30px;
+                flex: 0 0 30px;
+            }
+            .tt-defence .tt-chip.active {
+                background: linear-gradient(135deg,#2da64a,#1e7838);
+                border-color:#155a28;
+            }
+
+            /* ── RICH WIDGET TOOLTIP (color-coded, multi-row) ───────────────── */
+            .widget-tooltip {
+                position: absolute;
+                left: 50%;
+                bottom: calc(100% + 14px);
+                transform: translate(-50%, 8px);
+                width: 260px;
+                padding: 12px 14px 10px;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.92) 0%,
+                    rgba(225,238,255,0.82) 100%);
+                backdrop-filter: blur(18px) saturate(180%);
+                -webkit-backdrop-filter: blur(18px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.85);
+                border-bottom-color: rgba(255,255,255,0.45);
+                border-radius: 14px;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,1.00) inset,
+                    0 8px 28px rgba(0,0,0,0.22),
+                    0 2px 10px rgba(0,0,0,0.10),
+                    0 0 32px rgba(120,180,255,0.18);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.22s ease, transform 0.28s cubic-bezier(.2,.7,.2,1.2);
+                z-index: 999;
+                font-family: 'Arial Black', Arial, sans-serif;
+                color: rgba(10,10,25,0.90);
+                user-select: none;
+            }
+            .tt-flight  { width: 240px; }
+            .tt-weather { width: 280px; }
+            .tt-attack  { width: 280px; }
+            .tt-defence { width: 280px; }
+            .tt-attack-wide {
+                width: min(440px, calc(100vw - 40px));
+                max-width: calc(100vw - 40px);
+            }
+            /* two-column status grid inside the wide attack tooltip */
+            .tt-cols {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+                margin: 2px 0 4px;
+            }
+            .tt-cols .tt-col .tt-row {
+                padding: 2px 0;
+            }
+            .tt-cols .tt-col .tt-value {
+                max-width: 110px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            /* match weather/defence chip size — fixed 38px so chips don't stretch with the wider tooltip */
+            .tt-attack-wide .tt-grid-icons {
+                grid-template-columns: repeat(auto-fill, 32px);
+                justify-content: center;
+            }
+            /* invisible bridge between widget and panel so cursor can travel without losing hover */
+            .widget-tooltip::before {
+                content: '';
+                position: absolute;
+                left: 0; right: 0;
+                top: 100%;
+                height: 18px;
+                background: transparent;
+            }
+            /* downward-pointing caret */
+            .widget-tooltip::after {
+                content: '';
+                position: absolute;
+                left: 50%;
+                bottom: -6px;
+                transform: translateX(-50%) rotate(45deg);
+                width: 12px;
+                height: 12px;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.85) 0%,
+                    rgba(225,238,255,0.75) 100%);
+                border-right: 1px solid rgba(255,255,255,0.85);
+                border-bottom: 1px solid rgba(255,255,255,0.45);
+            }
+            /* hover on the host element (the widget itself OR its wrapper) shows the tooltip;
+               also keep it visible while the cursor is inside the tooltip so it stays
+               interactive (so users can click chips inside) */
+            .city-switch-btn:hover .widget-tooltip,
+            .weather-widget:hover .widget-tooltip,
+            .missile-btn:hover .widget-tooltip,
+            .defence-btn:hover .widget-tooltip,
+            .strategy-btn:hover .widget-tooltip,
+            .widget-host:hover .widget-tooltip,
+            .widget-tooltip:hover {
+                opacity: 1;
+                pointer-events: auto;
+                transform: translate(-50%, 0);
+                transition-delay: 0.20s;
+            }
+            .widget-host {
+                position: relative;
+                display: inline-flex;
+                align-items: stretch;
+            }
+            .flight-wrap {
+                height: 44px;
+                box-sizing: border-box;
+            }
+            .flight-wrap > .city-switch-btn { height: 100%; }
+            .widget-tooltip .tt-title {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                padding-bottom: 8px;
+                margin-bottom: 8px;
+                border-bottom: 1px solid rgba(10,20,40,0.10);
+            }
+            .widget-tooltip .tt-title i { font-size: 13px; }
+            .widget-tooltip .tt-title-flight  { color: #1e6fd0; }
+            .widget-tooltip .tt-title-flight i  { color: #1e6fd0; }
+            .widget-tooltip .tt-title-weather { color: #1e8fd0; }
+            .widget-tooltip .tt-title-weather i { color: #1e8fd0; }
+            .widget-tooltip .tt-title-attack  { color: #c0202a; }
+            .widget-tooltip .tt-title-attack i  { color: #c0202a; }
+            .widget-tooltip .tt-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                padding: 3px 0;
+                font-size: 10px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            /* hover preview row — collapsed until a chip is hovered */
+            .widget-tooltip .tt-row-hover {
+                max-height: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+                opacity: 0;
+                overflow: hidden;
+                transition: max-height 0.20s ease, opacity 0.20s ease,
+                            padding 0.20s ease;
+            }
+            .widget-tooltip .tt-row-hover.active {
+                max-height: 26px;
+                opacity: 1;
+                padding-top: 3px;
+                padding-bottom: 3px;
+            }
+            .widget-tooltip .tt-row-hover .tt-label {
+                color: #c0202a;
+            }
+            .tt-flight  .tt-row-hover .tt-label { color: #1e6fd0; }
+            .tt-weather .tt-row-hover .tt-label { color: #1e8fd0; }
+            .tt-attack  .tt-row-hover .tt-label { color: #c0202a; }
+            .widget-tooltip .tt-label {
+                color: rgba(10,10,25,0.50);
+                font-weight: 700;
+            }
+            .widget-tooltip .tt-value {
+                color: rgba(10,10,25,0.92);
+                font-weight: 800;
+                text-align: right;
+            }
+            /* themed value colors */
+            .widget-tooltip .tt-from   { color: #1e6fd0; }
+            .widget-tooltip .tt-to     { color: #e07028; }
+            .widget-tooltip .tt-weather{ color: #1e8fd0; }
+            .widget-tooltip .tt-msl    { color: #c0202a; }
+            /* status pill */
+            .widget-tooltip .tt-status {
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: rgba(60,140,80,0.18);
+                color: #1e7838;
+                font-size: 9px;
+            }
+            .weather-widget.pinned .widget-tooltip .tt-status,
+            .missile-btn.armed .widget-tooltip .tt-status {
+                background: rgba(220,60,30,0.20);
+                color: #c0202a;
+                animation: tt-status-pulse 1.2s ease-in-out infinite;
+            }
+            /* defence mode ACTIVE — green pulse on DEFEND CITY status */
+            .defence-btn:not(.offline) .widget-tooltip .tt-status {
+                background: rgba(60,180,90,0.22);
+                color: #1e7838;
+                animation: tt-status-pulse 1.2s ease-in-out infinite;
+            }
+            @keyframes tt-status-pulse {
+                0%,100% { box-shadow: 0 0 0 0 rgba(220,60,30,0.50); }
+                50%     { box-shadow: 0 0 0 4px rgba(220,60,30,0.00); }
+            }
+            /* ── interactive chip grid inside the tooltip ───────────────────── */
+            .widget-tooltip .tt-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 4px;
+                margin: 8px 0 2px;
+            }
+            .tt-flight .tt-grid { grid-template-columns: repeat(2, 1fr); }
+            .tt-weather .tt-grid-icons {
+                grid-template-columns: repeat(auto-fill, 32px);
+                justify-content: center;
+            }
+            .tt-attack  .tt-grid-icons {
+                grid-template-columns: repeat(auto-fill, 32px);
+                justify-content: center;
+            }
+
+            .widget-tooltip .tt-chip {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 5px 6px;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: rgba(10,10,25,0.78);
+                background: rgba(255,255,255,0.55);
+                border: 1px solid rgba(10,20,40,0.10);
+                border-radius: 7px;
+                cursor: pointer;
+                user-select: none;
+                transition: background 0.18s ease, color 0.18s ease,
+                            transform 0.14s ease, box-shadow 0.18s ease,
+                            border-color 0.18s ease;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .widget-tooltip .tt-chip i { font-size: 11px; opacity: 0.85; }
+            .widget-tooltip .tt-chip .tt-flag {
+                font-size: 12px;
+                margin-right: 6px;
+                line-height: 1;
+                /* keep the emoji glyph crisp */
+                font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+            }
+            /* left-align city chips in the flight tooltip */
+            .tt-flight .tt-chip-flag {
+                justify-content: flex-start;
+                text-align: left;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+            .widget-tooltip .tt-chip:hover:not(.active) {
+                background: rgba(255,255,255,0.92);
+                transform: translateY(-1px);
+                box-shadow: 0 3px 10px rgba(0,0,0,0.10);
+            }
+            /* hovering an already-selected chip — keep its themed gradient, just lift it slightly */
+            .widget-tooltip .tt-chip.active:hover {
+                transform: translateY(-1px);
+                filter: brightness(1.08);
+            }
+            .widget-tooltip .tt-chip.active {
+                color: #fff;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.55) inset,
+                    0 3px 12px rgba(0,0,0,0.18);
+            }
+            .tt-flight  .tt-chip.active { background: linear-gradient(135deg,#2480e0,#1e6fd0); border-color:#1856a8; }
+            .tt-weather .tt-chip.active { background: linear-gradient(135deg,#2aa6e0,#1e8fd0); border-color:#1574b8; }
+            .tt-attack  .tt-chip.active { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
+
+            /* icon-only chips (weather + attack + defence) — square aspect, fixed 32px */
+            .tt-grid-icons .tt-chip {
+                width: 32px;
+                height: 32px;
+                aspect-ratio: 1 / 1;
+                padding: 0;
+                font-size: 0;            /* hide any text node */
+                position: relative;
+            }
+            .tt-grid-icons .tt-chip i { font-size: 12px; opacity: 1; }
+            .tt-grid-icons .tt-chip.active i { color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.55); }
+
+            /* per-chip hover label — uses a real <span> so it works reliably in <button> */
+            .tt-grid-icons .tt-chip .chip-name {
+                position: absolute;
+                left: 50%;
+                bottom: calc(100% + 8px);
+                transform: translate(-50%, 4px);
+                padding: 4px 8px;
+                background: linear-gradient(135deg,
+                    rgba(20,28,52,0.95) 0%,
+                    rgba(20,28,52,0.85) 100%);
+                color: #fff;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.10em;
+                text-transform: uppercase;
+                border-radius: 6px;
+                box-shadow:
+                    0 2px 8px rgba(0,0,0,0.30),
+                    0 0 0 1px rgba(255,255,255,0.10) inset;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.18s ease, transform 0.18s ease;
+                z-index: 1000;
+            }
+            /* downward caret */
+            .tt-grid-icons .tt-chip .chip-name::before {
+                content: '';
+                position: absolute;
+                left: 50%;
+                bottom: -3px;
+                transform: translateX(-50%) rotate(45deg);
+                width: 7px;
+                height: 7px;
+                background: rgba(20,28,52,0.95);
+            }
+            .tt-grid-icons .tt-chip:hover .chip-name {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+            /* non-icon chips (flight cities) — keep the name inline, not floating */
+            .tt-grid:not(.tt-grid-icons) .tt-chip .chip-name {
+                position: static;
+                background: transparent;
+                color: inherit;
+                padding: 0;
+                font-size: inherit;
+                box-shadow: none;
+                border-radius: 0;
+                letter-spacing: inherit;
+                opacity: 1;
+                transform: none;
+                pointer-events: auto;
+            }
+
+            /* ── severity / difficulty slider row ─────────────────────────── */
+            .tt-slider-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 8px 0 4px;
+                padding: 4px 2px 0;
+            }
+            .tt-slider-label {
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+                min-width: 56px;
+            }
+            .tt-slider-label-weather { color: #1e8fd0; }
+            .tt-slider-label-attack  { color: #c0202a; }
+            .tt-slider-label-defence { color: #1e7838; }
+            .tt-slider-val {
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                min-width: 32px;
+                text-align: right;
+            }
+            .tt-slider-val-weather { color: #1e8fd0; }
+            .tt-slider-val-attack  { color: #c0202a; }
+            .tt-slider-val-defence { color: #1e7838; }
+            .tt-slider {
+                flex: 1;
+                -webkit-appearance: none;
+                appearance: none;
+                height: 6px;
+                border-radius: 999px;
+                background: rgba(10,20,40,0.12);
+                outline: none;
+                cursor: pointer;
+                margin: 0;
+            }
+            .tt-slider::-webkit-slider-runnable-track {
+                height: 6px;
+                border-radius: 999px;
+                background: transparent;
+            }
+            .tt-slider::-moz-range-track {
+                height: 6px;
+                border-radius: 999px;
+                background: rgba(10,20,40,0.12);
+            }
+            .tt-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: #fff;
+                border: 2px solid currentColor;
+                cursor: pointer;
+                margin-top: -4px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+                transition: transform 0.14s ease, box-shadow 0.18s ease;
+            }
+            .tt-slider::-moz-range-thumb {
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: #fff;
+                border: 2px solid currentColor;
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+                transition: transform 0.14s ease, box-shadow 0.18s ease;
+            }
+            .tt-slider:hover::-webkit-slider-thumb {
+                transform: scale(1.12);
+                box-shadow: 0 3px 10px rgba(0,0,0,0.30);
+            }
+            .tt-slider:hover::-moz-range-thumb {
+                transform: scale(1.12);
+                box-shadow: 0 3px 10px rgba(0,0,0,0.30);
+            }
+            .tt-slider-weather { color: #1e8fd0; background: linear-gradient(to right, rgba(30,143,208,0.15), rgba(30,143,208,0.35)); }
+            .tt-slider-attack  { color: #c0202a; background: linear-gradient(to right, rgba(192,32,42,0.15), rgba(192,32,42,0.45)); }
+            .tt-slider-defence { color: #1e7838; background: linear-gradient(to right, rgba(30,120,56,0.15), rgba(30,120,56,0.40)); }
+
+            /* ── ON/OFF toggle button (auto-attack / auto-defence) ───────── */
+            .tt-toggle-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 6px 0 4px;
+                padding: 0 2px;
+            }
+            .tt-toggle-label {
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+                min-width: 56px;
+            }
+            .tt-toggle-label-attack  { color: #c0202a; }
+            .tt-toggle-label-defence { color: #1e7838; }
+            .tt-toggle {
+                flex: 1;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.10em;
+                text-transform: uppercase;
+                padding: 6px 10px;
+                border-radius: 8px;
+                border: 1.5px solid;
+                cursor: pointer;
+                background: rgba(255,255,255,0.55);
+                color: rgba(10,10,25,0.65);
+                border-color: rgba(10,20,40,0.18);
+                transition: background 0.18s ease, color 0.18s ease,
+                            border-color 0.18s ease, box-shadow 0.18s ease,
+                            transform 0.14s ease;
+                user-select: none;
+            }
+            .tt-toggle:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.10); }
+            .tt-toggle:active { transform: translateY(0); }
+            .tt-toggle.on {
+                color: #fff;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.55) inset,
+                    0 3px 12px rgba(0,0,0,0.18);
+            }
+            .tt-toggle-attack.on  { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
+            .tt-toggle-defence.on { background: linear-gradient(135deg,#2da64a,#1e7838); border-color:#155a28; }
+
+            .widget-tooltip .tt-hint {
+                margin-top: 10px;
+                padding-top: 8px;
+                border-top: 1px dashed rgba(10,20,40,0.18);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.10em;
+                color: rgba(10,10,25,0.55);
+                text-align: center;
+                text-transform: uppercase;
+            }
+            .widget-tooltip .tt-hint i {
+                font-size: 8px;
+                color: rgba(10,10,25,0.45);
+                margin: 0 2px;
+            }
+
+            /* ── legacy data-tip tooltip (kept for any non-widget data-tip uses) */
+            [data-tip] {
+                position: relative;
+            }
+            [data-tip]::before,
+            [data-tip]::after {
+                position: absolute;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.18s ease, transform 0.22s cubic-bezier(.2,.7,.2,1.2);
+                z-index: 99;
+            }
+            [data-tip]::before {
+                content: attr(data-tip);
+                display: block;
+                box-sizing: border-box;
+                width: max-content;
+                width: -moz-max-content;
+                max-width: min(360px, 90vw);
+                left: 50%;
+                top: calc(100% + 10px);
+                /* explicit resets so leftover inset:0 from other ::before rules
+                   (e.g. the sheen on .city-switch-btn) cannot bleed in */
+                right: auto;
+                bottom: auto;
+                transform: translate(-50%, -4px);
+                /* extra right padding absorbs trailing letter-spacing */
+                padding: 8px 22px 8px 16px;
+                /* allow wrap so long tooltips stay inside the bordered box */
+                white-space: normal;
+                word-break: break-word;
+                line-height: 1.4;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                text-align: center;
+                color: rgba(10,10,25,0.92);
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.75) 0%,
+                    rgba(210,230,255,0.55) 100%);
+                backdrop-filter: blur(14px) saturate(180%);
+                -webkit-backdrop-filter: blur(14px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.70);
+                border-bottom-color: rgba(255,255,255,0.35);
+                border-radius: 10px;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.95) inset,
+                    0 6px 22px rgba(0,0,0,0.20),
+                    0 2px 8px  rgba(0,0,0,0.12);
+            }
+            [data-tip]::after {
+                content: '';
+                left: 50%;
+                top: calc(100% + 4px);
+                transform: translate(-50%, -4px) rotate(45deg);
+                width: 8px;
+                height: 8px;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(200,220,255,0.30) 100%);
+                backdrop-filter: blur(14px) saturate(180%);
+                -webkit-backdrop-filter: blur(14px) saturate(180%);
+                border-left: 1px solid rgba(255,255,255,0.55);
+                border-top:  1px solid rgba(255,255,255,0.55);
+            }
+            [data-tip]:hover::before,
+            [data-tip]:hover::after {
+                opacity: 1;
+                transition-delay: 0.35s;
+            }
+            [data-tip]:hover::before {
+                transform: translate(-50%, 0);
+            }
+            [data-tip]:hover::after {
+                transform: translate(-50%, 0) rotate(45deg);
+            }
+            /* widget-level tooltips appear ABOVE the widget (not below)
+               and explicitly inherit the wrap/border behavior so the
+               border reliably covers the entire text on all three widgets. */
+            .city-switch-btn[data-tip]::before,
+            .weather-widget[data-tip]::before,
+            .missile-btn[data-tip]::before {
+                top: auto;
+                bottom: calc(100% + 10px);
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, 4px);
+                width: max-content;
+                max-width: min(360px, 90vw);
+                white-space: normal;
+                word-break: break-word;
+                text-align: center;
+                padding: 8px 22px 8px 16px;
+                line-height: 1.4;
+                /* in case any widget's existing ::before set a different
+                   background/border/radius for sheen, lock the tooltip look */
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.75) 0%,
+                    rgba(210,230,255,0.55) 100%);
+                border: 1px solid rgba(255,255,255,0.70);
+                border-bottom-color: rgba(255,255,255,0.35);
+                border-radius: 10px;
+                color: rgba(10,10,25,0.92);
+            }
+            .city-switch-btn[data-tip]::after,
+            .weather-widget[data-tip]::after,
+            .missile-btn[data-tip]::after {
+                /* reset any prior inset:0 from sheen ::after rules */
+                left: 50%;
+                right: auto;
+            }
+            .city-switch-btn[data-tip]::after,
+            .weather-widget[data-tip]::after,
+            .missile-btn[data-tip]::after {
+                top: auto;
+                bottom: calc(100% + 4px);
+                transform: translate(-50%, 4px) rotate(45deg);
+                /* flip the arrow caret so the light edges point down toward the widget */
+                border-left: none;
+                border-top: none;
+                border-right: 1px solid rgba(255,255,255,0.70);
+                border-bottom: 1px solid rgba(255,255,255,0.70);
+            }
+            .city-switch-btn[data-tip]:hover::before,
+            .weather-widget[data-tip]:hover::before,
+            .missile-btn[data-tip]:hover::before {
+                transform: translate(-50%, 0);
+            }
+            .city-switch-btn[data-tip]:hover::after,
+            .weather-widget[data-tip]:hover::after,
+            .missile-btn[data-tip]:hover::after {
+                transform: translate(-50%, 0) rotate(45deg);
+            }
+            .weather-widget .ww-btn {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                width: 26px;
+                height: 26px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                color: rgba(10,10,25,0.85);
+                font-size: 12px;
+                padding: 0;
+                transition: background 0.18s ease, transform 0.14s ease;
+                position: relative;
+                z-index: 1;
+            }
+            .weather-widget .ww-btn:hover {
+                background: rgba(255,255,255,0.22);
+                transform: scale(1.10);
+            }
+            .weather-widget .ww-btn:active {
+                transform: scale(0.94);
+            }
+            .weather-widget .ww-pin.pinned {
+                background: linear-gradient(135deg,
+                    rgba(255,200,40,0.55) 0%,
+                    rgba(255,160,20,0.40) 100%);
+                color: #5a2d00;
+                box-shadow: 0 0 0 1px rgba(255,180,40,0.55) inset;
+            }
+            .weather-widget .ww-icon-wrap {
+                display: inline-flex;
+                width: 22px;
+                height: 22px;
+                align-items: center;
+                justify-content: center;
+                margin: 0 2px;
+                position: relative;
+                z-index: 1;
+            }
+            .weather-widget .ww-icon-wrap i {
+                font-size: 14px;
+                color: rgba(10,10,25,0.88);
+            }
+            /* icon-only center pin button */
+            .weather-widget .ww-icon-btn {
+                flex: 1 1 auto;
+                min-width: 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                height: 30px;
+                width: 100%;
+                border-radius: 999px;
+                position: relative;
+                z-index: 1;
+                color: rgba(10,10,25,0.90);
+                transition: background 0.18s ease, transform 0.14s ease, color 0.22s ease;
+            }
+            /* no inner hover bg — the outer widget pill handles the hover look */
+            .weather-widget .ww-icon-btn:hover {
+                background: transparent;
+            }
+            .weather-widget .ww-icon-btn:active {
+                background: transparent;
+            }
+            .weather-widget .ww-icon-btn .ww-icon {
+                font-size: 18px;
+                line-height: 1;
+                color: rgba(10,10,25,0.90);
+                transition: transform 0.25s ease;
+            }
+            .weather-widget .ww-icon-btn:hover .ww-icon {
+                animation: ww-icon-spin 0.6s ease;
+            }
+            @keyframes ww-icon-spin {
+                0%   { transform: rotate(0deg) scale(1); }
+                55%  { transform: rotate(180deg) scale(1.30); }
+                100% { transform: rotate(360deg) scale(1); }
+            }
+            /* pop animation on pin/unpin */
+            .weather-widget .ww-icon-btn.clicked {
+                animation: ww-label-pop 0.45s cubic-bezier(.2,.7,.2,1.4);
+            }
+            @keyframes ww-label-pop {
+                0%   { transform: scale(1); }
+                40%  { transform: scale(1.25); }
+                70%  { transform: scale(0.94); }
+                100% { transform: scale(1); }
+            }
+            /* PINNED state — applied to the whole widget */
+            .weather-widget.pinned {
+                background: linear-gradient(135deg,
+                    rgba(255,210,80,0.32) 0%,
+                    rgba(255,160,40,0.18) 100%);
+                border-color: rgba(255,200,80,0.65);
+                box-shadow:
+                    0 1px 0 rgba(255,240,180,0.90) inset,
+                    0 4px 18px rgba(255,150,30,0.18),
+                    0 0 22px rgba(255,180,40,0.35);
+                animation: ww-widget-pin-glow 1.8s ease-in-out infinite;
+            }
+            .weather-widget.pinned .ww-icon-btn,
+            .weather-widget.pinned .ww-icon {
+                color: #5a2d00;
+            }
+            .weather-widget.pinned .ww-icon {
+                text-shadow: 0 0 6px rgba(255,180,40,0.85), 0 0 12px rgba(255,200,60,0.55);
+            }
+            @keyframes ww-widget-pin-glow {
+                0%,100% { box-shadow:
+                    0 1px 0 rgba(255,240,180,0.90) inset,
+                    0 4px 18px rgba(255,150,30,0.18),
+                    0 0 18px rgba(255,180,40,0.30); }
+                50%     { box-shadow:
+                    0 1px 0 rgba(255,250,210,1.0) inset,
+                    0 4px 22px rgba(255,150,30,0.30),
+                    0 0 28px rgba(255,180,40,0.55); }
+            }
+            @keyframes ww-pin-dot {
+                0%,100% { opacity: 0.7; transform: scale(1); }
+                50%     { opacity: 1;   transform: scale(1.25); }
+            }
+        </style>
 
         <div class="container2 glass-panel" style="margin: 10px; position: relative;">
             <div class="stack" style="--stacks: 3;">
@@ -872,18 +2530,222 @@
 
     <script>
     (function(){
+        function setText(id, val){ var el=document.getElementById(id); if(el && el.textContent!==val) el.textContent=val; }
+        /* strip any pre-existing native `title` attributes so the browser default tooltip
+           never appears on top of our custom rich tooltip */
+        ['citySwitchBtn','weatherWidget','missileBtn'].forEach(function(id){
+            var n=document.getElementById(id);
+            if(!n) return;
+            n.removeAttribute('title');
+            n.querySelectorAll('[title]').forEach(function(c){ c.removeAttribute('title'); });
+        });
+        document.querySelectorAll('.widget-host,.widget-host *').forEach(function(c){ c.removeAttribute('title'); });
+
+        /* ── build the chip grids inside each tooltip ─────────────────────── */
+        function buildCityGrid(){
+            var host = document.getElementById('ttCityGrid');
+            if(!host || host._built) return;
+            if(!window.getAllCities) return;
+            var cities = window.getAllCities();
+            host.innerHTML = '';
+            /* city → flag emoji */
+            var CITY_FLAGS = {
+                'NEW YORK': '🇺🇸',
+                'CHICAGO':  '🇺🇸',
+                'TOKYO':    '🇯🇵',
+                'BEIJING':  '🇨🇳',
+                'LONDON':   '🇬🇧',
+                'DUBAI':    '🇦🇪',
+                'PARIS':    '🇫🇷',
+                'PRAGUE':   '🇨🇿'
+            };
+            cities.forEach(function(c){
+                var b = document.createElement('button');
+                b.className = 'tt-chip tt-chip-flag';
+                b.dataset.idx = c.index;
+                var flag = CITY_FLAGS[c.name] || '';
+                b.innerHTML = (flag ? '<span class="tt-flag">' + flag + '</span>' : '') + c.name;
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttCityHoverRow');
+                    var val = document.getElementById('ttCityHover');
+                    if(val) val.textContent = (flag ? flag + ' ' : '') + c.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttCityHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(e){
+                    e.stopPropagation();
+                    if(window.flyToCity) window.flyToCity(c.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildWeatherGrid(){
+            var host = document.getElementById('ttWeatherGrid');
+            if(!host || host._built) return;
+            if(!window.getAllWeatherEvents) return;
+            var evts = window.getAllWeatherEvents();
+            host.innerHTML = '';
+            evts.forEach(function(e){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = e.index;
+                b.innerHTML = '<i class="fa ' + e.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttWeatherHoverRow');
+                    var val = document.getElementById('ttWeatherHover');
+                    if(val) val.textContent = e.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttWeatherHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setWeatherEvent) window.setWeatherEvent(e.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildMissileGrid(){
+            var host = document.getElementById('ttMissileGrid');
+            if(!host || host._built) return;
+            if(!window.getAllMissileTypes) return;
+            var types = window.getAllMissileTypes();
+            host.innerHTML = '';
+            types.forEach(function(t){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = t.index;
+                b.innerHTML = '<i class="fa ' + t.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttMissileHoverRow');
+                    var val = document.getElementById('ttMissileHover');
+                    if(val) val.textContent = t.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttMissileHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setMissileTypeIndex) window.setMissileTypeIndex(t.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildDefenceGrid(){
+            var host = document.getElementById('ttDefenceGrid');
+            if(!host || host._built) return;
+            if(!window.getAllDefenceTypes) return;
+            var types = window.getAllDefenceTypes();
+            host.innerHTML = '';
+            types.forEach(function(t){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = t.index;
+                b.innerHTML = '<i class="fa ' + t.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttDefenceHoverRow');
+                    var val = document.getElementById('ttDefenceHover');
+                    if(val) val.textContent = t.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttDefenceHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setDefenceTypeIndex) window.setDefenceTypeIndex(t.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function syncActive(hostId, currentIdx){
+            var host = document.getElementById(hostId);
+            if(!host) return;
+            var chips = host.children;
+            for(var i=0;i<chips.length;i++){
+                chips[i].classList.toggle('active', String(currentIdx) === chips[i].dataset.idx);
+            }
+        }
         function pollCity(){
-            if(window.getCityName){
-                var el=document.getElementById('cityLabel');
-                if(el) el.textContent=window.getCityName();
+            /* lazy-build the grids once the APIs are available */
+            buildCityGrid(); buildWeatherGrid(); buildMissileGrid(); buildDefenceGrid();
+            /* ── FLIGHT widget ── */
+            if(window.getCityName)     setText('ttCityFrom', window.getCityName());
+            if(window.getNextCityName) setText('ttCityTo',   window.getNextCityName());
+            if(window.getCurrentCityIndex) syncActive('ttCityGrid', window.getCurrentCityIndex());
+
+            /* ── WEATHER widget ── */
+            if(window.getWeatherEventIcon){
+                var wi=document.getElementById('wwIcon');
+                if(wi){
+                    var ic=window.getWeatherEventIcon();
+                    if(wi._cur!==ic){
+                        wi.className='fa ww-icon '+ic;
+                        wi._cur=ic;
+                    }
+                }
             }
-            if(window.getNextCityName){
-                var nx=document.getElementById('cityNext');
-                var btn=document.getElementById('citySwitchBtn');
-                var nxt=window.getNextCityName();
-                if(nx) nx.textContent='→ '+nxt;
-                if(btn) btn.setAttribute('title','Fly to '+nxt);
+            if(window.getWeatherEventName) setText('ttWeatherName', window.getWeatherEventName());
+            if(window.isWeatherPinned){
+                var pinned=window.isWeatherPinned();
+                var ww=document.getElementById('weatherWidget');
+                if(ww) ww.classList.toggle('pinned', pinned);
+                setText('ttWeatherStatus', pinned ? 'PINNED' : 'AUTO');
             }
+            if(window.getWeatherEventIndex) syncActive('ttWeatherGrid', window.getWeatherEventIndex());
+
+            /* ── ATTACK widget ── */
+            if(window.getMissileTypeIcon){
+                var mIc=document.getElementById('missileIcon');
+                if(mIc){
+                    var icN=window.getMissileTypeIcon();
+                    if(mIc._cur!==icN){
+                        mIc.className='fa missile-icon '+icN;
+                        mIc._cur=icN;
+                    }
+                }
+            }
+            if(window.getMissileTypeName) setText('ttMissileType', window.getMissileTypeName());
+            if(window.isMissileArmed){
+                var armed=window.isMissileArmed();
+                var mb=document.getElementById('missileBtn');
+                if(mb) mb.classList.toggle('armed', armed);
+                setText('ttMissileStatus', armed ? 'ARMED' : 'IDLE');
+            }
+            if(window.getMissileTypeIndex) syncActive('ttMissileGrid', window.getMissileTypeIndex());
+
+            /* ── DEFENCE widget ── */
+            if(window.getDefenceTypeIcon){
+                var dIc=document.getElementById('defenceIcon');
+                if(dIc){
+                    var dIcN=window.getDefenceTypeIcon();
+                    if(dIc._cur!==dIcN){
+                        dIc.className='fa defence-icon '+dIcN;
+                        dIc._cur=dIcN;
+                    }
+                }
+            }
+            if(window.getDefenceTypeName) setText('ttDefenceType', window.getDefenceTypeName());
+            if(window.isDefenceMode){
+                var dm=window.isDefenceMode();
+                var dWrap=document.getElementById('defenceBtn');
+                if(dWrap) dWrap.classList.toggle('offline', !dm);
+                setText('ttDefenceStatus', dm ? 'DEFEND CITY!' : 'OFFLINE');
+            }
+            if(window.getDefenceTypeIndex) syncActive('ttDefenceGrid', window.getDefenceTypeIndex());
+
             setTimeout(pollCity,350);
         }
         pollCity();

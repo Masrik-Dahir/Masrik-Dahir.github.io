@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eagle Loader — Preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+
+    <link rel="stylesheet" href="css/eagle-loader.css">
+    <link rel="stylesheet" href="css/polish.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                         Oxygen, Ubuntu, "Helvetica Neue", sans-serif;
+            color: #1a1f3d;
+            background: #f7faff;
+        }
+
+        .pv-shell {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 28px 24px 80px;
+        }
+
+        .pv-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .pv-header h1 {
+            font-size: clamp(22px, 3.4vw, 34px);
+            margin: 0 0 6px;
+            letter-spacing: 0.02em;
+        }
+
+        .pv-header p {
+            margin: 0;
+            color: rgba(15, 30, 60, 0.65);
+            font-size: 14px;
+        }
+
+        .pv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 22px;
+            margin-bottom: 28px;
+        }
+
+        .pv-card {
+            background: white;
+            border: 1px solid rgba(15, 30, 60, 0.10);
+            border-radius: 16px;
+            padding: 18px 20px 22px;
+            box-shadow: 0 6px 24px rgba(15, 30, 60, 0.06);
+            position: relative;
+        }
+
+        .pv-card h2 {
+            margin: 0 0 4px;
+            font-size: 14px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(15, 30, 60, 0.55);
+        }
+
+        .pv-card p {
+            margin: 0 0 14px;
+            font-size: 13px;
+            color: rgba(15, 30, 60, 0.72);
+        }
+
+        .pv-stage {
+            position: relative;
+            background: linear-gradient(180deg, #ffffff 0%, #f0f5ff 100%);
+            border-radius: 12px;
+            border: 1px dashed rgba(15, 30, 60, 0.14);
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Inline preview: re-position the loader inside the stage rather than fixed */
+        .pv-stage .eagle-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .pv-stage--dark {
+            background: radial-gradient(ellipse at 50% 30%, #1d2a55 0%, #0d1431 60%, #06091e 100%);
+        }
+        .pv-stage--dark .eagle-loader__caption { color: rgba(255,255,255,0.78); }
+        .pv-stage--dark .eagle-loader__ring   { stroke: rgba(244,184,25,0.6); }
+
+        .pv-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 16px 0 24px;
+        }
+
+        .pv-btn {
+            border: 1px solid rgba(15, 30, 60, 0.18);
+            background: white;
+            color: #1a1f3d;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 10px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            min-width: 130px;
+        }
+
+        .pv-btn:hover {
+            background: #1a1f3d;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(15, 30, 60, 0.20);
+        }
+
+        .pv-btn--accent {
+            background: linear-gradient(135deg, #ff6b6b, #ffb14a);
+            color: white;
+            border-color: transparent;
+        }
+
+        .pv-btn--accent:hover {
+            background: linear-gradient(135deg, #ff5050, #ffa030);
+            color: white;
+        }
+
+        .pv-checkbox {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: rgba(15, 30, 60, 0.72);
+            user-select: none;
+        }
+
+        .pv-info {
+            background: white;
+            border: 1px solid rgba(15, 30, 60, 0.10);
+            border-radius: 16px;
+            padding: 18px 22px;
+            font-size: 13px;
+            color: rgba(15, 30, 60, 0.78);
+            line-height: 1.55;
+        }
+
+        .pv-info ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
+        }
+
+        .pv-info code {
+            font-family: "SF Mono", Menlo, Consolas, monospace;
+            font-size: 12px;
+            background: #f0f5ff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #3b4b7b;
+        }
+
+        .pv-state {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .pv-state--on  { background: #d1fae5; color: #065f46; }
+        .pv-state--off { background: #fee2e2; color: #991b1b; }
+
+        /* "Slow mode" — extends every loader animation 4× so each phase is easy to inspect */
+        body.pv-slow .eagle-loader__orbit-arm  { animation-duration: 16.8s !important; }
+        body.pv-slow .eagle-loader__ring       { animation-duration: 56s, 12s !important; }
+        body.pv-slow .eagle-loader__wing--up,
+        body.pv-slow .eagle-loader__wing--down { animation-duration: 1.68s !important; }
+        body.pv-slow .eagle-loader__caption    { animation-duration: 6.4s !important; }
+
+        /* Variant — make the eagle bigger so silhouettes are critique-ready */
+        .pv-stage--big .eagle-loader__lane { width: 320px; height: 320px; }
+        .pv-stage--big .eagle-loader        { width: 320px; }
+
+        @media (max-width: 600px) {
+            .pv-shell { padding: 20px 14px 60px; }
+            .pv-stage { min-height: 240px; }
+        }
+    </style>
+</head>
+<body class="polish">
+
+<div class="pv-shell">
+
+    <div class="pv-header">
+        <h1>Eagle Loader — Preview</h1>
+        <p>Inspect every phase of the trademark loading animation.
+           The loader runs continuously here; manual show/hide is also wired up.</p>
+    </div>
+
+    <div class="pv-controls">
+        <button class="pv-btn pv-btn--accent" id="pv-show">Show loader</button>
+        <button class="pv-btn"                id="pv-hide">Hide loader</button>
+        <button class="pv-btn"                id="pv-toggle">Toggle</button>
+        <label class="pv-checkbox">
+            <input type="checkbox" id="pv-slow"> 4× slow-motion
+        </label>
+        <span class="pv-state pv-state--on" id="pv-status">VISIBLE</span>
+    </div>
+
+    <div class="pv-grid">
+        <div class="pv-card">
+            <h2>Light backdrop</h2>
+            <p>How the loader looks against the default site background.</p>
+            <div class="pv-stage" id="pv-stage-light"></div>
+        </div>
+
+        <div class="pv-card">
+            <h2>Dark backdrop</h2>
+            <p>Stress-test on a midnight gradient — should the eagle ever flare on a dark page.</p>
+            <div class="pv-stage pv-stage--dark" id="pv-stage-dark"></div>
+        </div>
+
+        <div class="pv-card" style="grid-column: 1 / -1;">
+            <h2>Large variant — body, wings, beak in detail</h2>
+            <p>320 px stage so you can see the eagle silhouette, the orbit ring, and the wing flap clearly.</p>
+            <div class="pv-stage pv-stage--big" id="pv-stage-big" style="min-height: 360px;"></div>
+        </div>
+    </div>
+
+    <div class="pv-info">
+        <strong>Things to critique:</strong>
+        <ul>
+            <li><code>js/eagle-loader.js</code> — SVG eagle (5 paths + head + beak + eye), wing flap toggles two opacity-alternating groups every 210 ms.</li>
+            <li><code>css/eagle-loader.css</code> — orbit-arm rotates 360° every <strong>4.2 s</strong>; ring spins on its own 14 s axis and pulses gold↔blue every 3 s.</li>
+            <li>Centered <code>position: fixed; top: 50%; left: 50%</code>, 200 px wide. Shrink/grow by changing <code>.eagle-loader__lane</code> dimensions.</li>
+            <li>Reduced-motion path: ring + orbit + flap stop, eagle freezes at top, only the static wing pose remains.</li>
+            <li>Public API: <code>window.EagleLoader.show()</code>, <code>.hide()</code>, <code>.isVisible()</code>, <code>.bindLink(a)</code>.</li>
+        </ul>
+    </div>
+
+</div>
+
+<script src="js/eagle-loader.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    var statusEl = document.getElementById("pv-status");
+
+    function refreshStatus() {
+        var on = window.EagleLoader && window.EagleLoader.isVisible();
+        statusEl.textContent = on ? "VISIBLE" : "HIDDEN";
+        statusEl.className = "pv-state " + (on ? "pv-state--on" : "pv-state--off");
+    }
+
+    document.getElementById("pv-show").addEventListener("click", function () {
+        window.EagleLoader.show();
+        setTimeout(refreshStatus, 30);
+    });
+
+    document.getElementById("pv-hide").addEventListener("click", function () {
+        window.EagleLoader.hide();
+        setTimeout(refreshStatus, 600);
+    });
+
+    document.getElementById("pv-toggle").addEventListener("click", function () {
+        if (window.EagleLoader.isVisible()) {
+            window.EagleLoader.hide();
+            setTimeout(refreshStatus, 600);
+        } else {
+            window.EagleLoader.show();
+            setTimeout(refreshStatus, 30);
+        }
+    });
+
+    document.getElementById("pv-slow").addEventListener("change", function (e) {
+        document.body.classList.toggle("pv-slow", e.target.checked);
+    });
+
+    /**
+     * The loader auto-hides once on initial window.load. Override that for the
+     * preview page so the eagle keeps flying for inspection.
+     */
+    window.addEventListener("load", function () {
+        setTimeout(function () {
+            window.EagleLoader.show();
+            refreshStatus();
+        }, 350);
+    });
+
+    /**
+     * Clone the loader into each stage so each card has its own live instance
+     * to critique side by side.
+     */
+    function cloneLoaderInto(stageId) {
+        setTimeout(function () {
+            var origin = document.querySelector(".eagle-loader");
+            var stage = document.getElementById(stageId);
+            if (!origin || !stage) return;
+            var clone = origin.cloneNode(true);
+            clone.classList.remove("is-hidden");
+            clone.removeAttribute("style");
+            stage.appendChild(clone);
+        }, 50);
+    }
+
+    cloneLoaderInto("pv-stage-light");
+    cloneLoaderInto("pv-stage-dark");
+    cloneLoaderInto("pv-stage-big");
+
+    setInterval(refreshStatus, 800);
+})();
+</script>
+
+</body>
+</html>

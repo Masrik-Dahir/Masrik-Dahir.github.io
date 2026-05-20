@@ -137,7 +137,8 @@
         0 1px 4px  rgba(0,0,0,0.06);
     transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease;
     position: relative;
-    overflow: hidden;
+    /* visible so the ::after rainbow halo can glow OUTSIDE the pill on hover */
+    overflow: visible;
 }
 
 .city-switch-btn::before {
