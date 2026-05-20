@@ -925,7 +925,18 @@
                                oninput="if(window.setAttackDifficulty)window.setAttackDifficulty(this.value/100); document.getElementById('ttAttackSliderVal').textContent=this.value+'%';">
                         <span class="tt-slider-val tt-slider-val-attack" id="ttAttackSliderVal">50%</span>
                     </div>
-                    <div class="tt-hint">Tap an icon to switch • Tap icon below to arm</div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-attack">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-attack" id="ttAttackAutoBtn" aria-pressed="false"
+                                onclick="
+                                    var on = this.getAttribute('aria-pressed') !== 'true';
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                    this.textContent = on ? 'ON' : 'OFF';
+                                    if(window.setAutoAttackEnabled) window.setAutoAttackEnabled(on);
+                                ">OFF</button>
+                    </div>
+                    <div class="tt-hint">Auto: cycles all missile types • Difficulty scales intercept rate</div>
                 </div>
             </div>
 
@@ -966,7 +977,18 @@
                                oninput="if(window.setDefenceDifficulty)window.setDefenceDifficulty(this.value/100); document.getElementById('ttDefenceSliderVal').textContent=this.value+'%';">
                         <span class="tt-slider-val tt-slider-val-defence" id="ttDefenceSliderVal">50%</span>
                     </div>
-                    <div class="tt-hint">Tap a type to lock • Tap icon below to toggle</div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-defence">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-defence" id="ttDefenceAutoBtn" aria-pressed="false"
+                                onclick="
+                                    var on = this.getAttribute('aria-pressed') !== 'true';
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                    this.textContent = on ? 'ON' : 'OFF';
+                                    if(window.setAutoDefenceEnabled) window.setAutoDefenceEnabled(on);
+                                ">OFF</button>
+                    </div>
+                    <div class="tt-hint">Auto: cycles all interceptor types • Difficulty scales AI fire rate</div>
                 </div>
             </div>
         </div>
@@ -2140,6 +2162,55 @@
             .tt-slider-weather { color: #1e8fd0; background: linear-gradient(to right, rgba(30,143,208,0.15), rgba(30,143,208,0.35)); }
             .tt-slider-attack  { color: #c0202a; background: linear-gradient(to right, rgba(192,32,42,0.15), rgba(192,32,42,0.45)); }
             .tt-slider-defence { color: #1e7838; background: linear-gradient(to right, rgba(30,120,56,0.15), rgba(30,120,56,0.40)); }
+
+            /* ── ON/OFF toggle button (auto-attack / auto-defence) ───────── */
+            .tt-toggle-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin: 6px 0 4px;
+                padding: 0 2px;
+            }
+            .tt-toggle-label {
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 9px;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                white-space: nowrap;
+                min-width: 56px;
+            }
+            .tt-toggle-label-attack  { color: #c0202a; }
+            .tt-toggle-label-defence { color: #1e7838; }
+            .tt-toggle {
+                flex: 1;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 10px;
+                font-weight: 800;
+                letter-spacing: 0.10em;
+                text-transform: uppercase;
+                padding: 6px 10px;
+                border-radius: 8px;
+                border: 1.5px solid;
+                cursor: pointer;
+                background: rgba(255,255,255,0.55);
+                color: rgba(10,10,25,0.65);
+                border-color: rgba(10,20,40,0.18);
+                transition: background 0.18s ease, color 0.18s ease,
+                            border-color 0.18s ease, box-shadow 0.18s ease,
+                            transform 0.14s ease;
+                user-select: none;
+            }
+            .tt-toggle:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.10); }
+            .tt-toggle:active { transform: translateY(0); }
+            .tt-toggle.on {
+                color: #fff;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.55) inset,
+                    0 3px 12px rgba(0,0,0,0.18);
+            }
+            .tt-toggle-attack.on  { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
+            .tt-toggle-defence.on { background: linear-gradient(135deg,#2da64a,#1e7838); border-color:#155a28; }
 
             .widget-tooltip .tt-hint {
                 margin-top: 10px;

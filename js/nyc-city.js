@@ -8535,9 +8535,76 @@
         defenceDifficulty = Math.max(0, Math.min(1, v));
     };
 
+    /* ── AUTO toggles: cycle through ALL missile / interceptor types ──
+       autoAttackOn  — when true, fires missiles cycling through MISSILE_TYPES
+       autoDefenceOn — when true, cycles DEFENCE_TYPES (and enables defence-mode
+                       so AI launches targets to intercept).
+       Cadence is scaled by the matching difficulty slider. */
+    var autoAttackOn  = false, autoAttackTimer  = 0, autoAttackCyc  = 0;
+    var autoDefenceOn = false, autoDefenceTimer = 0, autoDefenceCyc = 0;
+    window.isAutoAttackOn   = function(){ return autoAttackOn; };
+    window.setAutoAttackEnabled = function(on){
+        autoAttackOn = !!on;
+        autoAttackTimer = 0;  /* fire immediately on enable */
+    };
+    window.isAutoDefenceOn  = function(){ return autoDefenceOn; };
+    window.setAutoDefenceEnabled = function(on){
+        autoDefenceOn = !!on;
+        autoDefenceTimer = 0;
+        if (autoDefenceOn && !defenceMode) defenceMode = true;
+    };
+
+    function pickAutoAttackTarget(){
+        var targets = [];
+        if (typeof LM !== 'undefined' && LM && LM.length) {
+            for (var li=0; li<LM.length; li++) {
+                var lx = (typeof LM[li].x === 'number') ? LM[li].x : W*0.5;
+                targets.push({ x: lx, y: GROUND - rng(40, GROUND*0.55) });
+            }
+        }
+        if (typeof BGBUILDS !== 'undefined' && BGBUILDS && BGBUILDS.length) {
+            for (var bi=0; bi<BGBUILDS.length; bi++) {
+                var b = BGBUILDS[bi];
+                if (b.x > -50 && b.x < W+50 && b.h > 30) {
+                    targets.push({ x: b.x + b.w/2, y: GROUND - b.h*rng(0.30, 0.85) });
+                }
+            }
+        }
+        if (targets.length) return targets[Math.floor(Math.random()*targets.length)];
+        return { x: rng(W*0.1, W*0.9), y: GROUND - rng(20, GROUND*0.4) };
+    }
+
+    function updateAutoSliders(dt){
+        /* AUTO-ATTACK: cycle every missile kind, fire at city targets.
+           interval ≈ 1500ms easy → 750ms hard (scaled by attack difficulty) */
+        if (autoAttackOn) {
+            autoAttackTimer -= dt;
+            if (autoAttackTimer <= 0) {
+                autoAttackTimer = 1500 - 750*attackDifficulty;
+                autoAttackCyc = (autoAttackCyc + 1) % MISSILE_TYPES.length;
+                missileTypeIdx = autoAttackCyc;  /* sync the visible chip so user sees the rotation */
+                var kind = MISSILE_TYPES[autoAttackCyc];
+                var tgt = pickAutoAttackTarget();
+                var savedArmed = missileArmed;
+                missileArmed = true; /* counts as user-fired — attack difficulty applies */
+                fireMissile(tgt.x, tgt.y, kind);
+                missileArmed = savedArmed;
+            }
+        }
+        /* AUTO-DEFENCE: rotate the active interceptor type so every combo is exercised */
+        if (autoDefenceOn) {
+            autoDefenceTimer -= dt;
+            if (autoDefenceTimer <= 0) {
+                autoDefenceTimer = 1500 - 750*defenceDifficulty;
+                autoDefenceCyc = (autoDefenceCyc + 1) % DEFENCE_TYPES.length;
+                defenceTypeIdx = autoDefenceCyc;
+            }
+        }
+    }
+
     /* hook update + draw into the existing loop */
     var _origUpd = updateParticles;
-    updateParticles = function(dt){ _origUpd(dt); updateMissileSystem(dt); };
+    updateParticles = function(dt){ _origUpd(dt); updateMissileSystem(dt); updateAutoSliders(dt); };
     var _origDrw = drawDynamic;
     drawDynamic = function(){ _origDrw(); drawMissileSystem(dynC); };
 })();
