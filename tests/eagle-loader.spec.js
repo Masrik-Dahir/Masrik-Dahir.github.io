@@ -90,6 +90,42 @@ test.describe('Eagle Loader — site-wide loading screen', () => {
         expect(result.scrollY).toBeGreaterThan(0);
     });
 
+    test('eagle paths render the SAME on /map.html and /work.html (no SVG style leak)', async ({ page }) => {
+        // Some pages have inline SVG <style> blocks with `path { stroke: ...;
+        // stroke-width: ... }` rules that would otherwise leak into the
+        // eagle. Sample the body-gradient path's computed style on both
+        // pages and require them to match.
+        async function sample(path) {
+            await page.goto(path, { waitUntil: 'load' });
+            await page.waitForTimeout(700);
+            return await page.evaluate(() => {
+                if (window.EagleLoader) window.EagleLoader.show();
+                const orbit = document.querySelector('.eagle-loader__orbit');
+                if (!orbit) return null;
+                // Find a path whose inline style references the body gradient
+                let t = null;
+                orbit.querySelectorAll('path').forEach(p => {
+                    const s = (p.getAttribute('style') || '');
+                    if (s.indexOf('bodyGrad') >= 0 && !t) t = p;
+                });
+                if (!t) return null;
+                const cs = getComputedStyle(t);
+                return {
+                    fill: cs.fill,
+                    stroke: cs.stroke,
+                    strokeWidth: cs.strokeWidth
+                };
+            });
+        }
+        const work = await sample('/work.html');
+        const map  = await sample('/map.html');
+        expect(work).not.toBeNull();
+        expect(map).not.toBeNull();
+        expect(map.fill).toBe(work.fill);
+        expect(map.stroke).toBe(work.stroke);
+        expect(map.strokeWidth).toBe(work.strokeWidth);
+    });
+
     test('top nav is rendered ABOVE content when scrolled (z-index stacking)', async ({ page }) => {
         await page.goto('/work.html', { waitUntil: 'load' });
         await page.waitForTimeout(900);

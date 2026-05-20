@@ -191,7 +191,11 @@
     display: none;
 }
 
-path {
+/* Scope all `path` rules to SVGs that are NOT the eagle loader's orbit
+ * SVG. Without this filter the global `path` rule overrides the eagle's
+ * `fill="url(#el-bodyGrad)"` presentation attributes and the bird shows
+ * up in light gray on the travel page. */
+svg:not(.eagle-loader__orbit) path {
     stroke: #78909C;
     stroke-width: 0.5;
     fill: #E0E0E0;
@@ -199,11 +203,11 @@ path {
     cursor: pointer;
 }
 
-path:hover {
+svg:not(.eagle-loader__orbit) path:hover {
     filter: brightness(1.18) saturate(1.4);
 }
 
-path.map-click-flash {
+svg:not(.eagle-loader__orbit) path.map-click-flash {
     animation: clickFlash 0.45s ease-out forwards;
 }
 
