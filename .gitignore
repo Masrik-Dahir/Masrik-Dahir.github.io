@@ -4,3 +4,6 @@ demo.html
 demo.2.html
 .claude/*
 CLAUDE.md
+/.claude/
+/docs/
+/.playwright-mcp/
