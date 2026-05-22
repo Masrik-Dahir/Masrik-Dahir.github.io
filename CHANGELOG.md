@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.2.0] - 2026-05-20
+### Added
+- **Positioning hero** on the homepage (`index.html`) — one-line "who I am, what I do, what I want" above all other content, with primary "See projects" and "Featured work" CTAs.
+- **Featured Projects** section on the homepage — three cards (NYC missile-defence sim, retro arcade gallery, travel atlas) with one-sentence outcomes, tech lines, and source links.
+- **Skills in context** section — replaces the homepage-leading "logo soup" with skill→project pairs that prove each capability.
+- **NYC canvas caption** (`#nyc-canvas-figure`) — frames the missile-defence simulation as engineering work (built with vanilla JS + Canvas 2D) with a "View source" link to `js/nyc-city.js`.
+- **Reduced-motion / mobile gate** in `js/nyc-city.js` — `prefers-reduced-motion: reduce` renders a single static frame; viewport <768px throttles to ~30fps.
+- `docs/SPEC_v1.2.0.md` — full spec driving this release.
+
+### Changed
+- Primary in-page navigation trimmed from 7 to 5 visible items at viewport ≥768px (Home, Career, Academia, Software, Games). Milestones and Travel demoted via `.nav-demoted` class — still reachable on mobile and via the popup nav.
+- Travel grid `<img>` tags in the homepage now carry `:alt="item.title"` and an `@error` handler that fades broken thumbnails.
+- AUTO-defence in `js/nyc-city.js` now leaves `defenceActive` enabled when spawning AI missiles, so batteries actually engage with the cycling interceptor type.
+
+### Fixed
+- **Broken Instagram link** — typo `instragram.com` → `instagram.com` (both occurrences). The dead link had been live on the personal-brand homepage.
+- Missing `alt` attributes added to every employer-logo, skill-logo, certification-badge, social-media, and Vue-bound travel image on the homepage.
+
 ## [1.1.0] - 2026-05-07
 ### Added
 - **Eagle Loader** — trademark site-wide loading screen with an SVG bald eagle flying in a circle (`js/eagle-loader.js`, `css/eagle-loader.css`). Auto-shows on initial paint, auto-hides 280 ms after `window.load`, and is exposed as `window.EagleLoader.show()/.hide()/.isVisible()` for any in-page navigation or long task. Internal links auto-bind to re-show the loader on click.

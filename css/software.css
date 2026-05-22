@@ -101,39 +101,151 @@
   pointer-events:none; z-index:0;
 }
 .sw-card:hover::before { opacity:1; }
-.sw-card:hover {
-  border-color:#c7d2fe;
-  box-shadow:
-    0 4px 12px rgba(99,102,241,.06),
-    0 12px 40px rgba(99,102,241,.10),
-    0 0 0 1px rgba(99,102,241,.08);
-  transform:translateY(-5px);
-}
+/* hover lift only — coloured halo + border-colour now driven by the
+   token-based liquid-glass system below */
+.sw-card:hover { transform:translateY(-5px); }
 .sw-card[data-cat="library"] { --sw-glow:rgba(99,102,241,.07); }
-.sw-card[data-cat="app"] { --sw-glow:rgba(16,185,129,.07); }
-.sw-card[data-cat="app"]:hover {
-  border-color:#a7f3d0;
-  box-shadow:
-    0 4px 12px rgba(16,185,129,.06),
-    0 12px 40px rgba(16,185,129,.10),
-    0 0 0 1px rgba(16,185,129,.08);
+.sw-card[data-cat="app"]     { --sw-glow:rgba(16,185,129,.07); }
+
+/* ════════════════════════════════════════════════════════════════
+   LIQUID-GLASS CARD SYSTEM — balanced multi-layer model
+   ────────────────────────────────────────────────────────────────
+   Each card is modelled as a piece of polished glass lit from a
+   single source above-and-left. Light intensity decays naturally
+   across the surface; the dominant visual is white (the glass
+   character), with hue used only as a subtle TINT, not as a fill.
+
+   ── Tuning model ─────────────────────────────────────────────
+     --c-r/c-g/c-b   = the per-category RGB channels (no alpha)
+     --lg-lit        = peak alpha for the primary light hit
+                       (top-left corner of the card)
+     --lg-mid        = alpha at mid-radius from the lit corner
+     --lg-edge-w-rim  = alpha of the white catch-light on lit edges
+     --lg-edge-w-soft = alpha of the white catch-light on shaded edges
+     --lg-counter    = alpha of the reflected colour at the
+                       opposite corner (bottom-right)
+     --lg-halo-out   = alpha of the outer coloured drop-shadow
+     --lg-halo-back  = alpha of the bounced-back drop-shadow
+   Every gradient below interpolates between these values so the
+   colour intensity is BALANCED rather than ad-hoc per layer.
+   ──────────────────────────────────────────────────────────── */
+
+.sw-card[data-cat="library"] {
+  --c-r:  99; --c-g: 102; --c-b: 241;
+  --c-r2:129; --c-g2:140; --c-b2:248;
+}
+.sw-card[data-cat="app"] {
+  --c-r:  16; --c-g: 185; --c-b: 129;
+  --c-r2: 52; --c-g2:211; --c-b2:153;
 }
 
-/* accent bar with animated gradient */
+/* Global tunables — change one number, all four layers stay in tune. */
+.sw-card {
+  --lg-lit:         0.42;
+  --lg-mid:         0.16;
+  --lg-edge-w-rim:  0.82;
+  --lg-edge-w-soft: 0.30;
+  --lg-counter:     0.10;
+  --lg-counter-mid: 0.04;
+  --lg-halo-out:    0.18;
+  --lg-halo-back:   0.06;
+}
+.sw-card:hover {
+  --lg-lit:         0.55;
+  --lg-mid:         0.22;
+  --lg-counter:     0.14;
+  --lg-counter-mid: 0.06;
+  --lg-halo-out:    0.28;
+  --lg-halo-back:   0.10;
+}
+
+/* ── LAYER 1: primary top-left coloured glow ────────────────────
+   Two perpendicular radial gradients form an L-shape along the
+   top + left edges. `mix-blend-mode: soft-light` means the colour
+   is added to the underlying white as a soft TINT (additive to
+   midtones, doesn't blow out highlights or muddy shadows) — so
+   it never reads as a saturated coloured stripe. */
 .sw-card-accent {
-  position:absolute; top:0; left:0; right:0; height:3px;
-  background-size:200% 100%;
-  animation:swAccentFlow 3s ease-in-out infinite;
-  transition:height 0.4s cubic-bezier(.22,1,.36,1), filter 0.4s ease;
-  z-index:1;
+  position:absolute;
+  top:0; left:0;
+  width:68%; height:68%;
+  pointer-events:none;
+  filter:blur(14px);
+  opacity:0.95;
+  z-index:0;
+  mix-blend-mode:soft-light;
+  background:
+    radial-gradient(ellipse 90% 32% at 0% 0%,
+      rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-lit)) 0%,
+      rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-mid)) 45%,
+      rgba(var(--c-r2),var(--c-g2),var(--c-b2),0.00) 78%),
+    radial-gradient(ellipse 32% 90% at 0% 0%,
+      rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-lit)) 0%,
+      rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-mid)) 45%,
+      rgba(var(--c-r2),var(--c-g2),var(--c-b2),0.00) 78%);
+  transition:filter 0.4s ease, width 0.4s cubic-bezier(.22,1,.36,1),
+             height 0.4s cubic-bezier(.22,1,.36,1);
 }
-.sw-card:hover .sw-card-accent { height:5px; filter:brightness(1.2) saturate(1.3); }
-@keyframes swAccentFlow {
-  0%,100% { background-position:0% 50%; }
-  50% { background-position:100% 50%; }
+.sw-card:hover .sw-card-accent { width:78%; height:78%; filter:blur(16px); }
+
+/* ── LAYER 2: perimeter rim + bottom-right counter reflection ───
+   Crisp 1px catch-lights on every edge (asymmetric: bright at
+   lit edges, soft at shaded edges). The colour counter-glow at
+   the opposite corner is intentionally a fraction of the primary
+   alpha — same `--lg-counter` family that all corner reflections
+   pull from, so the system stays self-consistent. */
+.sw-card::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  z-index:2;
+  background:radial-gradient(ellipse 42% 42% at 100% 100%,
+      rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-counter))    0%,
+      rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-counter-mid)) 40%,
+      transparent 78%);
+  box-shadow:
+    inset  0   1px  0     rgba(255,255,255,var(--lg-edge-w-rim)),
+    inset  1px 0    0     rgba(255,255,255,calc(var(--lg-edge-w-rim) - 0.15)),
+    inset  0  -1px  0     rgba(255,255,255,var(--lg-edge-w-soft)),
+    inset -1px 0    0     rgba(255,255,255,var(--lg-edge-w-soft)),
+    inset  0   0    0 1px rgba(var(--c-r), var(--c-g), var(--c-b), 0.06),
+    inset  0   2px  6px   rgba(255,255,255,0.22),
+    inset  0  -6px 14px   rgba(var(--c-r), var(--c-g), var(--c-b), calc(var(--lg-counter) * 0.55));
+  transition:background 0.4s ease, box-shadow 0.4s ease;
 }
-.sw-card[data-cat="library"] .sw-card-accent { background:linear-gradient(90deg,#3b82f6,#6366f1,#818cf8,#6366f1,#3b82f6); background-size:200% 100%; }
-.sw-card[data-cat="app"] .sw-card-accent { background:linear-gradient(90deg,#10b981,#06b6d4,#14b8a6,#06b6d4,#10b981); background-size:200% 100%; }
+
+/* ── LAYER 3 (existing): hover spotlight glow behind content ──
+   Defined above (.sw-card::before). Pulls from var(--sw-glow). */
+
+/* ── LAYER 4: outer halo box-shadow on the card itself ─────────
+   Coloured shadow offset UP-AND-LEFT (where the light source is)
+   and a weaker REFLECTED shadow DOWN-AND-RIGHT (the bounced
+   counter-light). Sized via the same `--lg-halo-*` tokens. */
+.sw-card {
+  box-shadow:
+    -3px -3px 16px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
+     3px  3px 14px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
+     0    1px  3px       rgba(15,23,42,0.05);
+}
+
+/* Hover: the box-shadow recalculates because --lg-halo-out/back
+   are larger; just spell it out so the cascade picks up the
+   numeric box-shadow values too. */
+.sw-card:hover {
+  border-color:rgba(var(--c-r), var(--c-g), var(--c-b), 0.30);
+  box-shadow:
+    -4px -4px 22px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
+     4px  4px 18px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
+     0    2px  6px       rgba(15,23,42,0.07);
+}
+.sw-card:hover::after {
+  background:radial-gradient(ellipse 52% 52% at 100% 100%,
+      rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-counter))    0%,
+      rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-counter-mid)) 42%,
+      transparent 82%);
+}
 
 .sw-card-body { padding:24px 22px 16px; flex:1; position:relative; z-index:1; }
 .sw-card-top {

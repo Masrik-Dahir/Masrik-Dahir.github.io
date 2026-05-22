@@ -1,0 +1,66 @@
+/**
+ * map-symbols.css — map-page override for the liquid-glass facet system.
+ *
+ * polish.css gives every .w3-card a hexagon-tessellated rainbow sweep on
+ * hover. On map.html the country cards swap that hex mask for a tight
+ * grid of tiny travel-icon outlines (globe, compass, plane, suitcase,
+ * map pin, etc.), sized to each card and avoiding text + image rects.
+ *
+ * Per-card mask URLs + dimensions are written into a JS-managed <style>
+ * element by js/map-symbols.js. This file handles the w3-container
+ * clearfix and dims the rainbow gradient so the travel icons appear as
+ * a subtle, lightly-visible texture instead of a saturated rainbow
+ * (other pages keep the full-strength polish.css gradient).
+ */
+
+/* w3.css's .w3-container clearfix would collapse the polish.css
+   pseudo-elements to 0×0. Force display back to block. */
+body.polish .w3-card.animate-on-scroll::before,
+body.polish .w3-card.animate-on-scroll::after {
+    display: block;
+    clear: none;
+}
+
+/* Vibrant variant of polish.css's rainbow gradient — each colour stop
+   sits at ~90 % alpha so the hue-rotate cycle reads clearly: the
+   travel-icon glistening visibly shifts pink → orange → gold → green
+   → cyan → blue → purple → pink without losing punch on the white
+   card surface. */
+body.polish .w3-card.animate-on-scroll::before {
+    background: linear-gradient(110deg,
+        rgba(255, 215, 225, 0.90)   0%,
+        rgba(255, 225, 205, 0.90)  14%,
+        rgba(255, 240, 195, 0.90)  28%,
+        rgba(232, 248, 210, 0.90)  42%,
+        rgba(205, 245, 222, 0.90)  56%,
+        rgba(205, 230, 250, 0.90)  70%,
+        rgba(218, 222, 250, 0.90)  84%,
+        rgba(235, 215, 250, 0.90)  95%,
+        rgba(255, 215, 225, 0.90) 100%) !important;
+}
+
+/* Keep the travel icons visible AND cycling through colours the entire
+   time the cursor hovers, similar to the milestone-button glistening.
+   Two layered loops:
+     • background-position slides → the pastel gradient sweeps across.
+     • hue-rotate spins 0° → 360° → the colours of every visible icon
+       cycle through the full spectrum (pink → peach → gold → lime →
+       mint → sky → lilac → back to pink) continuously.
+   polish.css's default `lg-rainbow-pass` would fade opacity to 0; we
+   override it here so the icons stay visible until mouseleave. */
+@keyframes map-rainbow-glisten {
+    0%   { background-position:   0% 50%; filter: hue-rotate(0deg);   }
+    100% { background-position: 200% 50%; filter: hue-rotate(360deg); }
+}
+body.polish .w3-card.animate-on-scroll:hover::before {
+    opacity: 1 !important;
+    animation: map-rainbow-glisten 5s linear infinite !important;
+}
+
+/* Soft rotating rainbow border ring. */
+body.polish .w3-card.animate-on-scroll::after {
+    opacity: 0;
+}
+body.polish .w3-card.animate-on-scroll:hover::after {
+    opacity: 0.9 !important;
+}

@@ -1,6 +1,8 @@
 <!-- README auto-maintained. Update this file whenever: code structure changes,
      new env vars added, commands change, new workflows added, or deps updated. -->
 
+> Software engineer building developer tools, AWS-heavy backends, and interactive web experiences. Open to roles and collaboration.
+
 <div align="center">
 
 *— project —*

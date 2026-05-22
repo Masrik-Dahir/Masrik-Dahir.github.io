@@ -93,16 +93,475 @@ body.polish .page-hero p {
     font-style: italic;
 }
 
+/* ── Liquid-glass buttons — site-wide, except top nav ────────────────
+ *
+ * Applies to every <button> and <input type=button|submit> on a polish
+ * page, except:
+ *   - top nav (`.glow-on-hover-nav`, `.glow-on-hover3`, descendants of
+ *     `.topnav` / `.topnav-2`)
+ *   - widget tooltip chips/toggles (`.tt-chip`, `.tt-toggle`)
+ *   - NYC canvas widget cores (`.ww-icon-btn`, `.msl-core`, `.dfn-core`,
+ *     `.city-switch-btn`)
+ *   - footer social media (`.glow-on-hover12`)
+ *   - game canvas controls (`#back-btn`, `#btn-left`, `#btn-up`,
+ *     `#btn-down`, `#btn-right`)
+ *
+ * Uses the same white→soft-blue gradient + backdrop blur as the
+ * positioning hero and widget tooltips. */
+
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right),
+body.polish input[type="button"]:not(.glow-on-hover-nav):not(.glow-on-hover3),
+body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3) {
+    background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(253,254,255,0.95) 100%);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid rgba(200,205,215,0.55);
+    border-radius: 10px;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,1.00) inset,
+        0 4px 14px rgba(0,0,0,0.08),
+        0 1px 4px rgba(0,0,0,0.05);
+    color: rgba(10,10,25,0.92);
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease;
+}
+
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover,
+body.polish input[type="button"]:not(.glow-on-hover-nav):not(.glow-on-hover3):hover,
+body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3):hover {
+    background: linear-gradient(135deg, rgba(255,255,255,1.00) 0%, rgba(254,255,255,0.98) 100%);
+    border-color: rgba(180,190,205,0.75);
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,1.00) inset,
+        0 6px 18px rgba(0,0,0,0.12),
+        0 2px 6px rgba(0,0,0,0.08);
+}
+
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):active,
+body.polish input[type="button"]:not(.glow-on-hover-nav):not(.glow-on-hover3):active,
+body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3):active {
+    transform: translateY(0);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.95) inset,
+        0 2px 8px rgba(0,0,0,0.10);
+}
+
+/* belt-and-suspenders: any button that lives inside a top nav stays
+   untouched even if it picks up a stray class above */
+body.polish .topnav button,
+body.polish .topnav-2 button,
+body.polish .topnav input[type="button"],
+body.polish .topnav input[type="submit"],
+body.polish .topnav-2 input[type="button"],
+body.polish .topnav-2 input[type="submit"] {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: revert;
+    border-radius: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LIQUID GLASS — diamond-facet system v2
+   ────────────────────────────────────────────────────────────────
+   Design language:
+
+     • Every liquid-glass surface carries a permanent, faint
+       tessellation of small diamond shapes — ◇ — rendered via a
+       tiled SVG pattern.
+     • Each diamond is drawn as four independent line segments,
+       each segment with a DIFFERENT stroke-opacity. The top-right
+       edge is brightest (catching the implied light source from
+       above-right), the bottom-left is darkest (in shadow). This
+       gives each diamond a 3D "cut gem" feel without expensive
+       filters.
+     • The two interior facet edges and an inner micro-diamond add
+       depth — like a brilliant-cut stone with culet and crown.
+     • A center pin-prick highlight is the sparkle.
+     • On hover, a soft horizontal spotlight slides across the
+       surface, intensifying the diamonds it passes over via screen
+       blending.
+
+   Implementation notes:
+
+     • The diamond tile is encoded as an inline SVG data-URI so it
+       lives entirely inside polish.css — no extra HTTP request,
+       no per-page asset hookup needed.
+     • `--lg-light-x` is a registered CSS custom property so the
+       hover sweep is smoothly tweenable on the GPU.
+     • The diamond pattern is ALWAYS visible (the user explicitly
+       asked for this) — hover only adds the spotlight on top.
+     • Cuts use multiple stroke colors (white, pale-cyan, pale-
+       periwinkle) so the diamonds feel like prismatic glass, not
+       just monochrome scratches.
+   ════════════════════════════════════════════════════════════════ */
+
+@property --lg-light-x {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -40%;
+}
+
+@keyframes lg-light-sweep {
+    0%   { --lg-light-x: -40%; }
+    100% { --lg-light-x: 140%; }
+}
+
+@keyframes lg-text-shimmer {
+    0%   { background-position: -200% 50%; }
+    100% { background-position:  200% 50%; }
+}
+
+/* The diamond tessellation is rendered as a MASK on each
+   pseudo-element. Two layers stack:
+
+     ::before — LARGE diamonds (32 px), masking a WARM rainbow
+                gradient (pink → amber) that sweeps left → right
+                at 110°.
+     ::after  — SMALL diamonds (18 px) offset half a cell, masking
+                a COOL rainbow gradient (emerald → sky → violet)
+                that sweeps top-right → bottom-left at 220° in the
+                OPPOSITE direction, at a different speed.
+
+   Together: two interleaved tessellations + two crossing rainbow
+   sweeps = a complex, glistening interference pattern. The two
+   pseudo-elements use screen blend so colors add rather than
+   cover each other. */
+body.polish {
+    --lg-facet-big:   36px;
+    /* OUTLINE-ONLY hexagon — fill='none', only the stroke (the
+       hexagon's edges) carries mask alpha. A flat-top regular
+       hexagon whose corners touch the tile edges so neighbouring
+       tiles line up cleanly. One inner concentric hex adds a
+       second outline ring for a faceted-gem feel. */
+    --lg-hex-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><polygon points='8,2 24,2 30,16 24,30 8,30 2,16' stroke='%23000' stroke-width='0.7' fill='none' stroke-linejoin='round'/><polygon points='12,10 20,10 23,16 20,22 12,22 9,16' stroke='%23000' stroke-opacity='0.55' stroke-width='0.5' fill='none' stroke-linejoin='round'/></svg>");
+}
+
+/* Hex-pattern sweep — colors visible immediately on hover, sweep
+   across the visible area, then slowly fade away in place. */
+@keyframes lg-rainbow-pass {
+    0%   { background-position:  0% 50%; opacity: 1; }
+    55%  { background-position: 90% 50%; opacity: 1; }
+    100% { background-position: 90% 50%; opacity: 0; }
+}
+@keyframes lg-rainbow-pass-reverse {
+    0%   { background-position:  220%  0%; }
+    100% { background-position: -120% 100%; }
+}
+
+/* registered custom property so the conic-gradient angle interpolates
+   smoothly via @keyframes — without @property it would step, not slide */
+@property --lg-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+
+/* slow rotation for the rainbow border ring */
+@keyframes lg-border-rotate {
+    0%   { --lg-angle:   0deg; }
+    100% { --lg-angle: 360deg; }
+}
+
+/* gentle halo breathing — outer aura pulses slightly */
+@keyframes lg-halo-pulse {
+    0%, 100% { filter: brightness(1.0); }
+    50%      { filter: brightness(1.25); }
+}
+
+/* ── Shared glass-surface selector list ─────────────────────── */
+
+body.polish .w3-card,
+body.polish .w3-card-2,
+body.polish .w3-card-4,
+body.polish .positioning-hero,
+body.polish .featured-card,
+body.polish .nyc-canvas-caption,
+body.polish .pretty,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right),
+body.polish .featured-links a,
+body.polish .positioning-cta a {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.32s cubic-bezier(.2,.7,.2,1.2),
+                box-shadow 0.32s ease;
+}
+
+/* ── PERMANENT diamond facet pattern (always visible, layer z=1) ─ */
+
+body.polish .w3-card::before,
+body.polish .w3-card-2::before,
+body.polish .w3-card-4::before,
+body.polish .positioning-hero::before,
+body.polish .featured-card::before,
+body.polish .nyc-canvas-caption::before,
+body.polish .pretty::before,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right)::before,
+body.polish .featured-links a::before,
+body.polish .positioning-cta a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* SLIGHT-LIGHT pastel wash — colours pulled most of the way back
+       toward white. Each stop has just enough hue to register but
+       stays delicate and airy. */
+    background: linear-gradient(110deg,
+        rgba(255, 215, 225, 1.00)  0%,   /* light pink       */
+        rgba(255, 225, 205, 1.00) 14%,   /* light peach      */
+        rgba(255, 240, 195, 1.00) 28%,   /* light gold       */
+        rgba(232, 248, 210, 1.00) 42%,   /* light lime       */
+        rgba(205, 245, 222, 1.00) 56%,   /* light mint       */
+        rgba(205, 230, 250, 1.00) 70%,   /* light sky        */
+        rgba(218, 222, 250, 1.00) 84%,   /* light periwinkle */
+        rgba(235, 215, 250, 1.00) 95%,   /* light lilac      */
+        rgba(255, 215, 225, 1.00) 100%); /* light pink       */
+    background-size: 280% 100%;
+    background-position: 0% 50%;
+    background-repeat: no-repeat;
+    /* mask: hexagon outlines (36px tile) */
+    -webkit-mask-image: var(--lg-hex-mask);
+            mask-image: var(--lg-hex-mask);
+    -webkit-mask-size: var(--lg-facet-big) var(--lg-facet-big);
+            mask-size: var(--lg-facet-big) var(--lg-facet-big);
+    -webkit-mask-repeat: repeat;
+            mask-repeat: repeat;
+    -webkit-mask-position: 0 0;
+            mask-position: 0 0;
+    /* mix-blend-mode REMOVED — screen blend made the pastel colours
+       disappear on white backgrounds (screen of any colour with white
+       is still white). Without it, the pastels paint visibly on every
+       background, including pure-white surfaces like milestone.html. */
+    /* Pastel halo — a coloured drop-shadow remains visible even when
+       the host sits on white, where a pure-white shadow would vanish. */
+    filter: drop-shadow(0 0 1.5px rgba(255, 200, 220, 0.65));
+    /* z-index -1 puts the rainbow layer BELOW in-flow content (text,
+       images, buttons inside the host) but ABOVE the host's own
+       background. Result: glow shines over the white surface only;
+       text and images sit on top of it, never veiled by colour. */
+    z-index: -1;
+    opacity: 0;
+    /* near-instant fade so the hex pattern + sweep appear the moment
+       the cursor enters; the perceived start of the animation is now
+       indistinguishable from the hover event itself. */
+    transition: opacity 0.04s linear;
+}
+
+/* On hover, the masked rainbow layer fades in AND the rainbow
+   gradient slides past — light "passes by" each diamond window. */
+body.polish .w3-card:hover::before,
+body.polish .w3-card-2:hover::before,
+body.polish .w3-card-4:hover::before,
+body.polish .positioning-hero:hover::before,
+body.polish .featured-card:hover::before,
+body.polish .nyc-canvas-caption:hover::before,
+body.polish .pretty:hover::before,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::before,
+body.polish .featured-links a:hover::before,
+body.polish .positioning-cta a:hover::before {
+    opacity: 1;
+    /* run the sweep once on hover, then hold at the end position */
+    animation: lg-rainbow-pass 3.5s cubic-bezier(.4, 0, .2, 1) 1 forwards;
+}
+
+/* ── HOVER spotlight (layer z=2) — soft directional hot-spot that
+   slides across the surface, intensifying whichever diamonds it
+   passes over via screen blend.                                  */
+
+body.polish .w3-card::after,
+body.polish .w3-card-2::after,
+body.polish .w3-card-4::after,
+body.polish .positioning-hero::after,
+body.polish .featured-card::after,
+body.polish .nyc-canvas-caption::after,
+body.polish .pretty::after,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right)::after,
+body.polish .featured-links a::after,
+body.polish .positioning-cta a::after {
+    /* ROTATING RAINBOW BORDER RING — rendered as a thin chromatic ring
+       around the inner edge of the element, using a conic-gradient
+       background masked via padding-box vs content-box subtraction.
+       The animated --lg-angle drives the conic-gradient's starting
+       angle, so the rainbow appears to rotate around the perimeter. */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    /* SLIGHT-LIGHT prism — matches the hex sweep palette, so the
+       rotating border ring stays delicate and airy. */
+    background: conic-gradient(from var(--lg-angle),
+        rgba(255, 215, 225, 1.00)    0deg,   /* light pink       */
+        rgba(255, 225, 205, 1.00)   45deg,   /* light peach      */
+        rgba(255, 240, 195, 1.00)   90deg,   /* light gold       */
+        rgba(232, 248, 210, 1.00)  135deg,   /* light lime       */
+        rgba(205, 245, 222, 1.00)  180deg,   /* light mint       */
+        rgba(205, 230, 250, 1.00)  225deg,   /* light sky        */
+        rgba(218, 222, 250, 1.00)  270deg,   /* light periwinkle */
+        rgba(235, 215, 250, 1.00)  315deg,   /* light lilac      */
+        rgba(255, 215, 225, 1.00)  360deg);  /* light pink       */
+    /* ring construction: a 2px padding, two stacked masks subtracted
+       so only the padding region (the ring) shows the conic gradient */
+    padding: 2px;
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+            mask-composite: exclude;
+    /* same negative z-index trick — rainbow border ring stays behind
+       content but above the host's background. */
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.35s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* hover — fade the ring in, spin the conic forever, and add a
+   multi-color outer halo via stacked box-shadows on the host element */
+body.polish .w3-card:hover::after,
+body.polish .w3-card-2:hover::after,
+body.polish .w3-card-4:hover::after,
+body.polish .positioning-hero:hover::after,
+body.polish .featured-card:hover::after,
+body.polish .nyc-canvas-caption:hover::after,
+body.polish .pretty:hover::after,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::after,
+body.polish .featured-links a:hover::after,
+body.polish .positioning-cta a:hover::after {
+    opacity: 1;
+    animation: lg-border-rotate 4.5s linear infinite;
+}
+
+/* the outer rainbow halo — five colored shadows stacked, plus a
+   gentle breathing pulse via brightness filter */
+body.polish .w3-card:hover,
+body.polish .w3-card-2:hover,
+body.polish .w3-card-4:hover,
+body.polish .positioning-hero:hover,
+body.polish .featured-card:hover,
+body.polish .nyc-canvas-caption:hover,
+body.polish .pretty:hover,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover,
+body.polish .featured-links a:hover,
+body.polish .positioning-cta a:hover {
+    /* Liquid-glass rim — a clean white inner edge plus a single soft
+       outer halo, no rainbow saturation. Reads as polished crystal
+       with a faint highlight rather than a glowing neon sign. */
+    box-shadow:
+        0 0  0 1px rgba(255,255,255,0.90),   /* crisp inner edge */
+        0 0 14px rgba(220,230,250,0.45),     /* cool diffuse halo */
+        0 4px 22px rgba( 30, 60,120,0.10);   /* soft drop-shadow lift */
+
+body.polish .w3-card:hover::after,
+body.polish .w3-card-2:hover::after,
+body.polish .w3-card-4:hover::after,
+body.polish .positioning-hero:hover::after,
+body.polish .featured-card:hover::after,
+body.polish .nyc-canvas-caption:hover::after,
+body.polish .pretty:hover::after,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::after,
+body.polish .featured-links a:hover::after,
+body.polish .positioning-cta a:hover::after {
+    opacity: 1;
+    /* small diamonds sweep in OPPOSITE direction at different speed */
+    animation: lg-rainbow-pass-reverse 5s linear infinite;
+}
+
+/* Page content always above the two effect layers */
+body.polish .w3-card > *,
+body.polish .w3-card-2 > *,
+body.polish .w3-card-4 > *,
+body.polish .positioning-hero > *,
+body.polish .featured-card > *,
+body.polish .nyc-canvas-caption > *,
+body.polish .pretty > *,
+body.polish .featured-links a > *,
+body.polish .positioning-cta a > * { position: relative; z-index: 3; }
+
+/* ── Subtle hover lift ─────────────────────────────────────── */
+
+body.polish .featured-card:hover,
+body.polish .positioning-hero:hover,
+body.polish .nyc-canvas-caption:hover {
+    transform: translateY(-1px);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,1.00) inset,
+        0 10px 28px rgba(30, 60, 120, 0.10),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Positioning name — single calm gradient shimmer (kept) ──── */
+
+body.polish .positioning-name {
+    background-image: linear-gradient(120deg,
+        #0a0a19 0%,
+        #1e6fd0 35%,
+        #5e2dc2 50%,
+        #1e6fd0 65%,
+        #0a0a19 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: lg-text-shimmer 18s linear infinite;
+}
+
+/* ── Skill rows — a 1px facet underline that slides in on hover */
+
+body.polish .skills-context-list li {
+    transition: background 0.30s ease, transform 0.30s ease, padding-left 0.30s ease;
+}
+body.polish .skills-context-list li:hover {
+    background: linear-gradient(90deg,
+        rgba(120,180,255,0.10) 0%,
+        rgba(120,180,255,0.00) 100%);
+    transform: translateX(3px);
+    padding-left: 5px;
+    border-radius: 6px;
+}
+
+/* ── Footer social icons — quiet lift, no glow halo ──────────── */
+
+body.polish footer a:hover i,
+body.polish footer a:hover img {
+    transform: translateY(-2px);
+    transition: transform 0.3s cubic-bezier(.2,.7,.2,1.2);
+}
+
+/* ── Logo/badge boxes — quiet hover, no wiggle ───────────────── */
+
+body.polish .box,
+body.polish .box2 {
+    transition: transform 0.4s cubic-bezier(.2,.7,.2,1.2), filter 0.4s ease;
+}
+body.polish .box:hover,
+body.polish .box2:hover {
+    transform: translateY(-2px) scale(1.04);
+    filter: drop-shadow(0 3px 10px rgba(120, 180, 255, 0.30));
+}
+
 /* ── Reduced motion ──────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-    body.polish .w3-card,
-    body.polish .w3-card-2,
-    body.polish .w3-card-4,
-    body.polish .box,
-    body.polish .box2,
-    body.polish footer a {
+    body.polish *,
+    body.polish *::before,
+    body.polish *::after {
+        animation: none !important;
         transition: none !important;
+    }
+    body.polish .positioning-name {
+        color: #0a0a19;
+        background: none;
+        -webkit-background-clip: initial;
+        background-clip: initial;
     }
     body.polish #page-graphics-canvas {
         display: none;

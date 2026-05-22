@@ -67,6 +67,299 @@
 <!-- Page Container -->
 <div class="w3-content info" style="max-width:1400px; background-color: white;">
 
+    <!-- Positioning hero — leads with point of view, not credentials -->
+    <section id="positioning" class="positioning-hero" aria-label="Introduction">
+        <h1 class="positioning-name">Masrik Dahir</h1>
+        <p class="positioning-line">
+            Software engineer building developer tools, AWS-heavy backends, and interactive web experiences.
+        </p>
+        <p class="positioning-status">Open to roles and collaboration.</p>
+        <div class="positioning-cta">
+            <a href="https://www.masrikdahir.com/software" class="positioning-cta-primary">See projects</a>
+            <a href="#featured-projects" class="positioning-cta-secondary">Featured work ↓</a>
+        </div>
+    </section>
+
+    <style>
+        .positioning-hero {
+            max-width: 720px;
+            margin: 24px auto 28px;
+            padding: 28px 24px 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #fbfcfe 100%);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border: 1px solid rgba(200,212,228,1.00);
+            border-radius: 14px;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,1.00) inset,
+                0 6px 24px rgba(0,0,0,0.10),
+                0 2px 8px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+        .positioning-name {
+            margin: 0 0 10px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: #0a0a19;
+            line-height: 1.1;
+        }
+        .positioning-line {
+            margin: 0 0 8px;
+            font-size: clamp(15px, 1.6vw, 18px);
+            line-height: 1.5;
+            color: #1a1a2e;
+        }
+        .positioning-status {
+            margin: 0 0 18px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            color: #1e7838;
+        }
+        .positioning-cta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+        }
+        .positioning-cta a {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: transform 0.14s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+        .positioning-cta a:focus-visible {
+            outline: 2px solid #1e6fd0;
+            outline-offset: 3px;
+        }
+        .positioning-cta-primary {
+            background: linear-gradient(135deg, #2480e0, #1e6fd0);
+            color: #fff;
+            border: 1.5px solid #1856a8;
+            box-shadow: 0 3px 12px rgba(30,111,208,0.30);
+        }
+        .positioning-cta-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(30,111,208,0.40);
+            color: #fff;
+        }
+        .positioning-cta-secondary {
+            color: #1e6fd0;
+            border: 1.5px solid rgba(30,111,208,0.30);
+            background: rgba(255,255,255,0.6);
+        }
+        .positioning-cta-secondary:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,0.9);
+            border-color: #1e6fd0;
+        }
+        @media (max-width: 480px) {
+            .positioning-hero { margin: 16px auto 20px; padding: 22px 18px 18px; }
+            .positioning-cta a { width: 100%; text-align: center; }
+        }
+        /* TASK-007 reverted — Milestones and Travel kept in the primary nav.
+           The .nav-demoted class is left on the markup but no longer hides anything. */
+
+        /* TASK-004 — Featured Projects */
+        .featured-projects {
+            max-width: 1080px;
+            margin: 8px auto 28px;
+            padding: 0 18px;
+        }
+        .featured-projects-title {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #1e6fd0;
+            margin: 0 0 14px;
+        }
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .featured-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(232,242,255,0.88) 100%);
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 12px;
+            padding: 18px 18px 16px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            transition: transform 0.18s ease, box-shadow 0.22s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .featured-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(30,111,208,0.18);
+        }
+        .featured-card h3 {
+            margin: 0 0 8px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: rgba(10,10,25,0.92);
+            line-height: 1.25;
+        }
+        .featured-card .featured-outcome {
+            margin: 0 0 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(10,10,25,0.74);
+            flex-grow: 1;
+        }
+        .featured-card .featured-tech {
+            margin: 0 0 12px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #1e7838;
+        }
+        .featured-card .featured-tech::before { content: 'Tech: '; color: rgba(10,10,25,0.50); }
+        .featured-links { display: flex; flex-wrap: wrap; gap: 12px; }
+        .featured-links a {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        }
+        .featured-links .featured-link-primary {
+            background: linear-gradient(135deg, #2480e0, #1e6fd0);
+            color: #fff;
+            border: 1px solid #1856a8;
+        }
+        .featured-links .featured-link-primary:hover { color:#fff; background: linear-gradient(135deg, #2a90f0, #2078e0); }
+        .featured-links .featured-link-secondary {
+            color: #1e6fd0;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(30,111,208,0.30);
+        }
+        .featured-links .featured-link-secondary:hover { background: rgba(255,255,255,0.95); border-color: #1e6fd0; }
+    </style>
+
+    <style>
+        /* TASK-006 — Skills in context */
+        .skills-context {
+            max-width: 1080px;
+            margin: 8px auto 32px;
+            padding: 0 18px;
+        }
+        .skills-context-title {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #1e7838;
+            margin: 0 0 14px;
+        }
+        .skills-context-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px 22px;
+        }
+        .skills-context-list li {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 13px;
+            line-height: 1.45;
+            color: rgba(10,10,25,0.78);
+            border-bottom: 1px dashed rgba(120,180,255,0.30);
+        }
+        .skill-name {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: #1e6fd0;
+            white-space: nowrap;
+        }
+        .skill-name::after { content: ' —'; color: rgba(10,10,25,0.40); }
+    </style>
+
+    <section id="skills-context" class="skills-context" aria-label="Skills in context">
+        <p class="skills-context-title">Skills, with the projects that prove them</p>
+        <ul class="skills-context-list">
+            <li><span class="skill-name">Vanilla JS &amp; Canvas 2D</span> the NYC missile-defence simulation and 100+ retro arcade games on this site (no game engine, no physics lib).</li>
+            <li><span class="skill-name">Vue 3</span> the 250-region travel atlas, software gallery, and dynamic UI sections of this site.</li>
+            <li><span class="skill-name">AWS (S3, CloudFront)</span> static-asset hosting and CDN for this site (<code>d3dw5jtb3w1kgy.cloudfront.net</code>) — plus AWS certifications.</li>
+            <li><span class="skill-name">Python</span> automation scripts, data scrapers, and personal tooling.</li>
+            <li><span class="skill-name">Java &amp; C</span> systems coursework, algorithm work, and competitive-programming archive.</li>
+            <li><span class="skill-name">SQL</span> backend data work at Capital One and CoStar Group.</li>
+            <li><span class="skill-name">CSS / Responsive UI</span> the glass-morphism widget tooltips, sliders, and animated landing pages across this site.</li>
+            <li><span class="skill-name">Rust</span> exploratory systems projects and language fundamentals.</li>
+        </ul>
+    </section>
+
+    <section id="featured-projects" class="featured-projects" aria-label="Featured projects">
+        <p class="featured-projects-title">Featured projects</p>
+        <div class="featured-grid">
+            <article class="featured-card">
+                <h3>NYC Missile-Defence Simulation</h3>
+                <p class="featured-outcome">
+                    Real-time Canvas 2D simulation: 23 missile classes, 6 interceptor types,
+                    weather and severity controls, AUTO modes that cycle every combination.
+                    Built from scratch — no game engine, no physics library.
+                </p>
+                <p class="featured-tech">Vanilla JS, Canvas 2D, custom physics</p>
+                <div class="featured-links">
+                    <a class="featured-link-primary" href="#nyc-canvas-figure">Try it ↑</a>
+                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/blob/master/js/nyc-city.js" target="_blank" rel="noopener">Source</a>
+                </div>
+            </article>
+
+            <article class="featured-card">
+                <h3>Retro Arcade Gallery (100+ games)</h3>
+                <p class="featured-outcome">
+                    Custom-built playable canvas games — physics, AI, mobile controls, gallery
+                    previews. Every game tested for winnability and medium difficulty per a
+                    documented spec.
+                </p>
+                <p class="featured-tech">Vanilla JS, Canvas 2D, mobile touch</p>
+                <div class="featured-links">
+                    <a class="featured-link-primary" href="https://www.masrikdahir.com/games">Play</a>
+                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/js/games" target="_blank" rel="noopener">Source</a>
+                </div>
+            </article>
+
+            <article class="featured-card">
+                <h3>Travel Atlas (250+ regions)</h3>
+                <p class="featured-outcome">
+                    Interactive atlas of US states, Canadian provinces, and 200+ countries with
+                    per-region pages, photo galleries, and continent-level navigation.
+                    Static-site architecture on AWS S3 + CloudFront.
+                </p>
+                <p class="featured-tech">Vue 3, AWS S3, CloudFront</p>
+                <div class="featured-links">
+                    <a class="featured-link-primary" href="https://www.masrikdahir.com/map">Browse</a>
+                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io" target="_blank" rel="noopener">Source</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
     <!-- The Grid -->
     <div class="w3-row-padding">
 
@@ -277,7 +570,7 @@
                                     <!--          Capital One -->
                                     <div data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
+                                             alt="Capital One logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
                                     </div>
                                 </TD>
 
@@ -285,7 +578,7 @@
                                     <!--          CoStar -->
                                     <div data-toggle="tooltip" data-html="true" title="CoStar Group">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
+                                             alt="CoStar Group logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -296,14 +589,14 @@
                                     <!--          Dept of Election -->
                                     <div data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
+                                             alt="Virginia Department of Elections logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
                                     </div>
                                 </TD>
                                 <TD>
                                     <!--          VCU -->
                                     <div data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
+                                             alt="Virginia Commonwealth University logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
                                     </div>
 
 
@@ -316,7 +609,7 @@
                                     <!--          Roanoke -->
                                     <div data-toggle="tooltip" data-html="true" title="Roanoke County">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
+                                             alt="Roanoke County logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
                                     </div>
                                 </TD>
 
@@ -324,7 +617,7 @@
                                     <!--          Att -->
                                     <div data-toggle="tooltip" data-html="true" title="AT&T Inc.">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
+                                             alt="AT&amp;T logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -353,14 +646,14 @@
                                     <!--          Python-->
                                     <div data-toggle="tooltip" data-html="true" title="Python Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/python.png"/>
+                                             alt="Python logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/python.png"/>
                                     </div>
                                 </TD>
                                 <TD>
                                     <!--          Java-->
                                     <div data-toggle="tooltip" data-html="true" title="Java Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/java.png"/>
+                                             alt="Java logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/java.png"/>
                                     </div>
                                 </TD>
 
@@ -368,7 +661,7 @@
                                     <!--          C-->
                                     <div data-toggle="tooltip" data-html="true" title="C Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/c2.png"/>
+                                             alt="C language logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/c2.png"/>
 
                                     </div>
                                 </TD>
@@ -377,7 +670,7 @@
                                     <!--          Nodejs-->
                                     <div data-toggle="tooltip" data-html="true" title="Node JS Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/nodejs.png"/>
+                                             alt="Node.js logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/nodejs.png"/>
 
                                     </div>
                                 </TD>
@@ -386,7 +679,7 @@
                                     <!--          SageMath-->
                                     <div data-toggle="tooltip" data-html="true" title="Sage Math Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/sage.png"/>
+                                             alt="SageMath logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/sage.png"/>
 
                                     </div>
                                 </TD>
@@ -400,7 +693,7 @@
                                     <!--          Rust-->
                                     <div data-toggle="tooltip" data-html="true" title="Rust Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Rust_programming_language_black_logo.svg.png" />
+                                             alt="Rust logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/Rust_programming_language_black_logo.svg.png" />
 
                                     </div>
                                 </TD>
@@ -408,7 +701,7 @@
                                     <!--          HTML-->
                                     <div data-toggle="tooltip" data-html="true" title="HTML Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/html.png"/>
+                                             alt="HTML5 logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/html.png"/>
 
                                     </div>
                                 </TD>
@@ -417,7 +710,7 @@
                                     <!--          CSS-->
                                     <div data-toggle="tooltip" data-html="true" title="CSS Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/css.png"/>
+                                             alt="CSS3 logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/css.png"/>
 
                                     </div>
                                 </TD>
@@ -426,7 +719,7 @@
                                     <!--          SQL-->
                                     <div data-toggle="tooltip" data-html="true" title="SQL Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/sql.png"/>
+                                             alt="SQL logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/sql.png"/>
 
                                     </div>
                                 </TD>
@@ -435,7 +728,7 @@
                                     <!--          PHP-->
                                     <div data-toggle="tooltip" data-html="true" title="PHP Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/php.png" />
+                                             alt="PHP logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/php.png" />
 
                                     </div>
                                 </TD>
@@ -448,7 +741,7 @@
                                     <!--          Angular JS-->
                                     <div data-toggle="tooltip" data-html="true" title="Angular JS Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/AngularJS-Shield.png" />
+                                             alt="AngularJS logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/AngularJS-Shield.png" />
 
                                     </div>
                                 </TD>
@@ -457,7 +750,7 @@
                                     <!--        AWS Cloud Practitioner-->
                                     <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner Certification">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png"/>
+                                             alt="AWS Cloud Practitioner certification badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png"/>
                                     </div>
                                 </TD>
 
@@ -465,7 +758,7 @@
                                     <!--        AWS Certified Developer-->
                                     <div data-toggle="tooltip" data-html="true" title="AWS Certified Developer">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png"/>
+                                             alt="AWS Certified Developer Associate badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png"/>
                                     </div>
                                 </TD>
 
@@ -473,7 +766,7 @@
                                     <!--        Postman Student Expert-->
                                     <div data-toggle="tooltip" data-html="true" title="Postman API Student Expert">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png"/>
+                                             alt="Postman API Student Expert badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png"/>
                                     </div>
                                 </TD>
 
@@ -481,7 +774,7 @@
                                     <!--        Databricks Fundamentals-->
                                     <div data-toggle="tooltip" data-html="true" title="Databricks Fundamentals">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png"/>
+                                             alt="Databricks Fundamentals badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -492,14 +785,14 @@
                                     <!--        Databricks Generative AI Fundamentals-->
                                     <div data-toggle="tooltip" data-html="true" title="Databricks Generative AI Fundamentals">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png"/>
+                                             alt="Databricks Generative AI Fundamentals badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png"/>
                                     </div>
                                 </TD>
                                 <TD>
                                     <!--        AWS Solutions Architect-->
                                     <div data-toggle="tooltip" data-html="true" title="AWS Solutions Architect">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png"/>
+                                             alt="AWS Certified Solutions Architect Associate badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -534,7 +827,7 @@
                                                 <div data-toggle="tooltip" data-html="true" :title="item.title">
                                                     <center>
                                                         <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                            <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
+                                                            <img :src="item.image" :alt="item.title" loading="lazy" @error="$event.target.style.opacity='0.3'" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                                         </button>
                                                     </center>
                                                 </div>
@@ -557,7 +850,7 @@
                                             <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
                                                 <div data-toggle="tooltip" data-html="true" :title="item.title">
                                                     <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                        <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
+                                                        <img :src="item.image" :alt="item.title" loading="lazy" @error="$event.target.style.opacity='0.3'" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                                     </button>
                                                 </div>
                                             </div>
@@ -587,7 +880,7 @@
         <footer class="w3-center w3-margin-top " style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
             <div style="padding: 10px">
                 <p style="padding-top: 15px;">Connect with me through Social Media</p>
-                <a href="https://www.instragram.com/masrik_dahir" target="blank" class="social-host" data-tip="Instagram"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
+                <a href="https://www.instagram.com/masrik_dahir" target="blank" class="social-host" data-tip="Instagram"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
                 <a href="https://www.twitter.com/masrik_dahir" target="blank" class="social-host" data-tip="Twitter / X"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
                 <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank" class="social-host" data-tip="LinkedIn"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
                 <a href="https://github.com/Masrik-Dahir" target="blank" class="social-host" data-tip="GitHub"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
@@ -598,6 +891,7 @@
                 <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
                     <b style="font-size:37px; color: black" class='w3-hover-opacity'>
                         <img class="" style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px "
+                             alt="Unstoppable Domains logo"
                              src="https://d3dw5jtb3w1kgy.cloudfront.net/w3_white.png"/>
                     </b>
                 </a>
@@ -675,7 +969,7 @@
 
 
 
-                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                <a href="https://www.masrikdahir.com/milestone" class="nav-demoted" style="text-decoration: none">
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
                         <div style="" class="w3-padding-small">
@@ -688,7 +982,7 @@
                     </button>
                 </a>
 
-                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                <a href="https://www.masrikdahir.com/map" class="nav-demoted" style="text-decoration: none">
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
                         <div style="" class="w3-padding-small">
@@ -782,7 +1076,7 @@
                                 </div>
                             </button>
                         </a>
-                        <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                        <a href="https://www.masrikdahir.com/milestone" class="nav-demoted" style="text-decoration: none">
                             <button class="glow-on-hover3" type="button"
                                     style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                                 <div style="" class="w3-padding-small">
@@ -795,7 +1089,7 @@
                             </button>
                         </a>
 
-                        <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                        <a href="https://www.masrikdahir.com/map" class="nav-demoted" style="text-decoration: none">
                             <button class="glow-on-hover3" type="button"
                                     style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                                 <div style="" class="w3-padding-small">
@@ -826,7 +1120,36 @@
 
         </div>
 
-        <canvas id='canv'></canvas>
+        <figure id="nyc-canvas-figure" class="nyc-canvas-figure">
+            <canvas id='canv'></canvas>
+            <noscript>
+                <p>This is a real-time canvas simulation of a city under missile defence. Enable JavaScript to interact with it.</p>
+            </noscript>
+        </figure>
+
+        <style>
+            .nyc-canvas-figure { margin: 0; padding: 0; }
+            .nyc-canvas-caption {
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 12px;
+                line-height: 1.5;
+                color: rgba(10,10,25,0.78);
+                padding: 10px 14px;
+                margin: 0 0 6px;
+                background: linear-gradient(135deg, rgba(255,255,255,0.94) 0%, rgba(225,238,255,0.84) 100%);
+                border: 1px solid rgba(120,180,255,0.30);
+                border-radius: 10px;
+                max-width: 720px;
+            }
+            .nyc-canvas-caption strong { color: #1e6fd0; font-weight: 800; letter-spacing: 0.04em; }
+            .nyc-canvas-caption a {
+                color: #c0202a;
+                font-weight: 800;
+                text-decoration: underline;
+                text-underline-offset: 2px;
+            }
+            .nyc-canvas-caption a:hover { color: #8a181e; }
+        </style>
 
         <div class="city-switcher-wrap">
             <div class="flight-wrap widget-host">
@@ -991,6 +1314,45 @@
                     <div class="tt-hint">Auto: cycles all interceptor types • Difficulty scales AI fire rate</div>
                 </div>
             </div>
+
+            <div id="reconstructBtn" class="reconstruct-btn icon-only">
+                <button class="rcn-core" onclick="
+                    if(window.toggleReconstruction){
+                        var on = window.toggleReconstruction();
+                        var wrap = document.getElementById('reconstructBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-wrench rcn-icon" id="rcnIcon" aria-hidden="true"></i>
+                </button>
+                <span class="rcn-pulse"></span>
+                <div class="widget-tooltip tt-rcn" role="tooltip">
+                    <div class="tt-title tt-title-rcn">Reconstruction</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-rcn-status" id="ttRcnStatus">IDLE</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Elapsed</span>
+                        <span class="tt-value tt-rcn-status" id="ttRcnTimer">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Damage</span>
+                        <span class="tt-value tt-rcn-status" id="ttRcnDamage">—</span>
+                    </div>
+                    <div class="tt-slider-row">
+                        <span class="tt-slider-label tt-slider-label-rcn">Speed</span>
+                        <input type="range" min="10" max="500" value="100" class="tt-slider tt-slider-rcn" id="ttRcnSpeedSlider" aria-label="Reconstruction speed"
+                               oninput="if(window.setReconstructionSpeed)window.setReconstructionSpeed(this.value/100); document.getElementById('ttRcnSpeedVal').textContent=(this.value/100).toFixed(2)+'×';">
+                        <span class="tt-slider-val tt-slider-val-rcn" id="ttRcnSpeedVal">1.00×</span>
+                    </div>
+                    <div class="tt-toggle-row">
+                        <button type="button" class="tt-rcn-instant" id="ttRcnInstantBtn"
+                                onclick="if(window.completeReconstructionNow) window.completeReconstructionNow();">REBUILD NOW</button>
+                    </div>
+                    <div class="tt-hint">Brings fire trucks, helicopters, tow trucks &amp; cranes • Auto-runs after attack/defence • Runs until every fire is out and every building is rebuilt</div>
+                </div>
+            </div>
         </div>
 
         <style>
@@ -1019,6 +1381,7 @@
             .city-switcher-wrap > .missile-btn,
             .city-switcher-wrap > .strategy-btn,
             .city-switcher-wrap > .defence-btn,
+            .city-switcher-wrap > .reconstruct-btn,
             .city-switcher-wrap > .flight-wrap {
                 height: 44px;
                 box-sizing: border-box;
@@ -1716,6 +2079,469 @@
                 0%   { transform: scale(0.94); opacity: 0.75; }
                 100% { transform: scale(1.30); opacity: 0; }
             }
+
+            /* ── RECONSTRUCTION widget (mirrors defence widget, orange theme) ── */
+            .reconstruct-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(255,200,140,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            .reconstruct-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .reconstruct-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .reconstruct-btn:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(255,210,150,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px  rgba(0,0,0,0.08);
+                transform: translateY(-1px);
+            }
+            .reconstruct-btn:hover::after { opacity: 1; }
+            .reconstruct-btn:active { transform: translateY(0) scale(0.97); }
+            .reconstruct-btn .rcn-core {
+                width: 100%;
+                height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                background-image: none !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                position: relative;
+                z-index: 1;
+            }
+            /* defeat polish.css's hex-mask hover overlay on the inner
+               button — it bleeds the diamond/hex shape over the wrench */
+            .reconstruct-btn .rcn-core::before,
+            .reconstruct-btn .rcn-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                -webkit-mask-image: none !important;
+                        mask-image: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .reconstruct-btn .rcn-core:hover {
+                background: rgba(255,255,255,0.10) !important;
+            }
+            .reconstruct-btn .rcn-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);              /* matches flight / weather icons */
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            .reconstruct-btn .rcn-core:hover .rcn-icon { transform: rotate(15deg); }
+            .reconstruct-btn.active .rcn-icon {
+                color: #ea580c;
+                text-shadow: 0 0 8px rgba(234,88,12,0.65);
+                animation: rcn-spin 1.2s linear infinite;
+            }
+            @keyframes rcn-spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+            }
+            .reconstruct-btn .rcn-pulse { display: none; }
+            .reconstruct-btn.active .rcn-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(234,88,12,0.55);
+                animation: rcn-pulse 1.6s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes rcn-pulse {
+                0%   { transform: scale(0.94); opacity: 0.80; }
+                100% { transform: scale(1.35); opacity: 0; }
+            }
+            /* tooltip orange title accent */
+            .widget-tooltip .tt-title-rcn { color: #ea580c; }
+            .widget-tooltip .tt-rcn-status { color: #ea580c; }
+            .tt-rcn .tt-row-hover .tt-label { color: #ea580c; }
+            .tt-slider-label-rcn { color: #ea580c; }
+            .tt-slider-val-rcn   { color: #ea580c; }
+            .tt-slider-rcn {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 100%;
+                height: 4px;
+                background: linear-gradient(90deg,
+                    rgba(234,88,12,0.45) 0%,
+                    rgba(251,191,36,0.45) 50%,
+                    rgba(234,88,12,0.85) 100%);
+                border-radius: 6px;
+                outline: none;
+            }
+            .tt-slider-rcn::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 14px; height: 14px;
+                border-radius: 50%;
+                background: radial-gradient(circle at 35% 30%, #fff 0%, #fb923c 60%, #c2410c 100%);
+                border: 1px solid rgba(234,88,12,0.85);
+                box-shadow: 0 0 6px rgba(234,88,12,0.65);
+                cursor: pointer;
+            }
+            .tt-slider-rcn::-moz-range-thumb {
+                width: 14px; height: 14px;
+                border-radius: 50%;
+                background: radial-gradient(circle at 35% 30%, #fff 0%, #fb923c 60%, #c2410c 100%);
+                border: 1px solid rgba(234,88,12,0.85);
+                box-shadow: 0 0 6px rgba(234,88,12,0.65);
+                cursor: pointer;
+            }
+            /* CSS @property — required so `--rcn-edge-angle` can be
+               interpolated as an <angle> in animations. Without this
+               the browser treats the var as a string and the conic
+               gradient would jump rather than smoothly rotate. */
+            @property --rcn-edge-angle {
+                syntax: '<angle>';
+                initial-value: 0deg;
+                inherits: false;
+            }
+
+            .tt-rcn-instant {
+                display: inline-block;
+                width: 100%;
+                padding: 6px 10px;
+                /* DOUBLE-LAYER background trick:
+                   padding-box layer  →  the white liquid-glass surface
+                                          shown INSIDE the border ring
+                   border-box layer   →  conic-rainbow that lives in the
+                                          2-px transparent border itself
+                   When `--rcn-edge-angle` animates, the conic gradient
+                   rotates → border colors flow continuously around the
+                   button perimeter. */
+                --rcn-edge-angle: 0deg;
+                background:
+                    linear-gradient(135deg,
+                        rgba(255,255,255,0.96) 0%,
+                        rgba(255,237,213,0.92) 100%) padding-box,
+                    conic-gradient(from var(--rcn-edge-angle),
+                        #ffb3c6,   /* cherry  */
+                        #ffd1a8,   /* peach   */
+                        #fff0a8,   /* lemon   */
+                        #c4f2c5,   /* mint    */
+                        #b8d9ff,   /* sky     */
+                        #d4c1ff,   /* lavender*/
+                        #ffc1e5,   /* rose    */
+                        #ffb3c6    /* loop seam — same as first stop  */
+                    ) border-box;
+                color: #9a3412;
+                border: 2px solid transparent;
+                border-radius: 8px;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.10em;
+                cursor: pointer;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.85) inset,
+                    0 2px 6px rgba(0,0,0,0.18);
+                transition: transform 0.12s ease, box-shadow 0.18s ease,
+                            color 0.18s ease;
+                /* Edge rotation runs continuously even at rest so the
+                   border ALWAYS glistens — full sentence visually
+                   confirms the button is interactive. */
+                animation: tt-rcn-edge-spin 4.5s linear infinite;
+            }
+            .tt-rcn-instant:hover {
+                color: #ea580c;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,1.00) inset,
+                    0 0 16px rgba(234,88,12,0.50),
+                    0 3px 10px rgba(0,0,0,0.20);
+                transform: translateY(-1px);
+                /* Hover speeds the rotation noticeably and bumps colour
+                   saturation so the edge POPS while the cursor is here. */
+                animation: tt-rcn-edge-spin 2.4s linear infinite;
+                filter: saturate(1.35) brightness(1.05);
+            }
+            .tt-rcn-instant:active { transform: translateY(0) scale(0.97); }
+
+            @keyframes tt-rcn-edge-spin {
+                to { --rcn-edge-angle: 360deg; }
+            }
+            /* REBUILD NOW button — hex OUTLINES tiled in soft pastel
+               rainbow that visibly cycles through colors on hover.
+
+               CRITICAL: filter is NOT !important so the keyframe
+               animation can actually drive `hue-rotate` — !important
+               on a static declaration would beat the animation per
+               CSS cascade rules.
+
+               Hex size is calc()-derived from the button height so
+               the pattern auto-scales to whatever the button ends
+               up being. ~14px tall hexagons → 1 clean row on a 22-
+               24px button, ~12 columns across a typical width. */
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant::before,
+            .widget-tooltip.tt-rcn .tt-rcn-instant::before {
+                /* VERY tiny hexagonal mesh — ~5 × 6 px per cell. At
+                   this density you only just barely perceive the
+                   hex geometry; the overall effect reads as a fine
+                   shimmering metallic mesh more than a tiled pattern.
+                   Stroke is dropped to 0.7 so the outline doesn't
+                   overwhelm the cell at this tile size. */
+                --hex-w: 5px;
+                --hex-h: 6px;
+                z-index: -1 !important;            /* BELOW the button text */
+                -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                -webkit-mask-size: var(--hex-w) var(--hex-h) !important;
+                        mask-size: var(--hex-w) var(--hex-h) !important;
+                background: linear-gradient(90deg,
+                    #ffb3c6 0%,     /* cherry  */
+                    #ffd1a8 14%,    /* peach   */
+                    #fff0a8 28%,    /* lemon   */
+                    #c4f2c5 42%,    /* mint    */
+                    #b8d9ff 56%,    /* sky     */
+                    #d4c1ff 70%,    /* lavender*/
+                    #ffc1e5 85%,    /* rose    */
+                    #ffb3c6 100%    /* seam back to cherry  */
+                ) !important;
+                background-size: 300% 100% !important;
+                background-position: 0% 50% !important;
+                mix-blend-mode: normal !important;
+                /* NO !important here so the keyframe's hue-rotate can
+                   actually take effect when the animation runs. */
+                filter: saturate(1.25) brightness(1.05);
+            }
+            /* Button creates its own stacking context so the negative-z
+               ::before doesn't fall outside it; text renders above it. */
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant,
+            .widget-tooltip.tt-rcn .tt-rcn-instant {
+                isolation: isolate;
+                z-index: 0;
+            }
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant:hover::before,
+            .widget-tooltip.tt-rcn .tt-rcn-instant:hover::before {
+                opacity: 1 !important;
+                /* TWO animations layered for very visible color change:
+                   – sweep: gradient slides full 300% width
+                   – hue-cycle: every pixel's hue rotates 360° */
+                animation:
+                    tt-hex-sweep 2.4s linear infinite,
+                    tt-hex-hue-cycle 3.6s linear infinite !important;
+            }
+            @keyframes tt-hex-sweep {
+                from { background-position:   0% 50%; }
+                to   { background-position: 200% 50%; }
+            }
+            @keyframes tt-hex-hue-cycle {
+                from { filter: saturate(1.25) brightness(1.05) hue-rotate(0deg); }
+                to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+            }
+
+            /* ═══════════════════════════════════════════════════════════
+               NEW NORM — Liquid-glass hex-shimmer for ALL widget-tooltip
+               buttons. Hexagons are sized via the per-button --hex-size
+               custom property (default 10px) so each button shows MANY
+               small hexes tiled across its surface. On hover, the hex
+               layer fades in and runs an INFINITE shimmer animation —
+               never stops glistening while the cursor stays on the
+               button. Apply `.liquid-glass-btn` to any future button to
+               get the same treatment outside widget tooltips. */
+            .widget-tooltip .tt-chip,
+            .widget-tooltip .tt-toggle,
+            .widget-tooltip .tt-rcn-instant,
+            .widget-tooltip .tt-stg-plan,
+            .widget-tooltip .tt-stg-exec,
+            .widget-tooltip .tt-stg-clear,
+            .liquid-glass-btn {
+                position: relative;
+                isolation: isolate;
+                overflow: hidden;
+                --hex-size: 10px;
+            }
+            /* per-button-type hex sizes — smaller for tiny chips, bigger
+               for the large rebuild button so the visual density is
+               consistent across the row. */
+            .widget-tooltip .tt-chip                 { --hex-size:  8px; }
+            .widget-tooltip .tt-toggle               { --hex-size:  9px; }
+            .widget-tooltip .tt-rcn-instant          { --hex-size: 11px; }
+            .widget-tooltip .tt-stg-plan,
+            .widget-tooltip .tt-stg-exec,
+            .widget-tooltip .tt-stg-clear            { --hex-size: 10px; }
+
+            /* Keep the button's own children above the hex layer */
+            .widget-tooltip .tt-chip > *,
+            .widget-tooltip .tt-toggle,
+            .widget-tooltip .tt-rcn-instant,
+            .widget-tooltip .tt-stg-plan,
+            .widget-tooltip .tt-stg-exec,
+            .widget-tooltip .tt-stg-clear,
+            .liquid-glass-btn > * {
+                position: relative;
+                z-index: 2;
+            }
+
+            /* The shimmer layer. ::before is a moving white-stripe gradient
+               clipped to a tiling hexagon mask. At rest it's invisible.
+               On hover it fades in (0 → 0.95) AND starts an infinite
+               shimmer animation. polish.css already attaches its own
+               ::before / ::after to many buttons with a one-shot
+               rainbow sweep — !important overrides it so this NEW norm
+               wins everywhere. */
+            body.polish .widget-tooltip .tt-chip::before,
+            body.polish .widget-tooltip .tt-toggle::before,
+            body.polish .widget-tooltip .tt-rcn-instant::before,
+            body.polish .widget-tooltip .tt-stg-plan::before,
+            body.polish .widget-tooltip .tt-stg-exec::before,
+            body.polish .widget-tooltip .tt-stg-clear::before,
+            body.polish .liquid-glass-btn::before,
+            .widget-tooltip .tt-chip::before,
+            .widget-tooltip .tt-toggle::before,
+            .widget-tooltip .tt-rcn-instant::before,
+            .widget-tooltip .tt-stg-plan::before,
+            .widget-tooltip .tt-stg-exec::before,
+            .widget-tooltip .tt-stg-clear::before,
+            .liquid-glass-btn::before {
+                content: '' !important;
+                position: absolute !important;
+                inset: 0 !important;
+                z-index: 0 !important;
+                pointer-events: none !important;
+                border-radius: inherit !important;
+                background:
+                    linear-gradient(110deg,
+                        rgba(255,255,255,0.00) 0%,
+                        rgba(255,255,255,0.00) 30%,
+                        rgba(255,255,255,0.55) 47%,
+                        rgba(255,255,255,0.85) 50%,
+                        rgba(255,255,255,0.55) 53%,
+                        rgba(255,255,255,0.00) 70%,
+                        rgba(255,255,255,0.00) 100%) !important;
+                background-size: 300% 100% !important;
+                background-position: -60% 50% !important;
+                -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 16'><polygon points='4.5,0.6 13.5,0.6 17.4,8 13.5,15.4 4.5,15.4 0.6,8' fill='%23000'/></svg>") !important;
+                        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 16'><polygon points='4.5,0.6 13.5,0.6 17.4,8 13.5,15.4 4.5,15.4 0.6,8' fill='%23000'/></svg>") !important;
+                -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 0.89) !important;
+                        mask-size: var(--hex-size) calc(var(--hex-size) * 0.89) !important;
+                -webkit-mask-repeat: repeat !important;
+                        mask-repeat: repeat !important;
+                mix-blend-mode: overlay !important;
+                opacity: 0 !important;
+                animation: none !important;
+                transition: opacity 0.30s ease !important;
+                /* `filter` is intentionally NOT set here — per-button
+                   overrides (e.g. .tt-rcn-instant) need to drive their
+                   own hue-rotate / saturate animations, and !important
+                   on this layer would beat the keyframe animation per
+                   the CSS cascade. */
+            }
+            /* Faint liquid-glass surface tint, also continuously animated
+               so the button has a subtle "alive" feel even at rest. */
+            .widget-tooltip .tt-chip::after,
+            .widget-tooltip .tt-toggle::after,
+            .widget-tooltip .tt-rcn-instant::after,
+            .widget-tooltip .tt-stg-plan::after,
+            .widget-tooltip .tt-stg-exec::after,
+            .widget-tooltip .tt-stg-clear::after,
+            .liquid-glass-btn::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                border-radius: inherit;
+                background: linear-gradient(160deg,
+                    rgba(255,255,255,0.28) 0%,
+                    rgba(255,255,255,0.06) 38%,
+                    rgba(255,255,255,0.00) 60%);
+            }
+
+            /* Hover state — fade in the hex shimmer AND run it
+               continuously. `infinite` is the key — no fade-away. */
+            body.polish .widget-tooltip .tt-chip:hover::before,
+            body.polish .widget-tooltip .tt-toggle:hover::before,
+            body.polish .widget-tooltip .tt-rcn-instant:hover::before,
+            body.polish .widget-tooltip .tt-stg-plan:hover::before,
+            body.polish .widget-tooltip .tt-stg-exec:hover::before,
+            body.polish .widget-tooltip .tt-stg-clear:hover::before,
+            body.polish .liquid-glass-btn:hover::before,
+            .widget-tooltip .tt-chip:hover::before,
+            .widget-tooltip .tt-toggle:hover::before,
+            .widget-tooltip .tt-rcn-instant:hover::before,
+            .widget-tooltip .tt-stg-plan:hover::before,
+            .widget-tooltip .tt-stg-exec:hover::before,
+            .widget-tooltip .tt-stg-clear:hover::before,
+            .liquid-glass-btn:hover::before {
+                opacity: 0.95 !important;
+                animation: tt-hex-glisten 2.4s linear infinite !important;
+            }
+            @keyframes tt-hex-glisten {
+                0%   { background-position: -60% 50%; }
+                100% { background-position: 160% 50%; }
+            }
+            @media (prefers-reduced-motion: reduce){
+                .widget-tooltip .tt-chip:hover::before,
+                .widget-tooltip .tt-toggle:hover::before,
+                .widget-tooltip .tt-rcn-instant:hover::before,
+                .widget-tooltip .tt-stg-plan:hover::before,
+                .widget-tooltip .tt-stg-exec:hover::before,
+                .widget-tooltip .tt-stg-clear:hover::before,
+                .liquid-glass-btn:hover::before {
+                    animation: none;
+                    opacity: 0.55;
+                }
+            }
+
             /* tooltip green title accent */
             .widget-tooltip .tt-title-defence  { color: #1e7838; }
             .widget-tooltip .tt-dfn { color: #1e7838; }
@@ -1825,6 +2651,7 @@
             .weather-widget:hover .widget-tooltip,
             .missile-btn:hover .widget-tooltip,
             .defence-btn:hover .widget-tooltip,
+            .reconstruct-btn:hover .widget-tooltip,
             .strategy-btn:hover .widget-tooltip,
             .widget-host:hover .widget-tooltip,
             .widget-tooltip:hover {
@@ -2212,67 +3039,36 @@
             .tt-toggle-attack.on  { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
             .tt-toggle-defence.on { background: linear-gradient(135deg,#2da64a,#1e7838); border-color:#155a28; }
 
-            /* ── social media tooltip (same glass look as widget tooltips) ── */
+            /* social media tooltip is rendered by the global [data-tip]::before rule below,
+               with a weather-widget-style white background override */
             .social-host {
-                position: relative;
+                display: inline-block;
+                vertical-align: top;
             }
-            .social-host::after {
-                content: attr(data-tip);
-                position: absolute;
-                left: 50%;
-                bottom: calc(100% + 10px);
-                transform: translate(-50%, 8px);
-                padding: 8px 12px;
+            .social-host[data-tip]::before {
                 background: linear-gradient(135deg,
-                    rgba(255,255,255,0.94) 0%,
-                    rgba(225,238,255,0.84) 100%);
-                backdrop-filter: blur(18px) saturate(180%);
-                -webkit-backdrop-filter: blur(18px) saturate(180%);
-                border: 1px solid rgba(255,255,255,0.85);
-                border-bottom-color: rgba(255,255,255,0.45);
-                border-radius: 10px;
+                    rgba(255,255,255,1.00) 0%,
+                    rgba(248,251,255,1.00) 100%);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                border: 1px solid rgba(200,215,235,1.00);
+                border-bottom-color: rgba(200,215,235,1.00);
                 box-shadow:
                     0 1px 0 rgba(255,255,255,1.00) inset,
-                    0 6px 22px rgba(0,0,0,0.22),
-                    0 2px 8px rgba(0,0,0,0.10),
-                    0 0 24px rgba(120,180,255,0.18);
-                font-family: 'Arial Black', Arial, sans-serif;
-                font-size: 10px;
-                font-weight: 800;
-                letter-spacing: 0.10em;
-                text-transform: uppercase;
-                color: rgba(10,10,25,0.90);
-                white-space: nowrap;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.22s ease, transform 0.28s cubic-bezier(.2,.7,.2,1.2);
-                z-index: 1000;
+                    0 8px 28px rgba(0,0,0,0.22),
+                    0 2px 10px rgba(0,0,0,0.10),
+                    0 0 32px rgba(120,180,255,0.18);
+                color: rgba(10,10,25,0.95);
             }
-            /* downward caret matching widget tooltips */
-            .social-host::before {
-                content: '';
-                position: absolute;
-                left: 50%;
-                bottom: calc(100% + 4px);
-                transform: translateX(-50%) translateY(8px) rotate(45deg);
-                width: 10px;
-                height: 10px;
+            .social-host[data-tip]::after {
                 background: linear-gradient(135deg,
-                    rgba(255,255,255,0.94),
-                    rgba(225,238,255,0.84));
-                border-right: 1px solid rgba(255,255,255,0.55);
-                border-bottom: 1px solid rgba(255,255,255,0.45);
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.22s ease, transform 0.28s cubic-bezier(.2,.7,.2,1.2);
-                z-index: 999;
+                    rgba(255,255,255,1.00) 0%,
+                    rgba(248,251,255,1.00) 100%);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                border-left: 1px solid rgba(200,215,235,1.00);
+                border-top:  1px solid rgba(200,215,235,1.00);
             }
-            .social-host:hover::after,
-            .social-host:hover::before {
-                opacity: 1;
-            }
-            .social-host:hover::after  { transform: translate(-50%, 0); }
-            .social-host:hover::before { transform: translateX(-50%) translateY(0) rotate(45deg); }
 
             .widget-tooltip .tt-hint {
                 margin-top: 10px;
@@ -2564,7 +3360,7 @@
             </div>
             <span>
 
-            <a href="https://www.instragram.com/masrik_dahir" target="blank" class="social-host" data-tip="Instagram" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://www.instagram.com/masrik_dahir" target="blank" class="social-host" data-tip="Instagram" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-instagram w3-hover-opacity"></i></button></a>
             <a href="https://www.twitter.com/masrik_dahir" target="blank" class="social-host" data-tip="Twitter / X" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-twitter w3-hover-opacity"></i></button></a>
@@ -2808,9 +3604,29 @@
             }
             if(window.getDefenceTypeIndex) syncActive('ttDefenceGrid', window.getDefenceTypeIndex());
 
+            /* ── RECONSTRUCTION widget polling ── */
+            if(window.isReconstructing){
+                var rOn = window.isReconstructing();
+                var rWrap = document.getElementById('reconstructBtn');
+                if(rWrap) rWrap.classList.toggle('active', rOn);
+                setText('ttRcnStatus', rOn ? 'REBUILDING' : 'IDLE');
+                if(window.getReconstructionTimer){
+                    var rT = window.getReconstructionTimer();
+                    setText('ttRcnTimer', rOn ? (rT/1000).toFixed(1) + ' s' : '—');
+                }
+                if(window.getReconstructionDamage){
+                    var rD = window.getReconstructionDamage();
+                    setText('ttRcnDamage', rOn ? String(rD) : '—');
+                }
+            }
+
             setTimeout(pollCity,350);
         }
         pollCity();
+
+        /* clean up any stale <span class="social-tip"> elements left over from a
+           previous design — the global [data-tip]::before rule now handles tooltips */
+        document.querySelectorAll('.social-host > .social-tip').forEach(function(n){ n.remove(); });
     })();
     </script>
 </body>

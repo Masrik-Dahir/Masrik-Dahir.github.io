@@ -33,8 +33,51 @@
         { type:'shooting',  sky0:'#0c0e18', sky1:'#181a24' },
         { type:'fireworks', sky0:'#08080e', sky1:'#14141e' },
         { type:'bloodmoon', sky0:'#1a0404', sky1:'#2a0808' },
-        { type:'nebula',    sky0:'#0a0218', sky1:'#180830' }
+        { type:'nebula',    sky0:'#0a0218', sky1:'#180830' },
+
+        /* ── ten invented weather phenomena ──────────────────────
+           Each event keeps its own display name (`type`) so the
+           weather widget treats it as a distinct entry, but pipes
+           into one of the existing particle/render systems via the
+           `alias` field. Sky palettes are hand-tuned and unique. */
+
+        /* Pink dust storm: warm purple gloom drifting fine particles. */
+        { type:'roseDust',       alias:'wind',      sky0:'#5a3c4c', sky1:'#a08090' },
+
+        /* Golden mid-day shower — soft gold drizzle, warm beige horizon. */
+        { type:'goldShower',     alias:'rain',      sky0:'#6a5828', sky1:'#cfb888' },
+
+        /* Cherry-blossom storm: dusty pink slow-falling petals. */
+        { type:'cherryStorm',    alias:'blizzard',  sky0:'#6a4858', sky1:'#d8a0b8' },
+
+        /* Mint mist: minty teal-green hush over the city. */
+        { type:'mintMist',       alias:'rain',      sky0:'#386858', sky1:'#a0cfb8' },
+
+        /* Amber hail: warm copper sky, bronze ice. */
+        { type:'amberHail',      alias:'hail',      sky0:'#5a3818', sky1:'#b8884c' },
+
+        /* Violet gale: deep amethyst cyclonic wind streaks. */
+        { type:'violetWind',     alias:'wind',      sky0:'#382858', sky1:'#7868b8' },
+
+        /* Coral flood: warm peach rising-water cataclysm. */
+        { type:'coralFlood',     alias:'flood',     sky0:'#5a2c20', sky1:'#c08868' },
+
+        /* Jade meteors: emerald sky, green plasma trails. */
+        { type:'jadeMeteors',    alias:'meteor',    sky0:'#08382a', sky1:'#388058' },
+
+        /* Topaz fireworks: warm yellow night sky, golden bursts. */
+        { type:'topazFireworks', alias:'fireworks', sky0:'#181408', sky1:'#382c10' },
+
+        /* Silver nebula: cool silvery cosmic clouds over a sleeping city. */
+        { type:'silverNebula',   alias:'nebula',    sky0:'#1c2030', sky1:'#9cb0c8' }
     ];
+
+    /* Resolve an event entry's effective rendering type.
+       Some EVENTS carry a UI-only `type` (e.g. 'roseDust') with an
+       `alias` field naming the existing particle/render path to
+       reuse (e.g. 'wind'). All rendering code that previously read
+       `ev.type` should go through this helper. */
+    function effType(ev) { return (ev && ev.alias) ? ev.alias : (ev && ev.type); }
     /* start on a real weather/disaster event (skip index 0 = 'clear') */
     var eventIndex = 1 + Math.floor(Math.random() * (EVENTS.length - 1));
     var eventTimer = 0, EVENT_DURATION = 12000;
@@ -3814,7 +3857,8 @@
         bgC.beginPath(); bgC.arc(W*0.82,H*0.12,22,0,Math.PI*2); bgC.fill();
 
         /* overcast cloud wisps */
-        if(ev.type==='snow'||ev.type==='blizzard'||ev.type==='rain') {
+        var bgType=effType(ev);
+        if(bgType==='snow'||bgType==='blizzard'||bgType==='rain') {
             bgC.fillStyle='rgba(255,255,255,0.22)';
             for(var ci=0;ci<6;ci++) {
                 var cx2=(ci*W/5.5+40)%W, cy2=H*0.08+ci*H*0.03;
@@ -3823,7 +3867,7 @@
         }
 
         /* heat glow disk */
-        if(ev.type==='heat') {
+        if(bgType==='heat') {
             radialGlow(bgC, W*0.15,H*0.09, 110, 255,140,40, 0.45);
             radialGlow(bgC, W*0.15,H*0.09,  55, 255,200,80, 0.65);
             bgC.fillStyle='rgba(255,220,100,0.98)';
@@ -3925,7 +3969,7 @@
     }
 
     function updateVehicles(dt) {
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         /* speed multiplier — bad weather slows traffic */
         var spMul = 1;
         if(type==='rain') spMul=0.65;
@@ -4210,7 +4254,7 @@
     }
 
     function updatePeds(dt) {
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         /* pedestrians ALWAYS walk at normal speed — only outfit changes by weather */
         var sm = 1;
         for(var i=0;i<peds.length;i++) {
@@ -4232,7 +4276,7 @@
 
     function drawPeds(c) {
         var rdH=H-GROUND;
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         var COATS=['#c8cce0','#e0e4f0','#8898b0','#a0a8c0','#e8d0b0'];
         var UMB=['#c83838','#1e6cb8','#1e8c3c','#444444','#c0a020','#7030a0'];
         /* outfit-only changes — body pose & walking speed stay normal */
@@ -4419,7 +4463,7 @@
 
     function updateParticles(dt) {
         var k=dt/16;
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         var i,p;
 
         if(type==='flood'&&floodRising&&floodY>GROUND-H*0.26) floodY-=0.065*k;
@@ -4615,7 +4659,7 @@
 
     function drawDynamic() {
         dynC.clearRect(0,0,W,H);
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         var i,p;
 
         /* ── DESTROYED-BUILDING / WRECKAGE LAYER ──────────────────────────
@@ -5189,7 +5233,25 @@
        MAIN LOOP
     ══════════════════════════════════════════════ */
 
+    /* ── perf / a11y gates: reduced-motion users get a single static frame;
+       small viewports throttle to ~30fps to save battery on phones. */
+    var _reduceMotionMQ = (typeof window !== 'undefined' && window.matchMedia)
+        ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var _reduceMotion = _reduceMotionMQ ? _reduceMotionMQ.matches : false;
+    if (_reduceMotionMQ && _reduceMotionMQ.addEventListener) {
+        _reduceMotionMQ.addEventListener('change', function(e){ _reduceMotion = e.matches; });
+    }
+    function _isSmallViewport(){ return (typeof window !== 'undefined') && window.innerWidth < 768; }
+    var _lastFrame = 0;
+
     function tick(ts) {
+        /* reduced motion: render one frame and stop the loop entirely */
+        if (_reduceMotion && lastTime) { return; }
+        /* small viewports: throttle to ~30fps */
+        if (_isSmallViewport()) {
+            if (ts - _lastFrame < 33) { animId=requestAnimationFrame(tick); return; }
+            _lastFrame = ts;
+        }
         if(!lastTime) lastTime=ts;
         var dt=Math.min(ts-lastTime,50);
         lastTime=ts;
@@ -5198,7 +5260,7 @@
         if(eventTimer>=EVENT_DURATION){
             eventTimer=0;
             eventIndex=(eventIndex+1)%EVENTS.length;
-            initEvent(EVENTS[eventIndex].type);
+            initEvent(effType(EVENTS[eventIndex]));
             cityBuilt=false;
         }
 
@@ -5262,7 +5324,7 @@
         drawDynamic();
 
         ctx.clearRect(0,0,W,H);
-        var evType=EVENTS[eventIndex].type;
+        var evType=effType(EVENTS[eventIndex]);
         ctx.drawImage(bgCvs,0,0);
         /* Earthquake shakes the BUILDINGS (cityCvs) but not the sky.
            Vehicles + peds shake individually inside dynCvs via their own xShake/yOff. */
@@ -5288,7 +5350,7 @@
     initVehicles();
     initPeds();
     initAirDefence();
-    initEvent(EVENTS[eventIndex].type);
+    initEvent(effType(EVENTS[eventIndex]));
 
     window.addEventListener('resize',function(){
         resize();
@@ -5335,7 +5397,18 @@
         blizzard:'Blizzard', tornado:'Tornado', flood:'Flood', hail:'Hail',
         wind:'Wind', heat:'Heatwave', earthquake:'Earthquake', meteor:'Meteor Shower',
         aurora:'Aurora', starry:'Starry Night', shooting:'Shooting Stars',
-        fireworks:'Fireworks', bloodmoon:'Blood Moon', nebula:'Nebula'
+        fireworks:'Fireworks', bloodmoon:'Blood Moon', nebula:'Nebula',
+        /* ── invented phenomena ── */
+        roseDust:'Rose Dust',
+        goldShower:'Gold Shower',
+        cherryStorm:'Cherry Blossom Storm',
+        mintMist:'Mint Mist',
+        amberHail:'Amber Hail',
+        violetWind:'Violet Gale',
+        coralFlood:'Coral Tide',
+        jadeMeteors:'Jade Meteors',
+        topazFireworks:'Topaz Fireworks',
+        silverNebula:'Silver Nebula'
     };
     /* black-and-white Font Awesome 4.7 icons (filled variants only — safer) */
     var WEATHER_ICONS={
@@ -5344,12 +5417,23 @@
         flood:'fa-tint', hail:'fa-asterisk', wind:'fa-flag',
         heat:'fa-fire', earthquake:'fa-exclamation-triangle', meteor:'fa-rocket',
         aurora:'fa-magic', starry:'fa-star', shooting:'fa-asterisk',
-        fireworks:'fa-bullseye', bloodmoon:'fa-moon-o', nebula:'fa-cloud'
+        fireworks:'fa-bullseye', bloodmoon:'fa-moon-o', nebula:'fa-cloud',
+        /* invented event icons — reuse FA 4.7 filled glyphs */
+        roseDust:'fa-leaf',
+        goldShower:'fa-tint',
+        cherryStorm:'fa-pagelines',
+        mintMist:'fa-cloud',
+        amberHail:'fa-asterisk',
+        violetWind:'fa-flag',
+        coralFlood:'fa-tint',
+        jadeMeteors:'fa-rocket',
+        topazFireworks:'fa-bullseye',
+        silverNebula:'fa-cloud'
     };
     function setEvent(idx){
         eventIndex=((idx%EVENTS.length)+EVENTS.length)%EVENTS.length;
         eventTimer=0;
-        initEvent(EVENTS[eventIndex].type);
+        initEvent(effType(EVENTS[eventIndex]));
         cityBuilt=false;
     }
     window.getWeatherEventType=function(){ return EVENTS[eventIndex].type; };
@@ -8288,11 +8372,17 @@
         } else {
             t = { x: rng(W*0.1, W*0.9), y: GROUND - rng(20, GROUND*0.4) };
         }
-        /* fire without the user's defence batteries auto-intercepting */
-        var savedActive = defenceActive;
-        defenceActive = false;
-        fireMissile(t.x, t.y, kind);
-        defenceActive = savedActive;
+        /* normally fire WITHOUT auto-intercept so the user clicks to defend,
+           but when AUTO-DEFENCE is on, leave defenceActive alone so batteries
+           engage every AI missile using the rotating interceptor type. */
+        if (autoDefenceOn) {
+            fireMissile(t.x, t.y, kind);
+        } else {
+            var savedActive = defenceActive;
+            defenceActive = false;
+            fireMissile(t.x, t.y, kind);
+            defenceActive = savedActive;
+        }
     }
     /* User clicked at (sx, sy) in defence mode — launch a CINEMATIC interceptor at
        the nearest in-flight missile (type-specific animation, target-lock, big hit). */
@@ -8602,9 +8692,1917 @@
         }
     }
 
+    /* ════════════════════════════════════════════════════════════════
+       RECONSTRUCTION SYSTEM
+       ────────────────────────────────────────────────────────────────
+       Activates automatically (a) when the user turns off attack or
+       defence, or (b) when auto-attack/auto-defence has been running
+       for 13 seconds (the global cap). The user can also click the
+       reconstruction button manually.
+
+       On activation the system samples the damage state (fires, smoke
+       plumes, wreckage, craters) and spawns proportional numbers of
+       fire trucks, tow trucks, and cranes. Each vehicle drives in
+       from off-screen, finds a target, performs its work animation,
+       then loops to the next target. Runs for 13 seconds, then any
+       remaining damage is cleared.
+       ════════════════════════════════════════════════════════════════ */
+    var reconstructOn = false;
+    var reconstructStartedAt = 0;
+    var reconstructVehicles = [];
+    var reconstructFX = [];                 /* steam puffs, dust clouds, splash drops, sparkles */
+    var reconstructWorkers = [];            /* small construction worker figures walking on ground */
+    var reconstructGhosts = [];             /* translucent building outlines materialising while cranes rebuild */
+    var reconstructCones = [];              /* orange traffic cones lining the road during rebuild */
+    var dynamicSpawnTimer = 0;              /* drip-feed fresh vehicles while damage remains */
+    var reconstructSpeed = 1.0;             /* dt multiplier — 0.25× slow … 5× turbo */
+    var AUTO_MAX_DURATION = 30000;          /* auto-attack/defence still capped at 30 s */
+    var autoAttackStartT = 0;
+    var autoDefenceStartT = 0;
+
+    function spawnTrafficCones(){
+        /* lay out 8-14 traffic cones along the road every time the
+           rebuild kicks off, plus a few clustered near each currently-
+           damaged location. */
+        reconstructCones.length = 0;
+        var lanes = 9 + Math.floor(Math.random() * 5);
+        for (var i = 0; i < lanes; i++){
+            reconstructCones.push({
+                x: W * (i + 0.5) / lanes + rng(-W * 0.04, W * 0.04),
+                y: GROUND - 1 + rng(-2, 2),
+                size: rng(0.85, 1.10),
+                bob: Math.random() * Math.PI * 2
+            });
+        }
+        /* cluster around each damaged site */
+        function clusterAt(cx){
+            var n = 3 + Math.floor(Math.random() * 2);
+            for (var k = 0; k < n; k++){
+                reconstructCones.push({
+                    x: cx + rng(-26, 26),
+                    y: GROUND - 1 + rng(-2, 2),
+                    size: rng(0.9, 1.1),
+                    bob: Math.random() * Math.PI * 2
+                });
+            }
+        }
+        for (var a = 0; a < fireFields.length; a++) clusterAt(fireFields[a].x);
+        for (var b = 0; b < wreckage.length; b++)   clusterAt(wreckage[b].x);
+        for (var c2 = 0; c2 < craters.length; c2++) clusterAt(craters[c2].x);
+    }
+
+    function damageCount(){
+        /* Every persistent damage entry counts as ≥1 — the old fractional
+           weights (×0.6, ×0.4, ×0.3) meant a single wreckage piece or
+           crater would `Math.floor` to 0, and reconstruction would
+           finalize while debris was still on screen. Now we count
+           every visible scar across ALL damage arrays. */
+        return fireFields.length
+             + smokePlumes.length
+             + wreckage.length
+             + craters.length
+             + explosions.length
+             + (typeof mushroomClouds   !== 'undefined' ? mushroomClouds.length   : 0)
+             + (typeof gasClouds        !== 'undefined' ? gasClouds.length        : 0)
+             + (typeof empPulses        !== 'undefined' ? empPulses.length        : 0)
+             + (typeof gravityWells     !== 'undefined' ? gravityWells.length     : 0)
+             + (typeof neutronPulses    !== 'undefined' ? neutronPulses.length    : 0)
+             + (typeof antimatterBursts !== 'undefined' ? antimatterBursts.length : 0)
+             + (typeof photonStrikes    !== 'undefined' ? photonStrikes.length    : 0)
+             + (typeof debrisParts      !== 'undefined' ? Math.floor(debrisParts.length / 8) : 0);
+    }
+
+    function spawnReconstructVehicle(kind, delay){
+        var fromLeft = Math.random() < 0.5;
+        var startX = fromLeft ? -120 : W + 120;
+        var dir = fromLeft ? 1 : -1;
+        var isHeli = kind === 'helicopter';
+        reconstructVehicles.push({
+            kind: kind,
+            x: startX,
+            /* helicopters fly high; ground vehicles sit on the road */
+            y: isHeli
+               ? (GROUND * 0.42 + rng(-20, 10))
+               : (GROUND + (H - GROUND) * 0.20 + rng(-4, 4)),
+            vx: dir * (isHeli ? (1.5 + Math.random() * 0.6) : (0.7 + Math.random() * 0.4)),
+            vy: 0,
+            phase: 'travel',
+            workT: 0,
+            target: null,
+            spawnDelay: delay,
+            visible: false,
+            sprayParticles: [],
+            sparkles: [],
+            rotorPhase: Math.random() * Math.PI * 2,
+            bobPhase:   Math.random() * Math.PI * 2,
+            bucketDrop: 0          /* 0–1: how far the water bucket has lowered */
+        });
+    }
+
+    function spawnWorker(){
+        /* small humanoid construction worker walking on ground */
+        var fromLeft = Math.random() < 0.5;
+        reconstructWorkers.push({
+            x: fromLeft ? -30 : W + 30,
+            y: GROUND - 1,
+            vx: (fromLeft ? 1 : -1) * (0.35 + Math.random() * 0.25),
+            walkPhase: Math.random() * Math.PI * 2,
+            helmetHue: rng(0, 60),   /* yellow/orange variations */
+            shirtHue:  pickShirt(),
+            life: 0,
+            maxLife: 14000 + Math.random() * 8000,
+            tool: Math.random() < 0.5 ? 'wrench' : (Math.random() < 0.5 ? 'hammer' : 'pipe')
+        });
+    }
+    function pickShirt(){
+        var shirts = ['#1e40af', '#ea580c', '#0891b2', '#15803d', '#9333ea', '#be123c'];
+        return shirts[Math.floor(Math.random() * shirts.length)];
+    }
+
+    function startReconstruction(){
+        if (reconstructOn) return;
+        reconstructOn = true;
+        reconstructStartedAt = (typeof performance !== 'undefined' && performance.now)
+                               ? performance.now() : Date.now();
+        dynamicSpawnTimer = 2200;
+
+        /* initial vehicle wave scales with current damage. Fire trucks
+           always get a hefty minimum of 4 so the water cannon show is
+           always front and centre, even on light damage. */
+        var nFire  = Math.min(12, Math.max(4, Math.ceil(fireFields.length * 1.5 + smokePlumes.length * 0.6 + wreckage.length * 0.3)));
+        var nHeli  = Math.min(4,  Math.max(2, Math.ceil(fireFields.length * 0.5 + smokePlumes.length * 0.25)));
+        var nTow   = Math.min(8,  Math.max(1, Math.ceil(wreckage.length * 0.40) + 1));
+        var nCrane = Math.min(7,  Math.max(1, Math.ceil(wreckage.length * 0.25 + craters.length * 0.5)));
+
+        for (var i = 0; i < nFire;  i++) spawnReconstructVehicle('fire',       i * 260 + rng(0, 180));
+        for (var h = 0; h < nHeli;  h++) spawnReconstructVehicle('helicopter', 200 + h * 500 + rng(0, 220));
+        for (var j = 0; j < nTow;   j++) spawnReconstructVehicle('tow',        320 + j * 320 + rng(0, 180));
+        for (var k = 0; k < nCrane; k++) spawnReconstructVehicle('crane',      600 + k * 380 + rng(0, 220));
+
+        /* and a small crew of construction workers — at least 4, more
+           for heavy damage. They walk independently across the ground
+           and do little hammering / digging gestures whenever they're
+           next to wreckage or a crater. */
+        var nWorkers = Math.min(10, Math.max(4, Math.ceil(damageCount() * 0.4)));
+        for (var w = 0; w < nWorkers; w++) spawnWorker();
+
+        /* lay traffic cones across the road */
+        spawnTrafficCones();
+
+        /* visual feedback — a quick golden flash */
+        screenFlash = Math.max(screenFlash, 0.35);
+    }
+
+    function maybeSpawnMore(){
+        /* if there's still damage to fix but few capable vehicles, drip
+           a fresh one in. Only matters when the user keeps the sim
+           running and damage outpaces the initial wave. */
+        var fires = fireFields.length + smokePlumes.length;
+        var wrecks = 0, brokenBuildings = 0;
+        for (var w = 0; w < wreckage.length; w++){
+            if (wreckage[w].kind === 'carWreck') wrecks++;
+            else if (wreckage[w].kind === 'brokenBuilding') brokenBuildings++;
+        }
+        var crat = craters.length;
+
+        /* count active per kind */
+        var aF = 0, aH = 0, aT = 0, aC = 0;
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var v = reconstructVehicles[i];
+            if (v.phase === 'leave') continue;
+            if      (v.kind === 'fire')       aF++;
+            else if (v.kind === 'helicopter') aH++;
+            else if (v.kind === 'tow')        aT++;
+            else if (v.kind === 'crane')      aC++;
+        }
+        if (fires > aF) spawnReconstructVehicle('fire', 0);
+        if (fires > aH * 3) spawnReconstructVehicle('helicopter', 200);
+        if (wrecks > aT * 2) spawnReconstructVehicle('tow', 200);
+        if ((brokenBuildings + crat) > aC * 2) spawnReconstructVehicle('crane', 400);
+        if (reconstructWorkers.length < 8 && damageCount() > 0) spawnWorker();
+    }
+
+    function finalizeReconstruction(){
+        /* called when damage has reached 0. Send every remaining
+           vehicle off-screen, then do a final SWEEP of any lingering
+           damage arrays — guarantees a fully clean city. */
+        reconstructCones.length = 0;
+        /* The vehicle
+           work loop tends to leave trace items behind (e.g. wreckage
+           with stuck fireT/smokeT timers); this catches them all. */
+        reconstructOn = false;
+        fireFields.length      = 0;
+        smokePlumes.length     = 0;
+        wreckage.length        = 0;
+        craters.length         = 0;
+        explosions.length      = 0;
+        if (typeof mushroomClouds   !== 'undefined') mushroomClouds.length   = 0;
+        if (typeof gasClouds        !== 'undefined') gasClouds.length        = 0;
+        if (typeof empPulses        !== 'undefined') empPulses.length        = 0;
+        if (typeof gravityWells     !== 'undefined') gravityWells.length     = 0;
+        if (typeof neutronPulses    !== 'undefined') neutronPulses.length    = 0;
+        if (typeof antimatterBursts !== 'undefined') antimatterBursts.length = 0;
+        if (typeof photonStrikes    !== 'undefined') photonStrikes.length    = 0;
+        if (typeof debrisParts      !== 'undefined') debrisParts.length      = 0;
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var rv = reconstructVehicles[i];
+            rv.phase = 'leave';
+            rv.target = null;
+            rv.sprayParticles.length = 0;
+            rv.sparkles.length = 0;
+            rv.vx = (rv.x < W / 2 ? -1 : 1) * 1.4;
+            if (rv.spawnDelay > 0) { reconstructVehicles.splice(i, 1); i--; }
+        }
+        /* workers exit naturally via their walk velocity */
+    }
+
+    /* hard cancel — used by the toggle button and the auto-system. */
+    function stopReconstruction(){
+        if (!reconstructOn && reconstructVehicles.length === 0 &&
+            reconstructWorkers.length === 0 && reconstructGhosts.length === 0) return;
+        reconstructOn = false;
+        reconstructFX.length = 0;
+        reconstructGhosts.length = 0;
+        reconstructCones.length = 0;
+        /* clear damage immediately on manual cancel — same sweep as
+           finalizeReconstruction so the city is fully clean. */
+        fireFields.length = 0;
+        smokePlumes.length = 0;
+        explosions.length = 0;
+        wreckage.length = 0;
+        craters.length = 0;
+        if (typeof mushroomClouds   !== 'undefined') mushroomClouds.length   = 0;
+        if (typeof gasClouds        !== 'undefined') gasClouds.length        = 0;
+        if (typeof empPulses        !== 'undefined') empPulses.length        = 0;
+        if (typeof gravityWells     !== 'undefined') gravityWells.length     = 0;
+        if (typeof neutronPulses    !== 'undefined') neutronPulses.length    = 0;
+        if (typeof antimatterBursts !== 'undefined') antimatterBursts.length = 0;
+        if (typeof photonStrikes    !== 'undefined') photonStrikes.length    = 0;
+        if (typeof debrisParts      !== 'undefined') debrisParts.length      = 0;
+        /* command vehicles + workers to leave */
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var rv = reconstructVehicles[i];
+            rv.phase = 'leave';
+            rv.target = null;
+            rv.sprayParticles.length = 0;
+            rv.sparkles.length = 0;
+            rv.vx = (rv.x < W / 2 ? -1 : 1) * 1.6;
+            if (rv.spawnDelay > 0) { reconstructVehicles.splice(i, 1); i--; }
+        }
+        for (var wk = 0; wk < reconstructWorkers.length; wk++){
+            reconstructWorkers[wk].maxLife = Math.min(reconstructWorkers[wk].maxLife,
+                                                      reconstructWorkers[wk].life + 1500);
+        }
+    }
+
+    function pickReconstructTarget(v){
+        if (v.kind === 'fire' || v.kind === 'helicopter'){
+            if (fireFields.length){
+                var ff = fireFields[Math.floor(Math.random() * fireFields.length)];
+                return { kind: 'fire', ref: ff, x: ff.x, y: GROUND - 20 };
+            }
+            if (smokePlumes.length){
+                var sp = smokePlumes[Math.floor(Math.random() * smokePlumes.length)];
+                return { kind: 'smoke', ref: sp, x: sp.x, y: GROUND - 20 };
+            }
+            /* burning wreckage — most car wrecks have smoke/fire timers */
+            for (var bi = 0; bi < wreckage.length; bi++){
+                var bw = wreckage[bi];
+                if (bw.fireT !== undefined || bw.smokeT !== undefined){
+                    return { kind: 'wreckFire', ref: bw,
+                             x: bw.x, y: (bw.y || GROUND) - 5 };
+                }
+            }
+            /* last-resort: ANY wreckage — cool it down */
+            if (wreckage.length){
+                var anyW = wreckage[Math.floor(Math.random() * wreckage.length)];
+                return { kind: 'wreckFire', ref: anyW,
+                         x: anyW.x, y: (anyW.y || GROUND) - 5 };
+            }
+            return null;
+        }
+        if (v.kind === 'tow'){
+            for (var i = 0; i < wreckage.length; i++){
+                if (wreckage[i].kind === 'carWreck' && !wreckage[i].towed){
+                    return { kind: 'wreck', ref: wreckage[i], x: wreckage[i].x, y: wreckage[i].y };
+                }
+            }
+            /* fall back to any wreckage */
+            if (wreckage.length){
+                return { kind: 'wreck', ref: wreckage[0], x: wreckage[0].x, y: wreckage[0].y };
+            }
+            return null;
+        }
+        if (v.kind === 'crane'){
+            for (var j = 0; j < wreckage.length; j++){
+                if (wreckage[j].kind === 'brokenBuilding'){
+                    return { kind: 'building', ref: wreckage[j],
+                             x: wreckage[j].x, y: GROUND - 30 };
+                }
+            }
+            if (craters.length){
+                var cr = craters[Math.floor(Math.random() * craters.length)];
+                return { kind: 'crater', ref: cr, x: cr.x, y: GROUND - 8 };
+            }
+            return null;
+        }
+    }
+
+    function updateReconstruction(dt){
+        if (!reconstructOn && reconstructVehicles.length === 0 &&
+            reconstructFX.length === 0 && reconstructWorkers.length === 0 &&
+            reconstructGhosts.length === 0 && reconstructCones.length === 0) return;
+        /* speed multiplier — applies to ALL reconstruction internals so
+           the slider can dial the whole sequence slow or turbo. */
+        dt = dt * reconstructSpeed;
+
+        if (reconstructOn){
+            /* end the active phase as soon as there's nothing left to
+               repair. Vehicles already in 'work' will finish their
+               current target on the next iteration via their normal
+               transitions; this only flips the global "spawning new
+               vehicles" flag off. */
+            if (damageCount() === 0){
+                finalizeReconstruction();
+            } else {
+                /* drip-feed additional vehicles + workers if damage is
+                   high and the initial wave isn't keeping up. */
+                dynamicSpawnTimer -= dt;
+                if (dynamicSpawnTimer <= 0){
+                    dynamicSpawnTimer = 1800;
+                    maybeSpawnMore();
+                }
+            }
+        }
+
+        /* update construction workers — they walk along ground, do
+           little hammer/wrench animations near targets. */
+        for (var wi = reconstructWorkers.length - 1; wi >= 0; wi--){
+            var wk = reconstructWorkers[wi];
+            wk.life += dt;
+            wk.walkPhase += dt * 0.012;
+            /* slow down if next to a target */
+            var nearTarget = false;
+            for (var wt = 0; wt < wreckage.length; wt++){
+                if (Math.abs(wreckage[wt].x - wk.x) < 22){ nearTarget = true; break; }
+            }
+            if (!nearTarget){
+                for (var ct = 0; ct < craters.length; ct++){
+                    if (Math.abs(craters[ct].x - wk.x) < 22){ nearTarget = true; break; }
+                }
+            }
+            wk.x += wk.vx * dt * 0.055 * (nearTarget ? 0.15 : 1);
+            wk.working = nearTarget;
+            /* tool sparks at target */
+            if (nearTarget && Math.random() < 0.25){
+                reconstructFX.push({
+                    kind: 'spark',
+                    x: wk.x + (wk.vx > 0 ? 4 : -4),
+                    y: wk.y - 6,
+                    vx: rng(-0.5, 0.5), vy: -1 - Math.random() * 0.5,
+                    life: 0, maxLife: 350,
+                    r: 0.8 + Math.random() * 0.4
+                });
+            }
+            if (wk.life >= wk.maxLife || wk.x < -50 || wk.x > W + 50){
+                reconstructWorkers.splice(wi, 1);
+            }
+        }
+
+        /* update rebuild ghosts — translucent building outlines that
+           emerge over a brokenBuilding then solidify before vanishing. */
+        for (var gi = reconstructGhosts.length - 1; gi >= 0; gi--){
+            var g = reconstructGhosts[gi];
+            g.life += dt;
+            /* emit sparkles along the outline */
+            if (Math.random() < 0.5){
+                reconstructFX.push({
+                    kind: 'spark',
+                    x: g.x + rng(-g.w / 2, g.w / 2),
+                    y: g.y - rng(0, g.h),
+                    vx: rng(-0.3, 0.3), vy: -0.4 - Math.random() * 0.3,
+                    life: 0, maxLife: 700,
+                    r: 1 + Math.random() * 0.4
+                });
+            }
+            if (g.life >= g.maxLife) reconstructGhosts.splice(gi, 1);
+        }
+
+        for (var i = reconstructVehicles.length - 1; i >= 0; i--){
+            var v = reconstructVehicles[i];
+            v.spawnDelay -= dt;
+            if (v.spawnDelay > 0) continue;
+            v.visible = true;
+
+            if (v.phase === 'travel'){
+                if (!v.target){
+                    v.target = pickReconstructTarget(v);
+                    if (!v.target){
+                        /* no work left → leave */
+                        v.phase = 'leave';
+                        v.vx = (v.x < W/2 ? -1 : 1) * (v.kind === 'helicopter' ? 2.4 : 1.4);
+                        continue;
+                    }
+                }
+                if (v.kind === 'helicopter'){
+                    /* fly toward target; bob up/down a tiny bit */
+                    var hdx = v.target.x - v.x;
+                    var hdir = hdx >= 0 ? 1 : -1;
+                    v.vx = hdir * Math.min(2.5, 0.9 + Math.abs(hdx) * 0.004);
+                    v.x += v.vx * dt * 0.09;
+                    v.bobPhase += dt * 0.005;
+                    /* target altitude: ~38 % of GROUND from top */
+                    var tgtY = GROUND * 0.38 + Math.sin(v.bobPhase) * 4;
+                    v.y += (tgtY - v.y) * 0.05;
+                    v.rotorPhase += dt * 0.06;
+                    if (Math.abs(hdx) < 22){
+                        v.phase = 'work';
+                        v.workT = 0;
+                        v.vx = 0;
+                    }
+                } else {
+                    var dx = v.target.x - v.x;
+                    var dir = dx > 0 ? 1 : -1;
+                    v.vx = dir * Math.min(1.5, 0.6 + Math.abs(dx) * 0.003);
+                    v.x += v.vx * dt * 0.06;
+                    if (Math.abs(dx) < 30){
+                        v.phase = 'work';
+                        v.workT = 0;
+                        v.vx = 0;
+                    }
+                }
+            }
+            else if (v.phase === 'work'){
+                v.workT += dt;
+                /* per-kind work animation + effect */
+                if (v.kind === 'fire'){
+                    /* PRESSURISED MULTI-STREAM water cannon. Three
+                       layers of particles per frame — a fast jet at
+                       the centre, a wider spray cone, and a fine mist.
+                       Each droplet has gravity + splash. */
+                    if (v.workT < 2200){
+                        var hoseDir = v.target && v.target.x > v.x ? 1 : -1;
+                        var tdx = v.target ? (v.target.x - v.x) : hoseDir * 60;
+                        var tdy = v.target ? -(v.y - 12 - v.target.y) : 30;
+                        var aim = Math.atan2(tdy, tdx);
+                        /* main jet — fast tight droplets */
+                        for (var j = 0; j < 3; j++){
+                            var jSpread = (Math.random() - 0.5) * 0.18;
+                            var spd = 3.0 + Math.random() * 1.4;
+                            v.sprayParticles.push({
+                                kind: 'jet',
+                                x: v.x + hoseDir * 22, y: v.y - 14,
+                                vx: Math.cos(aim + jSpread) * spd,
+                                vy: Math.sin(aim + jSpread) * spd - 0.6,
+                                life: 0, maxLife: 900 + Math.random() * 300,
+                                r: 1.4 + Math.random() * 0.6
+                            });
+                        }
+                        /* wide cone — slower fan of droplets */
+                        if (Math.random() < 0.85){
+                            var fSpread = (Math.random() - 0.5) * 0.55;
+                            v.sprayParticles.push({
+                                kind: 'cone',
+                                x: v.x + hoseDir * 20, y: v.y - 13,
+                                vx: Math.cos(aim + fSpread) * (1.6 + Math.random() * 0.8),
+                                vy: Math.sin(aim + fSpread) * (1.6 + Math.random() * 0.8) - 0.8,
+                                life: 0, maxLife: 1200,
+                                r: 2.0 + Math.random() * 0.9
+                            });
+                        }
+                        /* fine mist — drifts and dissipates */
+                        if (Math.random() < 0.4){
+                            v.sprayParticles.push({
+                                kind: 'mist',
+                                x: v.x + hoseDir * 18 + rng(-3, 3),
+                                y: v.y - 12 + rng(-4, 4),
+                                vx: Math.cos(aim) * 0.6 + rng(-0.3, 0.3),
+                                vy: -0.5 + rng(-0.3, 0.1),
+                                life: 0, maxLife: 1400,
+                                r: 5 + Math.random() * 4
+                            });
+                        }
+                    }
+                    if (v.workT > 2300){
+                        if (v.target){
+                            if (v.target.kind === 'fire'){
+                                var fi = fireFields.indexOf(v.target.ref);
+                                if (fi >= 0) fireFields.splice(fi, 1);
+                                /* steam burst at extinguish point */
+                                for (var st = 0; st < 8; st++){
+                                    reconstructFX.push({
+                                        kind: 'steam',
+                                        x: v.target.x + rng(-12, 12),
+                                        y: v.target.y + rng(-8, 8),
+                                        vx: rng(-0.4, 0.4),
+                                        vy: -0.8 - Math.random() * 0.6,
+                                        life: 0, maxLife: 1500,
+                                        r: 6 + Math.random() * 5
+                                    });
+                                }
+                            } else if (v.target.kind === 'smoke'){
+                                var si = smokePlumes.indexOf(v.target.ref);
+                                if (si >= 0) smokePlumes.splice(si, 1);
+                            } else if (v.target.kind === 'wreckFire'){
+                                /* cool a smoking wreck without towing it */
+                                if (v.target.ref){
+                                    v.target.ref.fireT = undefined;
+                                    v.target.ref.smokeT = undefined;
+                                }
+                                for (var stw = 0; stw < 6; stw++){
+                                    reconstructFX.push({
+                                        kind: 'steam',
+                                        x: v.target.x + rng(-10, 10),
+                                        y: v.target.y + rng(-6, 6),
+                                        vx: rng(-0.4, 0.4),
+                                        vy: -0.7 - Math.random() * 0.5,
+                                        life: 0, maxLife: 1400,
+                                        r: 5 + Math.random() * 4
+                                    });
+                                }
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                    }
+                }
+                else if (v.kind === 'helicopter'){
+                    /* Hover-and-dump water bucket attack: rotor keeps spinning,
+                       the bucket lowers (bucketDrop 0→1), a vertical cascade
+                       of water pours down onto the target, steam bursts on
+                       impact, then the bucket retracts and the heli moves on. */
+                    v.rotorPhase += dt * 0.06;
+                    v.bobPhase += dt * 0.005;
+                    /* lower bucket smoothly */
+                    var prog = Math.min(1, v.workT / 600);
+                    v.bucketDrop += (prog - v.bucketDrop) * 0.08;
+                    /* pour water 700–2400 ms window */
+                    if (v.workT > 600 && v.workT < 2400){
+                        /* WALL of falling water */
+                        for (var hd = 0; hd < 5; hd++){
+                            v.sprayParticles.push({
+                                kind: 'jet',
+                                x: v.x + rng(-9, 9),
+                                y: v.y + 4 + v.bucketDrop * 14,
+                                vx: rng(-0.5, 0.5),
+                                vy: 3.5 + Math.random() * 1.6,
+                                life: 0, maxLife: 1200,
+                                r: 1.8 + Math.random() * 0.8
+                            });
+                        }
+                        if (Math.random() < 0.8){
+                            v.sprayParticles.push({
+                                kind: 'cone',
+                                x: v.x + rng(-12, 12),
+                                y: v.y + 4 + v.bucketDrop * 14,
+                                vx: rng(-1.0, 1.0),
+                                vy: 2.4 + Math.random() * 1.2,
+                                life: 0, maxLife: 1400,
+                                r: 2.4 + Math.random() * 1.0
+                            });
+                        }
+                        if (Math.random() < 0.5){
+                            v.sprayParticles.push({
+                                kind: 'mist',
+                                x: v.x + rng(-15, 15),
+                                y: v.y + 12 + v.bucketDrop * 14,
+                                vx: rng(-0.4, 0.4),
+                                vy: 0.8 + Math.random() * 0.6,
+                                life: 0, maxLife: 1700,
+                                r: 7 + Math.random() * 5
+                            });
+                        }
+                        /* impact steam at target */
+                        if (v.target && Math.random() < 0.35){
+                            reconstructFX.push({
+                                kind: 'steam',
+                                x: v.target.x + rng(-14, 14),
+                                y: v.target.y + rng(-3, 5),
+                                vx: rng(-0.6, 0.6),
+                                vy: -1.2 - Math.random() * 0.6,
+                                life: 0, maxLife: 1500,
+                                r: 7 + Math.random() * 5
+                            });
+                        }
+                    }
+                    if (v.workT > 2600){
+                        if (v.target){
+                            if (v.target.kind === 'fire'){
+                                var fhi = fireFields.indexOf(v.target.ref);
+                                if (fhi >= 0) fireFields.splice(fhi, 1);
+                                /* huge steam burst */
+                                for (var bst = 0; bst < 12; bst++){
+                                    reconstructFX.push({
+                                        kind: 'steam',
+                                        x: v.target.x + rng(-18, 18),
+                                        y: v.target.y + rng(-10, 10),
+                                        vx: rng(-0.6, 0.6),
+                                        vy: -1 - Math.random() * 0.8,
+                                        life: 0, maxLife: 1800,
+                                        r: 8 + Math.random() * 6
+                                    });
+                                }
+                            } else if (v.target.kind === 'smoke'){
+                                var shi = smokePlumes.indexOf(v.target.ref);
+                                if (shi >= 0) smokePlumes.splice(shi, 1);
+                            } else if (v.target.kind === 'wreckFire'){
+                                if (v.target.ref){
+                                    v.target.ref.fireT = undefined;
+                                    v.target.ref.smokeT = undefined;
+                                }
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                        v.bucketDrop = 0;
+                    }
+                }
+                else if (v.kind === 'tow'){
+                    /* engage hook, then haul. mid-work spawns sparks +
+                       small dust puffs as the wreck lifts. */
+                    if (Math.random() < 0.5 && v.target && v.workT > 400){
+                        reconstructFX.push({
+                            kind: 'dust',
+                            x: v.target.x + rng(-12, 12),
+                            y: v.target.y + rng(-2, 4),
+                            vx: rng(-0.3, 0.3), vy: -0.4 - Math.random() * 0.3,
+                            life: 0, maxLife: 1100,
+                            r: 5 + Math.random() * 3
+                        });
+                    }
+                    if (Math.random() < 0.25 && v.target && v.workT > 200 && v.workT < 1400){
+                        /* sparks from the hook */
+                        var hookDir = v.target.x > v.x ? 1 : -1;
+                        reconstructFX.push({
+                            kind: 'spark',
+                            x: v.x + hookDir * 30, y: v.y - 3,
+                            vx: hookDir * (1.5 + Math.random()) + rng(-0.5, 0.5),
+                            vy: -1 - Math.random(),
+                            life: 0, maxLife: 400,
+                            r: 1.2 + Math.random() * 0.6
+                        });
+                    }
+                    if (v.workT > 1600){
+                        if (v.target && v.target.ref){
+                            var wi = wreckage.indexOf(v.target.ref);
+                            if (wi >= 0) wreckage.splice(wi, 1);
+                            /* triumph puff */
+                            for (var dp = 0; dp < 6; dp++){
+                                reconstructFX.push({
+                                    kind: 'dust',
+                                    x: v.target.x + rng(-15, 15),
+                                    y: v.target.y + rng(-5, 5),
+                                    vx: rng(-0.6, 0.6),
+                                    vy: -0.8 - Math.random() * 0.5,
+                                    life: 0, maxLife: 1300,
+                                    r: 6 + Math.random() * 4
+                                });
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                    }
+                }
+                else if (v.kind === 'crane'){
+                    /* construction sparkles + drifting dust + slow
+                       rebuild progress. After completion spawn a burst
+                       of golden + white "rebuilt!" sparkles. */
+                    if (Math.random() < 0.7 && v.target){
+                        v.sparkles.push({
+                            x: v.target.x + rng(-20, 20),
+                            y: GROUND - rng(5, 35),
+                            life: 0, maxLife: 700,
+                            r: rng(0.8, 2.0),
+                            hue: 40 + rng(0, 25)
+                        });
+                    }
+                    if (Math.random() < 0.35 && v.target){
+                        reconstructFX.push({
+                            kind: 'dust',
+                            x: v.target.x + rng(-25, 25),
+                            y: GROUND - rng(0, 10),
+                            vx: rng(-0.3, 0.3), vy: -0.3 - Math.random() * 0.3,
+                            life: 0, maxLife: 1500,
+                            r: 7 + Math.random() * 5
+                        });
+                    }
+                    if (v.workT > 2400){
+                        if (v.target){
+                            if (v.target.kind === 'building' && v.target.ref){
+                                /* Use the broken building's recorded
+                                   bounds (set when it was destroyed) so
+                                   the ghost matches the actual silhouette. */
+                                var br = v.target.ref;
+                                var bw = (br.rightX && br.leftX)
+                                         ? (br.rightX - br.leftX) : rng(40, 70);
+                                var bh = rng(55, 95);
+                                reconstructGhosts.push({
+                                    x: v.target.x,
+                                    y: GROUND,
+                                    w: bw, h: bh,
+                                    life: 0, maxLife: 2600,
+                                    hue: 40 + rng(0, 20),
+                                    floors: Math.floor(bh / 12)
+                                });
+                                var bi = wreckage.indexOf(v.target.ref);
+                                if (bi >= 0) wreckage.splice(bi, 1);
+                            } else if (v.target.kind === 'crater' && v.target.ref){
+                                var ci = craters.indexOf(v.target.ref);
+                                if (ci >= 0) craters.splice(ci, 1);
+                            }
+                            /* "rebuilt!" — burst of golden sparkles */
+                            for (var sk2 = 0; sk2 < 24; sk2++){
+                                v.sparkles.push({
+                                    x: v.target.x + rng(-32, 32),
+                                    y: GROUND - rng(0, 60),
+                                    life: 0, maxLife: 1100,
+                                    r: rng(1.2, 2.8),
+                                    hue: 40 + rng(0, 30)
+                                });
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                    }
+                }
+
+                /* update spray particles with gravity + splash */
+                for (var sp = v.sprayParticles.length - 1; sp >= 0; sp--){
+                    var p = v.sprayParticles[sp];
+                    p.x += p.vx * dt * 0.06;
+                    p.y += p.vy * dt * 0.06;
+                    /* mist drifts upward (rises), others fall */
+                    if (p.kind === 'mist'){
+                        p.vy += 0.01;
+                        p.r *= 1.005;
+                    } else {
+                        p.vy += 0.06;
+                    }
+                    p.life += dt;
+                    /* splash on ground */
+                    if (p.y >= GROUND && p.kind !== 'mist' && !p.splashed){
+                        p.splashed = true;
+                        for (var sp2 = 0; sp2 < 3; sp2++){
+                            reconstructFX.push({
+                                kind: 'splash',
+                                x: p.x + rng(-2, 2),
+                                y: GROUND - 1,
+                                vx: rng(-0.8, 0.8),
+                                vy: -0.6 - Math.random() * 0.4,
+                                life: 0, maxLife: 350,
+                                r: 1 + Math.random() * 0.6
+                            });
+                        }
+                    }
+                    if (p.life >= p.maxLife || p.y > GROUND + 3) v.sprayParticles.splice(sp, 1);
+                }
+                /* update sparkles */
+                for (var sk = v.sparkles.length - 1; sk >= 0; sk--){
+                    var s = v.sparkles[sk];
+                    s.life += dt;
+                    if (s.life >= s.maxLife) v.sparkles.splice(sk, 1);
+                }
+            }
+            else if (v.phase === 'leave'){
+                v.x += v.vx * dt * 0.08;
+                if (v.x < -180 || v.x > W + 180){
+                    reconstructVehicles.splice(i, 1);
+                }
+            }
+        }
+
+        /* update global FX (steam, dust, sparks, splash). These live
+           in `reconstructFX[]` independently of any single vehicle so
+           they persist after the spawning vehicle moves on. */
+        for (var fxi = reconstructFX.length - 1; fxi >= 0; fxi--){
+            var fx = reconstructFX[fxi];
+            fx.life += dt;
+            fx.x += fx.vx * dt * 0.06;
+            fx.y += fx.vy * dt * 0.06;
+            if (fx.kind === 'steam' || fx.kind === 'dust'){
+                fx.vy -= 0.002;            /* rises */
+                fx.r  *= 1.012;            /* expands */
+                fx.vx *= 0.985;
+            } else if (fx.kind === 'spark'){
+                fx.vy += 0.10;             /* falls */
+                fx.vx *= 0.95;
+            } else if (fx.kind === 'splash'){
+                fx.vy += 0.10;
+            }
+            if (fx.life >= fx.maxLife) reconstructFX.splice(fxi, 1);
+        }
+    }
+
+    function drawReconstruction(c){
+        if (!reconstructOn && reconstructVehicles.length === 0 &&
+            reconstructFX.length === 0 && reconstructWorkers.length === 0 &&
+            reconstructGhosts.length === 0 && reconstructCones.length === 0) return;
+
+        /* ─── Traffic cones ── orange triangular cones laid out across
+           the road. Drawn FIRST so everything else (water, sparkles,
+           vehicles) sits visually on top of them — and the cars driving
+           in the main scene render over them too. */
+        for (var ci2 = 0; ci2 < reconstructCones.length; ci2++){
+            drawCone(c, reconstructCones[ci2]);
+        }
+
+        /* ─── Rebuild ghosts ── translucent building outlines that
+           emerge and solidify when cranes complete a brokenBuilding. */
+        for (var gi = 0; gi < reconstructGhosts.length; gi++){
+            var g = reconstructGhosts[gi];
+            var t = g.life / g.maxLife;
+            /* alpha curve — fade in (0→0.7), hold, then fade out */
+            var ga = t < 0.3 ? (t / 0.3) * 0.7
+                   : t < 0.85 ? 0.7
+                   : (1 - t) / 0.15 * 0.7;
+            /* outline glow */
+            c.strokeStyle = 'hsla(' + g.hue.toFixed(0) + ',95%,65%,' +
+                            (0.85 * ga).toFixed(2) + ')';
+            c.lineWidth = 1.4;
+            c.shadowColor = 'hsla(' + g.hue.toFixed(0) + ',100%,60%,' + ga.toFixed(2) + ')';
+            c.shadowBlur = 16;
+            c.strokeRect(g.x - g.w / 2, g.y - g.h, g.w, g.h);
+            /* horizontal floor lines reveal progressively */
+            var floorsToShow = Math.floor(g.floors * Math.min(1, t * 1.8));
+            for (var fr = 1; fr < floorsToShow; fr++){
+                var fy = g.y - (g.h / g.floors) * fr;
+                c.beginPath();
+                c.moveTo(g.x - g.w / 2 + 3, fy);
+                c.lineTo(g.x + g.w / 2 - 3, fy);
+                c.stroke();
+            }
+            c.shadowBlur = 0;
+            /* glowing fill inside */
+            c.fillStyle = 'hsla(' + g.hue.toFixed(0) + ',95%,80%,' + (0.10 * ga).toFixed(2) + ')';
+            c.fillRect(g.x - g.w / 2, g.y - g.h, g.w, g.h);
+            /* window pips */
+            for (var fy2 = 1; fy2 < floorsToShow; fy2++){
+                var rowY = g.y - (g.h / g.floors) * fy2 + (g.h / g.floors) * 0.5;
+                for (var wx = 0; wx < Math.floor(g.w / 6); wx++){
+                    if ((fy2 + wx) % 2 === 0 && Math.random() < 0.7){
+                        c.fillStyle = 'hsla(' + g.hue.toFixed(0) + ',90%,75%,' +
+                                      (0.5 * ga).toFixed(2) + ')';
+                        c.fillRect(g.x - g.w / 2 + wx * 6 + 2, rowY - 2, 2, 3);
+                    }
+                }
+            }
+        }
+
+        /* Draw global FX FIRST so they sit behind the vehicles —
+           steam/dust looks natural rising behind a fire-truck cab. */
+        for (var fxi = 0; fxi < reconstructFX.length; fxi++){
+            var fx = reconstructFX[fxi];
+            var fa = 1 - fx.life / fx.maxLife;
+            if (fx.kind === 'steam'){
+                /* steam — white cloud puff, low saturation */
+                c.fillStyle = 'rgba(245,250,255,' + (0.55 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+                c.fillStyle = 'rgba(255,255,255,' + (0.30 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * 0.6, 0, Math.PI * 2); c.fill();
+            } else if (fx.kind === 'dust'){
+                /* construction dust — warm tan */
+                c.fillStyle = 'rgba(220,200,170,' + (0.50 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+                c.fillStyle = 'rgba(190,170,140,' + (0.30 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * 0.7, 0, Math.PI * 2); c.fill();
+            } else if (fx.kind === 'spark'){
+                /* orange spark — bright core, warm halo */
+                c.fillStyle = 'rgba(255,210,90,' + fa.toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+                c.fillStyle = 'rgba(255,140,40,' + (0.55 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * 2.4, 0, Math.PI * 2); c.fill();
+            } else if (fx.kind === 'splash'){
+                c.fillStyle = 'rgba(160,210,250,' + (0.85 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+            }
+        }
+
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var v = reconstructVehicles[i];
+            if (!v.visible) continue;
+            /* Helicopters render in a SEPARATE top-of-stack pass
+               (drawReconstructionAirborne) so they sit above cars
+               + missiles. Skip them entirely in this ground pass. */
+            if (v.kind === 'helicopter') continue;
+
+            /* Per-vehicle spray + sparkle particles drawn AROUND the vehicle */
+            if (v.sprayParticles && v.sprayParticles.length){
+                /* Pass 1: mist (drawn FIRST, behind the jet) */
+                for (var s = 0; s < v.sprayParticles.length; s++){
+                    var sp = v.sprayParticles[s];
+                    if (sp.kind !== 'mist') continue;
+                    var ma = 1 - sp.life / sp.maxLife;
+                    c.fillStyle = 'rgba(220,235,250,' + (0.18 * ma).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2); c.fill();
+                }
+                /* Pass 2: cone droplets (wider spray) */
+                for (var s2 = 0; s2 < v.sprayParticles.length; s2++){
+                    var sp2 = v.sprayParticles[s2];
+                    if (sp2.kind !== 'cone') continue;
+                    var ca = 1 - sp2.life / sp2.maxLife;
+                    c.fillStyle = 'rgba(150,210,255,' + (0.65 * ca).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r, 0, Math.PI * 2); c.fill();
+                    /* white core for fresh drops */
+                    if (sp2.life < 200){
+                        c.fillStyle = 'rgba(255,255,255,' + (0.5 * ca).toFixed(2) + ')';
+                        c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r * 0.5, 0, Math.PI * 2); c.fill();
+                    }
+                }
+                /* Pass 3: jet droplets (brightest, tightest) */
+                for (var s3 = 0; s3 < v.sprayParticles.length; s3++){
+                    var sp3 = v.sprayParticles[s3];
+                    if (sp3.kind !== 'jet') continue;
+                    var ja = 1 - sp3.life / sp3.maxLife;
+                    /* trail line — streak in motion direction */
+                    c.strokeStyle = 'rgba(180,225,255,' + (0.55 * ja).toFixed(2) + ')';
+                    c.lineWidth = sp3.r * 1.4;
+                    c.lineCap = 'round';
+                    c.beginPath();
+                    c.moveTo(sp3.x, sp3.y);
+                    c.lineTo(sp3.x - sp3.vx * 2, sp3.y - sp3.vy * 2);
+                    c.stroke();
+                    /* bright head droplet */
+                    c.fillStyle = 'rgba(240,250,255,' + (0.95 * ja).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp3.x, sp3.y, sp3.r * 0.9, 0, Math.PI * 2); c.fill();
+                }
+                c.lineCap = 'butt';
+            }
+
+            /* Vehicle body */
+            if      (v.kind === 'fire')   drawFireTruck(c, v);
+            else if (v.kind === 'tow')    drawTowTruck(c, v);
+            else if (v.kind === 'crane')  drawCrane(c, v);
+
+            /* Rebuild sparkles drawn ON TOP of the crane scene */
+            if (v.sparkles && v.sparkles.length){
+                for (var k = 0; k < v.sparkles.length; k++){
+                    var skp = v.sparkles[k];
+                    var ka  = 1 - skp.life / skp.maxLife;
+                    /* outer soft halo */
+                    c.fillStyle = 'hsla(' + skp.hue.toFixed(0) + ', 100%, 85%, ' +
+                                  (0.45 * ka).toFixed(2) + ')';
+                    c.beginPath(); c.arc(skp.x, skp.y, skp.r * 2.6, 0, Math.PI * 2); c.fill();
+                    /* inner solid pip */
+                    c.fillStyle = 'hsla(' + skp.hue.toFixed(0) + ', 95%, 65%, ' +
+                                  (0.95 * ka).toFixed(2) + ')';
+                    c.fillRect(skp.x - skp.r, skp.y - skp.r, skp.r * 2, skp.r * 2);
+                    /* cross-glints make them feel like real sparkles */
+                    c.strokeStyle = 'hsla(' + skp.hue.toFixed(0) + ', 100%, 90%, ' +
+                                    (0.75 * ka).toFixed(2) + ')';
+                    c.lineWidth = 0.8;
+                    c.beginPath();
+                    c.moveTo(skp.x - skp.r * 3, skp.y); c.lineTo(skp.x + skp.r * 3, skp.y);
+                    c.moveTo(skp.x, skp.y - skp.r * 3); c.lineTo(skp.x, skp.y + skp.r * 3);
+                    c.stroke();
+                }
+            }
+        }
+
+        /* ── Construction workers ── small humanoid sprites walking
+           along the ground with animated legs and a hard-hat. When
+           next to a target they swing a tool with sparks. */
+        for (var wki = 0; wki < reconstructWorkers.length; wki++){
+            var wkr = reconstructWorkers[wki];
+            drawWorker(c, wkr);
+        }
+    }
+
+    function drawHelicopter(c, v){
+        var x = v.x, y = v.y;
+        var dir = (v.vx === 0 && v.target) ? (v.target.x > v.x ? 1 : -1)
+                                            : (v.vx >= 0 ? 1 : -1);
+        var now = Date.now();
+        var rotorA = v.rotorPhase || (now * 0.06);
+
+        /* ── ROTOR DOWNWASH — a wide cone of moving dust just below
+           the helicopter, only when low enough or working */
+        if (v.phase === 'work' || v.y > GROUND * 0.45){
+            for (var dn = 0; dn < 2; dn++){
+                if (Math.random() < 0.4){
+                    reconstructFX.push({
+                        kind: 'dust',
+                        x: x + rng(-22, 22),
+                        y: GROUND - rng(0, 12),
+                        vx: rng(-0.7, 0.7),
+                        vy: -0.2 - Math.random() * 0.3,
+                        life: 0, maxLife: 1300,
+                        r: 5 + Math.random() * 4
+                    });
+                }
+            }
+        }
+
+        /* ── TAIL BOOM (drawn first so fuselage covers the inner joint) */
+        c.fillStyle = '#1e293b';
+        c.fillRect(x - dir * 8, y - 3, -dir * 22, 4);
+        /* tail rudder */
+        c.fillStyle = '#facc15';
+        c.fillRect(x - dir * 28, y - 8, dir * 2, 8);
+        /* tail rotor blur */
+        c.strokeStyle = 'rgba(180,180,180,0.55)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.arc(x - dir * 28, y - 4, 5, 0, Math.PI * 2);
+        c.stroke();
+        var trA = rotorA * 2.4;
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(x - dir * 28 - Math.cos(trA) * 5, y - 4 - Math.sin(trA) * 5);
+        c.lineTo(x - dir * 28 + Math.cos(trA) * 5, y - 4 + Math.sin(trA) * 5);
+        c.stroke();
+
+        /* ── FUSELAGE — rounded body with gradient */
+        var bg = c.createLinearGradient(x, y - 14, x, y + 8);
+        bg.addColorStop(0, '#fef9c3');
+        bg.addColorStop(0.4, '#facc15');
+        bg.addColorStop(1, '#a16207');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.ellipse(x, y - 2, 22, 12, 0, 0, Math.PI * 2);
+        c.fill();
+        /* dark belly underline */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.beginPath();
+        c.ellipse(x, y + 5, 18, 4, 0, 0, Math.PI);
+        c.fill();
+        /* red side stripe */
+        c.fillStyle = '#dc2626';
+        c.fillRect(x - 20, y - 4, 40, 2);
+        /* "FIRE & RESCUE" lettering placeholder — tiny block */
+        c.fillStyle = '#0f172a';
+        c.fillRect(x - 5, y, 10, 1.5);
+
+        /* ── COCKPIT GLASS — bubble at the front */
+        var glassGrad = c.createRadialGradient(x + dir * 8, y - 8, 2,
+                                                x + dir * 8, y - 6, 12);
+        glassGrad.addColorStop(0, '#dbeafe');
+        glassGrad.addColorStop(0.6, '#3b82f6');
+        glassGrad.addColorStop(1, '#1e3a8a');
+        c.fillStyle = glassGrad;
+        c.beginPath();
+        c.ellipse(x + dir * 10, y - 6, 9, 7, 0, 0, Math.PI * 2);
+        c.fill();
+        /* highlight on glass */
+        c.fillStyle = 'rgba(255,255,255,0.55)';
+        c.beginPath();
+        c.ellipse(x + dir * 12, y - 9, 3, 1.5, 0, 0, Math.PI * 2);
+        c.fill();
+        /* glass frame */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.ellipse(x + dir * 10, y - 6, 9, 7, 0, 0, Math.PI * 2);
+        c.stroke();
+
+        /* ── LANDING SKIDS */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 1.8;
+        c.beginPath();
+        c.moveTo(x - 12, y + 9); c.lineTo(x + 12, y + 9);
+        c.stroke();
+        /* skid struts */
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(x - 8, y + 6); c.lineTo(x - 10, y + 9);
+        c.moveTo(x + 8, y + 6); c.lineTo(x + 10, y + 9);
+        c.stroke();
+
+        /* ── MAIN ROTOR — fast-spinning, motion-blurred */
+        var rotorY = y - 14;
+        /* rotor blur disc */
+        var blurGrad = c.createRadialGradient(x, rotorY, 5, x, rotorY, 36);
+        blurGrad.addColorStop(0, 'rgba(220,220,220,0.50)');
+        blurGrad.addColorStop(0.7, 'rgba(180,180,180,0.20)');
+        blurGrad.addColorStop(1, 'rgba(180,180,180,0.00)');
+        c.fillStyle = blurGrad;
+        c.beginPath();
+        c.ellipse(x, rotorY, 36, 4, 0, 0, Math.PI * 2);
+        c.fill();
+        /* mast */
+        c.fillStyle = '#0f172a';
+        c.fillRect(x - 1.5, y - 14, 3, 6);
+        c.fillStyle = '#fbbf24';
+        c.beginPath(); c.arc(x, y - 14, 2.5, 0, Math.PI * 2); c.fill();
+        /* two blades drawn with current rotation for crisp ones over the blur */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 2.2;
+        c.lineCap = 'round';
+        var bl1c = Math.cos(rotorA);
+        var bl1s = Math.sin(rotorA);
+        c.beginPath();
+        c.moveTo(x - bl1c * 36, rotorY - bl1s * 3.5);
+        c.lineTo(x + bl1c * 36, rotorY + bl1s * 3.5);
+        c.stroke();
+        var bl2c = Math.cos(rotorA + Math.PI / 2);
+        var bl2s = Math.sin(rotorA + Math.PI / 2);
+        c.strokeStyle = 'rgba(31,41,55,0.35)';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(x - bl2c * 36, rotorY - bl2s * 3.5);
+        c.lineTo(x + bl2c * 36, rotorY + bl2s * 3.5);
+        c.stroke();
+        c.lineCap = 'butt';
+
+        /* ── WATER BUCKET — lowers from the belly during work */
+        if (v.phase === 'work' || (v.bucketDrop && v.bucketDrop > 0.02)){
+            var drop = (v.bucketDrop || 0);
+            var bkx = x;
+            var bky = y + 10 + drop * 26;
+            /* cable */
+            c.strokeStyle = '#475569';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(x, y + 8);
+            c.lineTo(bkx, bky - 6);
+            c.stroke();
+            /* bucket body — orange canvas with red ring */
+            c.fillStyle = '#ea580c';
+            c.beginPath();
+            c.moveTo(bkx - 9, bky - 6);
+            c.lineTo(bkx + 9, bky - 6);
+            c.lineTo(bkx + 7, bky + 8);
+            c.lineTo(bkx - 7, bky + 8);
+            c.closePath();
+            c.fill();
+            c.fillStyle = '#9a3412';
+            c.fillRect(bkx - 9, bky - 6, 18, 2);
+            c.fillStyle = '#fbbf24';
+            c.fillRect(bkx - 9, bky - 4, 18, 1);
+            /* water visible inside (top edge) when not pouring */
+            if (v.workT < 700 || v.workT > 2400){
+                c.fillStyle = '#3b82f6';
+                c.fillRect(bkx - 7, bky - 4, 14, 4);
+                c.fillStyle = 'rgba(255,255,255,0.45)';
+                c.fillRect(bkx - 7, bky - 4, 14, 0.8);
+            } else {
+                /* mid-pour: water pouring from the bottom of the bucket */
+                c.fillStyle = 'rgba(59,130,246,0.85)';
+                c.fillRect(bkx - 6, bky + 6, 12, 4);
+            }
+        }
+
+        /* ── NAVIGATION LIGHTS — red (port), green (starboard), white strobe */
+        var navBlink = Math.sin(now * 0.012) > 0;
+        c.fillStyle = '#ef4444';
+        c.fillRect(x - dir * 20, y - 1, 2, 2);
+        c.fillStyle = '#10b981';
+        c.fillRect(x + dir * 18, y - 1, 2, 2);
+        c.fillStyle = navBlink ? '#ffffff' : 'rgba(255,255,255,0.25)';
+        c.fillRect(x - 1, y - 16, 2, 2);
+        c.fillStyle = 'rgba(255,255,255,' + (navBlink ? 0.55 : 0.15) + ')';
+        c.beginPath(); c.arc(x, y - 15, 5, 0, Math.PI * 2); c.fill();
+
+        /* ── SEARCHLIGHT BEAM when working */
+        if (v.phase === 'work' && v.target){
+            var tx = v.target.x;
+            var ty = v.target.y;
+            var beamG = c.createLinearGradient(x, y + 6, tx, ty);
+            beamG.addColorStop(0, 'rgba(255,250,200,0.45)');
+            beamG.addColorStop(1, 'rgba(255,250,200,0.00)');
+            c.fillStyle = beamG;
+            c.beginPath();
+            c.moveTo(x - 4, y + 6);
+            c.lineTo(x + 4, y + 6);
+            c.lineTo(tx + 16, ty);
+            c.lineTo(tx - 16, ty);
+            c.closePath();
+            c.fill();
+        }
+    }
+
+    /* Airborne pass — drawn DIRECTLY to dynC after the destination-over
+       composite, so helicopters and their water cascade always render
+       above the cars, the missiles, and everything else on screen. */
+    function drawReconstructionAirborne(c){
+        if (!reconstructOn && reconstructVehicles.length === 0) return;
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var v = reconstructVehicles[i];
+            if (!v.visible || v.kind !== 'helicopter') continue;
+
+            /* spray particles (water bucket cascade) first so the
+               helicopter body draws on top of its own water stream */
+            if (v.sprayParticles && v.sprayParticles.length){
+                for (var s = 0; s < v.sprayParticles.length; s++){
+                    var sp = v.sprayParticles[s];
+                    if (sp.kind !== 'mist') continue;
+                    var ma = 1 - sp.life / sp.maxLife;
+                    c.fillStyle = 'rgba(220,235,250,' + (0.18 * ma).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2); c.fill();
+                }
+                for (var s2 = 0; s2 < v.sprayParticles.length; s2++){
+                    var sp2 = v.sprayParticles[s2];
+                    if (sp2.kind !== 'cone') continue;
+                    var ca = 1 - sp2.life / sp2.maxLife;
+                    c.fillStyle = 'rgba(150,210,255,' + (0.65 * ca).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r, 0, Math.PI * 2); c.fill();
+                    if (sp2.life < 200){
+                        c.fillStyle = 'rgba(255,255,255,' + (0.5 * ca).toFixed(2) + ')';
+                        c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r * 0.5, 0, Math.PI * 2); c.fill();
+                    }
+                }
+                for (var s3 = 0; s3 < v.sprayParticles.length; s3++){
+                    var sp3 = v.sprayParticles[s3];
+                    if (sp3.kind !== 'jet') continue;
+                    var ja = 1 - sp3.life / sp3.maxLife;
+                    c.strokeStyle = 'rgba(180,225,255,' + (0.55 * ja).toFixed(2) + ')';
+                    c.lineWidth = sp3.r * 1.4;
+                    c.lineCap = 'round';
+                    c.beginPath();
+                    c.moveTo(sp3.x, sp3.y);
+                    c.lineTo(sp3.x - sp3.vx * 2, sp3.y - sp3.vy * 2);
+                    c.stroke();
+                    c.fillStyle = 'rgba(240,250,255,' + (0.95 * ja).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp3.x, sp3.y, sp3.r * 0.9, 0, Math.PI * 2); c.fill();
+                }
+                c.lineCap = 'butt';
+            }
+
+            drawHelicopter(c, v);
+        }
+    }
+
+    function drawCone(c, co){
+        var x = co.x, y = co.y;
+        var s = co.size || 1;
+        var h = 11 * s;
+        /* base (dark mat) */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 5 * s, y, 10 * s, 1.6 * s);
+        /* main orange triangle body */
+        c.fillStyle = '#ea580c';
+        c.beginPath();
+        c.moveTo(x, y - h);
+        c.lineTo(x - 4 * s, y);
+        c.lineTo(x + 4 * s, y);
+        c.closePath();
+        c.fill();
+        /* shaded right side for depth */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath();
+        c.moveTo(x, y - h);
+        c.lineTo(x + 4 * s, y);
+        c.lineTo(x, y);
+        c.closePath();
+        c.fill();
+        /* white reflective bands */
+        c.fillStyle = '#ffffff';
+        c.fillRect(x - 3.2 * s, y - h * 0.45, 6.4 * s, 1.3 * s);
+        c.fillRect(x - 2.4 * s, y - h * 0.72, 4.8 * s, 1.0 * s);
+        /* tip highlight */
+        c.fillStyle = '#fb923c';
+        c.fillRect(x - 0.4 * s, y - h, 0.8 * s, 1.4 * s);
+    }
+
+    function drawWorker(c, wk){
+        var x = wk.x, y = wk.y;
+        var dir = wk.vx >= 0 ? 1 : -1;
+        var legSwing = Math.sin(wk.walkPhase) * 2;
+        var armSwing = wk.working
+                       ? Math.sin(wk.life * 0.012) * 8     /* big hammer swing */
+                       : -Math.sin(wk.walkPhase) * 1.6;    /* small walk swing */
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath(); c.ellipse(x, y, 5, 1.4, 0, 0, Math.PI * 2); c.fill();
+        /* body — high-vis shirt */
+        c.fillStyle = wk.shirtHue;
+        c.fillRect(x - 2.5, y - 11, 5, 6);
+        /* high-vis reflective stripes */
+        c.fillStyle = 'rgba(255,255,255,0.85)';
+        c.fillRect(x - 2.5, y - 9, 5, 0.7);
+        c.fillRect(x - 2.5, y - 7, 5, 0.7);
+        /* pants */
+        c.fillStyle = '#1e293b';
+        c.fillRect(x - 2.5, y - 5, 2.2, 5 + legSwing * 0.4);
+        c.fillRect(x + 0.3, y - 5, 2.2, 5 - legSwing * 0.4);
+        /* boots */
+        c.fillStyle = '#0f172a';
+        c.fillRect(x - 2.7, y - 1 + legSwing * 0.3, 2.5, 1.3);
+        c.fillRect(x + 0.2, y - 1 - legSwing * 0.3, 2.5, 1.3);
+        /* head */
+        c.fillStyle = '#fcd5b5';
+        c.beginPath(); c.arc(x, y - 13, 2.2, 0, Math.PI * 2); c.fill();
+        /* hard hat */
+        c.fillStyle = 'hsl(' + wk.helmetHue.toFixed(0) + ', 95%, 55%)';
+        c.beginPath();
+        c.arc(x, y - 14, 2.6, Math.PI, 2 * Math.PI);
+        c.closePath(); c.fill();
+        /* hat brim */
+        c.fillStyle = 'hsl(' + wk.helmetHue.toFixed(0) + ', 95%, 45%)';
+        c.fillRect(x - 3, y - 14, 6, 0.8);
+        /* arm holding tool */
+        c.strokeStyle = wk.shirtHue;
+        c.lineWidth = 1.4;
+        c.lineCap = 'round';
+        var armX = x + dir * 2;
+        var armY = y - 9;
+        var toolX = armX + dir * (3 + Math.abs(armSwing) * 0.4);
+        var toolY = armY + armSwing;
+        c.beginPath(); c.moveTo(armX, armY); c.lineTo(toolX, toolY); c.stroke();
+        /* tool */
+        if (wk.tool === 'wrench'){
+            c.strokeStyle = '#94a3b8';
+            c.lineWidth = 1.4;
+            c.beginPath(); c.moveTo(toolX, toolY); c.lineTo(toolX + dir * 3, toolY - 2); c.stroke();
+            c.fillStyle = '#cbd5e1';
+            c.fillRect(toolX + dir * 2.5, toolY - 3, 2, 2);
+        } else if (wk.tool === 'hammer'){
+            c.strokeStyle = '#78350f';
+            c.lineWidth = 1.4;
+            c.beginPath(); c.moveTo(toolX, toolY); c.lineTo(toolX + dir * 2.4, toolY - 2.2); c.stroke();
+            c.fillStyle = '#475569';
+            c.fillRect(toolX + dir * 2 - 1, toolY - 3.5, 3, 1.8);
+        } else {
+            /* pipe */
+            c.strokeStyle = '#64748b';
+            c.lineWidth = 2;
+            c.beginPath(); c.moveTo(toolX, toolY); c.lineTo(toolX + dir * 4, toolY - 0.6); c.stroke();
+        }
+        c.lineCap = 'butt';
+    }
+
+    function drawFireTruck(c, v){
+        var x = v.x, y = v.y;
+        var dir = (v.vx === 0 && v.target) ? (v.target.x > v.x ? 1 : -1)
+                                            : (v.vx >= 0 ? 1 : -1);
+        var now = Date.now();
+        /* chassis underbody shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath();
+        c.ellipse(x, y + 4, 28, 3, 0, 0, Math.PI * 2);
+        c.fill();
+        /* chassis — red with gradient feel */
+        var bodyGrad = c.createLinearGradient(x, y - 14, x, y);
+        bodyGrad.addColorStop(0, '#ef4444');
+        bodyGrad.addColorStop(0.5, '#dc2626');
+        bodyGrad.addColorStop(1, '#7f1d1d');
+        c.fillStyle = bodyGrad;
+        c.fillRect(x - 24, y - 14, 48, 14);
+        /* gold chrome trim */
+        c.fillStyle = '#fbbf24';
+        c.fillRect(x - 24, y - 5, 48, 1);
+        /* equipment lockers */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.fillRect(x - 22, y - 11, 8, 5);
+        c.fillRect(x - 12, y - 11, 8, 5);
+        c.fillRect(x - 2, y - 11, 8, 5);
+        c.fillRect(x + 8, y - 11, 8, 5);
+        /* cab */
+        c.fillStyle = '#b91c1c';
+        c.fillRect(x + (dir > 0 ? 9 : -25), y - 22, 16, 8);
+        /* cab roof curve */
+        c.fillStyle = '#7f1d1d';
+        c.fillRect(x + (dir > 0 ? 9 : -25), y - 22, 16, 2);
+        /* window — gradient blue (sky reflection) */
+        var winGrad = c.createLinearGradient(x, y - 20, x, y - 14);
+        winGrad.addColorStop(0, '#dbeafe');
+        winGrad.addColorStop(1, '#3b82f6');
+        c.fillStyle = winGrad;
+        c.fillRect(x + (dir > 0 ? 11 : -23), y - 20, 12, 5);
+        /* window frame */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.strokeRect(x + (dir > 0 ? 11 : -23), y - 20, 12, 5);
+        /* deployed water cannon turret on top — rotates toward target */
+        var aimAng = 0;
+        if (v.phase === 'work' && v.target){
+            aimAng = Math.atan2(v.target.y - (y - 18), v.target.x - x);
+        }
+        c.save();
+        c.translate(x, y - 18);
+        if (v.phase === 'work'){
+            c.rotate(aimAng);
+            /* cannon base */
+            c.fillStyle = '#374151';
+            c.beginPath(); c.arc(0, 0, 4, 0, Math.PI * 2); c.fill();
+            /* cannon barrel */
+            c.fillStyle = '#1f2937';
+            c.fillRect(0, -3, 16, 6);
+            /* nozzle */
+            c.fillStyle = '#fbbf24';
+            c.fillRect(14, -2.5, 4, 5);
+            c.fillStyle = '#fde047';
+            c.fillRect(16, -1.5, 2, 3);
+        }
+        c.restore();
+        /* ladder on top — yellow rails + rungs (when not in work mode) */
+        if (v.phase !== 'work'){
+            c.strokeStyle = '#fcd34d';
+            c.lineWidth = 1.3;
+            c.beginPath(); c.moveTo(x - 20, y - 16); c.lineTo(x + 20, y - 16); c.stroke();
+            c.beginPath(); c.moveTo(x - 20, y - 19); c.lineTo(x + 20, y - 19); c.stroke();
+            for (var ri = 0; ri < 9; ri++){
+                c.beginPath();
+                c.moveTo(x - 20 + ri * 5, y - 19);
+                c.lineTo(x - 20 + ri * 5, y - 16);
+                c.stroke();
+            }
+        }
+        /* hose snaking from cab to cannon during work */
+        if (v.phase === 'work'){
+            c.strokeStyle = '#dc2626';
+            c.lineWidth = 3;
+            c.beginPath();
+            c.moveTo(x + (dir > 0 ? 16 : -16), y - 8);
+            c.bezierCurveTo(x, y - 22, x, y - 22, x, y - 18);
+            c.stroke();
+            c.strokeStyle = '#fbbf24';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(x + (dir > 0 ? 16 : -16), y - 8);
+            c.bezierCurveTo(x, y - 22, x, y - 22, x, y - 18);
+            c.stroke();
+        }
+        /* wheels — proper rims + tires + rotation lines */
+        c.fillStyle = '#0f172a';
+        c.beginPath(); c.arc(x - 15, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 15, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#94a3b8';
+        c.beginPath(); c.arc(x - 15, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 15, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        /* spinning hubcap markers */
+        var spin = now * 0.02 + x * 0.1;
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(x - 15 + Math.cos(spin) * 2.4, y + 1 + Math.sin(spin) * 2.4);
+        c.lineTo(x - 15 - Math.cos(spin) * 2.4, y + 1 - Math.sin(spin) * 2.4);
+        c.moveTo(x + 15 + Math.cos(spin) * 2.4, y + 1 + Math.sin(spin) * 2.4);
+        c.lineTo(x + 15 - Math.cos(spin) * 2.4, y + 1 - Math.sin(spin) * 2.4);
+        c.stroke();
+        /* TWIN siren — alternating red/blue with sweeping glow */
+        var pulse = (Math.sin(now * 0.018) + 1) * 0.5;
+        c.fillStyle = pulse > 0.5 ? '#ef4444' : '#3b82f6';
+        c.fillRect(x - 6, y - 26, 5, 3);
+        c.fillStyle = pulse > 0.5 ? '#3b82f6' : '#ef4444';
+        c.fillRect(x + 1, y - 26, 5, 3);
+        /* glow halos */
+        c.fillStyle = 'rgba(239,68,68,' + (0.5 * (1 - pulse)).toFixed(2) + ')';
+        c.beginPath(); c.arc(x - 3, y - 24, 8, 0, Math.PI * 2); c.fill();
+        c.fillStyle = 'rgba(59,130,246,' + (0.5 * pulse).toFixed(2) + ')';
+        c.beginPath(); c.arc(x + 3, y - 24, 8, 0, Math.PI * 2); c.fill();
+        /* small headlight beam when traveling */
+        if (v.phase === 'travel' && Math.abs(v.vx) > 0.1){
+            c.fillStyle = 'rgba(255,250,200,0.30)';
+            c.beginPath();
+            c.moveTo(x + dir * 25, y - 11);
+            c.lineTo(x + dir * 60, y - 18);
+            c.lineTo(x + dir * 60, y - 2);
+            c.closePath();
+            c.fill();
+        }
+    }
+
+    function drawTowTruck(c, v){
+        var x = v.x, y = v.y;
+        var dir = (v.vx === 0 && v.target) ? (v.target.x > v.x ? 1 : -1)
+                                            : (v.vx >= 0 ? 1 : -1);
+        var now = Date.now();
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath(); c.ellipse(x, y + 4, 26, 3, 0, 0, Math.PI * 2); c.fill();
+        /* chassis — yellow gradient */
+        var bg = c.createLinearGradient(x, y - 12, x, y);
+        bg.addColorStop(0, '#fde047');
+        bg.addColorStop(0.5, '#facc15');
+        bg.addColorStop(1, '#a16207');
+        c.fillStyle = bg;
+        c.fillRect(x - 22, y - 12, 44, 12);
+        /* hazard chevron stripes — diagonal */
+        c.fillStyle = '#000000';
+        for (var st = 0; st < 7; st++){
+            c.save();
+            c.beginPath();
+            c.moveTo(x - 22 + st * 6.5, y - 4);
+            c.lineTo(x - 22 + st * 6.5 + 3, y - 4);
+            c.lineTo(x - 22 + st * 6.5 + 3 + 4, y);
+            c.lineTo(x - 22 + st * 6.5 + 4, y);
+            c.closePath();
+            c.fill();
+            c.restore();
+        }
+        /* cab */
+        c.fillStyle = '#ca8a04';
+        c.fillRect(x + (dir > 0 ? 7 : -23), y - 20, 16, 8);
+        /* window — sky-reflective gradient */
+        var twg = c.createLinearGradient(x, y - 20, x, y - 14);
+        twg.addColorStop(0, '#dbeafe');
+        twg.addColorStop(1, '#3b82f6');
+        c.fillStyle = twg;
+        c.fillRect(x + (dir > 0 ? 9 : -21), y - 18, 12, 5);
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.strokeRect(x + (dir > 0 ? 9 : -21), y - 18, 12, 5);
+        /* HYDRAULIC TOW BOOM — articulated two-segment arm */
+        var hookExtend = v.phase === 'work' ? Math.min(1, v.workT / 700) : 0.30;
+        /* pillar */
+        c.fillStyle = '#374151';
+        c.fillRect(x + (dir > 0 ? 13 : -17), y - 18, 4, 8);
+        /* boom segment 1 (rising from pillar) */
+        var p1x = x + dir * 15;
+        var p1y = y - 18;
+        var p2x = x + dir * (20 + 10 * hookExtend);
+        var p2y = y - 22 - 8 * hookExtend;
+        c.strokeStyle = '#0f172a';
+        c.lineWidth = 4;
+        c.lineCap = 'round';
+        c.beginPath(); c.moveTo(p1x, p1y); c.lineTo(p2x, p2y); c.stroke();
+        /* hydraulic piston detail */
+        c.strokeStyle = '#94a3b8';
+        c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(p1x, p1y - 2); c.lineTo(p1x + (p2x - p1x) * 0.6, p1y + (p2y - p1y) * 0.6 - 2); c.stroke();
+        /* boom segment 2 — extending out toward target */
+        var p3x = p2x + dir * (12 + 12 * hookExtend);
+        var p3y = p2y + 3 + 8 * hookExtend;
+        c.strokeStyle = '#0f172a';
+        c.lineWidth = 3.5;
+        c.beginPath(); c.moveTo(p2x, p2y); c.lineTo(p3x, p3y); c.stroke();
+        /* dangling chain to hook — swings during work */
+        var swing = v.phase === 'work' ? Math.sin(now * 0.008) * 4 : 0;
+        var chainLen = 8 + 4 * hookExtend;
+        var hookX = p3x + swing;
+        var hookY = p3y + chainLen;
+        c.strokeStyle = '#475569';
+        c.lineWidth = 1;
+        c.beginPath();
+        for (var ch = 0; ch < 5; ch++){
+            var cy0 = p3y + (chainLen / 5) * ch;
+            var cy1 = p3y + (chainLen / 5) * (ch + 1);
+            var cx0 = p3x + (hookX - p3x) * (ch / 5);
+            var cx1 = p3x + (hookX - p3x) * ((ch + 1) / 5);
+            c.moveTo(cx0, cy0); c.lineTo(cx1, cy1);
+        }
+        c.stroke();
+        /* link dots */
+        c.fillStyle = '#1f2937';
+        for (var ld = 0; ld <= 5; ld++){
+            var lcy = p3y + (chainLen / 5) * ld;
+            var lcx = p3x + (hookX - p3x) * (ld / 5);
+            c.beginPath(); c.arc(lcx, lcy, 1, 0, Math.PI * 2); c.fill();
+        }
+        c.lineCap = 'butt';
+        /* hook */
+        c.fillStyle = '#1f2937';
+        c.beginPath();
+        c.moveTo(hookX, hookY);
+        c.lineTo(hookX + 4, hookY + 1);
+        c.lineTo(hookX + 4, hookY + 5);
+        c.lineTo(hookX, hookY + 8);
+        c.lineTo(hookX - 3, hookY + 5);
+        c.closePath();
+        c.fill();
+        c.fillStyle = '#fbbf24';
+        c.fillRect(hookX - 1, hookY, 2, 2);
+        /* wheels */
+        c.fillStyle = '#0f172a';
+        c.beginPath(); c.arc(x - 14, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 14, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#94a3b8';
+        c.beginPath(); c.arc(x - 14, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 14, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        var spin2 = now * 0.022 + x * 0.13;
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(x - 14 + Math.cos(spin2) * 2.4, y + 1 + Math.sin(spin2) * 2.4);
+        c.lineTo(x - 14 - Math.cos(spin2) * 2.4, y + 1 - Math.sin(spin2) * 2.4);
+        c.moveTo(x + 14 + Math.cos(spin2) * 2.4, y + 1 + Math.sin(spin2) * 2.4);
+        c.lineTo(x + 14 - Math.cos(spin2) * 2.4, y + 1 - Math.sin(spin2) * 2.4);
+        c.stroke();
+        /* amber strobe — alternates with halo */
+        var blink2 = Math.sin(now * 0.028) > 0;
+        c.fillStyle = blink2 ? '#fbbf24' : '#f97316';
+        c.fillRect(x - 2, y - 26, 4, 3);
+        c.fillStyle = blink2 ? 'rgba(251,191,36,0.55)' : 'rgba(249,115,22,0.55)';
+        c.beginPath(); c.arc(x, y - 24, 8, 0, Math.PI * 2); c.fill();
+        /* headlight when traveling */
+        if (v.phase === 'travel' && Math.abs(v.vx) > 0.1){
+            c.fillStyle = 'rgba(255,245,180,0.32)';
+            c.beginPath();
+            c.moveTo(x + dir * 22, y - 11);
+            c.lineTo(x + dir * 56, y - 18);
+            c.lineTo(x + dir * 56, y - 4);
+            c.closePath(); c.fill();
+        }
+    }
+
+    function drawCrane(c, v){
+        var x = v.x, y = v.y;
+        var now = Date.now();
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.beginPath(); c.ellipse(x, y + 4, 26, 3, 0, 0, Math.PI * 2); c.fill();
+        /* TANK TRACKS — animated tread pattern */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 20, y - 1, 40, 5);
+        c.fillStyle = '#0f172a';
+        var trackOff = (v.phase === 'travel') ? (now * 0.08) % 6 : 0;
+        for (var t = 0; t < 11; t++){
+            c.fillRect(x - 20 + ((t * 4 + trackOff) % 44) - 2, y, 2, 4);
+        }
+        /* roller wheels inside tracks */
+        c.fillStyle = '#475569';
+        for (var rw = 0; rw < 4; rw++){
+            c.beginPath();
+            c.arc(x - 15 + rw * 10, y + 1.5, 2, 0, Math.PI * 2);
+            c.fill();
+        }
+        /* chassis — yellow gradient */
+        var cg = c.createLinearGradient(x, y - 13, x, y);
+        cg.addColorStop(0, '#fde047');
+        cg.addColorStop(0.6, '#facc15');
+        cg.addColorStop(1, '#a16207');
+        c.fillStyle = cg;
+        c.fillRect(x - 17, y - 13, 34, 12);
+        /* black trim line */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 17, y - 6, 34, 1.5);
+        /* cab — rotates with the arm */
+        c.fillStyle = '#f59e0b';
+        c.fillRect(x - 8, y - 22, 16, 9);
+        /* window — sky-reflective */
+        var wg = c.createLinearGradient(x, y - 22, x, y - 16);
+        wg.addColorStop(0, '#dbeafe');
+        wg.addColorStop(1, '#1d4ed8');
+        c.fillStyle = wg;
+        c.fillRect(x - 6, y - 20, 12, 6);
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.strokeRect(x - 6, y - 20, 12, 6);
+        /* counterweight on back */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 17, y - 19, 7, 7);
+        c.fillStyle = '#fbbf24';
+        c.fillRect(x - 16, y - 18, 5, 1.5);
+        c.fillRect(x - 16, y - 14, 5, 1.5);
+        /* CRANE ARM — rotates + swings during work */
+        var pivotX = x + 4, pivotY = y - 22;
+        var swingT = v.phase === 'work' ? v.workT * 0.003 : 0;
+        var armAngle = -Math.PI / 3 + Math.sin(swingT) * 0.35;
+        var armLen   = 50;
+        var armEndX  = pivotX + Math.cos(armAngle) * armLen;
+        var armEndY  = pivotY + Math.sin(armAngle) * armLen;
+        /* main boom — fat yellow */
+        c.strokeStyle = '#facc15';
+        c.lineWidth = 5;
+        c.lineCap = 'round';
+        c.beginPath();
+        c.moveTo(pivotX, pivotY);
+        c.lineTo(armEndX, armEndY);
+        c.stroke();
+        /* outer boom outline */
+        c.strokeStyle = '#a16207';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(pivotX, pivotY);
+        c.lineTo(armEndX, armEndY);
+        c.stroke();
+        /* INDUSTRIAL LATTICE — proper cross-bracing pattern */
+        c.strokeStyle = '#7c2d12';
+        c.lineWidth = 0.7;
+        for (var seg = 0; seg < 8; seg++){
+            var f  = seg / 8;
+            var f2 = (seg + 1) / 8;
+            var midX = pivotX + (armEndX - pivotX) * (f + f2) * 0.5;
+            var midY = pivotY + (armEndY - pivotY) * (f + f2) * 0.5;
+            /* perpendicular offset */
+            var perpDX = -(armEndY - pivotY) / armLen * 2.5;
+            var perpDY =  (armEndX - pivotX) / armLen * 2.5;
+            c.beginPath();
+            c.moveTo(pivotX + (armEndX - pivotX) * f + perpDX,
+                     pivotY + (armEndY - pivotY) * f + perpDY);
+            c.lineTo(pivotX + (armEndX - pivotX) * f2 - perpDX,
+                     pivotY + (armEndY - pivotY) * f2 - perpDY);
+            c.stroke();
+            c.beginPath();
+            c.moveTo(pivotX + (armEndX - pivotX) * f - perpDX,
+                     pivotY + (armEndY - pivotY) * f - perpDY);
+            c.lineTo(pivotX + (armEndX - pivotX) * f2 + perpDX,
+                     pivotY + (armEndY - pivotY) * f2 + perpDY);
+            c.stroke();
+        }
+        c.lineCap = 'butt';
+        /* boom tip pulley */
+        c.fillStyle = '#1f2937';
+        c.beginPath(); c.arc(armEndX, armEndY, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#94a3b8';
+        c.beginPath(); c.arc(armEndX, armEndY, 1.2, 0, Math.PI * 2); c.fill();
+        /* dangling cable + hook block + payload */
+        var dangle = v.phase === 'work' ? 12 + Math.sin(v.workT * 0.006) * 10 : 8;
+        c.strokeStyle = '#374151';
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(armEndX, armEndY);
+        c.lineTo(armEndX, armEndY + dangle);
+        c.stroke();
+        /* HOOK BLOCK — squared with crossbar */
+        c.fillStyle = '#1e293b';
+        c.fillRect(armEndX - 3.5, armEndY + dangle, 7, 5);
+        c.fillStyle = '#475569';
+        c.fillRect(armEndX - 3.5, armEndY + dangle + 1, 7, 1);
+        /* if working, dangle a SUSPENDED BUILDING BLOCK from the hook */
+        if (v.phase === 'work'){
+            var bxL = armEndX - 8, byL = armEndY + dangle + 5;
+            /* girder/block being placed */
+            c.fillStyle = '#94a3b8';
+            c.fillRect(bxL, byL, 16, 6);
+            c.fillStyle = '#475569';
+            c.fillRect(bxL, byL, 16, 1.5);
+            c.fillRect(bxL, byL + 4.5, 16, 1.5);
+            /* rivet dots */
+            c.fillStyle = '#1f2937';
+            for (var rv = 0; rv < 4; rv++){
+                c.beginPath();
+                c.arc(bxL + 2 + rv * 4, byL + 3, 0.7, 0, Math.PI * 2);
+                c.fill();
+            }
+        }
+        /* PIVOT base detail */
+        c.fillStyle = '#1f2937';
+        c.beginPath(); c.arc(pivotX, pivotY, 4, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#fbbf24';
+        c.beginPath(); c.arc(pivotX, pivotY, 2, 0, Math.PI * 2); c.fill();
+        /* warning strobe */
+        var blink3 = Math.sin(now * 0.022 + x * 0.1) > 0;
+        c.fillStyle = blink3 ? '#facc15' : '#fde047';
+        c.fillRect(pivotX - 2, pivotY - 5, 4, 2);
+        c.fillStyle = blink3 ? 'rgba(250,204,21,0.55)' : 'rgba(253,224,71,0.55)';
+        c.beginPath(); c.arc(pivotX, pivotY - 4, 6, 0, Math.PI * 2); c.fill();
+        /* headlight when traveling */
+        if (v.phase === 'travel' && Math.abs(v.vx) > 0.1){
+            var dirC = v.vx >= 0 ? 1 : -1;
+            c.fillStyle = 'rgba(255,250,200,0.30)';
+            c.beginPath();
+            c.moveTo(x + dirC * 18, y - 10);
+            c.lineTo(x + dirC * 50, y - 16);
+            c.lineTo(x + dirC * 50, y - 2);
+            c.closePath(); c.fill();
+        }
+    }
+
+    /* ─── Cap auto-attack / auto-defence at AUTO_MAX_DURATION ─── */
+    function updateAutoTimers(){
+        var now = (typeof performance !== 'undefined' && performance.now)
+                  ? performance.now() : Date.now();
+        if (autoAttackOn && (now - autoAttackStartT) > AUTO_MAX_DURATION){
+            autoAttackOn = false;
+            autoAttackTimer = 0;
+            var aBtn = document.getElementById('ttAttackAutoBtn');
+            if (aBtn){
+                aBtn.setAttribute('aria-pressed', 'false');
+                aBtn.classList.remove('on');
+                aBtn.textContent = 'OFF';
+            }
+            startReconstruction();
+        }
+        if (autoDefenceOn && (now - autoDefenceStartT) > AUTO_MAX_DURATION){
+            autoDefenceOn = false;
+            autoDefenceTimer = 0;
+            var dBtn = document.getElementById('ttDefenceAutoBtn');
+            if (dBtn){
+                dBtn.setAttribute('aria-pressed', 'false');
+                dBtn.classList.remove('on');
+                dBtn.textContent = 'OFF';
+            }
+            startReconstruction();
+        }
+    }
+
+    /* ─── Public window API ──────────────────────────────────── */
+    window.startReconstruction = startReconstruction;
+    window.stopReconstruction  = stopReconstruction;
+    window.isReconstructing    = function(){ return reconstructOn; };
+    window.getReconstructionTimer = function(){
+        /* No fixed timer anymore — return elapsed time so the widget
+           tooltip can show how long the rebuild has been running. */
+        if (!reconstructOn) return 0;
+        var now = (typeof performance !== 'undefined' && performance.now)
+                  ? performance.now() : Date.now();
+        return now - reconstructStartedAt;
+    };
+    window.getReconstructionDamage = function(){
+        return reconstructOn ? damageCount() : 0;
+    };
+    window.toggleReconstruction = function(){
+        if (reconstructOn) { stopReconstruction(); return false; }
+        startReconstruction();
+        return true;
+    };
+    /* slow ↔ fast control. `m` ∈ [0.1, 5] — values < 1 slow the rebuild
+       down (more time to admire animations), values > 1 speed it up. */
+    window.setReconstructionSpeed = function(m){
+        var v = parseFloat(m);
+        if (isNaN(v)) return;
+        reconstructSpeed = Math.max(0.1, Math.min(5, v));
+    };
+    window.getReconstructionSpeed = function(){ return reconstructSpeed; };
+    /* Instant rebuild — completes the current cycle right now. */
+    window.completeReconstructionNow = function(){
+        if (!reconstructOn){
+            /* nothing in flight; just clear any leftover damage anyway */
+            finalizeReconstruction();
+            return false;
+        }
+        finalizeReconstruction();
+        return true;
+    };
+
+    /* Wrap setAutoAttackEnabled / setAutoDefenceEnabled to record
+       the start time and to auto-trigger reconstruction on turn-off. */
+    var _origSetAutoAttack = window.setAutoAttackEnabled;
+    window.setAutoAttackEnabled = function(on){
+        if (on){
+            autoAttackStartT = (typeof performance !== 'undefined' && performance.now)
+                               ? performance.now() : Date.now();
+        }
+        _origSetAutoAttack(on);
+        if (!on) startReconstruction();
+    };
+    var _origSetAutoDefence = window.setAutoDefenceEnabled;
+    window.setAutoDefenceEnabled = function(on){
+        if (on){
+            autoDefenceStartT = (typeof performance !== 'undefined' && performance.now)
+                                ? performance.now() : Date.now();
+        }
+        _origSetAutoDefence(on);
+        if (!on) startReconstruction();
+    };
+
+    /* Manual attack / defence toggles also trigger reconstruction
+       when turning OFF. armMissile() / toggleDefenceMode() are the
+       toggle functions on those widgets. */
+    var _origArm = window.armMissile;
+    if (typeof _origArm === 'function'){
+        window.armMissile = function(){
+            var wasArmed = !!missileArmed;
+            var r = _origArm.apply(this, arguments);
+            if (wasArmed && !missileArmed) startReconstruction();
+            return r;
+        };
+    }
+    var _origTogDef = window.toggleDefenceMode;
+    if (typeof _origTogDef === 'function'){
+        window.toggleDefenceMode = function(){
+            var wasDM = !!defenceMode;
+            var r = _origTogDef.apply(this, arguments);
+            if (wasDM && !defenceMode) startReconstruction();
+            return r;
+        };
+    }
+
     /* hook update + draw into the existing loop */
     var _origUpd = updateParticles;
-    updateParticles = function(dt){ _origUpd(dt); updateMissileSystem(dt); updateAutoSliders(dt); };
+    updateParticles = function(dt){
+        _origUpd(dt);
+        updateMissileSystem(dt);
+        updateAutoSliders(dt);
+        updateAutoTimers();
+        updateReconstruction(dt);
+    };
+    /* Offscreen buffer used to composite the reconstruction layer
+       BEHIND the existing dynamic content. _origDrw clears dynC at
+       its start, so drawing reconstruction before it would just be
+       erased. Instead we let _origDrw draw cars/pedestrians as usual,
+       then paint reconstruction onto an offscreen canvas (preserving
+       its internal layer order), then blit that buffer onto dynC with
+       `destination-over` so the buffer only fills pixels NOT already
+       occupied by cars → cars visibly drive over the rebuild scene. */
+    var rcnBuffer = null;
+    function ensureRcnBuffer(){
+        if (!rcnBuffer){
+            rcnBuffer = document.createElement('canvas');
+        }
+        if (rcnBuffer.width !== W || rcnBuffer.height !== H){
+            rcnBuffer.width = W;
+            rcnBuffer.height = H;
+        }
+        return rcnBuffer;
+    }
+    function reconstructionHasAnyContent(){
+        return reconstructOn ||
+               reconstructVehicles.length > 0 ||
+               reconstructFX.length > 0 ||
+               reconstructWorkers.length > 0 ||
+               reconstructGhosts.length > 0 ||
+               reconstructCones.length > 0;
+    }
+
     var _origDrw = drawDynamic;
-    drawDynamic = function(){ _origDrw(); drawMissileSystem(dynC); };
+    drawDynamic = function(){
+        _origDrw();
+        if (reconstructionHasAnyContent()){
+            var buf = ensureRcnBuffer();
+            var rc  = buf.getContext('2d');
+            rc.clearRect(0, 0, W, H);
+            drawReconstruction(rc);              /* ground pass to buffer (helis skipped) */
+            dynC.save();
+            dynC.globalCompositeOperation = 'destination-over';
+            dynC.drawImage(buf, 0, 0);            /* composite BEHIND cars */
+            dynC.restore();
+        }
+        drawMissileSystem(dynC);
+        /* Helicopters last — drawn directly on dynC so they sit on TOP
+           of cars, missiles, and the entire reconstruction scene. */
+        drawReconstructionAirborne(dynC);
+    };
 })();

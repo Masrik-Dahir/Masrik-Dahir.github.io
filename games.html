@@ -23,6 +23,7 @@
     <!--    Site-wide loader + polish + animations -->
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
+    <link rel="stylesheet" href="css/search-cross.css?v=5">
     <link rel="stylesheet" href="css/animations.css">
 
     <script src="js/vendor/code.jquery.com.jquery-1.10.2.js"></script>
@@ -43,6 +44,8 @@
     <script src="js/eagle-loader.js" defer></script>
     <script src="js/animations.js" defer></script>
     <script src="js/page-graphics.js" defer></script>
+    <script src="js/hover-symbols-engine.js?v=2" defer></script>
+    <script src="js/games-symbols.js?v=2" defer></script>
 
     <script src="js/games/space-invaders.js" defer></script>
     <script src="js/games/snake.js" defer></script>
@@ -145,6 +148,9 @@
     <script src="js/games/mr-do.js" defer></script>
 
     <link rel="stylesheet" href="css/games.css">
+    <!-- Liquid-glass override for .game-card — must load AFTER games.css
+         so its border/box-shadow rules win the cascade. -->
+    <link rel="stylesheet" href="css/games-symbols.css?v=4">
 </head>
 
 <body class="w3-white polish" data-page-graphics="retro-stars">
@@ -156,13 +162,13 @@
 <div id="gallery-view" class="w3-content" style="max-width: min(1800px, 95%); background-color: white; margin: 0 auto; padding: 1px;">
     <div class="row" style="margin-bottom: 10px; margin-top: 15px">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px;">
+            <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px">
                 <div class="search_bar" style="display: flex; align-items: center; width: 100%;">
                     <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px;margin-right: 8px">
-                    <div style="display: flex; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; width: 100%; margin-right: 8px;">
                         <input id="game-search-input" class="search_searchbar" type="text" title="Search" placeholder="Search" style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;">
-                        <button onclick="document.getElementById('game-search-input').value='';document.getElementById('game-search-input').dispatchEvent(new Event('input'))" style="margin-left: 40px; background: transparent; border: none; cursor: pointer;">
-                            ✖️
+                        <button onclick="document.getElementById('game-search-input').value='';document.getElementById('game-search-input').dispatchEvent(new Event('input'))" class="search-cross-btn" aria-label="Clear search">
+                            <i class="fa fa-times" ></i>
                         </button>
                     </div>
                 </div>
