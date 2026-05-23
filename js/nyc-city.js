@@ -33,8 +33,63 @@
         { type:'shooting',  sky0:'#0c0e18', sky1:'#181a24' },
         { type:'fireworks', sky0:'#08080e', sky1:'#14141e' },
         { type:'bloodmoon', sky0:'#1a0404', sky1:'#2a0808' },
-        { type:'nebula',    sky0:'#0a0218', sky1:'#180830' }
+        { type:'nebula',    sky0:'#0a0218', sky1:'#180830' },
+
+        /* ── 10 invented spectacular weather events ──────────────
+           Each event has its OWN render path (no `alias`) — see the
+           initCustomEvent / updateCustomEvent / drawCustomEvent
+           module below. Sky palettes match the catastrophe in tone. */
+
+        /* TSUNAMI — full water-space scene: rising sea level, three
+           parallax wave layers, foam crests, rising bubbles, drifting
+           debris. Not just a single wave silhouette. */
+        { type:'tsunami',       sky0:'#1a3050', sky1:'#3e7090' },
+
+        /* MIRROR RAIN — shattering glass / mirror shards falling
+           through the air. Each shard catches the imagined light
+           source and casts a small dispersed rainbow speck below it,
+           so the sky fills with drifting prismatic reflections. */
+        { type:'mirrorRain',    sky0:'#1c1c28', sky1:'#48485c' },
+
+        /* SULFURIC ACID RAIN — yellow-green corrosive drops with
+           sizzling splash bursts on the pavement. */
+        { type:'acidRain',      sky0:'#3a4020', sky1:'#7a8040' },
+
+        /* GRAVITY WELL — black hole in the sky pulling debris into
+           a rotating accretion ring. */
+        { type:'gravityWell',   sky0:'#0a0418', sky1:'#180a38' },
+
+        /* CRYSTAL STORM — slow-falling cyan diamond shards that
+           flicker with caught light. */
+        { type:'crystalStorm',  sky0:'#0c2840', sky1:'#306890' },
+
+        /* LOCUST SWARM — biblical cloud of insects sweeping across
+           the mid-sky. */
+        { type:'locustSwarm',   sky0:'#3a3020', sky1:'#807040' },
+
+        /* LAVA RAIN — molten droplets glowing orange, leaving
+           smoldering spots where they hit. */
+        { type:'lavaRain',      sky0:'#2a0a04', sky1:'#601808' },
+
+        /* PLASMA STORM — multi-coloured electric arcs zigzagging
+           across the sky in cyan / magenta / yellow. */
+        { type:'plasmaStorm',   sky0:'#180830', sky1:'#481870' },
+
+        /* COSMIC RAY — vertical light beams from above with
+           shimmering particle streams. */
+        { type:'cosmicRay',     sky0:'#020208', sky1:'#0a0a18' },
+
+        /* QUANTUM GLITCH — reality-tearing pixel scatter with RGB
+           shift bars across the screen. */
+        { type:'quantumGlitch', sky0:'#1a1228', sky1:'#382848' }
     ];
+
+    /* Resolve an event entry's effective rendering type.
+       Some EVENTS carry a UI-only `type` (e.g. 'roseDust') with an
+       `alias` field naming the existing particle/render path to
+       reuse (e.g. 'wind'). All rendering code that previously read
+       `ev.type` should go through this helper. */
+    function effType(ev) { return (ev && ev.alias) ? ev.alias : (ev && ev.type); }
     /* start on a real weather/disaster event (skip index 0 = 'clear') */
     var eventIndex = 1 + Math.floor(Math.random() * (EVENTS.length - 1));
     var eventTimer = 0, EVENT_DURATION = 12000;
@@ -3814,7 +3869,8 @@
         bgC.beginPath(); bgC.arc(W*0.82,H*0.12,22,0,Math.PI*2); bgC.fill();
 
         /* overcast cloud wisps */
-        if(ev.type==='snow'||ev.type==='blizzard'||ev.type==='rain') {
+        var bgType=effType(ev);
+        if(bgType==='snow'||bgType==='blizzard'||bgType==='rain') {
             bgC.fillStyle='rgba(255,255,255,0.22)';
             for(var ci=0;ci<6;ci++) {
                 var cx2=(ci*W/5.5+40)%W, cy2=H*0.08+ci*H*0.03;
@@ -3823,7 +3879,7 @@
         }
 
         /* heat glow disk */
-        if(ev.type==='heat') {
+        if(bgType==='heat') {
             radialGlow(bgC, W*0.15,H*0.09, 110, 255,140,40, 0.45);
             radialGlow(bgC, W*0.15,H*0.09,  55, 255,200,80, 0.65);
             bgC.fillStyle='rgba(255,220,100,0.98)';
@@ -3925,7 +3981,7 @@
     }
 
     function updateVehicles(dt) {
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         /* speed multiplier — bad weather slows traffic */
         var spMul = 1;
         if(type==='rain') spMul=0.65;
@@ -4210,7 +4266,7 @@
     }
 
     function updatePeds(dt) {
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         /* pedestrians ALWAYS walk at normal speed — only outfit changes by weather */
         var sm = 1;
         for(var i=0;i<peds.length;i++) {
@@ -4232,7 +4288,7 @@
 
     function drawPeds(c) {
         var rdH=H-GROUND;
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         var COATS=['#c8cce0','#e0e4f0','#8898b0','#a0a8c0','#e8d0b0'];
         var UMB=['#c83838','#1e6cb8','#1e8c3c','#444444','#c0a020','#7030a0'];
         /* outfit-only changes — body pose & walking speed stay normal */
@@ -4364,6 +4420,1812 @@
         return burst;
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       INVENTED CATASTROPHE EVENT MODULE
+       ───────────────────────────────────────────────────────────
+       Self-contained init / update / draw for the 10 made-up
+       weather events (tsunami, fireball shower, sulfuric acid
+       rain, gravity well, crystal storm, locust swarm, lava rain,
+       plasma storm, cosmic ray, quantum glitch). Hooks into
+       initEvent, updateParticles, drawDynamic via three calls.
+       Each event renders entirely from its own state arrays so
+       the existing particle pipeline isn't disturbed.
+       ═══════════════════════════════════════════════════════════ */
+
+    var tsunamiState  = null;
+    var mirrorShards  = [];
+    var mirrorPrisms  = [];     /* drifting rainbow speck reflections */
+    var acidDrops     = [];
+    var acidSplats    = [];
+    var acidPools     = [];     /* corroded ground patches (bubbling) */
+    var acidSteam     = [];     /* steam wisps rising from acid */
+    var acidDripFalls = [];     /* drips running down building edges */
+    var gravityState  = null;
+    var gravityDebris = [];     /* torn building pieces being pulled in */
+    var gravityBeams  = [];     /* tractor beams to tallest structures */
+    var gravityRings  = [];     /* shockwave distortion rings */
+    var crystals      = [];
+    var crystalGlitter= [];
+    var stuckCrystals = [];     /* crystals embedded in buildings / cars */
+    var locusts       = [];
+    var lavaDrops     = [];
+    var lavaSplats    = [];
+    var lavaFires     = [];     /* burning fires on ground + buildings */
+    var lavaEmbers    = [];     /* floating embers rising from fires */
+    var lavaCraters   = [];     /* ground burn scars */
+    var lavaSmoke     = [];     /* smoke plumes from fires */
+    var plasmaArcs    = [];
+    var plasmaTimer   = 0;
+    var plasmaImpacts = [];     /* electric strike scorch points */
+    var plasmaSparks  = [];     /* spark showers from impacts */
+    var plasmaSmoke   = [];     /* smoke from electrocuted structures */
+    var cosmicBeams   = [];
+    var cosmicSparks  = [];
+    var cosmicImpacts = [];     /* vaporization strike sites */
+    var cosmicVapor   = [];     /* disintegration particles rising */
+    var glitchPixels  = [];
+    var glitchBars    = [];
+    var glitchTimer   = 0;
+
+    /* Pick a real destructible target — a building rooftop or a moving
+       vehicle — so lava / plasma / cosmic / crystal impacts land on
+       something solid in the scene, not in empty sky. Returns
+       { x, y, kind } where kind ∈ {'building','car'}. */
+    function pickImpactTarget() {
+        var useCar = (typeof vehicles !== 'undefined' && vehicles.length > 0)
+                     && Math.random() < 0.35;
+        if (useCar) {
+            var v = vehicles[rngI(0, vehicles.length)];
+            var rdH = H - GROUND;
+            var cs  = Math.max(5, rdH*0.12);
+            var laneOff = (v.dir===1) ? rdH*0.06 : -rdH*0.06;
+            var cy = GROUND + rdH*0.10 + laneOff - cs*0.55;
+            return { x: v.x + (v.xShake||0), y: cy + (v.yOff||0), kind: 'car' };
+        }
+        if (typeof BGBUILDS !== 'undefined' && BGBUILDS.length) {
+            var b = BGBUILDS[rngI(0, BGBUILDS.length)];
+            var bx = b.x + rng(b.w*0.2, b.w*0.8);
+            var by = GROUND - b.h - 2;
+            return { x: bx, y: by, kind: 'building' };
+        }
+        return { x: rng(W*0.1, W*0.9), y: GROUND - 40, kind: 'building' };
+    }
+
+    function initCustomEvent(type) {
+        tsunamiState  = null;
+        mirrorShards  = [];
+        mirrorPrisms  = [];
+        acidDrops     = [];
+        acidSplats    = [];
+        acidPools     = [];
+        acidSteam     = [];
+        acidDripFalls = [];
+        gravityState  = null;
+        gravityDebris = [];
+        gravityBeams  = [];
+        gravityRings  = [];
+        crystals      = [];
+        crystalGlitter= [];
+        stuckCrystals = [];
+        locusts       = [];
+        lavaDrops     = [];
+        lavaSplats    = [];
+        lavaFires     = [];
+        lavaEmbers    = [];
+        lavaCraters   = [];
+        lavaSmoke     = [];
+        plasmaArcs    = [];
+        plasmaTimer   = 0;
+        plasmaImpacts = [];
+        plasmaSparks  = [];
+        plasmaSmoke   = [];
+        cosmicBeams   = [];
+        cosmicSparks  = [];
+        cosmicImpacts = [];
+        cosmicVapor   = [];
+        glitchPixels  = [];
+        glitchBars    = [];
+        glitchTimer   = 0;
+
+        if (type === 'tsunami') {
+            /* Full water-space scene:
+                - waterLevel rises from below GROUND toward targetLevel
+                - three sine-displaced wave layers at different y, speed
+                  and phase for parallax depth
+                - foam crests bloom along the front wave
+                - bubbles rise from the dark depths
+                - debris (planks) float on the surface */
+            /* Water bounds per user spec:
+                 - START just ABOVE the road (so the flood is visible
+                   from the moment the event begins, not hidden behind
+                   the pavement)
+                 - PEAK at HALF the tallest building's rooftop height
+                   (so the tsunami visibly engulfs the lower city)
+               Tallest building is read from BGBUILDS (h is each
+               building's height in pixels above GROUND). */
+            var tallestH = 200;
+            if (typeof BGBUILDS !== 'undefined' && BGBUILDS.length) {
+                for (var bi=0; bi<BGBUILDS.length; bi++) {
+                    if (BGBUILDS[bi].h > tallestH) tallestH = BGBUILDS[bi].h;
+                }
+            }
+            tsunamiState = {
+                t: 0,
+                waterLevel:  GROUND - 8,                  /* start: just above the road */
+                targetLevel: GROUND - tallestH * 0.5,     /* peak: half the tallest building */
+                wavePhase1:  0,
+                wavePhase2:  Math.PI*0.7,
+                wavePhase3:  Math.PI*1.3,
+                bubbles:     [],
+                debris:      [],
+                foamCrests:  [],
+                splashSparks:[]
+            };
+            for (var b=0; b<28; b++) tsunamiState.bubbles.push({
+                x: rng(0, W),
+                y: GROUND + rng(20, H*0.4),
+                r: rng(1.5, 5),
+                vy: rng(-0.8, -2.0),
+                drift: rng(-0.4, 0.4)
+            });
+            for (var dd=0; dd<10; dd++) tsunamiState.debris.push({
+                x: rng(0, W),
+                y: GROUND + rng(0, 20),
+                w: rng(20, 60), h: rng(6, 12),
+                rot: rng(-0.4, 0.4), rotV: rng(-0.003, 0.003),
+                phase: rng(0, Math.PI*2)
+            });
+        } else if (type === 'mirrorRain') {
+            for (var i=0; i<70; i++) mirrorShards.push({
+                x: rng(0,W), y: rng(-H, GROUND-40),
+                vy: rng(3, 7), vx: rng(-1.4, 0.6),
+                w: rng(4, 12), h: rng(14, 36),
+                angle: rng(-Math.PI/2, Math.PI/2),
+                spin: rng(-0.04, 0.04),
+                shimmer: rng(0, Math.PI*2),
+                shimmerR: rng(0.06, 0.12)
+            });
+            for (var i=0; i<120; i++) mirrorPrisms.push({
+                x: rng(0,W), y: rng(0, GROUND),
+                vy: rng(0.3, 1.0), vx: rng(-0.2, 0.2),
+                hue: rng(0, 360),
+                hueDrift: rng(-30, 30),
+                life: 0, maxLife: rng(700, 1600),
+                size: rng(2, 5)
+            });
+        } else if (type === 'acidRain') {
+            for (var i=0; i<240; i++) acidDrops.push({
+                x: rng(0,W), y: rng(-H, GROUND),
+                vy: rng(6,12), vx: rng(-1.4,0.4),
+                len: rng(10,18)
+            });
+        } else if (type === 'gravityWell') {
+            var debris = [];
+            for (var i=0; i<120; i++) debris.push({
+                angle: rng(0, Math.PI*2),
+                radius: rng(80, 240),
+                speed: rng(0.005, 0.015),
+                spiral: rng(0.03, 0.10),
+                size: rng(1, 3.5),
+                hue: rngI(0, 3)   /* 0=white, 1=violet, 2=orange */
+            });
+            gravityState = {
+                cx: W*0.72, cy: GROUND*0.28,
+                r: 48, t: 0, debris: debris
+            };
+            /* Tractor beams aimed at 4 imaginary "tall buildings"
+               along the lower city silhouette — each beam pulls a
+               stream of building debris up into the well. */
+            for (var b=0; b<4; b++) gravityBeams.push({
+                bx: W*(0.12 + b*0.22) + rng(-30, 30),
+                by: GROUND - rng(60, 180),    /* nominal rooftop y */
+                pulse: rng(0, Math.PI*2),
+                emitTimer: rng(0, 200)
+            });
+        } else if (type === 'crystalStorm') {
+            for (var i=0; i<80; i++) crystals.push({
+                x: rng(0,W), y: rng(-H, GROUND-50),
+                vy: rng(0.6, 2.2), vx: rng(-0.4, 0.4),
+                r: rng(5, 12),
+                angle: rng(0, Math.PI*2),
+                spin: rng(-0.02, 0.02),
+                shine: rng(0, Math.PI*2)
+            });
+            for (var i=0; i<120; i++) crystalGlitter.push({
+                x: rng(0,W), y: rng(0, GROUND),
+                life: rng(0, 1000), maxLife: rng(400, 1200)
+            });
+        } else if (type === 'locustSwarm') {
+            for (var i=0; i<180; i++) locusts.push({
+                x: rng(-W*0.3, W*1.3), y: rng(H*0.08, GROUND-60),
+                vx: rng(2.5, 5.5), vy: rng(-0.4, 0.4),
+                wing: rng(0, Math.PI*2),
+                wingRate: rng(0.05, 0.10),
+                size: rng(2, 4)
+            });
+        } else if (type === 'lavaRain') {
+            for (var i=0; i<90; i++) lavaDrops.push({
+                x: rng(0,W), y: -rng(40, H*0.7),
+                vy: rng(5, 10), vx: rng(-0.5, 0.5),
+                r: rng(3, 7), trail: []
+            });
+        } else if (type === 'plasmaStorm') {
+            /* arcs spawn dynamically in update */
+        } else if (type === 'cosmicRay') {
+            /* multi-hue beam palette so each beam is a different
+               cosmic colour (cyan, magenta, lime, gold, violet…) */
+            var beamCols = ['rgb(180,220,255)','rgb(255,170,220)',
+                            'rgb(170,255,200)','rgb(255,220,120)',
+                            'rgb(200,170,255)','rgb(140,240,255)',
+                            'rgb(255,180,140)','rgb(220,255,170)'];
+            for (var i=0; i<6; i++) cosmicBeams.push({
+                x: rng(W*0.08, W*0.92),
+                alpha: rng(0.35, 0.70),
+                w: rng(24, 64),
+                pulse: rng(0, Math.PI*2),
+                pulseRate: rng(0.0008, 0.0022),
+                col: beamCols[i % beamCols.length]
+            });
+            for (var i=0; i<120; i++) cosmicSparks.push({
+                x: rng(0,W), y: rng(0, GROUND),
+                vy: rng(2.5, 5.5), life: 0, maxLife: rng(500, 1400),
+                col: beamCols[rngI(0, beamCols.length)]
+            });
+        } else if (type === 'quantumGlitch') {
+            for (var i=0; i<140; i++) glitchPixels.push({
+                x: rng(0,W), y: rng(0, GROUND),
+                size: rngI(2, 8),
+                col: ['#ff0044','#00ff88','#00ddff','#ffff00','#ff00ff'][rngI(0,5)],
+                next: rng(50, 400)
+            });
+        }
+    }
+
+    /* Advance all per-event state. Called each frame after the
+       existing particle update. */
+    function updateCustomEvent(dt) {
+        var type = effType(EVENTS[eventIndex]);
+        var k = dt/16;
+
+        if (type === 'tsunami' && tsunamiState) {
+            var ts = tsunamiState;
+            ts.t += dt;
+            /* ease water level toward target */
+            ts.waterLevel += (ts.targetLevel - ts.waterLevel) * 0.012 * k;
+            /* advance wave phases at different speeds */
+            ts.wavePhase1 += 0.0040 * dt;
+            ts.wavePhase2 += 0.0028 * dt;
+            ts.wavePhase3 += 0.0018 * dt;
+            /* bubbles rising from the depths */
+            for (var i=0; i<ts.bubbles.length; i++) {
+                var bb = ts.bubbles[i];
+                bb.y += bb.vy*k;
+                bb.x += bb.drift*k;
+                if (bb.y < ts.waterLevel - 4) {
+                    bb.x = rng(0, W);
+                    bb.y = GROUND + rng(20, H*0.4);
+                    bb.r = rng(1.5, 5);
+                    bb.vy = rng(-0.8, -2.0);
+                }
+            }
+            /* debris floats with a sine bob along the surface */
+            for (var i=0; i<ts.debris.length; i++) {
+                var dz = ts.debris[i];
+                dz.x += 0.5 * k;
+                dz.phase += 0.005 * dt;
+                dz.rot += dz.rotV * dt;
+                if (dz.x > W + 80) dz.x = -80;
+            }
+            /* spawn foam at the leading crest */
+            if (Math.random() < 0.55) {
+                var fx = rng(0, W);
+                var fy = ts.waterLevel + Math.sin(fx*0.025 + ts.wavePhase1)*8;
+                ts.foamCrests.push({
+                    x: fx, y: fy,
+                    vx: rng(-0.6, 0.6), vy: rng(-1.4, -0.2),
+                    life: 0, maxLife: rng(400, 900), r: rng(2, 5)
+                });
+            }
+            for (var i=ts.foamCrests.length-1; i>=0; i--) {
+                var f = ts.foamCrests[i];
+                f.x += f.vx*k; f.y += f.vy*k; f.vy += 0.04*k; f.life += dt;
+                if (f.life > f.maxLife) ts.foamCrests.splice(i,1);
+            }
+            /* occasional splash spark when a wave peaks against an obstacle */
+            if (Math.random() < 0.08) {
+                ts.splashSparks.push({
+                    x: rng(W*0.1, W*0.9),
+                    y: ts.waterLevel + rng(-20, 0),
+                    vx: rng(-2, 2), vy: rng(-3, -1),
+                    life: 0, maxLife: rng(300, 700)
+                });
+            }
+            for (var i=ts.splashSparks.length-1; i>=0; i--) {
+                var sk = ts.splashSparks[i];
+                sk.x += sk.vx*k; sk.y += sk.vy*k; sk.vy += 0.10*k; sk.life += dt;
+                if (sk.life > sk.maxLife) ts.splashSparks.splice(i,1);
+            }
+        }
+
+        else if (type === 'mirrorRain') {
+            for (var i=0; i<mirrorShards.length; i++) {
+                var ms = mirrorShards[i];
+                ms.x += ms.vx*k; ms.y += ms.vy*k;
+                ms.angle += ms.spin*k;
+                ms.shimmer += ms.shimmerR * dt;
+                if (ms.y > GROUND - 10) {
+                    /* spawn a burst of rainbow specks at impact */
+                    for (var p=0; p<5; p++) mirrorPrisms.push({
+                        x: ms.x + rng(-8, 8),
+                        y: GROUND - rng(0, 6),
+                        vy: rng(-0.6, 0.4), vx: rng(-1.2, 1.2),
+                        hue: rng(0, 360),
+                        hueDrift: rng(-90, 90),
+                        life: 0, maxLife: rng(400, 900),
+                        size: rng(2, 4)
+                    });
+                    ms.y = rng(-80, -10);
+                    ms.x = rng(0, W);
+                    ms.w = rng(4, 12); ms.h = rng(14, 36);
+                    ms.angle = rng(-Math.PI/2, Math.PI/2);
+                }
+            }
+            for (var i=0; i<mirrorPrisms.length; i++) {
+                var pr = mirrorPrisms[i];
+                pr.x += pr.vx*k; pr.y += pr.vy*k; pr.life += dt;
+                pr.hue = (pr.hue + pr.hueDrift*dt*0.001) % 360;
+                if (pr.life > pr.maxLife) {
+                    pr.x = rng(0, W);
+                    pr.y = rng(0, GROUND);
+                    pr.vy = rng(0.3, 1.0); pr.vx = rng(-0.2, 0.2);
+                    pr.life = 0; pr.maxLife = rng(700, 1600);
+                    pr.hue = rng(0, 360);
+                    pr.size = rng(2, 5);
+                }
+            }
+        }
+
+        else if (type === 'acidRain') {
+            for (var i=0; i<acidDrops.length; i++) {
+                var a = acidDrops[i];
+                a.x += a.vx*k; a.y += a.vy*k;
+                if (a.y >= GROUND) {
+                    acidSplats.push({ x: a.x, y: GROUND, r: 0,
+                                      maxR: rng(6, 14), life: 0,
+                                      maxLife: rng(500, 1100) });
+                    /* every few splats, spawn a corrosion pool that
+                       persists and bubbles */
+                    if (Math.random() < 0.28 && acidPools.length < 36) {
+                        acidPools.push({
+                            x: a.x + rng(-4, 4), y: GROUND,
+                            r: rng(8, 18),
+                            life: 0, maxLife: rng(5000, 12000),
+                            bubble: rng(0, Math.PI*2)
+                        });
+                    }
+                    /* steam wisp rising from the corrosion */
+                    if (Math.random() < 0.45 && acidSteam.length < 80) {
+                        acidSteam.push({
+                            x: a.x, y: GROUND - 4,
+                            vy: rng(-0.6, -1.4), vx: rng(-0.2, 0.2),
+                            r: rng(3, 7), maxR: rng(12, 24),
+                            life: 0, maxLife: rng(1400, 2800)
+                        });
+                    }
+                    a.y = rng(-60, -10); a.x = rng(0, W);
+                }
+            }
+            for (var i=acidSplats.length-1; i>=0; i--) {
+                acidSplats[i].life += dt;
+                acidSplats[i].r = acidSplats[i].maxR *
+                                  (acidSplats[i].life/acidSplats[i].maxLife);
+                if (acidSplats[i].life >= acidSplats[i].maxLife)
+                    acidSplats.splice(i, 1);
+            }
+            /* corrosion pools — bubble + slowly fade */
+            for (var i=acidPools.length-1; i>=0; i--) {
+                acidPools[i].life += dt;
+                acidPools[i].bubble += 0.005 * dt;
+                if (acidPools[i].life >= acidPools[i].maxLife)
+                    acidPools.splice(i, 1);
+            }
+            /* steam wisps grow as they rise */
+            for (var i=acidSteam.length-1; i>=0; i--) {
+                var st = acidSteam[i];
+                st.x += st.vx*k; st.y += st.vy*k; st.life += dt;
+                st.r = Math.min(st.maxR, st.r + 0.025*k);
+                if (st.life >= st.maxLife) acidSteam.splice(i, 1);
+            }
+            /* drips running down imaginary building edges — every so
+               often spawn a column of melting paint sliding toward
+               the ground */
+            if (Math.random() < 0.18 && acidDripFalls.length < 24) {
+                acidDripFalls.push({
+                    x: rng(W*0.05, W*0.95),
+                    y: rng(GROUND*0.20, GROUND*0.70),
+                    vy: rng(0.4, 1.2),
+                    len: rng(20, 60),
+                    grew: 0,
+                    maxGrow: rng(60, 200),
+                    /* melting paint colour — sampled from car/building
+                       palette (red, yellow, blue, beige, brown) */
+                    col: ['rgba(200,80,40,',
+                          'rgba(220,200,80,',
+                          'rgba(60,110,180,',
+                          'rgba(180,160,120,',
+                          'rgba(120,80,40,'][rngI(0,5)]
+                });
+            }
+            for (var i=acidDripFalls.length-1; i>=0; i--) {
+                var dr = acidDripFalls[i];
+                dr.y += dr.vy*k;
+                dr.grew += dr.vy*k;
+                if (dr.y > GROUND || dr.grew > dr.maxGrow) {
+                    acidDripFalls.splice(i, 1);
+                }
+            }
+        }
+
+        else if (type === 'gravityWell' && gravityState) {
+            var gs = gravityState;
+            gs.t += dt;
+            for (var i=0; i<gs.debris.length; i++) {
+                var d = gs.debris[i];
+                d.angle += d.speed*k;
+                d.radius -= d.spiral*k;
+                if (d.radius < gs.r*0.4) {
+                    d.angle = rng(0, Math.PI*2);
+                    d.radius = rng(180, 280);
+                }
+            }
+            /* shockwave rings emit periodically */
+            if (Math.random() < 0.012) gravityRings.push({
+                r: gs.r*0.5, life: 0, maxLife: 1400,
+                strength: rng(0.5, 1.0)
+            });
+            for (var i=gravityRings.length-1; i>=0; i--) {
+                var gr = gravityRings[i];
+                gr.life += dt;
+                gr.r += 0.05*dt;
+                if (gr.life > gr.maxLife) gravityRings.splice(i, 1);
+            }
+            /* tractor beams pull building debris from each beam target
+               toward the singularity */
+            for (var b=0; b<gravityBeams.length; b++) {
+                var gb = gravityBeams[b];
+                gb.pulse += 0.003*dt;
+                gb.emitTimer -= dt;
+                if (gb.emitTimer <= 0) {
+                    gb.emitTimer = rng(60, 220);
+                    gravityDebris.push({
+                        x: gb.bx + rng(-8, 8),
+                        y: gb.by + rng(-4, 4),
+                        targetX: gs.cx, targetY: gs.cy,
+                        progress: 0,
+                        speed: rng(0.0006, 0.0014),
+                        size: rng(2, 6),
+                        rot: rng(0, Math.PI*2),
+                        rotV: rng(-0.005, 0.005),
+                        col: rngI(0, 3)  /* 0=grey, 1=brown, 2=tan */
+                    });
+                }
+            }
+            /* fly building debris along curved bezier path toward the well */
+            for (var i=gravityDebris.length-1; i>=0; i--) {
+                var bd = gravityDebris[i];
+                bd.progress += bd.speed * dt;
+                bd.rot += bd.rotV * dt;
+                if (bd.progress >= 1) {
+                    gravityDebris.splice(i, 1);
+                    continue;
+                }
+                /* shrink as it falls in (spaghettification) */
+            }
+        }
+
+        else if (type === 'crystalStorm') {
+            for (var i=0; i<crystals.length; i++) {
+                var cz = crystals[i];
+                cz.y += cz.vy*k; cz.x += cz.vx*k;
+                cz.angle += cz.spin*k; cz.shine += 0.005*dt;
+                /* A small fraction of falling crystals "stick" into an
+                   ACTUAL target — a building rooftop or a moving car.
+                   The shard inherits the target's position so it
+                   visibly embeds in the structure, not in empty sky. */
+                if (Math.random() < 0.0040 && stuckCrystals.length < 70) {
+                    var tg = pickImpactTarget();
+                    stuckCrystals.push({
+                        x: tg.x, y: tg.y,
+                        r: cz.r * 0.85,
+                        angle: cz.angle,
+                        shine: rng(0, Math.PI*2),
+                        born: 0,
+                        onCar: tg.kind === 'car'
+                    });
+                    cz.y = rng(-60, -10); cz.x = rng(0, W);
+                    continue;
+                }
+                if (cz.y > GROUND) {
+                    /* a crystal hitting the ground also has a chance to
+                       embed at street level — looks like glass shards on
+                       the road */
+                    if (Math.random() < 0.45 && stuckCrystals.length < 80) {
+                        stuckCrystals.push({
+                            x: cz.x, y: GROUND - rng(0, 4),
+                            r: cz.r * 0.7,
+                            angle: rng(-0.8, 0.8),
+                            shine: rng(0, Math.PI*2),
+                            born: 0
+                        });
+                    }
+                    cz.y = rng(-60, -10); cz.x = rng(0, W);
+                }
+            }
+            for (var i=0; i<crystalGlitter.length; i++) {
+                crystalGlitter[i].life += dt;
+                if (crystalGlitter[i].life > crystalGlitter[i].maxLife) {
+                    crystalGlitter[i].x = rng(0, W);
+                    crystalGlitter[i].y = rng(0, GROUND);
+                    crystalGlitter[i].life = 0;
+                    crystalGlitter[i].maxLife = rng(400, 1200);
+                }
+            }
+            /* age the embedded crystals so they slowly twinkle */
+            for (var i=0; i<stuckCrystals.length; i++) {
+                stuckCrystals[i].born += dt;
+                stuckCrystals[i].shine += 0.004*dt;
+            }
+        }
+
+        else if (type === 'locustSwarm') {
+            for (var i=0; i<locusts.length; i++) {
+                var lc = locusts[i];
+                lc.x += lc.vx*k; lc.y += lc.vy*k;
+                lc.wing += lc.wingRate*k;
+                if (lc.x > W + 30) { lc.x = -30; lc.y = rng(H*0.08, GROUND-60); }
+            }
+        }
+
+        else if (type === 'lavaRain') {
+            for (var i=0; i<lavaDrops.length; i++) {
+                var lv = lavaDrops[i];
+                lv.x += lv.vx*k; lv.y += lv.vy*k; lv.vy += 0.05*k;
+                lv.trail.unshift({ x: lv.x, y: lv.y, life: 0 });
+                if (lv.trail.length > 8) lv.trail.pop();
+                for (var t=0; t<lv.trail.length; t++) lv.trail[t].life += dt;
+                /* periodically a drop "hits a building / car" — start
+                   a fire on the actual target instead of in empty sky */
+                if (Math.random() < 0.0020 && lavaFires.length < 22) {
+                    var tg = pickImpactTarget();
+                    lavaFires.push({
+                        x: tg.x, y: tg.y,
+                        size: rng(10, 18), life: 0,
+                        maxLife: rng(4000, 8000),
+                        flicker: rng(0, Math.PI*2),
+                        onBuilding: tg.kind === 'building',
+                        onCar: tg.kind === 'car'
+                    });
+                    lv.y = rng(-60, -10); lv.x = rng(0, W);
+                    lv.vy = rng(5, 10); lv.trail.length = 0;
+                    continue;
+                }
+                if (lv.y >= GROUND) {
+                    lavaSplats.push({ x: lv.x, y: GROUND, r: 0,
+                                      maxR: rng(8, 18), life: 0,
+                                      maxLife: rng(900, 1800) });
+                    /* ground fire on impact */
+                    if (Math.random() < 0.45 && lavaFires.length < 30) {
+                        lavaFires.push({
+                            x: lv.x, y: GROUND - 2,
+                            size: rng(8, 16), life: 0,
+                            maxLife: rng(3000, 6000),
+                            flicker: rng(0, Math.PI*2),
+                            onBuilding: false
+                        });
+                    }
+                    /* permanent crater scar */
+                    if (lavaCraters.length < 80) lavaCraters.push({
+                        x: lv.x, y: GROUND,
+                        r: rng(5, 12),
+                        born: 0
+                    });
+                    lv.y = rng(-60, -10); lv.x = rng(0, W);
+                    lv.vy = rng(5, 10); lv.trail.length = 0;
+                }
+            }
+            for (var i=lavaSplats.length-1; i>=0; i--) {
+                lavaSplats[i].life += dt;
+                lavaSplats[i].r = lavaSplats[i].maxR *
+                                  Math.min(1, lavaSplats[i].life/600);
+                if (lavaSplats[i].life >= lavaSplats[i].maxLife)
+                    lavaSplats.splice(i, 1);
+            }
+            /* burning fires spawn embers + smoke */
+            for (var i=0; i<lavaFires.length; i++) {
+                var lf = lavaFires[i];
+                lf.life += dt;
+                lf.flicker += 0.012 * dt;
+                if (Math.random() < 0.18 && lavaEmbers.length < 200) {
+                    lavaEmbers.push({
+                        x: lf.x + rng(-lf.size*0.4, lf.size*0.4),
+                        y: lf.y - rng(0, lf.size*0.5),
+                        vx: rng(-0.4, 0.4),
+                        vy: rng(-2.4, -4.2),
+                        life: 0, maxLife: rng(700, 1400),
+                        size: rng(1, 2.2),
+                        col: rngI(0, 3)  /* 0 yellow, 1 orange, 2 red */
+                    });
+                }
+                if (Math.random() < 0.06 && lavaSmoke.length < 80) {
+                    lavaSmoke.push({
+                        x: lf.x + rng(-3, 3),
+                        y: lf.y - lf.size*0.4,
+                        vx: rng(-0.25, 0.25),
+                        vy: rng(-0.5, -1.1),
+                        r: rng(6, 12), maxR: rng(28, 56),
+                        life: 0, maxLife: rng(2200, 4400)
+                    });
+                }
+            }
+            for (var i=lavaFires.length-1; i>=0; i--) {
+                if (lavaFires[i].life > lavaFires[i].maxLife)
+                    lavaFires.splice(i, 1);
+            }
+            for (var i=lavaEmbers.length-1; i>=0; i--) {
+                var em = lavaEmbers[i];
+                em.x += em.vx*k; em.y += em.vy*k;
+                em.vy *= 0.985; em.life += dt;
+                if (em.life > em.maxLife) lavaEmbers.splice(i, 1);
+            }
+            for (var i=lavaSmoke.length-1; i>=0; i--) {
+                var sk = lavaSmoke[i];
+                sk.x += sk.vx*k; sk.y += sk.vy*k;
+                sk.r = Math.min(sk.maxR, sk.r + 0.035*k);
+                sk.life += dt;
+                if (sk.life > sk.maxLife) lavaSmoke.splice(i, 1);
+            }
+            for (var i=0; i<lavaCraters.length; i++) lavaCraters[i].born += dt;
+        }
+
+        else if (type === 'plasmaStorm') {
+            plasmaTimer += dt;
+            if (plasmaTimer > rng(140, 380)) {
+                plasmaTimer = 0;
+                /* strike an ACTUAL target — a building rooftop or a
+                   moving car. Bolt zigzags from a random cloud point
+                   down to the target. */
+                var tgt = pickImpactTarget();
+                var startX = tgt.x + rng(-W*0.12, W*0.12);
+                var startY = rng(0, GROUND*0.35);
+                var hitX = tgt.x, hitY = tgt.y;
+                var segs = [{ x: startX, y: startY }];
+                var sx = startX, sy = startY;
+                while (sy < hitY - 60) {
+                    sx += rng(-50, 50);
+                    sy += rng(40, 90);
+                    segs.push({ x: sx, y: sy });
+                }
+                segs.push({ x: hitX, y: hitY });
+                var palette = ['#00ddff','#ff44ff','#ffee44','#44ffaa'];
+                var col = palette[rngI(0, palette.length)];
+                plasmaArcs.push({
+                    segs: segs, life: 0, maxLife: rng(400, 900),
+                    color: col,
+                    width: rng(1.5, 3.5)
+                });
+                /* impact site — burning scorch + sparks + smoke */
+                plasmaImpacts.push({
+                    x: hitX, y: hitY,
+                    r: 0, maxR: rng(14, 26),
+                    life: 0, maxLife: rng(3000, 5500),
+                    flicker: rng(0, Math.PI*2),
+                    col: col
+                });
+                for (var ps=0; ps<24; ps++) plasmaSparks.push({
+                    x: hitX, y: hitY,
+                    vx: rng(-3, 3), vy: rng(-3, 0.5),
+                    life: 0, maxLife: rng(400, 900),
+                    col: col
+                });
+                plasmaSmoke.push({
+                    x: hitX, y: hitY,
+                    vy: rng(-0.4, -0.9), vx: rng(-0.2, 0.2),
+                    r: rng(4, 8), maxR: rng(28, 50),
+                    life: 0, maxLife: rng(2400, 4800)
+                });
+            }
+            for (var i=plasmaArcs.length-1; i>=0; i--) {
+                plasmaArcs[i].life += dt;
+                if (plasmaArcs[i].life >= plasmaArcs[i].maxLife)
+                    plasmaArcs.splice(i, 1);
+            }
+            for (var i=plasmaImpacts.length-1; i>=0; i--) {
+                var im = plasmaImpacts[i];
+                im.life += dt; im.flicker += 0.015*dt;
+                im.r = Math.min(im.maxR, im.r + 0.06*k);
+                if (im.life > im.maxLife) plasmaImpacts.splice(i, 1);
+            }
+            for (var i=plasmaSparks.length-1; i>=0; i--) {
+                var sk = plasmaSparks[i];
+                sk.x += sk.vx*k; sk.y += sk.vy*k;
+                sk.vy += 0.18*k; sk.life += dt;
+                if (sk.life > sk.maxLife) plasmaSparks.splice(i, 1);
+            }
+            for (var i=plasmaSmoke.length-1; i>=0; i--) {
+                var ss = plasmaSmoke[i];
+                ss.x += ss.vx*k; ss.y += ss.vy*k;
+                ss.r = Math.min(ss.maxR, ss.r + 0.025*k);
+                ss.life += dt;
+                if (ss.life > ss.maxLife) plasmaSmoke.splice(i, 1);
+            }
+        }
+
+        else if (type === 'cosmicRay') {
+            for (var i=0; i<cosmicBeams.length; i++) {
+                var cb = cosmicBeams[i];
+                cb.pulse += cb.pulseRate*dt;
+                /* every couple of seconds a beam VAPORIZES a building
+                   at its base — spawn a glowing impact crater and a
+                   column of disintegration particles rising upward. */
+                cb._impactTimer = (cb._impactTimer || rng(1500, 3500)) - dt;
+                if (cb._impactTimer <= 0) {
+                    cb._impactTimer = rng(2000, 5000);
+                    /* vaporize a real building / car at the beam line */
+                    var tg = pickImpactTarget();
+                    var ix = tg.x, iy = tg.y;
+                    /* pick a spectral colour for this beam strike from
+                       a multi-hue cosmic palette */
+                    var cosmicCols = ['#a8e0ff','#ffb0ff','#aaffd0','#ffe070',
+                                       '#b890ff','#80ffe0','#ffa080','#d0ffa0'];
+                    var col = cosmicCols[rngI(0, cosmicCols.length)];
+                    cosmicImpacts.push({
+                        x: ix, y: iy,
+                        r: 0, maxR: rng(18, 32),
+                        life: 0, maxLife: rng(2200, 4400),
+                        flash: 1,
+                        col: col
+                    });
+                    /* burst of vaporization particles tinted to match */
+                    for (var v=0; v<32; v++) cosmicVapor.push({
+                        x: ix + rng(-10, 10),
+                        y: iy + rng(-4, 4),
+                        vx: rng(-0.5, 0.5),
+                        vy: rng(-2.5, -5),
+                        life: 0, maxLife: rng(900, 1800),
+                        size: rng(1, 2.4),
+                        col: col
+                    });
+                }
+            }
+            for (var i=0; i<cosmicSparks.length; i++) {
+                var cs = cosmicSparks[i];
+                cs.y += cs.vy*k; cs.life += dt;
+                if (cs.y > GROUND || cs.life > cs.maxLife) {
+                    cs.x = rng(0, W); cs.y = rng(0, H*0.2);
+                    cs.life = 0; cs.maxLife = rng(500, 1400);
+                }
+            }
+            for (var i=cosmicImpacts.length-1; i>=0; i--) {
+                var ci = cosmicImpacts[i];
+                ci.life += dt;
+                ci.r = Math.min(ci.maxR, ci.r + 0.06*k);
+                ci.flash = Math.max(0, ci.flash - 0.004*k);
+                if (ci.life > ci.maxLife) cosmicImpacts.splice(i, 1);
+            }
+            for (var i=cosmicVapor.length-1; i>=0; i--) {
+                var cv = cosmicVapor[i];
+                cv.x += cv.vx*k; cv.y += cv.vy*k;
+                cv.vy *= 0.985; cv.life += dt;
+                if (cv.life > cv.maxLife) cosmicVapor.splice(i, 1);
+            }
+        }
+
+        else if (type === 'quantumGlitch') {
+            glitchTimer += dt;
+            for (var i=0; i<glitchPixels.length; i++) {
+                glitchPixels[i].next -= dt;
+                if (glitchPixels[i].next <= 0) {
+                    glitchPixels[i].x = rng(0, W);
+                    glitchPixels[i].y = rng(0, GROUND);
+                    glitchPixels[i].next = rng(40, 400);
+                }
+            }
+            if (glitchTimer > rng(200, 700)) {
+                glitchTimer = 0;
+                glitchBars.push({
+                    y: rng(0, GROUND),
+                    h: rngI(2, 24),
+                    shift: rngI(-30, 30),
+                    life: 0, maxLife: rng(120, 320),
+                    col: ['rgba(255,0,80,0.45)','rgba(0,255,180,0.45)','rgba(60,140,255,0.45)'][rngI(0,3)]
+                });
+            }
+            for (var i=glitchBars.length-1; i>=0; i--) {
+                glitchBars[i].life += dt;
+                if (glitchBars[i].life >= glitchBars[i].maxLife)
+                    glitchBars.splice(i, 1);
+            }
+        }
+    }
+
+    /* Ground-anchored layer of the active custom event — drawn
+       BEFORE vehicles so cars sit on top of the puddles / craters /
+       impact scorches. Per-user request:
+         - acid rain corrosion pools must be UNDER cars
+         - lava rain craters + splats must be UNDER cars */
+    function drawCustomEventGround(c) {
+        var type = effType(EVENTS[eventIndex]);
+
+        /* ── acid rain ground layer: pools + their dark etch beneath ── */
+        if (type === 'acidRain') {
+            for (var i=0; i<acidPools.length; i++) {
+                var po = acidPools[i];
+                var p = po.life / po.maxLife;
+                var op = (p < 0.85) ? 1 : (1 - p)/0.15;
+                /* dark etch beneath pool */
+                c.fillStyle = 'rgba(60,70,20,' + (op*0.55) + ')';
+                c.beginPath();
+                c.ellipse(po.x, po.y + 1, po.r*1.1, po.r*0.35, 0, 0, Math.PI*2);
+                c.fill();
+                /* fluorescent pool body */
+                var pg = c.createRadialGradient(po.x, po.y, 0,
+                                                 po.x, po.y, po.r);
+                pg.addColorStop(0,   'rgba(220,255,120,' + (op*0.95) + ')');
+                pg.addColorStop(0.6, 'rgba(160,210,40,' + (op*0.85) + ')');
+                pg.addColorStop(1,   'rgba(80,120,20,0)');
+                c.fillStyle = pg;
+                c.beginPath();
+                c.ellipse(po.x, po.y - 1, po.r, po.r*0.42, 0, 0, Math.PI*2);
+                c.fill();
+                /* bubble caps */
+                for (var bb=0; bb<3; bb++) {
+                    var ba = po.bubble + bb*2.1;
+                    var bx = po.x + Math.cos(ba)*po.r*0.6;
+                    var by = po.y - 2 + Math.sin(ba)*po.r*0.15;
+                    var br = 1.5 + Math.sin(ba*1.7)*0.8 + 1;
+                    c.fillStyle = 'rgba(250,255,180,' + (op*0.85) + ')';
+                    c.beginPath(); c.arc(bx, by, br, 0, Math.PI*2); c.fill();
+                    c.strokeStyle = 'rgba(120,160,40,' + (op*0.85) + ')';
+                    c.lineWidth = 0.6;
+                    c.stroke();
+                }
+            }
+        }
+
+        /* ── crystal storm ground layer: embedded "stuck" shards ──
+           Lodged shards render here so cars (and any pedestrian
+           layer) draw over them. The falling crystals continue to
+           render above cars in drawCustomEvent — only the embedded
+           damage shards are pushed below. */
+        if (type === 'crystalStorm') {
+            for (var i=0; i<stuckCrystals.length; i++) {
+                var sk = stuckCrystals[i];
+                c.fillStyle = 'rgba(20,30,50,0.55)';
+                c.beginPath();
+                c.ellipse(sk.x, sk.y + sk.r*0.4,
+                          sk.r*0.9, sk.r*0.25, 0, 0, Math.PI*2);
+                c.fill();
+                c.save();
+                c.translate(sk.x, sk.y);
+                c.rotate(sk.angle);
+                var sg = c.createLinearGradient(0, -sk.r, 0, sk.r);
+                sg.addColorStop(0,   'rgba(220,240,255,0.95)');
+                sg.addColorStop(0.5, 'rgba(150,200,240,0.95)');
+                sg.addColorStop(1,   'rgba(70,110,160,0.95)');
+                c.fillStyle = sg;
+                c.beginPath();
+                c.moveTo(0, -sk.r);
+                c.lineTo(sk.r*0.6, 0);
+                c.lineTo(0, sk.r);
+                c.lineTo(-sk.r*0.6, 0);
+                c.closePath();
+                c.fill();
+                c.strokeStyle = 'rgba(20,40,80,0.85)';
+                c.lineWidth = 1;
+                c.stroke();
+                var tw = 0.5 + 0.5*Math.sin(sk.shine);
+                c.fillStyle = 'rgba(255,255,255,' + tw + ')';
+                c.beginPath();
+                c.arc(0, -sk.r*0.3, sk.r*0.15, 0, Math.PI*2);
+                c.fill();
+                c.restore();
+            }
+        }
+
+        /* ── lava rain ground layer: permanent craters + splats +
+              ground fires (so cars drive on top of all of them) ── */
+        if (type === 'lavaRain') {
+            /* crater scars first (oldest at bottom of z) */
+            for (var i=0; i<lavaCraters.length; i++) {
+                var cr = lavaCraters[i];
+                c.fillStyle = 'rgba(20,10,5,0.55)';
+                c.beginPath();
+                c.ellipse(cr.x, cr.y, cr.r, cr.r*0.4, 0, 0, Math.PI*2);
+                c.fill();
+                if (cr.born < 1500) {
+                    var hot = 1 - cr.born/1500;
+                    c.strokeStyle = 'rgba(255,120,30,' + (hot*0.55) + ')';
+                    c.lineWidth = 1.4;
+                    c.beginPath();
+                    c.ellipse(cr.x, cr.y, cr.r, cr.r*0.4, 0, 0, Math.PI*2);
+                    c.stroke();
+                }
+            }
+            /* pulsing molten splats */
+            for (var i=0; i<lavaSplats.length; i++) {
+                var s = lavaSplats[i];
+                var op = Math.max(0, 1 - s.life/s.maxLife);
+                var g = c.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+                g.addColorStop(0, 'rgba(255,220,80,' + (op*1.00) + ')');
+                g.addColorStop(0.55, 'rgba(255,120,30,' + (op*0.80) + ')');
+                g.addColorStop(1, 'rgba(80,20,0,0)');
+                c.fillStyle = g;
+                c.fillRect(s.x-s.r, s.y-s.r, s.r*2, s.r*2);
+            }
+            /* ground-level fires (those NOT on buildings or cars) —
+               drawn here so cars occlude them. Building-tied + car-tied
+               fires render above cars in the main drawCustomEvent so
+               they appear ON the structure they ignited. */
+            for (var i=0; i<lavaFires.length; i++) {
+                var lf = lavaFires[i];
+                if (lf.onBuilding || lf.onCar) continue;
+                drawLavaFire(c, lf);
+            }
+        }
+    }
+
+    /* Shared fire-petal renderer used by both ground and above-car
+       passes for lavaRain. */
+    function drawLavaFire(c, lf) {
+        var fadeIn  = Math.min(1, lf.life/200);
+        var fadeOut = Math.min(1, (lf.maxLife - lf.life)/800);
+        var fop = fadeIn * fadeOut;
+        var flick = 0.85 + 0.15*Math.sin(lf.flicker);
+        var fs = lf.size * flick;
+        /* halo */
+        var fg = c.createRadialGradient(lf.x, lf.y, 0,
+                                         lf.x, lf.y, fs*2.5);
+        fg.addColorStop(0, 'rgba(255,220,80,' + (0.9*fop) + ')');
+        fg.addColorStop(0.4, 'rgba(255,120,30,' + (0.6*fop) + ')');
+        fg.addColorStop(1, 'rgba(120,30,0,0)');
+        c.fillStyle = fg;
+        c.fillRect(lf.x-fs*2.5, lf.y-fs*2.5, fs*5, fs*5);
+        /* layered flame petals — 3 stacked teardrops */
+        for (var pn=0; pn<3; pn++) {
+            var ps = fs * (1 - pn*0.22);
+            var py = lf.y - pn*ps*0.6 - ps*0.3;
+            var col = ['rgba(255,80,20,'  + (fop*0.95) + ')',
+                       'rgba(255,180,40,' + (fop*0.95) + ')',
+                       'rgba(255,240,160,'+ (fop*0.95) + ')'][pn];
+            c.fillStyle = col;
+            c.beginPath();
+            c.moveTo(lf.x, py - ps);
+            c.bezierCurveTo(lf.x + ps*0.7, py - ps*0.4,
+                            lf.x + ps*0.5, py + ps*0.5,
+                            lf.x, py + ps*0.3);
+            c.bezierCurveTo(lf.x - ps*0.5, py + ps*0.5,
+                            lf.x - ps*0.7, py - ps*0.4,
+                            lf.x, py - ps);
+            c.fill();
+        }
+    }
+
+    /* Render the active custom event onto the dynamic canvas. */
+    function drawCustomEvent(c) {
+        var type = effType(EVENTS[eventIndex]);
+
+        /* ── TSUNAMI — full water-space scene ─────────────────────
+           Stratified rendering, from back to front:
+             1. Dark underwater body (gradient fill) below waterLevel.
+             2. Rising bubbles inside that body.
+             3. Three sine-displaced wave layers (back / mid / front)
+                at different y, amplitude, period, and opacity.
+             4. Floating debris bobbing on the surface phase.
+             5. Foam crests popping along the front wave.
+             6. Splash sparks where the surface meets obstacles. */
+        if (type === 'tsunami' && tsunamiState) {
+            var ts = tsunamiState;
+            var wlBack = ts.waterLevel - 24;     /* back wave y reference */
+            var wlMid  = ts.waterLevel - 8;
+            var wlFront= ts.waterLevel + 6;
+
+            /* 1. Deep water body */
+            var bodyG = c.createLinearGradient(0, ts.waterLevel - 30, 0, H);
+            bodyG.addColorStop(0,    'rgba(80,160,210,0.72)');
+            bodyG.addColorStop(0.20, 'rgba(40,110,170,0.85)');
+            bodyG.addColorStop(0.55, 'rgba(20,70,120,0.95)');
+            bodyG.addColorStop(1,    'rgba(8,30,60,1)');
+            c.fillStyle = bodyG;
+            c.fillRect(0, ts.waterLevel - 30, W, H);
+
+            /* 2. Bubbles in the dark water */
+            for (var i=0; i<ts.bubbles.length; i++) {
+                var bb = ts.bubbles[i];
+                c.fillStyle = 'rgba(220,240,255,0.55)';
+                c.beginPath(); c.arc(bb.x, bb.y, bb.r, 0, Math.PI*2); c.fill();
+                c.strokeStyle = 'rgba(255,255,255,0.30)';
+                c.lineWidth = 1;
+                c.beginPath(); c.arc(bb.x - bb.r*0.35, bb.y - bb.r*0.35, bb.r*0.4, 0, Math.PI*2); c.stroke();
+            }
+
+            /* 3. Three wave layers — back, mid, front.
+               Each is a poly-line of sine displacements filled down to H. */
+            function drawWaveLayer(c, yRef, amp, period, phase, fillStyle) {
+                c.fillStyle = fillStyle;
+                c.beginPath();
+                c.moveTo(0, H);
+                var step = 8;
+                for (var x=0; x<=W; x+=step) {
+                    var y = yRef + Math.sin(x/period + phase)*amp
+                                + Math.sin(x/(period*0.41) + phase*1.7)*amp*0.35;
+                    c.lineTo(x, y);
+                }
+                c.lineTo(W, H);
+                c.closePath();
+                c.fill();
+            }
+            drawWaveLayer(c, wlBack,  10, 90,  ts.wavePhase3, 'rgba(80,140,200,0.55)');
+            drawWaveLayer(c, wlMid,   16, 70,  ts.wavePhase2, 'rgba(50,110,180,0.75)');
+            drawWaveLayer(c, wlFront, 24, 55,  ts.wavePhase1, 'rgba(30,80,150,0.92)');
+
+            /* highlight along the front wave crest */
+            c.strokeStyle = 'rgba(230,245,255,0.45)';
+            c.lineWidth = 2;
+            c.beginPath();
+            for (var x=0; x<=W; x+=6) {
+                var y = wlFront + Math.sin(x/55 + ts.wavePhase1)*24
+                                + Math.sin(x/22.5 + ts.wavePhase1*1.7)*8;
+                if (x===0) c.moveTo(x, y); else c.lineTo(x, y);
+            }
+            c.stroke();
+
+            /* 4. Floating debris (planks) */
+            for (var i=0; i<ts.debris.length; i++) {
+                var dz = ts.debris[i];
+                var surfY = wlFront + Math.sin(dz.x/55 + ts.wavePhase1)*24
+                                    + Math.sin(dz.phase)*3;
+                c.save();
+                c.translate(dz.x, surfY);
+                c.rotate(dz.rot + Math.sin(dz.phase)*0.15);
+                c.fillStyle = '#6e4c2a';
+                c.fillRect(-dz.w/2, -dz.h/2, dz.w, dz.h);
+                c.strokeStyle = '#3a2614';
+                c.lineWidth = 1;
+                c.strokeRect(-dz.w/2, -dz.h/2, dz.w, dz.h);
+                /* plank grain */
+                c.strokeStyle = 'rgba(60,40,20,0.55)';
+                c.beginPath();
+                c.moveTo(-dz.w/2 + 4, -dz.h/2 + 2);
+                c.lineTo( dz.w/2 - 4, -dz.h/2 + 2);
+                c.moveTo(-dz.w/2 + 4,  dz.h/2 - 2);
+                c.lineTo( dz.w/2 - 4,  dz.h/2 - 2);
+                c.stroke();
+                c.restore();
+            }
+
+            /* 5. Foam crests — small white blobs riding the front wave */
+            for (var i=0; i<ts.foamCrests.length; i++) {
+                var f = ts.foamCrests[i];
+                var op = (1 - f.life/f.maxLife) * 0.85;
+                c.fillStyle = 'rgba(240,250,255,' + op + ')';
+                c.beginPath(); c.arc(f.x, f.y, f.r, 0, Math.PI*2); c.fill();
+            }
+
+            /* 6. Splash sparks (small droplets popping off the surface) */
+            for (var i=0; i<ts.splashSparks.length; i++) {
+                var sk = ts.splashSparks[i];
+                var op = (1 - sk.life/sk.maxLife);
+                c.fillStyle = 'rgba(200,230,255,' + op + ')';
+                c.beginPath(); c.arc(sk.x, sk.y, 1.5, 0, Math.PI*2); c.fill();
+            }
+        }
+
+        /* ── MIRROR RAIN ─────────────────────────────────────────
+           Falling mirror shards (rotating thin rectangles with a
+           white catch-light flash) and drifting prismatic specks
+           (small HSL-rotating dots) below them. */
+        else if (type === 'mirrorRain') {
+            /* drifting rainbow specks (background) */
+            for (var i=0; i<mirrorPrisms.length; i++) {
+                var pr = mirrorPrisms[i];
+                var p = pr.life / pr.maxLife;
+                var op = (p < 0.5 ? p*2 : (1-p)*2) * 0.85;
+                c.fillStyle = 'hsla(' + pr.hue + ', 90%, 70%, ' + op + ')';
+                c.beginPath();
+                c.arc(pr.x, pr.y, pr.size, 0, Math.PI*2);
+                c.fill();
+            }
+            /* mirror shards (foreground) */
+            for (var i=0; i<mirrorShards.length; i++) {
+                var ms = mirrorShards[i];
+                c.save();
+                c.translate(ms.x, ms.y);
+                c.rotate(ms.angle);
+                /* shard body — dark glass with a bright vertical highlight */
+                var g = c.createLinearGradient(-ms.w/2, 0, ms.w/2, 0);
+                g.addColorStop(0,   'rgba(60,75,95,0.85)');
+                g.addColorStop(0.4, 'rgba(140,170,200,0.95)');
+                g.addColorStop(0.55,'rgba(245,250,255,1)');
+                g.addColorStop(0.7, 'rgba(170,195,220,0.90)');
+                g.addColorStop(1,   'rgba(50,65,85,0.85)');
+                c.fillStyle = g;
+                c.fillRect(-ms.w/2, -ms.h/2, ms.w, ms.h);
+                /* rim outline */
+                c.strokeStyle = 'rgba(20,30,40,0.75)';
+                c.lineWidth = 0.8;
+                c.strokeRect(-ms.w/2, -ms.h/2, ms.w, ms.h);
+                /* shimmer streak — a moving bright bar */
+                var streakY = -ms.h/2 + ((Math.sin(ms.shimmer)*0.5 + 0.5) * ms.h);
+                c.fillStyle = 'rgba(255,255,255,0.85)';
+                c.fillRect(-ms.w/2 + 0.5, streakY, ms.w - 1, 1.5);
+                c.restore();
+            }
+        }
+
+        /* ── SULFURIC ACID RAIN ──────────────────────────────────
+           City colour stays untouched. Layers (back → front):
+             1. Acid drops streaking down through the air
+             2. Drips of melting paint running down imaginary
+                building edges (mid-air vertical streaks)
+             3. Steam wisps rising off the corrosion
+             4. Sizzling ground splats (rings) + a fizz droplet
+             5. Persistent corrosion pools at street level (bubbling
+                yellow-green puddles with bubble caps)
+             6. Charred etch-pits beneath the pools */
+        else if (type === 'acidRain') {
+            /* 1. drops */
+            c.strokeStyle = 'rgba(180,220,60,0.85)';
+            c.lineWidth = 1.6;
+            for (var i=0; i<acidDrops.length; i++) {
+                var a = acidDrops[i];
+                c.beginPath();
+                c.moveTo(a.x, a.y);
+                c.lineTo(a.x - a.vx*1.5, a.y - a.len);
+                c.stroke();
+            }
+
+            /* 2. melting paint drips on buildings + cars (vertical
+                  streaks in melt-colour with a bulbous head). */
+            for (var i=0; i<acidDripFalls.length; i++) {
+                var dr = acidDripFalls[i];
+                /* streak */
+                var grad = c.createLinearGradient(dr.x, dr.y - dr.len,
+                                                   dr.x, dr.y);
+                grad.addColorStop(0, dr.col + '0)');
+                grad.addColorStop(1, dr.col + '0.92)');
+                c.fillStyle = grad;
+                c.fillRect(dr.x - 1.4, dr.y - dr.len, 2.8, dr.len);
+                /* bulb at the leading tip — about to detach */
+                c.fillStyle = dr.col + '1)';
+                c.beginPath();
+                c.arc(dr.x, dr.y, 2.2, 0, Math.PI*2);
+                c.fill();
+            }
+
+            /* 3. steam wisps */
+            for (var i=0; i<acidSteam.length; i++) {
+                var st = acidSteam[i];
+                var op = (1 - st.life/st.maxLife) * 0.45;
+                var sg = c.createRadialGradient(st.x, st.y, 0, st.x, st.y, st.r);
+                sg.addColorStop(0, 'rgba(220,250,180,' + op + ')');
+                sg.addColorStop(1, 'rgba(220,250,180,0)');
+                c.fillStyle = sg;
+                c.fillRect(st.x - st.r, st.y - st.r, st.r*2, st.r*2);
+            }
+
+            /* 4. sizzling splats — fizz ring + droplet halo */
+            for (var i=0; i<acidSplats.length; i++) {
+                var s = acidSplats[i];
+                var op = 1 - s.life/s.maxLife;
+                c.strokeStyle = 'rgba(200,255,80,' + (op*0.85) + ')';
+                c.lineWidth = 1.5;
+                c.beginPath(); c.arc(s.x, s.y, s.r, 0, Math.PI*2); c.stroke();
+                if (s.r > 4) {
+                    c.fillStyle = 'rgba(220,255,160,' + (op*0.45) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, s.r*0.4, 0, Math.PI*2); c.fill();
+                }
+                c.fillStyle = 'rgba(230,255,140,' + (op*0.30) + ')';
+                c.beginPath(); c.arc(s.x + Math.sin(s.life*0.02)*3,
+                                     s.y - s.r*0.6, 1.2, 0, Math.PI*2);
+                c.fill();
+            }
+
+            /* corrosion pools render via drawCustomEventGround() so
+               they sit underneath the vehicles (cars drive over the
+               puddle, not under it visually). Nothing to draw here. */
+        }
+
+        /* ── GRAVITY WELL ─────────────────────────────────────────
+           Layered render (back → front):
+             1. Outer space-distortion rings (concentric, faded)
+             2. Expanding shockwave rings (periodic)
+             3. Tractor-beam light cones (from buildings → well)
+             4. Building-debris streams curving along bezier paths
+                from each beam target into the singularity
+             5. Multi-ring accretion disc (3 rotated arcs)
+             6. Spiralling cosmic debris
+             7. Event horizon (black core + violet halo)
+             8. Gravitational-lens highlight crescent */
+        else if (type === 'gravityWell' && gravityState) {
+            var gs = gravityState;
+
+            /* 1. faint outer distortion rings */
+            for (var or=0; or<5; or++) {
+                var ro = gs.r + 80 + or*28;
+                c.strokeStyle = 'rgba(150,100,200,' + (0.08 - or*0.013) + ')';
+                c.lineWidth = 1;
+                c.beginPath();
+                c.arc(gs.cx, gs.cy, ro, 0, Math.PI*2);
+                c.stroke();
+            }
+
+            /* 2. expanding shockwave rings */
+            for (var i=0; i<gravityRings.length; i++) {
+                var gr = gravityRings[i];
+                var op = (1 - gr.life/gr.maxLife) * gr.strength * 0.6;
+                c.strokeStyle = 'rgba(200,160,255,' + op + ')';
+                c.lineWidth = 2.5;
+                c.beginPath();
+                c.arc(gs.cx, gs.cy, gr.r, 0, Math.PI*2);
+                c.stroke();
+            }
+
+            /* 3. tractor-beam light cones */
+            for (var b=0; b<gravityBeams.length; b++) {
+                var gb = gravityBeams[b];
+                var pulse = 0.5 + 0.5*Math.sin(gb.pulse);
+                var bg = c.createLinearGradient(gb.bx, gb.by, gs.cx, gs.cy);
+                bg.addColorStop(0, 'rgba(190,140,255,' + (0.35*pulse) + ')');
+                bg.addColorStop(1, 'rgba(190,140,255,0)');
+                c.strokeStyle = bg;
+                c.lineWidth = 6 * pulse;
+                c.beginPath();
+                c.moveTo(gb.bx, gb.by);
+                c.lineTo(gs.cx, gs.cy);
+                c.stroke();
+                /* a softer wider halo around the beam */
+                c.strokeStyle = 'rgba(180,120,250,' + (0.15*pulse) + ')';
+                c.lineWidth = 16 * pulse;
+                c.stroke();
+                /* glow pin at the building end */
+                var bg2 = c.createRadialGradient(gb.bx, gb.by, 0,
+                                                 gb.bx, gb.by, 14);
+                bg2.addColorStop(0, 'rgba(255,220,255,' + (0.85*pulse) + ')');
+                bg2.addColorStop(1, 'rgba(180,120,255,0)');
+                c.fillStyle = bg2;
+                c.fillRect(gb.bx-14, gb.by-14, 28, 28);
+            }
+
+            /* 4. flying building debris (planks, slabs) */
+            for (var i=0; i<gravityDebris.length; i++) {
+                var bd = gravityDebris[i];
+                /* curved bezier from start (bx,by) toward (cx,cy) with
+                   a slight upward control point so it arcs */
+                var t = bd.progress;
+                var ctlX = (bd.x + bd.targetX)/2;
+                var ctlY = Math.min(bd.y, bd.targetY) - 80;
+                var mt = 1 - t;
+                var px = mt*mt*bd.x + 2*mt*t*ctlX + t*t*bd.targetX;
+                var py = mt*mt*bd.y + 2*mt*t*ctlY + t*t*bd.targetY;
+                /* spaghettified shrink near the well */
+                var shrink = 1 - t*0.75;
+                var cols = ['rgba(140,140,150,0.92)',
+                            'rgba(150,110,80,0.92)',
+                            'rgba(190,170,140,0.92)'];
+                c.save();
+                c.translate(px, py);
+                c.rotate(bd.rot);
+                c.fillStyle = cols[bd.col];
+                c.fillRect(-bd.size*shrink, -bd.size*0.6*shrink,
+                            bd.size*2*shrink, bd.size*1.2*shrink);
+                c.strokeStyle = 'rgba(20,20,30,0.65)';
+                c.lineWidth = 0.6;
+                c.strokeRect(-bd.size*shrink, -bd.size*0.6*shrink,
+                              bd.size*2*shrink, bd.size*1.2*shrink);
+                c.restore();
+            }
+
+            /* 5. accretion disc — 3 rotated arcs */
+            for (var ringI=0; ringI<3; ringI++) {
+                var rr = gs.r + 30 + ringI*22;
+                c.strokeStyle = 'rgba(180,120,255,' + (0.35 - ringI*0.08) + ')';
+                c.lineWidth = 2 + ringI*1.5;
+                c.beginPath();
+                c.arc(gs.cx, gs.cy, rr,
+                       gs.t*0.001 + ringI,
+                       gs.t*0.001 + ringI + Math.PI*1.4);
+                c.stroke();
+            }
+
+            /* 6. cosmic-debris speck cloud */
+            for (var i=0; i<gs.debris.length; i++) {
+                var d = gs.debris[i];
+                var px = gs.cx + Math.cos(d.angle)*d.radius;
+                var py = gs.cy + Math.sin(d.angle)*d.radius*0.35;
+                var cols2 = ['rgba(255,255,255,0.92)',
+                             'rgba(200,140,255,0.92)',
+                             'rgba(255,180,80,0.92)'];
+                c.fillStyle = cols2[d.hue];
+                c.beginPath(); c.arc(px, py, d.size, 0, Math.PI*2); c.fill();
+            }
+
+            /* 7. event horizon — deep black with violet halo */
+            var coreG = c.createRadialGradient(gs.cx, gs.cy, 0,
+                                                gs.cx, gs.cy, gs.r);
+            coreG.addColorStop(0,   'rgba(0,0,0,1)');
+            coreG.addColorStop(0.70,'rgba(20,0,40,0.98)');
+            coreG.addColorStop(0.90,'rgba(120,40,200,0.65)');
+            coreG.addColorStop(1,   'rgba(160,80,255,0)');
+            c.fillStyle = coreG;
+            c.beginPath(); c.arc(gs.cx, gs.cy, gs.r, 0, Math.PI*2); c.fill();
+
+            /* 8. lensing crescent — bright thin arc on the top edge */
+            c.strokeStyle = 'rgba(255,220,255,0.55)';
+            c.lineWidth = 1.5;
+            c.beginPath();
+            c.arc(gs.cx, gs.cy, gs.r + 2,
+                   Math.PI*1.15, Math.PI*1.85);
+            c.stroke();
+        }
+
+        /* ── CRYSTAL STORM ────────────────────────────────────── */
+        else if (type === 'crystalStorm') {
+            /* glitter sparkles in the air */
+            for (var i=0; i<crystalGlitter.length; i++) {
+                var gl = crystalGlitter[i];
+                var p = gl.life/gl.maxLife;
+                var op = (p < 0.5 ? p*2 : (1-p)*2) * 0.9;
+                c.fillStyle = 'rgba(220,250,255,' + op + ')';
+                c.fillRect(gl.x, gl.y, 1, 1);
+                c.fillRect(gl.x-1, gl.y, 1, 1);
+                c.fillRect(gl.x+1, gl.y, 1, 1);
+                c.fillRect(gl.x, gl.y-1, 1, 1);
+                c.fillRect(gl.x, gl.y+1, 1, 1);
+            }
+            /* embedded "stuck" crystals render in drawCustomEventGround()
+               so cars draw over them — they're damage marks lodged in
+               the road / car body / lower walls. Falling crystals
+               continue above cars below. */
+
+            /* falling crystals — small rotated diamonds with rim glow */
+            for (var i=0; i<crystals.length; i++) {
+                var cz = crystals[i];
+                c.save();
+                c.translate(cz.x, cz.y);
+                c.rotate(cz.angle);
+                c.fillStyle = 'rgba(180,230,255,0.85)';
+                c.beginPath();
+                c.moveTo(0, -cz.r);
+                c.lineTo(cz.r*0.6, 0);
+                c.lineTo(0, cz.r);
+                c.lineTo(-cz.r*0.6, 0);
+                c.closePath();
+                c.fill();
+                /* shine highlight */
+                c.strokeStyle = 'rgba(255,255,255,' +
+                                 (0.5 + 0.5*Math.sin(cz.shine)) + ')';
+                c.lineWidth = 1;
+                c.stroke();
+                c.restore();
+            }
+        }
+
+        /* ── LOCUST SWARM ─────────────────────────────────────────
+           Each locust is a fully-detailed insect: segmented abdomen,
+           thorax, head with two compound eyes, two antennae, two
+           flapping fore-wings and two static hind-wings, six legs
+           (three per side), and a faint motion-blur dust trail. */
+        else if (type === 'locustSwarm') {
+            /* dust haze backing */
+            c.fillStyle = 'rgba(110,90,40,0.12)';
+            c.fillRect(0, GROUND*0.2, W, GROUND*0.6);
+
+            for (var i=0; i<locusts.length; i++) {
+                var lc = locusts[i];
+                var s  = lc.size;          /* base size */
+                var x  = lc.x;
+                var y  = lc.y;
+                /* wing flap phase 0..1 then 1..0 — symmetric flap */
+                var fl = Math.abs(Math.sin(lc.wing));
+
+                /* motion-blur tail — faint trail behind */
+                c.fillStyle = 'rgba(60,45,20,0.10)';
+                c.beginPath();
+                c.ellipse(x - s*3, y, s*1.6, s*0.4, 0, 0, Math.PI*2);
+                c.fill();
+
+                /* HIND WINGS (translucent, fanned out) — drawn first
+                   so the fore-wings overlap them on top */
+                c.fillStyle = 'rgba(180,160,110,0.45)';
+                c.beginPath();
+                c.ellipse(x - s*0.3, y - s*0.7, s*1.9, s*0.55 + s*0.4*fl,
+                          -0.35, 0, Math.PI*2);
+                c.fill();
+                c.beginPath();
+                c.ellipse(x - s*0.3, y - s*0.7, s*1.9, s*0.55 + s*0.4*fl,
+                           0.35, 0, Math.PI*2);   /* mirror */
+                c.fill();
+
+                /* SEGMENTED ABDOMEN — 4 stacked tapering ellipses */
+                for (var seg=0; seg<4; seg++) {
+                    var segX = x - seg*s*0.55;
+                    var segR = s*0.55 - seg*s*0.07;
+                    c.fillStyle = (seg%2) ? 'rgba(70,55,25,0.95)'
+                                          : 'rgba(95,75,35,0.95)';
+                    c.beginPath();
+                    c.ellipse(segX, y, segR, s*0.45, 0, 0, Math.PI*2);
+                    c.fill();
+                }
+
+                /* THORAX */
+                c.fillStyle = 'rgba(50,40,20,1)';
+                c.beginPath();
+                c.ellipse(x + s*0.55, y, s*0.7, s*0.55, 0, 0, Math.PI*2);
+                c.fill();
+
+                /* LEGS — three per side, springy zigzag */
+                c.strokeStyle = 'rgba(30,22,12,0.95)';
+                c.lineWidth = 0.8;
+                for (var lg=0; lg<3; lg++) {
+                    var lx = x - s*0.4 + lg*s*0.45;
+                    /* below side */
+                    c.beginPath();
+                    c.moveTo(lx, y + s*0.25);
+                    c.lineTo(lx - s*0.4, y + s*0.8);
+                    c.lineTo(lx - s*0.15, y + s*1.4);
+                    c.stroke();
+                    /* above side (less visible) */
+                    c.beginPath();
+                    c.moveTo(lx, y - s*0.25);
+                    c.lineTo(lx - s*0.3, y - s*0.55);
+                    c.stroke();
+                }
+                /* hind-leg spike (locusts have a big jumping leg) */
+                c.lineWidth = 1.4;
+                c.beginPath();
+                c.moveTo(x - s*0.4, y + s*0.25);
+                c.lineTo(x - s*1.1, y - s*0.2);
+                c.lineTo(x - s*1.5, y + s*1.0);
+                c.stroke();
+
+                /* FORE-WINGS (over the body, flapping) */
+                c.fillStyle = 'rgba(120,95,50,0.85)';
+                var wAmp = 0.7 + 0.6*fl;
+                c.beginPath();
+                c.ellipse(x + s*0.1, y - s*0.5*wAmp,
+                          s*1.7, s*0.45*wAmp, -0.25, 0, Math.PI*2);
+                c.fill();
+                c.beginPath();
+                c.ellipse(x + s*0.1, y - s*0.5*wAmp,
+                          s*1.7, s*0.45*wAmp,  0.25, 0, Math.PI*2);
+                c.fill();
+                /* wing vein */
+                c.strokeStyle = 'rgba(40,30,12,0.7)';
+                c.lineWidth = 0.5;
+                c.beginPath();
+                c.moveTo(x - s*1.2, y - s*0.4*wAmp);
+                c.lineTo(x + s*1.4, y - s*0.5*wAmp);
+                c.stroke();
+
+                /* HEAD */
+                c.fillStyle = 'rgba(80,60,28,1)';
+                c.beginPath();
+                c.ellipse(x + s*1.2, y - s*0.05, s*0.55, s*0.5, 0, 0, Math.PI*2);
+                c.fill();
+
+                /* EYES — two compound eyes */
+                c.fillStyle = '#ff7728';
+                c.beginPath();
+                c.arc(x + s*1.45, y - s*0.15, s*0.20, 0, Math.PI*2);
+                c.fill();
+                c.fillStyle = 'rgba(0,0,0,0.85)';
+                c.beginPath();
+                c.arc(x + s*1.50, y - s*0.18, s*0.10, 0, Math.PI*2);
+                c.fill();
+                /* tiny eye highlight */
+                c.fillStyle = 'rgba(255,255,255,0.9)';
+                c.beginPath();
+                c.arc(x + s*1.52, y - s*0.22, s*0.04, 0, Math.PI*2);
+                c.fill();
+
+                /* ANTENNAE — two curving lines forward */
+                c.strokeStyle = 'rgba(30,22,12,0.95)';
+                c.lineWidth = 0.7;
+                c.beginPath();
+                c.moveTo(x + s*1.5, y - s*0.35);
+                c.quadraticCurveTo(x + s*2.1, y - s*0.9, x + s*2.4, y - s*1.3);
+                c.stroke();
+                c.beginPath();
+                c.moveTo(x + s*1.5, y - s*0.25);
+                c.quadraticCurveTo(x + s*2.3, y - s*0.55, x + s*2.7, y - s*0.7);
+                c.stroke();
+            }
+        }
+
+        /* ── LAVA RAIN ────────────────────────────────────────────
+           Layered render (back → front):
+             1. Hellish ground glow strip
+             2. Smoke plumes (drawn early so fires draw on top)
+             3. Permanent ground crater scars
+             4. Smoldering ground splats
+             5. Lava drop trails
+             6. Lava drop cores
+             7. Active fires (on ground + on buildings)
+             8. Rising embers */
+        else if (type === 'lavaRain') {
+            /* 1. ground glow */
+            c.fillStyle = 'rgba(180,40,0,0.10)';
+            c.fillRect(0, GROUND - 8, W, H - GROUND);
+
+            /* 2. smoke plumes (greyish-orange) */
+            for (var i=0; i<lavaSmoke.length; i++) {
+                var sm = lavaSmoke[i];
+                var op = (1 - sm.life/sm.maxLife) * 0.55;
+                var sg = c.createRadialGradient(sm.x, sm.y, 0, sm.x, sm.y, sm.r);
+                sg.addColorStop(0, 'rgba(120,80,40,' + (op*0.6) + ')');
+                sg.addColorStop(0.6, 'rgba(80,55,30,' + (op*0.35) + ')');
+                sg.addColorStop(1, 'rgba(40,28,18,0)');
+                c.fillStyle = sg;
+                c.fillRect(sm.x-sm.r, sm.y-sm.r, sm.r*2, sm.r*2);
+            }
+
+            /* lava craters + splats render via drawCustomEventGround()
+               so cars drive across them rather than over them — see
+               the ground-layer helper above. */
+
+            /* 5. drop trails (warm glow segments) */
+            for (var i=0; i<lavaDrops.length; i++) {
+                var lv = lavaDrops[i];
+                for (var t=lv.trail.length-1; t>=0; t--) {
+                    var tr = lv.trail[t];
+                    var fade = 1 - t/lv.trail.length;
+                    c.fillStyle = 'rgba(255,140,40,' + (fade*0.45) + ')';
+                    c.beginPath();
+                    c.arc(tr.x, tr.y, lv.r*(0.4 + fade*0.6), 0, Math.PI*2);
+                    c.fill();
+                }
+            }
+
+            /* 6. lava drop cores */
+            for (var i=0; i<lavaDrops.length; i++) {
+                var lv = lavaDrops[i];
+                var g = c.createRadialGradient(lv.x, lv.y, 0, lv.x, lv.y, lv.r*2);
+                g.addColorStop(0, 'rgba(255,240,180,1)');
+                g.addColorStop(0.4, 'rgba(255,150,40,0.95)');
+                g.addColorStop(1, 'rgba(160,30,0,0)');
+                c.fillStyle = g;
+                c.fillRect(lv.x-lv.r*2, lv.y-lv.r*2, lv.r*4, lv.r*4);
+            }
+
+            /* 7. building-tied + car-tied fires only — these render
+               ABOVE the cars so the flame stays attached to the
+               structure it ignited. Ground fires render in
+               drawCustomEventGround below cars (cars drive past them). */
+            for (var i=0; i<lavaFires.length; i++) {
+                var lf = lavaFires[i];
+                if (!(lf.onBuilding || lf.onCar)) continue;
+                drawLavaFire(c, lf);
+            }
+
+            /* 8. rising embers — yellow→orange→red specks */
+            var embCols = ['rgba(255,240,140,',
+                           'rgba(255,170,60,',
+                           'rgba(255,90,30,'];
+            for (var i=0; i<lavaEmbers.length; i++) {
+                var em = lavaEmbers[i];
+                var op = (1 - em.life/em.maxLife) * 0.95;
+                c.fillStyle = embCols[em.col] + op + ')';
+                c.beginPath();
+                c.arc(em.x, em.y, em.size, 0, Math.PI*2);
+                c.fill();
+            }
+        }
+
+        /* ── PLASMA STORM ─────────────────────────────────────────
+           Layered render:
+             1. Smoke columns from electrocuted strike sites (back)
+             2. Burning scorch impacts at building rooftops
+             3. Arcing plasma bolts (outer glow + bright core)
+             4. Spark showers radiating from impacts */
+        else if (type === 'plasmaStorm') {
+            /* 1. plasma smoke plumes */
+            for (var i=0; i<plasmaSmoke.length; i++) {
+                var ps = plasmaSmoke[i];
+                var op = (1 - ps.life/ps.maxLife) * 0.55;
+                var psg = c.createRadialGradient(ps.x, ps.y, 0, ps.x, ps.y, ps.r);
+                psg.addColorStop(0, 'rgba(110,90,140,' + (op*0.65) + ')');
+                psg.addColorStop(1, 'rgba(40,30,60,0)');
+                c.fillStyle = psg;
+                c.fillRect(ps.x-ps.r, ps.y-ps.r, ps.r*2, ps.r*2);
+            }
+
+            /* parse `#rrggbb` into rgba(r,g,b,a). Local helper. */
+            function hexA(hex, a) {
+                var h = hex.replace('#', '');
+                var r = parseInt(h.substr(0, 2), 16),
+                    g = parseInt(h.substr(2, 2), 16),
+                    b = parseInt(h.substr(4, 2), 16);
+                return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+            }
+            /* 2. impact scorch — bright halo + dark crater */
+            for (var i=0; i<plasmaImpacts.length; i++) {
+                var im = plasmaImpacts[i];
+                var fadeIn = Math.min(1, im.life/200);
+                var fadeOut = Math.min(1, (im.maxLife - im.life)/600);
+                var iop = fadeIn * fadeOut;
+                var flick = 0.7 + 0.3*Math.sin(im.flicker);
+                /* glowing halo in the strike colour */
+                var ig2 = c.createRadialGradient(im.x, im.y, 0,
+                                                  im.x, im.y, im.r*1.8);
+                ig2.addColorStop(0,   hexA(im.col, 0.85*iop*flick));
+                ig2.addColorStop(0.5, hexA(im.col, 0.45*iop*flick));
+                ig2.addColorStop(1,   hexA(im.col, 0));
+                c.fillStyle = ig2;
+                c.fillRect(im.x-im.r*1.8, im.y-im.r*1.8, im.r*3.6, im.r*3.6);
+                /* dark scorch core */
+                c.fillStyle = 'rgba(20,10,30,' + (iop*0.75) + ')';
+                c.beginPath();
+                c.arc(im.x, im.y, im.r*0.55, 0, Math.PI*2);
+                c.fill();
+                /* electric crackle ring */
+                c.strokeStyle = hexA(im.col, iop*flick);
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.arc(im.x, im.y, im.r*0.9, 0, Math.PI*2);
+                c.stroke();
+            }
+
+            /* 3. arcing bolts — outer glow + bright core */
+            for (var i=0; i<plasmaArcs.length; i++) {
+                var arc = plasmaArcs[i];
+                var p = arc.life/arc.maxLife;
+                var op = Math.sin(Math.min(1, p)*Math.PI);
+                c.strokeStyle = arc.color;
+                c.globalAlpha = op * 0.35;
+                c.lineWidth = arc.width * 3.5;
+                c.beginPath();
+                c.moveTo(arc.segs[0].x, arc.segs[0].y);
+                for (var s=1; s<arc.segs.length; s++) c.lineTo(arc.segs[s].x, arc.segs[s].y);
+                c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,' + op + ')';
+                c.lineWidth = arc.width;
+                c.beginPath();
+                c.moveTo(arc.segs[0].x, arc.segs[0].y);
+                for (var s=1; s<arc.segs.length; s++) c.lineTo(arc.segs[s].x, arc.segs[s].y);
+                c.stroke();
+                c.globalAlpha = 1;
+            }
+
+            /* 4. spark showers from impacts */
+            for (var i=0; i<plasmaSparks.length; i++) {
+                var sk = plasmaSparks[i];
+                var op = (1 - sk.life/sk.maxLife);
+                c.fillStyle = sk.col;
+                c.globalAlpha = op;
+                c.fillRect(sk.x - 1, sk.y - 1, 2, 2);
+                c.globalAlpha = 1;
+            }
+        }
+
+        /* ── COSMIC RAY ───────────────────────────────────────────
+           Layered render:
+             1. Vertical pulsing light beams from above
+             2. Shimmering particle streams falling
+             3. Impact craters at beam strike sites — bright flash
+                fading into a glowing crater scar
+             4. Disintegration particles rising from impact sites */
+        else if (type === 'cosmicRay') {
+            /* 1. vertical beams — each beam tinted with its own
+               cosmic colour from the multi-hue palette. */
+            for (var i=0; i<cosmicBeams.length; i++) {
+                var b = cosmicBeams[i];
+                var alpha = b.alpha * (0.65 + 0.35*Math.sin(b.pulse));
+                /* parse 'rgb(r,g,b)' → numeric parts */
+                var bp = b.col.match(/\d+/g);
+                var br = bp[0], bg_ = bp[1], bb = bp[2];
+                var g = c.createLinearGradient(0, 0, 0, GROUND);
+                g.addColorStop(0,
+                    'rgba(' + br + ',' + bg_ + ',' + bb + ',' + alpha + ')');
+                g.addColorStop(0.6,
+                    'rgba(' + br + ',' + bg_ + ',' + bb + ',' + (alpha*0.5) + ')');
+                g.addColorStop(1,
+                    'rgba(' + br + ',' + bg_ + ',' + bb + ',0)');
+                c.fillStyle = g;
+                c.fillRect(b.x - b.w/2, 0, b.w, GROUND);
+            }
+            /* 2. shimmering particle streams — each spark tinted */
+            for (var i=0; i<cosmicSparks.length; i++) {
+                var sp = cosmicSparks[i];
+                var p = sp.life/sp.maxLife;
+                var op = (p < 0.5 ? p*2 : (1-p)*2);
+                if (sp.col) {
+                    var sps = sp.col.match(/\d+/g);
+                    c.fillStyle = 'rgba(' + sps[0] + ',' + sps[1] +
+                                  ',' + sps[2] + ',' + op + ')';
+                } else {
+                    c.fillStyle = 'rgba(220,240,255,' + op + ')';
+                }
+                c.beginPath(); c.arc(sp.x, sp.y, 1.5, 0, Math.PI*2); c.fill();
+            }
+            /* 3. impact craters — flash + scar tinted with strike colour */
+            function hexAcr(hex, a) {
+                var h = hex.replace('#', '');
+                return 'rgba(' + parseInt(h.substr(0,2),16) +
+                       ',' + parseInt(h.substr(2,2),16) +
+                       ',' + parseInt(h.substr(4,2),16) + ',' + a + ')';
+            }
+            for (var i=0; i<cosmicImpacts.length; i++) {
+                var ci = cosmicImpacts[i];
+                var fadeIn = Math.min(1, ci.life/120);
+                var fadeOut = Math.min(1, (ci.maxLife - ci.life)/700);
+                var iop = fadeIn * fadeOut;
+                var tintHex = ci.col || '#b8dcff';
+                /* halo glow */
+                var ig = c.createRadialGradient(ci.x, ci.y, 0,
+                                                 ci.x, ci.y, ci.r*2.5);
+                ig.addColorStop(0,   'rgba(255,255,255,' + (0.9*iop*ci.flash) + ')');
+                ig.addColorStop(0.3, hexAcr(tintHex, 0.7*iop));
+                ig.addColorStop(0.7, hexAcr(tintHex, 0.4*iop));
+                ig.addColorStop(1,   hexAcr(tintHex, 0));
+                c.fillStyle = ig;
+                c.fillRect(ci.x-ci.r*2.5, ci.y-ci.r*2.5, ci.r*5, ci.r*5);
+                /* crater rim — dark ring */
+                c.strokeStyle = 'rgba(40,30,60,' + (iop*0.85) + ')';
+                c.lineWidth = 2;
+                c.beginPath();
+                c.arc(ci.x, ci.y, ci.r, 0, Math.PI*2);
+                c.stroke();
+                /* charred core */
+                c.fillStyle = 'rgba(10,5,20,' + (iop*0.65) + ')';
+                c.beginPath();
+                c.arc(ci.x, ci.y, ci.r*0.55, 0, Math.PI*2);
+                c.fill();
+                /* bright flash on first frame */
+                if (ci.flash > 0.1) {
+                    c.fillStyle = 'rgba(255,255,255,' + (ci.flash*iop) + ')';
+                    c.beginPath();
+                    c.arc(ci.x, ci.y, ci.r*0.35, 0, Math.PI*2);
+                    c.fill();
+                }
+            }
+            /* 4. vapor — particles tinted with their strike colour */
+            for (var i=0; i<cosmicVapor.length; i++) {
+                var cv = cosmicVapor[i];
+                var op = (1 - cv.life/cv.maxLife);
+                if (cv.col) {
+                    c.fillStyle = hexAcr(cv.col, op);
+                } else {
+                    c.fillStyle = 'rgba(220,235,255,' + op + ')';
+                }
+                c.beginPath();
+                c.arc(cv.x, cv.y, cv.size, 0, Math.PI*2);
+                c.fill();
+            }
+        }
+
+        /* ── QUANTUM GLITCH ───────────────────────────────────── */
+        else if (type === 'quantumGlitch') {
+            /* horizontal RGB-shifted bars */
+            for (var i=0; i<glitchBars.length; i++) {
+                var gb = glitchBars[i];
+                var p = gb.life/gb.maxLife;
+                var op = Math.sin(p*Math.PI);
+                c.fillStyle = gb.col.replace('0.45', (op*0.45).toFixed(2));
+                c.fillRect(0, gb.y, W, gb.h);
+            }
+            /* scattered RGB pixels */
+            for (var i=0; i<glitchPixels.length; i++) {
+                var gp = glitchPixels[i];
+                c.fillStyle = gp.col;
+                c.fillRect(gp.x, gp.y, gp.size, gp.size);
+            }
+            /* one big sweep scanline */
+            var scanY = ((glitchTimer*0.4) % GROUND);
+            c.fillStyle = 'rgba(255,255,255,0.05)';
+            c.fillRect(0, scanY, W, 2);
+        }
+    }
+
     function initEvent(type) {
         particles=[]; splashes=[];
         floodY=GROUND; floodRising=(type==='flood');
@@ -4397,6 +6259,8 @@
             if(starField.length===0) buildStarField();
             for(var fl=0;fl<6;fl++) fwLaunchers.push({timer:rng(0,3000), interval:rng(800,2200), x:rng(W*0.1,W*0.9)});
         }
+        /* initialise any custom-render event (no-op for the legacy ones) */
+        initCustomEvent(type);
     }
 
     function makeMeteor() {
@@ -4419,7 +6283,7 @@
 
     function updateParticles(dt) {
         var k=dt/16;
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         var i,p;
 
         if(type==='flood'&&floodRising&&floodY>GROUND-H*0.26) floodY-=0.065*k;
@@ -4512,6 +6376,9 @@
             var sp=splashes[i]; sp.life+=dt; sp.r=sp.maxR*(sp.life/sp.maxLife);
             if(sp.life>=sp.maxLife) splashes.splice(i,1);
         }
+
+        /* advance per-event state for the invented catastrophes */
+        updateCustomEvent(dt);
 
         if(type==='storm'||type==='meteor'){
             ltTimer+=dt;
@@ -4615,7 +6482,7 @@
 
     function drawDynamic() {
         dynC.clearRect(0,0,W,H);
-        var type=EVENTS[eventIndex].type;
+        var type=effType(EVENTS[eventIndex]);
         var i,p;
 
         /* ── DESTROYED-BUILDING / WRECKAGE LAYER ──────────────────────────
@@ -4902,19 +6769,30 @@
             radialGlow(dynC, esbX,esbY, 22, bc2[0],bc2[1],bc2[2], 0.50);
         }
 
+        /* Ground-level custom-event effects (acid puddles, lava
+           craters, plasma scorch points on the road) must render
+           BEFORE vehicles so the cars sit on top of them — drive
+           through the puddle, not on top of it visually. */
+        drawCustomEventGround(dynC);
+
         /* sort vehicles back-to-front so closer cars occlude farther ones:
            upper lane (dir=-1) drawn first; within a lane, the "back" of the lane drawn first */
         var sortedV = vehicles.slice().sort(function(a,b){
             if(a.dir!==b.dir) return (a.dir===1?1:-1) - (b.dir===1?1:-1);
             return a.dir===1 ? a.x-b.x : b.x-a.x;
         });
-        for(var vi=0;vi<sortedV.length;vi++) {
-            var V=sortedV[vi];
-            var off = (V.xShake||0)||(V.yOff||0);
-            if(off) { dynC.save(); dynC.translate(V.xShake||0, V.yOff||0); }
-            drawVehicle(dynC,V);
-            drawCarExtras(dynC, V, type);
-            if(off) dynC.restore();
+        /* Suppress ordinary civilian traffic during a military parade —
+           the street is taken over by the parade vehicles. The reverse
+           toggles back when the parade ends. */
+        if (!paradeOn) {
+            for(var vi=0;vi<sortedV.length;vi++) {
+                var V=sortedV[vi];
+                var off = (V.xShake||0)||(V.yOff||0);
+                if(off) { dynC.save(); dynC.translate(V.xShake||0, V.yOff||0); }
+                drawVehicle(dynC,V);
+                drawCarExtras(dynC, V, type);
+                if(off) dynC.restore();
+            }
         }
         drawPeds(dynC);
 
@@ -4936,6 +6814,11 @@
             dynC.fillText(CITIES[currentCityIndex].name,W/2,H*0.16);
             dynC.textBaseline='alphabetic';
         }
+
+        /* invented catastrophes — paint LAST on the dynamic canvas
+           so their effects sit above traffic, peds, and standard
+           weather particles. */
+        drawCustomEvent(dynC);
     }
 
     function drawAirplane(c) {
@@ -5189,7 +7072,25 @@
        MAIN LOOP
     ══════════════════════════════════════════════ */
 
+    /* ── perf / a11y gates: reduced-motion users get a single static frame;
+       small viewports throttle to ~30fps to save battery on phones. */
+    var _reduceMotionMQ = (typeof window !== 'undefined' && window.matchMedia)
+        ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var _reduceMotion = _reduceMotionMQ ? _reduceMotionMQ.matches : false;
+    if (_reduceMotionMQ && _reduceMotionMQ.addEventListener) {
+        _reduceMotionMQ.addEventListener('change', function(e){ _reduceMotion = e.matches; });
+    }
+    function _isSmallViewport(){ return (typeof window !== 'undefined') && window.innerWidth < 768; }
+    var _lastFrame = 0;
+
     function tick(ts) {
+        /* reduced motion: render one frame and stop the loop entirely */
+        if (_reduceMotion && lastTime) { return; }
+        /* small viewports: throttle to ~30fps */
+        if (_isSmallViewport()) {
+            if (ts - _lastFrame < 33) { animId=requestAnimationFrame(tick); return; }
+            _lastFrame = ts;
+        }
         if(!lastTime) lastTime=ts;
         var dt=Math.min(ts-lastTime,50);
         lastTime=ts;
@@ -5198,7 +7099,7 @@
         if(eventTimer>=EVENT_DURATION){
             eventTimer=0;
             eventIndex=(eventIndex+1)%EVENTS.length;
-            initEvent(EVENTS[eventIndex].type);
+            initEvent(effType(EVENTS[eventIndex]));
             cityBuilt=false;
         }
 
@@ -5262,7 +7163,7 @@
         drawDynamic();
 
         ctx.clearRect(0,0,W,H);
-        var evType=EVENTS[eventIndex].type;
+        var evType=effType(EVENTS[eventIndex]);
         ctx.drawImage(bgCvs,0,0);
         /* Earthquake shakes the BUILDINGS (cityCvs) but not the sky.
            Vehicles + peds shake individually inside dynCvs via their own xShake/yOff. */
@@ -5288,7 +7189,7 @@
     initVehicles();
     initPeds();
     initAirDefence();
-    initEvent(EVENTS[eventIndex].type);
+    initEvent(effType(EVENTS[eventIndex]));
 
     window.addEventListener('resize',function(){
         resize();
@@ -5335,7 +7236,18 @@
         blizzard:'Blizzard', tornado:'Tornado', flood:'Flood', hail:'Hail',
         wind:'Wind', heat:'Heatwave', earthquake:'Earthquake', meteor:'Meteor Shower',
         aurora:'Aurora', starry:'Starry Night', shooting:'Shooting Stars',
-        fireworks:'Fireworks', bloodmoon:'Blood Moon', nebula:'Nebula'
+        fireworks:'Fireworks', bloodmoon:'Blood Moon', nebula:'Nebula',
+        /* ── invented spectacular catastrophes ── */
+        tsunami:'Tsunami',
+        mirrorRain:'Mirror Rain',
+        acidRain:'Sulfuric Acid Rain',
+        gravityWell:'Gravity Well',
+        crystalStorm:'Crystal Storm',
+        locustSwarm:'Locust Swarm',
+        lavaRain:'Lava Rain',
+        plasmaStorm:'Plasma Storm',
+        cosmicRay:'Cosmic Ray',
+        quantumGlitch:'Quantum Glitch'
     };
     /* black-and-white Font Awesome 4.7 icons (filled variants only — safer) */
     var WEATHER_ICONS={
@@ -5344,12 +7256,23 @@
         flood:'fa-tint', hail:'fa-asterisk', wind:'fa-flag',
         heat:'fa-fire', earthquake:'fa-exclamation-triangle', meteor:'fa-rocket',
         aurora:'fa-magic', starry:'fa-star', shooting:'fa-asterisk',
-        fireworks:'fa-bullseye', bloodmoon:'fa-moon-o', nebula:'fa-cloud'
+        fireworks:'fa-bullseye', bloodmoon:'fa-moon-o', nebula:'fa-cloud',
+        /* invented event icons — FA 4.7 filled glyphs */
+        tsunami:'fa-tint',
+        mirrorRain:'fa-square',
+        acidRain:'fa-flask',
+        gravityWell:'fa-bullseye',
+        crystalStorm:'fa-cube',
+        locustSwarm:'fa-bug',
+        lavaRain:'fa-fire',
+        plasmaStorm:'fa-bolt',
+        cosmicRay:'fa-rocket',
+        quantumGlitch:'fa-th'
     };
     function setEvent(idx){
         eventIndex=((idx%EVENTS.length)+EVENTS.length)%EVENTS.length;
         eventTimer=0;
-        initEvent(EVENTS[eventIndex].type);
+        initEvent(effType(EVENTS[eventIndex]));
         cityBuilt=false;
     }
     window.getWeatherEventType=function(){ return EVENTS[eventIndex].type; };
@@ -5403,6 +7326,8 @@
     var neutronPulses = [];   /* neutron green radiation pulse */
     var antimatterBursts = [];/* antimatter spherical burst with rays */
     var photonStrikes = [];   /* vertical white beam */
+    /* shared FX bag for the new attack/defence types — each entry has .type */
+    var customFx = [];
 
     /* ── AIR DEFENCE ── */
     var airDefence = [];     /* batteries on the ground */
@@ -5422,17 +7347,30 @@
         decoy:'sam', swarm:'multi',
         photon:'laser', gravity:'emp', neutron:'patriot',
         emp:'sam', saturation:'multi',
+        /* new attack types → preferred interceptor */
+        kinetic:'coilgun', darkmatter:'gravnet', solar:'cryobeam',
+        cryo:'plasmac', tesla:'ionbeam',
         '_bomblet':'sam'
     };
     /* ── DEFENCE control ── */
-    var DEFENCE_TYPES  = ['auto','sam','patriot','multi','laser','emp'];
+    var DEFENCE_TYPES  = [
+        'auto','sam','patriot','multi','laser','emp',
+        /* new defence types */
+        'flak','coilgun','drones','ionbeam','cryobeam','plasmac','kinslug','gravnet'
+    ];
     var DEFENCE_LABELS = {
         auto:'AUTO',     sam:'SAM',     patriot:'PATRIOT',
-        multi:'MULTI',   laser:'LASER', emp:'EMP'
+        multi:'MULTI',   laser:'LASER', emp:'EMP',
+        flak:'FLAK',     coilgun:'COILGUN', drones:'DRONE SWARM',
+        ionbeam:'ION BEAM', cryobeam:'CRYO BEAM', plasmac:'PLASMA CANNON',
+        kinslug:'KINETIC SLUG', gravnet:'GRAV NET'
     };
     var DEFENCE_ICONS  = {
         auto:'fa-magic',     sam:'fa-rocket',     patriot:'fa-paper-plane',
-        multi:'fa-cubes',    laser:'fa-bolt',     emp:'fa-bullseye'
+        multi:'fa-cubes',    laser:'fa-bolt',     emp:'fa-bullseye',
+        flak:'fa-asterisk',  coilgun:'fa-bolt',  drones:'fa-puzzle-piece',
+        ionbeam:'fa-magnet', cryobeam:'fa-snowflake-o', plasmac:'fa-certificate',
+        kinslug:'fa-arrow-up',  gravnet:'fa-anchor'
     };
     var defenceTypeIdx = 0;     /* 0 = AUTO */
     var defenceActive  = true;  /* automatic interceptor batteries (on by default) */
@@ -5464,7 +7402,9 @@
         'nuclear','hydrogen','thermobaric','bunker','mirv',
         'stealth','railgun','drone','icbm','tactical',
         'antimatter','decoy','swarm',
-        'photon','gravity','neutron','emp','saturation'
+        'photon','gravity','neutron','emp','saturation',
+        /* ── 5 new specialty warheads ── */
+        'kinetic','darkmatter','solar','cryo','tesla'
     ];
     var MISSILE_LABELS = {
         standard:'STANDARD', cluster:'CLUSTER',
@@ -5477,7 +7417,9 @@
         antimatter:'ANTIMATTER',
         decoy:'DECOY',       swarm:'SWARM',
         photon:'PHOTON',     gravity:'GRAVITY',   neutron:'NEUTRON',
-        emp:'EMP',           saturation:'SATURATION'
+        emp:'EMP',           saturation:'SATURATION',
+        kinetic:'KINETIC ROD', darkmatter:'DARK MATTER',
+        solar:'SOLAR LANCE',   cryo:'CRYO',  tesla:'TESLA COIL'
     };
     var MISSILE_ICONS = {
         standard:'fa-rocket',   cluster:'fa-cubes',
@@ -5490,7 +7432,9 @@
         antimatter:'fa-asterisk',
         decoy:'fa-question-circle', swarm:'fa-th-large',
         photon:'fa-sun-o',      gravity:'fa-circle',   neutron:'fa-times-circle',
-        emp:'fa-bolt',          saturation:'fa-th-list'
+        emp:'fa-bolt',          saturation:'fa-th-list',
+        kinetic:'fa-arrow-down', darkmatter:'fa-moon-o',
+        solar:'fa-sun-o',       cryo:'fa-snowflake-o', tesla:'fa-flash'
     };
     var missileTypeIdx = 0;
 
@@ -5524,14 +7468,28 @@
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -60;
             spd = 0.38;
-        } else if(kind==='cluster' || kind==='mirv') {
+        } else if(kind==='cluster') {
             sx = (Math.random()<0.5 ? -60 : W+60);
             sy = -80;
             spd = 0.48;
-        } else if(kind==='nuclear' || kind==='hydrogen' || kind==='thermobaric') {
+        } else if(kind==='mirv') {
+            /* slightly faster + steeper than cluster */
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = -110;
+            spd = 0.58;
+        } else if(kind==='nuclear') {
             sx = (Math.random()<0.5 ? -60 : W+60);
             sy = -100;
             spd = 0.40;
+        } else if(kind==='hydrogen') {
+            /* heavier — slightly slower */
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = -110;
+            spd = 0.34;
+        } else if(kind==='thermobaric') {
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = -90;
+            spd = 0.44;
         } else if(kind==='icbm') {
             sx = tx + rng(-40, 40);
             sy = -200;
@@ -5547,15 +7505,27 @@
         } else if(kind==='stealth') {
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -40;
-            spd = 0.55;
-        } else if(kind==='railgun' || kind==='photon') {
+            spd = 0.52;
+        } else if(kind==='railgun') {
             sx = tx + rng(-20, 20);
             sy = -300;
             spd = 2.20;
-        } else if(kind==='antimatter' || kind==='gravity' || kind==='neutron') {
+        } else if(kind==='photon') {
+            sx = tx + rng(-20, 20);
+            sy = -300;
+            spd = 2.50;
+        } else if(kind==='antimatter') {
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -60;
             spd = 0.50;
+        } else if(kind==='gravity') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -60;
+            spd = 0.36;
+        } else if(kind==='neutron') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -60;
+            spd = 0.56;
         } else if(kind==='bio' || kind==='chemical') {
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -40;
@@ -5563,11 +7533,45 @@
         } else if(kind==='emp') {
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -60;
-            spd = 0.55;
-        } else if(kind==='tactical' || kind==='decoy' || kind==='_swarmer') {
+            spd = 0.66;
+        } else if(kind==='tactical') {
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 0.88;
+        } else if(kind==='decoy') {
+            /* darts in fast, low value warhead */
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 1.10;
+        } else if(kind==='_swarmer') {
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -40;
             spd = 0.62;
+        } else if(kind==='kinetic') {
+            /* Rod-from-God: drops straight down from orbit */
+            sx = tx + rng(-8, 8);
+            sy = -260;
+            spd = 1.80;
+        } else if(kind==='darkmatter') {
+            /* Dark Matter: arrives slowly, phasing in and out */
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = rng(-80, H*0.15);
+            spd = 0.42;
+        } else if(kind==='solar') {
+            /* Solar Lance: high-angle plunge with solar flare halo */
+            sx = (Math.random()<0.5 ? -60 : W+60);
+            sy = -120;
+            spd = 0.72;
+        } else if(kind==='cryo') {
+            /* Cryo Missile: slow chilled trajectory */
+            sx = (Math.random()<0.5 ? -50 : W+50);
+            sy = -50;
+            spd = 0.46;
+        } else if(kind==='tesla') {
+            /* Tesla Coil: erratic chain-lightning approach */
+            sx = (Math.random()<0.5 ? -40 : W+40);
+            sy = -40;
+            spd = 0.58;
         } else {
             sx = (Math.random()<0.5 ? -40 : W+40);
             sy = -40;
@@ -5614,6 +7618,37 @@
         if(kind==='hypersonic') {
             m.shockCones = [];
         }
+        if(kind==='kinetic') {
+            m.shockCones = [];
+            m.heatRings = [];
+        }
+        if(kind==='darkmatter') {
+            m.phaseT = 0;
+            m.ringPhase = rng(0, Math.PI*2);
+            m.warpPuffs = [];
+        }
+        if(kind==='solar') {
+            m.flareT = 0;
+            m.flares = [];
+            m.coronaRot = rng(0, Math.PI*2);
+        }
+        if(kind==='cryo') {
+            m.frostT = 0;
+            m.shards = [];
+            for (var ci=0; ci<6; ci++) {
+                m.shards.push({
+                    ang: rng(0, Math.PI*2),
+                    rad: rng(6, 14),
+                    spd: rng(-0.004, 0.004),
+                    size: rng(2, 4)
+                });
+            }
+        }
+        if(kind==='tesla') {
+            m.coilT = 0;
+            m.bolts = [];
+            m.zigPhase = rng(0, Math.PI*2);
+        }
         /* tag the missile as user-fired so defence batteries
            get 100% intercept when in attack mode */
         m.userFired = !!missileArmed;
@@ -5645,7 +7680,8 @@
             ? (INTERCEPT_FOR[m.kind] || 'sam')
             : defSel;
         /* launch delay — short so user sees the response quickly */
-        var delay = (iKind==='laser') ? 500 : 180 + Math.random()*180;
+        var instantKinds = (iKind==='laser' || iKind==='ionbeam' || iKind==='cryobeam' || iKind==='coilgun');
+        var delay = instantKinds ? 500 : 180 + Math.random()*180;
         best.cooldown = 240;
         best.alertT = delay;  /* show pre-launch warning blink */
         setTimeout(function(){
@@ -5662,14 +7698,49 @@
                 killMissile(m, true);
                 return;
             }
+            if (iKind === 'ionbeam') {
+                /* sustained ion beam — cyan-magenta double helix */
+                customFx.push({
+                    type:'ionBeam', x1:best.x, y1:best.y-14,
+                    x2:m.x, y2:m.y, life:0, maxLife:520, phase:rng(0,Math.PI*2)
+                });
+                spawnDefenceImpact('ionbeam', m.x, m.y);
+                killMissile(m, true);
+                return;
+            }
+            if (iKind === 'cryobeam') {
+                /* freezing beam — pale teal */
+                customFx.push({
+                    type:'cryoBeam', x1:best.x, y1:best.y-14,
+                    x2:m.x, y2:m.y, life:0, maxLife:480, phase:rng(0,Math.PI*2)
+                });
+                spawnDefenceImpact('cryobeam', m.x, m.y);
+                killMissile(m, true);
+                return;
+            }
+            if (iKind === 'coilgun') {
+                /* instant rail slug — bright yellow streak */
+                customFx.push({
+                    type:'coilTrace', x1:best.x, y1:best.y-14,
+                    x2:m.x, y2:m.y, life:0, maxLife:280
+                });
+                spawnDefenceImpact('coilgun', m.x, m.y);
+                killMissile(m, true);
+                return;
+            }
             var startX = best.x, startY = best.y - 14;
             var dx = m.x - startX, dy = m.y - startY;
             var dist = Math.sqrt(dx*dx + dy*dy) || 1;
             var spd = (iKind==='patriot') ? 1.10 :
                       (iKind==='emp')     ? 0.85 :
-                      (iKind==='multi')   ? 0.95 :
-                      0.95;
-            interceptors.push({
+                      (iKind==='multi')   ? 0.78 :
+                      (iKind==='flak')    ? 1.05 :
+                      (iKind==='drones')  ? 0.65 :
+                      (iKind==='plasmac') ? 1.20 :
+                      (iKind==='kinslug') ? 1.55 :
+                      (iKind==='gravnet') ? 0.55 :
+                      0.95;  /* sam */
+            var ic = {
                 kind: iKind,
                 x: startX, y: startY,
                 vx: dx/dist*spd, vy: dy/dist*spd,
@@ -5678,9 +7749,33 @@
                 target: m,
                 trail: [],
                 life: 0,
-                arcs: (iKind==='emp') ? [] : null,
-                spinT: 0
-            });
+                arcs: (iKind==='emp' || iKind==='plasmac') ? [] : null,
+                spinT: 0,
+                wobbleT: rng(0, Math.PI*2)
+            };
+            /* spawn drone-swarm companion sprites that fan out around the lead */
+            if (iKind==='drones') {
+                ic.swarmers = [];
+                for (var ds=0; ds<5; ds++) {
+                    ic.swarmers.push({
+                        offA: rng(0, Math.PI*2),
+                        offR: rng(8, 20),
+                        spin: rng(-0.008, 0.008),
+                        bob: rng(0, Math.PI*2)
+                    });
+                }
+            }
+            if (iKind==='gravnet') {
+                ic.netT = 0;
+            }
+            if (iKind==='flak') {
+                /* random proximity-fuse distance so it bursts BEFORE contact */
+                ic.proxR = rng(30, 55);
+            }
+            if (iKind==='kinslug') {
+                ic.heatT = 0;
+            }
+            interceptors.push(ic);
             /* launch smoke puff at the battery */
             for (var pi=0; pi<10; pi++) {
                 debrisParts.push({
@@ -5701,14 +7796,248 @@
         if (m.strategy) strategyStats.intercepted++;
         missiles.splice(idx, 1);
         if (midairExplosion) {
-            /* small mid-air detonation */
-            explosions.push({ x:m.x, y:m.y, r:0, maxR:40, life:0, maxLife:420, kind:'fire' });
-            explosions.push({ x:m.x, y:m.y, r:0, maxR:70, life:0, maxLife:320, kind:'shock' });
-            explosions.push({ x:m.x, y:m.y, r:0, maxR:22, life:0, maxLife:180, kind:'flash' });
+            spawnMissileIntercept(m);
+            return;
+        }
+    }
+
+    /* per-missile-kind unique mid-air detonation when intercepted.
+       Each warhead's signature payload still goes off — just smaller and airborne. */
+    function spawnMissileIntercept(m) {
+        if (m.kind==='kinetic') {
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:50, life:0, maxLife:400, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:30, life:0, maxLife:220, kind:'flash' });
+            customFx.push({ type:'kineticShock', x:m.x, y:m.y, r:0, maxR:120, life:0, maxLife:500, delay:0 });
+            return;
+        }
+        if (m.kind==='darkmatter') {
+            customFx.push({ type:'voidBurst', x:m.x, y:m.y, r:0, maxR:80, life:0, maxLife:700 });
+            customFx.push({ type:'darkImplode', x:m.x, y:m.y, r:60, maxR:0, life:0, maxLife:800, phase:'pull' });
+            return;
+        }
+        if (m.kind==='solar') {
+            customFx.push({ type:'sunFlare', x:m.x, y:m.y, r:0, maxR:140, life:0, maxLife:900, rot:rng(0,Math.PI*2) });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:55, life:0, maxLife:420, kind:'fire' });
+            return;
+        }
+        if (m.kind==='cryo') {
+            var icSh = [];
+            for (var ci=0; ci<18; ci++) icSh.push({
+                ang: rng(0, Math.PI*2), spd: rng(1.5, 4),
+                size: rng(2, 4), rot: rng(0, Math.PI*2), spin: rng(-0.2,0.2)
+            });
+            customFx.push({ type:'iceBurst', x:m.x, y:m.y, r:0, maxR:90, life:0, maxLife:800, shards:icSh });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:18, life:0, maxLife:180, kind:'flash' });
+            return;
+        }
+        if (m.kind==='tesla') {
+            customFx.push({ type:'teslaRing', x:m.x, y:m.y, r:0, maxR:110, life:0, maxLife:700, arcs:[] });
+            var tChains = [];
+            for (var tc=0; tc<5; tc++) {
+                var tAng = rng(0, Math.PI*2);
+                var tex = m.x + Math.cos(tAng)*rng(40, 100);
+                var tey = m.y + Math.sin(tAng)*rng(40, 100);
+                tChains.push({x1:m.x, y1:m.y, x2:tex, y2:tey});
+            }
+            customFx.push({ type:'chainBolts', x:m.x, y:m.y, chains:tChains, life:0, maxLife:550 });
+            return;
+        }
+        if (m.kind==='plasma') {
+            customFx.push({ type:'plasmaBurst', x:m.x, y:m.y, r:0, maxR:55, life:0, maxLife:600, arcs:[] });
+            return;
+        }
+        if (m.kind==='hypersonic') {
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:55, life:0, maxLife:380, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:90, life:0, maxLife:320, kind:'shock' });
+            customFx.push({ type:'kineticShock', x:m.x, y:m.y, r:0, maxR:100, life:0, maxLife:450, delay:0 });
+            return;
+        }
+        if (m.kind==='nuclear' || m.kind==='hydrogen') {
+            /* small contained nuclear pop — no ground mushroom */
+            customFx.push({ type:'sunFlare', x:m.x, y:m.y, r:0, maxR:120, life:0, maxLife:800, rot:rng(0,Math.PI*2) });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:60, life:0, maxLife:480, kind:'fire' });
+            return;
+        }
+        if (m.kind==='emp') {
+            customFx.push({ type:'ionScorch', x:m.x, y:m.y, r:0, maxR:50, life:0, maxLife:600 });
+            return;
+        }
+        if (m.kind==='neutron') {
+            customFx.push({ type:'cryoFreeze', x:m.x, y:m.y, r:0, maxR:48, life:0, maxLife:700,
+                crystals: (function(){var a=[];for(var i=0;i<8;i++)a.push({ang:rng(0,Math.PI*2),len:rng(10,20)});return a;})() });
+            return;
+        }
+        if (m.kind==='antimatter') {
+            customFx.push({ type:'voidBurst', x:m.x, y:m.y, r:0, maxR:100, life:0, maxLife:800 });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:35, life:0, maxLife:260, kind:'flash' });
+            return;
+        }
+        if (m.kind==='gravity') {
+            customFx.push({ type:'darkImplode', x:m.x, y:m.y, r:80, maxR:0, life:0, maxLife:900, phase:'pull' });
+            return;
+        }
+        if (m.kind==='standard') {
+            /* clean white-orange airburst */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:42, life:0, maxLife:380, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:75, life:0, maxLife:320, kind:'shock' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:24, life:0, maxLife:200, kind:'flash' });
+            _airDebris(m, 22, 99);
+            return;
+        }
+        if (m.kind==='cluster') {
+            /* warhead pops AND spits 4 mini-flashes */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:34, life:0, maxLife:300, kind:'flash' });
+            for (var cf=0; cf<4; cf++) {
+                var cfa = cf*(Math.PI/2) + rng(-0.4,0.4);
+                explosions.push({
+                    x: m.x + Math.cos(cfa)*22,
+                    y: m.y + Math.sin(cfa)*22,
+                    r:0, maxR:22, life:0, maxLife:280, kind:'flash'
+                });
+            }
+            _airDebris(m, 26, 99);
+            return;
+        }
+        if (m.kind==='cruise') {
+            /* long horizontal smear, blue exhaust spray */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:38, life:0, maxLife:340, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:65, life:0, maxLife:280, kind:'shock' });
+            /* wing pieces flung sideways along missile heading */
+            for (var cw=0; cw<14; cw++) {
+                debrisParts.push({
+                    x:m.x, y:m.y,
+                    vx: Math.cos(m.angle)*rng(-1,3) + rng(-2,2),
+                    vy: Math.sin(m.angle)*rng(-1,3) + rng(-2,2),
+                    rot:rng(0,Math.PI*2), spin:rng(-0.3,0.3),
+                    size:rng(2,5), shade:rngI(0,4),
+                    life:0, maxLife:rng(500,900)
+                });
+            }
+            return;
+        }
+        if (m.kind==='mirv') {
+            /* 3 sub-warhead pops radiating outward */
+            for (var mwI=0; mwI<3; mwI++) {
+                var mwaI = mwI*(Math.PI*2/3) + rng(-0.3,0.3);
+                explosions.push({
+                    x: m.x + Math.cos(mwaI)*20,
+                    y: m.y + Math.sin(mwaI)*20,
+                    r:0, maxR:30, life:0, maxLife:380, kind:'fire'
+                });
+            }
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:20, life:0, maxLife:200, kind:'flash' });
+            _airDebris(m, 18, 99);
+            return;
+        }
+        if (m.kind==='bunker') {
+            /* heavy slow rumble — small flash, big concussion */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:24, life:0, maxLife:200, kind:'flash' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:100, life:0, maxLife:480, kind:'shock' });
+            for (var bd=0; bd<26; bd++) {
+                debrisParts.push({
+                    x:m.x, y:m.y,
+                    vx: rng(-3,3), vy: rng(-3,3),
+                    rot:rng(0,Math.PI*2), spin:rng(-0.3,0.3),
+                    size:rng(2.5,5), shade:rngI(0,4),
+                    life:0, maxLife:rng(700,1200)
+                });
+            }
+            return;
+        }
+        if (m.kind==='stealth') {
+            /* mostly silent — dark void puff, small flash */
+            customFx.push({ type:'voidBurst', x:m.x, y:m.y, r:0, maxR:60, life:0, maxLife:600 });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:14, life:0, maxLife:160, kind:'flash' });
+            return;
+        }
+        if (m.kind==='railgun') {
+            /* hot kinetic spark */
+            customFx.push({ type:'kinSpark', x:m.x, y:m.y, r:0, maxR:60, life:0, maxLife:480 });
+            customFx.push({ type:'coilSpark', x:m.x, y:m.y, r:0, maxR:30, life:0, maxLife:340 });
+            return;
+        }
+        if (m.kind==='drone') {
+            /* drone fragments tumble */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:28, life:0, maxLife:260, kind:'fire' });
+            for (var ddd=0; ddd<14; ddd++) {
+                var dda = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:m.x, y:m.y,
+                    vx: Math.cos(dda)*rng(1,3), vy: Math.sin(dda)*rng(1,3) - rng(0,2),
+                    rot:rng(0,Math.PI*2), spin:rng(-0.5,0.5),
+                    size:rng(1.5,3), shade:rngI(0,4),
+                    life:0, maxLife:rng(700,1300)
+                });
+            }
+            return;
+        }
+        if (m.kind==='icbm') {
+            /* large mushroom-style mid-air kill */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:75, life:0, maxLife:520, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:120, life:0, maxLife:400, kind:'shock' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:40, life:0, maxLife:280, kind:'flash' });
+            customFx.push({ type:'kineticShock', x:m.x, y:m.y, r:0, maxR:140, life:0, maxLife:700, delay:0 });
+            _airDebris(m, 34, 99);
+            return;
+        }
+        if (m.kind==='tactical') {
+            /* small precise pop */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:24, life:0, maxLife:240, kind:'fire' });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:12, life:0, maxLife:140, kind:'flash' });
+            return;
+        }
+        if (m.kind==='decoy') {
+            /* harmless chaff burst — lots of shiny sparkles, no fire */
+            for (var dc=0; dc<28; dc++) {
+                var dca = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:m.x, y:m.y,
+                    vx: Math.cos(dca)*rng(2,5), vy: Math.sin(dca)*rng(2,5),
+                    rot:0, spin:0, size: rng(0.8, 1.5), shade:99,
+                    life:0, maxLife:rng(500,900)
+                });
+            }
+            return;
+        }
+        if (m.kind==='photon') {
+            /* white halo with vertical residual flicker */
+            customFx.push({ type:'ionScorch', x:m.x, y:m.y, r:0, maxR:50, life:0, maxLife:520 });
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:18, life:0, maxLife:200, kind:'flash' });
+            return;
+        }
+        if (m.kind==='_swarmer' || m.kind==='_bomblet') {
+            /* tiny fire flicker */
+            explosions.push({ x:m.x, y:m.y, r:0, maxR:14, life:0, maxLife:180, kind:'fire' });
+            return;
+        }
+        /* generic small mid-air detonation for any remaining types */
+        _genericIntercept(m);
+    }
+
+    function _airDebris(m, count, shadeOverride) {
+        for (var i=0; i<count; i++) {
+            var a = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:m.x, y:m.y,
+                vx: Math.cos(a)*rng(1.5,4), vy: Math.sin(a)*rng(1.5,4),
+                rot: rng(0,Math.PI*2), spin: rng(-0.3,0.3),
+                size: rng(1.4, 3),
+                shade: (shadeOverride !== undefined) ? shadeOverride : rngI(0,4),
+                life:0, maxLife: rng(500,1000)
+            });
+        }
+    }
+
+    function _genericIntercept(m) {
+        var x = m.x, y = m.y;
+        {
+            explosions.push({ x:x, y:y, r:0, maxR:40, life:0, maxLife:420, kind:'fire' });
+            explosions.push({ x:x, y:y, r:0, maxR:70, life:0, maxLife:320, kind:'shock' });
+            explosions.push({ x:x, y:y, r:0, maxR:22, life:0, maxLife:180, kind:'flash' });
             for (var i=0;i<20;i++) {
                 var a = Math.random()*Math.PI*2;
                 debrisParts.push({
-                    x:m.x, y:m.y,
+                    x:x, y:y,
                     vx:Math.cos(a)*rng(1.5,4), vy:Math.sin(a)*rng(1.5,4),
                     rot:rng(0,Math.PI*2), spin:rng(-0.3,0.3),
                     size:rng(1.5,3.5), shade:rngI(0,4),
@@ -5830,6 +8159,76 @@
             if(m.kind==='hypersonic' && Math.random()<0.3) {
                 m.shockCones.push({x:m.x, y:m.y, angle:m.angle, life:0, maxLife:rng(300,500)});
             }
+            /* ── per-kind in-flight FX for the 5 new missile types ────────── */
+            if(m.kind==='kinetic') {
+                m.shockCones.push({x:m.x, y:m.y, angle:m.angle, life:0, maxLife:rng(220,380)});
+                if (Math.random()<0.6) {
+                    m.heatRings.push({x:m.x, y:m.y, r:0, maxR:rng(14,26), life:0, maxLife:rng(280,480)});
+                }
+                for (var hr=m.heatRings.length-1; hr>=0; hr--) {
+                    m.heatRings[hr].life += dt;
+                    m.heatRings[hr].r = m.heatRings[hr].maxR * (m.heatRings[hr].life/m.heatRings[hr].maxLife);
+                    if (m.heatRings[hr].life >= m.heatRings[hr].maxLife) m.heatRings.splice(hr,1);
+                }
+            }
+            if(m.kind==='darkmatter') {
+                m.phaseT += dt;
+                m.ringPhase += dt * 0.005;
+                if (Math.random()<0.25 && m.warpPuffs.length<14) {
+                    m.warpPuffs.push({
+                        x:m.x+rng(-10,10), y:m.y+rng(-10,10),
+                        r:0, maxR:rng(10,22), life:0, maxLife:rng(380,640),
+                        hue: rngI(240, 290)
+                    });
+                }
+                for (var wp=m.warpPuffs.length-1; wp>=0; wp--) {
+                    m.warpPuffs[wp].life += dt;
+                    m.warpPuffs[wp].r = m.warpPuffs[wp].maxR * Math.pow(m.warpPuffs[wp].life/m.warpPuffs[wp].maxLife, 0.5);
+                    if (m.warpPuffs[wp].life >= m.warpPuffs[wp].maxLife) m.warpPuffs.splice(wp,1);
+                }
+            }
+            if(m.kind==='solar') {
+                m.flareT += dt;
+                m.coronaRot += dt * 0.004;
+                if (Math.random()<0.4 && m.flares.length<10) {
+                    var fAng = rng(0, Math.PI*2);
+                    m.flares.push({
+                        ang: fAng,
+                        r0: rng(8, 14), r1: rng(18, 30),
+                        life:0, maxLife: rng(280,520),
+                        hue: rngI(20, 50)
+                    });
+                }
+                for (var fr=m.flares.length-1; fr>=0; fr--) {
+                    m.flares[fr].life += dt;
+                    if (m.flares[fr].life >= m.flares[fr].maxLife) m.flares.splice(fr,1);
+                }
+            }
+            if(m.kind==='cryo') {
+                m.frostT += dt;
+                for (var sh=0; sh<m.shards.length; sh++) m.shards[sh].ang += m.shards[sh].spd*dt;
+            }
+            if(m.kind==='tesla') {
+                m.coilT += dt;
+                m.zigPhase += dt * 0.02;
+                if (Math.random()<0.55 && m.bolts.length<6) {
+                    var bAng = rng(0, Math.PI*2);
+                    var bPts = [];
+                    var bSegs = rngI(3,6);
+                    for (var bp=0; bp<=bSegs; bp++) {
+                        var bRad = rng(4, 20);
+                        bPts.push({
+                            dx: Math.cos(bAng + bp*0.6) * bRad + rng(-2,2),
+                            dy: Math.sin(bAng + bp*0.6) * bRad + rng(-2,2)
+                        });
+                    }
+                    m.bolts.push({pts:bPts, life:0, maxLife:rng(100,200)});
+                }
+                for (var bi2=m.bolts.length-1; bi2>=0; bi2--) {
+                    m.bolts[bi2].life += dt;
+                    if (m.bolts[bi2].life >= m.bolts[bi2].maxLife) m.bolts.splice(bi2,1);
+                }
+            }
             if(m.shockCones) {
                 for(var sc=m.shockCones.length-1;sc>=0;sc--) {
                     m.shockCones[sc].life+=dt;
@@ -5937,19 +8336,45 @@
                 }
                 ic.arcs.push({pts:pts, life:0, maxLife:180});
             }
+            /* plasma-cannon arcs */
+            if (ic.kind==='plasmac' && ic.arcs && Math.random()<0.30 && ic.arcs.length<5) {
+                var pcA = rng(0, Math.PI*2);
+                var pcPts = [];
+                for (var pp2=0; pp2<4; pp2++) {
+                    pcPts.push({dx:Math.cos(pcA+pp2*0.7)*rng(3,10), dy:Math.sin(pcA+pp2*0.7)*rng(3,10)});
+                }
+                ic.arcs.push({pts:pcPts, life:0, maxLife:160});
+            }
             if (ic.arcs) {
                 for (var ai=ic.arcs.length-1;ai>=0;ai--) {
                     ic.arcs[ai].life+=dt;
                     if (ic.arcs[ai].life>=ic.arcs[ai].maxLife) ic.arcs.splice(ai,1);
                 }
             }
+            /* drone-swarm: update each swarmer's bob/spin */
+            if (ic.kind==='drones' && ic.swarmers) {
+                for (var sw=0; sw<ic.swarmers.length; sw++) {
+                    ic.swarmers[sw].offA += ic.swarmers[sw].spin * dt;
+                    ic.swarmers[sw].bob  += dt * 0.012;
+                }
+            }
+            if (ic.kind==='gravnet') ic.netT += dt;
+            if (ic.kind==='kinslug')  ic.heatT  = (ic.heatT||0) + dt;
+            if (ic.kind==='flak')     ic.wobbleT += dt * 0.01;
             /* contact check */
             if (ic.target) {
                 var hx=ic.target.x-ic.x, hy=ic.target.y-ic.y;
-                var hitR2 = ic.enhanced ? 600 : 220;  /* ~24px vs 15px */
+                /* flak: proximity-fuse (bursts BEFORE contact) */
+                var hitR2;
+                if (ic.kind==='flak') {
+                    hitR2 = ic.proxR*ic.proxR;
+                } else {
+                    hitR2 = ic.enhanced ? 600 : 220;  /* ~24px vs 15px */
+                }
                 if (hx*hx+hy*hy < hitR2) {
                     if (ic.enhanced) killMissileBig(ic.target);
                     else killMissile(ic.target, true);
+                    spawnDefenceImpact(ic.kind, ic.x, ic.y, ic.target);
                     interceptors.splice(I,1);
                     continue;
                 }
@@ -6099,6 +8524,8 @@
             photonStrikes[ph].life += dt;
             if (photonStrikes[ph].life >= photonStrikes[ph].maxLife) photonStrikes.splice(ph,1);
         }
+        /* new custom attack/defence FX */
+        updateCustomFx(dt);
 
         /* screen flash decays */
         if(screenFlash>0) screenFlash = Math.max(0, screenFlash - dt*0.0025);
@@ -6524,14 +8951,30 @@
     /* ──── EMP (electric arcs, no fireball, disables nothing physical) ── */
     function triggerEMP(x, y) {
         var blastR = 150;
-        screenFlash = 0.4;
+        screenFlash = 0.6;
+        eqShakeX = (Math.random()-0.5)*8;
+        eqShakeY = (Math.random()-0.5)*6;
         empPulses.push({
             x:x, y:y, r:0, maxR:blastR*2.6,
             life:0, maxLife:1100,
             arcs: []
         });
         explosions.push({ x:x, y:y, r:0, maxR:30, life:0, maxLife:240, kind:'flash' });
-        /* no shred — EMP doesn't physically destroy */
+        /* EMP DOES damage — frying electronics is fatal at close range.
+           Use a smaller-than-blastR kill radius so it feels electrical rather
+           than concussive, but still destroys vehicles + ground floors. */
+        _shredInRadius(x, y, blastR * 0.75);
+        if (y < GROUND - 10) _flattenBuilding(x, y, blastR * 0.6);
+        /* scorched arc marks across the ground */
+        for (var sa=0; sa<14; sa++) {
+            var sang = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx: Math.cos(sang)*rng(2,6), vy: Math.sin(sang)*rng(2,5) - rng(0,2),
+                rot:0, spin:0, size: rng(0.8, 1.6), shade:99,
+                life:0, maxLife: rng(450, 900)
+            });
+        }
     }
 
     /* ──── PHOTON (vertical white beam) ──────────────────────────────── */
@@ -6568,6 +9011,11 @@
         if (kind==='neutron')      return triggerNeutron(x, y);
         if (kind==='emp')          return triggerEMP(x, y);
         if (kind==='photon')       return triggerPhoton(x, y);
+        if (kind==='kinetic')      return triggerKinetic(x, y);
+        if (kind==='darkmatter')   return triggerDarkmatter(x, y);
+        if (kind==='solar')        return triggerSolar(x, y);
+        if (kind==='cryo')         return triggerCryo(x, y);
+        if (kind==='tesla')        return triggerTesla(x, y);
         if (kind==='decoy') {
             for (var dp=0; dp<14; dp++) {
                 debrisParts.push({ x:x,y:y, vx:rng(-2,2),vy:rng(-3,1),
@@ -6577,25 +9025,85 @@
             return;
         }
         if (kind==='bunker') return triggerBunker(x, y);
-        /* per-kind blast scaling */
+        /* per-kind blast scaling — all distinct */
         var blastR = 90;
         var flashIntensity = 1;
-        if (kind==='tactical')    blastR = 55;
-        else if (kind==='railgun')blastR = 70;
-        else if (kind==='icbm')   blastR = 160;
-        else if (kind==='drone')  blastR = 75;
-        else if (kind==='stealth')blastR = 100;
+        var shakeMul = 1;
+        var debrisCount = 48, emberCount = 60;
+        if (kind==='standard')      { blastR = 90;  shakeMul = 1.0; }
+        else if (kind==='cluster')  { blastR = 110; shakeMul = 1.2; debrisCount = 64; }
+        else if (kind==='plasma')   { blastR = 80;  shakeMul = 0.7; emberCount = 90; flashIntensity = 0.7; }
+        else if (kind==='cruise')   { blastR = 100; shakeMul = 1.1; debrisCount = 56; }
+        else if (kind==='hypersonic'){blastR = 130; shakeMul = 1.6; debrisCount = 70; flashIntensity = 1.3; }
+        else if (kind==='mirv')     { blastR = 120; shakeMul = 1.4; debrisCount = 60; }
+        else if (kind==='tactical') { blastR = 55;  shakeMul = 0.6; debrisCount = 30; emberCount = 35; flashIntensity = 0.5; }
+        else if (kind==='railgun')  { blastR = 70;  shakeMul = 0.8; debrisCount = 36; }
+        else if (kind==='icbm')     { blastR = 170; shakeMul = 1.8; debrisCount = 80; flashIntensity = 1.4; }
+        else if (kind==='drone')    { blastR = 65;  shakeMul = 0.6; debrisCount = 30; emberCount = 30; }
+        else if (kind==='stealth')  { blastR = 105; shakeMul = 0.9; debrisCount = 44; flashIntensity = 0.6; }
+        else if (kind==='_bomblet') { blastR = 45;  shakeMul = 0.4; debrisCount = 18; emberCount = 20; flashIntensity = 0.4; }
         screenFlash = flashIntensity;
-        eqShakeX = (Math.random()-0.5) * 14;
-        eqShakeY = (Math.random()-0.5) * 10;
-        /* main fireball */
-        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.4, life:0, maxLife:700, kind:'fire' });
+        eqShakeX = (Math.random()-0.5) * 14 * shakeMul;
+        eqShakeY = (Math.random()-0.5) * 10 * shakeMul;
+        /* main fireball — color tint per kind */
+        var fireKind = 'fire';
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.4, life:0, maxLife:700, kind:fireKind });
         /* shock ring (faster, expanding outline) */
         explosions.push({ x:x, y:y, r:0, maxR:blastR*2.6, life:0, maxLife:550, kind:'shock' });
         /* secondary flash */
         explosions.push({ x:x, y:y, r:0, maxR:blastR*0.55, life:0, maxLife:260, kind:'flash' });
+        /* kind-specific extra signature */
+        if (kind==='hypersonic') {
+            customFx.push({ type:'kineticShock', x:x, y:y, r:0, maxR:blastR*3.4, life:0, maxLife:700, delay:0 });
+        } else if (kind==='railgun') {
+            customFx.push({ type:'coilSpark', x:x, y:y, r:0, maxR:blastR*0.7, life:0, maxLife:380 });
+        } else if (kind==='icbm') {
+            /* huge multi-ring shockwave */
+            customFx.push({ type:'kineticShock', x:x, y:y, r:0, maxR:blastR*3.6, life:0, maxLife:850, delay:0 });
+            customFx.push({ type:'kineticShock', x:x, y:y, r:0, maxR:blastR*2.6, life:0, maxLife:650, delay:120 });
+        } else if (kind==='cluster') {
+            /* secondary mini flash bursts (sub-munition pops) */
+            for (var sm=0; sm<5; sm++) {
+                explosions.push({
+                    x: x + rng(-blastR*0.6, blastR*0.6),
+                    y: y + rng(-blastR*0.3, blastR*0.3),
+                    r:0, maxR:24, life:0, maxLife:280, kind:'flash'
+                });
+            }
+        } else if (kind==='plasma') {
+            /* purple plasma after-burst */
+            customFx.push({ type:'plasmaBurst', x:x, y:y, r:0, maxR:blastR*1.4, life:0, maxLife:600, arcs:[] });
+        } else if (kind==='mirv') {
+            /* 3 mini child-warhead bursts radiating outward */
+            for (var mw=0; mw<3; mw++) {
+                var mwa = mw*(Math.PI*2/3) + rng(-0.4,0.4);
+                var mwr = blastR*0.85;
+                explosions.push({
+                    x: x + Math.cos(mwa)*mwr,
+                    y: y + Math.sin(mwa)*mwr,
+                    r:0, maxR:blastR*0.8, life:0, maxLife:520, kind:'fire'
+                });
+            }
+        } else if (kind==='drone') {
+            /* light dust puff */
+            for (var dpf=0; dpf<6; dpf++) {
+                smokePlumes.push({
+                    x: x + rng(-blastR*0.5, blastR*0.5),
+                    y: y + rng(-6, 6),
+                    r: rng(14, 22), vy: rng(0.4, 0.9),
+                    life:0, maxLife: rng(2000, 3200),
+                    op: rng(0.35, 0.5)
+                });
+            }
+        } else if (kind==='stealth') {
+            /* delayed concussion ring (the warhead was hard to spot) */
+            customFx.push({ type:'voidBurst', x:x, y:y, r:0, maxR:blastR*1.8, life:0, maxLife:700 });
+        } else if (kind==='tactical') {
+            /* tight precision shock */
+            customFx.push({ type:'kinSpark', x:x, y:y, r:0, maxR:blastR*1.4, life:0, maxLife:400 });
+        }
         /* debris fragments */
-        for(var i=0;i<48;i++) {
+        for(var i=0;i<debrisCount;i++) {
             var ang=Math.random()*Math.PI*2;
             var spd=rng(2.5, 8.5);
             debrisParts.push({
@@ -6608,7 +9116,7 @@
             });
         }
         /* embers / sparks */
-        for(var k=0;k<60;k++) {
+        for(var k=0;k<emberCount;k++) {
             var a2=Math.random()*Math.PI*2;
             debrisParts.push({
                 x:x, y:y,
@@ -7094,26 +9602,128 @@
             }
             return;
         }
-        /* standard / cluster / bomblet — multilayer smoke + fire core */
+        if(m.kind==='kinetic') {
+            /* incandescent vertical streak with ember dust */
+            for(var tK=0; tK<n-1; tK++) {
+                var k1=m.trail[tK], k2=m.trail[tK+1];
+                var aK = 1 - (k1.age/trailLife);
+                c.strokeStyle = 'rgba(255,150,40,'+(aK*0.55)+')';
+                c.lineWidth = 8*aK + 2;
+                c.beginPath(); c.moveTo(k1.x,k1.y); c.lineTo(k2.x,k2.y); c.stroke();
+                c.strokeStyle = 'rgba(255,255,220,'+(aK*0.95)+')';
+                c.lineWidth = 2;
+                c.beginPath(); c.moveTo(k1.x,k1.y); c.lineTo(k2.x,k2.y); c.stroke();
+            }
+            return;
+        }
+        if(m.kind==='darkmatter') {
+            /* fading purple void wisp with phase blink */
+            for(var tD=0; tD<n-1; tD++) {
+                var d1=m.trail[tD], d2=m.trail[tD+1];
+                var aD = 1 - (d1.age/trailLife);
+                c.strokeStyle = 'rgba(80,30,160,'+(aD*0.55)+')';
+                c.lineWidth = 5*aD;
+                c.beginPath(); c.moveTo(d1.x,d1.y); c.lineTo(d2.x,d2.y); c.stroke();
+                c.strokeStyle = 'rgba(180,120,255,'+(aD*0.65)+')';
+                c.lineWidth = 1.4;
+                c.beginPath(); c.moveTo(d1.x+rng(-2,2),d1.y+rng(-2,2));
+                c.lineTo(d2.x+rng(-2,2),d2.y+rng(-2,2)); c.stroke();
+            }
+            return;
+        }
+        if(m.kind==='solar') {
+            /* roiling orange/yellow plasma trail */
+            for(var tS=0; tS<n; tS++) {
+                var sP = m.trail[tS], aS = sP.age/trailLife;
+                var opS = (1-aS) * 0.75 * (tS/n);
+                var rS = 6 + aS*22;
+                var sg = c.createRadialGradient(sP.x,sP.y,0,sP.x,sP.y,rS);
+                sg.addColorStop(0,'rgba(255,255,200,'+(opS*1.2)+')');
+                sg.addColorStop(0.45,'rgba(255,140,40,'+opS+')');
+                sg.addColorStop(1,'rgba(120,20,0,0)');
+                c.fillStyle = sg;
+                c.beginPath(); c.arc(sP.x, sP.y, rS, 0, Math.PI*2); c.fill();
+            }
+            return;
+        }
+        if(m.kind==='cryo') {
+            /* pale cold vapor + tiny sparkle flecks */
+            for(var tC=0; tC<n-1; tC++) {
+                var c1=m.trail[tC], c2=m.trail[tC+1];
+                var aC2 = 1 - (c1.age/trailLife);
+                c.strokeStyle = 'rgba(180,220,255,'+(aC2*0.45)+')';
+                c.lineWidth = 4*aC2 + 1;
+                c.beginPath(); c.moveTo(c1.x,c1.y); c.lineTo(c2.x,c2.y); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,'+(aC2*0.55)+')';
+                c.lineWidth = 1;
+                c.beginPath(); c.moveTo(c1.x,c1.y); c.lineTo(c2.x,c2.y); c.stroke();
+            }
+            /* sparkles */
+            if (Math.random() < 0.5 && n > 2) {
+                var sIdx = rngI(0, n);
+                var sp = m.trail[sIdx];
+                c.fillStyle='rgba(220,240,255,0.9)';
+                c.beginPath(); c.arc(sp.x+rng(-3,3), sp.y+rng(-3,3), 1.2, 0, Math.PI*2); c.fill();
+            }
+            return;
+        }
+        if(m.kind==='tesla') {
+            /* zig-zag electric trail */
+            for(var tT=0; tT<n-1; tT++) {
+                var z1=m.trail[tT], z2=m.trail[tT+1];
+                var aT = 1 - (z1.age/trailLife);
+                c.strokeStyle = 'rgba(80,140,255,'+(aT*0.45)+')';
+                c.lineWidth = 5*aT + 1;
+                c.beginPath(); c.moveTo(z1.x,z1.y); c.lineTo(z2.x,z2.y); c.stroke();
+                c.strokeStyle = 'rgba(220,240,255,'+(aT*0.95)+')';
+                c.lineWidth = 1.2;
+                c.beginPath();
+                c.moveTo(z1.x+rng(-3,3),z1.y+rng(-3,3));
+                c.lineTo(z2.x+rng(-3,3),z2.y+rng(-3,3));
+                c.stroke();
+            }
+            return;
+        }
+        /* ── per-kind colored smoke trail palettes ────────────────────── */
+        var inner, mid, edgeAlpha;
+        if (m.kind==='nuclear')        { inner='rgba(255,255,200,'; mid='rgba(255,170,40,';  edgeAlpha='rgba(80,40,30,0)'; }
+        else if (m.kind==='hydrogen')  { inner='rgba(220,240,255,'; mid='rgba(120,180,255,'; edgeAlpha='rgba(20,40,80,0)'; }
+        else if (m.kind==='thermobaric') { inner='rgba(255,180,80,'; mid='rgba(255,80,20,'; edgeAlpha='rgba(60,20,10,0)'; }
+        else if (m.kind==='bunker')    { inner='rgba(200,200,200,'; mid='rgba(80,80,80,';   edgeAlpha='rgba(40,40,40,0)'; }
+        else if (m.kind==='mirv')      { inner='rgba(255,220,140,'; mid='rgba(180,60,30,';  edgeAlpha='rgba(40,20,20,0)'; }
+        else if (m.kind==='stealth')   { inner='rgba(80,80,90,';    mid='rgba(40,40,50,';   edgeAlpha='rgba(10,10,20,0)'; }
+        else if (m.kind==='railgun')   { inner='rgba(220,240,255,'; mid='rgba(100,180,255,'; edgeAlpha='rgba(20,40,120,0)'; }
+        else if (m.kind==='drone')     { inner='rgba(200,210,220,'; mid='rgba(120,130,150,'; edgeAlpha='rgba(50,55,70,0)'; }
+        else if (m.kind==='icbm')      { inner='rgba(255,255,240,'; mid='rgba(255,180,80,';  edgeAlpha='rgba(80,40,20,0)'; }
+        else if (m.kind==='tactical')  { inner='rgba(200,240,180,'; mid='rgba(80,160,40,';   edgeAlpha='rgba(20,40,10,0)'; }
+        else if (m.kind==='antimatter') { inner='rgba(240,240,255,'; mid='rgba(140,180,255,'; edgeAlpha='rgba(10,20,80,0)'; }
+        else if (m.kind==='decoy')     { inner='rgba(255,255,255,'; mid='rgba(200,210,230,'; edgeAlpha='rgba(80,90,110,0)'; }
+        else if (m.kind==='gravity')   { inner='rgba(180,140,255,'; mid='rgba(80,40,160,';   edgeAlpha='rgba(20,0,40,0)'; }
+        else if (m.kind==='neutron')   { inner='rgba(180,255,200,'; mid='rgba(80,200,140,';  edgeAlpha='rgba(20,60,40,0)'; }
+        else if (m.kind==='emp')       { inner='rgba(220,180,255,'; mid='rgba(140,80,220,';  edgeAlpha='rgba(40,0,80,0)'; }
+        else if (m.kind==='photon')    { inner='rgba(255,255,255,'; mid='rgba(255,240,180,'; edgeAlpha='rgba(180,140,40,0)'; }
+        else if (m.kind==='_swarmer')  { inner='rgba(255,200,80,';  mid='rgba(200,80,20,';   edgeAlpha='rgba(60,30,10,0)'; }
+        else                           { inner='rgba(255,210,90,';  mid='rgba(255,90,30,';   edgeAlpha='rgba(50,40,35,0)'; }
+
         for(var t=0;t<n;t++) {
             var pt=m.trail[t], frac=t/n;
             var af=pt.age/trailLife;
             var op=(1-af)*0.7*frac;
             var rad = 4 + af*16;
             var tg = c.createRadialGradient(pt.x,pt.y,0,pt.x,pt.y,rad);
-            tg.addColorStop(0,'rgba(255,210,90,'+(op*1.2)+')');
-            tg.addColorStop(0.4,'rgba(255,90,30,'+op+')');
-            tg.addColorStop(1,'rgba(50,40,35,0)');
+            tg.addColorStop(0, inner+(op*1.2)+')');
+            tg.addColorStop(0.4, mid+op+')');
+            tg.addColorStop(1, edgeAlpha);
             c.fillStyle = tg;
             c.beginPath(); c.arc(pt.x, pt.y, rad, 0, Math.PI*2); c.fill();
         }
-        /* fire-core stripe */
+        /* fire-core stripe (color picked from inner) */
         c.beginPath();
         for(var ti3=0;ti3<n;ti3++) {
             var p=m.trail[ti3];
             if(ti3===0) c.moveTo(p.x,p.y); else c.lineTo(p.x,p.y);
         }
-        c.strokeStyle = 'rgba(255,240,180,0.55)';
+        c.strokeStyle = inner + '0.55)';
         c.lineWidth = 1.4; c.lineCap='round';
         c.stroke();
     }
@@ -7542,6 +10152,863 @@
         c.beginPath(); c.arc(0,0,16,0,Math.PI*2); c.fill();
     }
 
+    /* ── NEW MISSILE BODIES (5) ─────────────────────────────────────── */
+    function drawKineticBody(c, m) {
+        var t = performance.now();
+        var hg = c.createRadialGradient(0,0,0,0,0,28);
+        hg.addColorStop(0,'rgba(255,220,140,0.85)');
+        hg.addColorStop(0.5,'rgba(255,100,30,0.55)');
+        hg.addColorStop(1,'rgba(160,20,0,0)');
+        c.fillStyle = hg;
+        c.beginPath(); c.arc(0,0,28,0,Math.PI*2); c.fill();
+        var bg = c.createLinearGradient(-18,0,18,0);
+        bg.addColorStop(0,'#5a3010');
+        bg.addColorStop(0.35,'#ff7030');
+        bg.addColorStop(0.6,'#ffeac0');
+        bg.addColorStop(1,'#ffffff');
+        c.fillStyle = bg;
+        c.fillRect(-22, -2.4, 44, 4.8);
+        c.strokeStyle='rgba(80,20,0,0.65)'; c.lineWidth=0.6;
+        c.strokeRect(-22, -2.4, 44, 4.8);
+        c.fillStyle='#ffffff';
+        c.beginPath(); c.moveTo(22,0); c.lineTo(16,-2.4); c.lineTo(16,2.4); c.closePath(); c.fill();
+        c.fillStyle='rgba(255,255,220,'+(0.55+0.45*Math.sin(t*0.04))+')';
+        c.beginPath(); c.arc(22,0,3,0,Math.PI*2); c.fill();
+        var pg = c.createLinearGradient(-22,0,-44,0);
+        pg.addColorStop(0,'rgba(255,255,255,1)');
+        pg.addColorStop(0.4,'rgba(255,180,80,0.8)');
+        pg.addColorStop(1,'rgba(200,30,0,0)');
+        c.fillStyle = pg;
+        c.beginPath();
+        c.moveTo(-22,-3); c.lineTo(-44,0); c.lineTo(-22,3);
+        c.closePath(); c.fill();
+    }
+    function drawDarkMatterBody(c, m) {
+        var t = performance.now();
+        var phase = m.phaseT ? Math.sin(m.phaseT*0.003) : 0;
+        var visible = 0.5 + 0.5*phase;
+        c.save();
+        c.globalAlpha = 0.35 + visible*0.55;
+        var og = c.createRadialGradient(0,0,2,0,0,28);
+        og.addColorStop(0,'rgba(50,10,80,0.9)');
+        og.addColorStop(0.4,'rgba(130,40,200,0.65)');
+        og.addColorStop(1,'rgba(20,0,40,0)');
+        c.fillStyle = og;
+        c.beginPath(); c.arc(0,0,28,0,Math.PI*2); c.fill();
+        if (m.warpPuffs) {
+            for (var wp=0; wp<m.warpPuffs.length; wp++) {
+                var WP = m.warpPuffs[wp];
+                var wpA = 1 - (WP.life/WP.maxLife);
+                var wpg = c.createRadialGradient(WP.x-m.x, WP.y-m.y, 0, WP.x-m.x, WP.y-m.y, WP.r);
+                wpg.addColorStop(0,'hsla('+WP.hue+',80%,55%,'+(wpA*0.45)+')');
+                wpg.addColorStop(1,'hsla('+WP.hue+',60%,20%,0)');
+                c.fillStyle = wpg;
+                c.beginPath(); c.arc(WP.x-m.x, WP.y-m.y, WP.r, 0, Math.PI*2); c.fill();
+            }
+        }
+        c.save(); c.rotate((m.ringPhase||0));
+        c.strokeStyle='rgba(180,120,255,0.85)'; c.lineWidth=1.4;
+        c.beginPath(); c.ellipse(0,0,18,5,0,0,Math.PI*2); c.stroke();
+        c.restore();
+        c.save(); c.rotate(-(m.ringPhase||0)*1.3);
+        c.strokeStyle='rgba(220,180,255,0.7)'; c.lineWidth=1;
+        c.beginPath(); c.ellipse(0,0,22,3,0,0,Math.PI*2); c.stroke();
+        c.restore();
+        c.fillStyle='rgba(0,0,0,0.95)';
+        c.beginPath(); c.arc(0,0,7,0,Math.PI*2); c.fill();
+        c.fillStyle='rgba(220,180,255,'+(0.7+0.3*Math.sin(t*0.02))+')';
+        c.beginPath(); c.arc(0,0,1.6,0,Math.PI*2); c.fill();
+        c.restore();
+    }
+    function drawSolarBody(c, m) {
+        var t = performance.now();
+        var og = c.createRadialGradient(0,0,3,0,0,34);
+        og.addColorStop(0,'rgba(255,250,200,1)');
+        og.addColorStop(0.35,'rgba(255,180,40,0.85)');
+        og.addColorStop(0.75,'rgba(220,60,0,0.45)');
+        og.addColorStop(1,'rgba(80,10,0,0)');
+        c.fillStyle = og;
+        c.beginPath(); c.arc(0,0,34,0,Math.PI*2); c.fill();
+        c.save();
+        c.rotate((m.coronaRot||0));
+        c.strokeStyle = 'rgba(255,180,60,0.65)'; c.lineWidth = 1.5;
+        for (var pS=0; pS<8; pS++) {
+            var pa = pS*(Math.PI/4);
+            c.beginPath();
+            c.moveTo(Math.cos(pa)*10, Math.sin(pa)*10);
+            c.lineTo(Math.cos(pa)*28, Math.sin(pa)*28);
+            c.stroke();
+        }
+        c.restore();
+        if (m.flares) {
+            for (var fr=0; fr<m.flares.length; fr++) {
+                var FR = m.flares[fr];
+                var fA = 1 - (FR.life/FR.maxLife);
+                var fr0 = FR.r0 + (FR.r1-FR.r0)*(FR.life/FR.maxLife);
+                c.strokeStyle = 'hsla('+FR.hue+',95%,65%,'+(fA*0.85)+')';
+                c.lineWidth = 1.6;
+                c.beginPath();
+                c.arc(0, 0, fr0, FR.ang, FR.ang+0.9);
+                c.stroke();
+            }
+        }
+        var cg = c.createRadialGradient(0,0,0,0,0,9);
+        cg.addColorStop(0,'rgba(255,255,255,1)');
+        cg.addColorStop(0.5,'rgba(255,240,140,1)');
+        cg.addColorStop(1,'rgba(255,120,20,0.85)');
+        c.fillStyle = cg;
+        c.beginPath(); c.arc(0,0,9+Math.sin(t*0.014)*1.5,0,Math.PI*2); c.fill();
+    }
+    function drawCryoBody(c, m) {
+        var t = performance.now();
+        var hg2 = c.createRadialGradient(0,0,2,0,0,22);
+        hg2.addColorStop(0,'rgba(220,250,255,0.75)');
+        hg2.addColorStop(0.5,'rgba(120,200,255,0.45)');
+        hg2.addColorStop(1,'rgba(20,80,140,0)');
+        c.fillStyle = hg2;
+        c.beginPath(); c.arc(0,0,22,0,Math.PI*2); c.fill();
+        var bg = c.createLinearGradient(0,-4,0,4);
+        bg.addColorStop(0,'#eaf6ff');
+        bg.addColorStop(0.5,'#8fc8ff');
+        bg.addColorStop(1,'#2f6090');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(14,0); c.lineTo(6,-4); c.lineTo(-12,-4); c.lineTo(-12,4); c.lineTo(6,4);
+        c.closePath(); c.fill();
+        c.strokeStyle='rgba(20,60,110,0.85)'; c.lineWidth=0.7; c.stroke();
+        c.strokeStyle='rgba(255,255,255,0.85)'; c.lineWidth=0.5;
+        c.beginPath(); c.moveTo(-12,0); c.lineTo(14,0); c.stroke();
+        if (m.shards) {
+            for (var sh=0; sh<m.shards.length; sh++) {
+                var S = m.shards[sh];
+                var sx2 = Math.cos(S.ang)*S.rad;
+                var sy2 = Math.sin(S.ang)*S.rad;
+                c.fillStyle='rgba(220,240,255,0.85)';
+                c.save();
+                c.translate(sx2, sy2);
+                c.rotate(S.ang*1.5);
+                c.beginPath();
+                c.moveTo(0,-S.size); c.lineTo(S.size*0.5,0);
+                c.lineTo(0,S.size); c.lineTo(-S.size*0.5,0);
+                c.closePath(); c.fill();
+                c.strokeStyle='rgba(60,140,200,0.85)';
+                c.lineWidth=0.6;
+                c.stroke();
+                c.restore();
+            }
+        }
+        c.fillStyle='#5a90c0';
+        c.beginPath(); c.moveTo(-12,-4); c.lineTo(-17,-8); c.lineTo(-9,-4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-12, 4); c.lineTo(-17, 8); c.lineTo(-9, 4); c.closePath(); c.fill();
+        var fl = 5 + Math.sin(t*0.02)*2;
+        var fg = c.createLinearGradient(-12,0,-12-fl*2,0);
+        fg.addColorStop(0,'rgba(220,250,255,1)');
+        fg.addColorStop(0.5,'rgba(120,200,255,0.7)');
+        fg.addColorStop(1,'rgba(30,90,160,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-12,-3); c.lineTo(-12-fl*2,0); c.lineTo(-12,3);
+        c.closePath(); c.fill();
+    }
+    function drawTeslaBody(c, m) {
+        var t = performance.now();
+        var og = c.createRadialGradient(0,0,2,0,0,24);
+        og.addColorStop(0,'rgba(220,240,255,0.8)');
+        og.addColorStop(0.5,'rgba(120,180,255,0.55)');
+        og.addColorStop(1,'rgba(40,80,200,0)');
+        c.fillStyle = og;
+        c.beginPath(); c.arc(0,0,24,0,Math.PI*2); c.fill();
+        c.fillStyle='#1a2030';
+        c.beginPath();
+        c.moveTo(13,0); c.lineTo(6,-4); c.lineTo(-12,-4); c.lineTo(-12,4); c.lineTo(6,4);
+        c.closePath(); c.fill();
+        c.strokeStyle='#0a0c14'; c.lineWidth=0.6; c.stroke();
+        c.strokeStyle='#80c0ff'; c.lineWidth=1;
+        for (var cr=-10; cr<=4; cr+=2) {
+            c.beginPath(); c.moveTo(cr,-4); c.lineTo(cr,4); c.stroke();
+        }
+        var cg = c.createRadialGradient(13,0,0,13,0,6);
+        cg.addColorStop(0,'rgba(255,255,255,1)');
+        cg.addColorStop(0.5,'rgba(140,200,255,0.85)');
+        cg.addColorStop(1,'rgba(40,80,200,0)');
+        c.fillStyle = cg;
+        c.beginPath(); c.arc(13,0,6,0,Math.PI*2); c.fill();
+        if (m.bolts) {
+            for (var bi=0; bi<m.bolts.length; bi++) {
+                var B = m.bolts[bi];
+                var bA = 1 - (B.life/B.maxLife);
+                c.strokeStyle = 'rgba(180,220,255,'+(bA*0.95)+')';
+                c.lineWidth = 1.6;
+                c.beginPath();
+                c.moveTo(B.pts[0].dx, B.pts[0].dy);
+                for (var bp=1; bp<B.pts.length; bp++) c.lineTo(B.pts[bp].dx, B.pts[bp].dy);
+                c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,'+(bA*0.85)+')';
+                c.lineWidth = 0.7;
+                c.beginPath();
+                c.moveTo(B.pts[0].dx, B.pts[0].dy);
+                for (var bp2=1; bp2<B.pts.length; bp2++) c.lineTo(B.pts[bp2].dx, B.pts[bp2].dy);
+                c.stroke();
+            }
+        }
+        c.fillStyle='#3a5070';
+        c.beginPath(); c.moveTo(-12,-4); c.lineTo(-17,-8); c.lineTo(-9,-4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-12, 4); c.lineTo(-17, 8); c.lineTo(-9, 4); c.closePath(); c.fill();
+        var flT = 5 + Math.sin(t*0.03)*2;
+        var fgT = c.createLinearGradient(-12,0,-12-flT*2,0);
+        fgT.addColorStop(0,'rgba(180,220,255,1)');
+        fgT.addColorStop(0.5,'rgba(80,140,255,0.75)');
+        fgT.addColorStop(1,'rgba(20,40,120,0)');
+        c.fillStyle = fgT;
+        c.beginPath();
+        c.moveTo(-12,-3); c.lineTo(-12-flT*2,0); c.lineTo(-12,3);
+        c.closePath(); c.fill();
+    }
+
+    /* MIRV — slim multi-warhead bus with re-entry vehicle cones on the side */
+    function drawMirvBody(c, m) {
+        /* main slim body, dark olive */
+        c.fillStyle='#3a4030';
+        c.beginPath();
+        c.moveTo(15,0); c.lineTo(8,-4); c.lineTo(-14,-4); c.lineTo(-14,4); c.lineTo(8,4);
+        c.closePath(); c.fill();
+        c.strokeStyle='#1a2010'; c.lineWidth=0.7; c.stroke();
+        /* multiple re-entry vehicle nose cones (3 stacked) */
+        c.fillStyle='#8a0a0a';
+        c.beginPath(); c.moveTo(15,0); c.lineTo(8,-4); c.lineTo(8,4); c.closePath(); c.fill();
+        c.fillStyle='#c02020';
+        c.beginPath(); c.moveTo(11,-2); c.lineTo(8,-4); c.lineTo(8,-1); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(11, 2); c.lineTo(8, 4); c.lineTo(8, 1); c.closePath(); c.fill();
+        /* warning bands */
+        c.fillStyle='#ffd040';
+        for (var s=-12; s<=4; s+=4) c.fillRect(s,-0.7,2,1.4);
+        /* large fins */
+        c.fillStyle='#2a3020';
+        c.beginPath(); c.moveTo(-14,-4); c.lineTo(-20,-10); c.lineTo(-10,-4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-14, 4); c.lineTo(-20, 10); c.lineTo(-10, 4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-14, 0); c.lineTo(-22, 0); c.lineTo(-12, 0); c.closePath(); c.stroke();
+        /* exhaust */
+        var fl = 8 + Math.sin(performance.now()*0.035)*3;
+        var fg = c.createLinearGradient(-14,0,-14-fl*2,0);
+        fg.addColorStop(0,'rgba(255,250,200,1)');
+        fg.addColorStop(0.5,'rgba(255,140,40,0.85)');
+        fg.addColorStop(1,'rgba(120,30,10,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-14,-3); c.lineTo(-14-fl*2,0); c.lineTo(-14,3);
+        c.closePath(); c.fill();
+    }
+
+    /* TACTICAL — compact short-range warhead, green/black stripes */
+    function drawTacticalBody(c, m) {
+        var t = performance.now();
+        /* compact body */
+        var bg = c.createLinearGradient(0,-3,0,3);
+        bg.addColorStop(0,'#4a7a3a');
+        bg.addColorStop(0.6,'#2a4020');
+        bg.addColorStop(1,'#0a1408');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(10,0); c.lineTo(4,-3); c.lineTo(-10,-3); c.lineTo(-10,3); c.lineTo(4,3);
+        c.closePath(); c.fill();
+        c.strokeStyle='#0a1008'; c.lineWidth=0.6; c.stroke();
+        /* nose */
+        c.fillStyle='#1a2010';
+        c.beginPath(); c.moveTo(10,0); c.lineTo(4,-3); c.lineTo(4,3); c.closePath(); c.fill();
+        /* military stripes */
+        c.fillStyle='rgba(0,0,0,0.65)';
+        c.fillRect(-7,-3,1,6); c.fillRect(-3,-3,1,6); c.fillRect(1,-3,1,6);
+        /* targeting sensor */
+        c.fillStyle='rgba(255,100,80,'+(0.7+0.3*Math.sin(t*0.04))+')';
+        c.beginPath(); c.arc(7,0,1.2,0,Math.PI*2); c.fill();
+        /* fins */
+        c.fillStyle='#1a2010';
+        c.beginPath(); c.moveTo(-10,-3); c.lineTo(-13,-6); c.lineTo(-7,-3); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-10, 3); c.lineTo(-13, 6); c.lineTo(-7, 3); c.closePath(); c.fill();
+        /* short exhaust */
+        var fl = 4 + Math.sin(t*0.05)*2;
+        var fg = c.createLinearGradient(-10,0,-10-fl*1.6,0);
+        fg.addColorStop(0,'rgba(255,240,180,1)');
+        fg.addColorStop(1,'rgba(120,30,10,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-10,-2); c.lineTo(-10-fl*1.6,0); c.lineTo(-10,2);
+        c.closePath(); c.fill();
+    }
+
+    /* DECOY — flashy spinning chaff missile, mostly mirror-bright */
+    function drawDecoyBody(c, m) {
+        var t = performance.now();
+        /* shiny tinfoil-mirror body */
+        var bg = c.createLinearGradient(0,-3,0,3);
+        bg.addColorStop(0,'#ffffff');
+        bg.addColorStop(0.5,'#c8d0e0');
+        bg.addColorStop(1,'#6a728c');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(11,0); c.lineTo(5,-3); c.lineTo(-11,-3); c.lineTo(-11,3); c.lineTo(5,3);
+        c.closePath(); c.fill();
+        c.strokeStyle='#404858'; c.lineWidth=0.5; c.stroke();
+        /* nose */
+        c.fillStyle='#9098a8';
+        c.beginPath(); c.moveTo(11,0); c.lineTo(5,-3); c.lineTo(5,3); c.closePath(); c.fill();
+        /* spinning chaff sparkles around body */
+        var n = 8;
+        for (var k=0; k<n; k++) {
+            var sa = k*(Math.PI*2/n) + t*0.008;
+            var sx = Math.cos(sa)*9, sy = Math.sin(sa)*5;
+            c.fillStyle = 'rgba(255,255,255,'+(0.5+0.5*Math.sin(t*0.05 + k))+')';
+            c.beginPath(); c.arc(sx, sy, 1.1, 0, Math.PI*2); c.fill();
+        }
+        /* question mark hint */
+        c.fillStyle='#404858'; c.font='bold 6px sans-serif'; c.textAlign='center';
+        c.fillText('?', -3, 2);
+        /* fins */
+        c.fillStyle='#7a8290';
+        c.beginPath(); c.moveTo(-11,-3); c.lineTo(-14,-5); c.lineTo(-7,-3); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-11, 3); c.lineTo(-14, 5); c.lineTo(-7, 3); c.closePath(); c.fill();
+        /* exhaust */
+        var fl = 4 + Math.sin(t*0.04)*1.5;
+        var fg = c.createLinearGradient(-11,0,-11-fl*1.8,0);
+        fg.addColorStop(0,'rgba(220,240,255,1)');
+        fg.addColorStop(1,'rgba(80,100,160,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-11,-2); c.lineTo(-11-fl*1.8,0); c.lineTo(-11,2);
+        c.closePath(); c.fill();
+    }
+
+    /* EMP — open-frame coil missile with arcing capacitor rings */
+    function drawEmpBody(c, m) {
+        var t = performance.now();
+        /* purple halo */
+        var og = c.createRadialGradient(0,0,2,0,0,22);
+        og.addColorStop(0,'rgba(220,180,255,0.7)');
+        og.addColorStop(0.5,'rgba(140,80,220,0.45)');
+        og.addColorStop(1,'rgba(40,0,80,0)');
+        c.fillStyle = og;
+        c.beginPath(); c.arc(0,0,22,0,Math.PI*2); c.fill();
+        /* open-frame body */
+        c.fillStyle='#2a1a3a';
+        c.beginPath();
+        c.moveTo(12,0); c.lineTo(6,-4); c.lineTo(-12,-4); c.lineTo(-12,4); c.lineTo(6,4);
+        c.closePath(); c.fill();
+        c.strokeStyle='#1a0a28'; c.lineWidth=0.6; c.stroke();
+        /* exposed capacitor coils */
+        c.strokeStyle='#c080ff'; c.lineWidth=0.9;
+        for (var rg=-10; rg<=4; rg+=3) {
+            c.beginPath();
+            c.ellipse(rg, 0, 1.5, 4, 0, 0, Math.PI*2);
+            c.stroke();
+        }
+        /* sparking nose */
+        c.fillStyle='rgba(255,255,255,'+(0.6+0.4*Math.sin(t*0.06))+')';
+        c.beginPath(); c.arc(12,0,2,0,Math.PI*2); c.fill();
+        c.strokeStyle='rgba(220,180,255,0.85)'; c.lineWidth=0.8;
+        for (var sp=0; sp<3; sp++) {
+            var sa = sp*(Math.PI*2/3) + t*0.01;
+            c.beginPath();
+            c.moveTo(12,0);
+            c.lineTo(12+Math.cos(sa)*5, Math.sin(sa)*5);
+            c.stroke();
+        }
+        /* fins */
+        c.fillStyle='#4a2a6a';
+        c.beginPath(); c.moveTo(-12,-4); c.lineTo(-16,-8); c.lineTo(-9,-4); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-12, 4); c.lineTo(-16, 8); c.lineTo(-9, 4); c.closePath(); c.fill();
+        /* exhaust */
+        var fl = 5 + Math.sin(t*0.04)*2;
+        var fg = c.createLinearGradient(-12,0,-12-fl*2,0);
+        fg.addColorStop(0,'rgba(200,140,255,1)');
+        fg.addColorStop(0.5,'rgba(120,60,200,0.7)');
+        fg.addColorStop(1,'rgba(40,0,80,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-12,-3); c.lineTo(-12-fl*2,0); c.lineTo(-12,3);
+        c.closePath(); c.fill();
+    }
+
+    /* SATURATION / SWARM lead missile — fat carrier that visibly opens up */
+    function drawSwarmCarrierBody(c, m) {
+        c.fillStyle='#5a4830';
+        c.beginPath();
+        c.moveTo(14,0); c.lineTo(8,-5); c.lineTo(-14,-5); c.lineTo(-14,5); c.lineTo(8,5);
+        c.closePath(); c.fill();
+        c.strokeStyle='#2a2010'; c.lineWidth=0.7; c.stroke();
+        /* mini-warhead grid markings */
+        c.fillStyle='rgba(255,200,80,0.85)';
+        for (var gx=-12; gx<=4; gx+=4) {
+            for (var gy=-3; gy<=3; gy+=3) {
+                c.fillRect(gx, gy, 2, 1.4);
+            }
+        }
+        /* fins */
+        c.fillStyle='#3a3020';
+        c.beginPath(); c.moveTo(-14,-5); c.lineTo(-18,-10); c.lineTo(-10,-5); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(-14, 5); c.lineTo(-18, 10); c.lineTo(-10, 5); c.closePath(); c.fill();
+        /* exhaust */
+        var fl = 7 + Math.sin(performance.now()*0.04)*3;
+        var fg = c.createLinearGradient(-14,0,-14-fl*2,0);
+        fg.addColorStop(0,'rgba(255,240,180,1)');
+        fg.addColorStop(0.5,'rgba(255,140,40,0.85)');
+        fg.addColorStop(1,'rgba(120,30,10,0)');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-14,-4); c.lineTo(-14-fl*2,0); c.lineTo(-14,4);
+        c.closePath(); c.fill();
+    }
+
+    /* ── NEW IMPACT TRIGGERS (5 attack) ─────────────────────────────── */
+    function triggerKinetic(x, y) {
+        var blastR = 130;
+        screenFlash = 0.9;
+        eqShakeX = (Math.random()-0.5)*28;
+        eqShakeY = (Math.random()-0.5)*22;
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.6, life:0, maxLife:550, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.4, life:0, maxLife:240, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*2.6, life:0, maxLife:480, kind:'shock' });
+        /* 5 concentric kinetic shock rings, delayed */
+        for (var sr=0; sr<5; sr++) {
+            customFx.push({
+                type:'kineticShock', x:x, y:y,
+                r:0, maxR: blastR * (2.4 + sr*0.7),
+                life:0, maxLife: 600 + sr*220, delay: sr*100
+            });
+        }
+        /* dust pillar rising upward */
+        for (var dpil=0; dpil<22; dpil++) {
+            smokePlumes.push({
+                x: x + rng(-blastR*0.4, blastR*0.4),
+                y: y + rng(-8, 4),
+                r: rng(14, 32), vy: rng(0.8, 1.6),
+                life:0, maxLife: rng(3500, 6000),
+                op: rng(0.45, 0.75)
+            });
+        }
+        for (var dpK=0; dpK<64; dpK++) {
+            var angK = -Math.PI/2 + rng(-Math.PI*0.45, Math.PI*0.45);
+            var spdK = rng(4, 12);
+            debrisParts.push({
+                x:x, y:y,
+                vx: Math.cos(angK)*spdK, vy: Math.sin(angK)*spdK - rng(2,6),
+                rot: rng(0,Math.PI*2), spin: rng(-0.4,0.4),
+                size: rng(1.8, 6), shade: rngI(0, 4),
+                life:0, maxLife: rng(900, 1800)
+            });
+        }
+        for (var emK=0; emK<70; emK++) {
+            var eaK = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx: Math.cos(eaK)*rng(4,12), vy: Math.sin(eaK)*rng(2,8) - rng(2,5),
+                rot:0, spin:0, size: rng(0.8,1.7), shade:99,
+                life:0, maxLife: rng(500,1200)
+            });
+        }
+        _shredInRadius(x, y, blastR);
+        if (y < GROUND - 10) _flattenBuilding(x, y, blastR);
+    }
+    function triggerDarkmatter(x, y) {
+        var blastR = 140;
+        screenFlash = 0.7;
+        eqShakeX = (Math.random()-0.5)*16;
+        eqShakeY = (Math.random()-0.5)*12;
+        customFx.push({ type:'darkImplode', x:x, y:y, r:240, maxR:0, life:0, maxLife:1400, phase:'pull' });
+        customFx.push({ type:'voidBurst', x:x, y:y, r:0, maxR:blastR*2.4, life:0, maxLife:1100 });
+        /* second outward shock with magenta tint */
+        customFx.push({ type:'voidBurst', x:x, y:y, r:0, maxR:blastR*3.4, life:0, maxLife:1500 });
+        /* spiraling captured particles */
+        for (var dmS=0; dmS<24; dmS++) {
+            var dmA = Math.random()*Math.PI*2;
+            var dmR = rng(40, 120);
+            debrisParts.push({
+                x: x + Math.cos(dmA)*dmR,
+                y: y + Math.sin(dmA)*dmR,
+                vx: -Math.cos(dmA)*rng(2,5), vy: -Math.sin(dmA)*rng(2,5),
+                rot:0, spin:0, size: rng(1, 2), shade:99,
+                life:0, maxLife: rng(700, 1300)
+            });
+        }
+        for (var spD=0; spD<28; spD++) {
+            var saD = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx: Math.cos(saD)*rng(2,7), vy: Math.sin(saD)*rng(2,7) - rng(0,3),
+                rot:0, spin:0, size: rng(1.2,2.2), shade:99,
+                life:0, maxLife: rng(600,1200)
+            });
+        }
+        _shredInRadius(x, y, blastR);
+        if (y < GROUND - 10) _flattenBuilding(x, y, blastR);
+    }
+    function triggerSolar(x, y) {
+        var blastR = 150;
+        screenFlash = 1.4;
+        eqShakeX = (Math.random()-0.5)*18;
+        eqShakeY = (Math.random()-0.5)*14;
+        /* triple-layer corona burst */
+        customFx.push({ type:'sunFlare', x:x, y:y, r:0, maxR:blastR*2.6, life:0, maxLife:1500, rot:rng(0,Math.PI*2) });
+        customFx.push({ type:'sunFlare', x:x, y:y, r:0, maxR:blastR*3.4, life:0, maxLife:1900, rot:rng(0,Math.PI*2) });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*1.5, life:0, maxLife:700, kind:'fire' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.4, life:0, maxLife:280, kind:'flash' });
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*3.0, life:0, maxLife:600, kind:'shock' });
+        for (var ffS=0; ffS<10; ffS++) {
+            fireFields.push({
+                x: x + rng(-blastR*0.7, blastR*0.7),
+                y: GROUND - rng(0, 6),
+                scale: rng(0.7, 1.3),
+                life: 0, maxLife: rng(2500, 4500),
+                phase: rng(0, 1000)
+            });
+        }
+        for (var emS=0; emS<90; emS++) {
+            var eaS = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx: Math.cos(eaS)*rng(3,11), vy: Math.sin(eaS)*rng(3,9) - rng(2,5),
+                rot:0, spin:0, size: rng(0.9,1.9), shade:99,
+                life:0, maxLife: rng(700, 1400)
+            });
+        }
+        _shredInRadius(x, y, blastR);
+        if (y < GROUND - 10) _flattenBuilding(x, y, blastR);
+    }
+    function triggerCryo(x, y) {
+        var blastR = 110;
+        screenFlash = 0.55;
+        eqShakeX = (Math.random()-0.5)*10;
+        eqShakeY = (Math.random()-0.5)*7;
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.5, life:0, maxLife:260, kind:'flash' });
+        var shardsArr = [];
+        for (var sC=0; sC<48; sC++) {
+            shardsArr.push({
+                ang: rng(0, Math.PI*2), spd: rng(1.5, 6),
+                size: rng(2, 6.5), rot: rng(0, Math.PI*2),
+                spin: rng(-0.2, 0.2)
+            });
+        }
+        customFx.push({ type:'iceBurst', x:x, y:y, r:0, maxR:blastR*2.4, life:0, maxLife:1400, shards: shardsArr });
+        customFx.push({ type:'iceBurst', x:x, y:y, r:0, maxR:blastR*1.4, life:0, maxLife:900, shards: [] });
+        customFx.push({ type:'frostField', x:x, y:GROUND, r:0, maxR:blastR*1.8, life:0, maxLife:5500 });
+        /* freezing mist puffs */
+        for (var fm=0; fm<10; fm++) {
+            smokePlumes.push({
+                x: x + rng(-blastR*0.6, blastR*0.6),
+                y: y + rng(-10, 10),
+                r: rng(18, 30), vy: rng(-0.2, 0.4),
+                life:0, maxLife: rng(2200, 3800),
+                op: rng(0.3, 0.55)
+            });
+        }
+        _shredInRadius(x, y, blastR);
+        if (y < GROUND - 10) _flattenBuilding(x, y, blastR);
+    }
+    function triggerTesla(x, y) {
+        var blastR = 130;
+        screenFlash = 1.0;
+        eqShakeX = (Math.random()-0.5)*12;
+        eqShakeY = (Math.random()-0.5)*10;
+        explosions.push({ x:x, y:y, r:0, maxR:blastR*0.6, life:0, maxLife:300, kind:'flash' });
+        /* dual concentric electric rings */
+        customFx.push({ type:'teslaRing', x:x, y:y, r:0, maxR:blastR*2.5, life:0, maxLife:1200, arcs:[] });
+        customFx.push({ type:'teslaRing', x:x, y:y, r:0, maxR:blastR*3.4, life:0, maxLife:1500, arcs:[] });
+        /* TWO sets of chain lightning fanning out in different directions */
+        for (var setI=0; setI<2; setI++) {
+            var chains = [];
+            var prevX = x, prevY = y;
+            for (var jj=0; jj<6; jj++) {
+                var nx = prevX + rng(-180, 180);
+                var ny = prevY + rng(-90, 90);
+                chains.push({ x1:prevX, y1:prevY, x2:nx, y2:ny });
+                prevX = nx; prevY = ny;
+            }
+            customFx.push({ type:'chainBolts', x:x, y:y, chains:chains, life:0, maxLife:900 });
+        }
+        /* radial bolt fan straight from center */
+        var fanChains = [];
+        for (var fa=0; fa<8; fa++) {
+            var ang = fa*(Math.PI/4) + rng(-0.2,0.2);
+            var ex = x + Math.cos(ang)*rng(120, 200);
+            var ey = y + Math.sin(ang)*rng(120, 200);
+            fanChains.push({x1:x, y1:y, x2:ex, y2:ey});
+        }
+        customFx.push({ type:'chainBolts', x:x, y:y, chains:fanChains, life:0, maxLife:700 });
+        for (var emT=0; emT<32; emT++) {
+            var eaT = Math.random()*Math.PI*2;
+            debrisParts.push({
+                x:x, y:y,
+                vx: Math.cos(eaT)*rng(3,9), vy: Math.sin(eaT)*rng(3,7) - rng(1,4),
+                rot:0, spin:0, size: rng(0.9,1.7), shade:99,
+                life:0, maxLife: rng(500,1000)
+            });
+        }
+        _shredInRadius(x, y, blastR);
+        if (y < GROUND - 10) _flattenBuilding(x, y, blastR);
+    }
+
+    /* ── DEFENCE IMPACT DISPATCHER (all defence kinds) ──────────────── */
+    function spawnDefenceImpact(kind, x, y, target) {
+        if (kind === 'sam') {
+            /* red-tipped frag — tight bright flash + radial spark fan */
+            explosions.push({ x:x, y:y, r:0, maxR:24, life:0, maxLife:220, kind:'flash' });
+            explosions.push({ x:x, y:y, r:0, maxR:58, life:0, maxLife:340, kind:'shock' });
+            for (var sd=0; sd<14; sd++) {
+                var sda = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:x, y:y,
+                    vx: Math.cos(sda)*rng(2,5), vy: Math.sin(sda)*rng(2,5) - rng(0,2),
+                    rot:0, spin:0, size: rng(0.8, 1.5), shade:99,
+                    life:0, maxLife: rng(400,700)
+                });
+            }
+            return;
+        }
+        if (kind === 'patriot') {
+            /* blue-tinged double-ring concussion */
+            customFx.push({ type:'kineticShock', x:x, y:y, r:0, maxR:80, life:0, maxLife:520, delay:0 });
+            customFx.push({ type:'kineticShock', x:x, y:y, r:0, maxR:52, life:0, maxLife:400, delay:80 });
+            explosions.push({ x:x, y:y, r:0, maxR:20, life:0, maxLife:200, kind:'flash' });
+            return;
+        }
+        if (kind === 'multi') {
+            /* 3-warhead frag burst — three small offset flashes */
+            for (var mh=0; mh<3; mh++) {
+                var mha = mh*(Math.PI*2/3) + rng(-0.3,0.3);
+                explosions.push({
+                    x: x + Math.cos(mha)*16,
+                    y: y + Math.sin(mha)*16,
+                    r:0, maxR:24, life:0, maxLife:260, kind:'flash'
+                });
+            }
+            explosions.push({ x:x, y:y, r:0, maxR:14, life:0, maxLife:160, kind:'flash' });
+            return;
+        }
+        if (kind === 'emp') {
+            /* small purple EMP pulse + crackle */
+            empPulses.push({
+                x:x, y:y, r:0, maxR:90,
+                life:0, maxLife:700,
+                arcs: []
+            });
+            explosions.push({ x:x, y:y, r:0, maxR:16, life:0, maxLife:200, kind:'flash' });
+            return;
+        }
+        if (kind === 'flak') {
+            var bits = [];
+            for (var s1=0; s1<38; s1++) {
+                bits.push({
+                    ang: rng(0, Math.PI*2),
+                    spd: rng(2, 7),
+                    size: rng(1.2, 2.6),
+                    life:0, maxLife: rng(360, 800)
+                });
+            }
+            customFx.push({ type:'flakBurst', x:x, y:y, r:0, maxR:75, life:0, maxLife:600, bits:bits });
+            customFx.push({ type:'flakBurst', x:x, y:y, r:0, maxR:48, life:0, maxLife:420, bits:[] });
+            explosions.push({ x:x, y:y, r:0, maxR:42, life:0, maxLife:340, kind:'flash' });
+            explosions.push({ x:x, y:y, r:0, maxR:90, life:0, maxLife:380, kind:'shock' });
+            /* sparking debris */
+            for (var fd=0; fd<14; fd++) {
+                var fda = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:x, y:y,
+                    vx: Math.cos(fda)*rng(3,7), vy: Math.sin(fda)*rng(3,6) - rng(0,2),
+                    rot:0, spin:0, size: rng(0.7,1.4), shade:99,
+                    life:0, maxLife: rng(400,700)
+                });
+            }
+            return;
+        }
+        if (kind === 'coilgun') {
+            customFx.push({ type:'coilSpark', x:x, y:y, r:0, maxR:36, life:0, maxLife:400 });
+            customFx.push({ type:'coilSpark', x:x, y:y, r:0, maxR:22, life:0, maxLife:260 });
+            explosions.push({ x:x, y:y, r:0, maxR:22, life:0, maxLife:220, kind:'flash' });
+            explosions.push({ x:x, y:y, r:0, maxR:60, life:0, maxLife:320, kind:'shock' });
+            for (var cd=0; cd<18; cd++) {
+                var cda = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:x, y:y,
+                    vx: Math.cos(cda)*rng(2,8), vy: Math.sin(cda)*rng(2,6) - rng(0,3),
+                    rot:0, spin:0, size: rng(0.7,1.6), shade:99,
+                    life:0, maxLife: rng(350,700)
+                });
+            }
+            return;
+        }
+        if (kind === 'drones') {
+            var hitsD = [];
+            for (var dh=0; dh<10; dh++) {
+                hitsD.push({ ox: rng(-24,24), oy: rng(-18,18), delay: dh*55, r: rng(7, 16) });
+            }
+            customFx.push({ type:'swarmCrash', x:x, y:y, life:0, maxLife:900, hits:hitsD });
+            /* drone fragments */
+            for (var dfp=0; dfp<16; dfp++) {
+                var dfa = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:x+rng(-15,15), y:y+rng(-10,10),
+                    vx: Math.cos(dfa)*rng(1,4), vy: Math.sin(dfa)*rng(1,4) - rng(1,3),
+                    rot: rng(0,Math.PI*2), spin: rng(-0.3,0.3),
+                    size: rng(1.2,2.5), shade: rngI(0,4),
+                    life:0, maxLife: rng(700,1400)
+                });
+            }
+            return;
+        }
+        if (kind === 'ionbeam') {
+            customFx.push({ type:'ionScorch', x:x, y:y, r:0, maxR:56, life:0, maxLife:650 });
+            customFx.push({ type:'ionScorch', x:x, y:y, r:0, maxR:30, life:0, maxLife:420 });
+            explosions.push({ x:x, y:y, r:0, maxR:18, life:0, maxLife:200, kind:'flash' });
+            return;
+        }
+        if (kind === 'cryobeam') {
+            var crystals = [];
+            for (var sB=0; sB<18; sB++) crystals.push({ang: rng(0, Math.PI*2), len: rng(10, 26)});
+            customFx.push({ type:'cryoFreeze', x:x, y:y, r:0, maxR:54, life:0, maxLife:900, crystals:crystals });
+            customFx.push({ type:'frostField', x:x, y:y+8, r:0, maxR:38, life:0, maxLife:1800 });
+            return;
+        }
+        if (kind === 'plasmac') {
+            var pcArcs = [];
+            for (var pa3=0; pa3<10; pa3++) {
+                var ptsPC = [];
+                var baPC = rng(0, Math.PI*2);
+                for (var ppPC=0; ppPC<6; ppPC++) {
+                    ptsPC.push({dx:Math.cos(baPC+ppPC*0.5)*rng(4,22), dy:Math.sin(baPC+ppPC*0.5)*rng(4,22)});
+                }
+                pcArcs.push({pts:ptsPC});
+            }
+            customFx.push({ type:'plasmaBurst', x:x, y:y, r:0, maxR:60, life:0, maxLife:750, arcs:pcArcs });
+            explosions.push({ x:x, y:y, r:0, maxR:30, life:0, maxLife:300, kind:'flash' });
+            explosions.push({ x:x, y:y, r:0, maxR:80, life:0, maxLife:480, kind:'shock' });
+            return;
+        }
+        if (kind === 'kinslug') {
+            customFx.push({ type:'kinSpark', x:x, y:y, r:0, maxR:44, life:0, maxLife:480 });
+            customFx.push({ type:'kinSpark', x:x, y:y, r:0, maxR:26, life:0, maxLife:320 });
+            explosions.push({ x:x, y:y, r:0, maxR:28, life:0, maxLife:260, kind:'flash' });
+            explosions.push({ x:x, y:y, r:0, maxR:70, life:0, maxLife:380, kind:'shock' });
+            for (var ksD=0; ksD<22; ksD++) {
+                var ksA = Math.random()*Math.PI*2;
+                debrisParts.push({
+                    x:x, y:y,
+                    vx: Math.cos(ksA)*rng(3,9), vy: Math.sin(ksA)*rng(3,7) - rng(1,4),
+                    rot:0, spin:0, size: rng(0.7,1.5), shade:99,
+                    life:0, maxLife: rng(400,800)
+                });
+            }
+            return;
+        }
+        if (kind === 'gravnet') {
+            var strands = [];
+            for (var sg=0; sg<12; sg++) strands.push({a: sg*(Math.PI*2/12), len: rng(24, 46)});
+            customFx.push({ type:'gravNet', x:x, y:y, life:0, maxLife:1100, strands:strands });
+            customFx.push({ type:'voidBurst', x:x, y:y, r:0, maxR:48, life:0, maxLife:700 });
+            return;
+        }
+    }
+
+    /* ── NEW INTERCEPTOR BODIES ─────────────────────────────────────── */
+    function drawInterceptorBodyExtra(c, ic) {
+        var t = performance.now();
+        if (ic.kind==='flak') {
+            c.fillStyle = '#a86020';
+            c.beginPath();
+            c.moveTo(8,0); c.lineTo(4,-3); c.lineTo(-7,-3); c.lineTo(-7,3); c.lineTo(4,3);
+            c.closePath(); c.fill();
+            c.strokeStyle='#3a1a08'; c.lineWidth=0.6; c.stroke();
+            c.fillStyle='#ffd060';
+            c.beginPath(); c.moveTo(8,0); c.lineTo(4,-3); c.lineTo(4,3); c.closePath(); c.fill();
+            c.fillStyle='#c08040';
+            c.beginPath(); c.moveTo(-7,-3); c.lineTo(-10,-5); c.lineTo(-5,-3); c.closePath(); c.fill();
+            c.beginPath(); c.moveTo(-7, 3); c.lineTo(-10, 5); c.lineTo(-5, 3); c.closePath(); c.fill();
+            c.fillStyle='rgba(255,200,80,'+(0.5+0.5*Math.sin(t*0.05))+')';
+            c.beginPath(); c.arc(-8,0,2.2,0,Math.PI*2); c.fill();
+            return;
+        }
+        if (ic.kind==='drones' && ic.swarmers) {
+            c.fillStyle='#3a4050'; c.fillRect(-5,-1.5,10,3);
+            c.fillStyle='#1a1d24'; c.beginPath(); c.arc(5,0,1.5,0,Math.PI*2); c.fill();
+            for (var sIB=0; sIB<ic.swarmers.length; sIB++) {
+                var SW = ic.swarmers[sIB];
+                var sxIB = Math.cos(SW.offA) * SW.offR + Math.sin(SW.bob)*1.5;
+                var syIB = Math.sin(SW.offA) * SW.offR * 0.6;
+                c.save();
+                c.translate(sxIB, syIB);
+                c.fillStyle='#2a3040'; c.fillRect(-2,-1,4,2);
+                c.strokeStyle='rgba(160,180,210,0.65)'; c.lineWidth=0.7;
+                c.beginPath(); c.arc(-1.5,-2.5, 2, 0, Math.PI*2); c.stroke();
+                c.beginPath(); c.arc(-1.5, 2.5, 2, 0, Math.PI*2); c.stroke();
+                c.fillStyle='rgba(255,200,100,'+(0.6+0.4*Math.sin(t*0.05 + SW.offA))+')';
+                c.beginPath(); c.arc(-3,0,1,0,Math.PI*2); c.fill();
+                c.restore();
+            }
+            return;
+        }
+        if (ic.kind==='plasmac') {
+            var og = c.createRadialGradient(0,0,0,0,0,16);
+            og.addColorStop(0,'rgba(255,255,200,1)');
+            og.addColorStop(0.4,'rgba(255,160,60,0.9)');
+            og.addColorStop(1,'rgba(220,40,20,0)');
+            c.fillStyle = og;
+            c.beginPath(); c.arc(0,0,16,0,Math.PI*2); c.fill();
+            if (ic.arcs) {
+                for (var aiP=0; aiP<ic.arcs.length; aiP++) {
+                    var A = ic.arcs[aiP], af = A.life/A.maxLife;
+                    c.strokeStyle='rgba(255,220,140,'+(1-af)+')';
+                    c.lineWidth=1.4;
+                    c.beginPath();
+                    c.moveTo(A.pts[0].dx, A.pts[0].dy);
+                    for (var piP=1; piP<A.pts.length; piP++) c.lineTo(A.pts[piP].dx, A.pts[piP].dy);
+                    c.stroke();
+                }
+            }
+            c.fillStyle='rgba(255,255,240,'+(0.7+0.3*Math.sin(t*0.04))+')';
+            c.beginPath(); c.arc(0,0,4,0,Math.PI*2); c.fill();
+            return;
+        }
+        if (ic.kind==='kinslug') {
+            var bg = c.createLinearGradient(-10,0,10,0);
+            bg.addColorStop(0,'#202028'); bg.addColorStop(0.6,'#a06030'); bg.addColorStop(1,'#fff080');
+            c.fillStyle = bg;
+            c.fillRect(-10, -1.5, 20, 3);
+            c.strokeStyle='#1a1010'; c.lineWidth=0.5; c.strokeRect(-10,-1.5,20,3);
+            c.fillStyle='#ffffff';
+            c.beginPath(); c.moveTo(10,0); c.lineTo(7,-1.5); c.lineTo(7,1.5); c.closePath(); c.fill();
+            var hgK = c.createRadialGradient(6,0,0,6,0,12);
+            hgK.addColorStop(0,'rgba(255,220,140,0.65)');
+            hgK.addColorStop(1,'rgba(255,80,20,0)');
+            c.fillStyle = hgK;
+            c.beginPath(); c.arc(6,0,12,0,Math.PI*2); c.fill();
+            return;
+        }
+        if (ic.kind==='gravnet') {
+            c.fillStyle='#384458';
+            c.beginPath();
+            c.moveTo(7,0); c.lineTo(3,-3); c.lineTo(-6,-3); c.lineTo(-6,3); c.lineTo(3,3);
+            c.closePath(); c.fill();
+            c.strokeStyle='#101822'; c.lineWidth=0.6; c.stroke();
+            var ag = c.createRadialGradient(0,0,2,0,0,14);
+            ag.addColorStop(0,'rgba(180,120,255,0.55)');
+            ag.addColorStop(1,'rgba(60,20,120,0)');
+            c.fillStyle = ag;
+            c.beginPath(); c.arc(0,0,14,0,Math.PI*2); c.fill();
+            c.strokeStyle='rgba(200,160,255,0.85)';
+            c.lineWidth=0.7;
+            var nT = (ic.netT||0)*0.005;
+            for (var ns=0; ns<5; ns++) {
+                var na = -Math.PI + ns*0.25 + Math.sin(nT+ns)*0.15;
+                c.beginPath();
+                c.moveTo(-6,0); c.lineTo(-6+Math.cos(na)*12, Math.sin(na)*12);
+                c.stroke();
+            }
+            return;
+        }
+        c.fillStyle = '#e8ecf2';
+        c.beginPath();
+        c.moveTo(8,0); c.lineTo(3,-2); c.lineTo(-7,-2); c.lineTo(-7,2); c.lineTo(3,2);
+        c.closePath(); c.fill();
+    }
+
     /* ── DRAW UNIQUE BLASTS ───────────────────────────────────────────── */
     function drawMushroomClouds(c) {
         for (var i=0; i<mushroomClouds.length; i++) {
@@ -7763,6 +11230,461 @@
         }
     }
 
+    /* ── CUSTOM FX UPDATE + DRAW ─────────────────────────────────────── */
+    function updateCustomFx(dt) {
+        for (var i=customFx.length-1; i>=0; i--) {
+            var F = customFx[i];
+            F.life += dt;
+            if (F.type==='kineticShock' || F.type==='voidBurst' ||
+                F.type==='sunFlare' || F.type==='iceBurst' ||
+                F.type==='teslaRing' || F.type==='coilSpark' ||
+                F.type==='ionScorch' || F.type==='cryoFreeze' ||
+                F.type==='plasmaBurst' || F.type==='kinSpark') {
+                F.r = F.maxR * Math.pow(Math.max(0, F.life)/F.maxLife, 0.5);
+            }
+            if (F.type==='frostField') {
+                F.r = Math.min(F.maxR, F.maxR * (F.life/600));
+            }
+            if (F.type==='darkImplode') {
+                var dpF = F.life / F.maxLife;
+                if (F.phase==='pull') {
+                    F.r = 200 * (1 - dpF*1.6);
+                    if (F.r <= 0) { F.r = 0; F.phase='burst'; }
+                } else {
+                    F.r = 200 * Math.min(1, (dpF-0.4)*1.8);
+                }
+            }
+            if (F.type==='teslaRing' && Math.random()<0.5 && F.arcs && F.arcs.length<10) {
+                var rA = rng(0, Math.PI*2);
+                var ptsT=[];
+                var rs = F.r*0.6;
+                ptsT.push({x: F.x+Math.cos(rA)*rs, y: F.y+Math.sin(rA)*rs});
+                for (var ppT=1; ppT<5; ppT++) {
+                    var rs2 = F.r*(0.6+ppT*0.08);
+                    ptsT.push({x: F.x+Math.cos(rA+ppT*0.5)*rs2+rng(-6,6),
+                              y: F.y+Math.sin(rA+ppT*0.5)*rs2+rng(-6,6)});
+                }
+                F.arcs.push({pts:ptsT, life:0, maxLife:180});
+            }
+            if (F.arcs) {
+                for (var aiF=F.arcs.length-1; aiF>=0; aiF--) {
+                    if (F.arcs[aiF].life !== undefined) {
+                        F.arcs[aiF].life += dt;
+                        if (F.arcs[aiF].life >= F.arcs[aiF].maxLife) F.arcs.splice(aiF,1);
+                    }
+                }
+            }
+            if (F.type==='iceBurst' && F.shards) {
+                for (var sh=0; sh<F.shards.length; sh++) {
+                    F.shards[sh].rot += F.shards[sh].spin * dt;
+                }
+            }
+            if (F.type==='flakBurst' && F.bits) {
+                for (var fb=F.bits.length-1; fb>=0; fb--) {
+                    F.bits[fb].life += dt;
+                    if (F.bits[fb].life >= F.bits[fb].maxLife) F.bits.splice(fb,1);
+                }
+            }
+            if (F.life >= F.maxLife) customFx.splice(i,1);
+        }
+    }
+
+    function drawCustomFx(c) {
+        var t = performance.now();
+        for (var i=0; i<customFx.length; i++) {
+            var F = customFx[i];
+            var p = F.life / F.maxLife;
+            var fade = (p<0.85) ? 1 : 1-(p-0.85)/0.15;
+
+            if (F.type==='kineticShock') {
+                if (F.life < F.delay) continue;
+                c.strokeStyle = 'rgba(255,200,120,'+((1-p)*0.85)+')';
+                c.lineWidth = 6*(1-p)+1;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,255,220,'+((1-p)*0.55)+')';
+                c.lineWidth = 1.5;
+                c.beginPath(); c.arc(F.x, F.y, F.r*0.95, 0, Math.PI*2); c.stroke();
+                if (F.life > F.maxLife*0.3) {
+                    c.fillStyle = 'rgba(60,40,30,'+((1-p)*0.55)+')';
+                    c.beginPath();
+                    c.ellipse(F.x, GROUND-1, F.r*0.6, 4, 0, 0, Math.PI*2);
+                    c.fill();
+                }
+            }
+            else if (F.type==='darkImplode') {
+                var dg = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, Math.max(1,F.r));
+                if (F.phase==='pull') {
+                    dg.addColorStop(0, 'rgba(0,0,0,'+(0.85*fade)+')');
+                    dg.addColorStop(0.6, 'rgba(80,30,160,'+(0.55*fade)+')');
+                    dg.addColorStop(1, 'rgba(20,0,40,0)');
+                } else {
+                    dg.addColorStop(0, 'rgba(180,120,255,'+(fade*(1-p)*0.85)+')');
+                    dg.addColorStop(0.4, 'rgba(80,20,160,'+(fade*(1-p)*0.5)+')');
+                    dg.addColorStop(1, 'rgba(20,0,40,0)');
+                }
+                c.fillStyle = dg;
+                c.beginPath(); c.arc(F.x, F.y, Math.max(1,F.r), 0, Math.PI*2); c.fill();
+                c.save();
+                c.translate(F.x, F.y);
+                c.rotate(t*0.003);
+                c.strokeStyle = 'rgba(220,180,255,'+(fade*0.6)+')';
+                c.lineWidth = 1.1;
+                for (var r=0; r<5; r++) {
+                    c.beginPath();
+                    c.ellipse(0,0, F.r*0.7*(1-r*0.12), F.r*0.18*(1-r*0.1), r*0.4, 0, Math.PI*2);
+                    c.stroke();
+                }
+                c.restore();
+            }
+            else if (F.type==='voidBurst') {
+                var vbg = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                vbg.addColorStop(0, 'rgba(220,180,255,'+((1-p)*0.85)+')');
+                vbg.addColorStop(0.35, 'rgba(140,60,220,'+((1-p)*0.55)+')');
+                vbg.addColorStop(1, 'rgba(20,0,60,0)');
+                c.fillStyle = vbg;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.fill();
+                c.strokeStyle = 'rgba(200,140,255,'+((1-p)*0.9)+')';
+                c.lineWidth = 2.5*(1-p)+0.5;
+                c.beginPath(); c.arc(F.x, F.y, F.r*0.95, 0, Math.PI*2); c.stroke();
+            }
+            else if (F.type==='sunFlare') {
+                var sg = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                sg.addColorStop(0, 'rgba(255,255,220,'+((1-p))+')');
+                sg.addColorStop(0.25, 'rgba(255,200,80,'+((1-p)*0.85)+')');
+                sg.addColorStop(0.6, 'rgba(255,80,20,'+((1-p)*0.5)+')');
+                sg.addColorStop(1, 'rgba(80,10,0,0)');
+                c.fillStyle = sg;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.fill();
+                c.save();
+                c.translate(F.x, F.y);
+                c.rotate(F.rot + t*0.0008);
+                c.strokeStyle = 'rgba(255,220,120,'+((1-p)*0.65)+')';
+                c.lineWidth = 2;
+                for (var r2=0; r2<14; r2++) {
+                    var ang2 = r2 * (Math.PI/7);
+                    c.beginPath();
+                    c.moveTo(Math.cos(ang2)*F.r*0.3, Math.sin(ang2)*F.r*0.3);
+                    c.lineTo(Math.cos(ang2)*F.r, Math.sin(ang2)*F.r);
+                    c.stroke();
+                }
+                c.restore();
+            }
+            else if (F.type==='iceBurst') {
+                c.strokeStyle = 'rgba(200,230,255,'+((1-p)*0.85)+')';
+                c.lineWidth = 3*(1-p)+1;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.stroke();
+                if (F.shards) {
+                    for (var sh2=0; sh2<F.shards.length; sh2++) {
+                        var S = F.shards[sh2];
+                        var sd = F.life * 0.06 * S.spd;
+                        var sx = F.x + Math.cos(S.ang)*sd;
+                        var sy = F.y + Math.sin(S.ang)*sd;
+                        c.save();
+                        c.translate(sx, sy);
+                        c.rotate(S.rot);
+                        c.fillStyle = 'rgba(220,240,255,'+(fade*0.9)+')';
+                        c.beginPath();
+                        c.moveTo(0,-S.size); c.lineTo(S.size*0.5,0);
+                        c.lineTo(0,S.size); c.lineTo(-S.size*0.5,0);
+                        c.closePath(); c.fill();
+                        c.strokeStyle = 'rgba(60,120,180,'+(fade*0.85)+')';
+                        c.lineWidth=0.6; c.stroke();
+                        c.restore();
+                    }
+                }
+            }
+            else if (F.type==='frostField') {
+                var ffg = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                ffg.addColorStop(0, 'rgba(220,240,255,'+(fade*0.65)+')');
+                ffg.addColorStop(0.7, 'rgba(140,200,240,'+(fade*0.35)+')');
+                ffg.addColorStop(1, 'rgba(40,80,140,0)');
+                c.fillStyle = ffg;
+                c.beginPath(); c.ellipse(F.x, F.y, F.r, F.r*0.4, 0, 0, Math.PI*2); c.fill();
+                c.strokeStyle = 'rgba(220,240,255,'+(fade*0.6)+')';
+                c.lineWidth = 0.7;
+                for (var cr2=0; cr2<8; cr2++) {
+                    var ca = cr2*(Math.PI/4);
+                    c.beginPath();
+                    c.moveTo(F.x, F.y);
+                    c.lineTo(F.x+Math.cos(ca)*F.r, F.y+Math.sin(ca)*F.r*0.4);
+                    c.stroke();
+                }
+            }
+            else if (F.type==='teslaRing') {
+                c.strokeStyle = 'rgba(180,220,255,'+((1-p)*0.95)+')';
+                c.lineWidth = 3*(1-p)+1;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,'+((1-p)*0.6)+')';
+                c.lineWidth = 1.2;
+                c.beginPath(); c.arc(F.x, F.y, F.r*0.92, 0, Math.PI*2); c.stroke();
+                if (F.arcs) {
+                    for (var aiT=0; aiT<F.arcs.length; aiT++) {
+                        var A2 = F.arcs[aiT], af2 = A2.life/A2.maxLife;
+                        c.strokeStyle = 'rgba(180,220,255,'+(1-af2)+')';
+                        c.lineWidth = 1.8;
+                        c.beginPath();
+                        c.moveTo(A2.pts[0].x, A2.pts[0].y);
+                        for (var pi2=1; pi2<A2.pts.length; pi2++) c.lineTo(A2.pts[pi2].x, A2.pts[pi2].y);
+                        c.stroke();
+                    }
+                }
+            }
+            else if (F.type==='chainBolts' && F.chains) {
+                var cAv = 1 - p;
+                for (var cb=0; cb<F.chains.length; cb++) {
+                    var CH = F.chains[cb];
+                    var segs = 5;
+                    var bpts = [{x:CH.x1, y:CH.y1}];
+                    for (var sgC=1; sgC<segs; sgC++) {
+                        var lin = sgC/segs;
+                        bpts.push({
+                            x: CH.x1 + (CH.x2-CH.x1)*lin + rng(-12,12),
+                            y: CH.y1 + (CH.y2-CH.y1)*lin + rng(-12,12)
+                        });
+                    }
+                    bpts.push({x:CH.x2, y:CH.y2});
+                    c.strokeStyle='rgba(180,220,255,'+(cAv*0.95)+')';
+                    c.lineWidth=2;
+                    c.beginPath();
+                    c.moveTo(bpts[0].x, bpts[0].y);
+                    for (var pp5=1; pp5<bpts.length; pp5++) c.lineTo(bpts[pp5].x, bpts[pp5].y);
+                    c.stroke();
+                    c.strokeStyle='rgba(255,255,255,'+(cAv*0.85)+')';
+                    c.lineWidth=0.7;
+                    c.beginPath();
+                    c.moveTo(bpts[0].x, bpts[0].y);
+                    for (var pp6=1; pp6<bpts.length; pp6++) c.lineTo(bpts[pp6].x, bpts[pp6].y);
+                    c.stroke();
+                    var egCh = c.createRadialGradient(CH.x2, CH.y2, 0, CH.x2, CH.y2, 12);
+                    egCh.addColorStop(0, 'rgba(255,255,255,'+(cAv*0.8)+')');
+                    egCh.addColorStop(1, 'rgba(80,140,255,0)');
+                    c.fillStyle = egCh;
+                    c.beginPath(); c.arc(CH.x2, CH.y2, 12, 0, Math.PI*2); c.fill();
+                }
+            }
+            else if (F.type==='flakBurst') {
+                var bg2 = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                bg2.addColorStop(0, 'rgba(70,60,50,'+((1-p)*0.85)+')');
+                bg2.addColorStop(0.5, 'rgba(40,30,28,'+((1-p)*0.5)+')');
+                bg2.addColorStop(1, 'rgba(20,10,5,0)');
+                c.fillStyle = bg2;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.fill();
+                if (p<0.2) {
+                    c.fillStyle='rgba(255,220,120,'+((0.2-p)*4)+')';
+                    c.beginPath(); c.arc(F.x, F.y, F.r*0.4, 0, Math.PI*2); c.fill();
+                }
+                if (F.bits) {
+                    for (var fbF=0; fbF<F.bits.length; fbF++) {
+                        var FB = F.bits[fbF];
+                        var bpF = FB.life/FB.maxLife;
+                        var dF = FB.life*0.05*FB.spd;
+                        var bx = F.x + Math.cos(FB.ang)*dF;
+                        var by = F.y + Math.sin(FB.ang)*dF;
+                        c.strokeStyle = 'rgba(255,180,80,'+((1-bpF)*0.85)+')';
+                        c.lineWidth = FB.size;
+                        c.beginPath();
+                        c.moveTo(bx - Math.cos(FB.ang)*FB.size*2, by - Math.sin(FB.ang)*FB.size*2);
+                        c.lineTo(bx, by);
+                        c.stroke();
+                    }
+                }
+            }
+            else if (F.type==='coilSpark') {
+                var cg2 = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                cg2.addColorStop(0, 'rgba(255,255,200,'+((1-p))+')');
+                cg2.addColorStop(0.5, 'rgba(255,220,100,'+((1-p)*0.65)+')');
+                cg2.addColorStop(1, 'rgba(180,100,40,0)');
+                c.fillStyle = cg2;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.fill();
+                c.strokeStyle='rgba(255,240,180,'+((1-p)*0.85)+')';
+                c.lineWidth=1;
+                for (var sk=0; sk<10; sk++) {
+                    var ska = sk*(Math.PI/5);
+                    c.beginPath();
+                    c.moveTo(F.x+Math.cos(ska)*4, F.y+Math.sin(ska)*4);
+                    c.lineTo(F.x+Math.cos(ska)*F.r*1.4, F.y+Math.sin(ska)*F.r*1.4);
+                    c.stroke();
+                }
+            }
+            else if (F.type==='swarmCrash' && F.hits) {
+                for (var hh=0; hh<F.hits.length; hh++) {
+                    var H = F.hits[hh];
+                    if (F.life < H.delay) continue;
+                    var hp = Math.min(1, (F.life - H.delay)/(F.maxLife - H.delay));
+                    var hg2 = c.createRadialGradient(F.x+H.ox, F.y+H.oy, 0, F.x+H.ox, F.y+H.oy, H.r);
+                    hg2.addColorStop(0, 'rgba(255,200,100,'+((1-hp)*0.85)+')');
+                    hg2.addColorStop(0.5, 'rgba(255,100,40,'+((1-hp)*0.55)+')');
+                    hg2.addColorStop(1, 'rgba(80,20,0,0)');
+                    c.fillStyle = hg2;
+                    c.beginPath(); c.arc(F.x+H.ox, F.y+H.oy, H.r*(1-hp*0.3), 0, Math.PI*2); c.fill();
+                }
+            }
+            else if (F.type==='ionScorch') {
+                var ig = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                ig.addColorStop(0, 'rgba(255,255,255,'+((1-p))+')');
+                ig.addColorStop(0.4, 'rgba(120,220,255,'+((1-p)*0.65)+')');
+                ig.addColorStop(0.8, 'rgba(220,80,200,'+((1-p)*0.35)+')');
+                ig.addColorStop(1, 'rgba(40,0,80,0)');
+                c.fillStyle = ig;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.fill();
+                c.save();
+                c.translate(F.x, F.y);
+                c.rotate(t*0.005);
+                c.strokeStyle='rgba(220,240,255,'+((1-p)*0.85)+')';
+                c.lineWidth=1.2;
+                for (var sl=0; sl<3; sl++) {
+                    var sa2 = sl*(Math.PI*2/3);
+                    c.beginPath();
+                    c.moveTo(0,0);
+                    for (var spI=1; spI<=8; spI++) {
+                        var sr2 = (spI/8)*F.r;
+                        c.lineTo(Math.cos(sa2+spI*0.4)*sr2, Math.sin(sa2+spI*0.4)*sr2);
+                    }
+                    c.stroke();
+                }
+                c.restore();
+            }
+            else if (F.type==='cryoFreeze') {
+                c.strokeStyle = 'rgba(200,240,255,'+((1-p)*0.9)+')';
+                c.lineWidth = 2.5*(1-p)+0.8;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.stroke();
+                if (F.crystals) {
+                    for (var cc=0; cc<F.crystals.length; cc++) {
+                        var C = F.crystals[cc];
+                        var cl = C.len*(F.life/F.maxLife);
+                        var cx = F.x + Math.cos(C.ang)*cl;
+                        var cy = F.y + Math.sin(C.ang)*cl;
+                        c.strokeStyle = 'rgba(220,240,255,'+((1-p)*0.95)+')';
+                        c.lineWidth = 1.6;
+                        c.beginPath();
+                        c.moveTo(F.x, F.y); c.lineTo(cx, cy);
+                        c.stroke();
+                        c.fillStyle='rgba(240,250,255,'+((1-p)*0.95)+')';
+                        c.save();
+                        c.translate(cx, cy);
+                        c.rotate(C.ang);
+                        c.beginPath();
+                        c.moveTo(0,-2); c.lineTo(2,0); c.lineTo(0,2); c.lineTo(-2,0); c.closePath(); c.fill();
+                        c.restore();
+                    }
+                }
+            }
+            else if (F.type==='plasmaBurst') {
+                var pg3 = c.createRadialGradient(F.x, F.y, 0, F.x, F.y, F.r);
+                pg3.addColorStop(0, 'rgba(255,255,200,'+((1-p))+')');
+                pg3.addColorStop(0.45, 'rgba(255,160,60,'+((1-p)*0.75)+')');
+                pg3.addColorStop(1, 'rgba(140,40,0,0)');
+                c.fillStyle = pg3;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.fill();
+                if (F.arcs) {
+                    for (var pa2=0; pa2<F.arcs.length; pa2++) {
+                        var PA = F.arcs[pa2];
+                        c.strokeStyle = 'rgba(255,220,140,'+((1-p)*0.85)+')';
+                        c.lineWidth = 1.6;
+                        c.beginPath();
+                        c.moveTo(F.x+PA.pts[0].dx, F.y+PA.pts[0].dy);
+                        for (var pp4=1; pp4<PA.pts.length; pp4++) {
+                            c.lineTo(F.x+PA.pts[pp4].dx, F.y+PA.pts[pp4].dy);
+                        }
+                        c.stroke();
+                    }
+                }
+            }
+            else if (F.type==='kinSpark') {
+                c.strokeStyle = 'rgba(255,240,180,'+((1-p)*0.95)+')';
+                c.lineWidth = 3.5*(1-p)+0.8;
+                c.beginPath(); c.arc(F.x, F.y, F.r, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,180,80,'+((1-p)*0.55)+')';
+                c.lineWidth = 1.4;
+                c.beginPath(); c.arc(F.x, F.y, F.r*0.85, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,220,150,'+((1-p)*0.85)+')';
+                c.lineWidth = 1.2;
+                for (var ks=0; ks<6; ks++) {
+                    var ksa = ks*(Math.PI/3) + (t*0.001);
+                    c.beginPath();
+                    c.moveTo(F.x+Math.cos(ksa)*F.r*0.5, F.y+Math.sin(ksa)*F.r*0.5);
+                    c.lineTo(F.x+Math.cos(ksa)*F.r*1.3, F.y+Math.sin(ksa)*F.r*1.3);
+                    c.stroke();
+                }
+            }
+            else if (F.type==='gravNet' && F.strands) {
+                var gp = F.life/F.maxLife;
+                var radG = 30 * (1 - gp*0.6);
+                c.strokeStyle='rgba(180,120,255,'+((1-gp)*0.95)+')';
+                c.lineWidth=1.6;
+                c.beginPath(); c.arc(F.x, F.y, radG, 0, Math.PI*2); c.stroke();
+                for (var st=0; st<F.strands.length; st++) {
+                    var ST = F.strands[st];
+                    var rotAng = ST.a + t*0.004;
+                    c.beginPath();
+                    c.moveTo(F.x, F.y);
+                    c.lineTo(F.x+Math.cos(rotAng)*radG, F.y+Math.sin(rotAng)*radG);
+                    c.stroke();
+                }
+                c.fillStyle='rgba(40,10,80,'+((1-gp)*0.85)+')';
+                c.beginPath(); c.arc(F.x, F.y, 3, 0, Math.PI*2); c.fill();
+            }
+            else if (F.type==='ionBeam') {
+                var ip = F.life/F.maxLife;
+                var op = (ip<0.3) ? 1 : 1-(ip-0.3)/0.7;
+                c.strokeStyle='rgba(120,220,255,'+(op*0.45)+')';
+                c.lineWidth=10;
+                c.beginPath(); c.moveTo(F.x1,F.y1); c.lineTo(F.x2,F.y2); c.stroke();
+                c.strokeStyle='rgba(220,80,200,'+(op*0.6)+')';
+                c.lineWidth=4;
+                c.beginPath(); c.moveTo(F.x1,F.y1); c.lineTo(F.x2,F.y2); c.stroke();
+                var dxI = F.x2-F.x1, dyI = F.y2-F.y1;
+                var dlI = Math.sqrt(dxI*dxI+dyI*dyI)||1;
+                var nxI = -dyI/dlI, nyI = dxI/dlI;
+                c.strokeStyle='rgba(255,255,255,'+op+')';
+                c.lineWidth=1.6;
+                c.beginPath();
+                var SEG = 14;
+                for (var sg2=0; sg2<=SEG; sg2++) {
+                    var L = sg2/SEG;
+                    var wob = Math.sin(L*Math.PI*4 + (F.phase||0) + t*0.02) * 4;
+                    var px = F.x1 + dxI*L + nxI*wob;
+                    var py = F.y1 + dyI*L + nyI*wob;
+                    if (sg2===0) c.moveTo(px,py); else c.lineTo(px,py);
+                }
+                c.stroke();
+            }
+            else if (F.type==='cryoBeam') {
+                var ip2 = F.life/F.maxLife;
+                var op2 = (ip2<0.3) ? 1 : 1-(ip2-0.3)/0.7;
+                c.strokeStyle='rgba(150,230,255,'+(op2*0.45)+')';
+                c.lineWidth=9;
+                c.beginPath(); c.moveTo(F.x1,F.y1); c.lineTo(F.x2,F.y2); c.stroke();
+                c.strokeStyle='rgba(220,250,255,'+op2+')';
+                c.lineWidth=2.4;
+                c.beginPath(); c.moveTo(F.x1,F.y1); c.lineTo(F.x2,F.y2); c.stroke();
+                var dx2=F.x2-F.x1, dy2=F.y2-F.y1;
+                for (var sk2=0; sk2<6; sk2++) {
+                    var L2 = (sk2+0.5)/6;
+                    var sx3 = F.x1 + dx2*L2 + rng(-3,3);
+                    var sy3 = F.y1 + dy2*L2 + rng(-3,3);
+                    c.fillStyle='rgba(220,240,255,'+(op2*0.95)+')';
+                    c.beginPath(); c.arc(sx3,sy3,1.6,0,Math.PI*2); c.fill();
+                }
+            }
+            else if (F.type==='coilTrace') {
+                var cpC = F.life/F.maxLife;
+                var cop = (cpC<0.25) ? 1 : 1-(cpC-0.25)/0.75;
+                c.strokeStyle='rgba(255,240,160,'+(cop*0.55)+')';
+                c.lineWidth=6;
+                c.beginPath(); c.moveTo(F.x1,F.y1); c.lineTo(F.x2,F.y2); c.stroke();
+                c.strokeStyle='rgba(255,255,255,'+cop+')';
+                c.lineWidth=1.4;
+                c.beginPath(); c.moveTo(F.x1,F.y1); c.lineTo(F.x2,F.y2); c.stroke();
+                var sg3 = c.createRadialGradient(F.x2,F.y2,0,F.x2,F.y2,18);
+                sg3.addColorStop(0,'rgba(255,255,200,'+cop+')');
+                sg3.addColorStop(1,'rgba(255,80,0,0)');
+                c.fillStyle = sg3;
+                c.beginPath(); c.arc(F.x2,F.y2,18,0,Math.PI*2); c.fill();
+            }
+        }
+    }
+
     function drawAirDefence(c) {
         for (var i=0;i<airDefence.length;i++) {
             var b=airDefence[i];
@@ -7826,9 +11748,14 @@
                 var af=tp.age/500;
                 var op=(1-af)*(enh?1.0:0.7)*(ti/ic.trail.length);
                 var rad=(enh?4:2)+af*(enh?14:8);
-                var trailCol = ic.kind==='emp'   ? 'rgba(200,140,255,'
-                              : ic.kind==='patriot' ? 'rgba(180,220,255,'
-                              : ic.kind==='multi' ? 'rgba(255,220,80,'
+                var trailCol = ic.kind==='emp'      ? 'rgba(200,140,255,'
+                              : ic.kind==='patriot'  ? 'rgba(180,220,255,'
+                              : ic.kind==='multi'    ? 'rgba(255,220,80,'
+                              : ic.kind==='flak'     ? 'rgba(255,170,80,'
+                              : ic.kind==='drones'   ? 'rgba(160,180,210,'
+                              : ic.kind==='plasmac'  ? 'rgba(255,180,80,'
+                              : ic.kind==='kinslug'  ? 'rgba(255,220,160,'
+                              : ic.kind==='gravnet'  ? 'rgba(180,120,255,'
                               : 'rgba(255,220,140,';
                 var tg = c.createRadialGradient(tp.x,tp.y,0,tp.x,tp.y,rad);
                 tg.addColorStop(0, trailCol+(op*1.3)+')');
@@ -7872,6 +11799,9 @@
                         c.stroke();
                     }
                 }
+            } else if (ic.kind==='flak' || ic.kind==='drones' || ic.kind==='plasmac' ||
+                       ic.kind==='kinslug' || ic.kind==='gravnet') {
+                drawInterceptorBodyExtra(c, ic);
             } else {
                 /* small white SAM body */
                 c.fillStyle = '#e8ecf2';
@@ -8047,18 +11977,23 @@
             else if(m.kind==='hydrogen')   drawHydrogenBody(c, m);
             else if(m.kind==='thermobaric')drawThermobaricBody(c, m);
             else if(m.kind==='bunker')     drawBunkerBody(c, m);
-            else if(m.kind==='mirv')       drawClusterBody(c, m);
+            else if(m.kind==='mirv')       drawMirvBody(c, m);
             else if(m.kind==='stealth')    drawStealthBody(c, m);
             else if(m.kind==='railgun')    drawRailgunBody(c, m);
             else if(m.kind==='drone')      drawDroneBody(c, m);
             else if(m.kind==='icbm')       drawICBMBody(c, m);
-            else if(m.kind==='tactical')   drawStandardBody(c, m);
+            else if(m.kind==='tactical')   drawTacticalBody(c, m);
             else if(m.kind==='antimatter') drawAntimatterBody(c, m);
-            else if(m.kind==='decoy')      drawStandardBody(c, m);
+            else if(m.kind==='decoy')      drawDecoyBody(c, m);
             else if(m.kind==='photon')     drawPhotonBody(c, m);
             else if(m.kind==='gravity')    drawGravityBody(c, m);
             else if(m.kind==='neutron')    drawNeutronBody(c, m);
-            else if(m.kind==='emp')        drawPlasmaBody(c, m);
+            else if(m.kind==='emp')        drawEmpBody(c, m);
+            else if(m.kind==='kinetic')    drawKineticBody(c, m);
+            else if(m.kind==='darkmatter') drawDarkMatterBody(c, m);
+            else if(m.kind==='solar')      drawSolarBody(c, m);
+            else if(m.kind==='cryo')       drawCryoBody(c, m);
+            else if(m.kind==='tesla')      drawTeslaBody(c, m);
             else                           drawStandardBody(c, m);
             c.restore();
         }
@@ -8170,6 +12105,7 @@
         drawNeutronPulses(c);
         drawAntimatterBursts(c);
         drawPhotonStrikes(c);
+        drawCustomFx(c);
         /* screen flash overlay (post-explosion white-out) */
         if(screenFlash>0) {
             c.fillStyle = 'rgba(255,250,220,'+(screenFlash*0.55)+')';
@@ -8288,11 +12224,17 @@
         } else {
             t = { x: rng(W*0.1, W*0.9), y: GROUND - rng(20, GROUND*0.4) };
         }
-        /* fire without the user's defence batteries auto-intercepting */
-        var savedActive = defenceActive;
-        defenceActive = false;
-        fireMissile(t.x, t.y, kind);
-        defenceActive = savedActive;
+        /* normally fire WITHOUT auto-intercept so the user clicks to defend,
+           but when AUTO-DEFENCE is on, leave defenceActive alone so batteries
+           engage every AI missile using the rotating interceptor type. */
+        if (autoDefenceOn) {
+            fireMissile(t.x, t.y, kind);
+        } else {
+            var savedActive = defenceActive;
+            defenceActive = false;
+            fireMissile(t.x, t.y, kind);
+            defenceActive = savedActive;
+        }
     }
     /* User clicked at (sx, sy) in defence mode — launch a CINEMATIC interceptor at
        the nearest in-flight missile (type-specific animation, target-lock, big hit). */
@@ -8602,9 +12544,3467 @@
         }
     }
 
+    /* ════════════════════════════════════════════════════════════════
+       RECONSTRUCTION SYSTEM
+       ────────────────────────────────────────────────────────────────
+       Activates automatically (a) when the user turns off attack or
+       defence, or (b) when auto-attack/auto-defence has been running
+       for 13 seconds (the global cap). The user can also click the
+       reconstruction button manually.
+
+       On activation the system samples the damage state (fires, smoke
+       plumes, wreckage, craters) and spawns proportional numbers of
+       fire trucks, tow trucks, and cranes. Each vehicle drives in
+       from off-screen, finds a target, performs its work animation,
+       then loops to the next target. Runs for 13 seconds, then any
+       remaining damage is cleared.
+       ════════════════════════════════════════════════════════════════ */
+    var reconstructOn = false;
+    var reconstructStartedAt = 0;
+    var reconstructVehicles = [];
+    var reconstructFX = [];                 /* steam puffs, dust clouds, splash drops, sparkles */
+    var reconstructWorkers = [];            /* small construction worker figures walking on ground */
+    var reconstructGhosts = [];             /* translucent building outlines materialising while cranes rebuild */
+    var reconstructCones = [];              /* orange traffic cones lining the road during rebuild */
+    var dynamicSpawnTimer = 0;              /* drip-feed fresh vehicles while damage remains */
+    var reconstructSpeed = 1.0;             /* dt multiplier — 0.25× slow … 5× turbo */
+    var AUTO_MAX_DURATION = 60000;          /* auto-attack/defence capped at 60 s */
+    var autoAttackStartT = 0;
+    var autoDefenceStartT = 0;
+
+    function spawnTrafficCones(){
+        /* lay out 8-14 traffic cones along the road every time the
+           rebuild kicks off, plus a few clustered near each currently-
+           damaged location. */
+        reconstructCones.length = 0;
+        var lanes = 9 + Math.floor(Math.random() * 5);
+        for (var i = 0; i < lanes; i++){
+            reconstructCones.push({
+                x: W * (i + 0.5) / lanes + rng(-W * 0.04, W * 0.04),
+                y: GROUND - 1 + rng(-2, 2),
+                size: rng(0.85, 1.10),
+                bob: Math.random() * Math.PI * 2
+            });
+        }
+        /* cluster around each damaged site */
+        function clusterAt(cx){
+            var n = 3 + Math.floor(Math.random() * 2);
+            for (var k = 0; k < n; k++){
+                reconstructCones.push({
+                    x: cx + rng(-26, 26),
+                    y: GROUND - 1 + rng(-2, 2),
+                    size: rng(0.9, 1.1),
+                    bob: Math.random() * Math.PI * 2
+                });
+            }
+        }
+        for (var a = 0; a < fireFields.length; a++) clusterAt(fireFields[a].x);
+        for (var b = 0; b < wreckage.length; b++)   clusterAt(wreckage[b].x);
+        for (var c2 = 0; c2 < craters.length; c2++) clusterAt(craters[c2].x);
+    }
+
+    function damageCount(){
+        /* Every persistent damage entry counts as ≥1 — the old fractional
+           weights (×0.6, ×0.4, ×0.3) meant a single wreckage piece or
+           crater would `Math.floor` to 0, and reconstruction would
+           finalize while debris was still on screen. Now we count
+           every visible scar across ALL damage arrays. */
+        return fireFields.length
+             + smokePlumes.length
+             + wreckage.length
+             + craters.length
+             + explosions.length
+             + (typeof mushroomClouds   !== 'undefined' ? mushroomClouds.length   : 0)
+             + (typeof gasClouds        !== 'undefined' ? gasClouds.length        : 0)
+             + (typeof empPulses        !== 'undefined' ? empPulses.length        : 0)
+             + (typeof gravityWells     !== 'undefined' ? gravityWells.length     : 0)
+             + (typeof neutronPulses    !== 'undefined' ? neutronPulses.length    : 0)
+             + (typeof antimatterBursts !== 'undefined' ? antimatterBursts.length : 0)
+             + (typeof photonStrikes    !== 'undefined' ? photonStrikes.length    : 0)
+             + (typeof debrisParts      !== 'undefined' ? Math.floor(debrisParts.length / 8) : 0);
+    }
+
+    function spawnReconstructVehicle(kind, delay){
+        var fromLeft = Math.random() < 0.5;
+        var startX = fromLeft ? -120 : W + 120;
+        var dir = fromLeft ? 1 : -1;
+        var isHeli = kind === 'helicopter';
+        reconstructVehicles.push({
+            kind: kind,
+            x: startX,
+            /* helicopters fly high; ground vehicles sit on the road */
+            y: isHeli
+               ? (GROUND * 0.42 + rng(-20, 10))
+               : (GROUND + (H - GROUND) * 0.20 + rng(-4, 4)),
+            vx: dir * (isHeli ? (1.5 + Math.random() * 0.6) : (0.7 + Math.random() * 0.4)),
+            vy: 0,
+            phase: 'travel',
+            workT: 0,
+            target: null,
+            spawnDelay: delay,
+            visible: false,
+            sprayParticles: [],
+            sparkles: [],
+            rotorPhase: Math.random() * Math.PI * 2,
+            bobPhase:   Math.random() * Math.PI * 2,
+            bucketDrop: 0          /* 0–1: how far the water bucket has lowered */
+        });
+    }
+
+    function spawnWorker(){
+        /* small humanoid construction worker walking on ground */
+        var fromLeft = Math.random() < 0.5;
+        reconstructWorkers.push({
+            x: fromLeft ? -30 : W + 30,
+            y: GROUND - 1,
+            vx: (fromLeft ? 1 : -1) * (0.35 + Math.random() * 0.25),
+            walkPhase: Math.random() * Math.PI * 2,
+            helmetHue: rng(0, 60),   /* yellow/orange variations */
+            shirtHue:  pickShirt(),
+            life: 0,
+            maxLife: 14000 + Math.random() * 8000,
+            tool: Math.random() < 0.5 ? 'wrench' : (Math.random() < 0.5 ? 'hammer' : 'pipe')
+        });
+    }
+    function pickShirt(){
+        var shirts = ['#1e40af', '#ea580c', '#0891b2', '#15803d', '#9333ea', '#be123c'];
+        return shirts[Math.floor(Math.random() * shirts.length)];
+    }
+
+    function startReconstruction(){
+        if (reconstructOn) return;
+        reconstructOn = true;
+        reconstructStartedAt = (typeof performance !== 'undefined' && performance.now)
+                               ? performance.now() : Date.now();
+        dynamicSpawnTimer = 2200;
+
+        /* initial vehicle wave scales with current damage. Fire trucks
+           always get a hefty minimum of 4 so the water cannon show is
+           always front and centre, even on light damage. */
+        var nFire  = Math.min(12, Math.max(4, Math.ceil(fireFields.length * 1.5 + smokePlumes.length * 0.6 + wreckage.length * 0.3)));
+        var nHeli  = Math.min(4,  Math.max(2, Math.ceil(fireFields.length * 0.5 + smokePlumes.length * 0.25)));
+        var nTow   = Math.min(8,  Math.max(1, Math.ceil(wreckage.length * 0.40) + 1));
+        var nCrane = Math.min(7,  Math.max(1, Math.ceil(wreckage.length * 0.25 + craters.length * 0.5)));
+
+        for (var i = 0; i < nFire;  i++) spawnReconstructVehicle('fire',       i * 260 + rng(0, 180));
+        for (var h = 0; h < nHeli;  h++) spawnReconstructVehicle('helicopter', 200 + h * 500 + rng(0, 220));
+        for (var j = 0; j < nTow;   j++) spawnReconstructVehicle('tow',        320 + j * 320 + rng(0, 180));
+        for (var k = 0; k < nCrane; k++) spawnReconstructVehicle('crane',      600 + k * 380 + rng(0, 220));
+
+        /* and a small crew of construction workers — at least 4, more
+           for heavy damage. They walk independently across the ground
+           and do little hammering / digging gestures whenever they're
+           next to wreckage or a crater. */
+        var nWorkers = Math.min(10, Math.max(4, Math.ceil(damageCount() * 0.4)));
+        for (var w = 0; w < nWorkers; w++) spawnWorker();
+
+        /* lay traffic cones across the road */
+        spawnTrafficCones();
+
+        /* visual feedback — a quick golden flash */
+        screenFlash = Math.max(screenFlash, 0.35);
+    }
+
+    function maybeSpawnMore(){
+        /* if there's still damage to fix but few capable vehicles, drip
+           a fresh one in. Only matters when the user keeps the sim
+           running and damage outpaces the initial wave. */
+        var fires = fireFields.length + smokePlumes.length;
+        var wrecks = 0, brokenBuildings = 0;
+        for (var w = 0; w < wreckage.length; w++){
+            if (wreckage[w].kind === 'carWreck') wrecks++;
+            else if (wreckage[w].kind === 'brokenBuilding') brokenBuildings++;
+        }
+        var crat = craters.length;
+
+        /* count active per kind */
+        var aF = 0, aH = 0, aT = 0, aC = 0;
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var v = reconstructVehicles[i];
+            if (v.phase === 'leave') continue;
+            if      (v.kind === 'fire')       aF++;
+            else if (v.kind === 'helicopter') aH++;
+            else if (v.kind === 'tow')        aT++;
+            else if (v.kind === 'crane')      aC++;
+        }
+        if (fires > aF) spawnReconstructVehicle('fire', 0);
+        if (fires > aH * 3) spawnReconstructVehicle('helicopter', 200);
+        if (wrecks > aT * 2) spawnReconstructVehicle('tow', 200);
+        if ((brokenBuildings + crat) > aC * 2) spawnReconstructVehicle('crane', 400);
+        if (reconstructWorkers.length < 8 && damageCount() > 0) spawnWorker();
+    }
+
+    function finalizeReconstruction(){
+        /* called when damage has reached 0. Send every remaining
+           vehicle off-screen, then do a final SWEEP of any lingering
+           damage arrays — guarantees a fully clean city. */
+        reconstructCones.length = 0;
+        /* The vehicle
+           work loop tends to leave trace items behind (e.g. wreckage
+           with stuck fireT/smokeT timers); this catches them all. */
+        reconstructOn = false;
+        fireFields.length      = 0;
+        smokePlumes.length     = 0;
+        wreckage.length        = 0;
+        craters.length         = 0;
+        explosions.length      = 0;
+        if (typeof mushroomClouds   !== 'undefined') mushroomClouds.length   = 0;
+        if (typeof gasClouds        !== 'undefined') gasClouds.length        = 0;
+        if (typeof empPulses        !== 'undefined') empPulses.length        = 0;
+        if (typeof gravityWells     !== 'undefined') gravityWells.length     = 0;
+        if (typeof neutronPulses    !== 'undefined') neutronPulses.length    = 0;
+        if (typeof antimatterBursts !== 'undefined') antimatterBursts.length = 0;
+        if (typeof photonStrikes    !== 'undefined') photonStrikes.length    = 0;
+        if (typeof customFx         !== 'undefined') customFx.length         = 0;
+        if (typeof debrisParts      !== 'undefined') debrisParts.length      = 0;
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var rv = reconstructVehicles[i];
+            rv.phase = 'leave';
+            rv.target = null;
+            rv.sprayParticles.length = 0;
+            rv.sparkles.length = 0;
+            rv.vx = (rv.x < W / 2 ? -1 : 1) * 1.4;
+            if (rv.spawnDelay > 0) { reconstructVehicles.splice(i, 1); i--; }
+        }
+        /* workers exit naturally via their walk velocity */
+    }
+
+    /* hard cancel — used by the toggle button and the auto-system. */
+    function stopReconstruction(){
+        if (!reconstructOn && reconstructVehicles.length === 0 &&
+            reconstructWorkers.length === 0 && reconstructGhosts.length === 0) return;
+        reconstructOn = false;
+        reconstructFX.length = 0;
+        reconstructGhosts.length = 0;
+        reconstructCones.length = 0;
+        /* clear damage immediately on manual cancel — same sweep as
+           finalizeReconstruction so the city is fully clean. */
+        fireFields.length = 0;
+        smokePlumes.length = 0;
+        explosions.length = 0;
+        wreckage.length = 0;
+        craters.length = 0;
+        if (typeof mushroomClouds   !== 'undefined') mushroomClouds.length   = 0;
+        if (typeof gasClouds        !== 'undefined') gasClouds.length        = 0;
+        if (typeof empPulses        !== 'undefined') empPulses.length        = 0;
+        if (typeof gravityWells     !== 'undefined') gravityWells.length     = 0;
+        if (typeof neutronPulses    !== 'undefined') neutronPulses.length    = 0;
+        if (typeof antimatterBursts !== 'undefined') antimatterBursts.length = 0;
+        if (typeof photonStrikes    !== 'undefined') photonStrikes.length    = 0;
+        if (typeof customFx         !== 'undefined') customFx.length         = 0;
+        if (typeof debrisParts      !== 'undefined') debrisParts.length      = 0;
+        /* command vehicles + workers to leave */
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var rv = reconstructVehicles[i];
+            rv.phase = 'leave';
+            rv.target = null;
+            rv.sprayParticles.length = 0;
+            rv.sparkles.length = 0;
+            rv.vx = (rv.x < W / 2 ? -1 : 1) * 1.6;
+            if (rv.spawnDelay > 0) { reconstructVehicles.splice(i, 1); i--; }
+        }
+        for (var wk = 0; wk < reconstructWorkers.length; wk++){
+            reconstructWorkers[wk].maxLife = Math.min(reconstructWorkers[wk].maxLife,
+                                                      reconstructWorkers[wk].life + 1500);
+        }
+    }
+
+    function pickReconstructTarget(v){
+        if (v.kind === 'fire' || v.kind === 'helicopter'){
+            if (fireFields.length){
+                var ff = fireFields[Math.floor(Math.random() * fireFields.length)];
+                return { kind: 'fire', ref: ff, x: ff.x, y: GROUND - 20 };
+            }
+            if (smokePlumes.length){
+                var sp = smokePlumes[Math.floor(Math.random() * smokePlumes.length)];
+                return { kind: 'smoke', ref: sp, x: sp.x, y: GROUND - 20 };
+            }
+            /* burning wreckage — most car wrecks have smoke/fire timers */
+            for (var bi = 0; bi < wreckage.length; bi++){
+                var bw = wreckage[bi];
+                if (bw.fireT !== undefined || bw.smokeT !== undefined){
+                    return { kind: 'wreckFire', ref: bw,
+                             x: bw.x, y: (bw.y || GROUND) - 5 };
+                }
+            }
+            /* last-resort: ANY wreckage — cool it down */
+            if (wreckage.length){
+                var anyW = wreckage[Math.floor(Math.random() * wreckage.length)];
+                return { kind: 'wreckFire', ref: anyW,
+                         x: anyW.x, y: (anyW.y || GROUND) - 5 };
+            }
+            return null;
+        }
+        if (v.kind === 'tow'){
+            for (var i = 0; i < wreckage.length; i++){
+                if (wreckage[i].kind === 'carWreck' && !wreckage[i].towed){
+                    return { kind: 'wreck', ref: wreckage[i], x: wreckage[i].x, y: wreckage[i].y };
+                }
+            }
+            /* fall back to any wreckage */
+            if (wreckage.length){
+                return { kind: 'wreck', ref: wreckage[0], x: wreckage[0].x, y: wreckage[0].y };
+            }
+            return null;
+        }
+        if (v.kind === 'crane'){
+            for (var j = 0; j < wreckage.length; j++){
+                if (wreckage[j].kind === 'brokenBuilding'){
+                    return { kind: 'building', ref: wreckage[j],
+                             x: wreckage[j].x, y: GROUND - 30 };
+                }
+            }
+            if (craters.length){
+                var cr = craters[Math.floor(Math.random() * craters.length)];
+                return { kind: 'crater', ref: cr, x: cr.x, y: GROUND - 8 };
+            }
+            return null;
+        }
+    }
+
+    function updateReconstruction(dt){
+        if (!reconstructOn && reconstructVehicles.length === 0 &&
+            reconstructFX.length === 0 && reconstructWorkers.length === 0 &&
+            reconstructGhosts.length === 0 && reconstructCones.length === 0) return;
+        /* speed multiplier — applies to ALL reconstruction internals so
+           the slider can dial the whole sequence slow or turbo. */
+        dt = dt * reconstructSpeed;
+
+        if (reconstructOn){
+            /* end the active phase as soon as there's nothing left to
+               repair. Vehicles already in 'work' will finish their
+               current target on the next iteration via their normal
+               transitions; this only flips the global "spawning new
+               vehicles" flag off. */
+            if (damageCount() === 0){
+                finalizeReconstruction();
+            } else {
+                /* drip-feed additional vehicles + workers if damage is
+                   high and the initial wave isn't keeping up. */
+                dynamicSpawnTimer -= dt;
+                if (dynamicSpawnTimer <= 0){
+                    dynamicSpawnTimer = 1800;
+                    maybeSpawnMore();
+                }
+            }
+        }
+
+        /* update construction workers — they walk along ground, do
+           little hammer/wrench animations near targets. */
+        for (var wi = reconstructWorkers.length - 1; wi >= 0; wi--){
+            var wk = reconstructWorkers[wi];
+            wk.life += dt;
+            wk.walkPhase += dt * 0.012;
+            /* slow down if next to a target */
+            var nearTarget = false;
+            for (var wt = 0; wt < wreckage.length; wt++){
+                if (Math.abs(wreckage[wt].x - wk.x) < 22){ nearTarget = true; break; }
+            }
+            if (!nearTarget){
+                for (var ct = 0; ct < craters.length; ct++){
+                    if (Math.abs(craters[ct].x - wk.x) < 22){ nearTarget = true; break; }
+                }
+            }
+            wk.x += wk.vx * dt * 0.055 * (nearTarget ? 0.15 : 1);
+            wk.working = nearTarget;
+            /* tool sparks at target */
+            if (nearTarget && Math.random() < 0.25){
+                reconstructFX.push({
+                    kind: 'spark',
+                    x: wk.x + (wk.vx > 0 ? 4 : -4),
+                    y: wk.y - 6,
+                    vx: rng(-0.5, 0.5), vy: -1 - Math.random() * 0.5,
+                    life: 0, maxLife: 350,
+                    r: 0.8 + Math.random() * 0.4
+                });
+            }
+            if (wk.life >= wk.maxLife || wk.x < -50 || wk.x > W + 50){
+                reconstructWorkers.splice(wi, 1);
+            }
+        }
+
+        /* update rebuild ghosts — translucent building outlines that
+           emerge over a brokenBuilding then solidify before vanishing. */
+        for (var gi = reconstructGhosts.length - 1; gi >= 0; gi--){
+            var g = reconstructGhosts[gi];
+            g.life += dt;
+            /* emit sparkles along the outline */
+            if (Math.random() < 0.5){
+                reconstructFX.push({
+                    kind: 'spark',
+                    x: g.x + rng(-g.w / 2, g.w / 2),
+                    y: g.y - rng(0, g.h),
+                    vx: rng(-0.3, 0.3), vy: -0.4 - Math.random() * 0.3,
+                    life: 0, maxLife: 700,
+                    r: 1 + Math.random() * 0.4
+                });
+            }
+            if (g.life >= g.maxLife) reconstructGhosts.splice(gi, 1);
+        }
+
+        for (var i = reconstructVehicles.length - 1; i >= 0; i--){
+            var v = reconstructVehicles[i];
+            v.spawnDelay -= dt;
+            if (v.spawnDelay > 0) continue;
+            v.visible = true;
+
+            if (v.phase === 'travel'){
+                if (!v.target){
+                    v.target = pickReconstructTarget(v);
+                    if (!v.target){
+                        /* no work left → leave */
+                        v.phase = 'leave';
+                        v.vx = (v.x < W/2 ? -1 : 1) * (v.kind === 'helicopter' ? 2.4 : 1.4);
+                        continue;
+                    }
+                }
+                if (v.kind === 'helicopter'){
+                    /* fly toward target; bob up/down a tiny bit */
+                    var hdx = v.target.x - v.x;
+                    var hdir = hdx >= 0 ? 1 : -1;
+                    v.vx = hdir * Math.min(2.5, 0.9 + Math.abs(hdx) * 0.004);
+                    v.x += v.vx * dt * 0.09;
+                    v.bobPhase += dt * 0.005;
+                    /* target altitude: ~38 % of GROUND from top */
+                    var tgtY = GROUND * 0.38 + Math.sin(v.bobPhase) * 4;
+                    v.y += (tgtY - v.y) * 0.05;
+                    v.rotorPhase += dt * 0.06;
+                    if (Math.abs(hdx) < 22){
+                        v.phase = 'work';
+                        v.workT = 0;
+                        v.vx = 0;
+                    }
+                } else {
+                    var dx = v.target.x - v.x;
+                    var dir = dx > 0 ? 1 : -1;
+                    v.vx = dir * Math.min(1.5, 0.6 + Math.abs(dx) * 0.003);
+                    v.x += v.vx * dt * 0.06;
+                    if (Math.abs(dx) < 30){
+                        v.phase = 'work';
+                        v.workT = 0;
+                        v.vx = 0;
+                    }
+                }
+            }
+            else if (v.phase === 'work'){
+                v.workT += dt;
+                /* per-kind work animation + effect */
+                if (v.kind === 'fire'){
+                    /* PRESSURISED MULTI-STREAM water cannon. Three
+                       layers of particles per frame — a fast jet at
+                       the centre, a wider spray cone, and a fine mist.
+                       Each droplet has gravity + splash. */
+                    if (v.workT < 2200){
+                        var hoseDir = v.target && v.target.x > v.x ? 1 : -1;
+                        var tdx = v.target ? (v.target.x - v.x) : hoseDir * 60;
+                        var tdy = v.target ? -(v.y - 12 - v.target.y) : 30;
+                        var aim = Math.atan2(tdy, tdx);
+                        /* main jet — fast tight droplets */
+                        for (var j = 0; j < 3; j++){
+                            var jSpread = (Math.random() - 0.5) * 0.18;
+                            var spd = 3.0 + Math.random() * 1.4;
+                            v.sprayParticles.push({
+                                kind: 'jet',
+                                x: v.x + hoseDir * 22, y: v.y - 14,
+                                vx: Math.cos(aim + jSpread) * spd,
+                                vy: Math.sin(aim + jSpread) * spd - 0.6,
+                                life: 0, maxLife: 900 + Math.random() * 300,
+                                r: 1.4 + Math.random() * 0.6
+                            });
+                        }
+                        /* wide cone — slower fan of droplets */
+                        if (Math.random() < 0.85){
+                            var fSpread = (Math.random() - 0.5) * 0.55;
+                            v.sprayParticles.push({
+                                kind: 'cone',
+                                x: v.x + hoseDir * 20, y: v.y - 13,
+                                vx: Math.cos(aim + fSpread) * (1.6 + Math.random() * 0.8),
+                                vy: Math.sin(aim + fSpread) * (1.6 + Math.random() * 0.8) - 0.8,
+                                life: 0, maxLife: 1200,
+                                r: 2.0 + Math.random() * 0.9
+                            });
+                        }
+                        /* fine mist — drifts and dissipates */
+                        if (Math.random() < 0.4){
+                            v.sprayParticles.push({
+                                kind: 'mist',
+                                x: v.x + hoseDir * 18 + rng(-3, 3),
+                                y: v.y - 12 + rng(-4, 4),
+                                vx: Math.cos(aim) * 0.6 + rng(-0.3, 0.3),
+                                vy: -0.5 + rng(-0.3, 0.1),
+                                life: 0, maxLife: 1400,
+                                r: 5 + Math.random() * 4
+                            });
+                        }
+                    }
+                    if (v.workT > 2300){
+                        if (v.target){
+                            if (v.target.kind === 'fire'){
+                                var fi = fireFields.indexOf(v.target.ref);
+                                if (fi >= 0) fireFields.splice(fi, 1);
+                                /* steam burst at extinguish point */
+                                for (var st = 0; st < 8; st++){
+                                    reconstructFX.push({
+                                        kind: 'steam',
+                                        x: v.target.x + rng(-12, 12),
+                                        y: v.target.y + rng(-8, 8),
+                                        vx: rng(-0.4, 0.4),
+                                        vy: -0.8 - Math.random() * 0.6,
+                                        life: 0, maxLife: 1500,
+                                        r: 6 + Math.random() * 5
+                                    });
+                                }
+                            } else if (v.target.kind === 'smoke'){
+                                var si = smokePlumes.indexOf(v.target.ref);
+                                if (si >= 0) smokePlumes.splice(si, 1);
+                            } else if (v.target.kind === 'wreckFire'){
+                                /* cool a smoking wreck without towing it */
+                                if (v.target.ref){
+                                    v.target.ref.fireT = undefined;
+                                    v.target.ref.smokeT = undefined;
+                                }
+                                for (var stw = 0; stw < 6; stw++){
+                                    reconstructFX.push({
+                                        kind: 'steam',
+                                        x: v.target.x + rng(-10, 10),
+                                        y: v.target.y + rng(-6, 6),
+                                        vx: rng(-0.4, 0.4),
+                                        vy: -0.7 - Math.random() * 0.5,
+                                        life: 0, maxLife: 1400,
+                                        r: 5 + Math.random() * 4
+                                    });
+                                }
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                    }
+                }
+                else if (v.kind === 'helicopter'){
+                    /* Hover-and-dump water bucket attack: rotor keeps spinning,
+                       the bucket lowers (bucketDrop 0→1), a vertical cascade
+                       of water pours down onto the target, steam bursts on
+                       impact, then the bucket retracts and the heli moves on. */
+                    v.rotorPhase += dt * 0.06;
+                    v.bobPhase += dt * 0.005;
+                    /* lower bucket smoothly */
+                    var prog = Math.min(1, v.workT / 600);
+                    v.bucketDrop += (prog - v.bucketDrop) * 0.08;
+                    /* pour water 700–2400 ms window */
+                    if (v.workT > 600 && v.workT < 2400){
+                        /* WALL of falling water */
+                        for (var hd = 0; hd < 5; hd++){
+                            v.sprayParticles.push({
+                                kind: 'jet',
+                                x: v.x + rng(-9, 9),
+                                y: v.y + 4 + v.bucketDrop * 14,
+                                vx: rng(-0.5, 0.5),
+                                vy: 3.5 + Math.random() * 1.6,
+                                life: 0, maxLife: 1200,
+                                r: 1.8 + Math.random() * 0.8
+                            });
+                        }
+                        if (Math.random() < 0.8){
+                            v.sprayParticles.push({
+                                kind: 'cone',
+                                x: v.x + rng(-12, 12),
+                                y: v.y + 4 + v.bucketDrop * 14,
+                                vx: rng(-1.0, 1.0),
+                                vy: 2.4 + Math.random() * 1.2,
+                                life: 0, maxLife: 1400,
+                                r: 2.4 + Math.random() * 1.0
+                            });
+                        }
+                        if (Math.random() < 0.5){
+                            v.sprayParticles.push({
+                                kind: 'mist',
+                                x: v.x + rng(-15, 15),
+                                y: v.y + 12 + v.bucketDrop * 14,
+                                vx: rng(-0.4, 0.4),
+                                vy: 0.8 + Math.random() * 0.6,
+                                life: 0, maxLife: 1700,
+                                r: 7 + Math.random() * 5
+                            });
+                        }
+                        /* impact steam at target */
+                        if (v.target && Math.random() < 0.35){
+                            reconstructFX.push({
+                                kind: 'steam',
+                                x: v.target.x + rng(-14, 14),
+                                y: v.target.y + rng(-3, 5),
+                                vx: rng(-0.6, 0.6),
+                                vy: -1.2 - Math.random() * 0.6,
+                                life: 0, maxLife: 1500,
+                                r: 7 + Math.random() * 5
+                            });
+                        }
+                    }
+                    if (v.workT > 2600){
+                        if (v.target){
+                            if (v.target.kind === 'fire'){
+                                var fhi = fireFields.indexOf(v.target.ref);
+                                if (fhi >= 0) fireFields.splice(fhi, 1);
+                                /* huge steam burst */
+                                for (var bst = 0; bst < 12; bst++){
+                                    reconstructFX.push({
+                                        kind: 'steam',
+                                        x: v.target.x + rng(-18, 18),
+                                        y: v.target.y + rng(-10, 10),
+                                        vx: rng(-0.6, 0.6),
+                                        vy: -1 - Math.random() * 0.8,
+                                        life: 0, maxLife: 1800,
+                                        r: 8 + Math.random() * 6
+                                    });
+                                }
+                            } else if (v.target.kind === 'smoke'){
+                                var shi = smokePlumes.indexOf(v.target.ref);
+                                if (shi >= 0) smokePlumes.splice(shi, 1);
+                            } else if (v.target.kind === 'wreckFire'){
+                                if (v.target.ref){
+                                    v.target.ref.fireT = undefined;
+                                    v.target.ref.smokeT = undefined;
+                                }
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                        v.bucketDrop = 0;
+                    }
+                }
+                else if (v.kind === 'tow'){
+                    /* engage hook, then haul. mid-work spawns sparks +
+                       small dust puffs as the wreck lifts. */
+                    if (Math.random() < 0.5 && v.target && v.workT > 400){
+                        reconstructFX.push({
+                            kind: 'dust',
+                            x: v.target.x + rng(-12, 12),
+                            y: v.target.y + rng(-2, 4),
+                            vx: rng(-0.3, 0.3), vy: -0.4 - Math.random() * 0.3,
+                            life: 0, maxLife: 1100,
+                            r: 5 + Math.random() * 3
+                        });
+                    }
+                    if (Math.random() < 0.25 && v.target && v.workT > 200 && v.workT < 1400){
+                        /* sparks from the hook */
+                        var hookDir = v.target.x > v.x ? 1 : -1;
+                        reconstructFX.push({
+                            kind: 'spark',
+                            x: v.x + hookDir * 30, y: v.y - 3,
+                            vx: hookDir * (1.5 + Math.random()) + rng(-0.5, 0.5),
+                            vy: -1 - Math.random(),
+                            life: 0, maxLife: 400,
+                            r: 1.2 + Math.random() * 0.6
+                        });
+                    }
+                    if (v.workT > 1600){
+                        if (v.target && v.target.ref){
+                            var wi = wreckage.indexOf(v.target.ref);
+                            if (wi >= 0) wreckage.splice(wi, 1);
+                            /* triumph puff */
+                            for (var dp = 0; dp < 6; dp++){
+                                reconstructFX.push({
+                                    kind: 'dust',
+                                    x: v.target.x + rng(-15, 15),
+                                    y: v.target.y + rng(-5, 5),
+                                    vx: rng(-0.6, 0.6),
+                                    vy: -0.8 - Math.random() * 0.5,
+                                    life: 0, maxLife: 1300,
+                                    r: 6 + Math.random() * 4
+                                });
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                    }
+                }
+                else if (v.kind === 'crane'){
+                    /* construction sparkles + drifting dust + slow
+                       rebuild progress. After completion spawn a burst
+                       of golden + white "rebuilt!" sparkles. */
+                    if (Math.random() < 0.7 && v.target){
+                        v.sparkles.push({
+                            x: v.target.x + rng(-20, 20),
+                            y: GROUND - rng(5, 35),
+                            life: 0, maxLife: 700,
+                            r: rng(0.8, 2.0),
+                            hue: 40 + rng(0, 25)
+                        });
+                    }
+                    if (Math.random() < 0.35 && v.target){
+                        reconstructFX.push({
+                            kind: 'dust',
+                            x: v.target.x + rng(-25, 25),
+                            y: GROUND - rng(0, 10),
+                            vx: rng(-0.3, 0.3), vy: -0.3 - Math.random() * 0.3,
+                            life: 0, maxLife: 1500,
+                            r: 7 + Math.random() * 5
+                        });
+                    }
+                    if (v.workT > 2400){
+                        if (v.target){
+                            if (v.target.kind === 'building' && v.target.ref){
+                                /* Use the broken building's recorded
+                                   bounds (set when it was destroyed) so
+                                   the ghost matches the actual silhouette. */
+                                var br = v.target.ref;
+                                var bw = (br.rightX && br.leftX)
+                                         ? (br.rightX - br.leftX) : rng(40, 70);
+                                var bh = rng(55, 95);
+                                reconstructGhosts.push({
+                                    x: v.target.x,
+                                    y: GROUND,
+                                    w: bw, h: bh,
+                                    life: 0, maxLife: 2600,
+                                    hue: 40 + rng(0, 20),
+                                    floors: Math.floor(bh / 12)
+                                });
+                                var bi = wreckage.indexOf(v.target.ref);
+                                if (bi >= 0) wreckage.splice(bi, 1);
+                            } else if (v.target.kind === 'crater' && v.target.ref){
+                                var ci = craters.indexOf(v.target.ref);
+                                if (ci >= 0) craters.splice(ci, 1);
+                            }
+                            /* "rebuilt!" — burst of golden sparkles */
+                            for (var sk2 = 0; sk2 < 24; sk2++){
+                                v.sparkles.push({
+                                    x: v.target.x + rng(-32, 32),
+                                    y: GROUND - rng(0, 60),
+                                    life: 0, maxLife: 1100,
+                                    r: rng(1.2, 2.8),
+                                    hue: 40 + rng(0, 30)
+                                });
+                            }
+                        }
+                        v.target = null;
+                        v.phase = 'travel';
+                    }
+                }
+
+                /* update spray particles with gravity + splash */
+                for (var sp = v.sprayParticles.length - 1; sp >= 0; sp--){
+                    var p = v.sprayParticles[sp];
+                    p.x += p.vx * dt * 0.06;
+                    p.y += p.vy * dt * 0.06;
+                    /* mist drifts upward (rises), others fall */
+                    if (p.kind === 'mist'){
+                        p.vy += 0.01;
+                        p.r *= 1.005;
+                    } else {
+                        p.vy += 0.06;
+                    }
+                    p.life += dt;
+                    /* splash on ground */
+                    if (p.y >= GROUND && p.kind !== 'mist' && !p.splashed){
+                        p.splashed = true;
+                        for (var sp2 = 0; sp2 < 3; sp2++){
+                            reconstructFX.push({
+                                kind: 'splash',
+                                x: p.x + rng(-2, 2),
+                                y: GROUND - 1,
+                                vx: rng(-0.8, 0.8),
+                                vy: -0.6 - Math.random() * 0.4,
+                                life: 0, maxLife: 350,
+                                r: 1 + Math.random() * 0.6
+                            });
+                        }
+                    }
+                    if (p.life >= p.maxLife || p.y > GROUND + 3) v.sprayParticles.splice(sp, 1);
+                }
+                /* update sparkles */
+                for (var sk = v.sparkles.length - 1; sk >= 0; sk--){
+                    var s = v.sparkles[sk];
+                    s.life += dt;
+                    if (s.life >= s.maxLife) v.sparkles.splice(sk, 1);
+                }
+            }
+            else if (v.phase === 'leave'){
+                v.x += v.vx * dt * 0.08;
+                if (v.x < -180 || v.x > W + 180){
+                    reconstructVehicles.splice(i, 1);
+                }
+            }
+        }
+
+        /* update global FX (steam, dust, sparks, splash). These live
+           in `reconstructFX[]` independently of any single vehicle so
+           they persist after the spawning vehicle moves on. */
+        for (var fxi = reconstructFX.length - 1; fxi >= 0; fxi--){
+            var fx = reconstructFX[fxi];
+            fx.life += dt;
+            fx.x += fx.vx * dt * 0.06;
+            fx.y += fx.vy * dt * 0.06;
+            if (fx.kind === 'steam' || fx.kind === 'dust'){
+                fx.vy -= 0.002;            /* rises */
+                fx.r  *= 1.012;            /* expands */
+                fx.vx *= 0.985;
+            } else if (fx.kind === 'spark'){
+                fx.vy += 0.10;             /* falls */
+                fx.vx *= 0.95;
+            } else if (fx.kind === 'splash'){
+                fx.vy += 0.10;
+            }
+            if (fx.life >= fx.maxLife) reconstructFX.splice(fxi, 1);
+        }
+    }
+
+    function drawReconstruction(c){
+        if (!reconstructOn && reconstructVehicles.length === 0 &&
+            reconstructFX.length === 0 && reconstructWorkers.length === 0 &&
+            reconstructGhosts.length === 0 && reconstructCones.length === 0) return;
+
+        /* ─── Traffic cones ── orange triangular cones laid out across
+           the road. Drawn FIRST so everything else (water, sparkles,
+           vehicles) sits visually on top of them — and the cars driving
+           in the main scene render over them too. */
+        for (var ci2 = 0; ci2 < reconstructCones.length; ci2++){
+            drawCone(c, reconstructCones[ci2]);
+        }
+
+        /* ─── Rebuild ghosts ── translucent building outlines that
+           emerge and solidify when cranes complete a brokenBuilding. */
+        for (var gi = 0; gi < reconstructGhosts.length; gi++){
+            var g = reconstructGhosts[gi];
+            var t = g.life / g.maxLife;
+            /* alpha curve — fade in (0→0.7), hold, then fade out */
+            var ga = t < 0.3 ? (t / 0.3) * 0.7
+                   : t < 0.85 ? 0.7
+                   : (1 - t) / 0.15 * 0.7;
+            /* outline glow */
+            c.strokeStyle = 'hsla(' + g.hue.toFixed(0) + ',95%,65%,' +
+                            (0.85 * ga).toFixed(2) + ')';
+            c.lineWidth = 1.4;
+            c.shadowColor = 'hsla(' + g.hue.toFixed(0) + ',100%,60%,' + ga.toFixed(2) + ')';
+            c.shadowBlur = 16;
+            c.strokeRect(g.x - g.w / 2, g.y - g.h, g.w, g.h);
+            /* horizontal floor lines reveal progressively */
+            var floorsToShow = Math.floor(g.floors * Math.min(1, t * 1.8));
+            for (var fr = 1; fr < floorsToShow; fr++){
+                var fy = g.y - (g.h / g.floors) * fr;
+                c.beginPath();
+                c.moveTo(g.x - g.w / 2 + 3, fy);
+                c.lineTo(g.x + g.w / 2 - 3, fy);
+                c.stroke();
+            }
+            c.shadowBlur = 0;
+            /* glowing fill inside */
+            c.fillStyle = 'hsla(' + g.hue.toFixed(0) + ',95%,80%,' + (0.10 * ga).toFixed(2) + ')';
+            c.fillRect(g.x - g.w / 2, g.y - g.h, g.w, g.h);
+            /* window pips */
+            for (var fy2 = 1; fy2 < floorsToShow; fy2++){
+                var rowY = g.y - (g.h / g.floors) * fy2 + (g.h / g.floors) * 0.5;
+                for (var wx = 0; wx < Math.floor(g.w / 6); wx++){
+                    if ((fy2 + wx) % 2 === 0 && Math.random() < 0.7){
+                        c.fillStyle = 'hsla(' + g.hue.toFixed(0) + ',90%,75%,' +
+                                      (0.5 * ga).toFixed(2) + ')';
+                        c.fillRect(g.x - g.w / 2 + wx * 6 + 2, rowY - 2, 2, 3);
+                    }
+                }
+            }
+        }
+
+        /* Draw global FX FIRST so they sit behind the vehicles —
+           steam/dust looks natural rising behind a fire-truck cab. */
+        for (var fxi = 0; fxi < reconstructFX.length; fxi++){
+            var fx = reconstructFX[fxi];
+            var fa = 1 - fx.life / fx.maxLife;
+            if (fx.kind === 'steam'){
+                /* steam — white cloud puff, low saturation */
+                c.fillStyle = 'rgba(245,250,255,' + (0.55 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+                c.fillStyle = 'rgba(255,255,255,' + (0.30 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * 0.6, 0, Math.PI * 2); c.fill();
+            } else if (fx.kind === 'dust'){
+                /* construction dust — warm tan */
+                c.fillStyle = 'rgba(220,200,170,' + (0.50 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+                c.fillStyle = 'rgba(190,170,140,' + (0.30 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * 0.7, 0, Math.PI * 2); c.fill();
+            } else if (fx.kind === 'spark'){
+                /* orange spark — bright core, warm halo */
+                c.fillStyle = 'rgba(255,210,90,' + fa.toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+                c.fillStyle = 'rgba(255,140,40,' + (0.55 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * 2.4, 0, Math.PI * 2); c.fill();
+            } else if (fx.kind === 'splash'){
+                c.fillStyle = 'rgba(160,210,250,' + (0.85 * fa).toFixed(2) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI * 2); c.fill();
+            }
+        }
+
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var v = reconstructVehicles[i];
+            if (!v.visible) continue;
+            /* Helicopters render in a SEPARATE top-of-stack pass
+               (drawReconstructionAirborne) so they sit above cars
+               + missiles. Skip them entirely in this ground pass. */
+            if (v.kind === 'helicopter') continue;
+
+            /* Per-vehicle spray + sparkle particles drawn AROUND the vehicle */
+            if (v.sprayParticles && v.sprayParticles.length){
+                /* Pass 1: mist (drawn FIRST, behind the jet) */
+                for (var s = 0; s < v.sprayParticles.length; s++){
+                    var sp = v.sprayParticles[s];
+                    if (sp.kind !== 'mist') continue;
+                    var ma = 1 - sp.life / sp.maxLife;
+                    c.fillStyle = 'rgba(220,235,250,' + (0.18 * ma).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2); c.fill();
+                }
+                /* Pass 2: cone droplets (wider spray) */
+                for (var s2 = 0; s2 < v.sprayParticles.length; s2++){
+                    var sp2 = v.sprayParticles[s2];
+                    if (sp2.kind !== 'cone') continue;
+                    var ca = 1 - sp2.life / sp2.maxLife;
+                    c.fillStyle = 'rgba(150,210,255,' + (0.65 * ca).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r, 0, Math.PI * 2); c.fill();
+                    /* white core for fresh drops */
+                    if (sp2.life < 200){
+                        c.fillStyle = 'rgba(255,255,255,' + (0.5 * ca).toFixed(2) + ')';
+                        c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r * 0.5, 0, Math.PI * 2); c.fill();
+                    }
+                }
+                /* Pass 3: jet droplets (brightest, tightest) */
+                for (var s3 = 0; s3 < v.sprayParticles.length; s3++){
+                    var sp3 = v.sprayParticles[s3];
+                    if (sp3.kind !== 'jet') continue;
+                    var ja = 1 - sp3.life / sp3.maxLife;
+                    /* trail line — streak in motion direction */
+                    c.strokeStyle = 'rgba(180,225,255,' + (0.55 * ja).toFixed(2) + ')';
+                    c.lineWidth = sp3.r * 1.4;
+                    c.lineCap = 'round';
+                    c.beginPath();
+                    c.moveTo(sp3.x, sp3.y);
+                    c.lineTo(sp3.x - sp3.vx * 2, sp3.y - sp3.vy * 2);
+                    c.stroke();
+                    /* bright head droplet */
+                    c.fillStyle = 'rgba(240,250,255,' + (0.95 * ja).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp3.x, sp3.y, sp3.r * 0.9, 0, Math.PI * 2); c.fill();
+                }
+                c.lineCap = 'butt';
+            }
+
+            /* Vehicle body */
+            if      (v.kind === 'fire')   drawFireTruck(c, v);
+            else if (v.kind === 'tow')    drawTowTruck(c, v);
+            else if (v.kind === 'crane')  drawCrane(c, v);
+
+            /* Rebuild sparkles drawn ON TOP of the crane scene */
+            if (v.sparkles && v.sparkles.length){
+                for (var k = 0; k < v.sparkles.length; k++){
+                    var skp = v.sparkles[k];
+                    var ka  = 1 - skp.life / skp.maxLife;
+                    /* outer soft halo */
+                    c.fillStyle = 'hsla(' + skp.hue.toFixed(0) + ', 100%, 85%, ' +
+                                  (0.45 * ka).toFixed(2) + ')';
+                    c.beginPath(); c.arc(skp.x, skp.y, skp.r * 2.6, 0, Math.PI * 2); c.fill();
+                    /* inner solid pip */
+                    c.fillStyle = 'hsla(' + skp.hue.toFixed(0) + ', 95%, 65%, ' +
+                                  (0.95 * ka).toFixed(2) + ')';
+                    c.fillRect(skp.x - skp.r, skp.y - skp.r, skp.r * 2, skp.r * 2);
+                    /* cross-glints make them feel like real sparkles */
+                    c.strokeStyle = 'hsla(' + skp.hue.toFixed(0) + ', 100%, 90%, ' +
+                                    (0.75 * ka).toFixed(2) + ')';
+                    c.lineWidth = 0.8;
+                    c.beginPath();
+                    c.moveTo(skp.x - skp.r * 3, skp.y); c.lineTo(skp.x + skp.r * 3, skp.y);
+                    c.moveTo(skp.x, skp.y - skp.r * 3); c.lineTo(skp.x, skp.y + skp.r * 3);
+                    c.stroke();
+                }
+            }
+        }
+
+        /* ── Construction workers ── small humanoid sprites walking
+           along the ground with animated legs and a hard-hat. When
+           next to a target they swing a tool with sparks. */
+        for (var wki = 0; wki < reconstructWorkers.length; wki++){
+            var wkr = reconstructWorkers[wki];
+            drawWorker(c, wkr);
+        }
+    }
+
+    function drawHelicopter(c, v){
+        var x = v.x, y = v.y;
+        var dir = (v.vx === 0 && v.target) ? (v.target.x > v.x ? 1 : -1)
+                                            : (v.vx >= 0 ? 1 : -1);
+        var now = Date.now();
+        var rotorA = v.rotorPhase || (now * 0.06);
+
+        /* ── ROTOR DOWNWASH — a wide cone of moving dust just below
+           the helicopter, only when low enough or working */
+        if (v.phase === 'work' || v.y > GROUND * 0.45){
+            for (var dn = 0; dn < 2; dn++){
+                if (Math.random() < 0.4){
+                    reconstructFX.push({
+                        kind: 'dust',
+                        x: x + rng(-22, 22),
+                        y: GROUND - rng(0, 12),
+                        vx: rng(-0.7, 0.7),
+                        vy: -0.2 - Math.random() * 0.3,
+                        life: 0, maxLife: 1300,
+                        r: 5 + Math.random() * 4
+                    });
+                }
+            }
+        }
+
+        /* ── TAIL BOOM (drawn first so fuselage covers the inner joint) */
+        c.fillStyle = '#1e293b';
+        c.fillRect(x - dir * 8, y - 3, -dir * 22, 4);
+        /* tail rudder */
+        c.fillStyle = '#facc15';
+        c.fillRect(x - dir * 28, y - 8, dir * 2, 8);
+        /* tail rotor blur */
+        c.strokeStyle = 'rgba(180,180,180,0.55)';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.arc(x - dir * 28, y - 4, 5, 0, Math.PI * 2);
+        c.stroke();
+        var trA = rotorA * 2.4;
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(x - dir * 28 - Math.cos(trA) * 5, y - 4 - Math.sin(trA) * 5);
+        c.lineTo(x - dir * 28 + Math.cos(trA) * 5, y - 4 + Math.sin(trA) * 5);
+        c.stroke();
+
+        /* ── FUSELAGE — rounded body with gradient */
+        var bg = c.createLinearGradient(x, y - 14, x, y + 8);
+        bg.addColorStop(0, '#fef9c3');
+        bg.addColorStop(0.4, '#facc15');
+        bg.addColorStop(1, '#a16207');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.ellipse(x, y - 2, 22, 12, 0, 0, Math.PI * 2);
+        c.fill();
+        /* dark belly underline */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.beginPath();
+        c.ellipse(x, y + 5, 18, 4, 0, 0, Math.PI);
+        c.fill();
+        /* red side stripe */
+        c.fillStyle = '#dc2626';
+        c.fillRect(x - 20, y - 4, 40, 2);
+        /* "FIRE & RESCUE" lettering placeholder — tiny block */
+        c.fillStyle = '#0f172a';
+        c.fillRect(x - 5, y, 10, 1.5);
+
+        /* ── COCKPIT GLASS — bubble at the front */
+        var glassGrad = c.createRadialGradient(x + dir * 8, y - 8, 2,
+                                                x + dir * 8, y - 6, 12);
+        glassGrad.addColorStop(0, '#dbeafe');
+        glassGrad.addColorStop(0.6, '#3b82f6');
+        glassGrad.addColorStop(1, '#1e3a8a');
+        c.fillStyle = glassGrad;
+        c.beginPath();
+        c.ellipse(x + dir * 10, y - 6, 9, 7, 0, 0, Math.PI * 2);
+        c.fill();
+        /* highlight on glass */
+        c.fillStyle = 'rgba(255,255,255,0.55)';
+        c.beginPath();
+        c.ellipse(x + dir * 12, y - 9, 3, 1.5, 0, 0, Math.PI * 2);
+        c.fill();
+        /* glass frame */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.ellipse(x + dir * 10, y - 6, 9, 7, 0, 0, Math.PI * 2);
+        c.stroke();
+
+        /* ── LANDING SKIDS */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 1.8;
+        c.beginPath();
+        c.moveTo(x - 12, y + 9); c.lineTo(x + 12, y + 9);
+        c.stroke();
+        /* skid struts */
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(x - 8, y + 6); c.lineTo(x - 10, y + 9);
+        c.moveTo(x + 8, y + 6); c.lineTo(x + 10, y + 9);
+        c.stroke();
+
+        /* ── MAIN ROTOR — fast-spinning, motion-blurred */
+        var rotorY = y - 14;
+        /* rotor blur disc */
+        var blurGrad = c.createRadialGradient(x, rotorY, 5, x, rotorY, 36);
+        blurGrad.addColorStop(0, 'rgba(220,220,220,0.50)');
+        blurGrad.addColorStop(0.7, 'rgba(180,180,180,0.20)');
+        blurGrad.addColorStop(1, 'rgba(180,180,180,0.00)');
+        c.fillStyle = blurGrad;
+        c.beginPath();
+        c.ellipse(x, rotorY, 36, 4, 0, 0, Math.PI * 2);
+        c.fill();
+        /* mast */
+        c.fillStyle = '#0f172a';
+        c.fillRect(x - 1.5, y - 14, 3, 6);
+        c.fillStyle = '#fbbf24';
+        c.beginPath(); c.arc(x, y - 14, 2.5, 0, Math.PI * 2); c.fill();
+        /* two blades drawn with current rotation for crisp ones over the blur */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 2.2;
+        c.lineCap = 'round';
+        var bl1c = Math.cos(rotorA);
+        var bl1s = Math.sin(rotorA);
+        c.beginPath();
+        c.moveTo(x - bl1c * 36, rotorY - bl1s * 3.5);
+        c.lineTo(x + bl1c * 36, rotorY + bl1s * 3.5);
+        c.stroke();
+        var bl2c = Math.cos(rotorA + Math.PI / 2);
+        var bl2s = Math.sin(rotorA + Math.PI / 2);
+        c.strokeStyle = 'rgba(31,41,55,0.35)';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        c.moveTo(x - bl2c * 36, rotorY - bl2s * 3.5);
+        c.lineTo(x + bl2c * 36, rotorY + bl2s * 3.5);
+        c.stroke();
+        c.lineCap = 'butt';
+
+        /* ── WATER BUCKET — lowers from the belly during work */
+        if (v.phase === 'work' || (v.bucketDrop && v.bucketDrop > 0.02)){
+            var drop = (v.bucketDrop || 0);
+            var bkx = x;
+            var bky = y + 10 + drop * 26;
+            /* cable */
+            c.strokeStyle = '#475569';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(x, y + 8);
+            c.lineTo(bkx, bky - 6);
+            c.stroke();
+            /* bucket body — orange canvas with red ring */
+            c.fillStyle = '#ea580c';
+            c.beginPath();
+            c.moveTo(bkx - 9, bky - 6);
+            c.lineTo(bkx + 9, bky - 6);
+            c.lineTo(bkx + 7, bky + 8);
+            c.lineTo(bkx - 7, bky + 8);
+            c.closePath();
+            c.fill();
+            c.fillStyle = '#9a3412';
+            c.fillRect(bkx - 9, bky - 6, 18, 2);
+            c.fillStyle = '#fbbf24';
+            c.fillRect(bkx - 9, bky - 4, 18, 1);
+            /* water visible inside (top edge) when not pouring */
+            if (v.workT < 700 || v.workT > 2400){
+                c.fillStyle = '#3b82f6';
+                c.fillRect(bkx - 7, bky - 4, 14, 4);
+                c.fillStyle = 'rgba(255,255,255,0.45)';
+                c.fillRect(bkx - 7, bky - 4, 14, 0.8);
+            } else {
+                /* mid-pour: water pouring from the bottom of the bucket */
+                c.fillStyle = 'rgba(59,130,246,0.85)';
+                c.fillRect(bkx - 6, bky + 6, 12, 4);
+            }
+        }
+
+        /* ── NAVIGATION LIGHTS — red (port), green (starboard), white strobe */
+        var navBlink = Math.sin(now * 0.012) > 0;
+        c.fillStyle = '#ef4444';
+        c.fillRect(x - dir * 20, y - 1, 2, 2);
+        c.fillStyle = '#10b981';
+        c.fillRect(x + dir * 18, y - 1, 2, 2);
+        c.fillStyle = navBlink ? '#ffffff' : 'rgba(255,255,255,0.25)';
+        c.fillRect(x - 1, y - 16, 2, 2);
+        c.fillStyle = 'rgba(255,255,255,' + (navBlink ? 0.55 : 0.15) + ')';
+        c.beginPath(); c.arc(x, y - 15, 5, 0, Math.PI * 2); c.fill();
+
+        /* ── SEARCHLIGHT BEAM when working */
+        if (v.phase === 'work' && v.target){
+            var tx = v.target.x;
+            var ty = v.target.y;
+            var beamG = c.createLinearGradient(x, y + 6, tx, ty);
+            beamG.addColorStop(0, 'rgba(255,250,200,0.45)');
+            beamG.addColorStop(1, 'rgba(255,250,200,0.00)');
+            c.fillStyle = beamG;
+            c.beginPath();
+            c.moveTo(x - 4, y + 6);
+            c.lineTo(x + 4, y + 6);
+            c.lineTo(tx + 16, ty);
+            c.lineTo(tx - 16, ty);
+            c.closePath();
+            c.fill();
+        }
+    }
+
+    /* Airborne pass — drawn DIRECTLY to dynC after the destination-over
+       composite, so helicopters and their water cascade always render
+       above the cars, the missiles, and everything else on screen. */
+    function drawReconstructionAirborne(c){
+        if (!reconstructOn && reconstructVehicles.length === 0) return;
+        for (var i = 0; i < reconstructVehicles.length; i++){
+            var v = reconstructVehicles[i];
+            if (!v.visible || v.kind !== 'helicopter') continue;
+
+            /* spray particles (water bucket cascade) first so the
+               helicopter body draws on top of its own water stream */
+            if (v.sprayParticles && v.sprayParticles.length){
+                for (var s = 0; s < v.sprayParticles.length; s++){
+                    var sp = v.sprayParticles[s];
+                    if (sp.kind !== 'mist') continue;
+                    var ma = 1 - sp.life / sp.maxLife;
+                    c.fillStyle = 'rgba(220,235,250,' + (0.18 * ma).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2); c.fill();
+                }
+                for (var s2 = 0; s2 < v.sprayParticles.length; s2++){
+                    var sp2 = v.sprayParticles[s2];
+                    if (sp2.kind !== 'cone') continue;
+                    var ca = 1 - sp2.life / sp2.maxLife;
+                    c.fillStyle = 'rgba(150,210,255,' + (0.65 * ca).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r, 0, Math.PI * 2); c.fill();
+                    if (sp2.life < 200){
+                        c.fillStyle = 'rgba(255,255,255,' + (0.5 * ca).toFixed(2) + ')';
+                        c.beginPath(); c.arc(sp2.x, sp2.y, sp2.r * 0.5, 0, Math.PI * 2); c.fill();
+                    }
+                }
+                for (var s3 = 0; s3 < v.sprayParticles.length; s3++){
+                    var sp3 = v.sprayParticles[s3];
+                    if (sp3.kind !== 'jet') continue;
+                    var ja = 1 - sp3.life / sp3.maxLife;
+                    c.strokeStyle = 'rgba(180,225,255,' + (0.55 * ja).toFixed(2) + ')';
+                    c.lineWidth = sp3.r * 1.4;
+                    c.lineCap = 'round';
+                    c.beginPath();
+                    c.moveTo(sp3.x, sp3.y);
+                    c.lineTo(sp3.x - sp3.vx * 2, sp3.y - sp3.vy * 2);
+                    c.stroke();
+                    c.fillStyle = 'rgba(240,250,255,' + (0.95 * ja).toFixed(2) + ')';
+                    c.beginPath(); c.arc(sp3.x, sp3.y, sp3.r * 0.9, 0, Math.PI * 2); c.fill();
+                }
+                c.lineCap = 'butt';
+            }
+
+            drawHelicopter(c, v);
+        }
+    }
+
+    function drawCone(c, co){
+        var x = co.x, y = co.y;
+        var s = co.size || 1;
+        var h = 11 * s;
+        /* base (dark mat) */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 5 * s, y, 10 * s, 1.6 * s);
+        /* main orange triangle body */
+        c.fillStyle = '#ea580c';
+        c.beginPath();
+        c.moveTo(x, y - h);
+        c.lineTo(x - 4 * s, y);
+        c.lineTo(x + 4 * s, y);
+        c.closePath();
+        c.fill();
+        /* shaded right side for depth */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath();
+        c.moveTo(x, y - h);
+        c.lineTo(x + 4 * s, y);
+        c.lineTo(x, y);
+        c.closePath();
+        c.fill();
+        /* white reflective bands */
+        c.fillStyle = '#ffffff';
+        c.fillRect(x - 3.2 * s, y - h * 0.45, 6.4 * s, 1.3 * s);
+        c.fillRect(x - 2.4 * s, y - h * 0.72, 4.8 * s, 1.0 * s);
+        /* tip highlight */
+        c.fillStyle = '#fb923c';
+        c.fillRect(x - 0.4 * s, y - h, 0.8 * s, 1.4 * s);
+    }
+
+    function drawWorker(c, wk){
+        var x = wk.x, y = wk.y;
+        var dir = wk.vx >= 0 ? 1 : -1;
+        var legSwing = Math.sin(wk.walkPhase) * 2;
+        var armSwing = wk.working
+                       ? Math.sin(wk.life * 0.012) * 8     /* big hammer swing */
+                       : -Math.sin(wk.walkPhase) * 1.6;    /* small walk swing */
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath(); c.ellipse(x, y, 5, 1.4, 0, 0, Math.PI * 2); c.fill();
+        /* body — high-vis shirt */
+        c.fillStyle = wk.shirtHue;
+        c.fillRect(x - 2.5, y - 11, 5, 6);
+        /* high-vis reflective stripes */
+        c.fillStyle = 'rgba(255,255,255,0.85)';
+        c.fillRect(x - 2.5, y - 9, 5, 0.7);
+        c.fillRect(x - 2.5, y - 7, 5, 0.7);
+        /* pants */
+        c.fillStyle = '#1e293b';
+        c.fillRect(x - 2.5, y - 5, 2.2, 5 + legSwing * 0.4);
+        c.fillRect(x + 0.3, y - 5, 2.2, 5 - legSwing * 0.4);
+        /* boots */
+        c.fillStyle = '#0f172a';
+        c.fillRect(x - 2.7, y - 1 + legSwing * 0.3, 2.5, 1.3);
+        c.fillRect(x + 0.2, y - 1 - legSwing * 0.3, 2.5, 1.3);
+        /* head */
+        c.fillStyle = '#fcd5b5';
+        c.beginPath(); c.arc(x, y - 13, 2.2, 0, Math.PI * 2); c.fill();
+        /* hard hat */
+        c.fillStyle = 'hsl(' + wk.helmetHue.toFixed(0) + ', 95%, 55%)';
+        c.beginPath();
+        c.arc(x, y - 14, 2.6, Math.PI, 2 * Math.PI);
+        c.closePath(); c.fill();
+        /* hat brim */
+        c.fillStyle = 'hsl(' + wk.helmetHue.toFixed(0) + ', 95%, 45%)';
+        c.fillRect(x - 3, y - 14, 6, 0.8);
+        /* arm holding tool */
+        c.strokeStyle = wk.shirtHue;
+        c.lineWidth = 1.4;
+        c.lineCap = 'round';
+        var armX = x + dir * 2;
+        var armY = y - 9;
+        var toolX = armX + dir * (3 + Math.abs(armSwing) * 0.4);
+        var toolY = armY + armSwing;
+        c.beginPath(); c.moveTo(armX, armY); c.lineTo(toolX, toolY); c.stroke();
+        /* tool */
+        if (wk.tool === 'wrench'){
+            c.strokeStyle = '#94a3b8';
+            c.lineWidth = 1.4;
+            c.beginPath(); c.moveTo(toolX, toolY); c.lineTo(toolX + dir * 3, toolY - 2); c.stroke();
+            c.fillStyle = '#cbd5e1';
+            c.fillRect(toolX + dir * 2.5, toolY - 3, 2, 2);
+        } else if (wk.tool === 'hammer'){
+            c.strokeStyle = '#78350f';
+            c.lineWidth = 1.4;
+            c.beginPath(); c.moveTo(toolX, toolY); c.lineTo(toolX + dir * 2.4, toolY - 2.2); c.stroke();
+            c.fillStyle = '#475569';
+            c.fillRect(toolX + dir * 2 - 1, toolY - 3.5, 3, 1.8);
+        } else {
+            /* pipe */
+            c.strokeStyle = '#64748b';
+            c.lineWidth = 2;
+            c.beginPath(); c.moveTo(toolX, toolY); c.lineTo(toolX + dir * 4, toolY - 0.6); c.stroke();
+        }
+        c.lineCap = 'butt';
+    }
+
+    function drawFireTruck(c, v){
+        var x = v.x, y = v.y;
+        var dir = (v.vx === 0 && v.target) ? (v.target.x > v.x ? 1 : -1)
+                                            : (v.vx >= 0 ? 1 : -1);
+        var now = Date.now();
+        /* chassis underbody shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath();
+        c.ellipse(x, y + 4, 28, 3, 0, 0, Math.PI * 2);
+        c.fill();
+        /* chassis — red with gradient feel */
+        var bodyGrad = c.createLinearGradient(x, y - 14, x, y);
+        bodyGrad.addColorStop(0, '#ef4444');
+        bodyGrad.addColorStop(0.5, '#dc2626');
+        bodyGrad.addColorStop(1, '#7f1d1d');
+        c.fillStyle = bodyGrad;
+        c.fillRect(x - 24, y - 14, 48, 14);
+        /* gold chrome trim */
+        c.fillStyle = '#fbbf24';
+        c.fillRect(x - 24, y - 5, 48, 1);
+        /* equipment lockers */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.fillRect(x - 22, y - 11, 8, 5);
+        c.fillRect(x - 12, y - 11, 8, 5);
+        c.fillRect(x - 2, y - 11, 8, 5);
+        c.fillRect(x + 8, y - 11, 8, 5);
+        /* cab */
+        c.fillStyle = '#b91c1c';
+        c.fillRect(x + (dir > 0 ? 9 : -25), y - 22, 16, 8);
+        /* cab roof curve */
+        c.fillStyle = '#7f1d1d';
+        c.fillRect(x + (dir > 0 ? 9 : -25), y - 22, 16, 2);
+        /* window — gradient blue (sky reflection) */
+        var winGrad = c.createLinearGradient(x, y - 20, x, y - 14);
+        winGrad.addColorStop(0, '#dbeafe');
+        winGrad.addColorStop(1, '#3b82f6');
+        c.fillStyle = winGrad;
+        c.fillRect(x + (dir > 0 ? 11 : -23), y - 20, 12, 5);
+        /* window frame */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.strokeRect(x + (dir > 0 ? 11 : -23), y - 20, 12, 5);
+        /* deployed water cannon turret on top — rotates toward target */
+        var aimAng = 0;
+        if (v.phase === 'work' && v.target){
+            aimAng = Math.atan2(v.target.y - (y - 18), v.target.x - x);
+        }
+        c.save();
+        c.translate(x, y - 18);
+        if (v.phase === 'work'){
+            c.rotate(aimAng);
+            /* cannon base */
+            c.fillStyle = '#374151';
+            c.beginPath(); c.arc(0, 0, 4, 0, Math.PI * 2); c.fill();
+            /* cannon barrel */
+            c.fillStyle = '#1f2937';
+            c.fillRect(0, -3, 16, 6);
+            /* nozzle */
+            c.fillStyle = '#fbbf24';
+            c.fillRect(14, -2.5, 4, 5);
+            c.fillStyle = '#fde047';
+            c.fillRect(16, -1.5, 2, 3);
+        }
+        c.restore();
+        /* ladder on top — yellow rails + rungs (when not in work mode) */
+        if (v.phase !== 'work'){
+            c.strokeStyle = '#fcd34d';
+            c.lineWidth = 1.3;
+            c.beginPath(); c.moveTo(x - 20, y - 16); c.lineTo(x + 20, y - 16); c.stroke();
+            c.beginPath(); c.moveTo(x - 20, y - 19); c.lineTo(x + 20, y - 19); c.stroke();
+            for (var ri = 0; ri < 9; ri++){
+                c.beginPath();
+                c.moveTo(x - 20 + ri * 5, y - 19);
+                c.lineTo(x - 20 + ri * 5, y - 16);
+                c.stroke();
+            }
+        }
+        /* hose snaking from cab to cannon during work */
+        if (v.phase === 'work'){
+            c.strokeStyle = '#dc2626';
+            c.lineWidth = 3;
+            c.beginPath();
+            c.moveTo(x + (dir > 0 ? 16 : -16), y - 8);
+            c.bezierCurveTo(x, y - 22, x, y - 22, x, y - 18);
+            c.stroke();
+            c.strokeStyle = '#fbbf24';
+            c.lineWidth = 1;
+            c.beginPath();
+            c.moveTo(x + (dir > 0 ? 16 : -16), y - 8);
+            c.bezierCurveTo(x, y - 22, x, y - 22, x, y - 18);
+            c.stroke();
+        }
+        /* wheels — proper rims + tires + rotation lines */
+        c.fillStyle = '#0f172a';
+        c.beginPath(); c.arc(x - 15, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 15, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#94a3b8';
+        c.beginPath(); c.arc(x - 15, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 15, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        /* spinning hubcap markers */
+        var spin = now * 0.02 + x * 0.1;
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(x - 15 + Math.cos(spin) * 2.4, y + 1 + Math.sin(spin) * 2.4);
+        c.lineTo(x - 15 - Math.cos(spin) * 2.4, y + 1 - Math.sin(spin) * 2.4);
+        c.moveTo(x + 15 + Math.cos(spin) * 2.4, y + 1 + Math.sin(spin) * 2.4);
+        c.lineTo(x + 15 - Math.cos(spin) * 2.4, y + 1 - Math.sin(spin) * 2.4);
+        c.stroke();
+        /* TWIN siren — alternating red/blue with sweeping glow */
+        var pulse = (Math.sin(now * 0.018) + 1) * 0.5;
+        c.fillStyle = pulse > 0.5 ? '#ef4444' : '#3b82f6';
+        c.fillRect(x - 6, y - 26, 5, 3);
+        c.fillStyle = pulse > 0.5 ? '#3b82f6' : '#ef4444';
+        c.fillRect(x + 1, y - 26, 5, 3);
+        /* glow halos */
+        c.fillStyle = 'rgba(239,68,68,' + (0.5 * (1 - pulse)).toFixed(2) + ')';
+        c.beginPath(); c.arc(x - 3, y - 24, 8, 0, Math.PI * 2); c.fill();
+        c.fillStyle = 'rgba(59,130,246,' + (0.5 * pulse).toFixed(2) + ')';
+        c.beginPath(); c.arc(x + 3, y - 24, 8, 0, Math.PI * 2); c.fill();
+        /* small headlight beam when traveling */
+        if (v.phase === 'travel' && Math.abs(v.vx) > 0.1){
+            c.fillStyle = 'rgba(255,250,200,0.30)';
+            c.beginPath();
+            c.moveTo(x + dir * 25, y - 11);
+            c.lineTo(x + dir * 60, y - 18);
+            c.lineTo(x + dir * 60, y - 2);
+            c.closePath();
+            c.fill();
+        }
+    }
+
+    function drawTowTruck(c, v){
+        var x = v.x, y = v.y;
+        var dir = (v.vx === 0 && v.target) ? (v.target.x > v.x ? 1 : -1)
+                                            : (v.vx >= 0 ? 1 : -1);
+        var now = Date.now();
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath(); c.ellipse(x, y + 4, 26, 3, 0, 0, Math.PI * 2); c.fill();
+        /* chassis — yellow gradient */
+        var bg = c.createLinearGradient(x, y - 12, x, y);
+        bg.addColorStop(0, '#fde047');
+        bg.addColorStop(0.5, '#facc15');
+        bg.addColorStop(1, '#a16207');
+        c.fillStyle = bg;
+        c.fillRect(x - 22, y - 12, 44, 12);
+        /* hazard chevron stripes — diagonal */
+        c.fillStyle = '#000000';
+        for (var st = 0; st < 7; st++){
+            c.save();
+            c.beginPath();
+            c.moveTo(x - 22 + st * 6.5, y - 4);
+            c.lineTo(x - 22 + st * 6.5 + 3, y - 4);
+            c.lineTo(x - 22 + st * 6.5 + 3 + 4, y);
+            c.lineTo(x - 22 + st * 6.5 + 4, y);
+            c.closePath();
+            c.fill();
+            c.restore();
+        }
+        /* cab */
+        c.fillStyle = '#ca8a04';
+        c.fillRect(x + (dir > 0 ? 7 : -23), y - 20, 16, 8);
+        /* window — sky-reflective gradient */
+        var twg = c.createLinearGradient(x, y - 20, x, y - 14);
+        twg.addColorStop(0, '#dbeafe');
+        twg.addColorStop(1, '#3b82f6');
+        c.fillStyle = twg;
+        c.fillRect(x + (dir > 0 ? 9 : -21), y - 18, 12, 5);
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.strokeRect(x + (dir > 0 ? 9 : -21), y - 18, 12, 5);
+        /* HYDRAULIC TOW BOOM — articulated two-segment arm */
+        var hookExtend = v.phase === 'work' ? Math.min(1, v.workT / 700) : 0.30;
+        /* pillar */
+        c.fillStyle = '#374151';
+        c.fillRect(x + (dir > 0 ? 13 : -17), y - 18, 4, 8);
+        /* boom segment 1 (rising from pillar) */
+        var p1x = x + dir * 15;
+        var p1y = y - 18;
+        var p2x = x + dir * (20 + 10 * hookExtend);
+        var p2y = y - 22 - 8 * hookExtend;
+        c.strokeStyle = '#0f172a';
+        c.lineWidth = 4;
+        c.lineCap = 'round';
+        c.beginPath(); c.moveTo(p1x, p1y); c.lineTo(p2x, p2y); c.stroke();
+        /* hydraulic piston detail */
+        c.strokeStyle = '#94a3b8';
+        c.lineWidth = 1.5;
+        c.beginPath(); c.moveTo(p1x, p1y - 2); c.lineTo(p1x + (p2x - p1x) * 0.6, p1y + (p2y - p1y) * 0.6 - 2); c.stroke();
+        /* boom segment 2 — extending out toward target */
+        var p3x = p2x + dir * (12 + 12 * hookExtend);
+        var p3y = p2y + 3 + 8 * hookExtend;
+        c.strokeStyle = '#0f172a';
+        c.lineWidth = 3.5;
+        c.beginPath(); c.moveTo(p2x, p2y); c.lineTo(p3x, p3y); c.stroke();
+        /* dangling chain to hook — swings during work */
+        var swing = v.phase === 'work' ? Math.sin(now * 0.008) * 4 : 0;
+        var chainLen = 8 + 4 * hookExtend;
+        var hookX = p3x + swing;
+        var hookY = p3y + chainLen;
+        c.strokeStyle = '#475569';
+        c.lineWidth = 1;
+        c.beginPath();
+        for (var ch = 0; ch < 5; ch++){
+            var cy0 = p3y + (chainLen / 5) * ch;
+            var cy1 = p3y + (chainLen / 5) * (ch + 1);
+            var cx0 = p3x + (hookX - p3x) * (ch / 5);
+            var cx1 = p3x + (hookX - p3x) * ((ch + 1) / 5);
+            c.moveTo(cx0, cy0); c.lineTo(cx1, cy1);
+        }
+        c.stroke();
+        /* link dots */
+        c.fillStyle = '#1f2937';
+        for (var ld = 0; ld <= 5; ld++){
+            var lcy = p3y + (chainLen / 5) * ld;
+            var lcx = p3x + (hookX - p3x) * (ld / 5);
+            c.beginPath(); c.arc(lcx, lcy, 1, 0, Math.PI * 2); c.fill();
+        }
+        c.lineCap = 'butt';
+        /* hook */
+        c.fillStyle = '#1f2937';
+        c.beginPath();
+        c.moveTo(hookX, hookY);
+        c.lineTo(hookX + 4, hookY + 1);
+        c.lineTo(hookX + 4, hookY + 5);
+        c.lineTo(hookX, hookY + 8);
+        c.lineTo(hookX - 3, hookY + 5);
+        c.closePath();
+        c.fill();
+        c.fillStyle = '#fbbf24';
+        c.fillRect(hookX - 1, hookY, 2, 2);
+        /* wheels */
+        c.fillStyle = '#0f172a';
+        c.beginPath(); c.arc(x - 14, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 14, y + 1, 4.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#94a3b8';
+        c.beginPath(); c.arc(x - 14, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(x + 14, y + 1, 2.4, 0, Math.PI * 2); c.fill();
+        var spin2 = now * 0.022 + x * 0.13;
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(x - 14 + Math.cos(spin2) * 2.4, y + 1 + Math.sin(spin2) * 2.4);
+        c.lineTo(x - 14 - Math.cos(spin2) * 2.4, y + 1 - Math.sin(spin2) * 2.4);
+        c.moveTo(x + 14 + Math.cos(spin2) * 2.4, y + 1 + Math.sin(spin2) * 2.4);
+        c.lineTo(x + 14 - Math.cos(spin2) * 2.4, y + 1 - Math.sin(spin2) * 2.4);
+        c.stroke();
+        /* amber strobe — alternates with halo */
+        var blink2 = Math.sin(now * 0.028) > 0;
+        c.fillStyle = blink2 ? '#fbbf24' : '#f97316';
+        c.fillRect(x - 2, y - 26, 4, 3);
+        c.fillStyle = blink2 ? 'rgba(251,191,36,0.55)' : 'rgba(249,115,22,0.55)';
+        c.beginPath(); c.arc(x, y - 24, 8, 0, Math.PI * 2); c.fill();
+        /* headlight when traveling */
+        if (v.phase === 'travel' && Math.abs(v.vx) > 0.1){
+            c.fillStyle = 'rgba(255,245,180,0.32)';
+            c.beginPath();
+            c.moveTo(x + dir * 22, y - 11);
+            c.lineTo(x + dir * 56, y - 18);
+            c.lineTo(x + dir * 56, y - 4);
+            c.closePath(); c.fill();
+        }
+    }
+
+    function drawCrane(c, v){
+        var x = v.x, y = v.y;
+        var now = Date.now();
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.beginPath(); c.ellipse(x, y + 4, 26, 3, 0, 0, Math.PI * 2); c.fill();
+        /* TANK TRACKS — animated tread pattern */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 20, y - 1, 40, 5);
+        c.fillStyle = '#0f172a';
+        var trackOff = (v.phase === 'travel') ? (now * 0.08) % 6 : 0;
+        for (var t = 0; t < 11; t++){
+            c.fillRect(x - 20 + ((t * 4 + trackOff) % 44) - 2, y, 2, 4);
+        }
+        /* roller wheels inside tracks */
+        c.fillStyle = '#475569';
+        for (var rw = 0; rw < 4; rw++){
+            c.beginPath();
+            c.arc(x - 15 + rw * 10, y + 1.5, 2, 0, Math.PI * 2);
+            c.fill();
+        }
+        /* chassis — yellow gradient */
+        var cg = c.createLinearGradient(x, y - 13, x, y);
+        cg.addColorStop(0, '#fde047');
+        cg.addColorStop(0.6, '#facc15');
+        cg.addColorStop(1, '#a16207');
+        c.fillStyle = cg;
+        c.fillRect(x - 17, y - 13, 34, 12);
+        /* black trim line */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 17, y - 6, 34, 1.5);
+        /* cab — rotates with the arm */
+        c.fillStyle = '#f59e0b';
+        c.fillRect(x - 8, y - 22, 16, 9);
+        /* window — sky-reflective */
+        var wg = c.createLinearGradient(x, y - 22, x, y - 16);
+        wg.addColorStop(0, '#dbeafe');
+        wg.addColorStop(1, '#1d4ed8');
+        c.fillStyle = wg;
+        c.fillRect(x - 6, y - 20, 12, 6);
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.strokeRect(x - 6, y - 20, 12, 6);
+        /* counterweight on back */
+        c.fillStyle = '#1f2937';
+        c.fillRect(x - 17, y - 19, 7, 7);
+        c.fillStyle = '#fbbf24';
+        c.fillRect(x - 16, y - 18, 5, 1.5);
+        c.fillRect(x - 16, y - 14, 5, 1.5);
+        /* CRANE ARM — rotates + swings during work */
+        var pivotX = x + 4, pivotY = y - 22;
+        var swingT = v.phase === 'work' ? v.workT * 0.003 : 0;
+        var armAngle = -Math.PI / 3 + Math.sin(swingT) * 0.35;
+        var armLen   = 50;
+        var armEndX  = pivotX + Math.cos(armAngle) * armLen;
+        var armEndY  = pivotY + Math.sin(armAngle) * armLen;
+        /* main boom — fat yellow */
+        c.strokeStyle = '#facc15';
+        c.lineWidth = 5;
+        c.lineCap = 'round';
+        c.beginPath();
+        c.moveTo(pivotX, pivotY);
+        c.lineTo(armEndX, armEndY);
+        c.stroke();
+        /* outer boom outline */
+        c.strokeStyle = '#a16207';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(pivotX, pivotY);
+        c.lineTo(armEndX, armEndY);
+        c.stroke();
+        /* INDUSTRIAL LATTICE — proper cross-bracing pattern */
+        c.strokeStyle = '#7c2d12';
+        c.lineWidth = 0.7;
+        for (var seg = 0; seg < 8; seg++){
+            var f  = seg / 8;
+            var f2 = (seg + 1) / 8;
+            var midX = pivotX + (armEndX - pivotX) * (f + f2) * 0.5;
+            var midY = pivotY + (armEndY - pivotY) * (f + f2) * 0.5;
+            /* perpendicular offset */
+            var perpDX = -(armEndY - pivotY) / armLen * 2.5;
+            var perpDY =  (armEndX - pivotX) / armLen * 2.5;
+            c.beginPath();
+            c.moveTo(pivotX + (armEndX - pivotX) * f + perpDX,
+                     pivotY + (armEndY - pivotY) * f + perpDY);
+            c.lineTo(pivotX + (armEndX - pivotX) * f2 - perpDX,
+                     pivotY + (armEndY - pivotY) * f2 - perpDY);
+            c.stroke();
+            c.beginPath();
+            c.moveTo(pivotX + (armEndX - pivotX) * f - perpDX,
+                     pivotY + (armEndY - pivotY) * f - perpDY);
+            c.lineTo(pivotX + (armEndX - pivotX) * f2 + perpDX,
+                     pivotY + (armEndY - pivotY) * f2 + perpDY);
+            c.stroke();
+        }
+        c.lineCap = 'butt';
+        /* boom tip pulley */
+        c.fillStyle = '#1f2937';
+        c.beginPath(); c.arc(armEndX, armEndY, 2.2, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#94a3b8';
+        c.beginPath(); c.arc(armEndX, armEndY, 1.2, 0, Math.PI * 2); c.fill();
+        /* dangling cable + hook block + payload */
+        var dangle = v.phase === 'work' ? 12 + Math.sin(v.workT * 0.006) * 10 : 8;
+        c.strokeStyle = '#374151';
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(armEndX, armEndY);
+        c.lineTo(armEndX, armEndY + dangle);
+        c.stroke();
+        /* HOOK BLOCK — squared with crossbar */
+        c.fillStyle = '#1e293b';
+        c.fillRect(armEndX - 3.5, armEndY + dangle, 7, 5);
+        c.fillStyle = '#475569';
+        c.fillRect(armEndX - 3.5, armEndY + dangle + 1, 7, 1);
+        /* if working, dangle a SUSPENDED BUILDING BLOCK from the hook */
+        if (v.phase === 'work'){
+            var bxL = armEndX - 8, byL = armEndY + dangle + 5;
+            /* girder/block being placed */
+            c.fillStyle = '#94a3b8';
+            c.fillRect(bxL, byL, 16, 6);
+            c.fillStyle = '#475569';
+            c.fillRect(bxL, byL, 16, 1.5);
+            c.fillRect(bxL, byL + 4.5, 16, 1.5);
+            /* rivet dots */
+            c.fillStyle = '#1f2937';
+            for (var rv = 0; rv < 4; rv++){
+                c.beginPath();
+                c.arc(bxL + 2 + rv * 4, byL + 3, 0.7, 0, Math.PI * 2);
+                c.fill();
+            }
+        }
+        /* PIVOT base detail */
+        c.fillStyle = '#1f2937';
+        c.beginPath(); c.arc(pivotX, pivotY, 4, 0, Math.PI * 2); c.fill();
+        c.fillStyle = '#fbbf24';
+        c.beginPath(); c.arc(pivotX, pivotY, 2, 0, Math.PI * 2); c.fill();
+        /* warning strobe */
+        var blink3 = Math.sin(now * 0.022 + x * 0.1) > 0;
+        c.fillStyle = blink3 ? '#facc15' : '#fde047';
+        c.fillRect(pivotX - 2, pivotY - 5, 4, 2);
+        c.fillStyle = blink3 ? 'rgba(250,204,21,0.55)' : 'rgba(253,224,71,0.55)';
+        c.beginPath(); c.arc(pivotX, pivotY - 4, 6, 0, Math.PI * 2); c.fill();
+        /* headlight when traveling */
+        if (v.phase === 'travel' && Math.abs(v.vx) > 0.1){
+            var dirC = v.vx >= 0 ? 1 : -1;
+            c.fillStyle = 'rgba(255,250,200,0.30)';
+            c.beginPath();
+            c.moveTo(x + dirC * 18, y - 10);
+            c.lineTo(x + dirC * 50, y - 16);
+            c.lineTo(x + dirC * 50, y - 2);
+            c.closePath(); c.fill();
+        }
+    }
+
+    /* ─── Cap auto-attack / auto-defence at AUTO_MAX_DURATION ─── */
+    function updateAutoTimers(){
+        var now = (typeof performance !== 'undefined' && performance.now)
+                  ? performance.now() : Date.now();
+        if (autoAttackOn && (now - autoAttackStartT) > AUTO_MAX_DURATION){
+            autoAttackOn = false;
+            autoAttackTimer = 0;
+            var aBtn = document.getElementById('ttAttackAutoBtn');
+            if (aBtn){
+                aBtn.setAttribute('aria-pressed', 'false');
+                aBtn.classList.remove('on');
+                aBtn.textContent = 'OFF';
+            }
+            startReconstruction();
+        }
+        if (autoDefenceOn && (now - autoDefenceStartT) > AUTO_MAX_DURATION){
+            autoDefenceOn = false;
+            autoDefenceTimer = 0;
+            var dBtn = document.getElementById('ttDefenceAutoBtn');
+            if (dBtn){
+                dBtn.setAttribute('aria-pressed', 'false');
+                dBtn.classList.remove('on');
+                dBtn.textContent = 'OFF';
+            }
+            startReconstruction();
+        }
+    }
+
+    /* ─── Public window API ──────────────────────────────────── */
+    window.startReconstruction = startReconstruction;
+    window.stopReconstruction  = stopReconstruction;
+    window.isReconstructing    = function(){ return reconstructOn; };
+    window.getReconstructionTimer = function(){
+        /* No fixed timer anymore — return elapsed time so the widget
+           tooltip can show how long the rebuild has been running. */
+        if (!reconstructOn) return 0;
+        var now = (typeof performance !== 'undefined' && performance.now)
+                  ? performance.now() : Date.now();
+        return now - reconstructStartedAt;
+    };
+    window.getReconstructionDamage = function(){
+        return reconstructOn ? damageCount() : 0;
+    };
+    window.toggleReconstruction = function(){
+        if (reconstructOn) { stopReconstruction(); return false; }
+        startReconstruction();
+        return true;
+    };
+    /* slow ↔ fast control. `m` ∈ [0.1, 5] — values < 1 slow the rebuild
+       down (more time to admire animations), values > 1 speed it up. */
+    window.setReconstructionSpeed = function(m){
+        var v = parseFloat(m);
+        if (isNaN(v)) return;
+        reconstructSpeed = Math.max(0.1, Math.min(5, v));
+    };
+    window.getReconstructionSpeed = function(){ return reconstructSpeed; };
+    /* Instant rebuild — completes the current cycle right now. */
+    window.completeReconstructionNow = function(){
+        if (!reconstructOn){
+            /* nothing in flight; just clear any leftover damage anyway */
+            finalizeReconstruction();
+            return false;
+        }
+        finalizeReconstruction();
+        return true;
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       MILITARY PARADE SYSTEM
+       ───────────────────────────────────────────────────────────
+       Spawns a coordinated air + ground show on the canvas:
+         • SKY: fighter jets in formation + attack helicopters
+                with spinning rotors
+         • ROAD: tanks with rotating turrets + missile-launcher
+                trucks with raised rockets
+       Each unit is rendered with multiple parts (fuselage, wings,
+       canopy, exhaust, rotor blur, tracks, cannon, etc.) so the
+       parade reads as a detailed military display, not silhouettes.
+
+       Public API:
+         window.toggleParade()  → boolean (new state)
+         window.startParade()   → spawns the units
+         window.stopParade()    → clears them
+         window.isParadeOn()    → boolean
+         window.getParadeStats()→ { air, ground }
+       ═══════════════════════════════════════════════════════════ */
+    var paradeOn = false;
+    var paradeForcedPin = false;   /* did we pin the weather to fireworks? */
+    var paradePrevEventIdx = -1;   /* event index before the parade pinned it */
+    var paradeJets = [];
+    var paradeHelis = [];
+    var paradeBannerPlanes = [];   /* slow biplanes pulling ceremonial banners */
+    var paradeBlimps = [];         /* hot-air-style military blimps */
+    var paradeTanks = [];
+    var paradeLaunchers = [];
+    var paradeAPCs = [];           /* armoured personnel carriers */
+    var paradeHumvees = [];        /* military jeeps with roof gunners */
+    var paradeHowitzers = [];      /* self-propelled artillery */
+    var paradeSoldiers = [];       /* marching soldier squads */
+    var paradeContrails = [];      /* jet vapour trails */
+    var paradeFlares = [];         /* drop flares from helis */
+
+    function startParade(){
+        if (paradeOn) return;
+
+        /* MUTUAL EXCLUSION: only one of attack / defence / strategy /
+           reconstruction / parade can run at a time. Cancel every
+           other mode first, including fast-forwarding any in-progress
+           reconstruction so the city is fully clean when the parade
+           starts.
+
+           NOTE: we call the INTERNAL state mutators directly (not the
+           wrapped window.* APIs) so the wraps don't loop back and try
+           to restart reconstruction or kick the parade off again. */
+        if (typeof missileArmed !== 'undefined' && missileArmed) {
+            missileArmed = false;
+            if (canvas && canvas.style) canvas.style.cursor = '';
+        }
+        if (typeof defenceMode !== 'undefined' && defenceMode) {
+            defenceMode = false;
+            defenceActive = true;
+            if (canvas && canvas.style) canvas.style.cursor = '';
+        }
+        if (typeof strategyMode !== 'undefined' && strategyMode) {
+            strategyMode = false;
+            if (canvas && canvas.style) canvas.style.cursor = '';
+        }
+        /* INSTANT REBUILD on parade start.
+           Per user spec: clicking "Parade" should always behave as if
+           the user had ALSO clicked the "REBUILD NOW" button — the
+           city becomes pristine even if no rebuild was in progress.
+           `stopReconstruction()` early-returns when nothing is in
+           flight, so it doesn't clear lingering damage from an
+           attack the user never cleaned up. `finalizeReconstruction()`
+           ALWAYS clears every damage array (fires, smoke, wreckage,
+           craters, broken buildings, all exotic FX) — exactly what
+           the "REBUILD NOW" button calls. */
+        if (typeof finalizeReconstruction === 'function') {
+            finalizeReconstruction();
+        }
+        /* reconstructOn might have been left set by finalize; reset
+           the flag and any UI ring just in case. */
+        if (typeof reconstructOn !== 'undefined') reconstructOn = false;
+        /* sync the UI buttons that track these modes so their
+           highlight rings disappear immediately */
+        if (typeof document !== 'undefined') {
+            var mWrap = document.getElementById('missileBtn');
+            if (mWrap) mWrap.classList.remove('armed');
+            var dWrap = document.getElementById('defenceBtn');
+            if (dWrap) dWrap.classList.add('offline');
+            var rWrap = document.getElementById('reconstructBtn');
+            if (rWrap) rWrap.classList.remove('active');
+            var sWrap = document.getElementById('strategyBtn');
+            if (sWrap) sWrap.classList.remove('active');
+        }
+
+        paradeOn = true;
+
+        /* Pin weather to fireworks for the duration of the parade —
+           celebratory backdrop. Record the previous event index +
+           pin state so stopParade can restore them. */
+        paradePrevEventIdx = eventIndex;
+        var fwIdx = -1;
+        for (var ei=0; ei<EVENTS.length; ei++) {
+            if (EVENTS[ei].type === 'fireworks') { fwIdx = ei; break; }
+        }
+        if (fwIdx >= 0) {
+            setEvent(fwIdx);
+            if (!weatherPinned) {
+                weatherPinned = true;
+                paradeForcedPin = true;
+            }
+        }
+        var rdH = H - GROUND;
+        var skyTop = Math.max(H*0.04, GROUND*0.10);
+        var skyMid = GROUND*0.30;
+        var skyLow = GROUND*0.55;
+
+        /* ── SKY — saturated across every altitude band ─────────── */
+
+        /* JETS — 5 altitude bands, 6-8 jets per band = 36 jets. */
+        var jetBands = [
+            { y: skyTop,                 count: 8, size: 20, vx: 1.6 },
+            { y: skyTop + 50,            count: 7, size: 18, vx: 1.5 },
+            { y: skyMid - 30,            count: 8, size: 17, vx: 1.7 },
+            { y: skyMid + 20,            count: 7, size: 16, vx: 1.8 },
+            { y: skyLow - 10,            count: 6, size: 15, vx: 1.9 }
+        ];
+        for (var jb=0; jb<jetBands.length; jb++){
+            var band = jetBands[jb];
+            for (var j=0; j<band.count; j++){
+                paradeJets.push({
+                    x: -W*0.25 + j*(W*0.16) + (jb%2 ? W*0.08 : 0),
+                    y: band.y + (j===0 ? 0 : (j%2 ? -12 : 12)),
+                    vx: band.vx + rng(-0.1, 0.1),
+                    size: band.size,
+                    isLead: j===0,
+                    bank: 0,
+                    afterburner: rng(0, Math.PI*2)
+                });
+            }
+        }
+
+        /* HELICOPTERS — 14 across two altitude bands. */
+        for (var h=0; h<14; h++){
+            paradeHelis.push({
+                x: -W*0.05 + h*(W*0.10),
+                y: (h%2 ? skyMid + 10 : skyMid + 50),
+                vx: 0.55 + rng(0, 0.15),
+                size: 19 + (h%3 ? 0 : 3),
+                rotor: rng(0, Math.PI*2),
+                rotorSpeed: 0.7,
+                tailRotor: 0,
+                bob: rng(0, Math.PI*2)
+            });
+        }
+
+        /* BANNER PLANES — 6 strung across low altitude carrying long
+           banners (so the whole low sky is filled with text + colour). */
+        var bannerTexts = ['VICTORY','FREEDOM','HONOR','GLORY','UNITY','PEACE'];
+        for (var b=0; b<bannerTexts.length; b++){
+            paradeBannerPlanes.push({
+                x: -W*0.5 + b*(W*0.35),
+                y: skyLow + (b%2 ? 0 : 28),
+                vx: 0.85,
+                size: 13,
+                propRot: 0,
+                bannerText: bannerTexts[b],
+                bob: rng(0, Math.PI*2)
+            });
+        }
+
+        /* BLIMPS — 4 stacked high overhead. */
+        for (var bl=0; bl<4; bl++){
+            paradeBlimps.push({
+                x: -W*0.4 + bl*(W*0.32),
+                y: skyTop - 40 + (bl%2 ? 22 : 0),
+                vx: 0.30,
+                size: 26,
+                bob: rng(0, Math.PI*2)
+            });
+        }
+
+        /* ── GROUND — BOTH lanes fully saturated ──────────────────
+           The original lane y values were too close to the road top —
+           the "lower" lane visually read as the same band as the
+           upper. Force a wider vertical separation so units clearly
+           occupy BOTH sides of the yellow centre stripe. The lower
+           lane y is now set well below the stripe (rdH*0.32) and the
+           upper lane is bumped slightly down (rdH*0.04) so both bands
+           sit cleanly inside the road geometry. */
+        var laneUpperY = GROUND + rdH * 0.04;
+        var laneLowerY = GROUND + rdH * 0.32;
+
+        /* ─── LOWER LANE — saturated heavy column ─────────────────
+           Spacing tightened to W*0.08–0.10 between heavy vehicles,
+           with multiple unit types interleaved so the road reads as
+           an unbroken column of armour + artillery. */
+
+        /* TANKS — 16, tight spacing */
+        for (var t=0; t<16; t++){
+            paradeTanks.push({
+                x: -W*0.15 + t*(W*0.10),
+                y: laneLowerY,
+                vx: 0.55,
+                size: 22,
+                turretAngle: 0,
+                trackOffset: rng(0, 1000)
+            });
+        }
+        /* MISSILE LAUNCHERS — 10, interleaved with tanks */
+        for (var m=0; m<10; m++){
+            paradeLaunchers.push({
+                x: -W*0.10 + m*(W*0.12),
+                y: laneLowerY + 1,
+                vx: 0.50,
+                size: 24,
+                wheelOffset: rng(0, 1000)
+            });
+        }
+        /* HOWITZERS — 8 in lower lane */
+        for (var ho=0; ho<8; ho++){
+            paradeHowitzers.push({
+                x: -W*0.05 + ho*(W*0.14),
+                y: laneLowerY,
+                vx: 0.48,
+                size: 20,
+                wheelOffset: rng(0, 1000)
+            });
+        }
+        /* APCs LOWER — 7 packed in lower lane */
+        for (var apcL=0; apcL<7; apcL++){
+            paradeAPCs.push({
+                x: -W*0.12 + apcL*(W*0.16),
+                y: laneLowerY,
+                vx: 0.60,
+                size: 19,
+                wheelOffset: rng(0, 1000),
+                turretAngle: 0
+            });
+        }
+        /* SOLDIER SQUADS LOWER — 6 squads filling gaps */
+        for (var sqL=0; sqL<6; sqL++){
+            paradeSoldiers.push({
+                x: -W*0.05 + sqL*(W*0.18),
+                y: laneLowerY + 4,
+                vx: 0.45,
+                rows: 2,
+                cols: 4,
+                marchPhase: rng(0, Math.PI*2)
+            });
+        }
+
+        /* ─── UPPER LANE — saturated light + mixed column ─────────── */
+
+        /* HUMVEES — 16 in the upper lane */
+        for (var hu=0; hu<16; hu++){
+            paradeHumvees.push({
+                x: -W*0.08 + hu*(W*0.08),
+                y: laneUpperY,
+                vx: 0.70,
+                size: 15,
+                wheelOffset: rng(0, 1000)
+            });
+        }
+        /* APCs UPPER — 9 across the upper lane */
+        for (var a=0; a<9; a++){
+            paradeAPCs.push({
+                x: -W*0.10 + a*(W*0.13),
+                y: laneUpperY,
+                vx: 0.60,
+                size: 19,
+                wheelOffset: rng(0, 1000),
+                turretAngle: 0
+            });
+        }
+        /* HOWITZERS UPPER — 4 in upper lane */
+        for (var hoU=0; hoU<4; hoU++){
+            paradeHowitzers.push({
+                x: -W*0.10 + hoU*(W*0.28),
+                y: laneUpperY,
+                vx: 0.48,
+                size: 20,
+                wheelOffset: rng(0, 1000)
+            });
+        }
+        /* TANKS UPPER — 5 in upper lane (mixed armour) */
+        for (var tU=0; tU<5; tU++){
+            paradeTanks.push({
+                x: -W*0.08 + tU*(W*0.22),
+                y: laneUpperY,
+                vx: 0.55,
+                size: 22,
+                turretAngle: 0,
+                trackOffset: rng(0, 1000)
+            });
+        }
+        /* MISSILE LAUNCHERS UPPER — 3 */
+        for (var mU=0; mU<3; mU++){
+            paradeLaunchers.push({
+                x: -W*0.12 + mU*(W*0.36),
+                y: laneUpperY + 1,
+                vx: 0.50,
+                size: 24,
+                wheelOffset: rng(0, 1000)
+            });
+        }
+        /* SOLDIER SQUADS UPPER — 8 squads, packed tight */
+        for (var sqU=0; sqU<8; sqU++){
+            paradeSoldiers.push({
+                x: -W*0.05 + sqU*(W*0.14),
+                y: laneUpperY + 4,
+                vx: 0.45,
+                rows: 2,
+                cols: 4,
+                marchPhase: rng(0, Math.PI*2)
+            });
+        }
+    }
+
+    function stopParade(){
+        var wasOn = paradeOn;
+        paradeOn = false;
+        /* visually deselect the parade widget button so its
+           olive-ring glow disappears as soon as another mode
+           takes over. */
+        if (wasOn && typeof document !== 'undefined') {
+            var pWrap = document.getElementById('paradeBtn');
+            if (pWrap) pWrap.classList.remove('active');
+        }
+        paradeJets.length = 0;
+        paradeHelis.length = 0;
+        paradeBannerPlanes.length = 0;
+        paradeBlimps.length = 0;
+        paradeTanks.length = 0;
+        paradeLaunchers.length = 0;
+        paradeAPCs.length = 0;
+        paradeHumvees.length = 0;
+        paradeHowitzers.length = 0;
+        paradeSoldiers.length = 0;
+        paradeContrails.length = 0;
+        paradeFlares.length = 0;
+        /* Unpin the fireworks weather if we were the one that pinned
+           it — leave it alone if the user had already pinned a
+           different event before starting the parade. */
+        if (paradeForcedPin) {
+            weatherPinned = false;
+            paradeForcedPin = false;
+        }
+        paradePrevEventIdx = -1;
+    }
+
+    function updateParade(dt){
+        if (!paradeOn) return;
+        var k = dt/16;
+
+        /* JETS */
+        for (var i=0; i<paradeJets.length; i++){
+            var j = paradeJets[i];
+            j.x += j.vx*k;
+            j.afterburner += 0.08*dt;
+            if (j.isLead) j.bank = Math.sin((j.x + j.afterburner)*0.005)*0.12;
+            paradeContrails.push({
+                x: j.x - j.size*1.5, y: j.y + 1,
+                life: 0, maxLife: 2400, w: j.size*0.5
+            });
+            if (j.x > W + 80) j.x = -W*0.45 - rng(0, W*0.3);
+        }
+        for (var i=paradeContrails.length-1; i>=0; i--){
+            paradeContrails[i].life += dt;
+            if (paradeContrails[i].life > paradeContrails[i].maxLife)
+                paradeContrails.splice(i,1);
+        }
+        if (paradeContrails.length > 900) paradeContrails.splice(0, paradeContrails.length-900);
+
+        /* HELIS */
+        for (var i=0; i<paradeHelis.length; i++){
+            var h = paradeHelis[i];
+            h.x += h.vx*k;
+            h.bob += 0.003*dt;
+            h.rotor += h.rotorSpeed*k;
+            h.tailRotor += h.rotorSpeed*1.7*k;
+            if (Math.random() < 0.012) paradeFlares.push({
+                x: h.x, y: h.y + 8,
+                vx: rng(-0.3, 0.3), vy: rng(0.5, 1.2),
+                life: 0, maxLife: rng(900, 1500),
+                hue: rng(0, 360)
+            });
+            if (h.x > W + 60) h.x = -W*0.20 - rng(0, W*0.4);
+        }
+        for (var i=paradeFlares.length-1; i>=0; i--){
+            var fl = paradeFlares[i];
+            fl.x += fl.vx*k; fl.y += fl.vy*k; fl.vy += 0.01*k;
+            fl.life += dt;
+            if (fl.life > fl.maxLife) paradeFlares.splice(i,1);
+        }
+
+        /* BANNER PLANES */
+        for (var i=0; i<paradeBannerPlanes.length; i++){
+            var bp = paradeBannerPlanes[i];
+            bp.x += bp.vx*k;
+            bp.propRot += 0.4*k;
+            bp.bob += 0.002*dt;
+            if (bp.x > W + 200) bp.x = -W*0.4 - rng(0, W*0.6);
+        }
+
+        /* BLIMPS — slow drift */
+        for (var i=0; i<paradeBlimps.length; i++){
+            var bz = paradeBlimps[i];
+            bz.x += bz.vx*k;
+            bz.bob += 0.0015*dt;
+            if (bz.x > W + 200) bz.x = -W*0.6 - rng(0, W*0.4);
+        }
+
+        /* TANKS */
+        for (var i=0; i<paradeTanks.length; i++){
+            var t = paradeTanks[i];
+            t.x += t.vx*k;
+            t.trackOffset += t.vx*4*k;
+            t.turretAngle = Math.sin((t.x + t.trackOffset*0.01)*0.005)*0.20;
+            if (t.x > W + 80) t.x = -W*0.20 - rng(0, W*0.4);
+        }
+        /* LAUNCHERS */
+        for (var i=0; i<paradeLaunchers.length; i++){
+            var ml = paradeLaunchers[i];
+            ml.x += ml.vx*k;
+            ml.wheelOffset += ml.vx*4*k;
+            if (ml.x > W + 100) ml.x = -W*0.50 - rng(0, W*0.4);
+        }
+        /* APCs */
+        for (var i=0; i<paradeAPCs.length; i++){
+            var apc = paradeAPCs[i];
+            apc.x += apc.vx*k;
+            apc.wheelOffset += apc.vx*4*k;
+            apc.turretAngle = Math.sin(apc.x*0.005)*0.30;
+            if (apc.x > W + 60) apc.x = -W*0.15 - rng(0, W*0.4);
+        }
+        /* HUMVEES */
+        for (var i=0; i<paradeHumvees.length; i++){
+            var hv = paradeHumvees[i];
+            hv.x += hv.vx*k;
+            hv.wheelOffset += hv.vx*4*k;
+            if (hv.x > W + 50) hv.x = -W*0.10 - rng(0, W*0.4);
+        }
+        /* HOWITZERS */
+        for (var i=0; i<paradeHowitzers.length; i++){
+            var ht = paradeHowitzers[i];
+            ht.x += ht.vx*k;
+            ht.wheelOffset += ht.vx*4*k;
+            if (ht.x > W + 80) ht.x = -W*0.40 - rng(0, W*0.4);
+        }
+        /* SOLDIERS — march phase drives leg + arm swing */
+        for (var i=0; i<paradeSoldiers.length; i++){
+            var sq = paradeSoldiers[i];
+            sq.x += sq.vx*k;
+            sq.marchPhase += 0.012*dt;   /* fast march tempo */
+            if (sq.x > W + 80) sq.x = -W*0.30 - rng(0, W*0.4);
+        }
+    }
+
+    /* ── PARADE rendering — highly-detailed military units ── */
+    function drawParade(c){
+        if (!paradeOn) return;
+
+        /* SKY back→front order: blimps → contrails → banner planes →
+           helis → jets. Heaviest air units (jets) sit on top. */
+        for (var i=0; i<paradeBlimps.length; i++) drawParadeBlimp(c, paradeBlimps[i]);
+        for (var i=0; i<paradeContrails.length; i++){
+            var ct = paradeContrails[i];
+            var op = (1 - ct.life/ct.maxLife) * 0.55;
+            c.fillStyle = 'rgba(255,255,255,' + op + ')';
+            c.beginPath();
+            c.ellipse(ct.x, ct.y, ct.w, ct.w*0.45, 0, 0, Math.PI*2);
+            c.fill();
+        }
+        for (var i=0; i<paradeBannerPlanes.length; i++) drawParadeBanner(c, paradeBannerPlanes[i]);
+        for (var i=0; i<paradeHelis.length; i++) drawParadeHeli(c, paradeHelis[i]);
+        for (var i=0; i<paradeFlares.length; i++){
+            var fl = paradeFlares[i];
+            var op = 1 - fl.life/fl.maxLife;
+            c.fillStyle = 'hsla(' + fl.hue + ',95%,65%,' + op + ')';
+            c.beginPath(); c.arc(fl.x, fl.y, 3, 0, Math.PI*2); c.fill();
+            c.fillStyle = 'rgba(255,255,255,' + (op*0.7) + ')';
+            c.beginPath(); c.arc(fl.x, fl.y, 1.2, 0, Math.PI*2); c.fill();
+        }
+        for (var i=0; i<paradeJets.length; i++) drawParadeJet(c, paradeJets[i]);
+
+        /* GROUND back→front: launchers + howitzers + tanks (heavy
+           lower lane), APCs + humvees (lighter upper lane), soldiers
+           on top so faces / muzzles read clearly. */
+        for (var i=0; i<paradeLaunchers.length; i++) drawParadeLauncher(c, paradeLaunchers[i]);
+        for (var i=0; i<paradeHowitzers.length; i++) drawParadeHowitzer(c, paradeHowitzers[i]);
+        for (var i=0; i<paradeAPCs.length; i++)      drawParadeAPC(c, paradeAPCs[i]);
+        for (var i=0; i<paradeHumvees.length; i++)   drawParadeHumvee(c, paradeHumvees[i]);
+        for (var i=0; i<paradeTanks.length; i++)     drawParadeTank(c, paradeTanks[i]);
+        for (var i=0; i<paradeSoldiers.length; i++)  drawParadeSquad(c, paradeSoldiers[i]);
+    }
+
+    /* ── INDIVIDUAL UNIT RENDERERS ──────────────────────────── */
+
+    function drawParadeJet(c, j){
+        var s = j.size;
+        var x = j.x, y = j.y;
+        c.save();
+        c.translate(x, y);
+        c.rotate(j.bank);
+        /* drop shadow */
+        c.fillStyle = 'rgba(0,0,0,0.18)';
+        c.beginPath();
+        c.ellipse(0, s*0.18, s*0.95, s*0.20, 0, 0, Math.PI*2);
+        c.fill();
+        /* DELTA WINGS — broad triangle */
+        c.fillStyle = '#3a4858';
+        c.beginPath();
+        c.moveTo(-s*0.8,  0);
+        c.lineTo( s*0.4, -s*0.85);
+        c.lineTo( s*0.6,  0);
+        c.lineTo( s*0.4,  s*0.85);
+        c.closePath();
+        c.fill();
+        /* wing-edge highlight */
+        c.strokeStyle = 'rgba(255,255,255,0.30)';
+        c.lineWidth = 0.8;
+        c.stroke();
+        /* MAIN FUSELAGE — sleek elongated body */
+        var fg = c.createLinearGradient(0, -s*0.3, 0, s*0.3);
+        fg.addColorStop(0, '#5a6a7c');
+        fg.addColorStop(0.5, '#8090a4');
+        fg.addColorStop(1, '#3a4452');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-s*1.4, 0);
+        c.lineTo(-s*1.1, -s*0.20);
+        c.lineTo( s*0.9, -s*0.18);
+        c.lineTo( s*1.5,  0);
+        c.lineTo( s*0.9,  s*0.18);
+        c.lineTo(-s*1.1,  s*0.20);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.45)';
+        c.lineWidth = 0.6;
+        c.stroke();
+        /* COCKPIT canopy — small dark teardrop on top */
+        var cg = c.createLinearGradient(0, -s*0.30, 0, -s*0.05);
+        cg.addColorStop(0, 'rgba(140,200,255,0.85)');
+        cg.addColorStop(1, 'rgba(20,40,80,0.95)');
+        c.fillStyle = cg;
+        c.beginPath();
+        c.ellipse(s*0.45, -s*0.15, s*0.30, s*0.12, 0, 0, Math.PI*2);
+        c.fill();
+        /* TAIL FIN — small triangle */
+        c.fillStyle = '#4a5868';
+        c.beginPath();
+        c.moveTo(-s*0.9, 0);
+        c.lineTo(-s*1.2, -s*0.55);
+        c.lineTo(-s*0.7, 0);
+        c.closePath();
+        c.fill();
+        /* MISSILES under wings */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(-s*0.1, -s*0.62, s*0.6, s*0.10);
+        c.fillRect(-s*0.1,  s*0.52, s*0.6, s*0.10);
+        c.fillStyle = '#cc2a2a';
+        c.fillRect( s*0.45, -s*0.62, s*0.12, s*0.10);
+        c.fillRect( s*0.45,  s*0.52, s*0.12, s*0.10);
+        /* AFTERBURNER — pulsing flame behind */
+        var flick = 0.7 + 0.3*Math.sin(j.afterburner);
+        var ag = c.createRadialGradient(-s*1.55, 0, 0, -s*1.55, 0, s*0.8);
+        ag.addColorStop(0, 'rgba(255,250,200,' + (0.95*flick) + ')');
+        ag.addColorStop(0.5, 'rgba(255,150,40,' + (0.7*flick) + ')');
+        ag.addColorStop(1, 'rgba(180,30,0,0)');
+        c.fillStyle = ag;
+        c.fillRect(-s*2.3, -s*0.6, s*0.9, s*1.2);
+        c.restore();
+    }
+
+    function drawParadeHeli(c, h){
+        var s = h.size;
+        var x = h.x, y = h.y + Math.sin(h.bob)*3;
+        c.save();
+        c.translate(x, y);
+        /* drop shadow */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.beginPath();
+        c.ellipse(0, s*0.55, s*0.9, s*0.18, 0, 0, Math.PI*2);
+        c.fill();
+        /* TAIL BOOM */
+        c.fillStyle = '#3e4a36';
+        c.fillRect(-s*1.4, -s*0.08, s*1.0, s*0.20);
+        /* TAIL FIN */
+        c.fillStyle = '#2e3828';
+        c.beginPath();
+        c.moveTo(-s*1.5, -s*0.05);
+        c.lineTo(-s*1.7, -s*0.45);
+        c.lineTo(-s*1.3,  0.05);
+        c.closePath();
+        c.fill();
+        /* MAIN BODY — rounded fuselage */
+        var bg = c.createLinearGradient(0, -s*0.4, 0, s*0.4);
+        bg.addColorStop(0, '#5a6a44');
+        bg.addColorStop(0.5, '#3e4a30');
+        bg.addColorStop(1, '#1e2820');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.ellipse(0, 0, s*0.85, s*0.45, 0, 0, Math.PI*2);
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.45)';
+        c.lineWidth = 0.6; c.stroke();
+        /* COCKPIT bubble */
+        var cg = c.createRadialGradient(s*0.45, -s*0.15, 0, s*0.45, 0, s*0.45);
+        cg.addColorStop(0, 'rgba(160,210,255,0.85)');
+        cg.addColorStop(1, 'rgba(20,50,90,0.90)');
+        c.fillStyle = cg;
+        c.beginPath();
+        c.ellipse(s*0.45, -s*0.05, s*0.42, s*0.30, 0, 0, Math.PI*2);
+        c.fill();
+        /* SIDE WEAPON PYLONS — small missile pods */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(-s*0.5, s*0.35, s*0.9, s*0.14);
+        c.fillStyle = '#cc2a2a';
+        c.fillRect( s*0.20, s*0.36, s*0.18, s*0.10);
+        /* LANDING SKIDS */
+        c.strokeStyle = '#1a1a1a';
+        c.lineWidth = 1.6;
+        c.beginPath();
+        c.moveTo(-s*0.7, s*0.55); c.lineTo(s*0.8, s*0.55);
+        c.stroke();
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(-s*0.5, s*0.45); c.lineTo(-s*0.5, s*0.55);
+        c.moveTo( s*0.55, s*0.45); c.lineTo( s*0.55, s*0.55);
+        c.stroke();
+        /* MAIN ROTOR — blurred disc + 4-blade hint */
+        c.save();
+        c.translate(0, -s*0.45);
+        /* rotor blur disc */
+        var rg = c.createRadialGradient(0, 0, 0, 0, 0, s*1.6);
+        rg.addColorStop(0, 'rgba(40,40,40,0.55)');
+        rg.addColorStop(0.7, 'rgba(40,40,40,0.20)');
+        rg.addColorStop(1, 'rgba(40,40,40,0)');
+        c.fillStyle = rg;
+        c.beginPath();
+        c.ellipse(0, 0, s*1.55, s*0.18, 0, 0, Math.PI*2);
+        c.fill();
+        /* 2 dark blades at current rotation */
+        c.rotate(h.rotor);
+        c.fillStyle = 'rgba(20,20,20,0.85)';
+        c.fillRect(-s*1.6, -1.2, s*3.2, 2.4);
+        c.rotate(Math.PI/2);
+        c.fillStyle = 'rgba(20,20,20,0.55)';
+        c.fillRect(-s*1.6, -1.2, s*3.2, 2.4);
+        /* central hub */
+        c.fillStyle = '#222';
+        c.beginPath(); c.arc(0, 0, 3, 0, Math.PI*2); c.fill();
+        c.restore();
+        /* TAIL ROTOR */
+        c.save();
+        c.translate(-s*1.55, -s*0.25);
+        c.rotate(h.tailRotor);
+        c.fillStyle = 'rgba(20,20,20,0.75)';
+        c.fillRect(-s*0.40, -0.8, s*0.80, 1.6);
+        c.rotate(Math.PI/2);
+        c.fillStyle = 'rgba(20,20,20,0.45)';
+        c.fillRect(-s*0.40, -0.8, s*0.80, 1.6);
+        c.restore();
+        c.restore();
+    }
+
+    function drawParadeTank(c, t){
+        var s = t.size;
+        var x = t.x, y = t.y;
+        c.save();
+        c.translate(x, y);
+        /* drop shadow */
+        c.fillStyle = 'rgba(0,0,0,0.30)';
+        c.beginPath();
+        c.ellipse(0, s*0.10, s*1.5, s*0.14, 0, 0, Math.PI*2);
+        c.fill();
+        /* TRACK belts */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(-s*1.4, -s*0.05, s*2.8, s*0.30);
+        /* roadwheels — 6 per side */
+        for (var w=0; w<6; w++){
+            var wx = -s*1.15 + w*s*0.46;
+            c.fillStyle = '#3a3a3a';
+            c.beginPath(); c.arc(wx, s*0.20, s*0.16, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#1a1a1a';
+            c.beginPath(); c.arc(wx, s*0.20, s*0.09, 0, Math.PI*2); c.fill();
+        }
+        /* TRACK link marks — animated stripes */
+        c.strokeStyle = 'rgba(70,70,70,0.85)';
+        c.lineWidth = 1;
+        var off = (t.trackOffset % 8) - 4;
+        for (var ls=0; ls<14; ls++){
+            var lx = -s*1.4 + ls*s*0.20 + off;
+            c.beginPath();
+            c.moveTo(lx, -s*0.05); c.lineTo(lx, s*0.05);
+            c.stroke();
+        }
+        /* HULL — main armoured chassis */
+        var hg = c.createLinearGradient(0, -s*0.5, 0, 0);
+        hg.addColorStop(0, '#5a6a44');
+        hg.addColorStop(0.6, '#3e4a30');
+        hg.addColorStop(1, '#2a3422');
+        c.fillStyle = hg;
+        c.beginPath();
+        c.moveTo(-s*1.3, -s*0.05);
+        c.lineTo(-s*1.0, -s*0.45);
+        c.lineTo( s*1.1, -s*0.45);
+        c.lineTo( s*1.3, -s*0.05);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.6; c.stroke();
+        /* armour panels — small detail lines */
+        c.strokeStyle = 'rgba(0,0,0,0.40)';
+        c.lineWidth = 0.5;
+        c.beginPath();
+        c.moveTo(-s*0.4, -s*0.45); c.lineTo(-s*0.4, -s*0.05);
+        c.moveTo( s*0.4, -s*0.45); c.lineTo( s*0.4, -s*0.05);
+        c.stroke();
+        /* TURRET (rotates with turretAngle) */
+        c.save();
+        c.translate(0, -s*0.45);
+        c.rotate(t.turretAngle);
+        /* turret base */
+        var tg = c.createLinearGradient(0, -s*0.30, 0, 0);
+        tg.addColorStop(0, '#4a5836');
+        tg.addColorStop(1, '#2e3822');
+        c.fillStyle = tg;
+        c.beginPath();
+        c.moveTo(-s*0.5, 0);
+        c.lineTo(-s*0.4, -s*0.32);
+        c.lineTo( s*0.5, -s*0.32);
+        c.lineTo( s*0.6, 0);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.stroke();
+        /* hatch */
+        c.fillStyle = '#1a1a1a';
+        c.beginPath();
+        c.arc(0, -s*0.30, s*0.10, 0, Math.PI*2);
+        c.fill();
+        /* MAIN CANNON — long barrel pointing forward */
+        c.fillStyle = '#1a1f12';
+        c.fillRect(s*0.45, -s*0.20, s*1.4, s*0.10);
+        /* muzzle */
+        c.fillStyle = '#0a0a08';
+        c.fillRect(s*1.78, -s*0.22, s*0.10, s*0.14);
+        c.fillStyle = '#3a4030';
+        c.fillRect(s*1.70, -s*0.22, s*0.10, s*0.14);
+        c.restore();
+        /* small ANTENNA */
+        c.strokeStyle = '#1a1a1a';
+        c.lineWidth = 0.7;
+        c.beginPath();
+        c.moveTo(-s*0.6, -s*0.45);
+        c.lineTo(-s*0.8, -s*0.95);
+        c.stroke();
+        c.fillStyle = '#cc2a2a';
+        c.beginPath(); c.arc(-s*0.8, -s*0.95, 1.3, 0, Math.PI*2); c.fill();
+        c.restore();
+    }
+
+    function drawParadeLauncher(c, ml){
+        var s = ml.size;
+        var x = ml.x, y = ml.y;
+        c.save();
+        c.translate(x, y);
+        /* drop shadow */
+        c.fillStyle = 'rgba(0,0,0,0.30)';
+        c.beginPath();
+        c.ellipse(0, s*0.12, s*1.6, s*0.14, 0, 0, Math.PI*2);
+        c.fill();
+        /* WHEELS — 8 wheels, 4 per side, big truck profile */
+        var off = ml.wheelOffset;
+        for (var w=0; w<4; w++){
+            var wx = -s*1.0 + w*s*0.60;
+            c.fillStyle = '#1a1a1a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.18, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#3a3a3a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.12, 0, Math.PI*2); c.fill();
+            /* wheel spoke rotation */
+            c.strokeStyle = 'rgba(20,20,20,0.85)';
+            c.lineWidth = 1;
+            c.save(); c.translate(wx, s*0.22); c.rotate(off*0.05);
+            c.beginPath();
+            c.moveTo(-s*0.10, 0); c.lineTo(s*0.10, 0);
+            c.moveTo(0, -s*0.10); c.lineTo(0, s*0.10);
+            c.stroke();
+            c.restore();
+        }
+        /* TRUCK CHASSIS */
+        var cg = c.createLinearGradient(0, -s*0.50, 0, 0);
+        cg.addColorStop(0, '#4a5638');
+        cg.addColorStop(1, '#252e1c');
+        c.fillStyle = cg;
+        c.fillRect(-s*1.30, -s*0.20, s*2.60, s*0.30);
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.6;
+        c.strokeRect(-s*1.30, -s*0.20, s*2.60, s*0.30);
+        /* CABIN (front) */
+        c.fillStyle = '#3e4a30';
+        c.beginPath();
+        c.moveTo( s*0.70, -s*0.20);
+        c.lineTo( s*0.85, -s*0.65);
+        c.lineTo( s*1.30, -s*0.65);
+        c.lineTo( s*1.30, -s*0.20);
+        c.closePath();
+        c.fill();
+        c.stroke();
+        /* cabin window */
+        var wg = c.createLinearGradient(s*0.95, -s*0.62, s*1.25, -s*0.30);
+        wg.addColorStop(0, 'rgba(140,200,255,0.85)');
+        wg.addColorStop(1, 'rgba(30,50,80,0.95)');
+        c.fillStyle = wg;
+        c.beginPath();
+        c.moveTo( s*0.95, -s*0.55);
+        c.lineTo( s*1.22, -s*0.55);
+        c.lineTo( s*1.22, -s*0.28);
+        c.lineTo( s*0.92, -s*0.28);
+        c.closePath();
+        c.fill();
+        /* RAISED LAUNCHER BED — angled upward holding 4 rockets */
+        c.save();
+        c.translate(-s*0.35, -s*0.35);
+        c.rotate(-0.35);   /* tilt rockets toward sky */
+        /* launcher rail */
+        c.fillStyle = '#2a3422';
+        c.fillRect(-s*0.85, -s*0.10, s*1.70, s*0.20);
+        c.strokeStyle = 'rgba(0,0,0,0.6)';
+        c.lineWidth = 0.6;
+        c.strokeRect(-s*0.85, -s*0.10, s*1.70, s*0.20);
+        /* 4 large rockets stacked across the rail */
+        for (var r=0; r<4; r++){
+            var ry = -s*0.06 + r*s*0.04 - s*0.08;
+            var rx = -s*0.85;
+            /* rocket body — long cylinder */
+            c.fillStyle = '#d6d6d2';
+            c.fillRect(rx, ry, s*1.60, s*0.05);
+            /* nose cone — red tip */
+            c.fillStyle = '#cc2a2a';
+            c.beginPath();
+            c.moveTo(rx + s*1.60, ry);
+            c.lineTo(rx + s*1.78, ry + s*0.025);
+            c.lineTo(rx + s*1.60, ry + s*0.05);
+            c.closePath();
+            c.fill();
+            /* tail fins */
+            c.fillStyle = '#888';
+            c.fillRect(rx - s*0.04, ry - s*0.02, s*0.10, s*0.09);
+            /* body stripe */
+            c.fillStyle = '#cc2a2a';
+            c.fillRect(rx + s*0.55, ry + s*0.012, s*0.10, s*0.025);
+        }
+        c.restore();
+        /* small flag on cabin */
+        c.fillStyle = '#cc2a2a';
+        c.fillRect(s*1.10, -s*0.85, s*0.18, s*0.10);
+        c.strokeStyle = '#1a1a1a';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(s*1.10, -s*0.85); c.lineTo(s*1.10, -s*0.55);
+        c.stroke();
+        c.restore();
+    }
+
+    /* ── BLIMP — long ovoid envelope + gondola + tail fins ── */
+    function drawParadeBlimp(c, bz){
+        var s = bz.size;
+        var x = bz.x, y = bz.y + Math.sin(bz.bob)*3;
+        c.save();
+        c.translate(x, y);
+        /* envelope */
+        var eg = c.createLinearGradient(0, -s*0.5, 0, s*0.5);
+        eg.addColorStop(0, '#c8d0d8');
+        eg.addColorStop(0.5, '#a8b0b8');
+        eg.addColorStop(1, '#7a8088');
+        c.fillStyle = eg;
+        c.beginPath();
+        c.ellipse(0, 0, s*1.8, s*0.55, 0, 0, Math.PI*2);
+        c.fill();
+        c.strokeStyle = 'rgba(40,50,60,0.55)';
+        c.lineWidth = 0.8; c.stroke();
+        /* longitudinal seam line */
+        c.strokeStyle = 'rgba(40,50,60,0.35)';
+        c.beginPath();
+        c.moveTo(-s*1.8, 0); c.lineTo(s*1.8, 0);
+        c.stroke();
+        /* tail fins (4 cross) */
+        c.fillStyle = '#5a6068';
+        c.beginPath();
+        c.moveTo(-s*1.6, -s*0.20);
+        c.lineTo(-s*2.05, -s*0.50);
+        c.lineTo(-s*1.6,  0);
+        c.closePath(); c.fill();
+        c.beginPath();
+        c.moveTo(-s*1.6, s*0.20);
+        c.lineTo(-s*2.05, s*0.50);
+        c.lineTo(-s*1.6, 0);
+        c.closePath(); c.fill();
+        /* gondola — small cabin under envelope */
+        c.fillStyle = '#3a4248';
+        c.fillRect(-s*0.5, s*0.40, s*1.0, s*0.20);
+        /* gondola windows */
+        c.fillStyle = 'rgba(180,220,255,0.85)';
+        for (var w=0; w<3; w++){
+            c.fillRect(-s*0.4 + w*s*0.35, s*0.45, s*0.18, s*0.10);
+        }
+        /* ceremonial olive star marking */
+        c.fillStyle = '#556b2f';
+        var ssize = s*0.30;
+        c.beginPath();
+        for (var p=0; p<5; p++){
+            var a = -Math.PI/2 + p*Math.PI*2/5;
+            var r = ssize;
+            c.lineTo(Math.cos(a)*r, Math.sin(a)*r*0.6);
+            var a2 = a + Math.PI/5;
+            c.lineTo(Math.cos(a2)*r*0.4, Math.sin(a2)*r*0.4*0.6);
+        }
+        c.closePath();
+        c.fill();
+        c.restore();
+    }
+
+    /* Per-country flag drawer — pure-canvas geometric flag patterns
+       sized to fit a given rectangle. Keeps the parade banner visually
+       tied to the city the simulation is currently on. */
+    function drawCountryFlag(c, cityName, bx, by, bw, bh){
+        function rect(col, x, y, w, h){
+            c.fillStyle = col;
+            c.fillRect(bx + x, by + y, w, h);
+        }
+        function star5(cx, cy, r, col){
+            c.fillStyle = col;
+            c.beginPath();
+            for (var i=0; i<5; i++){
+                var a1 = -Math.PI/2 + i*Math.PI*2/5;
+                c.lineTo(bx + cx + Math.cos(a1)*r,    by + cy + Math.sin(a1)*r);
+                var a2 = a1 + Math.PI/5;
+                c.lineTo(bx + cx + Math.cos(a2)*r*0.45, by + cy + Math.sin(a2)*r*0.45);
+            }
+            c.closePath();
+            c.fill();
+        }
+        switch (cityName) {
+            case 'NEW YORK':
+            case 'CHICAGO': {
+                /* USA — 13 stripes + blue canton with white stars */
+                var stripes = 13;
+                for (var st=0; st<stripes; st++){
+                    rect(st%2 ? '#ffffff' : '#b22234',
+                         0, st*(bh/stripes), bw, bh/stripes);
+                }
+                /* canton */
+                var cw = bw*0.42, ch = bh*7/13;
+                rect('#3c3b6e', 0, 0, cw, ch);
+                /* stars (simplified 5×4 grid = 20) */
+                for (var ry=0; ry<4; ry++) for (var rx=0; rx<5; rx++){
+                    star5(rx*cw/5 + cw/10, ry*ch/4 + ch/8, bh*0.04, '#ffffff');
+                }
+                break;
+            }
+            case 'TOKYO': {
+                /* JAPAN — white field, red disc centred */
+                rect('#ffffff', 0, 0, bw, bh);
+                c.fillStyle = '#bc002d';
+                c.beginPath();
+                c.arc(bx + bw/2, by + bh/2, bh*0.34, 0, Math.PI*2);
+                c.fill();
+                break;
+            }
+            case 'BEIJING': {
+                /* CHINA — red field + 1 large yellow star + 4 small */
+                rect('#de2910', 0, 0, bw, bh);
+                star5(bw*0.18, bh*0.32, bh*0.20, '#ffde00');
+                star5(bw*0.30, bh*0.16, bh*0.07, '#ffde00');
+                star5(bw*0.36, bh*0.30, bh*0.07, '#ffde00');
+                star5(bw*0.36, bh*0.48, bh*0.07, '#ffde00');
+                star5(bw*0.30, bh*0.62, bh*0.07, '#ffde00');
+                break;
+            }
+            case 'LONDON': {
+                /* UK — simplified Union Jack: blue field with white
+                   diagonal + horizontal/vertical crosses, red on top */
+                rect('#012169', 0, 0, bw, bh);
+                /* white diagonals */
+                c.strokeStyle = '#ffffff';
+                c.lineWidth = bh*0.22;
+                c.beginPath();
+                c.moveTo(bx, by); c.lineTo(bx + bw, by + bh);
+                c.moveTo(bx + bw, by); c.lineTo(bx, by + bh);
+                c.stroke();
+                /* white plus */
+                c.lineWidth = bh*0.32;
+                c.beginPath();
+                c.moveTo(bx, by + bh/2); c.lineTo(bx + bw, by + bh/2);
+                c.moveTo(bx + bw/2, by); c.lineTo(bx + bw/2, by + bh);
+                c.stroke();
+                /* red plus on top */
+                c.strokeStyle = '#c8102e';
+                c.lineWidth = bh*0.18;
+                c.beginPath();
+                c.moveTo(bx, by + bh/2); c.lineTo(bx + bw, by + bh/2);
+                c.moveTo(bx + bw/2, by); c.lineTo(bx + bw/2, by + bh);
+                c.stroke();
+                break;
+            }
+            case 'DUBAI': {
+                /* UAE — red vertical hoist + 3 horizontal stripes
+                   (green / white / black) */
+                rect('#00732f', bw*0.25, 0,            bw*0.75, bh/3);
+                rect('#ffffff', bw*0.25, bh/3,         bw*0.75, bh/3);
+                rect('#000000', bw*0.25, bh*2/3,       bw*0.75, bh/3);
+                rect('#ce1126', 0,        0,            bw*0.25, bh);
+                break;
+            }
+            case 'PARIS': {
+                /* FRANCE — 3 vertical stripes blue / white / red */
+                rect('#0055a4', 0,        0, bw/3, bh);
+                rect('#ffffff', bw/3,     0, bw/3, bh);
+                rect('#ef4135', bw*2/3,   0, bw/3, bh);
+                break;
+            }
+            case 'PRAGUE': {
+                /* CZECH REPUBLIC — white top + red bottom + blue
+                   triangle from the hoist (left edge) */
+                rect('#ffffff', 0, 0,       bw, bh/2);
+                rect('#d7141a', 0, bh/2,    bw, bh/2);
+                c.fillStyle = '#11457e';
+                c.beginPath();
+                c.moveTo(bx, by);
+                c.lineTo(bx + bw*0.46, by + bh/2);
+                c.lineTo(bx, by + bh);
+                c.closePath();
+                c.fill();
+                break;
+            }
+            default: {
+                /* generic neutral fallback — stripes + city initials */
+                rect('#ffffff', 0, 0, bw, bh);
+                rect('#b22234', 0, bh*2/3, bw, bh/3);
+                rect('#3c3b6e', 0, 0,      bw, bh/3);
+                c.fillStyle = '#ffffff';
+                c.font = 'bold ' + (bh*0.4).toFixed(0) + 'px sans-serif';
+                c.textAlign = 'center';
+                c.textBaseline = 'middle';
+                c.fillText(cityName, bx + bw/2, by + bh/2);
+                c.textAlign = 'start';
+                c.textBaseline = 'alphabetic';
+            }
+        }
+    }
+
+    /* ── BANNER PLANE — biplane silhouette + spinning propeller +
+       trailing flag of the current city's COUNTRY (USA for NYC /
+       Chicago, Japan for Tokyo, China for Beijing, UK for London,
+       UAE for Dubai, France for Paris, Czech Republic for Prague). */
+    function drawParadeBanner(c, bp){
+        var s = bp.size;
+        var x = bp.x, y = bp.y + Math.sin(bp.bob)*2;
+        c.save();
+        c.translate(x, y);
+        /* TRAILING ROPE → BANNER */
+        c.strokeStyle = '#2a2a2a';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(-s*1.2, s*0.1);
+        c.lineTo(-s*4.5, s*0.5);
+        c.stroke();
+        /* banner rect */
+        var bw = s*5.5, bh = s*1.4;
+        var bx = -s*4.5 - bw;
+        var by = s*0.5 - bh*0.5;
+        /* per-city country code → flag drawer */
+        var cityName = (typeof CITIES !== 'undefined' && CITIES[currentCityIndex])
+                        ? CITIES[currentCityIndex].name : 'NEW YORK';
+        drawCountryFlag(c, cityName, bx, by, bw, bh);
+        /* outer banner border */
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.8;
+        c.strokeRect(bx, by, bw, bh);
+
+        /* PLANE — biplane silhouette */
+        /* lower wing */
+        c.fillStyle = '#7a4e1a';
+        c.fillRect(-s*1.0, s*0.18, s*2.2, s*0.10);
+        /* upper wing */
+        c.fillRect(-s*1.0, -s*0.40, s*2.2, s*0.10);
+        /* struts */
+        c.strokeStyle = '#5a3a18';
+        c.lineWidth = 1;
+        c.beginPath();
+        c.moveTo(-s*0.6, s*0.20); c.lineTo(-s*0.6, -s*0.30);
+        c.moveTo( s*0.6, s*0.20); c.lineTo( s*0.6, -s*0.30);
+        c.stroke();
+        /* fuselage */
+        var fg = c.createLinearGradient(0, -s*0.1, 0, s*0.2);
+        fg.addColorStop(0, '#c89a4a');
+        fg.addColorStop(1, '#7a4e1a');
+        c.fillStyle = fg;
+        c.beginPath();
+        c.moveTo(-s*1.2, 0);
+        c.lineTo(-s*1.0, -s*0.15);
+        c.lineTo( s*0.9, -s*0.15);
+        c.lineTo( s*1.3,  0);
+        c.lineTo( s*0.9,  s*0.15);
+        c.lineTo(-s*1.0,  s*0.15);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.6; c.stroke();
+        /* cockpit */
+        c.fillStyle = 'rgba(40,80,140,0.85)';
+        c.fillRect(s*0.10, -s*0.22, s*0.35, s*0.18);
+        /* tail */
+        c.fillStyle = '#7a4e1a';
+        c.beginPath();
+        c.moveTo(-s*0.9, 0);
+        c.lineTo(-s*1.2, -s*0.40);
+        c.lineTo(-s*0.7, 0);
+        c.closePath();
+        c.fill();
+        /* propeller spinning — two-blade blur */
+        c.save();
+        c.translate(s*1.30, 0);
+        c.rotate(bp.propRot);
+        c.fillStyle = 'rgba(20,20,20,0.85)';
+        c.fillRect(-s*0.45, -1.2, s*0.90, 2.4);
+        c.rotate(Math.PI/2);
+        c.fillStyle = 'rgba(20,20,20,0.45)';
+        c.fillRect(-s*0.45, -1.2, s*0.90, 2.4);
+        c.restore();
+        /* prop hub */
+        c.fillStyle = '#222';
+        c.beginPath();
+        c.arc(s*1.30, 0, 1.6, 0, Math.PI*2);
+        c.fill();
+        c.restore();
+    }
+
+    /* ── APC — boxy armoured personnel carrier with roof gunner ── */
+    function drawParadeAPC(c, apc){
+        var s = apc.size;
+        var x = apc.x, y = apc.y;
+        c.save();
+        c.translate(x, y);
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.30)';
+        c.beginPath();
+        c.ellipse(0, s*0.18, s*1.5, s*0.16, 0, 0, Math.PI*2);
+        c.fill();
+        /* wheels — 4 each side, rotating spoke marks */
+        var off = apc.wheelOffset;
+        for (var w=0; w<4; w++){
+            var wx = -s*1.05 + w*s*0.65;
+            c.fillStyle = '#1a1a1a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.20, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#3a3a3a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.13, 0, Math.PI*2); c.fill();
+            c.strokeStyle = 'rgba(20,20,20,0.85)'; c.lineWidth = 1.1;
+            c.save(); c.translate(wx, s*0.22); c.rotate(off*0.05);
+            c.beginPath();
+            c.moveTo(-s*0.12, 0); c.lineTo(s*0.12, 0);
+            c.moveTo(0, -s*0.12); c.lineTo(0, s*0.12);
+            c.stroke();
+            c.restore();
+        }
+        /* main hull — angled wedge shape */
+        var hg = c.createLinearGradient(0, -s*0.5, 0, 0);
+        hg.addColorStop(0, '#5a6a44');
+        hg.addColorStop(0.5, '#3e4a30');
+        hg.addColorStop(1, '#2a3422');
+        c.fillStyle = hg;
+        c.beginPath();
+        c.moveTo(-s*1.30, s*0.05);
+        c.lineTo(-s*1.20, -s*0.30);
+        c.lineTo(-s*0.50, -s*0.55);
+        c.lineTo( s*0.95, -s*0.55);
+        c.lineTo( s*1.30, -s*0.20);
+        c.lineTo( s*1.30, s*0.05);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)'; c.lineWidth = 0.6; c.stroke();
+        /* armoured side detail lines */
+        c.strokeStyle = 'rgba(255,255,255,0.10)'; c.lineWidth = 0.5;
+        c.beginPath();
+        c.moveTo(-s*1.20, -s*0.15); c.lineTo(s*1.20, -s*0.15);
+        c.stroke();
+        /* tiny side window */
+        c.fillStyle = 'rgba(20,40,80,0.85)';
+        c.fillRect(s*0.10, -s*0.45, s*0.40, s*0.16);
+        /* ROOF TURRET with rotating cannon */
+        c.save();
+        c.translate(s*0.05, -s*0.55);
+        c.rotate(apc.turretAngle);
+        c.fillStyle = '#3a4628';
+        c.beginPath();
+        c.ellipse(0, 0, s*0.40, s*0.18, 0, 0, Math.PI*2);
+        c.fill();
+        /* mounted machine gun */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(0, -s*0.05, s*0.90, s*0.06);
+        c.fillStyle = '#0a0a08';
+        c.fillRect(s*0.86, -s*0.07, s*0.06, s*0.10);
+        c.restore();
+        /* antenna */
+        c.strokeStyle = '#1a1a1a'; c.lineWidth = 0.7;
+        c.beginPath();
+        c.moveTo(-s*0.80, -s*0.50);
+        c.lineTo(-s*0.95, -s*1.00);
+        c.stroke();
+        c.restore();
+    }
+
+    /* ── HUMVEE — small military jeep with roof gunner ── */
+    function drawParadeHumvee(c, hv){
+        var s = hv.size;
+        var x = hv.x, y = hv.y;
+        c.save();
+        c.translate(x, y);
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.28)';
+        c.beginPath();
+        c.ellipse(0, s*0.18, s*1.2, s*0.13, 0, 0, Math.PI*2);
+        c.fill();
+        /* wheels */
+        for (var w=0; w<2; w++){
+            var wx = -s*0.75 + w*s*1.5;
+            c.fillStyle = '#1a1a1a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.22, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#3a3a3a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.13, 0, Math.PI*2); c.fill();
+            c.strokeStyle = 'rgba(20,20,20,0.85)'; c.lineWidth = 1;
+            c.save(); c.translate(wx, s*0.22); c.rotate(hv.wheelOffset*0.05);
+            c.beginPath();
+            c.moveTo(-s*0.12, 0); c.lineTo(s*0.12, 0);
+            c.moveTo(0, -s*0.12); c.lineTo(0, s*0.12);
+            c.stroke();
+            c.restore();
+        }
+        /* body — wide flat-roofed truck shape */
+        var bg = c.createLinearGradient(0, -s*0.55, 0, 0);
+        bg.addColorStop(0, '#6a7855');
+        bg.addColorStop(1, '#3a4828');
+        c.fillStyle = bg;
+        c.beginPath();
+        c.moveTo(-s*1.10, s*0.05);
+        c.lineTo(-s*1.05, -s*0.40);
+        c.lineTo( s*1.00, -s*0.40);
+        c.lineTo( s*1.10, s*0.05);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)'; c.lineWidth = 0.6; c.stroke();
+        /* windscreen */
+        c.fillStyle = 'rgba(40,80,140,0.85)';
+        c.beginPath();
+        c.moveTo(-s*0.80, -s*0.40);
+        c.lineTo(-s*0.55, -s*0.65);
+        c.lineTo(-s*0.05, -s*0.65);
+        c.lineTo(-s*0.05, -s*0.40);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)'; c.stroke();
+        /* rear cabin */
+        c.fillStyle = '#5a6a44';
+        c.fillRect(0, -s*0.65, s*0.95, s*0.25);
+        c.strokeRect(0, -s*0.65, s*0.95, s*0.25);
+        /* ROOF MG (gunner) */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(s*0.30, -s*0.85, s*0.10, s*0.20);   /* mount post */
+        c.fillRect(s*0.20, -s*0.95, s*0.50, s*0.06);   /* gun barrel */
+        c.fillStyle = '#0a0a08';
+        c.fillRect(s*0.66, -s*0.97, s*0.06, s*0.10);   /* muzzle */
+        /* tiny soldier (gunner) sitting at the gun */
+        drawSoldierBust(c, s*0.18, -s*0.95, s*0.40);
+        c.restore();
+    }
+
+    /* ── HOWITZER — heavy self-propelled artillery ── */
+    function drawParadeHowitzer(c, ht){
+        var s = ht.size;
+        var x = ht.x, y = ht.y;
+        c.save();
+        c.translate(x, y);
+        c.fillStyle = 'rgba(0,0,0,0.30)';
+        c.beginPath();
+        c.ellipse(0, s*0.18, s*1.5, s*0.16, 0, 0, Math.PI*2);
+        c.fill();
+        /* wheels — 6 small wheels, half-tracks style */
+        for (var w=0; w<5; w++){
+            var wx = -s*1.20 + w*s*0.55;
+            c.fillStyle = '#1a1a1a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.16, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#3a3a3a';
+            c.beginPath(); c.arc(wx, s*0.22, s*0.09, 0, Math.PI*2); c.fill();
+        }
+        /* hull */
+        var hg = c.createLinearGradient(0, -s*0.4, 0, 0);
+        hg.addColorStop(0, '#5a6a44');
+        hg.addColorStop(1, '#2a3422');
+        c.fillStyle = hg;
+        c.beginPath();
+        c.moveTo(-s*1.40, s*0.05);
+        c.lineTo(-s*1.30, -s*0.30);
+        c.lineTo( s*1.30, -s*0.30);
+        c.lineTo( s*1.40, s*0.05);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)'; c.lineWidth = 0.6; c.stroke();
+        /* HUGE turret with very long cannon barrel */
+        c.save();
+        c.translate(0, -s*0.30);
+        /* turret base */
+        c.fillStyle = '#3e4a30';
+        c.beginPath();
+        c.moveTo(-s*0.55, 0);
+        c.lineTo(-s*0.40, -s*0.40);
+        c.lineTo( s*0.55, -s*0.40);
+        c.lineTo( s*0.70, 0);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)'; c.stroke();
+        /* HUGE elevated cannon barrel — much longer than tank */
+        c.save();
+        c.translate(s*0.55, -s*0.30);
+        c.rotate(-0.18);   /* slight upward elevation */
+        c.fillStyle = '#1a1f12';
+        c.fillRect(0, -s*0.08, s*1.80, s*0.16);
+        /* muzzle brake — wider at the tip */
+        c.fillStyle = '#0a0a08';
+        c.fillRect(s*1.72, -s*0.12, s*0.12, s*0.24);
+        c.fillStyle = '#3a4030';
+        c.fillRect(s*1.65, -s*0.10, s*0.10, s*0.20);
+        c.restore();
+        /* hatch */
+        c.fillStyle = '#1a1a1a';
+        c.beginPath();
+        c.arc(-s*0.10, -s*0.40, s*0.10, 0, Math.PI*2);
+        c.fill();
+        c.restore();
+        /* small soldier on top */
+        drawSoldierBust(c, -s*0.10, -s*0.75, s*0.30);
+        c.restore();
+    }
+
+    /* ── SOLDIER BUST helper — half-figure used as gunners on roof
+       mounts (Humvee, Howitzer). Detailed head + helmet + torso. */
+    function drawSoldierBust(c, cx, cy, scale){
+        var s = scale;
+        c.save();
+        c.translate(cx, cy);
+        /* torso */
+        c.fillStyle = '#3e4a28';
+        c.fillRect(-s*0.45, 0, s*0.90, s*0.55);
+        /* shoulder shading */
+        c.fillStyle = 'rgba(20,30,15,0.45)';
+        c.fillRect(-s*0.45, 0, s*0.90, s*0.10);
+        /* head */
+        c.fillStyle = '#d4a578';
+        c.beginPath();
+        c.arc(0, -s*0.25, s*0.30, 0, Math.PI*2);
+        c.fill();
+        /* helmet */
+        c.fillStyle = '#3a4628';
+        c.beginPath();
+        c.arc(0, -s*0.30, s*0.36, Math.PI, 0);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.6;
+        c.stroke();
+        /* helmet rim */
+        c.fillStyle = '#2a3420';
+        c.fillRect(-s*0.36, -s*0.18, s*0.72, s*0.06);
+        /* eye */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(s*0.05, -s*0.22, s*0.07, s*0.04);
+        c.restore();
+    }
+
+    /* ── SOLDIER SQUAD — marching formation of full-body soldiers ── */
+    function drawParadeSquad(c, sq){
+        var spacing = 16;          /* horizontal spacing between soldiers */
+        var rowSpacing = 8;        /* vertical spacing between rows */
+        var stepAngle = sq.marchPhase;
+        for (var r=0; r<sq.rows; r++){
+            for (var co=0; co<sq.cols; co++){
+                /* synchronised step — alternate rows mirror each other */
+                var leg = Math.sin(stepAngle + (r%2 ? Math.PI : 0)) * 0.4;
+                var sx = sq.x + co*spacing;
+                var sy = sq.y + r*rowSpacing;
+                drawSoldierFull(c, sx, sy, leg);
+            }
+        }
+    }
+
+    /* ── SOLDIER FULL-BODY — head + helmet + torso + arms with rifle
+       + legs animated by `legPhase`. Drawn small (~14 px tall) so a
+       full squad fits without crowding. */
+    function drawSoldierFull(c, x, y, legPhase){
+        c.save();
+        c.translate(x, y);
+        var s = 6;     /* base unit; soldier is ~2s × ~3s tall */
+        /* shadow */
+        c.fillStyle = 'rgba(0,0,0,0.35)';
+        c.beginPath();
+        c.ellipse(0, s*0.30, s*0.60, s*0.12, 0, 0, Math.PI*2);
+        c.fill();
+        /* legs (marching step — front leg up, back leg planted) */
+        c.strokeStyle = '#3a4628';
+        c.lineWidth = 2.2;
+        c.beginPath();
+        c.moveTo(-s*0.15, -s*0.5);
+        c.lineTo(-s*0.15 + legPhase*s*0.5, s*0.20);
+        c.moveTo( s*0.15, -s*0.5);
+        c.lineTo( s*0.15 - legPhase*s*0.5, s*0.20);
+        c.stroke();
+        /* boots */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(-s*0.30 + legPhase*s*0.5, s*0.18, s*0.30, s*0.10);
+        c.fillRect( s*0.00 - legPhase*s*0.5, s*0.18, s*0.30, s*0.10);
+        /* torso (uniform) */
+        var tg = c.createLinearGradient(0, -s*0.7, 0, 0);
+        tg.addColorStop(0, '#5a6a44');
+        tg.addColorStop(1, '#3a4628');
+        c.fillStyle = tg;
+        c.fillRect(-s*0.40, -s*1.0, s*0.80, s*0.55);
+        /* belt */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(-s*0.40, -s*0.50, s*0.80, s*0.10);
+        c.fillStyle = '#8a7040';
+        c.fillRect(-s*0.06, -s*0.50, s*0.12, s*0.10);
+        /* arms — left arm holds rifle across body, right arm at side */
+        c.strokeStyle = '#3a4628';
+        c.lineWidth = 2.0;
+        c.beginPath();
+        c.moveTo(-s*0.40, -s*0.90);
+        c.lineTo(-s*0.55, -s*0.30);   /* right arm down */
+        c.moveTo( s*0.40, -s*0.90);
+        c.lineTo( s*0.05, -s*0.55);   /* left arm across */
+        c.stroke();
+        /* RIFLE — held diagonally across the chest */
+        c.strokeStyle = '#1a1a1a';
+        c.lineWidth = 1.6;
+        c.beginPath();
+        c.moveTo(-s*0.20, -s*0.20);
+        c.lineTo( s*0.50, -s*1.10);
+        c.stroke();
+        c.fillStyle = '#3a2818';
+        c.beginPath();
+        c.moveTo(-s*0.25, -s*0.18);
+        c.lineTo(-s*0.10, -s*0.10);
+        c.lineTo(-s*0.15, -s*0.04);
+        c.closePath();
+        c.fill();
+        /* head */
+        c.fillStyle = '#d4a578';
+        c.beginPath();
+        c.arc(0, -s*1.20, s*0.25, 0, Math.PI*2);
+        c.fill();
+        /* HELMET — domed olive with chin strap */
+        c.fillStyle = '#3a4628';
+        c.beginPath();
+        c.arc(0, -s*1.25, s*0.30, Math.PI, 0);
+        c.closePath();
+        c.fill();
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.5;
+        c.stroke();
+        c.fillStyle = '#2a3420';
+        c.fillRect(-s*0.30, -s*1.15, s*0.60, s*0.05);   /* helmet rim */
+        /* chin strap */
+        c.strokeStyle = '#5a3a18';
+        c.lineWidth = 0.6;
+        c.beginPath();
+        c.moveTo(-s*0.20, -s*1.10);
+        c.lineTo(-s*0.05, -s*1.00);
+        c.lineTo( s*0.05, -s*1.00);
+        c.lineTo( s*0.20, -s*1.10);
+        c.stroke();
+        /* face details — eye + mouth */
+        c.fillStyle = '#1a1a1a';
+        c.fillRect(-s*0.07, -s*1.20, s*0.04, s*0.03);
+        c.fillRect( s*0.04, -s*1.20, s*0.04, s*0.03);
+        c.restore();
+    }
+
+    window.startParade = startParade;
+    window.stopParade  = stopParade;
+    window.isParadeOn  = function(){ return paradeOn; };
+    window.toggleParade = function(){
+        if (paradeOn) { stopParade(); return false; }
+        startParade(); return true;
+    };
+    window.getParadeStats = function(){
+        return {
+            air: paradeJets.length + paradeHelis.length +
+                 paradeBannerPlanes.length + paradeBlimps.length,
+            ground: paradeTanks.length + paradeLaunchers.length +
+                    paradeAPCs.length + paradeHumvees.length +
+                    paradeHowitzers.length + paradeSoldiers.length
+        };
+    };
+
+    /* Wrap setAutoAttackEnabled / setAutoDefenceEnabled to record
+       the start time and to auto-trigger reconstruction on turn-off. */
+    var _origSetAutoAttack = window.setAutoAttackEnabled;
+    window.setAutoAttackEnabled = function(on){
+        if (on){
+            autoAttackStartT = (typeof performance !== 'undefined' && performance.now)
+                               ? performance.now() : Date.now();
+        }
+        _origSetAutoAttack(on);
+        if (!on) startReconstruction();
+    };
+    var _origSetAutoDefence = window.setAutoDefenceEnabled;
+    window.setAutoDefenceEnabled = function(on){
+        if (on){
+            autoDefenceStartT = (typeof performance !== 'undefined' && performance.now)
+                                ? performance.now() : Date.now();
+        }
+        _origSetAutoDefence(on);
+        if (!on) startReconstruction();
+    };
+
+    /* ATTACK + DEFENCE + RECONSTRUCTION mutual exclusion.
+       Per user request: only one of attack / defence / reconstruction
+       can run at a time. If the user clicks attack or defence WHILE
+       the city is mid-rebuild, the reconstruction completes instantly
+       (same as if they had clicked the "instant rebuild" button —
+       calls stopReconstruction which clears every damage array), and
+       the requested mode then activates on a fully-clean city.
+
+       When attack or defence is TURNED OFF, reconstruction auto-starts
+       (existing behaviour, preserved). */
+    var _origArm = window.armMissile;
+    if (typeof _origArm === 'function'){
+        window.armMissile = function(){
+            var wasArmed = !!missileArmed;
+            /* turning ON attack while another mode is active →
+               dismiss parade AND finish any in-progress rebuild so
+               the city is pristine for the launch. */
+            if (!wasArmed) {
+                if (paradeOn) stopParade();
+                if (reconstructOn) stopReconstruction();
+            }
+            var r = _origArm.apply(this, arguments);
+            if (wasArmed && !missileArmed) startReconstruction();
+            return r;
+        };
+    }
+    var _origTogDef = window.toggleDefenceMode;
+    if (typeof _origTogDef === 'function'){
+        window.toggleDefenceMode = function(){
+            var wasDM = !!defenceMode;
+            if (!wasDM) {
+                if (paradeOn) stopParade();
+                if (reconstructOn) stopReconstruction();
+            }
+            var r = _origTogDef.apply(this, arguments);
+            if (wasDM && !defenceMode) startReconstruction();
+            return r;
+        };
+    }
+    var _origTogStrat = window.toggleStrategyMode;
+    if (typeof _origTogStrat === 'function'){
+        window.toggleStrategyMode = function(){
+            var wasSM = !!strategyMode;
+            if (!wasSM) {
+                if (paradeOn) stopParade();
+                if (reconstructOn) stopReconstruction();
+            }
+            var r = _origTogStrat.apply(this, arguments);
+            if (wasSM && !strategyMode) startReconstruction();
+            return r;
+        };
+    }
+    /* Wrap toggleReconstruction → if parade is on, dismiss the
+       parade before starting the rebuild. */
+    var _origTogRcn = window.toggleReconstruction;
+    if (typeof _origTogRcn === 'function'){
+        window.toggleReconstruction = function(){
+            /* If we're about to TURN ON (rcn is currently off), kill
+               any active parade first so the four modes stay mutually
+               exclusive. */
+            if (!reconstructOn) {
+                if (paradeOn) stopParade();
+            }
+            return _origTogRcn.apply(this, arguments);
+        };
+    }
+
     /* hook update + draw into the existing loop */
     var _origUpd = updateParticles;
-    updateParticles = function(dt){ _origUpd(dt); updateMissileSystem(dt); updateAutoSliders(dt); };
+    updateParticles = function(dt){
+        _origUpd(dt);
+        updateMissileSystem(dt);
+        updateAutoSliders(dt);
+        updateAutoTimers();
+        updateReconstruction(dt);
+        updateParade(dt);
+    };
+    /* Offscreen buffer used to composite the reconstruction layer
+       BEHIND the existing dynamic content. _origDrw clears dynC at
+       its start, so drawing reconstruction before it would just be
+       erased. Instead we let _origDrw draw cars/pedestrians as usual,
+       then paint reconstruction onto an offscreen canvas (preserving
+       its internal layer order), then blit that buffer onto dynC with
+       `destination-over` so the buffer only fills pixels NOT already
+       occupied by cars → cars visibly drive over the rebuild scene. */
+    var rcnBuffer = null;
+    function ensureRcnBuffer(){
+        if (!rcnBuffer){
+            rcnBuffer = document.createElement('canvas');
+        }
+        if (rcnBuffer.width !== W || rcnBuffer.height !== H){
+            rcnBuffer.width = W;
+            rcnBuffer.height = H;
+        }
+        return rcnBuffer;
+    }
+    function reconstructionHasAnyContent(){
+        return reconstructOn ||
+               reconstructVehicles.length > 0 ||
+               reconstructFX.length > 0 ||
+               reconstructWorkers.length > 0 ||
+               reconstructGhosts.length > 0 ||
+               reconstructCones.length > 0;
+    }
+
     var _origDrw = drawDynamic;
-    drawDynamic = function(){ _origDrw(); drawMissileSystem(dynC); };
+    drawDynamic = function(){
+        _origDrw();
+        if (reconstructionHasAnyContent()){
+            var buf = ensureRcnBuffer();
+            var rc  = buf.getContext('2d');
+            rc.clearRect(0, 0, W, H);
+            drawReconstruction(rc);              /* ground pass to buffer (helis skipped) */
+            dynC.save();
+            dynC.globalCompositeOperation = 'destination-over';
+            dynC.drawImage(buf, 0, 0);            /* composite BEHIND cars */
+            dynC.restore();
+        }
+        drawMissileSystem(dynC);
+        /* Helicopters last — drawn directly on dynC so they sit on TOP
+           of cars, missiles, and the entire reconstruction scene. */
+        drawReconstructionAirborne(dynC);
+        /* Military parade — air + ground units. Drawn after everything
+           so it reads as the headline event when active. */
+        drawParade(dynC);
+    };
 })();

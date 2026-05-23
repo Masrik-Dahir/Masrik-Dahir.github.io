@@ -67,6 +67,299 @@
 <!-- Page Container -->
 <div class="w3-content info" style="max-width:1400px; background-color: white;">
 
+    <!-- Positioning hero — leads with point of view, not credentials -->
+    <section id="positioning" class="positioning-hero" aria-label="Introduction">
+        <h1 class="positioning-name">Masrik Dahir</h1>
+        <p class="positioning-line">
+            Software engineer building developer tools, AWS-heavy backends, and interactive web experiences.
+        </p>
+        <p class="positioning-status">Open to roles and collaboration.</p>
+        <div class="positioning-cta">
+            <a href="https://www.masrikdahir.com/software" class="positioning-cta-primary">See projects</a>
+            <a href="#featured-projects" class="positioning-cta-secondary">Featured work ↓</a>
+        </div>
+    </section>
+
+    <style>
+        .positioning-hero {
+            max-width: 720px;
+            margin: 24px auto 28px;
+            padding: 28px 24px 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #fbfcfe 100%);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border: 1px solid rgba(200,212,228,1.00);
+            border-radius: 14px;
+            box-shadow:
+                0 1px 0 rgba(255,255,255,1.00) inset,
+                0 6px 24px rgba(0,0,0,0.10),
+                0 2px 8px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+        .positioning-name {
+            margin: 0 0 10px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: #0a0a19;
+            line-height: 1.1;
+        }
+        .positioning-line {
+            margin: 0 0 8px;
+            font-size: clamp(15px, 1.6vw, 18px);
+            line-height: 1.5;
+            color: #1a1a2e;
+        }
+        .positioning-status {
+            margin: 0 0 18px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            color: #1e7838;
+        }
+        .positioning-cta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+        }
+        .positioning-cta a {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: transform 0.14s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+        .positioning-cta a:focus-visible {
+            outline: 2px solid #1e6fd0;
+            outline-offset: 3px;
+        }
+        .positioning-cta-primary {
+            background: linear-gradient(135deg, #2480e0, #1e6fd0);
+            color: #fff;
+            border: 1.5px solid #1856a8;
+            box-shadow: 0 3px 12px rgba(30,111,208,0.30);
+        }
+        .positioning-cta-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 18px rgba(30,111,208,0.40);
+            color: #fff;
+        }
+        .positioning-cta-secondary {
+            color: #1e6fd0;
+            border: 1.5px solid rgba(30,111,208,0.30);
+            background: rgba(255,255,255,0.6);
+        }
+        .positioning-cta-secondary:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,0.9);
+            border-color: #1e6fd0;
+        }
+        @media (max-width: 480px) {
+            .positioning-hero { margin: 16px auto 20px; padding: 22px 18px 18px; }
+            .positioning-cta a { width: 100%; text-align: center; }
+        }
+        /* TASK-007 reverted — Milestones and Travel kept in the primary nav.
+           The .nav-demoted class is left on the markup but no longer hides anything. */
+
+        /* TASK-004 — Featured Projects */
+        .featured-projects {
+            max-width: 1080px;
+            margin: 8px auto 28px;
+            padding: 0 18px;
+        }
+        .featured-projects-title {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #1e6fd0;
+            margin: 0 0 14px;
+        }
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .featured-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(232,242,255,0.88) 100%);
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 12px;
+            padding: 18px 18px 16px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            transition: transform 0.18s ease, box-shadow 0.22s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .featured-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(30,111,208,0.18);
+        }
+        .featured-card h3 {
+            margin: 0 0 8px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            color: rgba(10,10,25,0.92);
+            line-height: 1.25;
+        }
+        .featured-card .featured-outcome {
+            margin: 0 0 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(10,10,25,0.74);
+            flex-grow: 1;
+        }
+        .featured-card .featured-tech {
+            margin: 0 0 12px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #1e7838;
+        }
+        .featured-card .featured-tech::before { content: 'Tech: '; color: rgba(10,10,25,0.50); }
+        .featured-links { display: flex; flex-wrap: wrap; gap: 12px; }
+        .featured-links a {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        }
+        .featured-links .featured-link-primary {
+            background: linear-gradient(135deg, #2480e0, #1e6fd0);
+            color: #fff;
+            border: 1px solid #1856a8;
+        }
+        .featured-links .featured-link-primary:hover { color:#fff; background: linear-gradient(135deg, #2a90f0, #2078e0); }
+        .featured-links .featured-link-secondary {
+            color: #1e6fd0;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(30,111,208,0.30);
+        }
+        .featured-links .featured-link-secondary:hover { background: rgba(255,255,255,0.95); border-color: #1e6fd0; }
+    </style>
+
+    <style>
+        /* TASK-006 — Skills in context */
+        .skills-context {
+            max-width: 1080px;
+            margin: 8px auto 32px;
+            padding: 0 18px;
+        }
+        .skills-context-title {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #1e7838;
+            margin: 0 0 14px;
+        }
+        .skills-context-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px 22px;
+        }
+        .skills-context-list li {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 13px;
+            line-height: 1.45;
+            color: rgba(10,10,25,0.78);
+            border-bottom: 1px dashed rgba(120,180,255,0.30);
+        }
+        .skill-name {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: #1e6fd0;
+            white-space: nowrap;
+        }
+        .skill-name::after { content: ' —'; color: rgba(10,10,25,0.40); }
+    </style>
+
+    <section id="skills-context" class="skills-context" aria-label="Skills in context">
+        <p class="skills-context-title">Skills, with the projects that prove them</p>
+        <ul class="skills-context-list">
+            <li><span class="skill-name">Vanilla JS &amp; Canvas 2D</span> the NYC missile-defence simulation and 100+ retro arcade games on this site (no game engine, no physics lib).</li>
+            <li><span class="skill-name">Vue 3</span> the 250-region travel atlas, software gallery, and dynamic UI sections of this site.</li>
+            <li><span class="skill-name">AWS (S3, CloudFront)</span> static-asset hosting and CDN for this site (<code>d3dw5jtb3w1kgy.cloudfront.net</code>) — plus AWS certifications.</li>
+            <li><span class="skill-name">Python</span> automation scripts, data scrapers, and personal tooling.</li>
+            <li><span class="skill-name">Java &amp; C</span> systems coursework, algorithm work, and competitive-programming archive.</li>
+            <li><span class="skill-name">SQL</span> backend data work at Capital One and CoStar Group.</li>
+            <li><span class="skill-name">CSS / Responsive UI</span> the glass-morphism widget tooltips, sliders, and animated landing pages across this site.</li>
+            <li><span class="skill-name">Rust</span> exploratory systems projects and language fundamentals.</li>
+        </ul>
+    </section>
+
+    <section id="featured-projects" class="featured-projects" aria-label="Featured projects">
+        <p class="featured-projects-title">Featured projects</p>
+        <div class="featured-grid">
+            <article class="featured-card">
+                <h3>NYC Missile-Defence Simulation</h3>
+                <p class="featured-outcome">
+                    Real-time Canvas 2D simulation: 23 missile classes, 6 interceptor types,
+                    weather and severity controls, AUTO modes that cycle every combination.
+                    Built from scratch — no game engine, no physics library.
+                </p>
+                <p class="featured-tech">Vanilla JS, Canvas 2D, custom physics</p>
+                <div class="featured-links">
+                    <a class="featured-link-primary" href="#nyc-canvas-figure">Try it ↑</a>
+                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/blob/master/js/nyc-city.js" target="_blank" rel="noopener">Source</a>
+                </div>
+            </article>
+
+            <article class="featured-card">
+                <h3>Retro Arcade Gallery (100+ games)</h3>
+                <p class="featured-outcome">
+                    Custom-built playable canvas games — physics, AI, mobile controls, gallery
+                    previews. Every game tested for winnability and medium difficulty per a
+                    documented spec.
+                </p>
+                <p class="featured-tech">Vanilla JS, Canvas 2D, mobile touch</p>
+                <div class="featured-links">
+                    <a class="featured-link-primary" href="https://www.masrikdahir.com/games">Play</a>
+                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/js/games" target="_blank" rel="noopener">Source</a>
+                </div>
+            </article>
+
+            <article class="featured-card">
+                <h3>Travel Atlas (250+ regions)</h3>
+                <p class="featured-outcome">
+                    Interactive atlas of US states, Canadian provinces, and 200+ countries with
+                    per-region pages, photo galleries, and continent-level navigation.
+                    Static-site architecture on AWS S3 + CloudFront.
+                </p>
+                <p class="featured-tech">Vue 3, AWS S3, CloudFront</p>
+                <div class="featured-links">
+                    <a class="featured-link-primary" href="https://www.masrikdahir.com/map">Browse</a>
+                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io" target="_blank" rel="noopener">Source</a>
+                </div>
+            </article>
+        </div>
+    </section>
+
     <!-- The Grid -->
     <div class="w3-row-padding">
 
@@ -277,7 +570,7 @@
                                     <!--          Capital One -->
                                     <div data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
+                                             alt="Capital One logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
                                     </div>
                                 </TD>
 
@@ -285,7 +578,7 @@
                                     <!--          CoStar -->
                                     <div data-toggle="tooltip" data-html="true" title="CoStar Group">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
+                                             alt="CoStar Group logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -296,14 +589,14 @@
                                     <!--          Dept of Election -->
                                     <div data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
+                                             alt="Virginia Department of Elections logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
                                     </div>
                                 </TD>
                                 <TD>
                                     <!--          VCU -->
                                     <div data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
+                                             alt="Virginia Commonwealth University logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
                                     </div>
 
 
@@ -316,7 +609,7 @@
                                     <!--          Roanoke -->
                                     <div data-toggle="tooltip" data-html="true" title="Roanoke County">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
+                                             alt="Roanoke County logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
                                     </div>
                                 </TD>
 
@@ -324,7 +617,7 @@
                                     <!--          Att -->
                                     <div data-toggle="tooltip" data-html="true" title="AT&T Inc.">
                                         <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
+                                             alt="AT&amp;T logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -353,14 +646,14 @@
                                     <!--          Python-->
                                     <div data-toggle="tooltip" data-html="true" title="Python Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/python.png"/>
+                                             alt="Python logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/python.png"/>
                                     </div>
                                 </TD>
                                 <TD>
                                     <!--          Java-->
                                     <div data-toggle="tooltip" data-html="true" title="Java Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/java.png"/>
+                                             alt="Java logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/java.png"/>
                                     </div>
                                 </TD>
 
@@ -368,7 +661,7 @@
                                     <!--          C-->
                                     <div data-toggle="tooltip" data-html="true" title="C Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/c2.png"/>
+                                             alt="C language logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/c2.png"/>
 
                                     </div>
                                 </TD>
@@ -377,7 +670,7 @@
                                     <!--          Nodejs-->
                                     <div data-toggle="tooltip" data-html="true" title="Node JS Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/nodejs.png"/>
+                                             alt="Node.js logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/nodejs.png"/>
 
                                     </div>
                                 </TD>
@@ -386,7 +679,7 @@
                                     <!--          SageMath-->
                                     <div data-toggle="tooltip" data-html="true" title="Sage Math Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/sage.png"/>
+                                             alt="SageMath logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/sage.png"/>
 
                                     </div>
                                 </TD>
@@ -400,7 +693,7 @@
                                     <!--          Rust-->
                                     <div data-toggle="tooltip" data-html="true" title="Rust Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Rust_programming_language_black_logo.svg.png" />
+                                             alt="Rust logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/Rust_programming_language_black_logo.svg.png" />
 
                                     </div>
                                 </TD>
@@ -408,7 +701,7 @@
                                     <!--          HTML-->
                                     <div data-toggle="tooltip" data-html="true" title="HTML Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/html.png"/>
+                                             alt="HTML5 logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/html.png"/>
 
                                     </div>
                                 </TD>
@@ -417,7 +710,7 @@
                                     <!--          CSS-->
                                     <div data-toggle="tooltip" data-html="true" title="CSS Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/css.png"/>
+                                             alt="CSS3 logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/css.png"/>
 
                                     </div>
                                 </TD>
@@ -426,7 +719,7 @@
                                     <!--          SQL-->
                                     <div data-toggle="tooltip" data-html="true" title="SQL Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/sql.png"/>
+                                             alt="SQL logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/sql.png"/>
 
                                     </div>
                                 </TD>
@@ -435,7 +728,7 @@
                                     <!--          PHP-->
                                     <div data-toggle="tooltip" data-html="true" title="PHP Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/php.png" />
+                                             alt="PHP logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/php.png" />
 
                                     </div>
                                 </TD>
@@ -448,7 +741,7 @@
                                     <!--          Angular JS-->
                                     <div data-toggle="tooltip" data-html="true" title="Angular JS Programming Language">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/AngularJS-Shield.png" />
+                                             alt="AngularJS logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/AngularJS-Shield.png" />
 
                                     </div>
                                 </TD>
@@ -457,7 +750,7 @@
                                     <!--        AWS Cloud Practitioner-->
                                     <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner Certification">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png"/>
+                                             alt="AWS Cloud Practitioner certification badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png"/>
                                     </div>
                                 </TD>
 
@@ -465,7 +758,7 @@
                                     <!--        AWS Certified Developer-->
                                     <div data-toggle="tooltip" data-html="true" title="AWS Certified Developer">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png"/>
+                                             alt="AWS Certified Developer Associate badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png"/>
                                     </div>
                                 </TD>
 
@@ -473,7 +766,7 @@
                                     <!--        Postman Student Expert-->
                                     <div data-toggle="tooltip" data-html="true" title="Postman API Student Expert">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png"/>
+                                             alt="Postman API Student Expert badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png"/>
                                     </div>
                                 </TD>
 
@@ -481,7 +774,7 @@
                                     <!--        Databricks Fundamentals-->
                                     <div data-toggle="tooltip" data-html="true" title="Databricks Fundamentals">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png"/>
+                                             alt="Databricks Fundamentals badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -492,14 +785,14 @@
                                     <!--        Databricks Generative AI Fundamentals-->
                                     <div data-toggle="tooltip" data-html="true" title="Databricks Generative AI Fundamentals">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png"/>
+                                             alt="Databricks Generative AI Fundamentals badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png"/>
                                     </div>
                                 </TD>
                                 <TD>
                                     <!--        AWS Solutions Architect-->
                                     <div data-toggle="tooltip" data-html="true" title="AWS Solutions Architect">
                                         <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png"/>
+                                             alt="AWS Certified Solutions Architect Associate badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png"/>
                                     </div>
                                 </TD>
                             </TR>
@@ -534,7 +827,7 @@
                                                 <div data-toggle="tooltip" data-html="true" :title="item.title">
                                                     <center>
                                                         <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                            <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
+                                                            <img :src="item.image" :alt="item.title" loading="lazy" @error="$event.target.style.opacity='0.3'" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                                         </button>
                                                     </center>
                                                 </div>
@@ -557,7 +850,7 @@
                                             <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
                                                 <div data-toggle="tooltip" data-html="true" :title="item.title">
                                                     <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                        <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
+                                                        <img :src="item.image" :alt="item.title" loading="lazy" @error="$event.target.style.opacity='0.3'" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                                     </button>
                                                 </div>
                                             </div>
@@ -587,10 +880,10 @@
         <footer class="w3-center w3-margin-top " style="color:#FFFAFA;background-color: black; display: inline-block; width: 100% ">
             <div style="padding: 10px">
                 <p style="padding-top: 15px;">Connect with me through Social Media</p>
-                <a href="https://www.instragram.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
-                <a href="https://www.twitter.com/masrik_dahir" target="blank"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
-                <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
-                <a href="https://github.com/Masrik-Dahir" target="blank"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
+                <a href="https://www.instagram.com/masrik_dahir" target="blank" class="social-host" data-tip="Instagram"><i style="font-size:36px" class="fab fa-instagram w3-hover-opacity">&#160&#160</i></a>
+                <a href="https://www.twitter.com/masrik_dahir" target="blank" class="social-host" data-tip="Twitter / X"><i style="font-size:36px" class="fab fa-twitter w3-hover-opacity">&#160&#160</i></a>
+                <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank" class="social-host" data-tip="LinkedIn"><i style="font-size:36px" class="fab fa-linkedin w3-hover-opacity">&#160&#160</i></a>
+                <a href="https://github.com/Masrik-Dahir" target="blank" class="social-host" data-tip="GitHub"><i style="font-size:36px" class="fab fa-github w3-hover-opacity">&#160&#160</i></a>
                 <a href="https://app.joinhandshake.com/users/20195119" target="blank"><i style="font-size:36px" class="fas fa-handshake w3-hover-opacity">&#160&#160</i></a>
                 <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" ><i style="font-size:36px" class="fab fa-youtube-square w3-hover-opacity">&#160&#160</i></a>
                 <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank"><i style="font-size:36px" class="fas fa-graduation-cap w3-hover-opacity">&#160</i></a>
@@ -598,6 +891,7 @@
                 <a href="https://ud.me/masrikdahir.nft" style="text-decoration: none" target="blank">
                     <b style="font-size:37px; color: black" class='w3-hover-opacity'>
                         <img class="" style="width:35px; vertical-align: middle; margin-bottom: 5px; margin-left: 5px "
+                             alt="Unstoppable Domains logo"
                              src="https://d3dw5jtb3w1kgy.cloudfront.net/w3_white.png"/>
                     </b>
                 </a>
@@ -675,7 +969,7 @@
 
 
 
-                <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                <a href="https://www.masrikdahir.com/milestone" class="nav-demoted" style="text-decoration: none">
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
                         <div style="" class="w3-padding-small">
@@ -688,7 +982,7 @@
                     </button>
                 </a>
 
-                <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                <a href="https://www.masrikdahir.com/map" class="nav-demoted" style="text-decoration: none">
                     <button class="glow-on-hover-nav" type="button"
                             style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">
                         <div style="" class="w3-padding-small">
@@ -782,7 +1076,7 @@
                                 </div>
                             </button>
                         </a>
-                        <a href="https://www.masrikdahir.com/milestone" style="text-decoration: none">
+                        <a href="https://www.masrikdahir.com/milestone" class="nav-demoted" style="text-decoration: none">
                             <button class="glow-on-hover3" type="button"
                                     style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                                 <div style="" class="w3-padding-small">
@@ -795,7 +1089,7 @@
                             </button>
                         </a>
 
-                        <a href="https://www.masrikdahir.com/map" style="text-decoration: none">
+                        <a href="https://www.masrikdahir.com/map" class="nav-demoted" style="text-decoration: none">
                             <button class="glow-on-hover3" type="button"
                                     style="margin-top: 5px; margin-bottom: 5px; margin-left: 10px">
                                 <div style="" class="w3-padding-small">
@@ -826,7 +1120,36 @@
 
         </div>
 
-        <canvas id='canv'></canvas>
+        <figure id="nyc-canvas-figure" class="nyc-canvas-figure">
+            <canvas id='canv'></canvas>
+            <noscript>
+                <p>This is a real-time canvas simulation of a city under missile defence. Enable JavaScript to interact with it.</p>
+            </noscript>
+        </figure>
+
+        <style>
+            .nyc-canvas-figure { margin: 0; padding: 0; }
+            .nyc-canvas-caption {
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 12px;
+                line-height: 1.5;
+                color: rgba(10,10,25,0.78);
+                padding: 10px 14px;
+                margin: 0 0 6px;
+                background: linear-gradient(135deg, rgba(255,255,255,0.94) 0%, rgba(225,238,255,0.84) 100%);
+                border: 1px solid rgba(120,180,255,0.30);
+                border-radius: 10px;
+                max-width: 720px;
+            }
+            .nyc-canvas-caption strong { color: #1e6fd0; font-weight: 800; letter-spacing: 0.04em; }
+            .nyc-canvas-caption a {
+                color: #c0202a;
+                font-weight: 800;
+                text-decoration: underline;
+                text-underline-offset: 2px;
+            }
+            .nyc-canvas-caption a:hover { color: #8a181e; }
+        </style>
 
         <div class="city-switcher-wrap">
             <div class="flight-wrap widget-host">
@@ -991,6 +1314,77 @@
                     <div class="tt-hint">Auto: cycles all interceptor types • Difficulty scales AI fire rate</div>
                 </div>
             </div>
+
+            <div id="reconstructBtn" class="reconstruct-btn icon-only">
+                <button class="rcn-core" onclick="
+                    if(window.toggleReconstruction){
+                        var on = window.toggleReconstruction();
+                        var wrap = document.getElementById('reconstructBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-wrench rcn-icon" id="rcnIcon" aria-hidden="true"></i>
+                </button>
+                <span class="rcn-pulse"></span>
+                <div class="widget-tooltip tt-rcn" role="tooltip">
+                    <div class="tt-title tt-title-rcn">Reconstruction</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-rcn-status" id="ttRcnStatus">IDLE</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Elapsed</span>
+                        <span class="tt-value tt-rcn-status" id="ttRcnTimer">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Damage</span>
+                        <span class="tt-value tt-rcn-status" id="ttRcnDamage">—</span>
+                    </div>
+                    <div class="tt-slider-row">
+                        <span class="tt-slider-label tt-slider-label-rcn">Speed</span>
+                        <input type="range" min="10" max="500" value="100" class="tt-slider tt-slider-rcn" id="ttRcnSpeedSlider" aria-label="Reconstruction speed"
+                               oninput="if(window.setReconstructionSpeed)window.setReconstructionSpeed(this.value/100); document.getElementById('ttRcnSpeedVal').textContent=(this.value/100).toFixed(2)+'×';">
+                        <span class="tt-slider-val tt-slider-val-rcn" id="ttRcnSpeedVal">1.00×</span>
+                    </div>
+                    <div class="tt-toggle-row">
+                        <button type="button" class="tt-rcn-instant" id="ttRcnInstantBtn"
+                                onclick="if(window.completeReconstructionNow) window.completeReconstructionNow();">REBUILD NOW</button>
+                    </div>
+                    <div class="tt-hint">Brings fire trucks, helicopters, tow trucks &amp; cranes • Auto-runs after attack/defence • Runs until every fire is out and every building is rebuilt</div>
+                </div>
+            </div>
+
+            <!-- PARADE — kicks off a fully-detailed military parade:
+                 fighter jets, attack helicopters in the sky; tanks and
+                 missile carriers driving down the road. -->
+            <div id="paradeBtn" class="parade-btn icon-only">
+                <button class="prd-core" onclick="
+                    if(window.toggleParade){
+                        var on = window.toggleParade();
+                        var wrap = document.getElementById('paradeBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-flag prd-icon" id="prdIcon" aria-hidden="true"></i>
+                </button>
+                <span class="prd-pulse"></span>
+                <div class="widget-tooltip tt-parade" role="tooltip">
+                    <div class="tt-title tt-title-parade">Military Parade</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdStatus">IDLE</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Air units</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdAir">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Ground units</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdGround">—</span>
+                    </div>
+                    <div class="tt-hint">Fighter jets &amp; attack helicopters fly overhead • Tanks &amp; missile carriers roll down the road • Click again to dismiss the parade</div>
+                </div>
+            </div>
         </div>
 
         <style>
@@ -1019,6 +1413,8 @@
             .city-switcher-wrap > .missile-btn,
             .city-switcher-wrap > .strategy-btn,
             .city-switcher-wrap > .defence-btn,
+            .city-switcher-wrap > .reconstruct-btn,
+            .city-switcher-wrap > .parade-btn,
             .city-switcher-wrap > .flight-wrap {
                 height: 44px;
                 box-sizing: border-box;
@@ -1716,6 +2112,882 @@
                 0%   { transform: scale(0.94); opacity: 0.75; }
                 100% { transform: scale(1.30); opacity: 0; }
             }
+
+            /* ── RECONSTRUCTION widget (mirrors defence widget, orange theme) ── */
+            .reconstruct-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(255,200,140,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            .reconstruct-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .reconstruct-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .reconstruct-btn:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(255,210,150,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px  rgba(0,0,0,0.08);
+                transform: translateY(-1px);
+            }
+            .reconstruct-btn:hover::after { opacity: 1; }
+            .reconstruct-btn:active { transform: translateY(0) scale(0.97); }
+            .reconstruct-btn .rcn-core {
+                width: 100%;
+                height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                background-image: none !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                position: relative;
+                z-index: 1;
+            }
+            /* defeat polish.css's hex-mask hover overlay on the inner
+               button — it bleeds the diamond/hex shape over the wrench */
+            .reconstruct-btn .rcn-core::before,
+            .reconstruct-btn .rcn-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                -webkit-mask-image: none !important;
+                        mask-image: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .reconstruct-btn .rcn-core:hover {
+                background: rgba(255,255,255,0.10) !important;
+            }
+            .reconstruct-btn .rcn-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);              /* matches flight / weather icons */
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            .reconstruct-btn .rcn-core:hover .rcn-icon { transform: rotate(15deg); }
+            .reconstruct-btn.active .rcn-icon {
+                color: #ea580c;
+                text-shadow: 0 0 8px rgba(234,88,12,0.65);
+                animation: rcn-spin 1.2s linear infinite;
+            }
+            @keyframes rcn-spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+            }
+            .reconstruct-btn .rcn-pulse { display: none; }
+            .reconstruct-btn.active .rcn-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(234,88,12,0.55);
+                animation: rcn-pulse 1.6s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes rcn-pulse {
+                0%   { transform: scale(0.94); opacity: 0.80; }
+                100% { transform: scale(1.35); opacity: 0; }
+            }
+            /* tooltip orange title accent */
+            .widget-tooltip .tt-title-rcn { color: #ea580c; }
+            .widget-tooltip .tt-rcn-status { color: #ea580c; }
+            .tt-rcn .tt-row-hover .tt-label { color: #ea580c; }
+            .tt-slider-label-rcn { color: #ea580c; }
+            .tt-slider-val-rcn   { color: #ea580c; }
+            .tt-slider-rcn {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 100%;
+                height: 4px;
+                background: linear-gradient(90deg,
+                    rgba(234,88,12,0.45) 0%,
+                    rgba(251,191,36,0.45) 50%,
+                    rgba(234,88,12,0.85) 100%);
+                border-radius: 6px;
+                outline: none;
+            }
+            /* ── PARADE widget (mirrors reconstruct, OLIVE / military theme) ── */
+            .parade-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(180,200,140,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            .parade-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .parade-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                /* Same multi-color rainbow halo as the other widget
+                   buttons (reconstruct / defence / attack / city
+                   switcher) so the parade button reads as part of
+                   the same family on hover. */
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .parade-btn:hover {
+                /* Same hover surface as reconstruct-btn — neutral white
+                   warm wash, identical shadow stack, identical lift —
+                   so the parade widget feels like a sibling button. */
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(255,210,150,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px  rgba(0,0,0,0.08);
+                transform: translateY(-1px);
+            }
+            .parade-btn:hover::after { opacity: 1; }
+            .parade-btn:active { transform: translateY(0) scale(0.97); }
+            .parade-btn .prd-core {
+                width: 100%;
+                height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                background-image: none !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                position: relative;
+                z-index: 1;
+            }
+            .parade-btn .prd-core::before,
+            .parade-btn .prd-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                -webkit-mask-image: none !important;
+                        mask-image: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .parade-btn .prd-core:hover {
+                background: rgba(255,255,255,0.10) !important;
+            }
+            .parade-btn .prd-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            .parade-btn .prd-core:hover .prd-icon { transform: rotate(-10deg); }
+            .parade-btn.active .prd-icon {
+                color: #556b2f;
+                text-shadow: 0 0 8px rgba(85,107,47,0.65);
+                animation: prd-wave 1.4s ease-in-out infinite;
+            }
+            @keyframes prd-wave {
+                0%, 100% { transform: rotate(-8deg); }
+                50%      { transform: rotate(8deg); }
+            }
+            .parade-btn .prd-pulse { display: none; }
+            .parade-btn.active .prd-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(85,107,47,0.55);
+                animation: prd-pulse 1.6s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes prd-pulse {
+                0%   { transform: scale(0.94); opacity: 0.80; }
+                100% { transform: scale(1.35); opacity: 0; }
+            }
+            /* tooltip olive title accent */
+            .widget-tooltip .tt-title-parade { color: #556b2f; }
+            .widget-tooltip .tt-prd-status   { color: #556b2f; }
+            .tt-parade { width: 240px; }
+
+            .tt-slider-rcn::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 14px; height: 14px;
+                border-radius: 50%;
+                background: radial-gradient(circle at 35% 30%, #fff 0%, #fb923c 60%, #c2410c 100%);
+                border: 1px solid rgba(234,88,12,0.85);
+                box-shadow: 0 0 6px rgba(234,88,12,0.65);
+                cursor: pointer;
+            }
+            .tt-slider-rcn::-moz-range-thumb {
+                width: 14px; height: 14px;
+                border-radius: 50%;
+                background: radial-gradient(circle at 35% 30%, #fff 0%, #fb923c 60%, #c2410c 100%);
+                border: 1px solid rgba(234,88,12,0.85);
+                box-shadow: 0 0 6px rgba(234,88,12,0.65);
+                cursor: pointer;
+            }
+            /* CSS @property — required so `--rcn-edge-angle` can be
+               interpolated as an <angle> in animations. Without this
+               the browser treats the var as a string and the conic
+               gradient would jump rather than smoothly rotate. */
+            @property --rcn-edge-angle {
+                syntax: '<angle>';
+                initial-value: 0deg;
+                inherits: false;
+            }
+
+            .tt-rcn-instant {
+                display: inline-block;
+                width: 100%;
+                padding: 7px 10px;
+                /* MULTI-LAYER liquid-glass background:
+                   – Top dome sheen — bright arc near upper edge that
+                     suggests light catching the curve of glass
+                   – Upper-left corner glow — secondary light source
+                     for asymmetric realism
+                   – Bottom depth shadow — soft dark band at lower
+                     edge giving the glass volumetric weight
+                   – Base surface gradient — the diffuse white body
+                   – Border-box conic — the rotating rainbow rim */
+                --rcn-edge-angle: 0deg;
+                --rcn-glint-pos: 0%;
+                background:
+                    /* moving glint highlight that sweeps across */
+                    linear-gradient(105deg,
+                        rgba(255,255,255,0.00) 0%,
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) - 18%),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) - 5%),
+                        rgba(255,255,255,0.85) var(--rcn-glint-pos),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) + 5%),
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) + 18%),
+                        rgba(255,255,255,0.00) 100%) padding-box,
+                    /* dome sheen at top */
+                    radial-gradient(ellipse 100% 60% at 50% -25%,
+                        rgba(255,255,255,0.85) 0%,
+                        rgba(255,255,255,0.30) 35%,
+                        rgba(255,255,255,0.00) 70%) padding-box,
+                    /* secondary corner glow at top-left */
+                    radial-gradient(ellipse 60% 90% at 0% 0%,
+                        rgba(255,255,255,0.55) 0%,
+                        rgba(255,255,255,0.00) 60%) padding-box,
+                    /* base soft tint */
+                    radial-gradient(ellipse 90% 65% at 50% 120%,
+                        rgba(15,20,40,0.10) 0%,
+                        rgba(15,20,40,0.00) 60%) padding-box,
+                    linear-gradient(135deg,
+                        rgba(255,253,250,0.88) 0%,
+                        rgba(252,242,230,0.84) 100%) padding-box,
+                    /* rotating conic rainbow border */
+                    conic-gradient(from var(--rcn-edge-angle),
+                        #ffb3c6, #ffd1a8, #fff0a8, #c4f2c5,
+                        #b8d9ff, #d4c1ff, #ffc1e5, #ffb3c6
+                    ) border-box;
+                color: #9a3412;
+                border: 2px solid transparent;
+                border-radius: 10px;
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.10em;
+                cursor: pointer;
+                backdrop-filter: blur(8px) saturate(150%);
+                -webkit-backdrop-filter: blur(8px) saturate(150%);
+                box-shadow:
+                    /* deep bright top rim — the dome of the glass */
+                    inset 0 1.5px 0 rgba(255,255,255,1.00),
+                    /* faint side highlights for crystalline edges */
+                    inset 1px 0 0 rgba(255,255,255,0.55),
+                    inset -1px 0 0 rgba(255,255,255,0.55),
+                    /* inner top-down sheen */
+                    inset 0 2px 6px rgba(255,255,255,0.45),
+                    /* inner bottom shadow that gives glass-bowl depth */
+                    inset 0 -2px 6px rgba(20,15,30,0.10),
+                    /* outer soft halo */
+                    0 0 14px rgba(255,200,220,0.25),
+                    0 2px 8px rgba(15,20,40,0.20),
+                    0 6px 18px rgba(15,20,40,0.10);
+                transition: transform 0.12s ease, box-shadow 0.20s ease,
+                            color 0.18s ease;
+                /* Two continuous animations — edge spins forever, the
+                   glint sweeps across the surface forever. */
+                animation:
+                    tt-rcn-edge-spin  4.5s linear infinite,
+                    tt-rcn-glint      6.0s linear infinite;
+            }
+            .tt-rcn-instant:hover {
+                color: #ea580c;
+                box-shadow:
+                    inset 0 1.5px 0 rgba(255,255,255,1.00),
+                    inset 1px 0 0 rgba(255,255,255,0.70),
+                    inset -1px 0 0 rgba(255,255,255,0.70),
+                    inset 0 2px 8px rgba(255,255,255,0.60),
+                    inset 0 -2px 8px rgba(20,15,30,0.12),
+                    0 0 22px rgba(255,180,200,0.55),
+                    0 0 36px rgba(180,200,255,0.30),
+                    0 4px 12px rgba(15,20,40,0.25),
+                    0 8px 22px rgba(15,20,40,0.15);
+                transform: translateY(-1px);
+                /* Hover speeds up BOTH animations and bumps saturation. */
+                animation:
+                    tt-rcn-edge-spin  2.4s linear infinite,
+                    tt-rcn-glint      3.2s linear infinite;
+                filter: saturate(1.30) brightness(1.05);
+            }
+            .tt-rcn-instant:active { transform: translateY(0) scale(0.97); }
+
+            @keyframes tt-rcn-edge-spin {
+                to { --rcn-edge-angle: 360deg; }
+            }
+            @property --rcn-glint-pos {
+                syntax: '<percentage>';
+                initial-value: -25%;
+                inherits: false;
+            }
+            @keyframes tt-rcn-glint {
+                0%   { --rcn-glint-pos: -25%; }
+                100% { --rcn-glint-pos: 125%; }
+            }
+
+            /* ═══════════════════════════════════════════════════════════
+               UNIVERSAL LIQUID-GLASS HOVER — applies the full multi-layer
+               glass + rotating conic border + sweeping glint treatment
+               to EVERY button inside ANY widget tooltip:
+                 • flight (city switcher) chips
+                 • weather chips
+                 • attack-control chips + AUTO toggle
+                 • defence-control chips + AUTO toggle
+                 • reconstruction REBUILD NOW button
+                 • strategy plan/exec/clear buttons
+               At rest each button keeps its native look; on hover it
+               transforms into the same liquid-glass style. */
+            /* Skip ACTIVE buttons (selected chips, ON toggles, active
+               strategy buttons) — they keep their per-state colored
+               background so the user can see which chip/toggle is
+               currently active. The liquid-glass treatment applies to
+               inactive buttons only. */
+            body.polish .widget-tooltip .tt-chip:not(.active):hover,
+            body.polish .widget-tooltip .tt-toggle:not(.on):hover,
+            body.polish .widget-tooltip .tt-stg-plan:not(.active):hover,
+            body.polish .widget-tooltip .tt-stg-exec:not(.active):hover,
+            body.polish .widget-tooltip .tt-stg-clear:not(.active):hover {
+                --rcn-edge-angle: 0deg;
+                --rcn-glint-pos: -25%;
+                background:
+                    linear-gradient(105deg,
+                        rgba(255,255,255,0.00) 0%,
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) - 18%),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) - 5%),
+                        rgba(255,255,255,0.85) var(--rcn-glint-pos),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) + 5%),
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) + 18%),
+                        rgba(255,255,255,0.00) 100%) padding-box,
+                    radial-gradient(ellipse 100% 60% at 50% -25%,
+                        rgba(255,255,255,0.85) 0%,
+                        rgba(255,255,255,0.30) 35%,
+                        rgba(255,255,255,0.00) 70%) padding-box,
+                    radial-gradient(ellipse 60% 90% at 0% 0%,
+                        rgba(255,255,255,0.55) 0%,
+                        rgba(255,255,255,0.00) 60%) padding-box,
+                    radial-gradient(ellipse 90% 65% at 50% 120%,
+                        rgba(15,20,40,0.10) 0%,
+                        rgba(15,20,40,0.00) 60%) padding-box,
+                    linear-gradient(135deg,
+                        rgba(255,253,250,0.88) 0%,
+                        rgba(252,242,230,0.84) 100%) padding-box,
+                    conic-gradient(from var(--rcn-edge-angle),
+                        #ffb3c6, #ffd1a8, #fff0a8, #c4f2c5,
+                        #b8d9ff, #d4c1ff, #ffc1e5, #ffb3c6
+                    ) border-box !important;
+                border: 2px solid transparent !important;
+                backdrop-filter: blur(8px) saturate(150%) !important;
+                -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+                box-shadow:
+                    inset 0 1.5px 0 rgba(255,255,255,1.00),
+                    inset 1px 0 0 rgba(255,255,255,0.70),
+                    inset -1px 0 0 rgba(255,255,255,0.70),
+                    inset 0 2px 8px rgba(255,255,255,0.60),
+                    inset 0 -2px 8px rgba(20,15,30,0.12),
+                    0 0 22px rgba(255,180,200,0.55),
+                    0 0 36px rgba(180,200,255,0.30),
+                    0 4px 12px rgba(15,20,40,0.25),
+                    0 8px 22px rgba(15,20,40,0.15) !important;
+                transform: translateY(-1px);
+                animation:
+                    tt-rcn-edge-spin  2.4s linear infinite,
+                    tt-rcn-glint      3.2s linear infinite !important;
+                filter: saturate(1.30) brightness(1.05);
+            }
+
+            /* Smaller buttons (chips, toggles, strategy actions) need a
+               slightly tighter border-radius so the conic ring follows
+               their existing corner curvature. */
+            body.polish .widget-tooltip .tt-chip:hover {
+                border-radius: 8px !important;
+            }
+            body.polish .widget-tooltip .tt-toggle:hover,
+            body.polish .widget-tooltip .tt-stg-plan:hover,
+            body.polish .widget-tooltip .tt-stg-exec:hover,
+            body.polish .widget-tooltip .tt-stg-clear:hover {
+                border-radius: 10px !important;
+            }
+
+            /* REBUILD NOW button — hex OUTLINES tiled in soft pastel
+               rainbow that visibly cycles through colors on hover.
+
+               CRITICAL: filter is NOT !important so the keyframe
+               animation can actually drive `hue-rotate` — !important
+               on a static declaration would beat the animation per
+               CSS cascade rules.
+
+               Hex size is calc()-derived from the button height so
+               the pattern auto-scales to whatever the button ends
+               up being. ~14px tall hexagons → 1 clean row on a 22-
+               24px button, ~12 columns across a typical width. */
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant::before,
+            .widget-tooltip.tt-rcn .tt-rcn-instant::before {
+                /* VERY tiny hexagonal mesh — ~5 × 6 px per cell. At
+                   this density you only just barely perceive the
+                   hex geometry; the overall effect reads as a fine
+                   shimmering metallic mesh more than a tiled pattern.
+                   Stroke is dropped to 0.7 so the outline doesn't
+                   overwhelm the cell at this tile size. */
+                --hex-w: 5px;
+                --hex-h: 6px;
+                z-index: -1 !important;            /* BELOW the button text */
+                -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                -webkit-mask-size: var(--hex-w) var(--hex-h) !important;
+                        mask-size: var(--hex-w) var(--hex-h) !important;
+                background: linear-gradient(90deg,
+                    #ffb3c6 0%,     /* cherry  */
+                    #ffd1a8 14%,    /* peach   */
+                    #fff0a8 28%,    /* lemon   */
+                    #c4f2c5 42%,    /* mint    */
+                    #b8d9ff 56%,    /* sky     */
+                    #d4c1ff 70%,    /* lavender*/
+                    #ffc1e5 85%,    /* rose    */
+                    #ffb3c6 100%    /* seam back to cherry  */
+                ) !important;
+                background-size: 300% 100% !important;
+                background-position: 0% 50% !important;
+                mix-blend-mode: normal !important;
+                /* NO !important here so the keyframe's hue-rotate can
+                   actually take effect when the animation runs. */
+                filter: saturate(1.25) brightness(1.05);
+            }
+            /* Button creates its own stacking context so the negative-z
+               ::before doesn't fall outside it; text renders above it. */
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant,
+            .widget-tooltip.tt-rcn .tt-rcn-instant {
+                isolation: isolate;
+                z-index: 0;
+            }
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant:hover::before,
+            .widget-tooltip.tt-rcn .tt-rcn-instant:hover::before {
+                opacity: 1 !important;
+                /* TWO animations layered for very visible color change:
+                   – sweep: gradient slides full 300% width
+                   – hue-cycle: every pixel's hue rotates 360° */
+                animation:
+                    tt-hex-sweep 2.4s linear infinite,
+                    tt-hex-hue-cycle 3.6s linear infinite !important;
+            }
+            @keyframes tt-hex-sweep {
+                from { background-position:   0% 50%; }
+                to   { background-position: 200% 50%; }
+            }
+            @keyframes tt-hex-hue-cycle {
+                from { filter: saturate(1.25) brightness(1.05) hue-rotate(0deg); }
+                to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+            }
+
+            /* ═══════════════════════════════════════════════════════════
+               NEW NORM — Liquid-glass hex-shimmer for ALL widget-tooltip
+               buttons. Hexagons are sized via the per-button --hex-size
+               custom property (default 10px) so each button shows MANY
+               small hexes tiled across its surface. On hover, the hex
+               layer fades in and runs an INFINITE shimmer animation —
+               never stops glistening while the cursor stays on the
+               button. Apply `.liquid-glass-btn` to any future button to
+               get the same treatment outside widget tooltips. */
+            .widget-tooltip .tt-chip,
+            .widget-tooltip .tt-toggle,
+            .widget-tooltip .tt-rcn-instant,
+            .widget-tooltip .tt-stg-plan,
+            .widget-tooltip .tt-stg-exec,
+            .widget-tooltip .tt-stg-clear,
+            .liquid-glass-btn {
+                position: relative;
+                isolation: isolate;
+                overflow: hidden;
+                --hex-size: 10px;
+            }
+            /* per-button-type hex sizes — very fine mesh so the hexes
+               read as a shimmering crystalline texture rather than a
+               coarse pattern. Tile width × 1.14 = tile height. */
+            .widget-tooltip .tt-chip                 { --hex-size:  5px; }
+            .widget-tooltip .tt-toggle               { --hex-size:  5px; }
+            .widget-tooltip .tt-rcn-instant          { --hex-size:  5px; }
+            .widget-tooltip .tt-stg-plan,
+            .widget-tooltip .tt-stg-exec,
+            .widget-tooltip .tt-stg-clear            { --hex-size:  5px; }
+
+            /* Keep the button's own children above the hex layer */
+            .widget-tooltip .tt-chip > *,
+            .widget-tooltip .tt-toggle,
+            .widget-tooltip .tt-rcn-instant,
+            .widget-tooltip .tt-stg-plan,
+            .widget-tooltip .tt-stg-exec,
+            .widget-tooltip .tt-stg-clear,
+            .liquid-glass-btn > * {
+                position: relative;
+                z-index: 2;
+            }
+
+            /* The shimmer layer. ::before is a moving white-stripe gradient
+               clipped to a tiling hexagon mask. At rest it's invisible.
+               On hover it fades in (0 → 0.95) AND starts an infinite
+               shimmer animation. polish.css already attaches its own
+               ::before / ::after to many buttons with a one-shot
+               rainbow sweep — !important overrides it so this NEW norm
+               wins everywhere. */
+            body.polish .widget-tooltip .tt-chip::before,
+            body.polish .widget-tooltip .tt-toggle::before,
+            body.polish .widget-tooltip .tt-rcn-instant::before,
+            body.polish .widget-tooltip .tt-stg-plan::before,
+            body.polish .widget-tooltip .tt-stg-exec::before,
+            body.polish .widget-tooltip .tt-stg-clear::before,
+            body.polish .liquid-glass-btn::before,
+            .widget-tooltip .tt-chip::before,
+            .widget-tooltip .tt-toggle::before,
+            .widget-tooltip .tt-rcn-instant::before,
+            .widget-tooltip .tt-stg-plan::before,
+            .widget-tooltip .tt-stg-exec::before,
+            .widget-tooltip .tt-stg-clear::before,
+            .liquid-glass-btn::before {
+                content: '' !important;
+                position: absolute !important;
+                inset: 0 !important;
+                /* z-index: -1 puts the hex mesh BELOW the button text
+                   and BELOW the button background (within the isolated
+                   stacking context). Matches the rebuild-button setup. */
+                z-index: -1 !important;
+                pointer-events: none !important;
+                border-radius: inherit !important;
+                /* Pastel rainbow stripe — same palette as the rebuild
+                   button so every tooltip button looks consistent. */
+                background:
+                    linear-gradient(90deg,
+                        #ffb3c6 0%,
+                        #ffd1a8 14%,
+                        #fff0a8 28%,
+                        #c4f2c5 42%,
+                        #b8d9ff 56%,
+                        #d4c1ff 70%,
+                        #ffc1e5 85%,
+                        #ffb3c6 100%) !important;
+                background-size: 300% 100% !important;
+                background-position: 0% 50% !important;
+                /* Stroke-only hexagon mask — only the OUTLINE is
+                   visible, never a filled shape. stroke-width=3.5 in
+                   the source viewBox scales to a fine 0.6-0.7px line
+                   at small render sizes. */
+                -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                        mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                -webkit-mask-repeat: repeat !important;
+                        mask-repeat: repeat !important;
+                /* `normal` blend so the rainbow paints DIRECTLY on the
+                   button surface — no overlay-bleaching to white. */
+                mix-blend-mode: normal !important;
+                opacity: 0 !important;
+                animation: none !important;
+                transition: opacity 0.30s ease !important;
+                /* `filter` is intentionally NOT set here — per-button
+                   overrides (e.g. .tt-rcn-instant) need to drive their
+                   own hue-rotate / saturate animations, and !important
+                   on this layer would beat the keyframe animation per
+                   the CSS cascade. */
+            }
+            /* Faint liquid-glass surface tint, also continuously animated
+               so the button has a subtle "alive" feel even at rest. */
+            .widget-tooltip .tt-chip::after,
+            .widget-tooltip .tt-toggle::after,
+            .widget-tooltip .tt-rcn-instant::after,
+            .widget-tooltip .tt-stg-plan::after,
+            .widget-tooltip .tt-stg-exec::after,
+            .widget-tooltip .tt-stg-clear::after,
+            .liquid-glass-btn::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                border-radius: inherit;
+                background: linear-gradient(160deg,
+                    rgba(255,255,255,0.28) 0%,
+                    rgba(255,255,255,0.06) 38%,
+                    rgba(255,255,255,0.00) 60%);
+            }
+
+            /* Hover state — fade in the hex shimmer AND run it
+               continuously. `infinite` is the key — no fade-away. */
+            body.polish .widget-tooltip .tt-chip:hover::before,
+            body.polish .widget-tooltip .tt-toggle:hover::before,
+            body.polish .widget-tooltip .tt-rcn-instant:hover::before,
+            body.polish .widget-tooltip .tt-stg-plan:hover::before,
+            body.polish .widget-tooltip .tt-stg-exec:hover::before,
+            body.polish .widget-tooltip .tt-stg-clear:hover::before,
+            body.polish .liquid-glass-btn:hover::before,
+            .widget-tooltip .tt-chip:hover::before,
+            .widget-tooltip .tt-toggle:hover::before,
+            .widget-tooltip .tt-rcn-instant:hover::before,
+            .widget-tooltip .tt-stg-plan:hover::before,
+            .widget-tooltip .tt-stg-exec:hover::before,
+            .widget-tooltip .tt-stg-clear:hover::before,
+            .liquid-glass-btn:hover::before {
+                opacity: 1 !important;
+                /* Same dual animation as the rebuild button — sweep
+                   the rainbow stripe AND rotate the hue, both forever. */
+                animation:
+                    tt-hex-sweep 2.4s linear infinite,
+                    tt-hex-hue-cycle 3.6s linear infinite !important;
+                filter: saturate(1.25) brightness(1.05);
+            }
+
+            /* ACTIVE buttons on hover — hex outlines stay LOCKED to
+               the active button's color family (reds for red, blues
+               for blue, etc.) but actively GLISTEN via two animations:
+
+                 1. tt-hex-sweep — slides the gradient horizontally so
+                    each hex passes through every shade in the family
+                 2. tt-active-shimmer — pulses brightness + saturation
+                    + a tiny ±15° hue range. The hue range is small
+                    enough that reds stay red (they shift slightly
+                    toward orange / magenta but never leave the family)
+                    while still being visibly DIFFERENT from frame to
+                    frame, which is what reads as "glistening".
+
+               Combined: each hex visibly changes color over time
+               (sweep delivers different shades) AND each hex pulses
+               (shimmer brightens + slightly hue-shifts). Together
+               the surface looks alive and crystalline. */
+            body.polish .widget-tooltip .tt-chip.active:hover::before,
+            body.polish .widget-tooltip .tt-toggle.on:hover::before,
+            body.polish .widget-tooltip .tt-stg-plan.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-exec.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-clear.active:hover::before {
+                opacity: 1 !important;
+                background-size: 300% 100% !important;
+                background-position: 0% 50% !important;
+                mix-blend-mode: normal !important;
+                animation:
+                    tt-hex-sweep        1.6s linear infinite,
+                    tt-active-shimmer   1.4s ease-in-out infinite !important;
+            }
+            @keyframes tt-active-shimmer {
+                0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
+                50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
+            }
+
+            /* ── RED family (Attack control) ──────────────────────── */
+            body.polish .widget-tooltip.tt-attack .tt-chip.active:hover::before,
+            body.polish .tt-toggle.tt-toggle-attack.on:hover::before {
+                background: linear-gradient(90deg,
+                    #8a0a14 0%,    /* dark crimson */
+                    #c0202a 14%,   /* base red     */
+                    #e04050 28%,   /* light red    */
+                    #c04020 42%,   /* burnt orange */
+                    #6a0a14 56%,   /* maroon       */
+                    #a02030 70%,   /* deep rose    */
+                    #d83040 85%,   /* signal red   */
+                    #8a0a14 100%   /* loop back    */
+                ) !important;
+            }
+
+            /* ── BLUE family (Flight / city switcher) ─────────────── */
+            body.polish .widget-tooltip.tt-flight .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #0a3a6a 0%,    /* dark navy    */
+                    #1856a8 14%,   /* royal blue   */
+                    #1e6fd0 28%,   /* base blue    */
+                    #2480e0 42%,   /* light azure  */
+                    #0c2050 56%,   /* midnight     */
+                    #2a5a8a 70%,   /* steel blue   */
+                    #1a4080 85%,   /* deep cobalt  */
+                    #0a3a6a 100%   /* loop back    */
+                ) !important;
+            }
+
+            /* ── CYAN family (Weather) ────────────────────────────── */
+            body.polish .widget-tooltip.tt-weather .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #0a4a6a 0%,    /* dark teal    */
+                    #1574b8 14%,   /* deep cyan    */
+                    #1e8fd0 28%,   /* base cyan    */
+                    #2aa6e0 42%,   /* light cyan   */
+                    #0a3050 56%,   /* midnight teal*/
+                    #1a6a8a 70%,   /* ocean        */
+                    #1480a8 85%,   /* slate ocean  */
+                    #0a4a6a 100%   /* loop back    */
+                ) !important;
+            }
+
+            /* ── GREEN family (Defence control) ───────────────────── */
+            body.polish .widget-tooltip.tt-defence .tt-chip.active:hover::before,
+            body.polish .tt-toggle.tt-toggle-defence.on:hover::before {
+                background: linear-gradient(90deg,
+                    #0a4a14 0%,    /* dark forest   */
+                    #1e7838 14%,   /* base green    */
+                    #2a8a4a 28%,   /* mid emerald   */
+                    #4aa86a 42%,   /* light spring  */
+                    #0c3010 56%,   /* deepest forest*/
+                    #2a6a30 70%,   /* hunter        */
+                    #1a5a20 85%,   /* pine          */
+                    #0a4a14 100%   /* loop back     */
+                ) !important;
+            }
+
+            /* ── ORANGE family (Reconstruction REBUILD NOW button) ── */
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant.active:hover::before {
+                background: linear-gradient(90deg,
+                    #8a3a05 0%,    /* dark amber    */
+                    #c2410c 14%,   /* burnt orange  */
+                    #ea580c 28%,   /* base orange   */
+                    #f97316 42%,   /* bright tangerine */
+                    #6b2a05 56%,   /* dark rust     */
+                    #b04a10 70%,   /* sienna        */
+                    #d56a18 85%,   /* gold-orange   */
+                    #8a3a05 100%   /* loop back     */
+                ) !important;
+            }
+
+            /* ── PURPLE family (Strategy plan/exec/clear actions) ── */
+            body.polish .widget-tooltip .tt-stg-plan.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-exec.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-clear.active:hover::before {
+                background: linear-gradient(90deg,
+                    #3a0a6a 0%,    /* deep violet   */
+                    #5a20a0 14%,   /* indigo        */
+                    #7030c0 28%,   /* base purple   */
+                    #aa6eff 42%,   /* light orchid  */
+                    #2a0850 56%,   /* royal indigo  */
+                    #4a1880 70%,   /* dark amethyst */
+                    #6028b0 85%,   /* deep grape    */
+                    #3a0a6a 100%   /* loop back     */
+                ) !important;
+            }
+            @keyframes tt-hex-glisten {
+                0%   { background-position: -60% 50%; }
+                100% { background-position: 160% 50%; }
+            }
+            @media (prefers-reduced-motion: reduce){
+                .widget-tooltip .tt-chip:hover::before,
+                .widget-tooltip .tt-toggle:hover::before,
+                .widget-tooltip .tt-rcn-instant:hover::before,
+                .widget-tooltip .tt-stg-plan:hover::before,
+                .widget-tooltip .tt-stg-exec:hover::before,
+                .widget-tooltip .tt-stg-clear:hover::before,
+                .liquid-glass-btn:hover::before {
+                    animation: none;
+                    opacity: 0.55;
+                }
+            }
+
             /* tooltip green title accent */
             .widget-tooltip .tt-title-defence  { color: #1e7838; }
             .widget-tooltip .tt-dfn { color: #1e7838; }
@@ -1825,6 +3097,7 @@
             .weather-widget:hover .widget-tooltip,
             .missile-btn:hover .widget-tooltip,
             .defence-btn:hover .widget-tooltip,
+            .reconstruct-btn:hover .widget-tooltip,
             .strategy-btn:hover .widget-tooltip,
             .widget-host:hover .widget-tooltip,
             .widget-tooltip:hover {
@@ -1981,12 +3254,157 @@
                 /* keep the emoji glyph crisp */
                 font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
             }
+            /* Stabilise the chip border-width across rest / hover /
+               active. Otherwise it swings between 1 px (base + active)
+               and 2 px (the liquid-glass `:not(.active):hover` rule
+               higher up), which with `box-sizing: border-box` makes
+               the icon + text shift sideways by 1 px on every click.
+               Locking width at 2 px on EVERY state — including the
+               click ripple itself — eliminates that horizontal hop. */
+            body.polish .widget-tooltip .tt-chip,
+            body.polish .widget-tooltip .tt-chip:hover,
+            body.polish .widget-tooltip .tt-chip.active,
+            body.polish .widget-tooltip .tt-chip.active:hover,
+            body.polish .widget-tooltip .tt-toggle,
+            body.polish .widget-tooltip .tt-toggle:hover,
+            body.polish .widget-tooltip .tt-toggle.on,
+            .widget-tooltip .tt-chip,
+            .widget-tooltip .tt-chip:hover,
+            .widget-tooltip .tt-chip.active,
+            .widget-tooltip .tt-toggle,
+            .widget-tooltip .tt-toggle:hover,
+            .widget-tooltip .tt-toggle.on {
+                border-width: 2px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* ─── CLICK WAVE — ink ripple + outer shockwave ring ───
+               Both are pure CSS animations driven by the JS that
+               spawns the elements (see the click-wave block at the
+               bottom of <body>). The inner ripple is clipped by the
+               chip's overflow:hidden for a contained ink-burst; the
+               outer wave sits on the chip's parent so it can expand
+               OUTSIDE the chip outline for a punchy impact halo. */
+            /* HARD-IMPACT RIPPLE — bright flash + fast expand + secondary
+               glow ring. The flash at 0% is at full opacity 1.0 and a
+               larger seed (12px) so the click feels percussive. */
+            @keyframes tt-ripple-burst {
+                0%   { transform: translate(-50%, -50%) scale(1);
+                       opacity: 1; }
+                15%  { opacity: 1; }
+                60%  { opacity: 0.55; }
+                100% { transform: translate(-50%, -50%) scale(42);
+                       opacity: 0; }
+            }
+            .tt-ripple {
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: radial-gradient(circle,
+                    rgba(255,255,255,1.00) 0%,
+                    rgba(255,255,255,0.80) 30%,
+                    rgba(220,235,255,0.35) 60%,
+                    rgba(255,255,255,0)   100%);
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 20;
+                animation: tt-ripple-burst 0.55s cubic-bezier(.14, .92, .28, 1.20) forwards;
+                box-shadow:
+                    0 0 24px rgba(255,255,255,0.85),
+                    0 0 48px rgba(180,210,255,0.55);
+            }
+            /* OUTER SHOCKWAVE — thicker ring that snaps out further and
+               carries a coloured glow trail, so the "impact" reads even
+               when the chip itself doesn't move. */
+            @keyframes tt-impact-wave-expand {
+                0%   { width: 8px;  height: 8px;
+                       border-width: 4px;
+                       border-color: rgba(255,255,255,1);
+                       box-shadow:
+                           0 0 26px rgba(255,255,255,1),
+                           0 0 48px rgba(180,210,255,0.75);
+                       opacity: 1; }
+                25%  { border-width: 3.5px; opacity: 0.95; }
+                65%  { border-width: 2px;   opacity: 0.6; }
+                100% { width: 180px; height: 180px;
+                       border-width: 0.5px;
+                       border-color: rgba(255,255,255,0);
+                       box-shadow:
+                           0 0 32px rgba(255,255,255,0),
+                           0 0 64px rgba(180,210,255,0);
+                       opacity: 0; }
+            }
+            .tt-impact-wave {
+                position: absolute;
+                width: 8px; height: 8px;
+                border-radius: 50%;
+                border: 4px solid rgba(255,255,255,1);
+                background: transparent;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 25;
+                animation: tt-impact-wave-expand 0.60s cubic-bezier(.14, .92, .28, 1.20) forwards;
+            }
+            /* Body-anchored variant — bypasses the chip's grid parent so
+               clicking a chip never reflows the icon row. */
+            .tt-impact-wave.tt-impact-wave-fixed {
+                position: fixed;
+                z-index: 9999;
+            }
+
+            /* ─── COLOR-ONLY CLICK FLASH on the chip itself ───
+               Driven by `.tt-impact-flash`. Animates ONLY `filter`
+               (brightness + saturation). No transform, no scale, no
+               box-shadow, no width/height change → zero layout effect
+               on the chip OR its siblings, and no glow spill that
+               could trigger a horizontal scrollbar. The chip simply
+               flashes to a brighter/saturated version of whatever its
+               current state colour is (e.g. red for attack, green for
+               defence), reading as a snappy impact tint with no
+               movement at all. */
+            @keyframes tt-impact-flash-anim {
+                0%   { filter: brightness(1.65) saturate(1.55); }
+                40%  { filter: brightness(1.30) saturate(1.30); }
+                100% { filter: none; }
+            }
+            .widget-tooltip .tt-chip.tt-impact-flash,
+            .widget-tooltip .tt-toggle.tt-impact-flash,
+            .tt-rcn-instant.tt-impact-flash,
+            .tt-stg-plan.tt-impact-flash,
+            .tt-stg-exec.tt-impact-flash,
+            .tt-stg-clear.tt-impact-flash {
+                animation: tt-impact-flash-anim 0.30s linear both;
+            }
+
             /* left-align city chips in the flight tooltip */
             .tt-flight .tt-chip-flag {
                 justify-content: flex-start;
                 text-align: left;
                 padding-left: 8px;
                 padding-right: 8px;
+            }
+            /* Lock the city-chip height across every state — rest /
+               hover / active / active-hover. Without this, the border
+               width swings between 1 px (base + active) and 2 px (the
+               liquid-glass hover state above) and that 2 px swing
+               shows up as a visible vertical resize when the user
+               clicks a city. `box-sizing: border-box` keeps the OUTER
+               box constant regardless of border-width, and the fixed
+               height enforces it even if other rules try to override. */
+            body.polish .tt-flight .tt-chip-flag,
+            body.polish .tt-flight .tt-chip-flag:hover,
+            body.polish .tt-flight .tt-chip-flag.active,
+            body.polish .tt-flight .tt-chip-flag.active:hover,
+            .tt-flight .tt-chip-flag,
+            .tt-flight .tt-chip-flag:hover,
+            .tt-flight .tt-chip-flag.active,
+            .tt-flight .tt-chip-flag.active:hover {
+                box-sizing: border-box !important;
+                height: 28px !important;
+                min-height: 28px !important;
+                max-height: 28px !important;
+                line-height: 1 !important;
             }
             .widget-tooltip .tt-chip:hover:not(.active) {
                 background: rgba(255,255,255,0.92);
@@ -2013,12 +3431,33 @@
                 width: 32px;
                 height: 32px;
                 aspect-ratio: 1 / 1;
-                padding: 0;
+                padding: 0 !important;
                 font-size: 0;            /* hide any text node */
                 position: relative;
+                box-sizing: border-box !important;
             }
-            .tt-grid-icons .tt-chip i { font-size: 12px; opacity: 1; }
-            .tt-grid-icons .tt-chip.active i { color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.55); }
+            /* LOCK the icon to the chip's geometric centre via absolute
+               positioning. With the icon out of the chip's flex flow,
+               NOTHING that happens to the chip (class toggles, ::before/
+               ::after appearing, hover-state padding tweaks, browser
+               UA :active behaviour, anything) can shift the icon
+               horizontally. The icon's left/top is permanently at 50%
+               with a -50% transform-origin, so even a brief reflow of
+               the chip's flexbox can't push it sideways. */
+            .tt-grid-icons .tt-chip i {
+                font-size: 12px;
+                opacity: 1;
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .tt-grid-icons .tt-chip.active i {
+                color: #fff;
+                text-shadow: 0 0 6px rgba(255,255,255,0.55);
+            }
 
             /* per-chip hover label — uses a real <span> so it works reliably in <button> */
             .tt-grid-icons .tt-chip .chip-name {
@@ -2211,6 +3650,37 @@
             }
             .tt-toggle-attack.on  { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
             .tt-toggle-defence.on { background: linear-gradient(135deg,#2da64a,#1e7838); border-color:#155a28; }
+
+            /* social media tooltip is rendered by the global [data-tip]::before rule below,
+               with a weather-widget-style white background override */
+            .social-host {
+                display: inline-block;
+                vertical-align: top;
+            }
+            .social-host[data-tip]::before {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,1.00) 0%,
+                    rgba(248,251,255,1.00) 100%);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                border: 1px solid rgba(200,215,235,1.00);
+                border-bottom-color: rgba(200,215,235,1.00);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,1.00) inset,
+                    0 8px 28px rgba(0,0,0,0.22),
+                    0 2px 10px rgba(0,0,0,0.10),
+                    0 0 32px rgba(120,180,255,0.18);
+                color: rgba(10,10,25,0.95);
+            }
+            .social-host[data-tip]::after {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,1.00) 0%,
+                    rgba(248,251,255,1.00) 100%);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                border-left: 1px solid rgba(200,215,235,1.00);
+                border-top:  1px solid rgba(200,215,235,1.00);
+            }
 
             .widget-tooltip .tt-hint {
                 margin-top: 10px;
@@ -2502,25 +3972,25 @@
             </div>
             <span>
 
-            <a href="https://www.instragram.com/masrik_dahir" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://www.instagram.com/masrik_dahir" target="blank" class="social-host" data-tip="Instagram" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-instagram w3-hover-opacity"></i></button></a>
-            <a href="https://www.twitter.com/masrik_dahir" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://www.twitter.com/masrik_dahir" target="blank" class="social-host" data-tip="Twitter / X" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-twitter w3-hover-opacity"></i></button></a>
-            <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://www.linkedin.com/in/masrik-dahir-2b79b2163/" target="_blank" class="social-host" data-tip="LinkedIn" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-linkedin w3-hover-opacity"></i></button></a>
-            <a href="https://github.com/Masrik-Dahir" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://github.com/Masrik-Dahir" target="blank" class="social-host" data-tip="GitHub" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-github w3-hover-opacity"></i></button></a>
-            <a href="https://app.joinhandshake.com/users/20195119" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://app.joinhandshake.com/users/20195119" target="blank" class="social-host" data-tip="Handshake" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fas fa-handshake w3-hover-opacity"></i></button></a>
-            <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://www.youtube.com/channel/UC6JyPjDH6oYUi_efCEPp6fw" target="blank" class="social-host" data-tip="YouTube" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fab fa-youtube-square w3-hover-opacity"></i></button></a>
-            <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://scholar.google.com/citations?hl=en&authuser=2&user=TX_u0HgAAAAJ" target="blank" class="social-host" data-tip="Google Scholar" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><i style="font-size:30px; color:black" class="fas fa-graduation-cap w3-hover-opacity"></i></button></a>
-            <a href="https://www.researchgate.net/profile/Masrik-Dahir" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://www.researchgate.net/profile/Masrik-Dahir" target="blank" class="social-host" data-tip="ResearchGate" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><span style="font-size:22px; color:black; line-height:1" class="w3-hover-opacity">R<sup style="font-size:12px; vertical-align:super">C</sup></span></button></a>
-            <a href="https://ud.me/masrikdahir.nft" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://ud.me/masrikdahir.nft" target="blank" class="social-host" data-tip="Unstoppable Domain" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><img style="width:30px; height:30px; object-fit:contain;" src="https://d3dw5jtb3w1kgy.cloudfront.net/w3-1.png" alt="Web3" class="w3-hover-opacity"/></button></a>
-            <a href="https://orcid.org/0000-0002-7841-310X" target="blank" style="text-decoration:none; display:inline-block; vertical-align:top;">
+            <a href="https://orcid.org/0000-0002-7841-310X" target="blank" class="social-host" data-tip="ORCID iD" style="text-decoration:none; display:inline-block; vertical-align:top;">
                 <button class="glow-on-hover12" style="margin:5px; padding:0; width:52px; height:52px; display:inline-flex; align-items:center; justify-content:center;"><img style="width:30px; height:30px; object-fit:contain;" alt="ORCID iD icon" src="https://d3dw5jtb3w1kgy.cloudfront.net/orcid.png" class="w3-hover-opacity"/></button></a>
         </span>
 
@@ -2746,9 +4216,60 @@
             }
             if(window.getDefenceTypeIndex) syncActive('ttDefenceGrid', window.getDefenceTypeIndex());
 
+            /* ── RECONSTRUCTION widget polling ── */
+            if(window.isReconstructing){
+                var rOn = window.isReconstructing();
+                var rWrap = document.getElementById('reconstructBtn');
+                if(rWrap) rWrap.classList.toggle('active', rOn);
+                setText('ttRcnStatus', rOn ? 'REBUILDING' : 'IDLE');
+                if(window.getReconstructionTimer){
+                    var rT = window.getReconstructionTimer();
+                    setText('ttRcnTimer', rOn ? (rT/1000).toFixed(1) + ' s' : '—');
+                }
+                if(window.getReconstructionDamage){
+                    var rD = window.getReconstructionDamage();
+                    setText('ttRcnDamage', rOn ? String(rD) : '—');
+                }
+            }
+
             setTimeout(pollCity,350);
         }
         pollCity();
+
+        /* clean up any stale <span class="social-tip"> elements left over from a
+           previous design — the global [data-tip]::before rule now handles tooltips */
+        document.querySelectorAll('.social-host > .social-tip').forEach(function(n){ n.remove(); });
+    })();
+
+    /* ═══════════════════════════════════════════════════════════
+       LIQUID-GLASS CLICK WAVE
+       ───────────────────────────────────────────────────────────
+       On every click of a tooltip chip / toggle, spawn TWO
+       transient elements for a punchy material-style impact:
+         1. `.tt-ripple`       — an INK-burst inside the chip, clipped
+            by the chip's overflow: hidden, starting at the click
+            point and expanding to fill the button surface
+         2. `.tt-impact-wave`  — a RING shockwave on the chip's parent,
+            centred on the button, expanding OUTWARD beyond the
+            button outline before fading
+       Both are auto-removed once their CSS animations complete so
+       the DOM stays clean.
+       ═══════════════════════════════════════════════════════════ */
+    (function(){
+        /* CLICK FEEDBACK INTENTIONALLY EMPTY.
+           Earlier iterations tried (1) appending a ripple span inside
+           the chip, (2) appending an outer shockwave to the chip's
+           parent, (3) anchoring the shockwave to <body>, and (4) a
+           pure-filter brightness flash via `.tt-impact-flash`. Each
+           was either visibly shifting the icon row left (flex /
+           grid re-measure or a horizontal scrollbar spike) or, per
+           the user's latest preference, doing TOO MUCH on click —
+           "button shouldn't change shape, just change to active
+           colour". Letting the existing `.active` class toggle on
+           the chip do that job — no JS-driven flash, no DOM
+           mutation, no transient class. The chip simply turns red /
+           green / blue (whichever theme) and that's the whole
+           click feedback. */
     })();
     </script>
 </body>

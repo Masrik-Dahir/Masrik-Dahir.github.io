@@ -1,0 +1,164 @@
+/**
+ * work-symbols.css — work-page hover treatment.
+ *
+ * Replaces the previous icon-glistening pattern (briefcase / gear / code
+ * etc. masked through polish.css's rainbow sweep) with the iOS-26-style
+ * liquid-glass card chrome borrowed from css/software.css `.sw-card`:
+ * a soft indigo halo, inner rim catch-light, subtle counter reflection
+ * at the bottom-right, and a lift on hover. No icon outlines, no
+ * rainbow mask, no rotating border ring.
+ *
+ * Polish.css attaches a rainbow-mask `::before` and rotating rainbow
+ * `::after` to every .w3-card; we override both with `!important` to
+ * fully suppress them and reuse the slots for the glass effect.
+ */
+
+/* ── Card base — sw-card chrome on every work .w3-card ────────── */
+body.polish #app_work .w3-card {
+    position: relative;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    isolation: isolate;
+    /* Amber halo channel — Tailwind amber-500 / amber-400, not in
+       use anywhere else on the site (sw-card uses indigo for libraries
+       and emerald for apps; games copies the library indigo). Warm,
+       professional, distinct from every other page's glow colour. */
+    --c-r: 245; --c-g: 158; --c-b:  11;
+    --c-r2:251; --c-g2:191; --c-b2: 36;
+    --lg-lit:         0.42;
+    --lg-mid:         0.16;
+    --lg-edge-w-rim:  0.82;
+    --lg-edge-w-soft: 0.30;
+    --lg-counter:     0.10;
+    --lg-counter-mid: 0.04;
+    --lg-halo-out:    0.18;
+    --lg-halo-back:   0.06;
+    box-shadow:
+        -3px -3px 16px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
+         3px  3px 14px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
+         0    1px  3px       rgba(15, 23, 42, 0.05);
+    transition:
+        transform    0.35s cubic-bezier(.34, 1.56, .64, 1),
+        border-color 0.35s ease,
+        box-shadow   0.4s  cubic-bezier(.22, 1, .36, 1);
+}
+body.polish #app_work .w3-card:hover {
+    transform: translateY(-5px);
+    --lg-lit:         0.55;
+    --lg-mid:         0.22;
+    --lg-counter:     0.14;
+    --lg-counter-mid: 0.06;
+    --lg-halo-out:    0.28;
+    --lg-halo-back:   0.10;
+    border-color: rgba(var(--c-r), var(--c-g), var(--c-b), 0.30);
+    box-shadow:
+        -4px -4px 22px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
+         4px  4px 18px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
+         0    2px  6px       rgba(15, 23, 42, 0.07);
+}
+
+/* ── Suppress polish.css's rainbow-mask `::before` ────────────── */
+/* w3.css's clearfix would also collapse this to 0×0; force display
+   back to block (harmless once the layer is invisible). */
+body.polish #app_work .w3-card::before {
+    display: block !important;
+    clear: none !important;
+    content: '' !important;
+    background: none !important;
+    -webkit-mask-image: none !important;
+            mask-image: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+/* ── ::after → sw-card inner rim + counter reflection ─────────── */
+/* polish.css uses this slot for the rotating rainbow ring; we
+   replace it with the static glass catch-light. */
+body.polish #app_work .w3-card::after {
+    display: block !important;
+    clear: none !important;
+    content: '' !important;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 2;
+    opacity: 1 !important;
+    animation: none !important;
+    -webkit-mask: none !important;
+            mask: none !important;
+    padding: 0 !important;
+    background: radial-gradient(ellipse 42% 42% at 100% 100%,
+        rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-counter))     0%,
+        rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-counter-mid)) 40%,
+        transparent 78%) !important;
+    box-shadow:
+        inset  0   1px  0     rgba(255, 255, 255, var(--lg-edge-w-rim)),
+        inset  1px 0    0     rgba(255, 255, 255, calc(var(--lg-edge-w-rim) - 0.15)),
+        inset  0  -1px  0     rgba(255, 255, 255, var(--lg-edge-w-soft)),
+        inset -1px 0    0     rgba(255, 255, 255, var(--lg-edge-w-soft)),
+        inset  0   0    0 1px rgba(var(--c-r), var(--c-g), var(--c-b), 0.06),
+        inset  0   2px  6px   rgba(255, 255, 255, 0.22),
+        inset  0  -6px 14px   rgba(var(--c-r), var(--c-g), var(--c-b), calc(var(--lg-counter) * 0.55)) !important;
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+body.polish #app_work .w3-card:hover::after {
+    background: radial-gradient(ellipse 52% 52% at 100% 100%,
+        rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-counter))     0%,
+        rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-counter-mid)) 42%,
+        transparent 82%) !important;
+}
+
+/* Card content stays above the glass layers. */
+body.polish #app_work .w3-card > * {
+    position: relative;
+    z-index: 3;
+}
+
+/* ── Collapse / extend toggle buttons in the page header ────────
+   The two <img type="button"> elements (#mymapshowButton + #
+   mymaphideButton) that hide/show the date column. Inline styles
+   on the markup hard-code a black or red 1 px border + lightcoral
+   background; ID selectors + `!important` win over those. We give
+   them the same amber liquid-glass token treatment as the .w3-card
+   below, keeping the icon centered inside the glass tile. */
+body.polish #mymapshowButton,
+body.polish #mymaphideButton {
+    width: 45px !important;
+    height: 45px !important;
+    padding: 6px !important;
+    margin: 1px 4px !important;
+    object-fit: contain;
+    background-color: #fff !important;
+    border: 1px solid rgba(245, 158, 11, 0.30) !important;
+    border-radius: 12px !important;
+    box-shadow:
+        -3px -3px 16px -4px rgba(245, 158, 11, 0.18),
+         3px  3px 14px -6px rgba(245, 158, 11, 0.06),
+         0    1px  3px       rgba(15, 23, 42, 0.05);
+    transition:
+        transform    0.35s cubic-bezier(.34, 1.56, .64, 1),
+        border-color 0.35s ease,
+        box-shadow   0.4s  cubic-bezier(.22, 1, .36, 1);
+    cursor: pointer;
+}
+body.polish #mymapshowButton:hover,
+body.polish #mymaphideButton:hover {
+    transform: translateY(-2px);
+    border-color: rgba(245, 158, 11, 0.55) !important;
+    box-shadow:
+        -4px -4px 22px -4px rgba(245, 158, 11, 0.28),
+         4px  4px 18px -6px rgba(245, 158, 11, 0.10),
+         0    2px  6px       rgba(15, 23, 42, 0.07);
+}
+/* Active (clicked) state — the page JS toggles `.active` between
+   the two buttons. Give the active one a stronger amber rim so it
+   reads as the currently-selected mode. */
+body.polish #mymapshowButton.active,
+body.polish #mymaphideButton.active {
+    border-color: rgba(245, 158, 11, 0.80) !important;
+    background-color: #fffaf0 !important;
+}

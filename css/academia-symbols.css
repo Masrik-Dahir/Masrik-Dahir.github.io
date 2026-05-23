@@ -1,0 +1,127 @@
+/**
+ * academia-symbols.css — academia-page hover treatment.
+ *
+ * Same iOS-26-style liquid-glass chrome as work-symbols.css, scoped to
+ * #app_academia. Suppresses polish.css's rainbow icon mask and rotating
+ * rainbow ring; reuses the ::before / ::after slots for the static
+ * glass catch-light + counter reflection from css/software.css `.sw-card`.
+ *
+ * The `.pretty` row-header buttons inside the cards keep their existing
+ * "no glistening" behaviour from inline rules in academia.html — only
+ * the parent .w3-card carries the glass treatment.
+ */
+
+/* ── Card base — sw-card chrome on every academia .w3-card ────── */
+body.polish #app_academia .w3-card {
+    position: relative;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    isolation: isolate;
+    /* Silver halo channel — Tailwind slate-400 / slate-300, a cool
+       metallic neutral with subtle blue undertones. Fresh colour not
+       used on any other page (work uses amber, sw-card library/app
+       use indigo + emerald, games uses indigo, map / milestone use
+       the pastel rainbow). Reads as polished pewter on the white
+       card surface — a quiet, scholarly chrome that complements the
+       academia content without competing with it. */
+    --c-r: 148; --c-g: 163; --c-b: 184;
+    --c-r2:203; --c-g2:213; --c-b2:225;
+    --lg-lit:         0.42;
+    --lg-mid:         0.16;
+    --lg-edge-w-rim:  0.82;
+    --lg-edge-w-soft: 0.30;
+    --lg-counter:     0.10;
+    --lg-counter-mid: 0.04;
+    --lg-halo-out:    0.18;
+    --lg-halo-back:   0.06;
+    box-shadow:
+        -3px -3px 16px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
+         3px  3px 14px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
+         0    1px  3px       rgba(15, 23, 42, 0.05);
+    transition:
+        transform    0.35s cubic-bezier(.34, 1.56, .64, 1),
+        border-color 0.35s ease,
+        box-shadow   0.4s  cubic-bezier(.22, 1, .36, 1);
+}
+body.polish #app_academia .w3-card:hover {
+    transform: translateY(-5px);
+    --lg-lit:         0.55;
+    --lg-mid:         0.22;
+    --lg-counter:     0.14;
+    --lg-counter-mid: 0.06;
+    --lg-halo-out:    0.28;
+    --lg-halo-back:   0.10;
+    border-color: rgba(var(--c-r), var(--c-g), var(--c-b), 0.30);
+    box-shadow:
+        -4px -4px 22px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
+         4px  4px 18px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
+         0    2px  6px       rgba(15, 23, 42, 0.07);
+}
+
+/* ── Suppress polish.css's rainbow-mask `::before` ────────────── */
+body.polish #app_academia .w3-card::before {
+    display: block !important;
+    clear: none !important;
+    content: '' !important;
+    background: none !important;
+    -webkit-mask-image: none !important;
+            mask-image: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+    box-shadow: none !important;
+}
+
+/* ── ::after → sw-card inner rim + counter reflection ─────────── */
+body.polish #app_academia .w3-card::after {
+    display: block !important;
+    clear: none !important;
+    content: '' !important;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 2;
+    opacity: 1 !important;
+    animation: none !important;
+    -webkit-mask: none !important;
+            mask: none !important;
+    padding: 0 !important;
+    background: radial-gradient(ellipse 42% 42% at 100% 100%,
+        rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-counter))     0%,
+        rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-counter-mid)) 40%,
+        transparent 78%) !important;
+    box-shadow:
+        inset  0   1px  0     rgba(255, 255, 255, var(--lg-edge-w-rim)),
+        inset  1px 0    0     rgba(255, 255, 255, calc(var(--lg-edge-w-rim) - 0.15)),
+        inset  0  -1px  0     rgba(255, 255, 255, var(--lg-edge-w-soft)),
+        inset -1px 0    0     rgba(255, 255, 255, var(--lg-edge-w-soft)),
+        inset  0   0    0 1px rgba(var(--c-r), var(--c-g), var(--c-b), 0.06),
+        inset  0   2px  6px   rgba(255, 255, 255, 0.22),
+        inset  0  -6px 14px   rgba(var(--c-r), var(--c-g), var(--c-b), calc(var(--lg-counter) * 0.55)) !important;
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+body.polish #app_academia .w3-card:hover::after {
+    background: radial-gradient(ellipse 52% 52% at 100% 100%,
+        rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-counter))     0%,
+        rgba(var(--c-r2),var(--c-g2),var(--c-b2),var(--lg-counter-mid)) 42%,
+        transparent 82%) !important;
+}
+
+/* Card content stays above the glass layers. */
+body.polish #app_academia .w3-card > * {
+    position: relative;
+    z-index: 3;
+}
+
+/* Re-assert no-glistening on the inner .pretty buttons — they were
+   already disabled but the parent's new chrome layers shouldn't bleed
+   into them either. */
+body.polish #app_academia .pretty::before,
+body.polish #app_academia .pretty::after {
+    content: none !important;
+}
+body.polish #app_academia .pretty:hover {
+    box-shadow: none !important;
+}

@@ -25,6 +25,7 @@
     <!--    Site-wide loader + polish + animations -->
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
+    <link rel="stylesheet" href="css/work-symbols.css?v=7">
     <link rel="stylesheet" href="css/animations.css">
 
 
@@ -56,6 +57,314 @@
     <script src="js/eagle-loader.js" defer></script>
     <script src="js/animations.js" defer></script>
     <script src="js/page-graphics.js" defer></script>
+
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           Universal liquid-glass norm — applied to the collapse
+           (`.btn1`) and expand (`.btn2`) toggle wrappers. Same model
+           used by widget-tooltip buttons in index.html and the
+           .pretty row buttons in academia.html.
+
+           – Hex-outline shimmer on ::before (small pastel rainbow mesh)
+           – Conic-rainbow rotating border (continuous, never stops)
+           – White-glint sweep across the surface (continuous)
+           – Frosted backdrop-filter
+           ═══════════════════════════════════════════════════════════ */
+        @property --rcn-edge-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        @property --rcn-glint-pos {
+            syntax: '<percentage>';
+            initial-value: -25%;
+            inherits: false;
+        }
+        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes tt-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
+        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
+        @keyframes tt-active-shimmer {
+            0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
+            50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
+        }
+
+        body.polish .btn1,
+        body.polish .btn2 {
+            display: inline-block !important;
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            border-radius: 12px !important;
+            padding: 6px !important;               /* whitish glass halo around the icon */
+            margin: 1px !important;
+            line-height: 0 !important;
+            cursor: pointer !important;
+            float: right !important;
+            --hex-size: 8px;
+            --rcn-edge-angle: 0deg;
+            --rcn-glint-pos: -25%;
+            /* MULTI-LAYER liquid-glass background:
+               – Top arc sheen   →  light catching the upper curve
+               – Corner glow     →  asymmetric secondary highlight
+               – Bottom shadow   →  glass-bowl depth
+               – Whitish base    →  the icon sits on a frosted white pane
+               – Conic border    →  rotating rainbow rim outside */
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.85) 0%,
+                    rgba(255,255,255,0.30) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                radial-gradient(ellipse 90% 65% at 50% 120%,
+                    rgba(15,20,40,0.08) 0%,
+                    rgba(15,20,40,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.88) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.50),   /* muted cherry  */
+                    rgba(255,209,168,0.50),   /* muted peach   */
+                    rgba(255,240,168,0.50),   /* muted lemon   */
+                    rgba(196,242,197,0.50),   /* muted mint    */
+                    rgba(184,217,255,0.50),   /* muted sky     */
+                    rgba(212,193,255,0.50),   /* muted lavender*/
+                    rgba(255,193,229,0.50),   /* muted rose    */
+                    rgba(255,179,198,0.50)    /* loop          */
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(8px) saturate(130%) !important;
+            -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                inset 0 -1px 0 rgba(20,15,30,0.05),
+                0 0 0 1.5px rgba(15,20,40,0.55),       /* clear visible border ring at rest */
+                0 0 10px rgba(220,225,235,0.30),
+                0 2px 6px rgba(15,20,40,0.12) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease !important;
+            animation:
+                tt-rcn-edge-spin 4.5s linear infinite,
+                tt-rcn-glint     6.0s linear infinite !important;
+        }
+        /* Hex-shimmer layer */
+        body.polish .btn1::before,
+        body.polish .btn2::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            z-index: -1 !important;
+            pointer-events: none !important;
+            border-radius: inherit !important;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+        }
+        /* On hover: hex shimmer fades in + dual sweep/hue animation +
+           brighter halo + lift */
+        body.polish .btn1:hover::before,
+        body.polish .btn2:hover::before {
+            opacity: 0.55 !important;       /* softer hex shimmer */
+            animation:
+                tt-hex-sweep      2.4s linear infinite,
+                tt-hex-hue-cycle  3.6s linear infinite !important;
+            filter: saturate(0.85) brightness(1.05);
+        }
+        /* On hover the rotating conic-gradient rainbow border is
+           REPLACED with a clean solid themed border line (indigo
+           for inactive, picked because it's the universal "you
+           are hovering this" colour across the site). Shadow is
+           also trimmed down to just an inner highlight + tight
+           1-px elevation — no big colour halo. */
+        body.polish .btn1:hover,
+        body.polish .btn2:hover {
+            transform: translateY(-1px) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(99, 102, 241, 0.85),
+                    rgba(99, 102, 241, 0.85)) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 1px 3px rgba(15,20,40,0.10) !important;
+        }
+        /* Keep the inner img clean — it IS the button's surface now.
+           Selectors use the IDs so this beats work-symbols.css's
+           amber-theme treatment of #mymapshowButton/#mymaphideButton
+           (which would otherwise paint a second border + padding +
+           margin + box-shadow on the img). */
+        body.polish .btn1 > #mymapshowButton,
+        body.polish .btn2 > #mymaphideButton,
+        body.polish .btn1 > img,
+        body.polish .btn2 > img {
+            display: block !important;
+            position: relative !important;
+            z-index: 2 !important;
+            width: 45px !important;
+            height: 45px !important;
+            border: none !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            float: none !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
+        }
+        body.polish .btn1 > #mymapshowButton:hover,
+        body.polish .btn2 > #mymaphideButton:hover {
+            transform: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* ── ACTIVE state ─────────────────────────────────────────
+           The existing JS at the end of <body> toggles `.active`
+           on the img element. When active:
+             • Wrapper gets a CRIMSON multi-layer background + red
+               conic-gradient border (still rotating continuously).
+             • Icon img is inverted to white so it reads cleanly on
+               top of the red surface. */
+        body.polish .btn1:has(> img.active),
+        body.polish .btn2:has(> img.active) {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.20) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.40) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.95) 0%,    /* crimson    */
+                    rgba(185, 28, 28,0.94) 50%,   /* deep crimson */
+                    rgba(239, 68, 68,0.93) 100%   /* bright red */
+                ) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    #ef4444,   /* red       */
+                    #dc2626,   /* crimson   */
+                    #b91c1c,   /* dark red  */
+                    #f87171,   /* light red */
+                    #c0202a,   /* signal    */
+                    #ff6b7a,   /* coral     */
+                    #991b1b,   /* wine      */
+                    #ef4444    /* loop      */
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                inset 0 -1px 0 rgba(80,8,15,0.18),
+                0 0 14px rgba(255,80,100,0.55),
+                0 2px 8px rgba(80,8,15,0.25) !important;
+        }
+        /* Active icon → WHITE via filter trick. brightness(0) flattens
+           every pixel to black, then invert(1) flips to white. Works on
+           any opaque-color icon PNG. !important overrides the existing
+           JS that sets inline background/border on the img. */
+        body.polish .btn1 > img.active,
+        body.polish .btn2 > img.active {
+            filter: brightness(0) invert(1) !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* ::before background for the ACTIVE button must also be red
+           AT REST so that when the cursor leaves, the fade-out shows
+           red fading away (not the pastel rainbow). Without this rule
+           the user briefly sees the inactive-pastel palette during
+           the 0.3s opacity transition when they move off the button. */
+        body.polish .btn1:has(> img.active)::before,
+        body.polish .btn2:has(> img.active)::before {
+            background: linear-gradient(90deg,
+                #8a0a14 0%,    /* dark crimson */
+                #c0202a 14%,   /* base red     */
+                #e04050 28%,   /* light red    */
+                #c04020 42%,   /* burnt orange */
+                #6a0a14 56%,   /* maroon       */
+                #a02030 70%,   /* deep rose    */
+                #d83040 85%,   /* signal red   */
+                #8a0a14 100%   /* loop         */
+            ) !important;
+            background-size: 300% 100% !important;
+        }
+
+        /* Active button on hover — hex shimmer locked to the RED
+           family that matches the crimson active background. Same
+           pattern as index.html's per-theme active hover: only the
+           SWEEP animation runs (no full-spectrum hue-rotate), so
+           reds stay red. tt-active-shimmer adds a brightness pulse
+           + ±15° hue wobble for the "glistening" feel without
+           leaving the red family. */
+        /* ACTIVE wrapper on hover — keep crimson background, just
+           bump border to a fully-opaque crimson (deeper than rest). */
+        body.polish .btn1:has(> img.active):hover,
+        body.polish .btn2:has(> img.active):hover {
+            background:
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.97) 0%,
+                    rgba(185, 28, 28,0.96) 50%,
+                    rgba(239, 68, 68,0.95) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(185, 28, 28, 1.00),
+                    rgba(185, 28, 28, 1.00)) border-box !important;
+            border: 1.5px solid transparent !important;
+            transform: translateY(-1px) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.55),
+                0 1px 3px rgba(80,8,15,0.18) !important;
+        }
+        body.polish .btn1:has(> img.active):hover::before,
+        body.polish .btn2:has(> img.active):hover::before {
+            opacity: 1 !important;
+            background: linear-gradient(90deg,
+                #8a0a14 0%,    /* dark crimson  */
+                #c0202a 14%,   /* base red      */
+                #e04050 28%,   /* light red     */
+                #c04020 42%,   /* burnt orange  */
+                #6a0a14 56%,   /* maroon        */
+                #a02030 70%,   /* deep rose     */
+                #d83040 85%,   /* signal red    */
+                #8a0a14 100%   /* loop          */
+            ) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            mix-blend-mode: normal !important;
+            animation:
+                tt-hex-sweep      1.6s linear infinite,
+                tt-active-shimmer 1.4s ease-in-out infinite !important;
+        }
+        /* Hex shimmer layer stays at z-index: -1 (set in the
+           ::before rule). It paints behind the icon img so the
+           rainbow hexes are visible through the icon's transparent
+           PNG pixels — same way .tt-chip in index.html shows hex
+           behind its FontAwesome glyphs. */
+        body.polish .btn1::before,
+        body.polish .btn2::before {
+            border-radius: 10px !important;
+        }
+    </style>
 
 </head>
 
@@ -154,27 +463,167 @@
 
 
 
-    mymaphideButton.addEventListener('click', () => {
+    /* Click handlers attached to the WRAPPERS (.btn1 / .btn2) so a
+       click anywhere within the button — on the icon img OR on the
+       padding around it — flips the active state. Previously the
+       listener was only on the inner img, so clicks in the wrapper's
+       padding ring missed. */
+    const btn1Wrap = document.querySelector('.btn1');     /* collapse wrapper */
+    const btn2Wrap = document.querySelector('.btn2');     /* extend wrapper   */
 
-        mymaphideButton.classList.add('active');
-        mymapshowButton.classList.remove('active');
-        mymaphideButton.style.border = "1px solid red";
-        mymaphideButton.style.background = "lightcoral";
-        mymapshowButton.style.background = "white";
-        mymapshowButton.style.border = "1px solid black";
-
-    });
-
-    mymapshowButton.addEventListener('click', () => {
-        mymapshowButton.classList.add('active');
+    function setActiveCollapse(){
+        mymapshowButton.classList.add('active');          /* collapse → active */
         mymaphideButton.classList.remove('active');
-        mymaphideButton.style.border = "1px solid black";
-        mymapshowButton.style.border = "1px solid red";
-        mymapshowButton.style.background = "lightcoral";
-        mymaphideButton.style.background = "white";
+    }
+    function setActiveExtend(){
+        mymaphideButton.classList.add('active');          /* extend → active */
+        mymapshowButton.classList.remove('active');
+    }
 
+    if (btn1Wrap) btn1Wrap.addEventListener('click', setActiveCollapse);
+    if (btn2Wrap) btn2Wrap.addEventListener('click', setActiveExtend);
 
-    });
+    /* Initial state — map visible on page load → extend is active. */
+    setActiveExtend();
+
+    /* ── Per-job collapse/extend ────────────────────────────────
+       Two click surfaces on every job card:
+         • <h4> title → always slide-toggles its <p1> bullets.
+         • The whole card → if the card is currently collapsed
+           (p1 hidden), clicking ANYWHERE on the card expands it.
+       The second rule is what the user asked for: after the
+       global Collapse button hides every p1, the user can just
+       click the card body to bring back that one item. When
+       expanded, body clicks fall through normally so links and
+       text selection still work. */
+    function wireWorkCardToggles(){
+        var cards = document.querySelectorAll('#app_work > div > .w3-card, #app_work .w3-card');
+        if (!cards.length) return false;
+        for (var i = 0; i < cards.length; i++){
+            var card = cards[i];
+            if (card._wireWorkToggle) continue;
+            card._wireWorkToggle = true;
+            var head = card.querySelector('h4');
+            if (!head) continue;
+            head.style.cursor = 'pointer';
+            head.style.userSelect = 'none';
+            head.setAttribute('data-toggleable', '1');
+            /* Closure-bind each card */
+            (function(cardEl){
+                function p1Hidden(){
+                    var p1 = cardEl.querySelector('p1');
+                    if (!p1) return false;
+                    return (p1.style.display === 'none' ||
+                            getComputedStyle(p1).display === 'none');
+                }
+                function togglePanel(){
+                    var p1 = cardEl.querySelector('p1');
+                    if (!p1) return;
+                    if (typeof $ === 'function'){
+                        $(p1).stop(true, false).slideToggle(220);
+                    } else {
+                        var isHidden = p1Hidden();
+                        p1.style.display = isHidden ? '' : 'none';
+                    }
+                    refreshCardCursor();
+                }
+                function expandPanel(){
+                    var p1 = cardEl.querySelector('p1');
+                    if (!p1) return;
+                    if (typeof $ === 'function'){
+                        $(p1).stop(true, false).slideDown(220);
+                    } else {
+                        p1.style.display = '';
+                    }
+                    refreshCardCursor();
+                }
+                function refreshCardCursor(){
+                    /* When collapsed, the card itself becomes the
+                       click target → show pointer cursor on the
+                       whole card. When expanded, only the title is
+                       a toggle, so the rest of the card behaves
+                       normally. */
+                    if (p1Hidden()){
+                        cardEl.style.cursor = 'pointer';
+                        cardEl.setAttribute('data-collapsed', '1');
+                    } else {
+                        cardEl.style.cursor = '';
+                        cardEl.removeAttribute('data-collapsed');
+                    }
+                }
+                cardEl.querySelector('h4').addEventListener('click', function(e){
+                    togglePanel();
+                    e.stopPropagation();
+                    e.preventDefault();
+                }, false);
+                /* Card-body click → only acts when the card is
+                   currently collapsed; ignored otherwise so links,
+                   text selection, and inner controls still work. */
+                cardEl.addEventListener('click', function(e){
+                    if (!p1Hidden()) return;
+                    /* Ignore clicks on the title — its own handler
+                       already toggles and we don't want to fire
+                       twice. */
+                    if (e.target.closest && e.target.closest('h4')) return;
+                    expandPanel();
+                    e.stopPropagation();
+                }, false);
+                /* Track collapse state via the global Collapse /
+                   Extend buttons too, so the cursor + flag stay in
+                   sync. jQuery's slideUp/slideDown finishes async, so
+                   poll briefly after each global click. */
+                refreshCardCursor();
+                cardEl._refreshWorkCursor = refreshCardCursor;
+            })(card);
+        }
+        /* Hook global buttons once → re-sync every card's cursor
+           after the global animation completes. */
+        if (!window._workWiredGlobalSync){
+            window._workWiredGlobalSync = true;
+            function syncAllCards(){
+                var all = document.querySelectorAll('#app_work .w3-card');
+                for (var k = 0; k < all.length; k++){
+                    if (typeof all[k]._refreshWorkCursor === 'function'){
+                        all[k]._refreshWorkCursor();
+                    }
+                }
+            }
+            ['.btn1', '.btn2'].forEach(function(sel){
+                var el = document.querySelector(sel);
+                if (!el) return;
+                el.addEventListener('click', function(){
+                    /* slideUp/slideDown defaults to 400ms — sync
+                       once mid-animation and once after. */
+                    setTimeout(syncAllCards, 50);
+                    setTimeout(syncAllCards, 450);
+                });
+            });
+        }
+        return true;
+    }
+
+    /* Wire on first paint AND retry — Vue renders the cards
+       asynchronously so the initial run usually finds 0 cards. */
+    function tryWire(){
+        if (wireWorkCardToggles()) return;
+    }
+    tryWire();
+    setTimeout(tryWire, 250);
+    setTimeout(tryWire, 800);
+    setTimeout(tryWire, 1800);
+    setTimeout(tryWire, 3500);
+
+    /* MutationObserver — guarantees the wiring runs the moment Vue
+       inserts/updates the cards, even if our setTimeout retries
+       miss the right window. */
+    if (typeof MutationObserver !== 'undefined'){
+        var moRoot = document.getElementById('app_work');
+        if (moRoot){
+            new MutationObserver(function(){
+                wireWorkCardToggles();
+            }).observe(moRoot, { childList: true, subtree: true });
+        }
+    }
 </script>
 <div id="footer-placeholder"></div>
 </body>

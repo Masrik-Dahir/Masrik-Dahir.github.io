@@ -54,13 +54,257 @@
 
     <!--  Custom  -->
     <link rel="stylesheet" href="css/map-page.css">
+    <link rel="stylesheet" href="css/map-symbols.css?v=10">
+    <link rel="stylesheet" href="css/search-cross.css?v=5">
     <script src="js/map-enhancer.js" defer></script>
     <script src="js/components.js" defer></script>
+    <script src="js/hover-symbols-engine.js?v=2" defer></script>
+    <script src="js/map-symbols.js?v=4" defer></script>
 
     <!--    Site-wide loader + animations + page graphics -->
     <script src="js/eagle-loader.js" defer></script>
     <script src="js/animations.js" defer></script>
     <script src="js/page-graphics.js" defer></script>
+
+    <style>
+        /* ════════════════════════════════════════════════════════
+           MAP-PAGE styling rules
+           ────────────────────────────────────────────────────────
+           • .w3-card  → keeps the polish.css hex-pattern hover, but
+                          its mask is overridden with a travel-icon
+                          tessellation. This is where the actual SVG
+                          map graphics live.
+           • Every other liquid-glass element (region buttons, header
+                          buttons, etc.) → DISABLES the travel-icon
+                          mask layer and instead gets a software-card-
+                          style side-colour glow on hover (colored
+                          corner glow + perimeter rim + outer halo). */
+
+        /* Travel-icon mask — only applies to .w3-card. The JS at
+           the bottom of body sets --lg-hex-mask on .w3-card elements
+           on hover. For everything else, we'll disable the pseudo-
+           element mask layer entirely. */
+        body.polish {
+            --lg-hex-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><g fill='%23000'><path transform='translate(15 18)' d='M14 0 L18 0 L18 8 L28 12 L28 14 L18 12 L18 22 L22 26 L22 28 L10 28 L10 26 L14 22 L14 12 L4 14 L4 12 L14 8 L14 0 Z' fill-opacity='0.88'/><path transform='translate(135 25)' d='M0 4 L18 4 L18 18 L0 18 Z M6 0 L12 0 L12 4 L6 4 Z' fill-opacity='0.80'/><path transform='translate(20 95)' d='M0 12 L24 12 L21 16 L3 16 Z M11 0 L13 0 L13 12 L11 12 Z' fill-opacity='0.85'/><path transform='translate(110 90)' d='M12 0 L14 12 L12 24 L10 12 Z M0 12 L12 10 L24 12 L12 14 Z' fill-opacity='0.72'/><path transform='translate(70 140)' d='M8 0 C12 0,14 4,14 8 C14 12,11 14,8 14 C5 14,2 12,2 8 C2 4,4 0,8 0 Z M6 14 L10 14 L10 18 L6 18 Z' fill-opacity='0.78'/><path transform='translate(140 145)' d='M12 0 L14 2 L14 20 L18 20 L16 22 L12 22 L8 22 L6 20 L10 20 L10 2 Z M4 8 L20 8 L20 10 L4 10 Z' fill-opacity='0.82'/></g></svg>");
+            --lg-facet-big: 200px;
+        }
+
+        /* Faint cyan tint on .w3-card so the surface reads as
+           SEA/SKY rather than just empty white. */
+        body.polish .w3-card,
+        body.polish .w3-card-2,
+        body.polish .w3-card-4 {
+            background-image:
+                radial-gradient(ellipse 70% 50% at 20% 30%, rgba(180,220,235,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 70% at 75% 80%, rgba(160,210,225,0.05) 0%, transparent 65%);
+        }
+
+        /* AT-REST FILL is handled by js/map-enhancer.js — it reads
+           image.json (visit counts per region) and applies the visited
+           teal / unvisited grey colours via setPathFill. We do NOT
+           force a fill here; doing so would override map-enhancer's
+           per-region colouring. */
+
+        /* Hover-flag images: best-quality scaling for big states/countries.
+           map-enhancer.js generates <pattern> → <image> for each region;
+           when a continent-scale path uses that pattern as fill, the
+           image gets blown up to huge physical sizes. These hints ask
+           every browser engine for its highest-quality resampling. */
+        body.polish .w3-card svg pattern image,
+        body.polish .w3-card svg > image {
+            image-rendering: auto;
+            image-rendering: smooth;
+            image-rendering: high-quality;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: optimizeQuality;
+        }
+
+        /* STATE/COUNTRY BORDERS — slim, visible, AUTO-SIZED per map.
+           Different SVG maps have different viewBox dimensions and
+           render at different display sizes, so a fixed stroke-width
+           looks too thick on some maps and too thin on others.
+
+           Strategy:
+             • `vector-effect: non-scaling-stroke` keeps the stroke a
+               constant device-pixel width regardless of how the SVG
+               is zoomed (handles user zoom uniformity).
+             • `--map-stroke` is a CSS variable set per-SVG by the
+               auto-tuning JS at the bottom of <body>. The JS measures
+               each map's rendered size + path complexity and picks a
+               proportional width (range 0.5 – 1.2 px).
+             • A sensible default of 0.8 fires if JS hasn't run yet. */
+        body.polish .w3-card svg path[data-id],
+        body.polish .w3-card svg path[id] {
+            stroke: rgba(20, 30, 50, 0.75) !important;
+            stroke-width: var(--map-stroke, 0.8) !important;
+            stroke-linejoin: round !important;
+            stroke-linecap: round !important;
+            vector-effect: non-scaling-stroke !important;
+            paint-order: stroke fill;
+            transition: stroke 0.2s ease, stroke-width 0.2s ease, filter 0.2s ease;
+        }
+        body.polish .w3-card svg path[data-id]:hover,
+        body.polish .w3-card svg path[id]:hover {
+            stroke: rgba(10, 14, 28, 1.00) !important;
+            stroke-width: var(--map-stroke-hover, 1.5) !important;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.30));
+        }
+
+        /* ── SOFTWARE-CARD LIQUID GLASS for region buttons ────────
+           Full multi-layer treatment matching the software.html cards:
+             • Coloured border (visible at rest, saturates on hover)
+             • Outer directional halo (up-and-left, with bounced halo
+               down-and-right) via box-shadow
+             • Inner corner glow at top-left (::before, blurred,
+               soft-light blended)
+             • Perimeter rim catch-lights + bottom-right counter
+               reflection (::after, inset box-shadows + radial)
+           The polish.css travel-icon mask is explicitly disabled on
+           these buttons so its <mask-image: var(--lg-hex-mask)> is
+           overridden by the software-card pseudo-element rendering. */
+
+        /* ── DIAMOND HEXAGON LIQUID GLASS norm — applied to every
+              country/state selector button on map.html. Replaces the
+              prior software-card corner-glow style. Same model used
+              by work.html, software.html, academia.html, games.html:
+              hex outline mesh + rotating conic-rainbow border +
+              sweeping glint. Per-button colour theme still cycles
+              through 6 hues via nth-child below — that colour drives
+              the halo + active variant. */
+        @property --rcn-edge-angle {
+            syntax: '<angle>'; initial-value: 0deg; inherits: false;
+        }
+        @property --rcn-glint-pos {
+            syntax: '<percentage>'; initial-value: -25%; inherits: false;
+        }
+        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
+        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
+        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes tt-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+
+        body.polish .pop-up-button {
+            --c-r:  99; --c-g: 102; --c-b: 241;
+            --hex-size: 6px;
+            --rcn-edge-angle: 0deg;
+            --rcn-glint-pos: -25%;
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            border-radius: 12px !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.90) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.55),
+                    rgba(255,209,168,0.55),
+                    rgba(255,240,168,0.55),
+                    rgba(196,242,197,0.55),
+                    rgba(184,217,255,0.55),
+                    rgba(212,193,255,0.55),
+                    rgba(255,193,229,0.55),
+                    rgba(255,179,198,0.55)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(6px) saturate(120%) !important;
+            -webkit-backdrop-filter: blur(6px) saturate(120%) !important;
+            /* DRASTICALLY reduced shadow — just a 1-pixel inner top
+               highlight + a hairline 1-pixel elevation. No outer
+               coloured halo at rest. */
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.85),
+                0 1px 2px rgba(15,20,40,0.08) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease !important;
+            animation:
+                tt-rcn-edge-spin 4.5s linear infinite,
+                tt-rcn-glint     6.0s linear infinite !important;
+        }
+
+        /* Hex mesh on ::before — hidden at rest, fades + animates on hover. */
+        body.polish .pop-up-button::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            z-index: -1 !important;
+            pointer-events: none !important;
+            border-radius: inherit !important;
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            top: 0 !important;
+            left: 0 !important;
+            filter: none !important;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+        }
+        /* Suppress the old ::after rim/counter-glow layer */
+        body.polish .pop-up-button::after {
+            content: none !important;
+            display: none !important;
+        }
+
+        /* Keep the button's img / text content above the hex layer */
+        body.polish .pop-up-button > * {
+            position: relative;
+            z-index: 3;
+        }
+
+        /* Hover hex shimmer — subtle pastel hex outlines cycling.
+           Same as before but the WRAPPER's border becomes clearly
+           visible (themed solid colour) and shadow is killed. */
+        body.polish .pop-up-button:hover::before {
+            opacity: 0.30 !important;
+            animation:
+                tt-hex-sweep      3.0s linear infinite,
+                tt-hex-hue-cycle  4.5s linear infinite !important;
+            filter: saturate(0.55) brightness(1.02);
+        }
+        /* On hover the conic-gradient border is REPLACED with a flat
+           themed solid border so the edge reads as a clear line.
+           Shadow is also stripped down to just the inner highlight
+           and a 1-px elevation — no glowing halo. */
+        body.polish .pop-up-button:hover {
+            transform: translateY(-1px) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 0.85),
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 0.85)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                0 1px 2px rgba(15,20,40,0.10) !important;
+        }
+
+        /* Per-button colour rotation — cycles through six travel-
+           themed hues so each region selector reads as its own
+           identity rather than every button being indigo. */
+        body.polish .pop-up-button:nth-child(6n+1) { --c-r:  99; --c-g:102; --c-b:241; --c-r2:129; --c-g2:140; --c-b2:248; } /* indigo */
+        body.polish .pop-up-button:nth-child(6n+2) { --c-r:  16; --c-g:185; --c-b:129; --c-r2: 52; --c-g2:211; --c-b2:153; } /* emerald */
+        body.polish .pop-up-button:nth-child(6n+3) { --c-r: 245; --c-g:158; --c-b: 11; --c-r2:251; --c-g2:191; --c-b2: 36; } /* amber */
+        body.polish .pop-up-button:nth-child(6n+4) { --c-r: 236; --c-g: 72; --c-b:153; --c-r2:244; --c-g2:114; --c-b2:182; } /* pink */
+        body.polish .pop-up-button:nth-child(6n+5) { --c-r:   6; --c-g:182; --c-b:212; --c-r2: 34; --c-g2:211; --c-b2:238; } /* cyan */
+        body.polish .pop-up-button:nth-child(6n+6) { --c-r: 139; --c-g: 92; --c-b:246; --c-r2:167; --c-g2:139; --c-b2:250; } /* violet */
+    </style>
 
 
 </head>
@@ -83,13 +327,13 @@
             <div class="">
                 <div class="row" style="margin-bottom: 10px; margin-top: 15px">
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%;; min-width: 250px;">
+                        <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px">
                             <div class="search_bar" style="display: flex; align-items: center; width: 100%;">
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px;margin-right: 8px">
-                                <div style="display: flex; align-items: center; width: 100%;">
+                                <div style="display: flex; align-items: center; width: 100%; margin-right: 8px;">
                                     <input class="search_searchbar" type="text" title="Search" v-model="searchQuery" placeholder="Search" style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;">
-                                    <button @click="searchQuery = ''" style="margin-left: 40px; background: transparent; border: none; cursor: pointer;">
-                                        ✖️
+                                    <button @click="searchQuery = ''" class="search-cross-btn" aria-label="Clear search">
+                                        <i class="fa fa-times" ></i>
                                     </button>
                                 </div>
                             </div>
@@ -100,7 +344,7 @@
                     <div style="display: flex; margin-left: 10px; white-space: nowrap; justify-content: space-between;">
                         <div v-if="resources.length" v-cloak class="table" style="display: flex;">
                             <div v-for="(item, index) in resultQuery" :key="index" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
-                                <div data-toggle="" data-html="true" :title="item.title" style="margin: auto">
+                                <div data-toggle="tooltip" data-html="true" :title="item.title" style="margin: auto">
                                     <center>
                                         <button @click="scrollToSection(item.id, item.url)" class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
                                             <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
@@ -110,12 +354,16 @@
                                 </div>
                             </div>
                             <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
-                                <div style="margin: auto" data-toggle="" data-html="true" title="+190">
+                                <div data-toggle="tooltip" data-html="true" title="+190" style="margin: auto">
                                     <center>
-                                        <button style="background: transparent; border: none">
-                                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/three-dots.png" style="width: 50px; height: 100%; object-fit: contain;"/>
+                                        <button class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/three-dots.png" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                         </button>
-                                        <div v-cloak style="color: black; text-align: center; width: 80px;"></div>
+                                        <!-- Non-breaking space gives this label div the same line-height
+                                             as the country abbreviation labels (e.g. "USA", "CAN") below
+                                             their tiles, so the outer wrapper measures the same vertical
+                                             extent and the dots button sits on the same baseline. -->
+                                        <div v-cloak style="color: black; text-align: center; width: 50px;">&nbsp;</div>
                                     </center>
                                 </div>
                             </div>
@@ -198,8 +446,8 @@
                                 id="style6">path {
                             fill-rule: evenodd;
                         }</style>
-                        <pattern id="flag-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/usa.webp" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
+                        <pattern id="flag-pattern" patternUnits="objectBoundingBox" width="1" height="1" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/usa.webp" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" />
                         </pattern>
                     </defs>
                     <metadata
@@ -697,8 +945,8 @@
                                 stroke-width: 1;  <!-- Set border thickness -->
                             }
                         </style>
-                        <pattern id="canada-flag-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/CAN.svg.png" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
+                        <pattern id="canada-flag-pattern" patternUnits="objectBoundingBox" width="1" height="1" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/CAN.svg.png" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" />
                         </pattern>
                     </defs>
                     <metadata
@@ -848,8 +1096,8 @@
                             fill-rule: evenodd;
                         }</style>
 
-                        <pattern id="bangladesh-flag-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Bangladesh/img.png" x="0" y="0" width="60" height="50" viewBox="0 0 50 50" preserveAspectRatio="xMidYMid slice" />
+                        <pattern id="bangladesh-flag-pattern" patternUnits="objectBoundingBox" width="1" height="1" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+                            <image href="https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Bangladesh/img.png" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" />
                         </pattern>
                     </defs>
                     <metadata
@@ -3797,6 +4045,464 @@
 
 <div id="footer-placeholder"></div>
 
+<script>
+/* ── Random travel-icon mask generator ─────────────────────────
+   Builds a fresh tile of travel iconography on every page load
+   and injects it as a CSS variable, so every visit to the map
+   page gets a unique constellation of planes, ships, suitcases,
+   compasses, hot-air balloons, anchors, and map pins.
+
+   Each icon is one of seven base silhouettes; the generator
+   picks random icons, places them at random positions inside the
+   tile, and applies random scale + rotation + fill-opacity. The
+   pastel rainbow sweep from polish.css then flows through these
+   icon silhouettes on hover. */
+(function(){
+    var TILE = 280;
+    var R = function(min, max){ return min + Math.random() * (max - min); };
+    var pickInt = function(min, max){ return Math.floor(R(min, max + 0.999)); };
+
+    /* Travel-icon path library. Each entry is one SVG <path> data
+       string centred roughly on (0,0) so the placer can transform
+       it freely (translate/rotate/scale).
+
+       All paths are designed as filled silhouettes — sized to fit
+       within ~±14 px so a 220 px tile can comfortably hold 7–10
+       icons without crowding. */
+    var ICONS = [
+        /* PLANE — top-down silhouette */
+        'M14 -14 L18 -14 L18 -6 L28 -2 L28 0 L18 -2 L18 8 L22 12 L22 14 L10 14 L10 12 L14 8 L14 -2 L4 0 L4 -2 L14 -6 L14 -14 Z',
+        /* SUITCASE — body + handle */
+        'M-9 -5 L9 -5 L9 9 L-9 9 Z M-3 -9 L3 -9 L3 -5 L-3 -5 Z',
+        /* SUITCASE WITH WHEELS — alt suitcase */
+        'M-9 -6 L9 -6 L9 6 L-9 6 Z M-3 -10 L3 -10 L3 -6 L-3 -6 Z M-7 6 L-3 6 L-3 8 L-7 8 Z M3 6 L7 6 L7 8 L3 8 Z',
+        /* SHIP — hull + mast + crossbar */
+        'M-12 4 L12 4 L9 8 L-9 8 Z M-1 -8 L1 -8 L1 4 L-1 4 Z M-7 -2 L7 -2 L5 1 L-5 1 Z',
+        /* SAILBOAT — hull + triangular sail */
+        'M-10 4 L10 4 L8 8 L-8 8 Z M-1 -10 L1 -10 L1 4 L-1 4 Z M1 -10 L8 2 L1 2 Z',
+        /* CRUISE SHIP — multi-deck */
+        'M-14 4 L14 4 L11 8 L-11 8 Z M-12 -2 L12 -2 L12 4 L-12 4 Z M-9 -6 L9 -6 L9 -2 L-9 -2 Z M-3 -10 L-1 -10 L-1 -6 L-3 -6 Z M1 -10 L3 -10 L3 -6 L1 -6 Z',
+        /* SUBMARINE — oval hull + periscope */
+        'M-14 -2 C-14 -5,-10 -6,-6 -6 L6 -6 C10 -6,14 -5,14 -2 C14 2,10 4,6 4 L-6 4 C-10 4,-14 2,-14 -2 Z M-2 -10 L2 -10 L2 -6 L-2 -6 Z',
+        /* COMPASS — 4-point star */
+        'M0 -12 L2 0 L0 12 L-2 0 Z M-12 0 L0 -2 L12 0 L0 2 Z',
+        /* HOT-AIR BALLOON — envelope + basket */
+        'M0 -10 C6 -10,8 -6,8 -2 C8 4,4 6,0 6 C-4 6,-8 4,-8 -2 C-8 -6,-6 -10,0 -10 Z M-3 6 L3 6 L3 10 L-3 10 Z',
+        /* ANCHOR — ring + shaft + crossbar */
+        'M0 -12 L2 -10 L2 8 L6 8 L4 10 L0 10 L-4 10 L-6 8 L-2 8 L-2 -10 Z M-8 -4 L8 -4 L8 -2 L-8 -2 Z',
+        /* MAP PIN — teardrop */
+        'M0 -12 C6 -12,8 -6,8 -2 C8 4,0 12,0 12 C0 12,-8 4,-8 -2 C-8 -6,-6 -12,0 -12 Z M-2 -4 L2 -4 L2 0 L-2 0 Z',
+        /* CAR — side view, body + cabin + wheels */
+        'M-12 0 L12 0 L12 4 L-12 4 Z M-8 -6 L8 -6 L10 0 L-10 0 Z M-9 4 L-5 4 L-5 6 L-9 6 Z M5 4 L9 4 L9 6 L5 6 Z',
+        /* BUS — rectangular vehicle */
+        'M-10 -8 L10 -8 L10 6 L-10 6 Z M-8 -6 L-2 -6 L-2 -1 L-8 -1 Z M2 -6 L8 -6 L8 -1 L2 -1 Z M-9 6 L-5 6 L-5 8 L-9 8 Z M5 6 L9 6 L9 8 L5 8 Z',
+        /* TRAIN — locomotive front */
+        'M-10 -4 L10 -4 L10 8 L-10 8 Z M-2 -10 L2 -10 L2 -4 L-2 -4 Z M-6 8 L-3 8 L-3 10 L-6 10 Z M3 8 L6 8 L6 10 L3 10 Z',
+        /* HELICOPTER — body + rotor */
+        'M-6 -2 L6 -2 L8 0 L6 4 L-6 4 L-8 0 Z M-14 -6 L14 -6 L14 -4 L-14 -4 Z M-1 -8 L1 -8 L1 -6 L-1 -6 Z M3 4 L6 4 L6 7 L3 7 Z',
+        /* GLOBE — circle */
+        'M0 -12 C7 -12,12 -7,12 0 C12 7,7 12,0 12 C-7 12,-12 7,-12 0 C-12 -7,-7 -12,0 -12 Z M-12 0 L12 0 Z M0 -12 L0 12 Z',
+        /* CAMERA — body + viewfinder + lens bump */
+        'M-10 -4 L-6 -4 L-4 -7 L4 -7 L6 -4 L10 -4 L10 6 L-10 6 Z M-2 1 C-2 -1,2 -1,2 1 C2 3,-2 3,-2 1 Z',
+        /* SUN — starburst */
+        'M0 -12 L3 -3 L12 0 L3 3 L0 12 L-3 3 L-12 0 L-3 -3 Z',
+        /* CLOUD — bumpy */
+        'M-10 2 C-12 2,-12 -2,-10 -2 C-10 -7,-4 -8,-2 -5 C-2 -9,5 -9,6 -5 C10 -7,13 -2,10 0 C13 0,13 4,10 4 L-10 4 C-12 4,-12 2,-10 2 Z',
+        /* MOUNTAIN — double peak with snow cap implied */
+        'M-13 8 L-5 -6 L-2 -2 L3 -10 L13 8 Z M-5 -6 L-3 -2 L-7 -2 Z M3 -10 L5 -6 L1 -6 Z',
+        /* PALM TREE — trunk + radiating fronds */
+        'M-1 -2 L1 -2 L2 10 L-2 10 Z M0 -10 L4 -6 L2 -3 L-2 -3 L-4 -6 Z M0 -10 L-7 -7 L-2 -3 Z M0 -10 L7 -7 L2 -3 Z M-2 -3 L-9 -1 L-2 1 Z M2 -3 L9 -1 L2 1 Z',
+        /* BEACH UMBRELLA — canopy + pole */
+        'M-10 -2 C-10 -10,10 -10,10 -2 L0 -2 Z M-1 -2 L1 -2 L1 10 L-1 10 Z M0 -10 L1 -12 L-1 -12 Z',
+        /* LIGHTHOUSE — tower + dome + base */
+        'M-5 -6 L5 -6 L7 10 L-7 10 Z M-3 -8 L3 -8 L3 -6 L-3 -6 Z M-2 -10 C-2 -14,2 -14,2 -10 Z M0 -14 L1 -16 L-1 -16 Z',
+        /* TENT — triangle */
+        'M-10 8 L0 -10 L10 8 Z M-3 8 L0 -2 L3 8 Z',
+        /* BACKPACK — body + top strap */
+        'M-8 -6 C-8 -10,8 -10,8 -6 L8 10 L-8 10 Z M-3 -12 L3 -12 L3 -8 L-3 -8 Z M-6 -2 L6 -2 L6 0 L-6 0 Z',
+        /* ENVELOPE / POSTCARD */
+        'M-12 -6 L12 -6 L12 6 L-12 6 Z M-12 -6 L0 2 L12 -6 Z',
+        /* PARACHUTE — dome + lines + figure */
+        'M-12 -4 C-12 -12,12 -12,12 -4 Z M-1 -4 L-5 8 L-3 10 L0 8 L3 10 L5 8 L1 -4 Z',
+        /* STAR — 5-point */
+        'M0 -10 L2.4 -3.1 L9.5 -3.1 L3.8 1.2 L5.9 8.1 L0 4 L-5.9 8.1 L-3.8 1.2 L-9.5 -3.1 L-2.4 -3.1 Z',
+        /* WAVE — sinuous */
+        'M-12 -2 C-9 -6,-6 -6,-3 -2 C0 2,3 2,6 -2 C9 -6,12 -6,12 -2 L12 4 L-12 4 Z',
+        /* PYRAMID — triangle with horizontal lines (rocks) */
+        'M0 -12 L12 8 L-12 8 Z M-6 -2 L6 -2 L4 0 L-4 0 Z M-9 4 L9 4 L7 6 L-7 6 Z',
+        /* BOARDING PASS / TICKET — rectangle with notch */
+        'M-12 -5 L-2 -5 L-2 -3 L0 -3 L0 -5 L12 -5 L12 5 L0 5 L0 3 L-2 3 L-2 5 L-12 5 Z',
+        /* BINOCULARS — twin barrels */
+        'M-9 -8 L-2 -8 L-2 8 L-9 8 Z M2 -8 L9 -8 L9 8 L2 8 Z M-2 -4 L2 -4 L2 -2 L-2 -2 Z',
+        /* LIFE RING — annular ring with crossbars (filled like a donut) */
+        'M0 -10 C5 -10,10 -5,10 0 C10 5,5 10,0 10 C-5 10,-10 5,-10 0 C-10 -5,-5 -10,0 -10 Z M0 -7 C-4 -7,-7 -4,-7 0 C-7 4,-4 7,0 7 C4 7,7 4,7 0 C7 -4,4 -7,0 -7 Z M-10 -2 L-7 -2 L-7 2 L-10 2 Z M7 -2 L10 -2 L10 2 L7 2 Z',
+        /* SNOWFLAKE — 6 arms */
+        'M0 -12 L1 -12 L1 12 L-1 12 L-1 -12 Z M-10 -6 L10 6 L9 7 L-11 -5 Z M-10 6 L10 -6 L11 -5 L-9 7 Z',
+        /* KEY — round bow + shaft + teeth */
+        'M-10 0 C-10 -4,-6 -6,-3 -4 L8 -4 L8 -2 L4 -2 L4 0 L0 0 L0 2 L-3 2 C-6 4,-10 4,-10 0 Z'
+    ];
+
+    /* Place one icon at (cx, cy) with random scale + rotation +
+       opacity. Returns the SVG <path> markup with a baked-in
+       transform string. Uses SINGLE quotes for SVG attributes so
+       the outer CSS `url("…")` (double-quoted) parses cleanly — a
+       single inner double-quote would terminate the URL early. */
+    function placeIcon(cx, cy){
+        var d = ICONS[Math.floor(Math.random() * ICONS.length)];
+        var scale = R(0.55, 1.10);
+        var rot   = pickInt(-30, 30);  /* tilt within ±30° */
+        var alpha = R(0.65, 0.92);
+        return "<path d='" + d + "' fill='%23000' fill-opacity='" +
+               alpha.toFixed(2) + "' transform='translate(" +
+               cx.toFixed(1) + " " + cy.toFixed(1) + ") rotate(" +
+               rot + ") scale(" + scale.toFixed(2) + ")'/>";
+    }
+
+    /* Build the tile: a Poisson-ish scatter — divide the tile into
+       a 4×4 jittered grid so icons spread out evenly without
+       overlapping, with random per-cell offset for organic feel. */
+    function buildTile(){
+        var paths = '';
+        var cellsX = 4, cellsY = 4;
+        var cellW = TILE / cellsX;
+        var cellH = TILE / cellsY;
+        for (var x = 0; x < cellsX; x++){
+            for (var y = 0; y < cellsY; y++){
+                if (Math.random() < 0.10) continue;
+                var cx = cellW * (x + R(0.22, 0.78));
+                var cy = cellH * (y + R(0.22, 0.78));
+                paths += placeIcon(cx, cy);
+            }
+        }
+        return paths;
+    }
+
+    /* Build one complete mask data-URL string */
+    function buildMaskUrl(){
+        var svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 " +
+                  TILE + " " + TILE + "'>" + buildTile() + "</svg>";
+        return "url(\"data:image/svg+xml;utf8," + svg + "\")";
+    }
+
+    /* Initial GLOBAL mask — covers the first paint and any element
+       the user hasn't hovered yet. Set on body.polish so every
+       liquid-glass surface reads it via CSS cascade. */
+    var style = document.createElement('style');
+    style.id = 'lg-map-random';
+    style.textContent =
+        "body.polish {" +
+            "--lg-hex-mask: " + buildMaskUrl() + ";" +
+            "--lg-facet-big: " + TILE + "px;" +
+        "}";
+    document.head.appendChild(style);
+
+    /* ─── Per-hover re-randomization ───────────────────────────
+       Every time the cursor enters a liquid-glass element, that
+       element gets its OWN freshly-generated mask via an inline
+       custom-property override. The element-scoped value beats
+       the body-level one through the cascade, so each card
+       shuffles independently — hover the same card twice and the
+       icon arrangement is different each time. */
+    /* Every liquid-glass surface (cards AND buttons) gets a fresh
+       travel-icon mask on each mouseenter, so the unique shapes
+       appear on hover and change every time. */
+    var TARGET_SEL = '.w3-card, .w3-card-2, .w3-card-4, .pop-up-button, ' +
+                     'button:not(.glow-on-hover-nav):not(.glow-on-hover3)' +
+                     ':not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle)' +
+                     ':not(.ww-icon-btn):not(.msl-core):not(.dfn-core)' +
+                     ':not(.city-switch-btn)';
+
+    function attach(el){
+        if (el._lgRandomized) return;
+        el._lgRandomized = true;
+        el.addEventListener('mouseenter', function(){
+            el.style.setProperty('--lg-hex-mask', buildMaskUrl());
+        });
+    }
+    function scanAndAttach(){
+        var nodes = document.querySelectorAll(TARGET_SEL);
+        for (var i = 0; i < nodes.length; i++) attach(nodes[i]);
+    }
+
+    /* Run on page load + after every DOM change (Vue cards mount
+       asynchronously, so the initial scan misses them). */
+    if (document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', scanAndAttach);
+    } else {
+        scanAndAttach();
+    }
+    /* Catch buttons/cards added later (Vue v-for renders). */
+    if (typeof MutationObserver !== 'undefined'){
+        var obs = new MutationObserver(scanAndAttach);
+        obs.observe(document.body, { childList: true, subtree: true });
+    }
+
+    /* ─── Auto-tune state/country border thickness per SVG ────────
+       A fixed stroke-width looks wrong across maps with wildly
+       different viewBox dimensions and rendered sizes. This routine
+       picks a per-SVG `--map-stroke` from three signals:
+
+         1. Rendered width (px on screen) — bigger maps tolerate a
+            slightly thicker stroke; small maps need finer lines.
+         2. viewBox extent — maps with tiny coordinate spaces (e.g.
+            country outlines at 0–100) need thinner numeric values
+            to translate to the same screen thickness.
+         3. Average path bounding-box — maps with lots of tiny
+            sub-regions (Indonesia islands, Greek isles) get thinner
+            strokes so the small shapes stay readable.
+
+       Output stroke is clamped to [0.45, 1.20] so it never goes
+       invisible or chunky. Hover stroke is 1.7× the rest stroke. */
+    function tuneMapStrokes(){
+        document.querySelectorAll('.w3-card svg').forEach(function(svg){
+            var rect = svg.getBoundingClientRect();
+            if (rect.width < 10 || rect.height < 10) return;
+
+            /* viewBox dimensions */
+            var vb = svg.viewBox && svg.viewBox.baseVal;
+            var vbW = (vb && vb.width)  ? vb.width  : rect.width;
+            var vbH = (vb && vb.height) ? vb.height : rect.height;
+
+            /* Average bounding-box width of the regions, as a proxy
+               for "how big is one typical state/country in this map".
+               Small average → many small regions → use a thinner stroke. */
+            var paths = svg.querySelectorAll('path[data-id], path[id]');
+            var sumDim = 0, count = 0;
+            for (var i = 0; i < paths.length; i++){
+                try {
+                    var b = paths[i].getBBox();
+                    if (b.width > 0 && b.height > 0){
+                        sumDim += (b.width + b.height) / 2;
+                        count++;
+                    }
+                } catch(e){ /* getBBox can throw on hidden elements */ }
+            }
+            var avgDim = count ? (sumDim / count) : Math.min(vbW, vbH) * 0.2;
+
+            /* avgDim is in SVG user units. Convert to device pixels
+               using the SVG's render scale: devicePxPerUnit = rect.width / vbW */
+            var pxPerUnit = rect.width / vbW;
+            var avgPx = avgDim * pxPerUnit;  /* avg region size on screen */
+
+            /* Heuristic: stroke ≈ 0.55 + log2(avgPx / 40) * 0.18
+               – avgPx ~40 px → stroke 0.55 (tiny details)
+               – avgPx ~80 px → stroke 0.73
+               – avgPx ~160 px → stroke 0.91
+               – avgPx ~320 px → stroke 1.09 */
+            var stroke = 0.55 + (Math.log(Math.max(avgPx, 10) / 40) / Math.LN2) * 0.18;
+            stroke = Math.max(0.45, Math.min(1.20, stroke));
+
+            svg.style.setProperty('--map-stroke', stroke.toFixed(2));
+            svg.style.setProperty('--map-stroke-hover', (stroke * 1.7).toFixed(2));
+        });
+    }
+
+    /* Run on first paint + on resize (rendered widths change) */
+    function scheduleTune(){
+        if (document.readyState === 'complete') tuneMapStrokes();
+        else window.addEventListener('load', tuneMapStrokes);
+    }
+    scheduleTune();
+    var resizeT;
+    window.addEventListener('resize', function(){
+        clearTimeout(resizeT);
+        resizeT = setTimeout(tuneMapStrokes, 200);
+    });
+
+    /* ─── Flag-on-hover (single image overlay) ─────────────────
+       Replaces the SVG <pattern> fill approach (which renders the
+       flag tiled OR fragmented across multi-subpath states) with a
+       dynamic <image> overlay:
+
+         • At rest, every region is filled neutral gray.
+         • On mouseenter, the JS measures the path's bbox, creates
+           a <clipPath> that mirrors the path's geometry, and inserts
+           a single <image> element sized to exactly that bbox,
+           clipped to the state's outline.
+         • On mouseleave the image is removed.
+
+       Result: exactly ONE flag per state at any moment, perfectly
+       fitted to the state's shape — no tiling, no fragmentation. */
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+
+    /* Build a flag URL for one region from its `data-name`.
+       Uses Wikimedia Commons' Special:FilePath endpoint, which
+       resolves "Flag of <Region>.svg" to the canonical hosted image
+       and serves it with a redirect that browsers follow inside an
+       SVG <image>. Falls back to the SVG's own country-flag URL on
+       network error. */
+    function buildStateFlagUrl(name){
+        if (!name) return null;
+        var slug = name.trim().replace(/\s+/g, '_');
+        return 'https://commons.wikimedia.org/wiki/Special:FilePath/Flag_of_' +
+               encodeURIComponent(slug) + '.svg';
+    }
+
+    function setupFlagHover(){
+        var svgs = document.querySelectorAll('.w3-card svg');
+        for (var s = 0; s < svgs.length; s++){
+            var svg = svgs[s];
+            if (svg._lgFlagSvg) continue;
+            svg._lgFlagSvg = true;
+
+            /* Read the fallback (country) flag URL from the
+               existing <pattern> definition. */
+            var patEl = svg.querySelector('pattern');
+            var fallbackUrl = '';
+            if (patEl){
+                var imgEl = patEl.querySelector('image');
+                if (imgEl){
+                    fallbackUrl = imgEl.getAttribute('href') ||
+                                  imgEl.getAttribute('xlink:href') || '';
+                }
+            }
+
+            /* Make sure there's a <defs> we can attach clipPaths to */
+            var defs = svg.querySelector('defs');
+            if (!defs){
+                defs = document.createElementNS(SVG_NS, 'defs');
+                svg.insertBefore(defs, svg.firstChild);
+            }
+
+            /* Wire EVERY region path inside .w3-card svgs — every
+               state shows its flag on hover, regardless of whether
+               the source SVG shipped with a pattern fill or not. */
+            var paths = svg.querySelectorAll('path[data-id], path[id]');
+            for (var i = 0; i < paths.length; i++){
+                var p = paths[i];
+                if (p._lgFlagWired) continue;
+                /* Skip the eagle loader (and other non-region paths
+                   that happen to have an id). They live in SVGs
+                   without a <pattern>; we can identify them either
+                   by being in the eagle-loader SVG or by being inside
+                   a <symbol>/<defs> rather than the map proper. */
+                if (p.closest('defs, symbol, .eagle-loader__orbit')) continue;
+                p._lgFlagWired = true;
+                wirePath(p, svg, defs, fallbackUrl);
+            }
+        }
+    }
+
+    function wirePath(path, svg, defs, fallbackUrl){
+        var overlayImg = null;
+        var clipId = null;
+        /* Resolve the per-region flag URL from data-name; if absent,
+           use the country flag as the URL outright. */
+        var regionName = path.getAttribute('data-name') ||
+                         path.getAttribute('data-id') || '';
+        var stateFlagUrl = buildStateFlagUrl(regionName) || fallbackUrl;
+
+        path.addEventListener('mouseenter', function(){
+            var bbox;
+            try { bbox = path.getBBox(); } catch(e){ return; }
+            if (!bbox || !bbox.width || !bbox.height) return;
+
+            /* Build a one-off clipPath that mirrors this path's
+               geometry (cached after first hover). The clipPath
+               inner path also carries the SAME fill-rule as the
+               source SVG (evenodd, per the inline style block in
+               the SVG defs) — without this, complex multi-subpath
+               states clip oddly and leave bare patches inside their
+               borders instead of fully covering them with flag. */
+            if (!clipId){
+                clipId = 'lg-flagclip-' +
+                         (path.id || Math.random().toString(36).slice(2, 9));
+                var clipEl = document.createElementNS(SVG_NS, 'clipPath');
+                clipEl.setAttribute('id', clipId);
+                clipEl.setAttribute('clipPathUnits', 'userSpaceOnUse');
+                var clipPath = document.createElementNS(SVG_NS, 'path');
+                clipPath.setAttribute('d', path.getAttribute('d') || '');
+                clipPath.setAttribute('clip-rule', 'evenodd');
+                clipPath.setAttribute('fill-rule', 'evenodd');
+                clipEl.appendChild(clipPath);
+                defs.appendChild(clipEl);
+            }
+
+            /* Insert one <image> sized to the path's full bounding
+               box and clipped to the path outline. The flag now
+               FITS THE SHAPE of the state — fills the bbox with
+               preserveAspectRatio="slice" (cropping excess), then
+               the clip-path trims it to the state silhouette. */
+            overlayImg = document.createElementNS(SVG_NS, 'image');
+            overlayImg.setAttributeNS('http://www.w3.org/1999/xlink',
+                                       'xlink:href', stateFlagUrl);
+            overlayImg.setAttribute('href', stateFlagUrl);
+            overlayImg.setAttribute('x', bbox.x);
+            overlayImg.setAttribute('y', bbox.y);
+            overlayImg.setAttribute('width', bbox.width);
+            overlayImg.setAttribute('height', bbox.height);
+            overlayImg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+            overlayImg.setAttribute('clip-path', 'url(#' + clipId + ')');
+            overlayImg.style.pointerEvents = 'none';
+            /* If the per-region flag fails to load, swap to the
+               country flag as a fallback. */
+            overlayImg.addEventListener('error', function(){
+                if (fallbackUrl && stateFlagUrl !== fallbackUrl){
+                    overlayImg.setAttributeNS('http://www.w3.org/1999/xlink',
+                                               'xlink:href', fallbackUrl);
+                    overlayImg.setAttribute('href', fallbackUrl);
+                }
+            }, { once: true });
+            svg.appendChild(overlayImg);
+        });
+
+        path.addEventListener('mouseleave', function(){
+            if (overlayImg && overlayImg.parentNode){
+                overlayImg.parentNode.removeChild(overlayImg);
+            }
+            overlayImg = null;
+        });
+    }
+    /* ─── Mark traveled regions as green ──────────────────────
+       The Vue popup-button strip near the top of each region card
+       lists every state/country the user has actually visited.
+       Each `.pop-up-button` has a SIBLING `<div>` (NOT inside the
+       button) holding the abbreviation. We collect those visited
+       abbreviations and stamp `.lg-traveled` on matching SVG paths. */
+    function tagTraveledRegions(){
+        var visited = Object.create(null);
+        var buttons = document.querySelectorAll('.pop-up-button');
+        for (var b = 0; b < buttons.length; b++){
+            /* Walk forward through siblings to find the abv text.
+               This is safer than `parentElement.querySelector('div')`
+               which might also return a div nested inside the button. */
+            var sib = buttons[b].nextElementSibling;
+            while (sib && sib.tagName !== 'DIV') sib = sib.nextElementSibling;
+            if (!sib) continue;
+            var abv = (sib.textContent || '').trim().toUpperCase();
+            /* Vue interpolations like "{{ item.abv }}" can leave the
+               raw text when v-cloak hasn't been processed yet — skip those. */
+            if (!abv || abv.indexOf('{{') !== -1) continue;
+            if (abv.length > 6) continue;
+            visited[abv] = true;
+        }
+
+        /* If no visited abvs were found yet (Vue not mounted), don't
+           touch any classes — leave the previous state intact rather
+           than clearing everything to gray. */
+        var hasAny = false;
+        for (var k in visited){ hasAny = true; break; }
+        if (!hasAny) return;
+
+        var paths = document.querySelectorAll(
+            '.w3-card svg path[data-id], .w3-card svg path[id]');
+        for (var i = 0; i < paths.length; i++){
+            var p = paths[i];
+            var key = (p.getAttribute('data-id') ||
+                       p.getAttribute('id') || '').toUpperCase();
+            if (visited[key]) p.classList.add('lg-traveled');
+            else              p.classList.remove('lg-traveled');
+        }
+    }
+
+    /* setupFlagHover() and tagTraveledRegions() were experimental
+       overlays that competed with js/map-enhancer.js. Disabled —
+       map-enhancer is the source of truth for visited colouring and
+       hover-flag rendering (it reads image.json for per-region photo
+       counts and creates the pattern fills). */
+})();
+</script>
+
 </body>
 
 <script>
@@ -4006,5 +4712,82 @@
         mymapshowButton.style.background = "lightgrey";
         mymaphideButton.style.background = "white";
     });
+</script>
+
+<!-- ─── Fix Bootstrap tooltip arrows to render as triangles ───
+     `.tooltip-arrow` is a 0×0 element whose visible "arrow" is
+     formed by one CSS border edge colored while the other three
+     edges stay transparent. Some site-wide rule is setting
+     `currentColor` on these edges (probably inheriting black),
+     which paints ALL four edges → the arrow renders as a small
+     solid rectangle. Forcing the three "wrong-side" edges to
+     transparent restores the triangular shape. The per-placement
+     rules in d.css (lines 4188+) explicitly color the correct
+     edge for each placement (top/bottom/left/right). -->
+<style>
+    .tooltip-arrow {
+        border-color: transparent !important;
+    }
+    .tooltip.top .tooltip-arrow,
+    .tooltip.top-left .tooltip-arrow,
+    .tooltip.top-right .tooltip-arrow {
+        border-top-color: #000 !important;
+    }
+    .tooltip.bottom .tooltip-arrow,
+    .tooltip.bottom-left .tooltip-arrow,
+    .tooltip.bottom-right .tooltip-arrow {
+        border-bottom-color: #000 !important;
+    }
+    .tooltip.left .tooltip-arrow {
+        border-left-color: #000 !important;
+    }
+    .tooltip.right .tooltip-arrow {
+        border-right-color: #000 !important;
+    }
+</style>
+
+<!-- ──────────────────────────────────────────────────────────────
+     Re-initialize Bootstrap tooltips after Vue mounts the
+     `.pop-up-button` elements. js/random.js calls
+     `$('[data-toggle="tooltip"]').tooltip()` once at document.ready,
+     but Vue's v-for templates haven't rendered yet at that point —
+     so the country selectors under the search bar AND the region
+     selectors under each map SVG don't receive their tooltips.
+
+     This block re-runs the initialization at intervals up to 4 s
+     post-load, and again on every DOM mutation, so EVERY popup
+     button (no matter when Vue inserts it) gets the same Bootstrap
+     tooltip behaviour. Both sets — search-bar and under-SVG — end
+     up with identical hoverable native tooltips.
+
+     `.tooltip()` is idempotent in Bootstrap 3 — calling it on an
+     already-initialized element no-ops. -->
+<script>
+(function(){
+    function initTooltips(){
+        if (typeof jQuery === 'undefined') return;
+        try {
+            jQuery('[data-toggle="tooltip"]').tooltip({
+                container: 'body',
+                trigger: 'hover focus'
+            });
+        } catch (e) { /* tooltip already initialized — ignore */ }
+    }
+    if (document.readyState === 'complete') initTooltips();
+    else window.addEventListener('load', initTooltips);
+    /* Catch Vue mount waves */
+    setTimeout(initTooltips, 400);
+    setTimeout(initTooltips, 1200);
+    setTimeout(initTooltips, 2500);
+    setTimeout(initTooltips, 4000);
+    /* Catch any future v-for re-renders */
+    if (typeof MutationObserver !== 'undefined'){
+        var debounce = null;
+        new MutationObserver(function(){
+            clearTimeout(debounce);
+            debounce = setTimeout(initTooltips, 150);
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+})();
 </script>
 </html>

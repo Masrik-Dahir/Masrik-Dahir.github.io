@@ -26,6 +26,7 @@
     <!--    Site-wide loader + polish (animations.css already loaded above) -->
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
+    <link rel="stylesheet" href="css/search-cross.css?v=5">
 
     <!--    JS imports-->
     <script src="js/vendor/code.jquery.com.jquery-1.10.2.js"></script>
@@ -53,6 +54,227 @@
     <script src="js/random.js" defer></script>
     <link rel="stylesheet" href="css/software.css">
 
+    <!-- Same liquid-glass model as work.html and academia.html:
+         rotating rainbow conic border + sweeping glint + fine hex
+         shimmer mesh on ::before. Active tab gets its theme color
+         (slate for All, indigo for Libraries, emerald for Apps)
+         with a white icon/text and color-family-locked hex shimmer
+         on hover. -->
+    <style>
+        @property --rcn-edge-angle {
+            syntax: '<angle>'; initial-value: 0deg; inherits: false;
+        }
+        @property --rcn-glint-pos {
+            syntax: '<percentage>'; initial-value: -25%; inherits: false;
+        }
+        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
+        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
+        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes tt-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+        @keyframes tt-active-shimmer {
+            0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
+            50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
+        }
+
+        body.polish .sw-tabs { gap: 10px !important; }
+
+        /* Suppress software.css's coloured underline bar (`.sw-tab::after`
+           grows from 0 to 60% on hover with an indigo→blue→cyan gradient).
+           User reported it reading as a "two-colour band" on the button. */
+        body.polish .sw-tab::after {
+            content: none !important;
+            display: none !important;
+            background: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        body.polish .sw-tab {
+            /* default per-tab token (slate-grey for "All") */
+            --c-r: 100; --c-g: 116; --c-b: 139;
+            --hex-size: 5px;
+            --rcn-edge-angle: 0deg;
+            --rcn-glint-pos: -25%;
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            padding: 8px 14px !important;
+            border-radius: 12px !important;
+            color: #334155 !important;
+            cursor: pointer;
+            /* SIMPLE flat background — just the base white linear
+               gradient + conic rainbow border. The previous version
+               stacked a top dome sheen + upper-left corner glow which
+               the user perceived as a "two-coloured top". This single
+               gradient keeps the surface uniformly white. */
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.90) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.50),
+                    rgba(255,209,168,0.50),
+                    rgba(255,240,168,0.50),
+                    rgba(196,242,197,0.50),
+                    rgba(184,217,255,0.50),
+                    rgba(212,193,255,0.50),
+                    rgba(255,193,229,0.50),
+                    rgba(255,179,198,0.50)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(8px) saturate(130%) !important;
+            -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                inset 0 -1px 0 rgba(20,15,30,0.05),
+                0 0 10px rgba(220,225,235,0.30),
+                0 2px 6px rgba(15,20,40,0.12) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease,
+                        color 0.22s ease !important;
+            animation:
+                tt-rcn-edge-spin 4.5s linear infinite,
+                tt-rcn-glint     6.0s linear infinite !important;
+        }
+
+        /* Per-tab theme tokens (used by active state + halos) */
+        body.polish .sw-tab:nth-child(1) { --c-r: 100; --c-g: 116; --c-b: 139; }   /* slate (All)     */
+        body.polish .sw-tab:nth-child(2) { --c-r:  99; --c-g: 102; --c-b: 241; }   /* indigo (Libs)   */
+        body.polish .sw-tab:nth-child(3) { --c-r:  16; --c-g: 185; --c-b: 129; }   /* emerald (Apps)  */
+
+        /* Keep all content above the hex layer */
+        body.polish .sw-tab > * { position: relative; z-index: 2; }
+
+        /* Hex mesh layer */
+        body.polish .sw-tab::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            z-index: -1 !important;
+            pointer-events: none !important;
+            border-radius: inherit !important;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+        }
+
+        /* Inactive tab on hover — VERY subtle pastel hex shimmer
+           + small lift. Much lower opacity + desaturated. */
+        body.polish .sw-tab:not(.active):hover::before {
+            opacity: 0.30 !important;             /* was 0.55 */
+            animation:
+                tt-hex-sweep      3.0s linear infinite,
+                tt-hex-hue-cycle  4.5s linear infinite !important;
+            filter: saturate(0.55) brightness(1.02);
+        }
+        body.polish .sw-tab:not(.active):hover {
+            transform: translateY(-1px) !important;
+            color: rgba(var(--c-r), var(--c-g), var(--c-b), 1.00) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                inset 0 -1px 0 rgba(20,15,30,0.05),
+                0 0 10px rgba(220,225,235,0.30),
+                0 3px 8px rgba(15,20,40,0.12) !important;
+        }
+
+        /* ── ACTIVE state — themed background + WHITE text/icon ── */
+        body.polish .sw-tab.active {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.20) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.40) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 0.95) 0%,
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 1.00) 50%,
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 0.92) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 1.0) 0%,
+                    rgba(255,255,255,0.85) 50%,
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 1.0) 100%
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            color: #ffffff !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.45),
+                inset 0 -1px 0 rgba(0,0,0,0.18),
+                0 0 14px rgba(var(--c-r), var(--c-g), var(--c-b), 0.55),
+                0 2px 8px rgba(0,0,0,0.20) !important;
+        }
+        body.polish .sw-tab.active i,
+        body.polish .sw-tab.active .tab-icon {
+            color: #ffffff !important;
+        }
+        body.polish .sw-tab.active .tab-count {
+            background: rgba(255,255,255,0.22) !important;
+            color: #ffffff !important;
+        }
+
+        /* Count pill on inactive tabs follows tab colour */
+        body.polish .sw-tab:not(.active) .tab-count {
+            background: rgba(var(--c-r), var(--c-g), var(--c-b), 0.10);
+            color: rgba(var(--c-r), var(--c-g), var(--c-b), 1.00);
+        }
+
+        /* Active button ::before base background — themed dark family
+           SO the leave-fade transition doesn't briefly flash pastels. */
+        body.polish .sw-tab:nth-child(1).active::before {
+            background: linear-gradient(90deg,
+                #1e293b 0%, #334155 14%, #475569 28%, #64748b 42%,
+                #0f172a 56%, #475569 70%, #334155 85%, #1e293b 100%) !important;
+            background-size: 300% 100% !important;
+        }
+        body.polish .sw-tab:nth-child(2).active::before {
+            background: linear-gradient(90deg,
+                #1e1b4b 0%, #3730a3 14%, #4338ca 28%, #6366f1 42%,
+                #312e81 56%, #818cf8 70%, #4f46e5 85%, #1e1b4b 100%) !important;
+            background-size: 300% 100% !important;
+        }
+        body.polish .sw-tab:nth-child(3).active::before {
+            background: linear-gradient(90deg,
+                #064e3b 0%, #047857 14%, #059669 28%, #10b981 42%,
+                #022c22 56%, #34d399 70%, #15803d 85%, #064e3b 100%) !important;
+            background-size: 300% 100% !important;
+        }
+
+        /* Active tab on hover — themed hex shimmer, but TONED DOWN
+           (lower opacity, no aggressive brightness pulse) so the
+           glistening reads as quiet sheen rather than flashing. */
+        body.polish .sw-tab.active:hover::before {
+            opacity: 0.55 !important;
+            mix-blend-mode: normal !important;
+            animation:
+                tt-hex-sweep      2.4s linear infinite,
+                tt-active-shimmer 2.4s ease-in-out infinite !important;
+            filter: saturate(1.05) brightness(1.02);
+        }
+        body.polish .sw-tab.active:hover {
+            transform: translateY(-1px) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.45),
+                inset 0 -1px 0 rgba(0,0,0,0.18),
+                0 0 14px rgba(var(--c-r), var(--c-g), var(--c-b), 0.40),
+                0 3px 10px rgba(0,0,0,0.18) !important;
+        }
+    </style>
+
     <!--    Site-wide loader (animations.js already loaded above) -->
     <script src="js/eagle-loader.js" defer></script>
 </head>
@@ -70,13 +292,13 @@
         <!-- Search bar -->
         <div class="row" style="margin-bottom: 0; margin-top: 15px">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px;">
+                <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px">
                     <div class="search_bar" style="display: flex; align-items: center; width: 100%;">
                         <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px;margin-right: 8px">
-                        <div style="display: flex; align-items: center; width: 100%;">
-                            <input class="search_searchbar" type="text" title="Search" v-model="searchQuery" placeholder="Search projects..." style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;">
-                            <button v-if="searchQuery" @click="searchQuery = ''" style="margin-left: 40px; background: transparent; border: none; cursor: pointer; font-size: 18px; color: #94a3b8;">
-                                <i class="fas fa-times"></i>
+                        <div style="display: flex; align-items: center; width: 100%; margin-right: 8px;">
+                            <input class="search_searchbar" type="text" title="Search" v-model="searchQuery" placeholder="Search" style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;">
+                            <button @click="searchQuery = ''" class="search-cross-btn" aria-label="Clear search">
+                                <i class="fa fa-times" ></i>
                             </button>
                         </div>
                     </div>

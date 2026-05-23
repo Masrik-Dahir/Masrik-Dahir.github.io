@@ -42,6 +42,435 @@
     <script src="../js/vendor/bootstrap-tooltip-3.4.1.min.js"></script>
     <script src="../js/random.js" defer></script>
 
+    <!-- ════════════════════════════════════════════════════════════
+         DIAMOND-HEX LIQUID GLASS NORM — applied to every button on
+         this page: collapse/extend (.btn1–.btn4), action buttons
+         (.glow-on-hover Blazing — Calculate / Clear / ?), and
+         breadcrumb + trash icon buttons (.glow-on-hover_nav Blazing).
+
+         – Hex-outline shimmer on ::before (fine pastel mesh, hover)
+         – CLEAR solid themed border on hover (indigo by default,
+           crimson for active toggle pairs)
+         – Frosted backdrop-filter, multi-layer white surface
+         – Rotating conic-gradient rainbow rim at rest
+         ════════════════════════════════════════════════════════════ -->
+    <style>
+        @property --rcn-edge-angle {
+            syntax: '<angle>'; initial-value: 0deg; inherits: false;
+        }
+        @property --rcn-glint-pos {
+            syntax: '<percentage>'; initial-value: -25%; inherits: false;
+        }
+        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
+        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
+        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes tt-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+        @keyframes tt-active-shimmer {
+            0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
+            50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
+        }
+
+        /* ── Collapse/extend wrappers (.btn1–.btn4) — work.html style ── */
+        body .btn1, body .btn2, body .btn3, body .btn4 {
+            display: inline-block !important;
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            border-radius: 12px !important;
+            padding: 6px !important;            /* whitish glass halo around icon */
+            margin: 1px !important;
+            line-height: 0 !important;
+            cursor: pointer !important;
+            float: right !important;
+            --hex-size: 8px;
+            --rcn-edge-angle: 0deg;
+            --rcn-glint-pos: -25%;
+            /* MULTI-LAYER liquid-glass background (mirrors work.html) */
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.85) 0%,
+                    rgba(255,255,255,0.30) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                radial-gradient(ellipse 90% 65% at 50% 120%,
+                    rgba(15,20,40,0.08) 0%,
+                    rgba(15,20,40,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.88) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.50), rgba(255,209,168,0.50),
+                    rgba(255,240,168,0.50), rgba(196,242,197,0.50),
+                    rgba(184,217,255,0.50), rgba(212,193,255,0.50),
+                    rgba(255,193,229,0.50), rgba(255,179,198,0.50)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(8px) saturate(130%) !important;
+            -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                inset 0 -1px 0 rgba(20,15,30,0.05),
+                0 0 0 1.5px rgba(15,20,40,0.55),   /* visible border ring at rest */
+                0 0 10px rgba(220,225,235,0.30),
+                0 2px 6px rgba(15,20,40,0.12) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease !important;
+            animation:
+                tt-rcn-edge-spin 4.5s linear infinite,
+                tt-rcn-glint     6.0s linear infinite !important;
+        }
+        body .btn1::before, body .btn2::before,
+        body .btn3::before, body .btn4::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            z-index: -1 !important;
+            pointer-events: none !important;
+            border-radius: inherit !important;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+        }
+        body .btn1:hover::before, body .btn2:hover::before,
+        body .btn3:hover::before, body .btn4:hover::before {
+            opacity: 0.55 !important;
+            animation:
+                tt-hex-sweep      2.4s linear infinite,
+                tt-hex-hue-cycle  3.6s linear infinite !important;
+            filter: saturate(0.85) brightness(1.05);
+        }
+        /* Inactive hover — solid indigo border replaces rotating rim */
+        body .btn1:hover, body .btn2:hover, body .btn3:hover, body .btn4:hover {
+            transform: translateY(-1px) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(99, 102, 241, 0.85),
+                    rgba(99, 102, 241, 0.85)) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 1px 3px rgba(15,20,40,0.10) !important;
+        }
+        /* Keep the inner img clean — strip the inline border/background
+           that the markup adds (border: 1px solid black; background:
+           lightcoral on the extend btn) so the wrapper is the sole
+           visual surface. */
+        body .btn1 > #mymapshowButton,
+        body .btn2 > #mymaphideButton,
+        body .btn1 > img, body .btn2 > img,
+        body .btn3 > img, body .btn4 > img {
+            display: block !important;
+            position: relative !important;
+            z-index: 2 !important;
+            width: 45px !important;
+            height: 45px !important;
+            border: none !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            float: none !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
+        }
+        body .btn1 > #mymapshowButton:hover,
+        body .btn2 > #mymaphideButton:hover {
+            transform: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        /* ── ACTIVE state (matches work.html) ─────────────────────────
+           If JS toggles `.active` on the inner img, the wrapper picks
+           up a crimson multi-layer surface + rotating red conic rim,
+           and the icon flips to white via brightness(0) invert(1). */
+        body .btn1:has(> img.active),
+        body .btn2:has(> img.active),
+        body .btn3:has(> img.active),
+        body .btn4:has(> img.active) {
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.20) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.40) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.95) 0%,
+                    rgba(185, 28, 28,0.94) 50%,
+                    rgba(239, 68, 68,0.93) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    #ef4444, #dc2626, #b91c1c, #f87171,
+                    #c0202a, #ff6b7a, #991b1b, #ef4444
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                inset 0 -1px 0 rgba(80,8,15,0.18),
+                0 0 14px rgba(255,80,100,0.55),
+                0 2px 8px rgba(80,8,15,0.25) !important;
+        }
+        body .btn1 > img.active, body .btn2 > img.active,
+        body .btn3 > img.active, body .btn4 > img.active {
+            filter: brightness(0) invert(1) !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+        body .btn1:has(> img.active)::before,
+        body .btn2:has(> img.active)::before,
+        body .btn3:has(> img.active)::before,
+        body .btn4:has(> img.active)::before {
+            background: linear-gradient(90deg,
+                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
+                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%) !important;
+            background-size: 300% 100% !important;
+        }
+        body .btn1:has(> img.active):hover,
+        body .btn2:has(> img.active):hover,
+        body .btn3:has(> img.active):hover,
+        body .btn4:has(> img.active):hover {
+            background:
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.97) 0%,
+                    rgba(185, 28, 28,0.96) 50%,
+                    rgba(239, 68, 68,0.95) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(185, 28, 28, 1.00),
+                    rgba(185, 28, 28, 1.00)) border-box !important;
+            border: 1.5px solid transparent !important;
+            transform: translateY(-1px) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.55),
+                0 1px 3px rgba(80,8,15,0.18) !important;
+        }
+        body .btn1:has(> img.active):hover::before,
+        body .btn2:has(> img.active):hover::before,
+        body .btn3:has(> img.active):hover::before,
+        body .btn4:has(> img.active):hover::before {
+            opacity: 1 !important;
+            background: linear-gradient(90deg,
+                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
+                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            mix-blend-mode: normal !important;
+            animation:
+                tt-hex-sweep      1.6s linear infinite,
+                tt-active-shimmer 1.4s ease-in-out infinite !important;
+        }
+        body .btn1::before, body .btn2::before,
+        body .btn3::before, body .btn4::before {
+            border-radius: 10px !important;
+        }
+
+        /* glowing.css's .glow-on-hover::after paints a #111 (black)
+           layer over the entire button at z-index: -1 — that's why
+           Calculate / Clear / ? show as black rectangles. Kill that
+           layer entirely so my white liquid-glass surface shows. */
+        body button.glow-on-hover.Blazing::after {
+            content: none !important;
+            display: none !important;
+            background: transparent !important;
+        }
+        /* Same .glow-on-hover::before exists as a rainbow blur halo.
+           Disable it too so our hex-mesh ::before can take over. */
+        body button.glow-on-hover.Blazing::before {
+            background: linear-gradient(90deg,
+                #ffb3c6, #ffd1a8, #fff0a8, #c4f2c5,
+                #b8d9ff, #d4c1ff, #ffc1e5, #ffb3c6) !important;
+            filter: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+        /* Same dark-overlay treatment from .glow-on-hover_nav (used
+           by the breadcrumb + trash icon buttons) gets suppressed. */
+        body button.glow-on-hover_nav.Blazing::after {
+            content: none !important;
+            display: none !important;
+            background: transparent !important;
+        }
+        body button.glow-on-hover_nav.Blazing::before {
+            background: transparent !important;
+            filter: none !important;
+        }
+
+        /* ── Action buttons (Calculate / Clear / ? — .glow-on-hover Blazing)
+              Mirrors the .glow-on-hover_nav.Blazing breadcrumb buttons
+              ("Software", "Real Estate Analyzer") so the whole top
+              cluster reads as one button family. */
+        body button.glow-on-hover.Blazing {
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            width: auto !important;
+            height: auto !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            cursor: pointer !important;
+            color: #334155 !important;
+            font-weight: 600;
+            --rcn-edge-angle: 0deg;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.90) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.50), rgba(255,209,168,0.50),
+                    rgba(255,240,168,0.50), rgba(196,242,197,0.50),
+                    rgba(184,217,255,0.50), rgba(212,193,255,0.50),
+                    rgba(255,193,229,0.50), rgba(255,179,198,0.50)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            outline: none !important;
+            backdrop-filter: blur(6px) saturate(130%);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.85),
+                0 1px 3px rgba(15,20,40,0.08) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease,
+                        background 0.22s ease !important;
+            animation: tt-rcn-edge-spin 4.5s linear infinite !important;
+        }
+        /* Suppress hex-mesh ::before so action buttons match the
+           plain-rim look of the .glow-on-hover_nav.Blazing breadcrumb
+           buttons ("Software", "Real Estate Analyzer"). */
+        body button.glow-on-hover.Blazing::before {
+            content: none !important;
+            display: none !important;
+            background: transparent !important;
+            -webkit-mask-image: none !important;
+                    mask-image: none !important;
+            animation: none !important;
+            opacity: 0 !important;
+        }
+        body button.glow-on-hover.Blazing > * {
+            position: relative;
+            z-index: 2;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+        }
+        body button.glow-on-hover.Blazing:hover::before {
+            content: none !important;
+            display: none !important;
+            opacity: 0 !important;
+            animation: none !important;
+        }
+        body button.glow-on-hover.Blazing:hover {
+            transform: translateY(-1px) !important;
+            color: rgba(99, 102, 241, 1.00) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(99, 102, 241, 0.85),
+                    rgba(99, 102, 241, 0.85)) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 1px 3px rgba(15,20,40,0.12) !important;
+        }
+        /* Active press — deeper crimson accent */
+        body button.glow-on-hover.Blazing:active {
+            transform: translateY(0) scale(0.98) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.97) 0%,
+                    rgba(185, 28, 28,0.96) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(185, 28, 28, 1.00),
+                    rgba(185, 28, 28, 1.00)) border-box !important;
+            color: #ffffff !important;
+        }
+
+        /* ── Breadcrumb + trash icon buttons (.glow-on-hover_nav Blazing) ── */
+        body button.glow-on-hover_nav.Blazing {
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            padding: 6px 12px !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            color: #334155 !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.90) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.50), rgba(255,209,168,0.50),
+                    rgba(255,240,168,0.50), rgba(196,242,197,0.50),
+                    rgba(184,217,255,0.50), rgba(212,193,255,0.50),
+                    rgba(255,193,229,0.50), rgba(255,179,198,0.50)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(6px) saturate(130%);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.85),
+                0 1px 3px rgba(15,20,40,0.08) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease !important;
+            animation: tt-rcn-edge-spin 4.5s linear infinite !important;
+            --rcn-edge-angle: 0deg;
+        }
+        body button.glow-on-hover_nav.Blazing:hover {
+            transform: translateY(-1px) !important;
+            color: rgba(99, 102, 241, 1.00) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(99, 102, 241, 0.85),
+                    rgba(99, 102, 241, 0.85)) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 1px 3px rgba(15,20,40,0.12) !important;
+        }
+        body button.glow-on-hover_nav.Blazing:active {
+            transform: translateY(0) scale(0.97) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.97) 0%,
+                    rgba(185, 28, 28,0.96) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(185, 28, 28, 1.00),
+                    rgba(185, 28, 28, 1.00)) border-box !important;
+            color: #ffffff !important;
+        }
+        body button.glow-on-hover_nav.Blazing img {
+            filter: brightness(0.7) contrast(1.3);
+        }
+    </style>
+
 </head>
 <body class="w3-white">
 
@@ -58,11 +487,11 @@
             <div class="" style="">
                 <bdi style="float: left;">
                     <a href="https://www.masrikdahir.com/software"><button class="glow-on-hover_nav Blazing" type="button" >
-                        <h6 style="margin: 0px; padding: 0px;">Software</h6>
+                        <div style="margin: 0px; padding: 0px;">Software</div>
                     </button></a>
                 </bdi>
 
-                <bdi style="float: left;">
+                <bdi style="float: left; margin-top: 7px;">
                     <img src="https://d3dw5jtb3w1kgy.cloudfront.net/arr.png" style="width: 20px;margin: 0px; padding: 0px; margin-top: 2px;">
                 </bdi>
 
@@ -82,11 +511,11 @@
                 <b>
                     <a class="btn1">
                         <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/up.jpg" ;/>
+                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/collapse.png" ;/>
                     </a>
                     <a class="btn2">
                         <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/down.jpg" ;/>
+                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/extend.png" ;/>
                     </a>
 
                 </b>
@@ -163,21 +592,26 @@
                 </table>
                 <br>
                 <bdi style="float: left;">
-                    <button class="glow-on-hover Blazing" type="button" ><h4>?</h4>
-                        </button>
+                    <button class="glow-on-hover_nav Blazing" type="button" >
+                        <div style="margin: 0px; padding: 0px;">?</div>
+                    </button>
                 </bdi>
                 <bdi style="float: left;">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </bdi>
                 <bdi style="float: left;">
-                    <button class="glow-on-hover Blazing" type="button" onclick="clean_data()"><h4>Clear</h4></button>
+                    <button class="glow-on-hover_nav Blazing" type="button" >
+                        <div style="margin: 0px; padding: 0px;" onclick="clean_data()">Clear</div>
+                    </button>
                 </bdi>
                 <bdi style="float: left;">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 </bdi>
                 <bdi style="float: left;">
                     <a id="calculate">
-                        <button class="glow-on-hover Blazing" type="submit" onclick="operation()"><h4>Calculate</h4></button>
+                        <button class="glow-on-hover_nav Blazing" type="submit" onclick="operation()" >
+                            <div style="margin: 0px; padding: 0px;" onclick="clean_data()">Calculate</div>
+                        </button>
                     </a>
                 </bdi>
 
@@ -185,6 +619,7 @@
             <br><br>
 
             </p1>
+            <br>
         </div>
 
         <div class="w3-container w3-card w3-white w3-margin-bottom">
@@ -193,11 +628,11 @@
                 <b>
                     <a class="btn3">
                         <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/up.jpg" ;/>
+                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/collapse.png" ;/>
                     </a>
                     <a class="btn4">
                         <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/down.jpg" ;/>
+                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/extend.png" ;/>
                     </a>
 
                 </b>
@@ -205,7 +640,7 @@
 
             <p34>
             </p34>
-
+            <br>
         </div>
 
     </div>

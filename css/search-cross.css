@@ -1,0 +1,146 @@
+/**
+ * search-cross.css — shared style for the search-clear "×" on
+ * games.html, map.html, and software.html.
+ *
+ * The element is still a <button> for keyboard accessibility, but
+ * visually it must look like a bare icon: no background, no border,
+ * no border-radius, no padding/margin box, no focus ring, no
+ * liquid-glass effect from polish.css. The icon stays motionless on
+ * hover — only its text colour cycles through the rainbow.
+ */
+
+/* ── Base: complete chrome reset ────────────────────────────────
+   `appearance:none` strips browser-default button paint.
+   `-moz-focus-inner` is Firefox's INNER focus border; only resettable
+   via its own pseudo-element rule. Width/height/min-* are forced to
+   auto so the button is sized purely by its glyph (no implicit
+   button-shaped hit-box). `!important` is required because polish.css
+   targets every <button> with multi-rule specificity. */
+body.polish .search-cross-btn,
+.search-cross-btn {
+    -webkit-appearance: none !important;
+       -moz-appearance: none !important;
+            appearance: none !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 0 0 8px !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    cursor: pointer;
+    color: #000;
+    font-size: 18px;
+    line-height: 1;
+    font-family: inherit;
+    vertical-align: middle;
+    transform: none !important;
+    transition: color 0.2s ease;
+    /* Anchor the cross at its current position so nothing inside the
+       button can push it around on hover. */
+    position: relative;
+    top: 0;
+    left: 0;
+}
+.search-cross-btn::-moz-focus-inner {
+    border: 0 !important;
+    padding: 0 !important;
+}
+.search-cross-btn:focus,
+.search-cross-btn:focus-visible,
+.search-cross-btn:active {
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    transform: none !important;
+}
+
+/* ── Suppress polish.css's ::before / ::after layers entirely ── */
+body.polish .search-cross-btn::before,
+body.polish .search-cross-btn::after,
+.search-cross-btn::before,
+.search-cross-btn::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+    -webkit-mask: none !important;
+            mask: none !important;
+    border: 0 !important;
+}
+
+/* ── Hover: ONLY color animates; the glyph itself stays still ──
+   No transform, no scale, no translate, no width/height change. */
+@keyframes search-cross-rainbow {
+    0%   { color: #ef4444; }   /* red    */
+    14%  { color: #f97316; }   /* orange */
+    28%  { color: #eab308; }   /* yellow */
+    42%  { color: #22c55e; }   /* green  */
+    57%  { color: #06b6d4; }   /* cyan   */
+    71%  { color: #3b82f6; }   /* blue   */
+    85%  { color: #a855f7; }   /* purple */
+    100% { color: #ef4444; }   /* loop   */
+}
+body.polish .search-cross-btn:hover,
+.search-cross-btn:hover {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    margin: 0 0 0 8px !important;        /* identical to rest state */
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: 18px;
+    animation: search-cross-rainbow 3s linear infinite;
+}
+
+/* The Font Awesome <i> inside inherits the button colour and is the
+   only thing visible. icons.css already sizes every `.fa` to 30 px
+   font / 10 px padding / 50 px width / 5 px 2 px margin — but pages
+   that wrap their content in `.sw-page` (software.html) include
+   `software.css` which has a hard reset of `.sw-page .fa { padding:0
+   !important; font-size:inherit !important; ... }`. We force the
+   icons.css defaults back with `!important` so the cross icon
+   renders identically across games, software, and map. */
+/* `.sw-page .fa { ...!important }` from software.css has specificity
+   (0, 2, 0). To beat it without changing load order we use selectors
+   with at least (0, 2, 1): `.search-cross-btn i.fa` and the parallel
+   `.fas` variant. */
+.search-cross-btn i.fa,
+.search-cross-btn i.fas,
+.search-cross-btn i.far,
+.search-cross-btn i.fab,
+.search-cross-btn .cross-glyph {
+    color: inherit;
+    font-style: normal;
+    display: inline-block !important;
+    padding: 10px !important;
+    font-size: 30px !important;
+    width: 50px !important;
+    margin: 5px 2px !important;
+    text-align: center;
+    text-decoration: none !important;
+    background: none !important;
+    line-height: 1;
+    transition: none !important;
+    transform: none !important;
+}
+.search-cross-btn:hover i.fa,
+.search-cross-btn:hover i.fas,
+.search-cross-btn:hover i.far,
+.search-cross-btn:hover i.fab,
+.search-cross-btn:hover .cross-glyph {
+    transform: none !important;
+    padding: 10px !important;
+    font-size: 30px !important;
+    width: 50px !important;
+    margin: 5px 2px !important;
+}

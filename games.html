@@ -23,6 +23,7 @@
     <!--    Site-wide loader + polish + animations -->
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
+    <link rel="stylesheet" href="css/search-cross.css?v=5">
     <link rel="stylesheet" href="css/animations.css">
 
     <script src="js/vendor/code.jquery.com.jquery-1.10.2.js"></script>
@@ -43,6 +44,8 @@
     <script src="js/eagle-loader.js" defer></script>
     <script src="js/animations.js" defer></script>
     <script src="js/page-graphics.js" defer></script>
+    <script src="js/hover-symbols-engine.js?v=2" defer></script>
+    <script src="js/games-symbols.js?v=2" defer></script>
 
     <script src="js/games/space-invaders.js" defer></script>
     <script src="js/games/snake.js" defer></script>
@@ -145,6 +148,160 @@
     <script src="js/games/mr-do.js" defer></script>
 
     <link rel="stylesheet" href="css/games.css">
+    <!-- Liquid-glass override for .game-card — must load AFTER games.css
+         so its border/box-shadow rules win the cascade. -->
+    <link rel="stylesheet" href="css/games-symbols.css?v=4">
+
+    <!-- Same liquid-glass norm used by work.html, software.html,
+         and academia.html. Applied to the .game-card-tag (PLAY /
+         COMING badge on every game card). PLAY = active state
+         (crimson red, white text, red-only hex shimmer on hover).
+         COMING = inactive (whitish glass, pastel hex shimmer). -->
+    <style>
+        @property --rcn-edge-angle {
+            syntax: '<angle>'; initial-value: 0deg; inherits: false;
+        }
+        @property --rcn-glint-pos {
+            syntax: '<percentage>'; initial-value: -25%; inherits: false;
+        }
+        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
+        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
+        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes tt-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+        @keyframes tt-active-shimmer {
+            0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
+            50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
+        }
+
+        /* ── PLAY / COMING badge on each game card ─────────────── */
+        body.polish .game-card-tag {
+            --hex-size: 4px;
+            --rcn-edge-angle: 0deg;
+            --rcn-glint-pos: -25%;
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            padding: 3px 12px !important;
+            border-radius: 6px !important;
+            font-family: "georgia", sans-serif !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.5px !important;
+            color: #ffffff !important;
+            /* ACTIVE (PLAY) — crimson liquid-glass background +
+               rotating crimson conic border. PLAY tags don't have
+               .coming class, so this is the default. */
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.20) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                linear-gradient(135deg,
+                    rgba(220, 38, 38,0.95) 0%,
+                    rgba(185, 28, 28,0.94) 50%,
+                    rgba(239, 68, 68,0.93) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    #ef4444, #dc2626, #b91c1c, #f87171,
+                    #c0202a, #ff6b7a, #991b1b, #ef4444
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.45),
+                inset 0 -1px 0 rgba(80,8,15,0.18),
+                0 0 10px rgba(255,80,100,0.40),
+                0 1px 4px rgba(80,8,15,0.20) !important;
+            animation:
+                tt-rcn-edge-spin 4.5s linear infinite,
+                tt-rcn-glint     6.0s linear infinite !important;
+        }
+        /* Hex mesh layer — red family for the PLAY (active) badge */
+        body.polish .game-card-tag::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            z-index: -1 !important;
+            pointer-events: none !important;
+            border-radius: inherit !important;
+            background: linear-gradient(90deg,
+                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
+                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            transition: opacity 0.30s ease !important;
+        }
+        body.polish .game-card-tag > * { position: relative; z-index: 2; }
+        /* Hover PLAY badge — red family hex shimmer DIALED UP so the
+           badge clearly glistens. Higher opacity, faster sweep, full
+           active-shimmer brightness pulse. Colours still locked to
+           the red family (no full-spectrum hue rotate). */
+        body.polish .game-card:hover .game-card-tag:not(.coming)::before,
+        body.polish .game-card-tag:not(.coming):hover::before {
+            opacity: 1 !important;
+            animation:
+                tt-hex-sweep      1.4s linear infinite,
+                tt-active-shimmer 1.2s ease-in-out infinite !important;
+        }
+        /* Plus a small lift on hover. Outer red halo is dialled
+           down to a soft glow (was 0.75 + 0.40 — now ~0.30 + 0.15)
+           so the badge POPS without flooding the card with red. */
+        body.polish .game-card:hover .game-card-tag:not(.coming),
+        body.polish .game-card-tag:not(.coming):hover {
+            transform: translateY(-1px) scale(1.05);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.55),
+                inset 0 -1px 0 rgba(80,8,15,0.18),
+                0 0 8px rgba(255,80,100,0.30),
+                0 2px 6px rgba(80,8,15,0.15) !important;
+        }
+
+        /* ── COMING badge — inactive whitish liquid glass ─────── */
+        body.polish .game-card-tag.coming {
+            color: #475569 !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.88) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.50),
+                    rgba(255,209,168,0.50),
+                    rgba(255,240,168,0.50),
+                    rgba(196,242,197,0.50),
+                    rgba(184,217,255,0.50),
+                    rgba(212,193,255,0.50),
+                    rgba(255,193,229,0.50),
+                    rgba(255,179,198,0.50)
+                ) border-box !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                0 0 8px rgba(220,225,235,0.25),
+                0 1px 3px rgba(15,20,40,0.10) !important;
+        }
+        /* COMING base ::before = pastel rainbow (no leave-fade flash) */
+        body.polish .game-card-tag.coming::before {
+            background: linear-gradient(90deg,
+                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+        }
+        body.polish .game-card:hover .game-card-tag.coming::before,
+        body.polish .game-card-tag.coming:hover::before {
+            opacity: 0.30 !important;
+            animation:
+                tt-hex-sweep     3.0s linear infinite,
+                tt-hex-hue-cycle 4.5s linear infinite !important;
+            filter: saturate(0.55) brightness(1.02);
+        }
+    </style>
 </head>
 
 <body class="w3-white polish" data-page-graphics="retro-stars">
@@ -156,13 +313,13 @@
 <div id="gallery-view" class="w3-content" style="max-width: min(1800px, 95%); background-color: white; margin: 0 auto; padding: 1px;">
     <div class="row" style="margin-bottom: 10px; margin-top: 15px">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px;">
+            <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px">
                 <div class="search_bar" style="display: flex; align-items: center; width: 100%;">
                     <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px;margin-right: 8px">
-                    <div style="display: flex; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; width: 100%; margin-right: 8px;">
                         <input id="game-search-input" class="search_searchbar" type="text" title="Search" placeholder="Search" style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;">
-                        <button onclick="document.getElementById('game-search-input').value='';document.getElementById('game-search-input').dispatchEvent(new Event('input'))" style="margin-left: 40px; background: transparent; border: none; cursor: pointer;">
-                            ✖️
+                        <button onclick="document.getElementById('game-search-input').value='';document.getElementById('game-search-input').dispatchEvent(new Event('input'))" class="search-cross-btn" aria-label="Clear search">
+                            <i class="fa fa-times" ></i>
                         </button>
                     </div>
                 </div>

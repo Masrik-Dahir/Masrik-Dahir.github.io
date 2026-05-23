@@ -29,6 +29,7 @@
     <!--    Site-wide loader + polish + animations -->
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
+    <link rel="stylesheet" href="css/milestone-symbols.css?v=4">
     <link rel="stylesheet" href="css/animations.css">
 
     <!--    JS imports-->
@@ -64,7 +65,7 @@
     <script src="js/page-graphics.js" defer></script>
 </head>
 
-<body class="w3-white polish" data-page-graphics="confetti">
+<body class="w3-white polish" data-page-graphics="none">
 <div id="nav-placeholder"></div>
 
 <!-- Page Container -->
@@ -82,28 +83,28 @@
                         <div v-for="item in resultQuery">
                             <div v-if="windowWidth > 1000">
                                 <a style="text-decoration:none" v-bind:href="item.uri" target="_blank">
-                                <button class="button-55" role="button" style="margin: 10px; width: 200px; overflow-wrap: break-word;"> <!-- Fixed width with word break -->
-                                    <center>
-                                        <h3 style="font-size: calc(12px + 0.4vw); word-break: break-word; white-space: normal;">{{item.title}}</h3>
-                                        <div class="w3-container">
-                                                <img v-bind:src="item.img" v-bind:style="item.style" alt="Masrik Dahir"/>
-                                            <p style="font-size: 15px; word-break: break-word; white-space: normal;">{{item.des}}</p>
+                                <button class="button-55 milestone-btn" role="button" style="margin: 10px; width: 220px; height: 280px;">
+                                    <div class="milestone-btn-inner">
+                                        <h3 class="milestone-title" style="font-size: calc(12px + 0.4vw);">{{item.title}}</h3>
+                                        <div class="milestone-img-wrap">
+                                            <img v-bind:src="item.img" v-bind:style="item.style" alt="Masrik Dahir"/>
                                         </div>
-                                    </center>
+                                        <p class="milestone-des" v-if="item.des">{{item.des}}</p>
+                                    </div>
                                 </button>
                                 </a>
                             </div>
                             <div v-else>
                                 <a style="text-decoration:none" v-bind:href="item.uri" target="_blank">
 
-                                <button class="button-55" role="button" style="margin: 10px; width: 150px; overflow-wrap: break-word;"> <!-- Fixed width with word break -->
-                                    <center>
-                                        <h3 style="font-size: calc(12px + 0.4vw); word-break: break-word; white-space: normal;">{{item.title}}</h3>
-                                        <div class="w3-container">
+                                <button class="button-55 milestone-btn" role="button" style="margin: 10px; width: 160px; height: 240px;">
+                                    <div class="milestone-btn-inner">
+                                        <h3 class="milestone-title" style="font-size: calc(12px + 0.4vw);">{{item.title}}</h3>
+                                        <div class="milestone-img-wrap">
                                             <img v-bind:src="item.img" v-bind:style="item.style" alt="Masrik Dahir"/>
-                                            <p style="font-size: 15px; word-break: break-word; white-space: normal;">{{item.des}}</p>
                                         </div>
-                                    </center>
+                                        <p class="milestone-des" v-if="item.des">{{item.des}}</p>
+                                    </div>
                                 </button>
                                 </a>
 

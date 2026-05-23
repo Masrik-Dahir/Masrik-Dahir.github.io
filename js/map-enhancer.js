@@ -221,22 +221,68 @@
         var defs = ensureDefs(svgEl);
         if (defs.querySelector("#" + patternId)) return; // already exists
 
-        var bbox = pathEl.getBBox();
-        var tileW = bbox.width / TILES_ACROSS;
-        var tileH = tileW * 2 / 3; // flag aspect ratio ~3:2
-
         var ns = "http://www.w3.org/2000/svg";
         var pattern = document.createElementNS(ns, "pattern");
         pattern.setAttribute("id", patternId);
-        pattern.setAttribute("patternUnits", "userSpaceOnUse");
-        pattern.setAttribute("width", tileW);
-        pattern.setAttribute("height", tileH);
+
+        /* SIZE CHECK — decide between single-fitted and tiled rendering.
+           Compare the path's largest dimension against the SVG viewBox.
+           A state/country whose bbox spans more than ~30% of the SVG's
+           larger viewBox axis is "too big" — a single fitted flag would
+           render so huge that it looks blurry and stretched. For those
+           cases we switch to a TILED pattern (multiple smaller flag
+           instances) so the visual stays sharp.
+
+           Threshold rationale:
+             • USA map viewBox ~1000×600 → 30% ≈ 300 px. Texas (~250 wide)
+               stays single; Alaska (~400 wide w/ Aleutians) tiles.
+             • Africa map viewBox ~900×900 → 30% ≈ 270 px. Sudan,
+               Algeria, DRC, etc. tile; smaller countries stay single. */
+        var bbox;
+        try { bbox = pathEl.getBBox(); } catch (e) { bbox = null; }
+        var vb = svgEl.viewBox && svgEl.viewBox.baseVal;
+        var svgMaxDim = (vb && vb.width && vb.height)
+                        ? Math.max(vb.width, vb.height)
+                        : 1000;
+        var bboxMaxDim = (bbox && bbox.width && bbox.height)
+                        ? Math.max(bbox.width, bbox.height)
+                        : 0;
+        var isLarge = bboxMaxDim > svgMaxDim * 0.30;
 
         var img = document.createElementNS(ns, "image");
         img.setAttribute("href", imageUrl);
-        img.setAttribute("width", tileW);
-        img.setAttribute("height", tileH);
+        img.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", imageUrl);
         img.setAttribute("preserveAspectRatio", "xMidYMid slice");
+
+        if (isLarge) {
+            /* TILED PATTERN — flag repeats at a smaller tile size so the
+               source image never has to be blown up beyond its natural
+               resolution. Tile dimensions are derived from the SVG's
+               viewBox so the tile is the same physical size regardless
+               of which path uses the pattern. Tile ~12% of the SVG's
+               larger axis with a 3:2 flag aspect ratio. */
+            var tileW = svgMaxDim * 0.12;
+            var tileH = tileW * (2 / 3);
+            pattern.setAttribute("patternUnits", "userSpaceOnUse");
+            pattern.setAttribute("width", tileW);
+            pattern.setAttribute("height", tileH);
+            img.setAttribute("x", "0");
+            img.setAttribute("y", "0");
+            img.setAttribute("width", tileW);
+            img.setAttribute("height", tileH);
+        } else {
+            /* SINGLE-FITTED PATTERN — one flag covers the path's bbox,
+               scaled to fit with aspect preserved (excess cropped). */
+            pattern.setAttribute("patternUnits", "objectBoundingBox");
+            pattern.setAttribute("width", "1");
+            pattern.setAttribute("height", "1");
+            pattern.setAttribute("viewBox", "0 0 100 100");
+            pattern.setAttribute("preserveAspectRatio", "xMidYMid slice");
+            img.setAttribute("x", "0");
+            img.setAttribute("y", "0");
+            img.setAttribute("width", "100");
+            img.setAttribute("height", "100");
+        }
 
         pattern.appendChild(img);
         defs.appendChild(pattern);

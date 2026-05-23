@@ -1,0 +1,38 @@
+/**
+ * milestone-symbols.css — keeps the polish.css hex-pattern glistening on
+ * milestone buttons running forever while hovered.
+ *
+ * polish.css's default `lg-rainbow-pass` animation fades the masked
+ * rainbow layer to opacity 0 after ~2 seconds (`100% { opacity: 0; }`),
+ * even while the cursor is still hovering. For milestone buttons we
+ * want the colourful glistening to persist as long as the cursor stays
+ * over the button — so we swap that animation for a continuous loop
+ * that only slides `background-position` and never fades.
+ *
+ * The hex mask itself (and the rotating rainbow border ring on
+ * `::after`) come straight from polish.css — only the keyframes change.
+ */
+
+/* Two layered loops, matching the map-page glistening cycle:
+     • background-position slides 0 % ↔ 100 % → the pastel gradient
+       sweeps across, then back, never going off-screen.
+     • hue-rotate cycles 0° → 360° → every visible hex cycles through
+       the full rainbow (pink → peach → gold → lime → mint → sky →
+       lilac → pink) continuously.
+   opacity stays pinned at 1 so the hex mask never fades while hovered.
+   `animation-direction: alternate` is critical — with polish.css's
+   `background-repeat: no-repeat` and `background-size: 280% 100%`, a
+   one-shot 0 → 200 % slide walks the gradient completely off-screen
+   past ~155 %, leaving the bare white card visible (the "hex turning
+   white from right to left" the user reported). Sliding 0 → 100 %
+   keeps the gradient on-screen the whole time, and `alternate` makes
+   the return trip a smooth visual reverse instead of a hard snap. */
+@keyframes milestone-glisten-loop {
+    0%   { background-position:   0% 50%; filter: hue-rotate(0deg);   opacity: 1; }
+    100% { background-position: 100% 50%; filter: hue-rotate(360deg); opacity: 1; }
+}
+
+body.polish #app_milestone .milestone-btn:hover::before {
+    animation: milestone-glisten-loop 5s linear infinite alternate !important;
+    opacity: 1 !important;
+}
