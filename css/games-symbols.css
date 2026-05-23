@@ -66,7 +66,11 @@ body.polish .game-card:hover {
     --lg-counter-mid: 0.06;
     --lg-halo-out:    0.28;
     --lg-halo-back:   0.10;
-    border-color: transparent;
+    /* CLEAR themed border on hover — 1.5 px solid line in the card's
+       category colour (per-card token via --c-r/g/b). Makes the
+       hovered card visibly stand out from the grid with a crisp
+       outline rather than a colourless edge. */
+    border: 1.5px solid rgba(var(--c-r), var(--c-g), var(--c-b), 0.85) !important;
     box-shadow:
         -4px -4px 22px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
          4px  4px 18px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),

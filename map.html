@@ -163,120 +163,136 @@
            these buttons so its <mask-image: var(--lg-hex-mask)> is
            overridden by the software-card pseudo-element rendering. */
 
-        body.polish .pop-up-button,
-        body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.pop-up-button):not(.search-cross-btn) {
+        /* ── DIAMOND HEXAGON LIQUID GLASS norm — applied to every
+              country/state selector button on map.html. Replaces the
+              prior software-card corner-glow style. Same model used
+              by work.html, software.html, academia.html, games.html:
+              hex outline mesh + rotating conic-rainbow border +
+              sweeping glint. Per-button colour theme still cycles
+              through 6 hues via nth-child below — that colour drives
+              the halo + active variant. */
+        @property --rcn-edge-angle {
+            syntax: '<angle>'; initial-value: 0deg; inherits: false;
+        }
+        @property --rcn-glint-pos {
+            syntax: '<percentage>'; initial-value: -25%; inherits: false;
+        }
+        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
+        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
+        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes tt-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+
+        body.polish .pop-up-button {
             --c-r:  99; --c-g: 102; --c-b: 241;
-            --c-r2:129; --c-g2:140; --c-b2:248;
-            --lg-lit:         0.45;
-            --lg-mid:         0.17;
-            --lg-counter:     0.12;
-            --lg-counter-mid: 0.05;
-            --lg-edge-w-rim:  0.82;
-            --lg-edge-w-soft: 0.32;
-            --lg-halo-out:    0.22;
-            --lg-halo-back:   0.08;
-            position: relative;
-            overflow: hidden;
-            isolation: isolate;
-            background-color: #ffffff !important;
-            border: 1.5px solid rgba(var(--c-r), var(--c-g), var(--c-b), 0.45) !important;
+            --hex-size: 6px;
+            --rcn-edge-angle: 0deg;
+            --rcn-glint-pos: -25%;
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
             border-radius: 12px !important;
-            box-shadow:
-                -3px -3px 16px -4px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-out)),
-                 3px  3px 14px -6px rgba(var(--c-r), var(--c-g), var(--c-b), var(--lg-halo-back)),
-                 0    1px  3px       rgba(15,23,42,0.06);
-            transition: transform 0.35s cubic-bezier(.34,1.56,.64,1),
-                        box-shadow 0.40s cubic-bezier(.22,1,.36,1),
-                        border-color 0.35s ease;
-        }
-
-        /* Inner corner glow — blurred, soft-light blended L-shape at
-           top-left. Overrides polish.css's hex-mask layer. */
-        body.polish .pop-up-button::before,
-        body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.pop-up-button):not(.search-cross-btn)::before {
-            content: '' !important;
-            display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            inset: auto !important;
-            width: 70% !important;
-            height: 70% !important;
-            pointer-events: none !important;
-            filter: blur(10px) !important;
-            opacity: 0.95 !important;
-            z-index: 0 !important;
-            mix-blend-mode: soft-light !important;
-            -webkit-mask-image: none !important;
-                    mask-image: none !important;
             background:
-                radial-gradient(ellipse 90% 32% at 0% 0%,
-                    rgba(var(--c-r),  var(--c-g),  var(--c-b),  var(--lg-lit)) 0%,
-                    rgba(var(--c-r2), var(--c-g2), var(--c-b2), var(--lg-mid)) 45%,
-                    rgba(var(--c-r2), var(--c-g2), var(--c-b2), 0.00) 78%),
-                radial-gradient(ellipse 32% 90% at 0% 0%,
-                    rgba(var(--c-r),  var(--c-g),  var(--c-b),  var(--lg-lit)) 0%,
-                    rgba(var(--c-r2), var(--c-g2), var(--c-b2), var(--lg-mid)) 45%,
-                    rgba(var(--c-r2), var(--c-g2), var(--c-b2), 0.00) 78%) !important;
-            animation: none !important;
-            transition: width 0.4s cubic-bezier(.22,1,.36,1),
-                        height 0.4s cubic-bezier(.22,1,.36,1),
-                        filter 0.4s ease !important;
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.90) 100%) padding-box,
+                conic-gradient(from var(--rcn-edge-angle),
+                    rgba(255,179,198,0.55),
+                    rgba(255,209,168,0.55),
+                    rgba(255,240,168,0.55),
+                    rgba(196,242,197,0.55),
+                    rgba(184,217,255,0.55),
+                    rgba(212,193,255,0.55),
+                    rgba(255,193,229,0.55),
+                    rgba(255,179,198,0.55)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(6px) saturate(120%) !important;
+            -webkit-backdrop-filter: blur(6px) saturate(120%) !important;
+            /* DRASTICALLY reduced shadow — just a 1-pixel inner top
+               highlight + a hairline 1-pixel elevation. No outer
+               coloured halo at rest. */
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.85),
+                0 1px 2px rgba(15,20,40,0.08) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease !important;
+            animation:
+                tt-rcn-edge-spin 4.5s linear infinite,
+                tt-rcn-glint     6.0s linear infinite !important;
         }
 
-        /* Perimeter rim + bottom-right counter reflection */
-        body.polish .pop-up-button::after,
-        body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.pop-up-button):not(.search-cross-btn)::after {
+        /* Hex mesh on ::before — hidden at rest, fades + animates on hover. */
+        body.polish .pop-up-button::before {
             content: '' !important;
-            display: block !important;
             position: absolute !important;
             inset: 0 !important;
+            z-index: -1 !important;
             pointer-events: none !important;
             border-radius: inherit !important;
-            z-index: 2 !important;
-            opacity: 1 !important;
-            -webkit-mask-image: none !important;
-                    mask-image: none !important;
-            background: radial-gradient(ellipse 42% 42% at 100% 100%,
-                rgba(var(--c-r),  var(--c-g),  var(--c-b),  var(--lg-counter))    0%,
-                rgba(var(--c-r2), var(--c-g2), var(--c-b2), var(--lg-counter-mid)) 40%,
-                transparent 78%) !important;
-            box-shadow:
-                inset  0   1px  0     rgba(255,255,255,var(--lg-edge-w-rim)),
-                inset  1px 0    0     rgba(255,255,255,calc(var(--lg-edge-w-rim) - 0.15)),
-                inset  0  -1px  0     rgba(255,255,255,var(--lg-edge-w-soft)),
-                inset -1px 0    0     rgba(255,255,255,var(--lg-edge-w-soft)),
-                inset  0   0    0 1px rgba(var(--c-r), var(--c-g), var(--c-b), 0.10),
-                inset  0   2px  6px   rgba(255,255,255,0.24),
-                inset  0  -6px 14px   rgba(var(--c-r), var(--c-g), var(--c-b), calc(var(--lg-counter) * 0.55)) !important;
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            top: 0 !important;
+            left: 0 !important;
+            filter: none !important;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
             animation: none !important;
-            transition: background 0.4s ease, box-shadow 0.4s ease !important;
+            transition: opacity 0.30s ease !important;
+        }
+        /* Suppress the old ::after rim/counter-glow layer */
+        body.polish .pop-up-button::after {
+            content: none !important;
+            display: none !important;
         }
 
-        /* Keep the button's img / text content above the glow layers */
-        body.polish .pop-up-button > *,
-        body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.pop-up-button):not(.search-cross-btn) > * {
+        /* Keep the button's img / text content above the hex layer */
+        body.polish .pop-up-button > * {
             position: relative;
             z-index: 3;
         }
 
-        /* Hover — corner glow expands, border saturates, lift */
-        body.polish .pop-up-button:hover,
-        body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.pop-up-button):not(.search-cross-btn):hover {
-            --lg-lit:         0.60;
-            --lg-mid:         0.24;
-            --lg-counter:     0.18;
-            --lg-counter-mid: 0.07;
-            --lg-halo-out:    0.40;
-            --lg-halo-back:   0.14;
-            border-color: rgba(var(--c-r), var(--c-g), var(--c-b), 0.85) !important;
-            transform: translateY(-2px) !important;
+        /* Hover hex shimmer — subtle pastel hex outlines cycling.
+           Same as before but the WRAPPER's border becomes clearly
+           visible (themed solid colour) and shadow is killed. */
+        body.polish .pop-up-button:hover::before {
+            opacity: 0.30 !important;
+            animation:
+                tt-hex-sweep      3.0s linear infinite,
+                tt-hex-hue-cycle  4.5s linear infinite !important;
+            filter: saturate(0.55) brightness(1.02);
         }
-        body.polish .pop-up-button:hover::before,
-        body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.pop-up-button):not(.search-cross-btn):hover::before {
-            width: 84% !important;
-            height: 84% !important;
-            filter: blur(13px) !important;
+        /* On hover the conic-gradient border is REPLACED with a flat
+           themed solid border so the edge reads as a clear line.
+           Shadow is also stripped down to just the inner highlight
+           and a 1-px elevation — no glowing halo. */
+        body.polish .pop-up-button:hover {
+            transform: translateY(-1px) !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 0.85),
+                    rgba(var(--c-r), var(--c-g), var(--c-b), 0.85)
+                ) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                0 1px 2px rgba(15,20,40,0.10) !important;
         }
 
         /* Per-button colour rotation — cycles through six travel-
@@ -328,7 +344,7 @@
                     <div style="display: flex; margin-left: 10px; white-space: nowrap; justify-content: space-between;">
                         <div v-if="resources.length" v-cloak class="table" style="display: flex;">
                             <div v-for="(item, index) in resultQuery" :key="index" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
-                                <div data-toggle="" data-html="true" :title="item.title" style="margin: auto">
+                                <div data-toggle="tooltip" data-html="true" :title="item.title" style="margin: auto">
                                     <center>
                                         <button @click="scrollToSection(item.id, item.url)" class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
                                             <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
@@ -338,7 +354,7 @@
                                 </div>
                             </div>
                             <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
-                                <div data-toggle="" data-html="true" title="+190" style="margin: auto">
+                                <div data-toggle="tooltip" data-html="true" title="+190" style="margin: auto">
                                     <center>
                                         <button class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
                                             <img src="https://d3dw5jtb3w1kgy.cloudfront.net/three-dots.png" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
@@ -4696,5 +4712,82 @@
         mymapshowButton.style.background = "lightgrey";
         mymaphideButton.style.background = "white";
     });
+</script>
+
+<!-- ─── Fix Bootstrap tooltip arrows to render as triangles ───
+     `.tooltip-arrow` is a 0×0 element whose visible "arrow" is
+     formed by one CSS border edge colored while the other three
+     edges stay transparent. Some site-wide rule is setting
+     `currentColor` on these edges (probably inheriting black),
+     which paints ALL four edges → the arrow renders as a small
+     solid rectangle. Forcing the three "wrong-side" edges to
+     transparent restores the triangular shape. The per-placement
+     rules in d.css (lines 4188+) explicitly color the correct
+     edge for each placement (top/bottom/left/right). -->
+<style>
+    .tooltip-arrow {
+        border-color: transparent !important;
+    }
+    .tooltip.top .tooltip-arrow,
+    .tooltip.top-left .tooltip-arrow,
+    .tooltip.top-right .tooltip-arrow {
+        border-top-color: #000 !important;
+    }
+    .tooltip.bottom .tooltip-arrow,
+    .tooltip.bottom-left .tooltip-arrow,
+    .tooltip.bottom-right .tooltip-arrow {
+        border-bottom-color: #000 !important;
+    }
+    .tooltip.left .tooltip-arrow {
+        border-left-color: #000 !important;
+    }
+    .tooltip.right .tooltip-arrow {
+        border-right-color: #000 !important;
+    }
+</style>
+
+<!-- ──────────────────────────────────────────────────────────────
+     Re-initialize Bootstrap tooltips after Vue mounts the
+     `.pop-up-button` elements. js/random.js calls
+     `$('[data-toggle="tooltip"]').tooltip()` once at document.ready,
+     but Vue's v-for templates haven't rendered yet at that point —
+     so the country selectors under the search bar AND the region
+     selectors under each map SVG don't receive their tooltips.
+
+     This block re-runs the initialization at intervals up to 4 s
+     post-load, and again on every DOM mutation, so EVERY popup
+     button (no matter when Vue inserts it) gets the same Bootstrap
+     tooltip behaviour. Both sets — search-bar and under-SVG — end
+     up with identical hoverable native tooltips.
+
+     `.tooltip()` is idempotent in Bootstrap 3 — calling it on an
+     already-initialized element no-ops. -->
+<script>
+(function(){
+    function initTooltips(){
+        if (typeof jQuery === 'undefined') return;
+        try {
+            jQuery('[data-toggle="tooltip"]').tooltip({
+                container: 'body',
+                trigger: 'hover focus'
+            });
+        } catch (e) { /* tooltip already initialized — ignore */ }
+    }
+    if (document.readyState === 'complete') initTooltips();
+    else window.addEventListener('load', initTooltips);
+    /* Catch Vue mount waves */
+    setTimeout(initTooltips, 400);
+    setTimeout(initTooltips, 1200);
+    setTimeout(initTooltips, 2500);
+    setTimeout(initTooltips, 4000);
+    /* Catch any future v-for re-renders */
+    if (typeof MutationObserver !== 'undefined'){
+        var debounce = null;
+        new MutationObserver(function(){
+            clearTimeout(debounce);
+            debounce = setTimeout(initTooltips, 150);
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+})();
 </script>
 </html>

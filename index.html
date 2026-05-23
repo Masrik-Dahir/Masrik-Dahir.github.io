@@ -1353,6 +1353,38 @@
                     <div class="tt-hint">Brings fire trucks, helicopters, tow trucks &amp; cranes • Auto-runs after attack/defence • Runs until every fire is out and every building is rebuilt</div>
                 </div>
             </div>
+
+            <!-- PARADE — kicks off a fully-detailed military parade:
+                 fighter jets, attack helicopters in the sky; tanks and
+                 missile carriers driving down the road. -->
+            <div id="paradeBtn" class="parade-btn icon-only">
+                <button class="prd-core" onclick="
+                    if(window.toggleParade){
+                        var on = window.toggleParade();
+                        var wrap = document.getElementById('paradeBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-flag prd-icon" id="prdIcon" aria-hidden="true"></i>
+                </button>
+                <span class="prd-pulse"></span>
+                <div class="widget-tooltip tt-parade" role="tooltip">
+                    <div class="tt-title tt-title-parade">Military Parade</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Status</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdStatus">IDLE</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Air units</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdAir">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Ground units</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdGround">—</span>
+                    </div>
+                    <div class="tt-hint">Fighter jets &amp; attack helicopters fly overhead • Tanks &amp; missile carriers roll down the road • Click again to dismiss the parade</div>
+                </div>
+            </div>
         </div>
 
         <style>
@@ -1382,6 +1414,7 @@
             .city-switcher-wrap > .strategy-btn,
             .city-switcher-wrap > .defence-btn,
             .city-switcher-wrap > .reconstruct-btn,
+            .city-switcher-wrap > .parade-btn,
             .city-switcher-wrap > .flight-wrap {
                 height: 44px;
                 box-sizing: border-box;
@@ -2228,6 +2261,146 @@
                 border-radius: 6px;
                 outline: none;
             }
+            /* ── PARADE widget (mirrors reconstruct, OLIVE / military theme) ── */
+            .parade-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(180,200,140,0.06) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            .parade-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .parade-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                /* Same multi-color rainbow halo as the other widget
+                   buttons (reconstruct / defence / attack / city
+                   switcher) so the parade button reads as part of
+                   the same family on hover. */
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .parade-btn:hover {
+                /* Same hover surface as reconstruct-btn — neutral white
+                   warm wash, identical shadow stack, identical lift —
+                   so the parade widget feels like a sibling button. */
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(255,210,150,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px  rgba(0,0,0,0.08);
+                transform: translateY(-1px);
+            }
+            .parade-btn:hover::after { opacity: 1; }
+            .parade-btn:active { transform: translateY(0) scale(0.97); }
+            .parade-btn .prd-core {
+                width: 100%;
+                height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                background-image: none !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                position: relative;
+                z-index: 1;
+            }
+            .parade-btn .prd-core::before,
+            .parade-btn .prd-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                -webkit-mask-image: none !important;
+                        mask-image: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .parade-btn .prd-core:hover {
+                background: rgba(255,255,255,0.10) !important;
+            }
+            .parade-btn .prd-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            .parade-btn .prd-core:hover .prd-icon { transform: rotate(-10deg); }
+            .parade-btn.active .prd-icon {
+                color: #556b2f;
+                text-shadow: 0 0 8px rgba(85,107,47,0.65);
+                animation: prd-wave 1.4s ease-in-out infinite;
+            }
+            @keyframes prd-wave {
+                0%, 100% { transform: rotate(-8deg); }
+                50%      { transform: rotate(8deg); }
+            }
+            .parade-btn .prd-pulse { display: none; }
+            .parade-btn.active .prd-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(85,107,47,0.55);
+                animation: prd-pulse 1.6s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes prd-pulse {
+                0%   { transform: scale(0.94); opacity: 0.80; }
+                100% { transform: scale(1.35); opacity: 0; }
+            }
+            /* tooltip olive title accent */
+            .widget-tooltip .tt-title-parade { color: #556b2f; }
+            .widget-tooltip .tt-prd-status   { color: #556b2f; }
+            .tt-parade { width: 240px; }
+
             .tt-slider-rcn::-webkit-slider-thumb {
                 -webkit-appearance: none;
                 appearance: none;
@@ -2259,65 +2432,198 @@
             .tt-rcn-instant {
                 display: inline-block;
                 width: 100%;
-                padding: 6px 10px;
-                /* DOUBLE-LAYER background trick:
-                   padding-box layer  →  the white liquid-glass surface
-                                          shown INSIDE the border ring
-                   border-box layer   →  conic-rainbow that lives in the
-                                          2-px transparent border itself
-                   When `--rcn-edge-angle` animates, the conic gradient
-                   rotates → border colors flow continuously around the
-                   button perimeter. */
+                padding: 7px 10px;
+                /* MULTI-LAYER liquid-glass background:
+                   – Top dome sheen — bright arc near upper edge that
+                     suggests light catching the curve of glass
+                   – Upper-left corner glow — secondary light source
+                     for asymmetric realism
+                   – Bottom depth shadow — soft dark band at lower
+                     edge giving the glass volumetric weight
+                   – Base surface gradient — the diffuse white body
+                   – Border-box conic — the rotating rainbow rim */
                 --rcn-edge-angle: 0deg;
+                --rcn-glint-pos: 0%;
                 background:
+                    /* moving glint highlight that sweeps across */
+                    linear-gradient(105deg,
+                        rgba(255,255,255,0.00) 0%,
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) - 18%),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) - 5%),
+                        rgba(255,255,255,0.85) var(--rcn-glint-pos),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) + 5%),
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) + 18%),
+                        rgba(255,255,255,0.00) 100%) padding-box,
+                    /* dome sheen at top */
+                    radial-gradient(ellipse 100% 60% at 50% -25%,
+                        rgba(255,255,255,0.85) 0%,
+                        rgba(255,255,255,0.30) 35%,
+                        rgba(255,255,255,0.00) 70%) padding-box,
+                    /* secondary corner glow at top-left */
+                    radial-gradient(ellipse 60% 90% at 0% 0%,
+                        rgba(255,255,255,0.55) 0%,
+                        rgba(255,255,255,0.00) 60%) padding-box,
+                    /* base soft tint */
+                    radial-gradient(ellipse 90% 65% at 50% 120%,
+                        rgba(15,20,40,0.10) 0%,
+                        rgba(15,20,40,0.00) 60%) padding-box,
                     linear-gradient(135deg,
-                        rgba(255,255,255,0.96) 0%,
-                        rgba(255,237,213,0.92) 100%) padding-box,
+                        rgba(255,253,250,0.88) 0%,
+                        rgba(252,242,230,0.84) 100%) padding-box,
+                    /* rotating conic rainbow border */
                     conic-gradient(from var(--rcn-edge-angle),
-                        #ffb3c6,   /* cherry  */
-                        #ffd1a8,   /* peach   */
-                        #fff0a8,   /* lemon   */
-                        #c4f2c5,   /* mint    */
-                        #b8d9ff,   /* sky     */
-                        #d4c1ff,   /* lavender*/
-                        #ffc1e5,   /* rose    */
-                        #ffb3c6    /* loop seam — same as first stop  */
+                        #ffb3c6, #ffd1a8, #fff0a8, #c4f2c5,
+                        #b8d9ff, #d4c1ff, #ffc1e5, #ffb3c6
                     ) border-box;
                 color: #9a3412;
                 border: 2px solid transparent;
-                border-radius: 8px;
+                border-radius: 10px;
                 font-family: 'Arial Black', Arial, sans-serif;
                 font-size: 11px;
                 font-weight: 800;
                 letter-spacing: 0.10em;
                 cursor: pointer;
+                backdrop-filter: blur(8px) saturate(150%);
+                -webkit-backdrop-filter: blur(8px) saturate(150%);
                 box-shadow:
-                    0 1px 0 rgba(255,255,255,0.85) inset,
-                    0 2px 6px rgba(0,0,0,0.18);
-                transition: transform 0.12s ease, box-shadow 0.18s ease,
+                    /* deep bright top rim — the dome of the glass */
+                    inset 0 1.5px 0 rgba(255,255,255,1.00),
+                    /* faint side highlights for crystalline edges */
+                    inset 1px 0 0 rgba(255,255,255,0.55),
+                    inset -1px 0 0 rgba(255,255,255,0.55),
+                    /* inner top-down sheen */
+                    inset 0 2px 6px rgba(255,255,255,0.45),
+                    /* inner bottom shadow that gives glass-bowl depth */
+                    inset 0 -2px 6px rgba(20,15,30,0.10),
+                    /* outer soft halo */
+                    0 0 14px rgba(255,200,220,0.25),
+                    0 2px 8px rgba(15,20,40,0.20),
+                    0 6px 18px rgba(15,20,40,0.10);
+                transition: transform 0.12s ease, box-shadow 0.20s ease,
                             color 0.18s ease;
-                /* Edge rotation runs continuously even at rest so the
-                   border ALWAYS glistens — full sentence visually
-                   confirms the button is interactive. */
-                animation: tt-rcn-edge-spin 4.5s linear infinite;
+                /* Two continuous animations — edge spins forever, the
+                   glint sweeps across the surface forever. */
+                animation:
+                    tt-rcn-edge-spin  4.5s linear infinite,
+                    tt-rcn-glint      6.0s linear infinite;
             }
             .tt-rcn-instant:hover {
                 color: #ea580c;
                 box-shadow:
-                    0 1px 0 rgba(255,255,255,1.00) inset,
-                    0 0 16px rgba(234,88,12,0.50),
-                    0 3px 10px rgba(0,0,0,0.20);
+                    inset 0 1.5px 0 rgba(255,255,255,1.00),
+                    inset 1px 0 0 rgba(255,255,255,0.70),
+                    inset -1px 0 0 rgba(255,255,255,0.70),
+                    inset 0 2px 8px rgba(255,255,255,0.60),
+                    inset 0 -2px 8px rgba(20,15,30,0.12),
+                    0 0 22px rgba(255,180,200,0.55),
+                    0 0 36px rgba(180,200,255,0.30),
+                    0 4px 12px rgba(15,20,40,0.25),
+                    0 8px 22px rgba(15,20,40,0.15);
                 transform: translateY(-1px);
-                /* Hover speeds the rotation noticeably and bumps colour
-                   saturation so the edge POPS while the cursor is here. */
-                animation: tt-rcn-edge-spin 2.4s linear infinite;
-                filter: saturate(1.35) brightness(1.05);
+                /* Hover speeds up BOTH animations and bumps saturation. */
+                animation:
+                    tt-rcn-edge-spin  2.4s linear infinite,
+                    tt-rcn-glint      3.2s linear infinite;
+                filter: saturate(1.30) brightness(1.05);
             }
             .tt-rcn-instant:active { transform: translateY(0) scale(0.97); }
 
             @keyframes tt-rcn-edge-spin {
                 to { --rcn-edge-angle: 360deg; }
             }
+            @property --rcn-glint-pos {
+                syntax: '<percentage>';
+                initial-value: -25%;
+                inherits: false;
+            }
+            @keyframes tt-rcn-glint {
+                0%   { --rcn-glint-pos: -25%; }
+                100% { --rcn-glint-pos: 125%; }
+            }
+
+            /* ═══════════════════════════════════════════════════════════
+               UNIVERSAL LIQUID-GLASS HOVER — applies the full multi-layer
+               glass + rotating conic border + sweeping glint treatment
+               to EVERY button inside ANY widget tooltip:
+                 • flight (city switcher) chips
+                 • weather chips
+                 • attack-control chips + AUTO toggle
+                 • defence-control chips + AUTO toggle
+                 • reconstruction REBUILD NOW button
+                 • strategy plan/exec/clear buttons
+               At rest each button keeps its native look; on hover it
+               transforms into the same liquid-glass style. */
+            /* Skip ACTIVE buttons (selected chips, ON toggles, active
+               strategy buttons) — they keep their per-state colored
+               background so the user can see which chip/toggle is
+               currently active. The liquid-glass treatment applies to
+               inactive buttons only. */
+            body.polish .widget-tooltip .tt-chip:not(.active):hover,
+            body.polish .widget-tooltip .tt-toggle:not(.on):hover,
+            body.polish .widget-tooltip .tt-stg-plan:not(.active):hover,
+            body.polish .widget-tooltip .tt-stg-exec:not(.active):hover,
+            body.polish .widget-tooltip .tt-stg-clear:not(.active):hover {
+                --rcn-edge-angle: 0deg;
+                --rcn-glint-pos: -25%;
+                background:
+                    linear-gradient(105deg,
+                        rgba(255,255,255,0.00) 0%,
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) - 18%),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) - 5%),
+                        rgba(255,255,255,0.85) var(--rcn-glint-pos),
+                        rgba(255,255,255,0.55) calc(var(--rcn-glint-pos) + 5%),
+                        rgba(255,255,255,0.00) calc(var(--rcn-glint-pos) + 18%),
+                        rgba(255,255,255,0.00) 100%) padding-box,
+                    radial-gradient(ellipse 100% 60% at 50% -25%,
+                        rgba(255,255,255,0.85) 0%,
+                        rgba(255,255,255,0.30) 35%,
+                        rgba(255,255,255,0.00) 70%) padding-box,
+                    radial-gradient(ellipse 60% 90% at 0% 0%,
+                        rgba(255,255,255,0.55) 0%,
+                        rgba(255,255,255,0.00) 60%) padding-box,
+                    radial-gradient(ellipse 90% 65% at 50% 120%,
+                        rgba(15,20,40,0.10) 0%,
+                        rgba(15,20,40,0.00) 60%) padding-box,
+                    linear-gradient(135deg,
+                        rgba(255,253,250,0.88) 0%,
+                        rgba(252,242,230,0.84) 100%) padding-box,
+                    conic-gradient(from var(--rcn-edge-angle),
+                        #ffb3c6, #ffd1a8, #fff0a8, #c4f2c5,
+                        #b8d9ff, #d4c1ff, #ffc1e5, #ffb3c6
+                    ) border-box !important;
+                border: 2px solid transparent !important;
+                backdrop-filter: blur(8px) saturate(150%) !important;
+                -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+                box-shadow:
+                    inset 0 1.5px 0 rgba(255,255,255,1.00),
+                    inset 1px 0 0 rgba(255,255,255,0.70),
+                    inset -1px 0 0 rgba(255,255,255,0.70),
+                    inset 0 2px 8px rgba(255,255,255,0.60),
+                    inset 0 -2px 8px rgba(20,15,30,0.12),
+                    0 0 22px rgba(255,180,200,0.55),
+                    0 0 36px rgba(180,200,255,0.30),
+                    0 4px 12px rgba(15,20,40,0.25),
+                    0 8px 22px rgba(15,20,40,0.15) !important;
+                transform: translateY(-1px);
+                animation:
+                    tt-rcn-edge-spin  2.4s linear infinite,
+                    tt-rcn-glint      3.2s linear infinite !important;
+                filter: saturate(1.30) brightness(1.05);
+            }
+
+            /* Smaller buttons (chips, toggles, strategy actions) need a
+               slightly tighter border-radius so the conic ring follows
+               their existing corner curvature. */
+            body.polish .widget-tooltip .tt-chip:hover {
+                border-radius: 8px !important;
+            }
+            body.polish .widget-tooltip .tt-toggle:hover,
+            body.polish .widget-tooltip .tt-stg-plan:hover,
+            body.polish .widget-tooltip .tt-stg-exec:hover,
+            body.polish .widget-tooltip .tt-stg-clear:hover {
+                border-radius: 10px !important;
+            }
+
             /* REBUILD NOW button — hex OUTLINES tiled in soft pastel
                rainbow that visibly cycles through colors on hover.
 
@@ -2409,15 +2715,15 @@
                 overflow: hidden;
                 --hex-size: 10px;
             }
-            /* per-button-type hex sizes — smaller for tiny chips, bigger
-               for the large rebuild button so the visual density is
-               consistent across the row. */
-            .widget-tooltip .tt-chip                 { --hex-size:  8px; }
-            .widget-tooltip .tt-toggle               { --hex-size:  9px; }
-            .widget-tooltip .tt-rcn-instant          { --hex-size: 11px; }
+            /* per-button-type hex sizes — very fine mesh so the hexes
+               read as a shimmering crystalline texture rather than a
+               coarse pattern. Tile width × 1.14 = tile height. */
+            .widget-tooltip .tt-chip                 { --hex-size:  5px; }
+            .widget-tooltip .tt-toggle               { --hex-size:  5px; }
+            .widget-tooltip .tt-rcn-instant          { --hex-size:  5px; }
             .widget-tooltip .tt-stg-plan,
             .widget-tooltip .tt-stg-exec,
-            .widget-tooltip .tt-stg-clear            { --hex-size: 10px; }
+            .widget-tooltip .tt-stg-clear            { --hex-size:  5px; }
 
             /* Keep the button's own children above the hex layer */
             .widget-tooltip .tt-chip > *,
@@ -2455,27 +2761,39 @@
                 content: '' !important;
                 position: absolute !important;
                 inset: 0 !important;
-                z-index: 0 !important;
+                /* z-index: -1 puts the hex mesh BELOW the button text
+                   and BELOW the button background (within the isolated
+                   stacking context). Matches the rebuild-button setup. */
+                z-index: -1 !important;
                 pointer-events: none !important;
                 border-radius: inherit !important;
+                /* Pastel rainbow stripe — same palette as the rebuild
+                   button so every tooltip button looks consistent. */
                 background:
-                    linear-gradient(110deg,
-                        rgba(255,255,255,0.00) 0%,
-                        rgba(255,255,255,0.00) 30%,
-                        rgba(255,255,255,0.55) 47%,
-                        rgba(255,255,255,0.85) 50%,
-                        rgba(255,255,255,0.55) 53%,
-                        rgba(255,255,255,0.00) 70%,
-                        rgba(255,255,255,0.00) 100%) !important;
+                    linear-gradient(90deg,
+                        #ffb3c6 0%,
+                        #ffd1a8 14%,
+                        #fff0a8 28%,
+                        #c4f2c5 42%,
+                        #b8d9ff 56%,
+                        #d4c1ff 70%,
+                        #ffc1e5 85%,
+                        #ffb3c6 100%) !important;
                 background-size: 300% 100% !important;
-                background-position: -60% 50% !important;
-                -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 16'><polygon points='4.5,0.6 13.5,0.6 17.4,8 13.5,15.4 4.5,15.4 0.6,8' fill='%23000'/></svg>") !important;
-                        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 16'><polygon points='4.5,0.6 13.5,0.6 17.4,8 13.5,15.4 4.5,15.4 0.6,8' fill='%23000'/></svg>") !important;
-                -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 0.89) !important;
-                        mask-size: var(--hex-size) calc(var(--hex-size) * 0.89) !important;
+                background-position: 0% 50% !important;
+                /* Stroke-only hexagon mask — only the OUTLINE is
+                   visible, never a filled shape. stroke-width=3.5 in
+                   the source viewBox scales to a fine 0.6-0.7px line
+                   at small render sizes. */
+                -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
+                        mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
                 -webkit-mask-repeat: repeat !important;
                         mask-repeat: repeat !important;
-                mix-blend-mode: overlay !important;
+                /* `normal` blend so the rainbow paints DIRECTLY on the
+                   button surface — no overlay-bleaching to white. */
+                mix-blend-mode: normal !important;
                 opacity: 0 !important;
                 animation: none !important;
                 transition: opacity 0.30s ease !important;
@@ -2522,8 +2840,136 @@
             .widget-tooltip .tt-stg-exec:hover::before,
             .widget-tooltip .tt-stg-clear:hover::before,
             .liquid-glass-btn:hover::before {
-                opacity: 0.95 !important;
-                animation: tt-hex-glisten 2.4s linear infinite !important;
+                opacity: 1 !important;
+                /* Same dual animation as the rebuild button — sweep
+                   the rainbow stripe AND rotate the hue, both forever. */
+                animation:
+                    tt-hex-sweep 2.4s linear infinite,
+                    tt-hex-hue-cycle 3.6s linear infinite !important;
+                filter: saturate(1.25) brightness(1.05);
+            }
+
+            /* ACTIVE buttons on hover — hex outlines stay LOCKED to
+               the active button's color family (reds for red, blues
+               for blue, etc.) but actively GLISTEN via two animations:
+
+                 1. tt-hex-sweep — slides the gradient horizontally so
+                    each hex passes through every shade in the family
+                 2. tt-active-shimmer — pulses brightness + saturation
+                    + a tiny ±15° hue range. The hue range is small
+                    enough that reds stay red (they shift slightly
+                    toward orange / magenta but never leave the family)
+                    while still being visibly DIFFERENT from frame to
+                    frame, which is what reads as "glistening".
+
+               Combined: each hex visibly changes color over time
+               (sweep delivers different shades) AND each hex pulses
+               (shimmer brightens + slightly hue-shifts). Together
+               the surface looks alive and crystalline. */
+            body.polish .widget-tooltip .tt-chip.active:hover::before,
+            body.polish .widget-tooltip .tt-toggle.on:hover::before,
+            body.polish .widget-tooltip .tt-stg-plan.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-exec.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-clear.active:hover::before {
+                opacity: 1 !important;
+                background-size: 300% 100% !important;
+                background-position: 0% 50% !important;
+                mix-blend-mode: normal !important;
+                animation:
+                    tt-hex-sweep        1.6s linear infinite,
+                    tt-active-shimmer   1.4s ease-in-out infinite !important;
+            }
+            @keyframes tt-active-shimmer {
+                0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
+                50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
+            }
+
+            /* ── RED family (Attack control) ──────────────────────── */
+            body.polish .widget-tooltip.tt-attack .tt-chip.active:hover::before,
+            body.polish .tt-toggle.tt-toggle-attack.on:hover::before {
+                background: linear-gradient(90deg,
+                    #8a0a14 0%,    /* dark crimson */
+                    #c0202a 14%,   /* base red     */
+                    #e04050 28%,   /* light red    */
+                    #c04020 42%,   /* burnt orange */
+                    #6a0a14 56%,   /* maroon       */
+                    #a02030 70%,   /* deep rose    */
+                    #d83040 85%,   /* signal red   */
+                    #8a0a14 100%   /* loop back    */
+                ) !important;
+            }
+
+            /* ── BLUE family (Flight / city switcher) ─────────────── */
+            body.polish .widget-tooltip.tt-flight .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #0a3a6a 0%,    /* dark navy    */
+                    #1856a8 14%,   /* royal blue   */
+                    #1e6fd0 28%,   /* base blue    */
+                    #2480e0 42%,   /* light azure  */
+                    #0c2050 56%,   /* midnight     */
+                    #2a5a8a 70%,   /* steel blue   */
+                    #1a4080 85%,   /* deep cobalt  */
+                    #0a3a6a 100%   /* loop back    */
+                ) !important;
+            }
+
+            /* ── CYAN family (Weather) ────────────────────────────── */
+            body.polish .widget-tooltip.tt-weather .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #0a4a6a 0%,    /* dark teal    */
+                    #1574b8 14%,   /* deep cyan    */
+                    #1e8fd0 28%,   /* base cyan    */
+                    #2aa6e0 42%,   /* light cyan   */
+                    #0a3050 56%,   /* midnight teal*/
+                    #1a6a8a 70%,   /* ocean        */
+                    #1480a8 85%,   /* slate ocean  */
+                    #0a4a6a 100%   /* loop back    */
+                ) !important;
+            }
+
+            /* ── GREEN family (Defence control) ───────────────────── */
+            body.polish .widget-tooltip.tt-defence .tt-chip.active:hover::before,
+            body.polish .tt-toggle.tt-toggle-defence.on:hover::before {
+                background: linear-gradient(90deg,
+                    #0a4a14 0%,    /* dark forest   */
+                    #1e7838 14%,   /* base green    */
+                    #2a8a4a 28%,   /* mid emerald   */
+                    #4aa86a 42%,   /* light spring  */
+                    #0c3010 56%,   /* deepest forest*/
+                    #2a6a30 70%,   /* hunter        */
+                    #1a5a20 85%,   /* pine          */
+                    #0a4a14 100%   /* loop back     */
+                ) !important;
+            }
+
+            /* ── ORANGE family (Reconstruction REBUILD NOW button) ── */
+            body.polish .widget-tooltip.tt-rcn .tt-rcn-instant.active:hover::before {
+                background: linear-gradient(90deg,
+                    #8a3a05 0%,    /* dark amber    */
+                    #c2410c 14%,   /* burnt orange  */
+                    #ea580c 28%,   /* base orange   */
+                    #f97316 42%,   /* bright tangerine */
+                    #6b2a05 56%,   /* dark rust     */
+                    #b04a10 70%,   /* sienna        */
+                    #d56a18 85%,   /* gold-orange   */
+                    #8a3a05 100%   /* loop back     */
+                ) !important;
+            }
+
+            /* ── PURPLE family (Strategy plan/exec/clear actions) ── */
+            body.polish .widget-tooltip .tt-stg-plan.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-exec.active:hover::before,
+            body.polish .widget-tooltip .tt-stg-clear.active:hover::before {
+                background: linear-gradient(90deg,
+                    #3a0a6a 0%,    /* deep violet   */
+                    #5a20a0 14%,   /* indigo        */
+                    #7030c0 28%,   /* base purple   */
+                    #aa6eff 42%,   /* light orchid  */
+                    #2a0850 56%,   /* royal indigo  */
+                    #4a1880 70%,   /* dark amethyst */
+                    #6028b0 85%,   /* deep grape    */
+                    #3a0a6a 100%   /* loop back     */
+                ) !important;
             }
             @keyframes tt-hex-glisten {
                 0%   { background-position: -60% 50%; }
@@ -2808,12 +3254,157 @@
                 /* keep the emoji glyph crisp */
                 font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
             }
+            /* Stabilise the chip border-width across rest / hover /
+               active. Otherwise it swings between 1 px (base + active)
+               and 2 px (the liquid-glass `:not(.active):hover` rule
+               higher up), which with `box-sizing: border-box` makes
+               the icon + text shift sideways by 1 px on every click.
+               Locking width at 2 px on EVERY state — including the
+               click ripple itself — eliminates that horizontal hop. */
+            body.polish .widget-tooltip .tt-chip,
+            body.polish .widget-tooltip .tt-chip:hover,
+            body.polish .widget-tooltip .tt-chip.active,
+            body.polish .widget-tooltip .tt-chip.active:hover,
+            body.polish .widget-tooltip .tt-toggle,
+            body.polish .widget-tooltip .tt-toggle:hover,
+            body.polish .widget-tooltip .tt-toggle.on,
+            .widget-tooltip .tt-chip,
+            .widget-tooltip .tt-chip:hover,
+            .widget-tooltip .tt-chip.active,
+            .widget-tooltip .tt-toggle,
+            .widget-tooltip .tt-toggle:hover,
+            .widget-tooltip .tt-toggle.on {
+                border-width: 2px !important;
+                box-sizing: border-box !important;
+            }
+
+            /* ─── CLICK WAVE — ink ripple + outer shockwave ring ───
+               Both are pure CSS animations driven by the JS that
+               spawns the elements (see the click-wave block at the
+               bottom of <body>). The inner ripple is clipped by the
+               chip's overflow:hidden for a contained ink-burst; the
+               outer wave sits on the chip's parent so it can expand
+               OUTSIDE the chip outline for a punchy impact halo. */
+            /* HARD-IMPACT RIPPLE — bright flash + fast expand + secondary
+               glow ring. The flash at 0% is at full opacity 1.0 and a
+               larger seed (12px) so the click feels percussive. */
+            @keyframes tt-ripple-burst {
+                0%   { transform: translate(-50%, -50%) scale(1);
+                       opacity: 1; }
+                15%  { opacity: 1; }
+                60%  { opacity: 0.55; }
+                100% { transform: translate(-50%, -50%) scale(42);
+                       opacity: 0; }
+            }
+            .tt-ripple {
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: radial-gradient(circle,
+                    rgba(255,255,255,1.00) 0%,
+                    rgba(255,255,255,0.80) 30%,
+                    rgba(220,235,255,0.35) 60%,
+                    rgba(255,255,255,0)   100%);
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 20;
+                animation: tt-ripple-burst 0.55s cubic-bezier(.14, .92, .28, 1.20) forwards;
+                box-shadow:
+                    0 0 24px rgba(255,255,255,0.85),
+                    0 0 48px rgba(180,210,255,0.55);
+            }
+            /* OUTER SHOCKWAVE — thicker ring that snaps out further and
+               carries a coloured glow trail, so the "impact" reads even
+               when the chip itself doesn't move. */
+            @keyframes tt-impact-wave-expand {
+                0%   { width: 8px;  height: 8px;
+                       border-width: 4px;
+                       border-color: rgba(255,255,255,1);
+                       box-shadow:
+                           0 0 26px rgba(255,255,255,1),
+                           0 0 48px rgba(180,210,255,0.75);
+                       opacity: 1; }
+                25%  { border-width: 3.5px; opacity: 0.95; }
+                65%  { border-width: 2px;   opacity: 0.6; }
+                100% { width: 180px; height: 180px;
+                       border-width: 0.5px;
+                       border-color: rgba(255,255,255,0);
+                       box-shadow:
+                           0 0 32px rgba(255,255,255,0),
+                           0 0 64px rgba(180,210,255,0);
+                       opacity: 0; }
+            }
+            .tt-impact-wave {
+                position: absolute;
+                width: 8px; height: 8px;
+                border-radius: 50%;
+                border: 4px solid rgba(255,255,255,1);
+                background: transparent;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                z-index: 25;
+                animation: tt-impact-wave-expand 0.60s cubic-bezier(.14, .92, .28, 1.20) forwards;
+            }
+            /* Body-anchored variant — bypasses the chip's grid parent so
+               clicking a chip never reflows the icon row. */
+            .tt-impact-wave.tt-impact-wave-fixed {
+                position: fixed;
+                z-index: 9999;
+            }
+
+            /* ─── COLOR-ONLY CLICK FLASH on the chip itself ───
+               Driven by `.tt-impact-flash`. Animates ONLY `filter`
+               (brightness + saturation). No transform, no scale, no
+               box-shadow, no width/height change → zero layout effect
+               on the chip OR its siblings, and no glow spill that
+               could trigger a horizontal scrollbar. The chip simply
+               flashes to a brighter/saturated version of whatever its
+               current state colour is (e.g. red for attack, green for
+               defence), reading as a snappy impact tint with no
+               movement at all. */
+            @keyframes tt-impact-flash-anim {
+                0%   { filter: brightness(1.65) saturate(1.55); }
+                40%  { filter: brightness(1.30) saturate(1.30); }
+                100% { filter: none; }
+            }
+            .widget-tooltip .tt-chip.tt-impact-flash,
+            .widget-tooltip .tt-toggle.tt-impact-flash,
+            .tt-rcn-instant.tt-impact-flash,
+            .tt-stg-plan.tt-impact-flash,
+            .tt-stg-exec.tt-impact-flash,
+            .tt-stg-clear.tt-impact-flash {
+                animation: tt-impact-flash-anim 0.30s linear both;
+            }
+
             /* left-align city chips in the flight tooltip */
             .tt-flight .tt-chip-flag {
                 justify-content: flex-start;
                 text-align: left;
                 padding-left: 8px;
                 padding-right: 8px;
+            }
+            /* Lock the city-chip height across every state — rest /
+               hover / active / active-hover. Without this, the border
+               width swings between 1 px (base + active) and 2 px (the
+               liquid-glass hover state above) and that 2 px swing
+               shows up as a visible vertical resize when the user
+               clicks a city. `box-sizing: border-box` keeps the OUTER
+               box constant regardless of border-width, and the fixed
+               height enforces it even if other rules try to override. */
+            body.polish .tt-flight .tt-chip-flag,
+            body.polish .tt-flight .tt-chip-flag:hover,
+            body.polish .tt-flight .tt-chip-flag.active,
+            body.polish .tt-flight .tt-chip-flag.active:hover,
+            .tt-flight .tt-chip-flag,
+            .tt-flight .tt-chip-flag:hover,
+            .tt-flight .tt-chip-flag.active,
+            .tt-flight .tt-chip-flag.active:hover {
+                box-sizing: border-box !important;
+                height: 28px !important;
+                min-height: 28px !important;
+                max-height: 28px !important;
+                line-height: 1 !important;
             }
             .widget-tooltip .tt-chip:hover:not(.active) {
                 background: rgba(255,255,255,0.92);
@@ -2840,12 +3431,33 @@
                 width: 32px;
                 height: 32px;
                 aspect-ratio: 1 / 1;
-                padding: 0;
+                padding: 0 !important;
                 font-size: 0;            /* hide any text node */
                 position: relative;
+                box-sizing: border-box !important;
             }
-            .tt-grid-icons .tt-chip i { font-size: 12px; opacity: 1; }
-            .tt-grid-icons .tt-chip.active i { color: #fff; text-shadow: 0 0 6px rgba(255,255,255,0.55); }
+            /* LOCK the icon to the chip's geometric centre via absolute
+               positioning. With the icon out of the chip's flex flow,
+               NOTHING that happens to the chip (class toggles, ::before/
+               ::after appearing, hover-state padding tweaks, browser
+               UA :active behaviour, anything) can shift the icon
+               horizontally. The icon's left/top is permanently at 50%
+               with a -50% transform-origin, so even a brief reflow of
+               the chip's flexbox can't push it sideways. */
+            .tt-grid-icons .tt-chip i {
+                font-size: 12px;
+                opacity: 1;
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .tt-grid-icons .tt-chip.active i {
+                color: #fff;
+                text-shadow: 0 0 6px rgba(255,255,255,0.55);
+            }
 
             /* per-chip hover label — uses a real <span> so it works reliably in <button> */
             .tt-grid-icons .tt-chip .chip-name {
@@ -3627,6 +4239,37 @@
         /* clean up any stale <span class="social-tip"> elements left over from a
            previous design — the global [data-tip]::before rule now handles tooltips */
         document.querySelectorAll('.social-host > .social-tip').forEach(function(n){ n.remove(); });
+    })();
+
+    /* ═══════════════════════════════════════════════════════════
+       LIQUID-GLASS CLICK WAVE
+       ───────────────────────────────────────────────────────────
+       On every click of a tooltip chip / toggle, spawn TWO
+       transient elements for a punchy material-style impact:
+         1. `.tt-ripple`       — an INK-burst inside the chip, clipped
+            by the chip's overflow: hidden, starting at the click
+            point and expanding to fill the button surface
+         2. `.tt-impact-wave`  — a RING shockwave on the chip's parent,
+            centred on the button, expanding OUTWARD beyond the
+            button outline before fading
+       Both are auto-removed once their CSS animations complete so
+       the DOM stays clean.
+       ═══════════════════════════════════════════════════════════ */
+    (function(){
+        /* CLICK FEEDBACK INTENTIONALLY EMPTY.
+           Earlier iterations tried (1) appending a ripple span inside
+           the chip, (2) appending an outer shockwave to the chip's
+           parent, (3) anchoring the shockwave to <body>, and (4) a
+           pure-filter brightness flash via `.tt-impact-flash`. Each
+           was either visibly shifting the icon row left (flex /
+           grid re-measure or a horizontal scrollbar spike) or, per
+           the user's latest preference, doing TOO MUCH on click —
+           "button shouldn't change shape, just change to active
+           colour". Letting the existing `.active` class toggle on
+           the chip do that job — no JS-driven flash, no DOM
+           mutation, no transient class. The chip simply turns red /
+           green / blue (whichever theme) and that's the whole
+           click feedback. */
     })();
     </script>
 </body>
