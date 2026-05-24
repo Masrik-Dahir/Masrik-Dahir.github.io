@@ -54,6 +54,101 @@
     transform:translate(-50%,-50%) scale(1);
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Site-wide top-nav → content spacing.
+   Ensures every page has the SAME 24px gap from the bottom edge of
+   the last top-nav element to where the page content starts. Most
+   pages use `<div class="w3-content w3-margin-top">` as the
+   content shell — w3.css gives that a 16px top margin by default;
+   we bump it to 24px so the spacing is consistent across work.html,
+   academia.html, software.html, milestone.html, map.html, games.html,
+   index.html, and any page that uses the shell.
+   ════════════════════════════════════════════════════════════════ */
+.w3-content.w3-margin-top {
+    margin-top: 24px !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Mobile hamburger menu fixes — applied site-wide for #popup-3,
+   the mobile nav menu that opens when the user taps the hamburger
+   inside the top bar. By default popup.css positions the menu
+   centered on the viewport, which OVERLAPS the "Masrik Dahir"
+   header at the top of mobile mode (cuts off the name). These
+   rules anchor the menu directly UNDER the topnav-2 header so the
+   brand stays visible, BLUR the rest of the page (no dark dim),
+   and make every tap outside the menu count as "close".
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 1026px) {
+    /* The brand bar at the top: keep it pinned and ABOVE the
+       blur overlay so "Masrik Dahir" stays visible + sharp.
+       (Some pages don't load d.css which would provide
+       `.navbar-fixed-top { position:fixed; ... }`; declaring it
+       here makes the behaviour consistent everywhere.) */
+    .topnav-2.navbar-fixed-top {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1030 !important;
+        background: white !important;
+        border-bottom: 2px solid black !important;
+    }
+
+    /* Menu drops down from under the brand bar, anchored top-right.
+       It used to be centered on the viewport (which clipped the
+       header above it). */
+    .popup#popup-3 .content,
+    .popuphome#popup-3 .content {
+        top: 80px !important;            /* sit just under topnav-2 */
+        left: auto !important;
+        right: 16px !important;
+        height: auto !important;
+        max-height: calc(100vh - 100px) !important;
+        width: min(85vw, 280px) !important;
+        transform: translate(0, -20px) scale(0.95) !important;
+        transform-origin: top right !important;
+        opacity: 0;
+        /* When closed, opacity:0 leaves the menu invisible but still
+           in the layout — without pointer-events:none it would block
+           taps on any element behind it (e.g., work.html's collapse /
+           extend buttons that sit under the top-right corner). */
+        pointer-events: none;
+        border-radius: 12px !important;
+        box-shadow: 0 18px 40px rgba(15,23,42,0.18) !important;
+        border: 1px solid rgba(0,0,0,0.08) !important;
+        z-index: 1031 !important;        /* above the brand bar */
+    }
+    .popup#popup-3.active .content,
+    .popuphome#popup-3.active .content {
+        transform: translate(0, 0) scale(1) !important;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Full-screen click-catcher overlay — any tap outside the menu
+       closes it (the overlay has `onclick="closePopup(3)"` from
+       components.js). Background is BLURRED rather than dimmed.
+       A tiny rgba white tint is required for backdrop-filter to
+       render reliably on Chromium-based browsers when the layer
+       is otherwise transparent. The topnav-2 (z-index 1030) and
+       the menu .content (z-index 1031) both sit ABOVE this layer,
+       so they stay sharp while only the page content between/below
+       them goes hazy. */
+    .popup#popup-3 .overlay,
+    .popuphome#popup-3 .overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1029 !important;        /* under topnav-2 + menu */
+        background: rgba(255,255,255,0.02) !important;
+        border: none !important;
+        backdrop-filter: blur(8px) saturate(120%) !important;
+        -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
+    }
+}
+
 
 
 

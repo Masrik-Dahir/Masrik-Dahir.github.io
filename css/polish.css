@@ -109,7 +109,7 @@ body.polish .page-hero p {
  * Uses the same white→soft-blue gradient + backdrop blur as the
  * positioning hero and widget tooltips. */
 
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right),
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right),
 body.polish input[type="button"]:not(.glow-on-hover-nav):not(.glow-on-hover3),
 body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3) {
     background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(253,254,255,0.95) 100%);
@@ -128,7 +128,7 @@ body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3) {
     transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, border-color 0.22s ease;
 }
 
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover,
 body.polish input[type="button"]:not(.glow-on-hover-nav):not(.glow-on-hover3):hover,
 body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3):hover {
     background: linear-gradient(135deg, rgba(255,255,255,1.00) 0%, rgba(254,255,255,0.98) 100%);
@@ -140,7 +140,7 @@ body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3):ho
         0 2px 6px rgba(0,0,0,0.08);
 }
 
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):active,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):active,
 body.polish input[type="button"]:not(.glow-on-hover-nav):not(.glow-on-hover3):active,
 body.polish input[type="submit"]:not(.glow-on-hover-nav):not(.glow-on-hover3):active {
     transform: translateY(0);
@@ -283,7 +283,7 @@ body.polish .positioning-hero,
 body.polish .featured-card,
 body.polish .nyc-canvas-caption,
 body.polish .pretty,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right),
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right),
 body.polish .featured-links a,
 body.polish .positioning-cta a {
     position: relative;
@@ -302,7 +302,7 @@ body.polish .positioning-hero::before,
 body.polish .featured-card::before,
 body.polish .nyc-canvas-caption::before,
 body.polish .pretty::before,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right)::before,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right)::before,
 body.polish .featured-links a::before,
 body.polish .positioning-cta a::before {
     content: '';
@@ -362,7 +362,7 @@ body.polish .positioning-hero:hover::before,
 body.polish .featured-card:hover::before,
 body.polish .nyc-canvas-caption:hover::before,
 body.polish .pretty:hover::before,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::before,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::before,
 body.polish .featured-links a:hover::before,
 body.polish .positioning-cta a:hover::before {
     opacity: 1;
@@ -381,7 +381,7 @@ body.polish .positioning-hero::after,
 body.polish .featured-card::after,
 body.polish .nyc-canvas-caption::after,
 body.polish .pretty::after,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right)::after,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right)::after,
 body.polish .featured-links a::after,
 body.polish .positioning-cta a::after {
     /* ROTATING RAINBOW BORDER RING — rendered as a thin chromatic ring
@@ -433,7 +433,7 @@ body.polish .positioning-hero:hover::after,
 body.polish .featured-card:hover::after,
 body.polish .nyc-canvas-caption:hover::after,
 body.polish .pretty:hover::after,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::after,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::after,
 body.polish .featured-links a:hover::after,
 body.polish .positioning-cta a:hover::after {
     opacity: 1;
@@ -449,7 +449,7 @@ body.polish .positioning-hero:hover,
 body.polish .featured-card:hover,
 body.polish .nyc-canvas-caption:hover,
 body.polish .pretty:hover,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover,
 body.polish .featured-links a:hover,
 body.polish .positioning-cta a:hover {
     /* Liquid-glass rim — a clean white inner edge plus a single soft
@@ -467,7 +467,7 @@ body.polish .positioning-hero:hover::after,
 body.polish .featured-card:hover::after,
 body.polish .nyc-canvas-caption:hover::after,
 body.polish .pretty:hover::after,
-body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::after,
+body.polish button:not(.glow-on-hover-nav):not(.glow-on-hover3):not(.glow-on-hover12):not(.tt-chip):not(.tt-toggle):not(.ww-icon-btn):not(.msl-core):not(.dfn-core):not(.city-switch-btn):not(.fa-btn):not(#back-btn):not(#btn-left):not(#btn-up):not(#btn-down):not(#btn-right):hover::after,
 body.polish .featured-links a:hover::after,
 body.polish .positioning-cta a:hover::after {
     opacity: 1;

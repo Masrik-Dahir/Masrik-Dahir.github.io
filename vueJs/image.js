@@ -67,11 +67,25 @@ function createStateComponent(stateName, stateAbbreviation, numImages = 10) {
         },
         methods: {
             selectImage(index) {
-                // this.currentIndex = index;
+                /* Mark this card as the active one, then OPEN the
+                   full-viewport lightbox at that exact photo. The
+                   user clicks a thumbnail → that photo blows up to
+                   fill the screen. */
                 this.resources.forEach((item, i) => {
                     item.isActive = (i === index);
                 });
-                this.scrollToActiveImage();
+                this.isSlideVisible = true;
+                if (typeof window.showSlideById === "function") {
+                    window.showSlideById();
+                }
+                if (typeof window.currentSlide === "function") {
+                    window.currentSlide(index + 1);
+                }
+                /* Auto-pause: opening from a thumbnail means the user
+                   wants to study THAT photo — don't auto-advance. */
+                if (typeof window.pauseSlideShow === "function") {
+                    setTimeout(window.pauseSlideShow, 0);
+                }
             },
             scrollToActiveImage() {
                 this.$nextTick(() => {

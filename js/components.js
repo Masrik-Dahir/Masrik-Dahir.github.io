@@ -14,7 +14,12 @@
         { label: "Home", path: "/", aliases: ["/index"] },
         { label: "Career", path: "/work", aliases: [] },
         { label: "Academia", path: "/academia", aliases: ["/education"] },
-        { label: "Software", path: "/software", aliases: ["/product"] },
+        /* Software covers the gallery page (/software) AND every
+           sub-directory that hosts an individual software project:
+           /web/<app> (calculator apps, real-estate analyzer, etc.)
+           and /library/<lib> (awsutil docs, etc.). The isActive()
+           prefix-check below treats any of these as Software. */
+        { label: "Software", path: "/software", aliases: ["/product", "/web", "/library"] },
         { label: "Milestones", path: "/milestone", aliases: [] },
         { label: "Travel", path: "/map", aliases: [] },
         { label: "Games", path: "/games", aliases: [] }

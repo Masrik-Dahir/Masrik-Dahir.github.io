@@ -150,6 +150,126 @@ const app_software = {
                     hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/re",javascript:"",finance:""}
                 },
                 {
+                    title:"Real Estate Pro (9 more tools)",
+                    des:"Rent-vs-Buy, affordability, rental cash-flow & ROI, closing cost, LTV, cash-out refi, property tax by state, moving cost, down-payment & PMI optimizer",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/re2", uri:"web/re2",
+                    hosts:["github","web","javascript","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/re2",javascript:"",finance:""}
+                },
+                {
+                    title:"Personal Finance Calculators",
+                    des:"10-in-1: budget planner, net worth, savings goal, emergency fund, COL comparison, subscriptions, inflation, salary↔hourly, take-home, latte factor",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/budget", uri:"web/budget",
+                    hosts:["github","web","javascript","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/budget",javascript:"",finance:""}
+                },
+                {
+                    title:"Loans & Debt Calculators",
+                    des:"10-in-1: mortgage amortization, early payoff, auto loan, student loan, snowball vs avalanche, consolidation, refinance break-even, affordability, IO vs amortizing, APR↔APY",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/loans", uri:"web/loans",
+                    hosts:["github","web","javascript","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/loans",javascript:"",finance:""}
+                },
+                {
+                    title:"Investing & Retirement Calculators",
+                    des:"12-in-1: compound interest, retirement projector, FIRE, DCA, allocation donut, DRIP, Roth vs Traditional, Rule of 72, position size, crypto P/L, annuity, fee drag",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/invest", uri:"web/invest",
+                    hosts:["github","web","javascript","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/invest",javascript:"",finance:""}
+                },
+                {
+                    title:"Tax Calculators",
+                    des:"6-in-1: federal bracket visualizer, freelance/self-employment, sales tax, capital gains, W-4 withholding, bill+tip+tax splitter",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/taxes", uri:"web/taxes",
+                    hosts:["github","web","javascript","finance"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/taxes",javascript:"",finance:""}
+                },
+                {
+                    title:"Health & Fitness Calculators",
+                    des:"11-in-1: BMI/body-fat, TDEE/BMR, macros, weight-loss timeline, water intake, heart-rate zones, pace predictor, 1RM, due date, sleep cycles, steps converter",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/health", uri:"web/health",
+                    hosts:["github","web","javascript","health"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/health",javascript:"",health:""}
+                },
+                {
+                    title:"Food & Nutrition Calculators",
+                    des:"7-in-1: recipe scaler, cooking measurement converter, coffee brew ratio, BAC estimator, meal-prep cost, baking pan-size converter, caffeine tracker",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/food", uri:"web/food",
+                    hosts:["github","web","javascript","food"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/food",javascript:"",food:""}
+                },
+                {
+                    title:"Home & DIY Calculators",
+                    des:"9-in-1: paint quantity, tile/flooring, wallpaper, concrete/mulch volume, appliance electricity cost, solar payback, renovation budget, lawn coverage, plant spacing",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/home", uri:"web/home",
+                    hosts:["github","web","javascript","home"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/home",javascript:"",home:""}
+                },
+                {
+                    title:"Automotive & Travel Calculators",
+                    des:"9-in-1: trip fuel cost, EV charging, lease vs buy, true cost of ownership, road trip planner, currency converter, time zones, points/miles value, country tip",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/auto", uri:"web/auto",
+                    hosts:["github","web","javascript","travel"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/auto",javascript:"",travel:""}
+                },
+                {
+                    title:"Productivity & Work Calculators",
+                    des:"7-in-1: exact age + birthday countdown, date difference, freelance rate, project quote, Pomodoro planner, reading time, meeting cost",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/work", uri:"web/work",
+                    hosts:["github","web","javascript","productivity"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/work",javascript:"",productivity:""}
+                },
+                {
+                    title:"Education & Career Calculators",
+                    des:"5-in-1: GPA + grade-needed predictor, raise impact, job offer comparison, student budget, typing speed (WPM)",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/edu", uri:"web/edu",
+                    hosts:["github","web","javascript","education"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/edu",javascript:"",education:""}
+                },
+                {
+                    title:"Lifestyle & Misc Calculators",
+                    des:"5-in-1: wedding/event budget, pet age + lifetime cost, who-owes-whom splitter, gift planner, carbon footprint",
+                    category:"app",
+                    uri_github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",
+                    uri_windows:"", uri_android:"", uri_apple:"",
+                    uri_web:"web/life", uri:"web/life",
+                    hosts:["github","web","javascript","lifestyle"],
+                    hostLinks:{github:"https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/web",web:"web/life",javascript:"",lifestyle:""}
+                },
+                {
                     title:"Stock Market",
                     des:"PHP Server: Building financial model and charts for ETFs, Mutual Funds, Cryptocurrencies, and Options",
                     category:"app",
@@ -207,32 +327,40 @@ const app_software = {
         },
         hostIcon(host) {
             var map = {
-                pypi:       '<i class="fas fa-code" style="color:#3776ab"></i>',
-                npm:        '<i class="fas fa-cube" style="color:#cb3837"></i>',
-                nuget:      '<i class="fas fa-gem" style="color:#004880"></i>',
-                maven:      '<i class="fas fa-coffee" style="color:#c71a36"></i>',
-                crates:     '<i class="fas fa-cog" style="color:#dea584"></i>',
-                rubygems:   '<i class="fas fa-gem" style="color:#e9573f"></i>',
-                go:         '<i class="fas fa-terminal" style="color:#00add8"></i>',
-                github:     '<i class="fab fa-github" style="color:#24292e"></i>',
-                windows:    '<i class="fab fa-windows" style="color:#0078d4"></i>',
-                android:    '<i class="fab fa-android" style="color:#3ddc84"></i>',
-                apple:      '<i class="fab fa-apple" style="color:#555"></i>',
-                web:        '<i class="fas fa-globe" style="color:#475569"></i>',
-                research:   '<i class="fas fa-flask" style="color:#8b5cf6"></i>',
-                python:     '<i class="fab fa-python" style="color:#3776ab"></i>',
-                java:       '<i class="fab fa-java" style="color:#007396"></i>',
-                javascript: '<i class="fab fa-js" style="color:#f7df1e"></i>',
-                nodejs:     '<i class="fab fa-node-js" style="color:#339933"></i>',
-                php:        '<i class="fab fa-php" style="color:#777bb4"></i>',
-                aws:        '<i class="fab fa-aws" style="color:#ff9900"></i>',
-                database:   '<i class="fas fa-database" style="color:#336791"></i>',
-                ml:         '<i class="fas fa-chart-line" style="color:#ff6f00"></i>',
-                security:   '<i class="fas fa-shield-alt" style="color:#d32f2f"></i>',
-                graph:      '<i class="fas fa-project-diagram" style="color:#0288d1"></i>',
-                finance:    '<i class="fas fa-chart-bar" style="color:#2e7d32"></i>'
+                pypi:         '<i class="fas fa-code" style="color:#3776ab"></i>',
+                npm:          '<i class="fas fa-cube" style="color:#cb3837"></i>',
+                nuget:        '<i class="fas fa-gem" style="color:#004880"></i>',
+                maven:        '<i class="fas fa-coffee" style="color:#c71a36"></i>',
+                crates:       '<i class="fas fa-cog" style="color:#dea584"></i>',
+                rubygems:     '<i class="fas fa-gem" style="color:#e9573f"></i>',
+                go:           '<i class="fas fa-terminal" style="color:#00add8"></i>',
+                github:       '<i class="fab fa-github" style="color:#24292e"></i>',
+                windows:      '<i class="fab fa-windows" style="color:#0078d4"></i>',
+                android:      '<i class="fab fa-android" style="color:#3ddc84"></i>',
+                apple:        '<i class="fab fa-apple" style="color:#555"></i>',
+                web:          '<i class="fas fa-globe" style="color:#475569"></i>',
+                research:     '<i class="fas fa-flask" style="color:#8b5cf6"></i>',
+                python:       '<i class="fab fa-python" style="color:#3776ab"></i>',
+                java:         '<i class="fab fa-java" style="color:#007396"></i>',
+                javascript:   '<i class="fab fa-js" style="color:#f7df1e"></i>',
+                nodejs:       '<i class="fab fa-node-js" style="color:#339933"></i>',
+                php:          '<i class="fab fa-php" style="color:#777bb4"></i>',
+                aws:          '<i class="fab fa-aws" style="color:#ff9900"></i>',
+                database:     '<i class="fas fa-database" style="color:#336791"></i>',
+                ml:           '<i class="fas fa-chart-line" style="color:#ff6f00"></i>',
+                security:     '<i class="fas fa-shield-alt" style="color:#d32f2f"></i>',
+                graph:        '<i class="fas fa-project-diagram" style="color:#0288d1"></i>',
+                finance:      '<i class="fas fa-chart-bar" style="color:#2e7d32"></i>',
+                /* Formula-page topical tags */
+                health:       '<i class="fas fa-heartbeat" style="color:#e53e3e"></i>',
+                food:         '<i class="fas fa-utensils" style="color:#dd6b20"></i>',
+                home:         '<i class="fas fa-home" style="color:#2b6cb0"></i>',
+                travel:       '<i class="fas fa-plane" style="color:#0ea5e9"></i>',
+                productivity: '<i class="fas fa-tasks" style="color:#6366f1"></i>',
+                education:    '<i class="fas fa-graduation-cap" style="color:#7c3aed"></i>',
+                lifestyle:    '<i class="fas fa-star" style="color:#ec4899"></i>'
             };
-            return map[host] || host;
+            return map[host] || '<i class="fas fa-tag" style="color:#9ca3af"></i>';
         },
         hostLabel(host) {
             var map = {
@@ -243,9 +371,11 @@ const app_software = {
                 research:'Research', python:'Python', java:'Java', javascript:'JavaScript',
                 nodejs:'Node.js', php:'PHP', aws:'AWS',
                 database:'Database', ml:'Machine Learning', security:'Security',
-                graph:'Graph Theory', finance:'Finance'
+                graph:'Graph Theory', finance:'Finance',
+                health:'Health', food:'Food', home:'Home', travel:'Travel',
+                productivity:'Productivity', education:'Education', lifestyle:'Lifestyle'
             };
-            return map[host] || host;
+            return map[host] || host.charAt(0).toUpperCase() + host.slice(1);
         },
         categoryIcon(cat) {
             if (cat === 'library') return '<i class="fas fa-cubes"></i>';

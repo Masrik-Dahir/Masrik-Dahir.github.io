@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="../../css/glowing.css">
   <link rel="stylesheet" href="../../css/code.css">
   <link rel="stylesheet" href="../../css/new.css">
-  <link rel="stylesheet" href="../../css/popup.css">
+  <link rel="stylesheet" href="../../css/popup.css?v=4">
   <link rel="stylesheet" href="../../css/vintage.css">
   <script src="../../js/vendor/code.jquery.com.jquery-1.10.2.js"></script>
   <script src="../../js/icon-animation.js"></script>
@@ -21,7 +21,7 @@
   <script src="../../js/expand_jquery.js"></script>
   <script src="../../js/briefcase.js" defer></script>
   <script src="../../js/aesthetics.js" crossorigin="anonymous"></script>
-  <script src="../../js/components.js" defer></script>
+  <script src="../../js/components.js?v=active2" defer></script>
   <script src="../../js/vendor/vue@3.2.36.dist.vue.global.js"></script>
   <script src="../../vueJs/default.js" defer></script>
   <script src="../../js/vendor/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
@@ -32,6 +32,7 @@
   <script src="../../js/vendor/bootstrap-tooltip-3.4.1.min.js"></script>
   <script src="../../js/random.js" defer></script>
   <link rel="stylesheet" href="../../css/awsutil-docs.css">
+  <link rel="stylesheet" href="../../css/search-cross.css?v=5">
 </head>
 <body class="w3-white">
 <div class="page-loader" id="page-loader"><div class="spinner"></div></div>
@@ -65,7 +66,7 @@
   </nav>
   <div class="sidebar-resize"></div>
 
-  <div class="lang-bar"><a class="lang-home" href="../awsutil.html" style="text-decoration:none" title="All Languages"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">AwsUtil</b></div></div></button></a><div class="lang-links"><a href="python.html" style="text-decoration:none" title="Python"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Python</b></div></div></button></a><a href="csharp.html" style="text-decoration:none" title="C#"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">C#</b></div></div></button></a><a href="go.html" style="text-decoration:none" title="Go"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Go</b></div></div></button></a><a href="java.html" style="text-decoration:none" title="Java"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Java</b></div></div></button></a><a href="rust.html" style="text-decoration:none" title="Rust"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Rust</b></div></div></button></a><a href="typescript.html" style="text-decoration:none" title="TypeScript"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">TypeScript</b></div></div></button></a><a href="ruby.html" style="text-decoration:none" title="Ruby"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:red;font-size:calc(11px + 0.3vw)">Ruby</b></div></div></button></a></div><div class="search-wrap"><img class="search-icon" src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" alt="search"><input type="text" id="side-search" placeholder="Search modules..." autocomplete="off" v-model="searchQuery" @input="onSearch"><button v-if="searchQuery" class="search-clear" @click="searchQuery = ''" type="button" title="Clear search">✖️</button></div></div>
+  <div class="lang-bar"><a class="lang-home" href="../../software.html" style="text-decoration:none" title="Software"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Software</b></div></div></button></a><span style="margin:0 6px;color:#9ca3af;font-size:calc(12px + 0.3vw)">&rsaquo;</span><a href="../awsutil.html" style="text-decoration:none" title="AwsUtil"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">AwsUtil</b></div></div></button></a><span style="margin:0 6px;color:#9ca3af;font-size:calc(12px + 0.3vw)">&rsaquo;</span><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent;cursor:default"><div class="w3-padding-small"><div><b style="color:red;font-size:calc(11px + 0.3vw)">Ruby</b></div></div></button><div class="search-wrap" style="margin-left:auto"><img class="search-icon" src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" alt="search"><input type="text" id="side-search" placeholder="Search modules..." autocomplete="off" v-model="searchQuery" @input="onSearch"><button v-if="searchQuery" class="search-cross-btn" @click="searchQuery = ''" type="button" title="Clear search">&times;</button></div></div>
   <div id="content">
     <div class="page-hdr">
       <h1 data-lang-abbr="RB"> AwsUtil <small>Ruby</small></h1>

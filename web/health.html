@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health & Fitness · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Health & Fitness');</script>
+<script src="health.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Health & Fitness</h1><p>Eleven tools: BMI/body-fat (Navy method), TDEE/BMR, macros, weight-loss timeline, water intake, heart-rate zones, running pace predictor (Riegel), one-rep-max, pregnancy due date, sleep cycle planner, and steps→distance/calories.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">BMI / Body Fat</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Sex</label><div class="fa-input-wrap"><select id="bm_sex"><option value="male">Male</option><option value="female">Female</option></select></div></div>
+<div class="fa-field"><label>Height (cm)</label><div class="fa-input-wrap"><input id="bm_height" type="number" value="175"></div></div>
+<div class="fa-field"><label>Weight (kg)</label><div class="fa-input-wrap"><input id="bm_weight" type="number" value="78"></div></div>
+<div class="fa-field"><label>Neck (cm)</label><div class="fa-input-wrap"><input id="bm_neck" type="number" value="38"></div></div>
+<div class="fa-field"><label>Waist (cm)</label><div class="fa-input-wrap"><input id="bm_waist" type="number" value="86"></div></div>
+<div class="fa-field"><label>Hip — female (cm)</label><div class="fa-input-wrap"><input id="bm_hip" type="number" value="0"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcBMI()">Calculate</button></div>
+<div class="fa-hint fa-err" id="bm_err" style="display:none"></div>
+<div class="fa-results" id="bm_results"><div class="fa-stats" id="bm_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="bm_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">TDEE & BMR</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Sex</label><div class="fa-input-wrap"><select id="td_sex"><option value="male">Male</option><option value="female">Female</option></select></div></div>
+<div class="fa-field"><label>Age</label><div class="fa-input-wrap"><input id="td_age" type="number" value="30"></div></div>
+<div class="fa-field"><label>Height (cm)</label><div class="fa-input-wrap"><input id="td_height" type="number" value="175"></div></div>
+<div class="fa-field"><label>Weight (kg)</label><div class="fa-input-wrap"><input id="td_weight" type="number" value="78"></div></div>
+<div class="fa-field"><label>Activity</label><div class="fa-input-wrap"><select id="td_activity">
+<option value="1.2">Sedentary</option>
+<option value="1.375">Light (1-3 days/wk)</option>
+<option value="1.55" selected>Moderate (3-5 days/wk)</option>
+<option value="1.725">Active (6-7 days/wk)</option>
+<option value="1.9">Very active</option>
+</select></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcTDEE()">Calculate</button></div>
+<div class="fa-hint fa-err" id="td_err" style="display:none"></div>
+<div class="fa-results" id="td_results"><div class="fa-stats" id="td_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="td_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Macros (P / C / F)</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Daily calories</label><div class="fa-input-wrap"><input id="mc_cals" type="number" value="2200"><span class="fa-input-suffix">kcal</span></div></div>
+<div class="fa-field"><label>Goal</label><div class="fa-input-wrap"><select id="mc_goal">
+<option value="cut">Cut (40/30/30)</option>
+<option value="maintain" selected>Maintain (30/40/30)</option>
+<option value="bulk">Bulk (30/50/20)</option>
+</select></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcMacros()">Calculate</button></div>
+<div class="fa-hint fa-err" id="mc_err" style="display:none"></div>
+<div class="fa-results" id="mc_results"><div class="fa-stats" id="mc_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="mc_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Weight-Loss Timeline</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Current weight (kg)</label><div class="fa-input-wrap"><input id="wl_current" type="number" value="85"></div></div>
+<div class="fa-field"><label>Goal weight (kg)</label><div class="fa-input-wrap"><input id="wl_goal" type="number" value="72"></div></div>
+<div class="fa-field"><label>Daily calorie deficit</label><div class="fa-input-wrap"><input id="wl_deficit" type="number" value="500"><span class="fa-input-suffix">kcal</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcWeightLoss()">Project</button></div>
+<div class="fa-hint fa-err" id="wl_err" style="display:none"></div>
+<div class="fa-results" id="wl_results"><div class="fa-stats" id="wl_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="wl_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Water Intake</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Weight (kg)</label><div class="fa-input-wrap"><input id="wa_weight" type="number" value="78"></div></div>
+<div class="fa-field"><label>Active minutes/day</label><div class="fa-input-wrap"><input id="wa_activity" type="number" value="30"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcWater()">Calculate</button></div>
+<div class="fa-hint fa-err" id="wa_err" style="display:none"></div>
+<div class="fa-results" id="wa_results"><div class="fa-stats" id="wa_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="wa_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Heart Rate Zones</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Age</label><div class="fa-input-wrap"><input id="hr_age" type="number" value="30"></div></div>
+<div class="fa-field"><label>Resting HR (bpm)</label><div class="fa-input-wrap"><input id="hr_rest" type="number" value="60"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcHR()">Calculate</button></div>
+<div class="fa-hint fa-err" id="hr_err" style="display:none"></div>
+<div class="fa-results" id="hr_results"><div class="fa-stats" id="hr_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="hr_chart"></canvas></div><div id="hr_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Running Pace / Race Predictor</h2><p class="fa-card-blurb">Uses Riegel's formula (exponent 1.06) to project finishing time across distances.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Recent race distance (km)</label><div class="fa-input-wrap"><input id="rp_dist" type="number" step="0.1" value="5"></div></div>
+<div class="fa-field"><label>Time (minutes)</label><div class="fa-input-wrap"><input id="rp_timeMin" type="number" step="0.1" value="25"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPace()">Predict</button></div>
+<div class="fa-hint fa-err" id="rp_err" style="display:none"></div>
+<div class="fa-results" id="rp_results"><div class="fa-stats" id="rp_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="rp_chart"></canvas></div><div id="rp_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">One-Rep Max (1RM)</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Weight lifted</label><div class="fa-input-wrap"><input id="or_weight" type="number" value="100"><span class="fa-input-suffix">kg/lb</span></div></div>
+<div class="fa-field"><label>Reps performed</label><div class="fa-input-wrap"><input id="or_reps" type="number" value="5"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcORM()">Calculate</button></div>
+<div class="fa-hint fa-err" id="or_err" style="display:none"></div>
+<div class="fa-results" id="or_results"><div class="fa-stats" id="or_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="or_chart"></canvas></div><div id="or_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Pregnancy Due Date</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>First day of last period</label><div class="fa-input-wrap"><input id="pg_lmp" type="date"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcDue()">Calculate</button></div>
+<div class="fa-hint fa-err" id="pg_err" style="display:none"></div>
+<div class="fa-results" id="pg_results"><div class="fa-stats" id="pg_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="pg_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Sleep Cycle Planner</h2><p class="fa-card-blurb">Waking at the end of a sleep cycle (≈90 min) feels less groggy. Choose wake or bedtime as the anchor.</p></div>
+<input type="hidden" id="sl_mode" value="wake">
+<div class="fa-tabs" style="margin-bottom:14px">
+<button class="sl-tab fa-btn" data-mode="wake" onclick="toggleSleepMode('wake')">I want to wake at...</button>
+<button class="sl-tab fa-btn-ghost" data-mode="bed" onclick="toggleSleepMode('bed')">I'm going to bed at...</button>
+</div>
+<div class="fa-grid">
+<div class="fa-field"><label>Time</label><div class="fa-input-wrap"><input id="sl_time" type="time" value="07:00"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcSleep()">Plan</button></div>
+<div class="fa-hint fa-err" id="sl_err" style="display:none"></div>
+<div class="fa-results" id="sl_results"><div class="fa-stats" id="sl_stats"></div><div id="sl_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Steps → Distance & Calories</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Steps taken</label><div class="fa-input-wrap"><input id="st_steps" type="number" value="10000"></div></div>
+<div class="fa-field"><label>Height (cm)</label><div class="fa-input-wrap"><input id="st_height" type="number" value="170"></div></div>
+<div class="fa-field"><label>Weight (kg)</label><div class="fa-input-wrap"><input id="st_weight" type="number" value="70"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcSteps()">Calculate</button></div>
+<div class="fa-hint fa-err" id="st_err" style="display:none"></div>
+<div class="fa-results" id="st_results"><div class="fa-stats" id="st_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="st_chart"></canvas></div></div>
+</section>
+
+</body></html>

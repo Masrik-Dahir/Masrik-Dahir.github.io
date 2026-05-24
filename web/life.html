@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lifestyle & Misc · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Lifestyle & Misc');</script>
+<script src="life.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Lifestyle & Misc</h1><p>Five tools: wedding / event budget tracker, pet age + lifetime care cost, who-owes-whom expense settler, gift / holiday spending planner, personal carbon footprint with sustainability score.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Wedding / Event Budget</h2></div>
+<div class="fa-row-list" id="wd_rows"></div>
+<div class="fa-grid" style="margin-top:14px">
+<div class="fa-field"><label>Guest count</label><div class="fa-input-wrap"><input id="wd_guests" type="number" value="100"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addWedRow('Category',500,0)">+ Add category</button><button class="fa-btn" onclick="calcWedding()">Total</button></div>
+<div class="fa-hint fa-err" id="wd_err" style="display:none"></div>
+<div class="fa-results" id="wd_results"><div class="fa-stats" id="wd_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="wd_chart"></canvas></div><div id="wd_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Pet Age & Lifetime Cost</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Pet type</label><div class="fa-input-wrap"><select id="pt_type">
+<option value="dog_small">Dog (small)</option>
+<option value="dog_med" selected>Dog (medium)</option>
+<option value="dog_large">Dog (large)</option>
+<option value="cat">Cat</option>
+<option value="rabbit">Rabbit</option>
+<option value="hamster">Hamster</option>
+</select></div></div>
+<div class="fa-field"><label>Age (yr)</label><div class="fa-input-wrap"><input id="pt_age" type="number" step="0.5" value="3"></div></div>
+<div class="fa-field"><label>Annual care cost</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="pt_annual" type="number" value="1500"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPet()">Calculate</button></div>
+<div class="fa-hint fa-err" id="pt_err" style="display:none"></div>
+<div class="fa-results" id="pt_results"><div class="fa-stats" id="pt_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="pt_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Who-Owes-Whom Settler</h2><p class="fa-card-blurb">Roommates or trip-mates: list who paid for what, get the minimum number of transfers to settle up.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>People (comma-separated)</label><div class="fa-input-wrap"><input id="se_people" type="text" value="Alice, Bob, Carol"></div></div>
+</div>
+<div class="fa-row-list" id="se_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addSettleRow('','','')">+ Add expense</button><button class="fa-btn" onclick="calcSettle()">Settle</button></div>
+<div class="fa-hint fa-err" id="se_err" style="display:none"></div>
+<div class="fa-results" id="se_results"><div class="fa-stats" id="se_stats"></div><div class="fa-section-heading">Net per person</div><div class="fa-chart-wrap" style="height:240px"><canvas id="se_chart"></canvas></div><div class="fa-section-heading">Transfers</div><div id="se_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Gift / Holiday Planner</h2></div>
+<div class="fa-row-list" id="gf_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addGiftRow('Person',50)">+ Add person</button><button class="fa-btn" onclick="calcGifts()">Plan</button></div>
+<div class="fa-hint fa-err" id="gf_err" style="display:none"></div>
+<div class="fa-results" id="gf_results"><div class="fa-stats" id="gf_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="gf_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Carbon Footprint</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Annual car miles</label><div class="fa-input-wrap"><input id="cb_miles" type="number" value="12000"></div></div>
+<div class="fa-field"><label>Car MPG</label><div class="fa-input-wrap"><input id="cb_mpg" type="number" value="28"></div></div>
+<div class="fa-field"><label>Annual home kWh</label><div class="fa-input-wrap"><input id="cb_kwh" type="number" value="10000"></div></div>
+<div class="fa-field"><label>Flights /yr</label><div class="fa-input-wrap"><input id="cb_flights" type="number" value="2"></div></div>
+<div class="fa-field"><label>Diet</label><div class="fa-input-wrap"><select id="cb_diet">
+<option value="meat">Heavy meat</option>
+<option value="mixed" selected>Mixed</option>
+<option value="vegetarian">Vegetarian</option>
+<option value="vegan">Vegan</option>
+</select></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcCarbon()">Calculate</button></div>
+<div class="fa-hint fa-err" id="cb_err" style="display:none"></div>
+<div class="fa-results" id="cb_results"><div class="fa-stats" id="cb_stats"></div><div class="fa-section-heading">CO₂ breakdown</div><div class="fa-chart-wrap" style="height:280px"><canvas id="cb_chart"></canvas></div></div>
+</section>
+
+</body></html>

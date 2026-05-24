@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/glowing.css">
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
-    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/popup.css?v=4">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/vendor/bootstrap-grid.css"/>
     <link rel="stylesheet" href="css/vintage.css">
@@ -25,7 +25,7 @@
     <!--    Site-wide loader + polish + animations -->
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
-    <link rel="stylesheet" href="css/work-symbols.css?v=7">
+    <link rel="stylesheet" href="css/work-symbols.css?v=8">
     <link rel="stylesheet" href="css/animations.css">
 
 
@@ -98,8 +98,10 @@
             position: relative !important;
             isolation: isolate !important;
             overflow: hidden !important;
-            border-radius: 12px !important;
-            padding: 6px !important;               /* whitish glass halo around the icon */
+            border-radius: clamp(6px, 1.2vw, 12px) !important;
+            /* halo padding scales with viewport so the wrapper doesn't
+               dominate when the inner icon shrinks on small screens */
+            padding: clamp(2px, 0.8vw, 6px) !important;
             margin: 1px !important;
             line-height: 0 !important;
             cursor: pointer !important;
@@ -219,8 +221,9 @@
             display: block !important;
             position: relative !important;
             z-index: 2 !important;
-            width: 45px !important;
-            height: 45px !important;
+            /* responsive sizing — scales 22→45px as viewport grows */
+            width: clamp(22px, 5.5vw, 45px) !important;
+            height: clamp(22px, 5.5vw, 45px) !important;
             border: none !important;
             background: transparent !important;
             background-color: transparent !important;
@@ -378,11 +381,11 @@
         <h4 class="w3-container w3-margin-top" style="margin-bottom: 10px;" >
             <b>
                 <a class="btn1">
-                    <img type="button" id="mymapshowButton" class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid black" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/collapse.png"
+                    <img type="button" id="mymapshowButton" class="btn btn-outline-primary pop-up-button" style="width: clamp(22px, 5.5vw, 45px); height: clamp(22px, 5.5vw, 45px); margin: 1px; float: right; border: 1px solid black" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/collapse.png"
                          />
                 </a>
                 <a class="btn2">
-                    <img type="button" id="mymaphideButton"  class="btn btn-outline-primary pop-up-button" style="width: calc(1% + 45px); height:calc(1% + 45px); margin: 1px; float: right; border: 1px solid red; background: lightcoral" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/extend.png"
+                    <img type="button" id="mymaphideButton"  class="btn btn-outline-primary pop-up-button" style="width: clamp(22px, 5.5vw, 45px); height: clamp(22px, 5.5vw, 45px); margin: 1px; float: right; border: 1px solid red; background: lightcoral" src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/extend.png"
                          />
                 </a>
             </b>

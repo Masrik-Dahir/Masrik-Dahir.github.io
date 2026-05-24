@@ -3998,6 +3998,26 @@
         else if(type==='wind') spMul=1.2;
         for(var i=0;i<vehicles.length;i++) {
             var v=vehicles[i];
+            /* skip cars inside alien saucers — they don't drive */
+            if (v._absHidden && !v._absLifting) { continue; }
+            /* alien-car aging — counts toward shape-shift back to
+               normal. After _alienizedDur, enter morph for _morphDur,
+               then clear the flag. */
+            if (v._alienized){
+                v._alienizedT += dt;
+                if (!v._morphing && v._alienizedT > v._alienizedDur){
+                    v._morphing = true;
+                    v._morphT = 0;
+                }
+                if (v._morphing){
+                    v._morphT += dt;
+                    if (v._morphT >= v._morphDur){
+                        v._alienized = false;
+                        v._morphing = false;
+                        v._morphT = 0;
+                    }
+                }
+            }
             v.x+=v.dir*v.speed*spMul*dt*0.055;
             v.lightPhase+=dt*0.005;
             v.wiperT+=dt*0.012;
@@ -4271,6 +4291,8 @@
         var sm = 1;
         for(var i=0;i<peds.length;i++) {
             var p=peds[i];
+            /* abducted peds — held in the saucer's beam, no walking */
+            if (p._absHidden || p._absLifting) { p.t+=dt*0.003; continue; }
             p.x+=p.dir*p.speed*sm*dt*0.038;
             p.t+=dt*0.003;
             if(type==='earthquake') {
@@ -4297,11 +4319,18 @@
         var isHot=(type==='heat');
         for(var i=0;i<peds.length;i++) {
             var p=peds[i];
+            /* skip peds currently hidden inside an alien ship; the
+               abduction renderer draws them in the beam itself. */
+            if (p._absHidden && !p._absLifting) continue;
             var rowOff=p.row*6;
             /* earthquake per-ped jitter */
             var eqX = p.eqX||0, eqY = p.eqY||0;
             if(eqX||eqY) { c.save(); c.translate(eqX, eqY); }
             var pedY=GROUND+rdH*0.58+rowOff;
+            /* lifted by tractor beam — override y for vertical lift */
+            if (p._absLifting && p._absY !== undefined) {
+                pedY = p._absY;
+            }
             var col=COATS[p.coat];
 
             var swing=Math.sin(p.t*4.5)*3;
@@ -6787,11 +6816,79 @@
         if (!paradeOn) {
             for(var vi=0;vi<sortedV.length;vi++) {
                 var V=sortedV[vi];
+                /* skip cars that are hidden inside an alien saucer */
+                if (V._absHidden && !V._absLifting) continue;
                 var off = (V.xShake||0)||(V.yOff||0);
-                if(off) { dynC.save(); dynC.translate(V.xShake||0, V.yOff||0); }
+                if(off || V._absLifting){
+                    dynC.save();
+                    if (V._absLifting && V._absY !== undefined){
+                        /* during lift, override draw y by translating
+                           so the existing drawVehicle code stays
+                           untouched */
+                        var rdHV = H - GROUND;
+                        var laneOffV = (V.dir===1) ? rdHV*0.06 : -rdHV*0.06;
+                        var baseY = GROUND + rdHV*0.10 + laneOffV;
+                        dynC.translate(0, V._absY - baseY);
+                    } else if (off) {
+                        dynC.translate(V.xShake||0, V.yOff||0);
+                    }
+                }
                 drawVehicle(dynC,V);
                 drawCarExtras(dynC, V, type);
-                if(off) dynC.restore();
+                /* ALIEN-CAR GLOW — green hover-halo + electric arcs
+                   while the car is "alienized". During morph phase the
+                   glow pulses fast and fades out. */
+                if (V._alienized){
+                    var rdHV2 = H - GROUND;
+                    var laneOffV2 = (V.dir===1) ? rdHV2*0.06 : -rdHV2*0.06;
+                    var byV2 = GROUND + rdHV2*0.10 + laneOffV2;
+                    var carScale = Math.max(5, rdHV2*0.12);
+                    var morphProg = V._morphing ? (V._morphT / V._morphDur) : 0;
+                    var glowA = (1 - morphProg) * (0.55 + Math.sin(performance.now()*0.012 + V.x*0.05)*0.25);
+                    var pulseFast = V._morphing ? Math.sin(V._morphT*0.05) * 0.5 + 0.5 : 0;
+                    /* underbelly green hover glow */
+                    var gh = dynC.createRadialGradient(V.x, byV2+2, 1, V.x, byV2+2, carScale*1.4);
+                    gh.addColorStop(0, 'rgba(100,255,140,' + glowA + ')');
+                    gh.addColorStop(0.5, 'rgba(60,200,100,' + (glowA*0.55) + ')');
+                    gh.addColorStop(1, 'rgba(60,200,100,0)');
+                    dynC.fillStyle = gh;
+                    dynC.beginPath();
+                    dynC.ellipse(V.x, byV2+2, carScale*1.4, carScale*0.55, 0, 0, Math.PI*2);
+                    dynC.fill();
+                    /* electric arcs over body — 3 short jagged bolts */
+                    for (var ea=0; ea<3; ea++){
+                        var eaOff = (ea-1) * carScale*0.35;
+                        var ax0 = V.x + eaOff, ay0 = byV2 - carScale*0.55;
+                        var jitter1 = rng(-3, 3), jitter2 = rng(-3, 3);
+                        dynC.strokeStyle = 'rgba(180,255,220,' + (glowA*0.85) + ')';
+                        dynC.lineWidth = 1.2;
+                        dynC.beginPath();
+                        dynC.moveTo(ax0 - 4, ay0 - 2);
+                        dynC.lineTo(ax0 + jitter1, ay0 - 6);
+                        dynC.lineTo(ax0 + 4, ay0 - 4);
+                        dynC.stroke();
+                    }
+                    /* alien chassis tint — green wash on body */
+                    dynC.fillStyle = 'rgba(120,255,150,' + (glowA*0.35) + ')';
+                    dynC.fillRect(V.x - carScale*0.55, byV2 - carScale*0.5, carScale*1.1, carScale*0.5);
+                    /* eyes-as-headlights — bright green dots */
+                    var ed = V.dir;
+                    dynC.fillStyle = 'rgba(180,255,160,' + glowA + ')';
+                    dynC.beginPath(); dynC.arc(V.x + ed*carScale*0.50, byV2 - carScale*0.22, 1.6, 0, Math.PI*2); dynC.fill();
+                    dynC.beginPath(); dynC.arc(V.x + ed*carScale*0.50, byV2 - carScale*0.10, 1.6, 0, Math.PI*2); dynC.fill();
+                    /* morph ripple ring */
+                    if (V._morphing){
+                        dynC.strokeStyle = 'rgba(160,255,200,' + (1 - morphProg) + ')';
+                        dynC.lineWidth = 1.4;
+                        dynC.beginPath();
+                        dynC.ellipse(V.x, byV2 - carScale*0.20,
+                                     carScale*0.6 + morphProg*carScale*0.8,
+                                     carScale*0.2 + morphProg*carScale*0.3,
+                                     0, 0, Math.PI*2);
+                        dynC.stroke();
+                    }
+                }
+                if(off || V._absLifting) dynC.restore();
             }
         }
         drawPeds(dynC);
@@ -8050,8 +8147,11 @@
     function updateMissileSystem(dt) {
         /* defensive — make sure batteries exist (handles deferred canvas sizing) */
         if (!airDefence || airDefence.length===0) initAirDefence();
-        /* DEFENCE MODE — AI spawns hostile missiles for the user to intercept */
-        if (defenceMode) {
+        /* DEFENCE MODE — AI spawns hostile missiles for the user to intercept.
+           Skip while ABDUCTION is active: during an alien wave the
+           defence batteries are firing UP at saucers, not defending
+           against simulated AI city missiles. */
+        if (defenceMode && !abductionOn) {
             defenceModeTimer -= dt;
             if (defenceModeTimer <= 0) {
                 /* defenceDifficulty: 0 = slow (4–6.5s), 1 = fast (0.5–2s) */
@@ -11803,31 +11903,94 @@
                        ic.kind==='kinslug' || ic.kind==='gravnet') {
                 drawInterceptorBodyExtra(c, ic);
             } else {
-                /* small white SAM body */
-                c.fillStyle = '#e8ecf2';
+                /* ── ENHANCED SAM / PATRIOT / generic interceptor ──
+                   Layered render with motion-blur halo, swept fins,
+                   bi-color body, hot nose-cone glow, vapor cone tip,
+                   and a 3-color exhaust plume + corona. */
+                /* motion-blur halo behind body */
+                var hloKind = ic.kind==='multi'   ? 'rgba(255,220,80,'
+                            : ic.kind==='patriot' ? 'rgba(140,200,255,'
+                            : 'rgba(255,200,140,';
+                c.fillStyle = hloKind + '0.35)';
                 c.beginPath();
-                c.moveTo(8,0); c.lineTo(3,-2); c.lineTo(-7,-2); c.lineTo(-7,2); c.lineTo(3,2);
+                c.ellipse(-3, 0, 16, 3.0, 0, 0, Math.PI*2);
+                c.fill();
+                /* swept fin shadows */
+                c.fillStyle = '#2a2e36';
+                c.beginPath(); c.moveTo(-4,-2.2); c.lineTo(-10,-5); c.lineTo(-6,-2.2); c.closePath(); c.fill();
+                c.beginPath(); c.moveTo(-4, 2.2); c.lineTo(-10, 5); c.lineTo(-6, 2.2); c.closePath(); c.fill();
+                /* fin LED tips */
+                c.fillStyle = hloKind + '0.95)';
+                c.beginPath(); c.arc(-10,-5,1.0,0,Math.PI*2); c.fill();
+                c.beginPath(); c.arc(-10, 5,1.0,0,Math.PI*2); c.fill();
+                /* mid-stabilisers */
+                c.fillStyle = '#3a3f4a';
+                c.beginPath(); c.moveTo(0,-2.2); c.lineTo(-2,-3.6); c.lineTo(-3,-2.2); c.closePath(); c.fill();
+                c.beginPath(); c.moveTo(0, 2.2); c.lineTo(-2, 3.6); c.lineTo(-3, 2.2); c.closePath(); c.fill();
+                /* main body — chrome gradient */
+                var bg = c.createLinearGradient(0,-2.4, 0, 2.4);
+                bg.addColorStop(0,   '#f4f6fa');
+                bg.addColorStop(0.5, '#a0a8b2');
+                bg.addColorStop(1,   '#54595e');
+                c.fillStyle = bg;
+                c.beginPath();
+                c.moveTo(8,0); c.lineTo(3,-2.4); c.lineTo(-7,-2.4); c.lineTo(-7,2.4); c.lineTo(3,2.4);
                 c.closePath(); c.fill();
-                c.strokeStyle='#404858'; c.lineWidth=0.6; c.stroke();
-                /* nose */
-                c.fillStyle = ic.kind==='multi'   ? '#ffd040'
+                /* upper highlight stripe */
+                c.fillStyle = 'rgba(255,255,255,0.65)';
+                c.fillRect(-7,-2.4, 10, 0.8);
+                /* panel lines */
+                c.strokeStyle = 'rgba(20,30,50,0.55)';
+                c.lineWidth = 0.5;
+                c.beginPath();
+                c.moveTo(-2,-2.4); c.lineTo(-2,2.4);
+                c.moveTo( 2,-2.4); c.lineTo( 2,2.4);
+                c.stroke();
+                /* cockpit/sensor glow on body */
+                c.fillStyle = hloKind + '0.95)';
+                c.beginPath(); c.arc(0, 0, 1.4, 0, Math.PI*2); c.fill();
+                /* nose cone — bright type-color */
+                var noseCol = ic.kind==='multi'   ? '#ffd040'
                             : ic.kind==='patriot' ? '#3060e0'
                             : '#c0202a';
-                c.beginPath(); c.moveTo(8,0); c.lineTo(3,-2); c.lineTo(3,2); c.closePath(); c.fill();
-                /* fins */
-                c.fillStyle='#5a606c';
-                c.beginPath(); c.moveTo(-7,-2); c.lineTo(-10,-4); c.lineTo(-5,-2); c.closePath(); c.fill();
-                c.beginPath(); c.moveTo(-7,2);  c.lineTo(-10,4);  c.lineTo(-5,2);  c.closePath(); c.fill();
-                /* exhaust */
-                var fl = 5 + Math.sin(ic.spinT*0.04)*2;
-                var fg2 = c.createLinearGradient(-7,0,-7-fl*1.8,0);
-                fg2.addColorStop(0,'rgba(255,240,180,1)');
-                fg2.addColorStop(0.5,'rgba(255,140,40,0.7)');
-                fg2.addColorStop(1,'rgba(120,30,10,0)');
-                c.fillStyle = fg2;
+                c.fillStyle = noseCol;
+                c.beginPath(); c.moveTo(8,0); c.lineTo(3,-2.4); c.lineTo(3,2.4); c.closePath(); c.fill();
+                /* vapor cone at the tip */
+                var vcg = c.createRadialGradient(8,0,0.5, 8,0, 5);
+                vcg.addColorStop(0, 'rgba(255,255,255,0.95)');
+                vcg.addColorStop(0.5, hloKind + '0.55)');
+                vcg.addColorStop(1, hloKind + '0)');
+                c.fillStyle = vcg;
+                c.beginPath(); c.arc(8, 0, 5, 0, Math.PI*2); c.fill();
+                /* hot sensor dot on tip */
+                c.fillStyle = '#ffffff';
+                c.beginPath(); c.arc(7, 0, 0.9, 0, Math.PI*2); c.fill();
+                /* EXHAUST PLUME — 4 stacked flames + corona */
+                var fl = 7 + Math.sin(ic.spinT*0.04)*2;
+                /* corona behind nozzle */
+                var corG = c.createRadialGradient(-9,0,1, -9,0, 11);
+                corG.addColorStop(0, hloKind + '0.85)');
+                corG.addColorStop(0.5, 'rgba(255,220,140,0.55)');
+                corG.addColorStop(1, 'rgba(255,180,80,0)');
+                c.fillStyle = corG;
+                c.beginPath(); c.arc(-9, 0, 11, 0, Math.PI*2); c.fill();
+                /* outer flame */
+                c.fillStyle = '#ff8030';
                 c.beginPath();
-                c.moveTo(-7,-1.5); c.lineTo(-7-fl*1.8,0); c.lineTo(-7,1.5);
-                c.closePath(); c.fill();
+                c.moveTo(-7,-2.2); c.lineTo(-7-fl*1.8,-3.0); c.lineTo(-7-fl*1.4,0);
+                c.lineTo(-7-fl*1.8, 3.0); c.lineTo(-7, 2.2); c.closePath(); c.fill();
+                /* mid flame */
+                c.fillStyle = '#ffd060';
+                c.beginPath();
+                c.moveTo(-7,-1.5); c.lineTo(-7-fl*1.3,-1.8); c.lineTo(-7-fl,0);
+                c.lineTo(-7-fl*1.3, 1.8); c.lineTo(-7, 1.5); c.closePath(); c.fill();
+                /* white-hot core */
+                c.fillStyle = '#ffffff';
+                c.beginPath();
+                c.moveTo(-7,-0.7); c.lineTo(-7-fl*0.8, 0); c.lineTo(-7, 0.7); c.closePath(); c.fill();
+                /* nozzle dot */
+                c.fillStyle = hloKind + '0.95)';
+                c.beginPath(); c.arc(-7, 0, 1.4, 0, Math.PI*2); c.fill();
             }
             c.restore();
         }
@@ -12118,10 +12281,26 @@
        - Attack mode: click fires a missile at that spot
        Stays in mode across multiple clicks; only the widget buttons toggle modes. */
     canvas.addEventListener('click', function(ev){
-        if(!defenceMode && !missileArmed && !strategyMode) return;
         var rect = canvas.getBoundingClientRect();
         var sx = (ev.clientX - rect.left) * (canvas.width / rect.width);
         var sy = (ev.clientY - rect.top)  * (canvas.height/ rect.height);
+        /* ABDUCTION click-to-fire — while abduction is on, every
+           click fires the selected missile at the nearest saucer
+           as a BONUS shot (works alongside the auto-fire system). */
+        if (typeof abductionOn !== 'undefined' && abductionOn){
+            if (window.fireAbductionManual && window.fireAbductionManual(sx, sy)){
+                return;
+            }
+        }
+        /* SUPERHERO target villain — click ANY villain on screen to
+           designate them as the priority target. All heroes will
+           converge to attack them. Works regardless of Auto state. */
+        if (typeof superheroOn !== 'undefined' && superheroOn){
+            if (window.fireSuperheroManual && window.fireSuperheroManual(sx, sy)){
+                return;
+            }
+        }
+        if(!defenceMode && !missileArmed && !strategyMode) return;
         if (strategyMode) {
             if (strategyQueue.length >= STRATEGY_MAX) return;
             var kind = MISSILE_TYPES[missileTypeIdx];
@@ -12493,7 +12672,22 @@
     window.setAutoDefenceEnabled = function(on){
         autoDefenceOn = !!on;
         autoDefenceTimer = 0;
-        if (autoDefenceOn && !defenceMode) defenceMode = true;
+        if (autoDefenceOn){
+            /* AUTO-DEFENCE requires defenceMode (so AI spawns hostile
+               missiles) AND defenceActive (so the batteries
+               auto-engage them via tryIntercept). toggleDefenceMode
+               turns defenceActive OFF for the manual-defence game,
+               so we must explicitly turn it back ON here — otherwise
+               every interceptor is skipped at the
+               `if (!defenceActive) return;` guard. */
+            if (!defenceMode) defenceMode = true;
+            defenceActive = true;
+        } else {
+            /* On AUTO OFF, leave defenceMode where it is (user may
+               still want to manually click-intercept) but defenceActive
+               can stay true — the original toggleDefenceMode path
+               re-asserts the right state on its own. */
+        }
     };
 
     function pickAutoAttackTarget(){
@@ -12533,13 +12727,36 @@
                 missileArmed = savedArmed;
             }
         }
-        /* AUTO-DEFENCE: rotate the active interceptor type so every combo is exercised */
+        /* AUTO-DEFENCE: rotate the active interceptor type AND spawn
+           a steady stream of incoming AI missiles so the defence
+           batteries have something to intercept. Without this stream
+           the user sees nothing happening on auto-defence. The
+           defenceActive flag (set when defenceMode is on) makes the
+           batteries auto-intercept everything that flies in.
+
+           Fire-rate scales with defence difficulty:
+             0% → 1500 ms between attacks
+             100% → 250 ms between attacks
+           Each attack uses the user-selected DEFENCE chip's matching
+           offensive type, so anti-missiles fired in response are
+           drawn from the defence-control items. */
         if (autoDefenceOn) {
             autoDefenceTimer -= dt;
             if (autoDefenceTimer <= 0) {
-                autoDefenceTimer = 1500 - 750*defenceDifficulty;
+                autoDefenceTimer = 1500 - 1250*defenceDifficulty;
                 autoDefenceCyc = (autoDefenceCyc + 1) % DEFENCE_TYPES.length;
                 defenceTypeIdx = autoDefenceCyc;
+                /* Spawn an attacking missile so the defence has a
+                   target — uses the cycled MISSILE_TYPE matching the
+                   current defence-type slot. defenceActive stays on
+                   (defenceMode is true while auto-defence is on) so
+                   the batteries auto-engage. */
+                var atkKind = MISSILE_TYPES[autoDefenceCyc % MISSILE_TYPES.length];
+                var tgt = pickAutoAttackTarget();
+                var savedArmed = missileArmed;
+                missileArmed = true;
+                fireMissile(tgt.x, tgt.y, atkKind);
+                missileArmed = savedArmed;
             }
         }
     }
@@ -14294,32 +14511,74 @@
         }
     }
 
-    /* ─── Cap auto-attack / auto-defence at AUTO_MAX_DURATION ─── */
+    /* Auto-attack / auto-defence run forever while toggled ON.
+       The previous AUTO_MAX_DURATION auto-shutoff was removed — auto
+       mode now only ends when the user clicks OFF. */
     function updateAutoTimers(){
-        var now = (typeof performance !== 'undefined' && performance.now)
-                  ? performance.now() : Date.now();
-        if (autoAttackOn && (now - autoAttackStartT) > AUTO_MAX_DURATION){
-            autoAttackOn = false;
-            autoAttackTimer = 0;
-            var aBtn = document.getElementById('ttAttackAutoBtn');
-            if (aBtn){
-                aBtn.setAttribute('aria-pressed', 'false');
-                aBtn.classList.remove('on');
-                aBtn.textContent = 'OFF';
+        /* no-op */
+    }
+
+    /* ── AUTO CITY ADVANCE ─────────────────────────────────────────
+       When the city is leveled while any auto mode is running
+       (Attack-control AUTO, Defence-control AUTO, or Superhero
+       AUTO), automatically fly to the next city — same effect as
+       clicking the Flight Control plane button. Cooldown prevents
+       retriggering until the new city has had time to populate. */
+    var _autoCitySwitchCooldown = 0;        /* ms until next allowed switch */
+    var _autoCitySwitchLastT    = 0;
+
+    function _bgBuildingDestroyed(b){
+        if (typeof wreckage === 'undefined' || !wreckage) return false;
+        var cxB = b.x + b.w * 0.5;
+        for (var wi = 0; wi < wreckage.length; wi++){
+            var w = wreckage[wi];
+            if (w.kind === 'brokenBuilding' &&
+                cxB >= w.leftX && cxB <= w.rightX){
+                return true;
             }
-            startReconstruction();
         }
-        if (autoDefenceOn && (now - autoDefenceStartT) > AUTO_MAX_DURATION){
-            autoDefenceOn = false;
-            autoDefenceTimer = 0;
-            var dBtn = document.getElementById('ttDefenceAutoBtn');
-            if (dBtn){
-                dBtn.setAttribute('aria-pressed', 'false');
-                dBtn.classList.remove('on');
-                dBtn.textContent = 'OFF';
-            }
-            startReconstruction();
+        return false;
+    }
+
+    function cityRuinFraction(){
+        if (typeof BGBUILDS === 'undefined' || !BGBUILDS || !BGBUILDS.length) return 0;
+        var total = 0, dead = 0;
+        for (var i = 0; i < BGBUILDS.length; i++){
+            var b = BGBUILDS[i];
+            /* only count buildings visible on screen */
+            if (b.x + b.w < 0 || b.x > W) continue;
+            /* only count meaningfully tall buildings (skip tiny shacks) */
+            if (b.h < 30) continue;
+            total++;
+            if (_bgBuildingDestroyed(b)) dead++;
         }
+        if (total === 0) return 0;
+        return dead / total;
+    }
+
+    function maybeAutoSwitchCity(dt){
+        if (_autoCitySwitchCooldown > 0){
+            _autoCitySwitchCooldown -= dt;
+            return;
+        }
+        /* ANY auto mode active? */
+        var attackAuto  = (typeof autoAttackOn  !== 'undefined') && autoAttackOn;
+        var defenceAuto = (typeof autoDefenceOn !== 'undefined') && autoDefenceOn;
+        var heroAuto    = (typeof superheroOn   !== 'undefined') && superheroOn &&
+                          (typeof superheroAutoFight !== 'undefined') && superheroAutoFight;
+        if (!attackAuto && !defenceAuto && !heroAuto) return;
+        /* never re-trigger while a flight is already in progress */
+        if (typeof airplane !== 'undefined' && airplane) return;
+        /* threshold: ≥80% of on-screen tall buildings reduced to rubble */
+        if (cityRuinFraction() < 0.80) return;
+        if (typeof window.switchCity !== 'function') return;
+        try { window.switchCity(); } catch(_e){ return; }
+        /* 12 s lockout — gives the plane time to fly in, rebuild
+           BGBUILDS, and start populating the new city before we
+           consider switching again. */
+        _autoCitySwitchCooldown = 12000;
+        _autoCitySwitchLastT = (typeof performance !== 'undefined' && performance.now)
+                               ? performance.now() : Date.now();
     }
 
     /* ─── Public window API ──────────────────────────────────── */
@@ -14396,6 +14655,125 @@
     var paradeContrails = [];      /* jet vapour trails */
     var paradeFlares = [];         /* drop flares from helis */
 
+    /* PARADE THEME picker — `Military Parade` is the original full
+       display; the other themes pick a subset (or amplification) of
+       the existing unit types so the parade reads differently each
+       time the user selects one. Each theme value is a multiplier
+       applied to the default count for that unit kind (0 = skip).
+       Default theme = 'military'. */
+    /* 14 parade themes — EVERY theme has BOTH road and sky packed
+       with units AND a SALUTES array of multiple firing kinds.
+       Each spawn tick picks one kind at random from the array, so
+       the parade fires a constant mix of different effects.
+
+       Salute kinds available:
+         flak, smoketrail, tankarc, riflevolley, firework,
+         navalcannon, confetti, phantommsl, samclimb, mgtracer,
+         howitzerarc, rpgburst, droneblink, royalcannon,
+         mortar, chaff, napalm, plasma, emp, shrapnel,
+         starshell, tracerstream, shockwave, airburst, dragon  */
+    var PARADE_THEMES = [
+        /* ── row 1 ─────────────────────────────────────────────── */
+        { id:'military', name:'Military Parade', icon:'fa-fighter-jet',
+          mult:{ jet:1.0, heli:1.0, banner:1.0, blimp:1.0,
+                 tank:1.0, launcher:1.0, apc:1.0, humvee:1.0, howitzer:1.0, soldier:1.0 },
+          salute:{ kinds:['flak','tankarc','tracerstream','airburst','mortar'],
+                   intMin:120, intMax:280,
+                   colorA:'#5a5a5a', colorB:'#cccccc' } },
+        { id:'airshow', name:'Air Show', icon:'fa-plane',
+          mult:{ jet:1.8, heli:1.4, banner:1.4, blimp:1.4,
+                 tank:0.7, launcher:0.7, apc:0.8, humvee:0.8, howitzer:0.6, soldier:1.0 },
+          salute:{ kinds:['smoketrail','chaff','starshell','airburst'],
+                   intMin:90, intMax:200,
+                   colorA:'#ff4060', colorB:'#4080ff' } },
+        { id:'armor', name:'Armor Column', icon:'fa-truck',
+          mult:{ jet:0.7, heli:0.8, banner:0.7, blimp:0.6,
+                 tank:1.6, launcher:1.5, apc:1.4, humvee:1.3, howitzer:1.5, soldier:1.0 },
+          salute:{ kinds:['tankarc','flak','mortar','shrapnel','shockwave','tracerstream'],
+                   intMin:100, intMax:240,
+                   colorA:'#ffaa30', colorB:'#ff5400' } },
+        { id:'marching', name:'Marching Bands', icon:'fa-music',
+          mult:{ jet:0.7, heli:0.8, banner:1.6, blimp:1.4,
+                 tank:0.7, launcher:0.7, apc:1.0, humvee:1.0, howitzer:0.6, soldier:2.6 },
+          salute:{ kinds:['riflevolley','firework','tracerstream','starshell','confetti'],
+                   intMin:120, intMax:260,
+                   colorA:'#ffe040', colorB:'#aa8800' } },
+        { id:'patriot', name:'Patriotic Flyover', icon:'fa-flag',
+          mult:{ jet:1.7, heli:0.9, banner:2.1, blimp:1.6,
+                 tank:0.7, launcher:0.7, apc:0.9, humvee:1.0, howitzer:0.6, soldier:1.6 },
+          salute:{ kinds:['firework','smoketrail','starshell','airburst','riflevolley'],
+                   intMin:100, intMax:220,
+                   colorA:'#ff2040', colorB:'#2060ff' } },
+        { id:'naval', name:'Naval Salute', icon:'fa-anchor',
+          mult:{ jet:0.9, heli:1.4, banner:1.0, blimp:0.8,
+                 tank:1.0, launcher:1.2, apc:1.2, humvee:1.0, howitzer:1.1, soldier:1.3 },
+          salute:{ kinds:['navalcannon','mortar','flak','shockwave','tracerstream'],
+                   intMin:140, intMax:300,
+                   colorA:'#dddddd', colorB:'#aaaaaa' } },
+        { id:'banner', name:'Banner Procession', icon:'fa-flag-checkered',
+          mult:{ jet:0.8, heli:0.9, banner:2.4, blimp:2.0,
+                 tank:0.6, launcher:0.6, apc:0.8, humvee:0.9, howitzer:0.6, soldier:1.4 },
+          salute:{ kinds:['confetti','firework','starshell','smoketrail','riflevolley'],
+                   intMin:90, intMax:200,
+                   colorA:'#ffcc20', colorB:'#ff60a0' } },
+        /* ── row 2 ─────────────────────────────────────────────── */
+        { id:'stealth', name:'Stealth Squadron', icon:'fa-eye-slash',
+          mult:{ jet:1.6, heli:0.9, banner:0.7, blimp:0.6,
+                 tank:0.7, launcher:1.0, apc:1.0, humvee:0.9, howitzer:0.7, soldier:0.9 },
+          salute:{ kinds:['phantommsl','emp','plasma','chaff','airburst'],
+                   intMin:180, intMax:380,
+                   colorA:'#202028', colorB:'#404060' } },
+        { id:'rocket', name:'Rocket Battery', icon:'fa-rocket',
+          mult:{ jet:0.7, heli:0.8, banner:0.7, blimp:0.6,
+                 tank:0.8, launcher:2.4, apc:0.9, humvee:0.8, howitzer:1.6, soldier:0.9 },
+          salute:{ kinds:['samclimb','rpgburst','napalm','airburst','mortar','shockwave'],
+                   intMin:90, intMax:220,
+                   colorA:'#ffd040', colorB:'#ff4020' } },
+        { id:'cavalry', name:'Cavalry Charge', icon:'fa-car',
+          mult:{ jet:0.7, heli:1.0, banner:0.7, blimp:0.6,
+                 tank:1.0, launcher:0.8, apc:1.6, humvee:2.2, howitzer:0.7, soldier:1.4 },
+          salute:{ kinds:['mgtracer','tracerstream','shrapnel','riflevolley','flak'],
+                   intMin:80, intMax:180,
+                   colorA:'#ff8020', colorB:'#ffaa40' } },
+        { id:'artillery', name:'Heavy Artillery', icon:'fa-crosshairs',
+          mult:{ jet:0.7, heli:0.8, banner:0.6, blimp:0.5,
+                 tank:1.0, launcher:1.2, apc:0.9, humvee:0.9, howitzer:2.4, soldier:0.8 },
+          salute:{ kinds:['howitzerarc','mortar','shrapnel','shockwave','flak','airburst'],
+                   intMin:140, intMax:280,
+                   colorA:'#cccccc', colorB:'#666666' } },
+        { id:'special', name:'Special Forces', icon:'fa-user-secret',
+          mult:{ jet:0.8, heli:1.2, banner:0.7, blimp:0.5,
+                 tank:0.8, launcher:0.9, apc:1.2, humvee:1.3, howitzer:0.8, soldier:2.6 },
+          salute:{ kinds:['rpgburst','riflevolley','mgtracer','shrapnel','tracerstream'],
+                   intMin:120, intMax:240,
+                   colorA:'#ff4020', colorB:'#ff9020' } },
+        { id:'drone', name:'Drone Swarm', icon:'fa-paper-plane',
+          mult:{ jet:0.7, heli:2.4, banner:0.7, blimp:0.6,
+                 tank:0.7, launcher:0.9, apc:0.9, humvee:1.0, howitzer:0.7, soldier:1.0 },
+          salute:{ kinds:['droneblink','plasma','emp','chaff','airburst'],
+                   intMin:50, intMax:130,
+                   colorA:'#40ff80', colorB:'#80c0ff' } },
+        { id:'royal', name:'Royal Honor', icon:'fa-trophy',
+          mult:{ jet:0.9, heli:1.0, banner:1.8, blimp:1.7,
+                 tank:1.0, launcher:0.9, apc:1.2, humvee:1.3, howitzer:1.1, soldier:2.3 },
+          salute:{ kinds:['royalcannon','firework','starshell','riflevolley','dragon','confetti'],
+                   intMin:120, intMax:260,
+                   colorA:'#ffd700', colorB:'#ff8800' } }
+    ];
+    var paradeThemeIdx = 0;
+    function paradeMult(kind){
+        var t = PARADE_THEMES[paradeThemeIdx] || PARADE_THEMES[0];
+        var v = t.mult[kind];
+        return (typeof v === 'number') ? v : 1;
+    }
+    /* pmCount(base, kind) — base count * theme multiplier, ceiled.
+       Returns 0 if multiplier is exactly 0 so the loop is skipped. */
+    function pmCount(base, kind){
+        var m = paradeMult(kind);
+        if (m === 0) return 0;
+        return Math.max(1, Math.round(base * m));
+    }
+
     function startParade(){
         if (paradeOn) return;
 
@@ -14420,6 +14798,33 @@
         if (typeof strategyMode !== 'undefined' && strategyMode) {
             strategyMode = false;
             if (canvas && canvas.style) canvas.style.cursor = '';
+        }
+        /* AUTO toggles — clicking parade should also turn OFF the
+           Auto-Attack and Auto-Defence cycles, since parade owns the
+           city for the duration. Reset the internal state flags AND
+           sync the visible AUTO toggle buttons in the tooltips so the
+           UI matches the new state. */
+        if (typeof autoAttackOn !== 'undefined' && autoAttackOn) {
+            autoAttackOn = false;
+            autoAttackTimer = 0;
+        }
+        if (typeof autoDefenceOn !== 'undefined' && autoDefenceOn) {
+            autoDefenceOn = false;
+            autoDefenceTimer = 0;
+        }
+        if (typeof document !== 'undefined') {
+            var aBtn = document.getElementById('ttAttackAutoBtn');
+            if (aBtn) {
+                aBtn.setAttribute('aria-pressed', 'false');
+                aBtn.classList.remove('on');
+                aBtn.textContent = 'OFF';
+            }
+            var dBtn = document.getElementById('ttDefenceAutoBtn');
+            if (dBtn) {
+                dBtn.setAttribute('aria-pressed', 'false');
+                dBtn.classList.remove('on');
+                dBtn.textContent = 'OFF';
+            }
         }
         /* INSTANT REBUILD on parade start.
            Per user spec: clicking "Parade" should always behave as if
@@ -14474,13 +14879,15 @@
 
         /* ── SKY — saturated across every altitude band ─────────── */
 
-        /* JETS — 5 altitude bands, 6-8 jets per band = 36 jets. */
+        /* JETS — 6 altitude bands, denser per band so the sky is
+           visibly PACKED with aircraft regardless of theme. */
         var jetBands = [
-            { y: skyTop,                 count: 8, size: 20, vx: 1.6 },
-            { y: skyTop + 50,            count: 7, size: 18, vx: 1.5 },
-            { y: skyMid - 30,            count: 8, size: 17, vx: 1.7 },
-            { y: skyMid + 20,            count: 7, size: 16, vx: 1.8 },
-            { y: skyLow - 10,            count: 6, size: 15, vx: 1.9 }
+            { y: skyTop,                 count: pmCount(10,'jet'), size: 22, vx: 1.6 },
+            { y: skyTop + 50,            count: pmCount( 9,'jet'), size: 20, vx: 1.5 },
+            { y: skyMid - 30,            count: pmCount(10,'jet'), size: 18, vx: 1.7 },
+            { y: skyMid + 20,            count: pmCount( 9,'jet'), size: 17, vx: 1.8 },
+            { y: skyLow - 30,            count: pmCount( 8,'jet'), size: 16, vx: 1.9 },
+            { y: skyLow + 20,            count: pmCount( 7,'jet'), size: 15, vx: 2.0 }
         ];
         for (var jb=0; jb<jetBands.length; jb++){
             var band = jetBands[jb];
@@ -14497,8 +14904,9 @@
             }
         }
 
-        /* HELICOPTERS — 14 across two altitude bands. */
-        for (var h=0; h<14; h++){
+        /* HELICOPTERS — 22 across three altitude bands. */
+        var heliCount = pmCount(22,'heli');
+        for (var h=0; h<heliCount; h++){
             paradeHelis.push({
                 x: -W*0.05 + h*(W*0.10),
                 y: (h%2 ? skyMid + 10 : skyMid + 50),
@@ -14513,21 +14921,24 @@
 
         /* BANNER PLANES — 6 strung across low altitude carrying long
            banners (so the whole low sky is filled with text + colour). */
-        var bannerTexts = ['VICTORY','FREEDOM','HONOR','GLORY','UNITY','PEACE'];
-        for (var b=0; b<bannerTexts.length; b++){
+        var bannerTexts = ['VICTORY','FREEDOM','HONOR','GLORY','UNITY','PEACE','VALOR','TRIUMPH','LIBERTY','COURAGE'];
+        var bannerCount = pmCount(bannerTexts.length,'banner');
+        for (var b=0; b<bannerCount; b++){
+            var bt = bannerTexts[b % bannerTexts.length];
             paradeBannerPlanes.push({
                 x: -W*0.5 + b*(W*0.35),
                 y: skyLow + (b%2 ? 0 : 28),
                 vx: 0.85,
                 size: 13,
                 propRot: 0,
-                bannerText: bannerTexts[b],
+                bannerText: bt,
                 bob: rng(0, Math.PI*2)
             });
         }
 
-        /* BLIMPS — 4 stacked high overhead. */
-        for (var bl=0; bl<4; bl++){
+        /* BLIMPS — 7 stacked high overhead. */
+        var blimpCount = pmCount(7,'blimp');
+        for (var bl=0; bl<blimpCount; bl++){
             paradeBlimps.push({
                 x: -W*0.4 + bl*(W*0.32),
                 y: skyTop - 40 + (bl%2 ? 22 : 0),
@@ -14553,8 +14964,9 @@
            with multiple unit types interleaved so the road reads as
            an unbroken column of armour + artillery. */
 
-        /* TANKS — 16, tight spacing */
-        for (var t=0; t<16; t++){
+        /* TANKS — 24, tight spacing */
+        var tankLowerCount = pmCount(24,'tank');
+        for (var t=0; t<tankLowerCount; t++){
             paradeTanks.push({
                 x: -W*0.15 + t*(W*0.10),
                 y: laneLowerY,
@@ -14564,8 +14976,9 @@
                 trackOffset: rng(0, 1000)
             });
         }
-        /* MISSILE LAUNCHERS — 10, interleaved with tanks */
-        for (var m=0; m<10; m++){
+        /* MISSILE LAUNCHERS — 16, interleaved with tanks */
+        var lnchLowerCount = pmCount(16,'launcher');
+        for (var m=0; m<lnchLowerCount; m++){
             paradeLaunchers.push({
                 x: -W*0.10 + m*(W*0.12),
                 y: laneLowerY + 1,
@@ -14574,8 +14987,9 @@
                 wheelOffset: rng(0, 1000)
             });
         }
-        /* HOWITZERS — 8 in lower lane */
-        for (var ho=0; ho<8; ho++){
+        /* HOWITZERS — 14 in lower lane */
+        var howLowerCount = pmCount(14,'howitzer');
+        for (var ho=0; ho<howLowerCount; ho++){
             paradeHowitzers.push({
                 x: -W*0.05 + ho*(W*0.14),
                 y: laneLowerY,
@@ -14585,7 +14999,8 @@
             });
         }
         /* APCs LOWER — 7 packed in lower lane */
-        for (var apcL=0; apcL<7; apcL++){
+        var apcLowerCount = pmCount(7,'apc');
+        for (var apcL=0; apcL<apcLowerCount; apcL++){
             paradeAPCs.push({
                 x: -W*0.12 + apcL*(W*0.16),
                 y: laneLowerY,
@@ -14596,7 +15011,8 @@
             });
         }
         /* SOLDIER SQUADS LOWER — 6 squads filling gaps */
-        for (var sqL=0; sqL<6; sqL++){
+        var sqLowerCount = pmCount(6,'soldier');
+        for (var sqL=0; sqL<sqLowerCount; sqL++){
             paradeSoldiers.push({
                 x: -W*0.05 + sqL*(W*0.18),
                 y: laneLowerY + 4,
@@ -14610,7 +15026,8 @@
         /* ─── UPPER LANE — saturated light + mixed column ─────────── */
 
         /* HUMVEES — 16 in the upper lane */
-        for (var hu=0; hu<16; hu++){
+        var humCount = pmCount(16,'humvee');
+        for (var hu=0; hu<humCount; hu++){
             paradeHumvees.push({
                 x: -W*0.08 + hu*(W*0.08),
                 y: laneUpperY,
@@ -14620,7 +15037,8 @@
             });
         }
         /* APCs UPPER — 9 across the upper lane */
-        for (var a=0; a<9; a++){
+        var apcUpperCount = pmCount(9,'apc');
+        for (var a=0; a<apcUpperCount; a++){
             paradeAPCs.push({
                 x: -W*0.10 + a*(W*0.13),
                 y: laneUpperY,
@@ -14631,7 +15049,8 @@
             });
         }
         /* HOWITZERS UPPER — 4 in upper lane */
-        for (var hoU=0; hoU<4; hoU++){
+        var howUpperCount = pmCount(4,'howitzer');
+        for (var hoU=0; hoU<howUpperCount; hoU++){
             paradeHowitzers.push({
                 x: -W*0.10 + hoU*(W*0.28),
                 y: laneUpperY,
@@ -14641,7 +15060,8 @@
             });
         }
         /* TANKS UPPER — 5 in upper lane (mixed armour) */
-        for (var tU=0; tU<5; tU++){
+        var tankUpperCount = pmCount(5,'tank');
+        for (var tU=0; tU<tankUpperCount; tU++){
             paradeTanks.push({
                 x: -W*0.08 + tU*(W*0.22),
                 y: laneUpperY,
@@ -14652,7 +15072,8 @@
             });
         }
         /* MISSILE LAUNCHERS UPPER — 3 */
-        for (var mU=0; mU<3; mU++){
+        var lnchUpperCount = pmCount(3,'launcher');
+        for (var mU=0; mU<lnchUpperCount; mU++){
             paradeLaunchers.push({
                 x: -W*0.12 + mU*(W*0.36),
                 y: laneUpperY + 1,
@@ -14662,7 +15083,8 @@
             });
         }
         /* SOLDIER SQUADS UPPER — 8 squads, packed tight */
-        for (var sqU=0; sqU<8; sqU++){
+        var sqUpperCount = pmCount(8,'soldier');
+        for (var sqU=0; sqU<sqUpperCount; sqU++){
             paradeSoldiers.push({
                 x: -W*0.05 + sqU*(W*0.14),
                 y: laneUpperY + 4,
@@ -14707,7 +15129,8 @@
     }
 
     function updateParade(dt){
-        if (!paradeOn) return;
+        if (!paradeOn){ updateParadeSalutes(dt); return; }
+        updateParadeSalutes(dt);
         var k = dt/16;
 
         /* JETS */
@@ -14850,6 +15273,9 @@
         for (var i=0; i<paradeHumvees.length; i++)   drawParadeHumvee(c, paradeHumvees[i]);
         for (var i=0; i<paradeTanks.length; i++)     drawParadeTank(c, paradeTanks[i]);
         for (var i=0; i<paradeSoldiers.length; i++)  drawParadeSquad(c, paradeSoldiers[i]);
+        /* salute / firing effects — drawn ON TOP of units so muzzle
+           flashes & tracers read above the vehicles */
+        drawParadeSalutes(c);
     }
 
     /* ── INDIVIDUAL UNIT RENDERERS ──────────────────────────── */
@@ -15843,12 +16269,9539 @@
         c.restore();
     }
 
+    /* ═══════════════════════════════════════════════════════════
+       PARADE SALUTE / FIRING SYSTEM
+       ─────────────────────────────────────────────────────────────
+       Every theme has a `salute` spec that drives a unique firing
+       effect. Salutes are projectiles / bursts / smoke trails fired
+       into empty sky by ground and air units while the parade is
+       marching. They're spawned on a timer (intMin..intMax ms) and
+       stored in `paradeSalutes`. Each entity has a `kind` string
+       that selects its update + draw routine.
+       ═══════════════════════════════════════════════════════════ */
+    var paradeSalutes = [];
+    var paradeSaluteTimer = 0;
+    /* Multi-shot salvo: queue extra salute spawns for a tiny burst
+       a few frames apart so volleys, swarms, and arcs feel rhythmic
+       rather than uniform. */
+    var paradeSaluteQueue = [];
+
+    function pickGroundUnitX(){
+        /* prefer an actual unit position so the salute clearly comes
+           FROM a parade vehicle, not random air */
+        var pools = [paradeTanks, paradeLaunchers, paradeHowitzers,
+                     paradeAPCs, paradeHumvees, paradeSoldiers];
+        for (var pi=0; pi<8; pi++){
+            var pool = pools[Math.floor(Math.random()*pools.length)];
+            if (pool && pool.length){
+                var u = pool[Math.floor(Math.random()*pool.length)];
+                if (u.x > 0 && u.x < W) return { x:u.x, y:u.y, unit:u };
+            }
+        }
+        return { x: rng(W*0.1, W*0.9), y: GROUND + (H-GROUND)*0.15, unit:null };
+    }
+    function pickAirUnitPos(){
+        var pools = [paradeJets, paradeHelis, paradeBannerPlanes, paradeBlimps];
+        for (var pi=0; pi<8; pi++){
+            var pool = pools[Math.floor(Math.random()*pools.length)];
+            if (pool && pool.length){
+                var u = pool[Math.floor(Math.random()*pool.length)];
+                if (u.x > -40 && u.x < W+40) return { x:u.x, y:u.y, unit:u };
+            }
+        }
+        return { x: rng(W*0.1, W*0.9), y: GROUND*0.3, unit:null };
+    }
+
+    function spawnParadeSalute(){
+        if (!paradeOn) return;
+        var theme = PARADE_THEMES[paradeThemeIdx];
+        if (!theme || !theme.salute) return;
+        var spec = theme.salute;
+        /* pick a random kind from the theme's array — themes fire a
+           mix of effects so the parade reads as a constant variety
+           of explosions, tracers, missiles, smoke trails */
+        var kind = spec.kinds ? spec.kinds[Math.floor(Math.random() * spec.kinds.length)] : spec.kind;
+
+        if (kind === 'flak'){
+            /* AA shell burst high in sky — concentric black puffs */
+            var fx = rng(W*0.10, W*0.90);
+            var fy = rng(H*0.06, GROUND*0.50);
+            paradeSalutes.push({
+                kind:'flak', x:fx, y:fy, age:0, max:1700,
+                colorA:spec.colorA, colorB:spec.colorB,
+                radius: rng(14, 22),
+                sparks: []
+            });
+            /* extra puffs around it */
+            for (var f=0; f<3; f++){
+                paradeSaluteQueue.push({ delay: 60 + f*70,
+                    salute: { kind:'flak', x:fx + rng(-30, 30), y:fy + rng(-15, 15),
+                              age:0, max:1500, colorA:spec.colorA, colorB:spec.colorB,
+                              radius: rng(10, 16), sparks:[] } });
+            }
+        } else if (kind === 'smoketrail'){
+            /* jet trails colored smoke — pick an actual jet */
+            var ap = pickAirUnitPos();
+            paradeSalutes.push({
+                kind:'smoketrail', x:ap.x, y:ap.y, age:0, max:2400,
+                colorA:spec.colorA, colorB: spec.colorB,
+                /* attach to jet so smoke follows it */
+                followJet: ap.unit,
+                puffs: [],
+                spawnT: 0, spawnInterval: 40
+            });
+        } else if (kind === 'tankarc'){
+            /* tank fires arcing shell that explodes high up */
+            var gp = pickGroundUnitX();
+            var apex = rng(H*0.10, GROUND*0.45);
+            var startX = gp.x;
+            var startY = gp.y - 10;
+            var targetX = startX + rng(-60, 60);
+            paradeSalutes.push({
+                kind:'arcshell', x:startX, y:startY,
+                vx: (targetX-startX)*0.02, vy: -rng(3.6, 4.8),
+                age:0, max:1800,
+                colorA:spec.colorA, colorB:spec.colorB,
+                apexY:apex, sparks:[], trail:[], exploded:false,
+                muzzleFlashT: 200
+            });
+        } else if (kind === 'riflevolley'){
+            /* squad-wide synchronized rifle volley — 6 tracers */
+            var gp2 = pickGroundUnitX();
+            for (var rv=0; rv<6; rv++){
+                paradeSaluteQueue.push({ delay: rv*22,
+                    salute: { kind:'tracerline',
+                              x: gp2.x + rng(-30, 30), y: gp2.y - 12,
+                              vy: -rng(7.0, 9.5),
+                              age:0, max:600,
+                              colorA:spec.colorA, colorB:spec.colorB,
+                              spark: false } });
+            }
+        } else if (kind === 'firework'){
+            /* high-altitude burst → 18 colored particles in star */
+            var fwx = rng(W*0.15, W*0.85);
+            var fwy = rng(H*0.05, GROUND*0.35);
+            var parts = [];
+            var hueBase = rng(0, 360);
+            for (var fpi=0; fpi<22; fpi++){
+                var ang = fpi/22 * Math.PI*2;
+                parts.push({
+                    x:fwx, y:fwy,
+                    vx: Math.cos(ang) * rng(1.5, 3.5),
+                    vy: Math.sin(ang) * rng(1.5, 3.5),
+                    age:0, max: rng(900, 1500),
+                    hue: (hueBase + rng(-40, 40))
+                });
+            }
+            paradeSalutes.push({
+                kind:'firework', x:fwx, y:fwy, age:0, max:1600,
+                particles: parts, colorA:spec.colorA, colorB:spec.colorB
+            });
+        } else if (kind === 'navalcannon'){
+            /* horizontal salvo from coastal humvee/APC */
+            var gp3 = pickGroundUnitX();
+            var dir = (Math.random() < 0.5 ? -1 : 1);
+            paradeSalutes.push({
+                kind:'shellline', x:gp3.x, y:gp3.y - 12,
+                vx: dir * rng(6, 9), vy: -rng(0.5, 1.2),
+                age:0, max:1800,
+                colorA:spec.colorA, colorB:spec.colorB,
+                exploded:false, smokePuff: { age:0, max:600, x:gp3.x, y:gp3.y - 8 }
+            });
+        } else if (kind === 'confetti'){
+            /* drift down from banner planes */
+            var ap2 = pickAirUnitPos();
+            for (var ci=0; ci<10; ci++){
+                paradeSaluteQueue.push({ delay: ci*40,
+                    salute: { kind:'confettifleck',
+                              x: ap2.x + rng(-40, 40), y: ap2.y + rng(0, 20),
+                              vx: rng(-0.5, 0.5), vy: rng(0.6, 1.4),
+                              age:0, max: rng(2200, 3800),
+                              hue: rng(0, 360),
+                              spin: rng(0, Math.PI*2),
+                              spinV: rng(-0.08, 0.08) } });
+            }
+        } else if (kind === 'phantommsl'){
+            /* stealth jet drops a dark cruise missile */
+            var ap3 = pickAirUnitPos();
+            paradeSalutes.push({
+                kind:'phantommsl', x:ap3.x, y:ap3.y + 6,
+                vx: -0.5, vy: 0.6,
+                age:0, max: 2400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                trail: []
+            });
+        } else if (kind === 'samclimb'){
+            /* surface-to-air missile spirals up from launcher */
+            var gp4 = pickGroundUnitX();
+            paradeSalutes.push({
+                kind:'sammissile', x:gp4.x, y:gp4.y - 10,
+                vx: rng(-0.3, 0.3), vy: -rng(2.8, 4.0),
+                spiral: rng(0, Math.PI*2),
+                spiralV: rng(0.08, 0.16),
+                age:0, max: 2200,
+                colorA:spec.colorA, colorB:spec.colorB,
+                trail:[],
+                exploded:false
+            });
+            /* two more in quick succession */
+            for (var sm=1; sm<3; sm++){
+                paradeSaluteQueue.push({ delay: sm*120,
+                    salute: { kind:'sammissile',
+                              x: gp4.x + rng(-20, 20), y: gp4.y - 10,
+                              vx: rng(-0.4, 0.4), vy: -rng(2.6, 3.8),
+                              spiral: rng(0, Math.PI*2),
+                              spiralV: rng(0.08, 0.16),
+                              age:0, max: 2200,
+                              colorA:spec.colorA, colorB:spec.colorB,
+                              trail:[], exploded:false } });
+            }
+        } else if (kind === 'mgtracer'){
+            /* machine gun horizontal tracer stream */
+            var gp5 = pickGroundUnitX();
+            var dir2 = (Math.random() < 0.5 ? -1 : 1);
+            for (var mg=0; mg<6; mg++){
+                paradeSaluteQueue.push({ delay: mg*30,
+                    salute: { kind:'mgtracer',
+                              x: gp5.x, y: gp5.y - 12,
+                              vx: dir2 * rng(8, 11), vy: rng(-2.6, -1.4),
+                              age:0, max:550,
+                              colorA:spec.colorA, colorB:spec.colorB } });
+            }
+        } else if (kind === 'howitzerarc'){
+            /* slow arcing shell with smoke trail */
+            var gp6 = pickGroundUnitX();
+            paradeSalutes.push({
+                kind:'arcshell', x:gp6.x, y:gp6.y - 10,
+                vx: rng(-1.5, 1.5), vy: -rng(3.0, 4.0),
+                age:0, max:2400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                apexY: rng(H*0.05, GROUND*0.30),
+                sparks:[], trail:[], exploded:false,
+                fat:true, muzzleFlashT: 250
+            });
+        } else if (kind === 'rpgburst'){
+            /* RPG / RPG-like rocket short trail, big burst */
+            var gp7 = pickGroundUnitX();
+            paradeSalutes.push({
+                kind:'rpg', x:gp7.x, y:gp7.y - 10,
+                vx: rng(-2, 2), vy: -rng(3.5, 5.0),
+                age:0, max:1400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                trail:[], exploded:false
+            });
+        } else if (kind === 'droneblink'){
+            /* drone formation blinking light points */
+            var ap4 = pickAirUnitPos();
+            paradeSalutes.push({
+                kind:'droneblink', x:ap4.x, y:ap4.y, age:0, max:900,
+                colorA:spec.colorA, colorB:spec.colorB,
+                points: (function(){
+                    var pts = [];
+                    var n = 5;
+                    for (var k=0; k<n; k++){
+                        var a = k/n * Math.PI*2;
+                        pts.push({ ox: Math.cos(a)*22, oy: Math.sin(a)*8,
+                                   blinkT: rng(0, Math.PI*2) });
+                    }
+                    return pts;
+                })()
+            });
+        } else if (kind === 'royalcannon'){
+            /* golden ceremonial cannon fire — big puff + falling
+               glitter sparks */
+            var gp8 = pickGroundUnitX();
+            paradeSalutes.push({
+                kind:'royalpuff', x:gp8.x, y:gp8.y - 8, age:0, max:1400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                sparks: (function(){
+                    var s=[];
+                    for (var k=0; k<24; k++){
+                        s.push({
+                            x: gp8.x + rng(-4, 4),
+                            y: gp8.y - 10,
+                            vx: rng(-1.8, 1.8),
+                            vy: rng(-4.5, -2.5),
+                            age:0, max: rng(900, 1600)
+                        });
+                    }
+                    return s;
+                })()
+            });
+        } else if (kind === 'mortar'){
+            /* high-arc mortar shell — slow trajectory, white smoke
+               trail, impacts mid-sky into a fat puff */
+            var mgp = pickGroundUnitX();
+            paradeSalutes.push({
+                kind:'mortarshell', x:mgp.x, y:mgp.y - 10,
+                vx: rng(-1.0, 1.0), vy: -rng(2.5, 3.5),
+                age:0, max:3200,
+                colorA:spec.colorA, colorB:spec.colorB,
+                trail:[], exploded:false, sparks:[],
+                apexY: rng(H*0.08, GROUND*0.25),
+                muzzleFlashT:200
+            });
+        } else if (kind === 'chaff'){
+            /* jet drops chaff — fan of glittering metallic flakes */
+            var cap = pickAirUnitPos();
+            for (var ch=0; ch<12; ch++){
+                paradeSaluteQueue.push({ delay: ch*30,
+                    salute: { kind:'chafffleck',
+                              x: cap.x + rng(-8, 8), y: cap.y + 6,
+                              vx: rng(-1.2, 1.2), vy: rng(-0.3, 0.5),
+                              age:0, max: rng(900, 1600),
+                              spin: rng(0, Math.PI*2),
+                              spinV: rng(-0.15, 0.15),
+                              colorA:'#dddddd', colorB:'#ffffff' } });
+            }
+        } else if (kind === 'napalm'){
+            /* napalm canister falls — burning orange trail, ground
+               pool of fire on impact */
+            var nap = pickAirUnitPos();
+            paradeSalutes.push({
+                kind:'napalmdrop', x:nap.x, y:nap.y + 4,
+                vx: rng(-0.3, 0.3), vy: rng(1.2, 2.0),
+                age:0, max:2400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                trail:[], exploded:false, pool:[]
+            });
+        } else if (kind === 'plasma'){
+            /* energy beam strike — bright vertical column from sky
+               down with corona pulse */
+            var px2 = rng(W*0.10, W*0.90);
+            var pyTop = rng(H*0.05, H*0.15);
+            var pyBot = rng(GROUND*0.55, GROUND*0.85);
+            paradeSalutes.push({
+                kind:'plasmabeam', x:px2, yTop:pyTop, yBot:pyBot,
+                age:0, max:900,
+                colorA:spec.colorA, colorB:spec.colorB
+            });
+        } else if (kind === 'emp'){
+            /* EMP shockwave — expanding electric rings with branching
+               lightning forks */
+            var ex2 = rng(W*0.15, W*0.85);
+            var ey2 = rng(H*0.10, GROUND*0.40);
+            paradeSalutes.push({
+                kind:'empring', x:ex2, y:ey2,
+                age:0, max:1400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                forks: (function(){
+                    var f=[];
+                    for (var k=0; k<6; k++){
+                        var fa = k*Math.PI/3 + rng(-0.2,0.2);
+                        f.push({ ang:fa, segs:[], len: rng(30, 60) });
+                    }
+                    return f;
+                })()
+            });
+        } else if (kind === 'shrapnel'){
+            /* gritty radial debris burst — gray + brown, falls under
+               gravity, lots of small angular pieces */
+            var shp = pickGroundUnitX();
+            var shY = shp.y - rng(20, 50);
+            var pcs = [];
+            for (var sh=0; sh<26; sh++){
+                var sha = sh/26 * Math.PI*2;
+                pcs.push({
+                    x: shp.x, y: shY,
+                    vx: Math.cos(sha) * rng(1.8, 3.6),
+                    vy: Math.sin(sha) * rng(1.8, 3.6),
+                    age:0, max: rng(800, 1500),
+                    rot: rng(0, Math.PI*2), rotV: rng(-0.2, 0.2),
+                    size: rng(1.4, 2.6)
+                });
+            }
+            paradeSalutes.push({
+                kind:'shrapnel', x:shp.x, y:shY, age:0, max:1600,
+                colorA:spec.colorA, colorB:spec.colorB,
+                pieces: pcs
+            });
+        } else if (kind === 'starshell'){
+            /* high-altitude illumination flare — slowly descends with
+               bright corona and trailing smoke */
+            var sx3 = rng(W*0.15, W*0.85);
+            var sy3 = rng(H*0.05, H*0.20);
+            paradeSalutes.push({
+                kind:'starshell', x:sx3, y:sy3,
+                vx: rng(-0.1, 0.1), vy: rng(0.25, 0.45),
+                age:0, max:3600,
+                colorA:spec.colorA, colorB:spec.colorB,
+                puffs:[]
+            });
+        } else if (kind === 'tracerstream'){
+            /* vertical wall of tracers — 8 in quick succession */
+            var tsg = pickGroundUnitX();
+            for (var ts=0; ts<8; ts++){
+                paradeSaluteQueue.push({ delay: ts*40,
+                    salute: { kind:'tracerline',
+                              x: tsg.x + rng(-25, 25), y: tsg.y - 12,
+                              vy: -rng(7.5, 10.0),
+                              age:0, max:700,
+                              colorA:spec.colorA, colorB:spec.colorB,
+                              spark: false } });
+            }
+        } else if (kind === 'shockwave'){
+            /* ground-level pressure wave — large expanding ring + dust
+               cloud rising */
+            var swg = pickGroundUnitX();
+            paradeSalutes.push({
+                kind:'shockwave', x:swg.x, y:swg.y - 4,
+                age:0, max:1400,
+                colorA:spec.colorA, colorB:spec.colorB,
+                dust:[]
+            });
+            for (var d=0; d<14; d++){
+                paradeSaluteQueue.push({ delay: d*20,
+                    salute: { kind:'dustparticle',
+                              x: swg.x + rng(-12,12), y: swg.y,
+                              vx: rng(-1.4, 1.4), vy: rng(-2.4, -0.6),
+                              age:0, max: rng(700, 1300),
+                              colorA:'#9a8870' } });
+            }
+        } else if (kind === 'airburst'){
+            /* mid-air detonation — large white-yellow flash + ring */
+            var abx = rng(W*0.10, W*0.90);
+            var aby = rng(H*0.08, GROUND*0.40);
+            paradeSalutes.push({
+                kind:'airburst', x:abx, y:aby,
+                age:0, max:1000,
+                colorA:spec.colorA, colorB:spec.colorB,
+                sparks: (function(){
+                    var sp=[];
+                    for (var k=0; k<28; k++){
+                        var sa = k/28 * Math.PI*2;
+                        sp.push({
+                            x:abx, y:aby,
+                            vx: Math.cos(sa) * rng(2.0, 4.5),
+                            vy: Math.sin(sa) * rng(2.0, 4.5),
+                            age:0, max: rng(500, 1000)
+                        });
+                    }
+                    return sp;
+                })()
+            });
+        } else if (kind === 'dragon'){
+            /* dragon-style multi-color firework — large burst that
+               then sub-bursts into smaller multi-colored stars */
+            var dx2 = rng(W*0.15, W*0.85);
+            var dy2 = rng(H*0.06, GROUND*0.30);
+            var dparts = [];
+            for (var dpi=0; dpi<14; dpi++){
+                var da = dpi/14 * Math.PI*2;
+                dparts.push({
+                    x:dx2, y:dy2,
+                    vx: Math.cos(da) * rng(2.5, 4.5),
+                    vy: Math.sin(da) * rng(2.5, 4.5),
+                    age:0, max: rng(900, 1500),
+                    hue: rng(0, 360),
+                    subburstAt: rng(500, 800),
+                    subBurst: false
+                });
+            }
+            paradeSalutes.push({
+                kind:'dragon', x:dx2, y:dy2, age:0, max:2400,
+                particles: dparts,
+                subSparks: [],
+                colorA:spec.colorA, colorB:spec.colorB
+            });
+        }
+    }
+
+    function updateParadeSalutes(dt){
+        if (!paradeOn){ paradeSalutes.length = 0; paradeSaluteQueue.length = 0; return; }
+        var theme = PARADE_THEMES[paradeThemeIdx];
+        if (!theme || !theme.salute) return;
+        var spec = theme.salute;
+        var k = dt/16;
+
+        /* spawn primary salute on timer — fire MULTIPLE salutes per
+           tick so the parade reads as constant fire from all units */
+        paradeSaluteTimer -= dt;
+        if (paradeSaluteTimer <= 0){
+            var burst = 1 + Math.floor(Math.random() * 3);
+            for (var sb=0; sb<burst; sb++) spawnParadeSalute();
+            paradeSaluteTimer = rng(spec.intMin, spec.intMax);
+        }
+        /* drain queued sub-spawns */
+        for (var qi=paradeSaluteQueue.length-1; qi>=0; qi--){
+            var q = paradeSaluteQueue[qi];
+            q.delay -= dt;
+            if (q.delay <= 0){
+                paradeSalutes.push(q.salute);
+                paradeSaluteQueue.splice(qi, 1);
+            }
+        }
+
+        /* update each active salute */
+        for (var i = paradeSalutes.length-1; i >= 0; i--){
+            var s = paradeSalutes[i];
+            s.age += dt;
+            if (s.age > s.max){ paradeSalutes.splice(i, 1); continue; }
+            var kk = s.kind;
+
+            if (kk === 'flak'){
+                /* puff expands + fades */
+                /* nothing positional; spark trickle */
+                if (Math.random() < 0.25){
+                    s.sparks.push({ x:s.x + rng(-3,3), y:s.y + rng(-3,3),
+                                    vx: rng(-1.6, 1.6), vy: rng(-1.6, 1.6),
+                                    age:0, max: rng(300, 700) });
+                }
+                for (var sp=s.sparks.length-1; sp>=0; sp--){
+                    s.sparks[sp].x += s.sparks[sp].vx * k;
+                    s.sparks[sp].y += s.sparks[sp].vy * k;
+                    s.sparks[sp].age += dt;
+                    if (s.sparks[sp].age > s.sparks[sp].max) s.sparks.splice(sp,1);
+                }
+            } else if (kk === 'smoketrail'){
+                if (s.followJet && s.followJet.x !== undefined){
+                    s.x = s.followJet.x - 6;
+                    s.y = s.followJet.y + 1;
+                }
+                s.spawnT += dt;
+                if (s.spawnT > s.spawnInterval){
+                    s.spawnT = 0;
+                    s.puffs.push({ x:s.x, y:s.y, age:0, max:1400,
+                                   color: (Math.random() < 0.5 ? s.colorA : s.colorB),
+                                   r: rng(3, 5) });
+                }
+                for (var pf=s.puffs.length-1; pf>=0; pf--){
+                    var pu = s.puffs[pf];
+                    pu.age += dt;
+                    pu.r += 0.012 * dt;
+                    if (pu.age > pu.max) s.puffs.splice(pf,1);
+                }
+            } else if (kk === 'arcshell'){
+                if (!s.exploded){
+                    s.x += s.vx * k * 1.5;
+                    s.y += s.vy * k * 1.5;
+                    s.vy += 0.10 * k;
+                    if (s.muzzleFlashT > 0) s.muzzleFlashT -= dt;
+                    s.trail.push({ x:s.x, y:s.y, age:0 });
+                    if (s.trail.length > 24) s.trail.shift();
+                    if (s.y <= s.apexY || s.vy >= 0){
+                        s.exploded = true;
+                        s.age = 0;
+                        s.max = 900;
+                        /* burst sparks */
+                        var bcount = s.fat ? 30 : 18;
+                        for (var b=0; b<bcount; b++){
+                            var ba = b/bcount * Math.PI*2;
+                            s.sparks.push({
+                                x:s.x, y:s.y,
+                                vx: Math.cos(ba) * rng(1.4, 3.0),
+                                vy: Math.sin(ba) * rng(1.4, 3.0),
+                                age:0, max: rng(500, 1100)
+                            });
+                        }
+                    }
+                } else {
+                    for (var bb=s.sparks.length-1; bb>=0; bb--){
+                        var bs = s.sparks[bb];
+                        bs.x += bs.vx * k;
+                        bs.y += bs.vy * k;
+                        bs.vy += 0.04 * k;
+                        bs.age += dt;
+                        if (bs.age > bs.max) s.sparks.splice(bb,1);
+                    }
+                }
+            } else if (kk === 'tracerline'){
+                s.y += s.vy * k;
+                if (s.age > s.max * 0.6) s.spark = true;
+            } else if (kk === 'firework'){
+                for (var fp=0; fp<s.particles.length; fp++){
+                    var p = s.particles[fp];
+                    p.x += p.vx * k;
+                    p.y += p.vy * k;
+                    p.vy += 0.04 * k;
+                    p.vx *= 0.985;
+                    p.age += dt;
+                }
+            } else if (kk === 'shellline'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                s.vy += 0.06 * k;
+                if (s.smokePuff) s.smokePuff.age += dt;
+                if (!s.exploded && (s.x < 0 || s.x > W || s.y < 0)){
+                    s.exploded = true;
+                    s.max = s.age + 600;
+                }
+            } else if (kk === 'confettifleck'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                s.vy += 0.005 * k;
+                s.vx *= 0.998;
+                s.spin += s.spinV * dt * 0.05;
+            } else if (kk === 'phantommsl'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                s.vy += 0.03 * k;
+                s.trail.push({ x:s.x, y:s.y, age:0 });
+                if (s.trail.length > 36) s.trail.shift();
+            } else if (kk === 'sammissile'){
+                if (!s.exploded){
+                    s.spiral += s.spiralV * dt * 0.06;
+                    s.x += s.vx * k + Math.sin(s.spiral)*0.6;
+                    s.y += s.vy * k;
+                    s.trail.push({ x:s.x, y:s.y, age:0 });
+                    if (s.trail.length > 28) s.trail.shift();
+                    if (s.y < H * 0.08){
+                        s.exploded = true;
+                        s.age = 0;
+                        s.max = 700;
+                        s.sparks = [];
+                        for (var sa=0; sa<14; sa++){
+                            var sang = sa/14 * Math.PI*2;
+                            s.sparks.push({
+                                x:s.x, y:s.y,
+                                vx: Math.cos(sang) * rng(1.5, 2.8),
+                                vy: Math.sin(sang) * rng(1.5, 2.8),
+                                age:0, max: rng(400, 900)
+                            });
+                        }
+                    }
+                } else {
+                    for (var sk=s.sparks.length-1; sk>=0; sk--){
+                        var ssk = s.sparks[sk];
+                        ssk.x += ssk.vx * k;
+                        ssk.y += ssk.vy * k;
+                        ssk.vy += 0.05 * k;
+                        ssk.age += dt;
+                        if (ssk.age > ssk.max) s.sparks.splice(sk,1);
+                    }
+                }
+            } else if (kk === 'mgtracer'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                s.vy += 0.05 * k;
+            } else if (kk === 'rpg'){
+                if (!s.exploded){
+                    s.x += s.vx * k;
+                    s.y += s.vy * k;
+                    s.vy += 0.08 * k;
+                    s.trail.push({ x:s.x, y:s.y, age:0 });
+                    if (s.trail.length > 14) s.trail.shift();
+                    if (s.y < H*0.20 || s.vy >= 0){
+                        s.exploded = true;
+                        s.age = 0;
+                        s.max = 600;
+                        s.sparks = [];
+                        for (var rs=0; rs<18; rs++){
+                            var ra = rs/18 * Math.PI*2;
+                            s.sparks.push({
+                                x:s.x, y:s.y,
+                                vx: Math.cos(ra) * rng(1.5, 3.5),
+                                vy: Math.sin(ra) * rng(1.5, 3.5),
+                                age:0, max: rng(400, 900)
+                            });
+                        }
+                    }
+                } else {
+                    for (var rsk=s.sparks.length-1; rsk>=0; rsk--){
+                        var rk = s.sparks[rsk];
+                        rk.x += rk.vx * k;
+                        rk.y += rk.vy * k;
+                        rk.vy += 0.05 * k;
+                        rk.age += dt;
+                        if (rk.age > rk.max) s.sparks.splice(rsk,1);
+                    }
+                }
+            } else if (kk === 'droneblink'){
+                for (var dp=0; dp<s.points.length; dp++){
+                    s.points[dp].blinkT += dt*0.005;
+                }
+            } else if (kk === 'royalpuff'){
+                for (var rsp=s.sparks.length-1; rsp>=0; rsp--){
+                    var rp = s.sparks[rsp];
+                    rp.x += rp.vx * k;
+                    rp.y += rp.vy * k;
+                    rp.vy += 0.06 * k;
+                    rp.age += dt;
+                    if (rp.age > rp.max) s.sparks.splice(rsp,1);
+                }
+            } else if (kk === 'mortarshell'){
+                if (!s.exploded){
+                    s.x += s.vx * k * 1.4;
+                    s.y += s.vy * k * 1.4;
+                    s.vy += 0.075 * k;
+                    if (s.muzzleFlashT > 0) s.muzzleFlashT -= dt;
+                    s.trail.push({ x:s.x, y:s.y, age:0 });
+                    if (s.trail.length > 40) s.trail.shift();
+                    if (s.y <= s.apexY || s.vy >= 0){
+                        s.exploded = true;
+                        s.age = 0;
+                        s.max = 1100;
+                        for (var b=0; b<36; b++){
+                            var ba = b/36 * Math.PI*2;
+                            s.sparks.push({
+                                x:s.x, y:s.y,
+                                vx: Math.cos(ba) * rng(1.6, 3.4),
+                                vy: Math.sin(ba) * rng(1.6, 3.4),
+                                age:0, max: rng(700, 1300)
+                            });
+                        }
+                    }
+                } else {
+                    for (var bb=s.sparks.length-1; bb>=0; bb--){
+                        var bs = s.sparks[bb];
+                        bs.x += bs.vx * k; bs.y += bs.vy * k;
+                        bs.vy += 0.05 * k;
+                        bs.age += dt;
+                        if (bs.age > bs.max) s.sparks.splice(bb,1);
+                    }
+                }
+            } else if (kk === 'chafffleck'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                s.vy += 0.015 * k;
+                s.spin += s.spinV * dt * 0.05;
+            } else if (kk === 'napalmdrop'){
+                if (!s.exploded){
+                    s.x += s.vx * k;
+                    s.y += s.vy * k;
+                    s.vy += 0.04 * k;
+                    s.trail.push({ x:s.x, y:s.y, age:0 });
+                    if (s.trail.length > 28) s.trail.shift();
+                    if (s.y >= GROUND - 12){
+                        s.exploded = true;
+                        s.age = 0;
+                        s.max = 1800;
+                        for (var npi=0; npi<14; npi++){
+                            s.pool.push({
+                                x: s.x + rng(-30, 30),
+                                y: GROUND - 6 - rng(0, 4),
+                                age:0, max: rng(900, 1500),
+                                r: rng(4, 9),
+                                hue: 10 + rng(0, 25)
+                            });
+                        }
+                    }
+                } else {
+                    for (var npp=0; npp<s.pool.length; npp++){
+                        s.pool[npp].age += dt;
+                    }
+                }
+            } else if (kk === 'plasmabeam'){
+                /* beam pulses — no positional update */
+            } else if (kk === 'empring'){
+                /* forks extend over first 300ms */
+                for (var ef=0; ef<s.forks.length; ef++){
+                    var fk = s.forks[ef];
+                    var maxSegs = Math.min(6, Math.floor(s.age / 50));
+                    while (fk.segs.length < maxSegs){
+                        var lastX = (fk.segs.length === 0 ? s.x : fk.segs[fk.segs.length-1].x);
+                        var lastY = (fk.segs.length === 0 ? s.y : fk.segs[fk.segs.length-1].y);
+                        var step = fk.len/6;
+                        var jitter = rng(-12, 12) * 0.018 * Math.PI;
+                        fk.segs.push({
+                            x: lastX + Math.cos(fk.ang + jitter) * step,
+                            y: lastY + Math.sin(fk.ang + jitter) * step
+                        });
+                    }
+                }
+            } else if (kk === 'shrapnel'){
+                for (var pi=s.pieces.length-1; pi>=0; pi--){
+                    var pc = s.pieces[pi];
+                    pc.x += pc.vx * k;
+                    pc.y += pc.vy * k;
+                    pc.vy += 0.10 * k;
+                    pc.rot += pc.rotV * k;
+                    pc.age += dt;
+                    if (pc.age > pc.max) s.pieces.splice(pi, 1);
+                }
+            } else if (kk === 'starshell'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                if (Math.random() < 0.4){
+                    s.puffs.push({ x:s.x + rng(-2,2), y:s.y + rng(-2,2),
+                                   age:0, max: rng(800, 1400), r: rng(2,4) });
+                }
+                for (var spu=s.puffs.length-1; spu>=0; spu--){
+                    var spp = s.puffs[spu];
+                    spp.age += dt;
+                    spp.r += 0.01 * k;
+                    if (spp.age > spp.max) s.puffs.splice(spu,1);
+                }
+            } else if (kk === 'shockwave'){
+                /* expanding ring + rising dust handled by separate
+                   dust particle salutes; nothing positional here */
+            } else if (kk === 'dustparticle'){
+                s.x += s.vx * k;
+                s.y += s.vy * k;
+                s.vy += 0.025 * k;
+            } else if (kk === 'airburst'){
+                for (var ab=s.sparks.length-1; ab>=0; ab--){
+                    var abs = s.sparks[ab];
+                    abs.x += abs.vx * k; abs.y += abs.vy * k;
+                    abs.vy += 0.04 * k; abs.vx *= 0.985;
+                    abs.age += dt;
+                    if (abs.age > abs.max) s.sparks.splice(ab,1);
+                }
+            } else if (kk === 'dragon'){
+                for (var dpi2=0; dpi2<s.particles.length; dpi2++){
+                    var dp = s.particles[dpi2];
+                    dp.x += dp.vx * k;
+                    dp.y += dp.vy * k;
+                    dp.vy += 0.035 * k;
+                    dp.vx *= 0.985;
+                    dp.age += dt;
+                    if (!dp.subBurst && dp.age > dp.subburstAt){
+                        dp.subBurst = true;
+                        for (var sbi=0; sbi<8; sbi++){
+                            var sba = sbi/8 * Math.PI*2;
+                            s.subSparks.push({
+                                x:dp.x, y:dp.y,
+                                vx: Math.cos(sba) * rng(1.2, 2.4),
+                                vy: Math.sin(sba) * rng(1.2, 2.4),
+                                age:0, max: rng(500, 900),
+                                hue: dp.hue + rng(-30,30)
+                            });
+                        }
+                    }
+                }
+                for (var sbsi=s.subSparks.length-1; sbsi>=0; sbsi--){
+                    var ss3 = s.subSparks[sbsi];
+                    ss3.x += ss3.vx * k; ss3.y += ss3.vy * k;
+                    ss3.vy += 0.035 * k; ss3.vx *= 0.985;
+                    ss3.age += dt;
+                    if (ss3.age > ss3.max) s.subSparks.splice(sbsi,1);
+                }
+            }
+        }
+    }
+
+    function drawParadeSalutes(c){
+        if (!paradeOn || paradeSalutes.length === 0) return;
+        for (var i=0; i<paradeSalutes.length; i++){
+            var s = paradeSalutes[i];
+            var lp = s.age / s.max;       /* lifetime progress 0..1 */
+            var fade = 1 - lp;
+
+            if (s.kind === 'flak'){
+                /* expanding puff */
+                var ex = s.age / 400;
+                var rad = s.radius * (1 + ex*0.8);
+                c.fillStyle = 'rgba(40,40,40,' + (fade*0.6) + ')';
+                c.beginPath(); c.arc(s.x, s.y, rad, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'rgba(180,180,180,' + (fade*0.45) + ')';
+                c.beginPath(); c.arc(s.x, s.y, rad*0.55, 0, Math.PI*2); c.fill();
+                /* white flash on spawn */
+                if (lp < 0.12){
+                    c.fillStyle = 'rgba(255,240,180,' + (1 - lp/0.12) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, rad*0.35, 0, Math.PI*2); c.fill();
+                }
+                /* sparks */
+                for (var ss=0; ss<s.sparks.length; ss++){
+                    var sk = s.sparks[ss];
+                    var sf = 1 - sk.age/sk.max;
+                    c.fillStyle = 'rgba(255,200,80,' + sf + ')';
+                    c.beginPath(); c.arc(sk.x, sk.y, 1.5, 0, Math.PI*2); c.fill();
+                }
+            } else if (s.kind === 'smoketrail'){
+                for (var pf=0; pf<s.puffs.length; pf++){
+                    var pu = s.puffs[pf];
+                    var pf2 = 1 - pu.age/pu.max;
+                    c.fillStyle = pu.color;
+                    c.globalAlpha = pf2 * 0.55;
+                    c.beginPath(); c.arc(pu.x, pu.y, pu.r * (1 + pu.age*0.0015), 0, Math.PI*2); c.fill();
+                }
+                c.globalAlpha = 1;
+            } else if (s.kind === 'arcshell'){
+                if (!s.exploded){
+                    /* muzzle flash at origin */
+                    if (s.muzzleFlashT > 0){
+                        var mf = s.muzzleFlashT / 250;
+                        c.fillStyle = 'rgba(255,240,140,' + mf + ')';
+                        var mfx = s.x - s.vx * (s.age/16);
+                        var mfy = s.y - s.vy * (s.age/16);
+                        c.beginPath(); c.arc(mfx, mfy, 10 * mf, 0, Math.PI*2); c.fill();
+                    }
+                    /* trail */
+                    for (var t=0; t<s.trail.length; t++){
+                        var tt = s.trail[t];
+                        var a = t / s.trail.length;
+                        c.fillStyle = 'rgba(180,180,180,' + (a*0.5) + ')';
+                        c.beginPath(); c.arc(tt.x, tt.y, 2 * a, 0, Math.PI*2); c.fill();
+                    }
+                    /* shell */
+                    c.fillStyle = s.colorA;
+                    c.beginPath(); c.arc(s.x, s.y, s.fat ? 3.5 : 2.5, 0, Math.PI*2); c.fill();
+                } else {
+                    /* burst */
+                    var bf = 1 - lp;
+                    c.fillStyle = s.colorA;
+                    c.globalAlpha = bf*0.9;
+                    c.beginPath();
+                    c.arc(s.x, s.y, (s.fat?18:12) + lp*30, 0, Math.PI*2);
+                    c.fill();
+                    c.globalAlpha = 1;
+                    c.fillStyle = 'rgba(255,255,255,' + (bf*0.7) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, 5 * bf, 0, Math.PI*2); c.fill();
+                    for (var bb=0; bb<s.sparks.length; bb++){
+                        var bs = s.sparks[bb];
+                        var bsf = 1 - bs.age/bs.max;
+                        c.fillStyle = (Math.random() < 0.5 ? s.colorA : s.colorB);
+                        c.globalAlpha = bsf;
+                        c.beginPath(); c.arc(bs.x, bs.y, 2 * bsf + 0.3, 0, Math.PI*2); c.fill();
+                    }
+                    c.globalAlpha = 1;
+                }
+            } else if (s.kind === 'tracerline'){
+                /* yellow tracer streak */
+                c.strokeStyle = s.colorA;
+                c.lineWidth = 1.6;
+                c.beginPath();
+                c.moveTo(s.x, s.y);
+                c.lineTo(s.x, s.y + 18);
+                c.stroke();
+                if (s.spark){
+                    c.fillStyle = s.colorB;
+                    c.beginPath(); c.arc(s.x, s.y, 2.5, 0, Math.PI*2); c.fill();
+                }
+            } else if (s.kind === 'firework'){
+                /* multi-color radial */
+                for (var fp=0; fp<s.particles.length; fp++){
+                    var p = s.particles[fp];
+                    var pf3 = 1 - p.age/p.max;
+                    if (pf3 <= 0) continue;
+                    c.fillStyle = 'hsla(' + p.hue + ',95%,65%,' + pf3 + ')';
+                    c.beginPath(); c.arc(p.x, p.y, 2 * pf3 + 0.3, 0, Math.PI*2); c.fill();
+                    /* trailing tail */
+                    c.strokeStyle = 'hsla(' + p.hue + ',95%,65%,' + (pf3*0.4) + ')';
+                    c.lineWidth = 0.9;
+                    c.beginPath();
+                    c.moveTo(p.x, p.y);
+                    c.lineTo(p.x - p.vx*2, p.y - p.vy*2);
+                    c.stroke();
+                }
+            } else if (s.kind === 'shellline'){
+                /* smoke puff at gun */
+                if (s.smokePuff){
+                    var sp = s.smokePuff;
+                    var spf = 1 - sp.age/sp.max;
+                    if (spf > 0){
+                        c.fillStyle = 'rgba(230,230,230,' + (spf*0.65) + ')';
+                        c.beginPath(); c.arc(sp.x, sp.y, 10 + sp.age*0.02, 0, Math.PI*2); c.fill();
+                    }
+                }
+                if (!s.exploded){
+                    /* shell */
+                    c.fillStyle = s.colorA;
+                    c.beginPath(); c.arc(s.x, s.y, 3, 0, Math.PI*2); c.fill();
+                    /* trail */
+                    c.strokeStyle = 'rgba(220,220,220,0.6)';
+                    c.lineWidth = 1.2;
+                    c.beginPath();
+                    c.moveTo(s.x, s.y);
+                    c.lineTo(s.x - s.vx*3, s.y - s.vy*3);
+                    c.stroke();
+                }
+            } else if (s.kind === 'confettifleck'){
+                var cf = 1 - lp;
+                c.save();
+                c.translate(s.x, s.y);
+                c.rotate(s.spin);
+                c.fillStyle = 'hsl(' + s.hue + ',90%,60%)';
+                c.globalAlpha = cf;
+                c.fillRect(-2, -1, 4, 2);
+                c.restore();
+                c.globalAlpha = 1;
+            } else if (s.kind === 'phantommsl'){
+                /* dark cruise missile with subtle exhaust */
+                var ang = Math.atan2(s.vy, s.vx);
+                c.save();
+                c.translate(s.x, s.y);
+                c.rotate(ang);
+                c.fillStyle = s.colorA;
+                c.fillRect(-8, -1.5, 14, 3);
+                c.fillStyle = '#666';
+                c.fillRect(4, -1.5, 2, 3);
+                c.restore();
+                for (var tr=0; tr<s.trail.length; tr++){
+                    var ttr = s.trail[tr];
+                    var a2 = tr / s.trail.length;
+                    c.fillStyle = 'rgba(100,100,120,' + (a2*0.3) + ')';
+                    c.beginPath(); c.arc(ttr.x, ttr.y, 1.5 * a2, 0, Math.PI*2); c.fill();
+                }
+            } else if (s.kind === 'sammissile'){
+                if (!s.exploded){
+                    for (var tr2=0; tr2<s.trail.length; tr2++){
+                        var ttr2 = s.trail[tr2];
+                        var a3 = tr2 / s.trail.length;
+                        c.fillStyle = 'rgba(255,200,60,' + (a3*0.6) + ')';
+                        c.beginPath(); c.arc(ttr2.x, ttr2.y, 2 * a3, 0, Math.PI*2); c.fill();
+                    }
+                    var sang = Math.atan2(s.vy, s.vx);
+                    c.save();
+                    c.translate(s.x, s.y);
+                    c.rotate(sang);
+                    c.fillStyle = '#dddddd';
+                    c.fillRect(-6, -1.6, 12, 3.2);
+                    c.fillStyle = s.colorA;
+                    c.beginPath();
+                    c.moveTo(-6, 0); c.lineTo(-14, -2.4); c.lineTo(-12, 0); c.lineTo(-14, 2.4);
+                    c.closePath(); c.fill();
+                    c.restore();
+                } else {
+                    /* burst */
+                    var ef = 1 - lp;
+                    c.fillStyle = s.colorA;
+                    c.globalAlpha = ef*0.9;
+                    c.beginPath(); c.arc(s.x, s.y, 8 + lp*22, 0, Math.PI*2); c.fill();
+                    c.fillStyle = 'rgba(255,255,255,' + (ef*0.7) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, 4 * ef, 0, Math.PI*2); c.fill();
+                    c.globalAlpha = 1;
+                    for (var sk2=0; sk2<s.sparks.length; sk2++){
+                        var sks = s.sparks[sk2];
+                        var sf2 = 1 - sks.age/sks.max;
+                        c.fillStyle = s.colorB;
+                        c.globalAlpha = sf2;
+                        c.beginPath(); c.arc(sks.x, sks.y, 1.5 * sf2 + 0.3, 0, Math.PI*2); c.fill();
+                    }
+                    c.globalAlpha = 1;
+                }
+            } else if (s.kind === 'mgtracer'){
+                c.strokeStyle = s.colorA;
+                c.lineWidth = 1.6;
+                c.beginPath();
+                c.moveTo(s.x, s.y);
+                c.lineTo(s.x - s.vx*3, s.y - s.vy*3);
+                c.stroke();
+                c.fillStyle = s.colorB;
+                c.beginPath(); c.arc(s.x, s.y, 1.6, 0, Math.PI*2); c.fill();
+            } else if (s.kind === 'rpg'){
+                if (!s.exploded){
+                    for (var tr3=0; tr3<s.trail.length; tr3++){
+                        var ttr3 = s.trail[tr3];
+                        var a4 = tr3 / s.trail.length;
+                        c.fillStyle = 'rgba(255,180,80,' + (a4*0.65) + ')';
+                        c.beginPath(); c.arc(ttr3.x, ttr3.y, 2 * a4, 0, Math.PI*2); c.fill();
+                    }
+                    c.fillStyle = '#444';
+                    c.beginPath(); c.arc(s.x, s.y, 2.6, 0, Math.PI*2); c.fill();
+                } else {
+                    var rf = 1 - lp;
+                    c.fillStyle = s.colorA;
+                    c.globalAlpha = rf*0.9;
+                    c.beginPath(); c.arc(s.x, s.y, 10 + lp*25, 0, Math.PI*2); c.fill();
+                    c.fillStyle = 'rgba(255,255,255,' + (rf*0.75) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, 5 * rf, 0, Math.PI*2); c.fill();
+                    c.globalAlpha = 1;
+                    for (var rsk2=0; rsk2<s.sparks.length; rsk2++){
+                        var rk2 = s.sparks[rsk2];
+                        var rsf = 1 - rk2.age/rk2.max;
+                        c.fillStyle = s.colorB;
+                        c.globalAlpha = rsf;
+                        c.beginPath(); c.arc(rk2.x, rk2.y, 1.6 * rsf + 0.3, 0, Math.PI*2); c.fill();
+                    }
+                    c.globalAlpha = 1;
+                }
+            } else if (s.kind === 'droneblink'){
+                /* synchronized formation lights */
+                for (var dp=0; dp<s.points.length; dp++){
+                    var pt = s.points[dp];
+                    var pulse = 0.5 + Math.sin(pt.blinkT*6) * 0.5;
+                    c.fillStyle = (dp % 2 === 0 ? s.colorA : s.colorB);
+                    c.globalAlpha = fade * pulse;
+                    c.beginPath(); c.arc(s.x + pt.ox, s.y + pt.oy, 2.0, 0, Math.PI*2); c.fill();
+                }
+                c.globalAlpha = 1;
+            } else if (s.kind === 'royalpuff'){
+                /* big gold smoke + glitter sparks */
+                var rf2 = 1 - lp;
+                c.fillStyle = s.colorB;
+                c.globalAlpha = rf2 * 0.5;
+                c.beginPath(); c.arc(s.x, s.y, 14 + lp*22, 0, Math.PI*2); c.fill();
+                c.fillStyle = s.colorA;
+                c.globalAlpha = rf2 * 0.7;
+                c.beginPath(); c.arc(s.x, s.y, 9 + lp*14, 0, Math.PI*2); c.fill();
+                c.globalAlpha = 1;
+                for (var rsp=0; rsp<s.sparks.length; rsp++){
+                    var rspp = s.sparks[rsp];
+                    var rspf = 1 - rspp.age/rspp.max;
+                    c.fillStyle = s.colorA;
+                    c.globalAlpha = rspf;
+                    c.beginPath(); c.arc(rspp.x, rspp.y, 1.8 * rspf + 0.3, 0, Math.PI*2); c.fill();
+                }
+                c.globalAlpha = 1;
+            } else if (s.kind === 'mortarshell'){
+                if (!s.exploded){
+                    /* heavy smoke trail */
+                    for (var mt=0; mt<s.trail.length; mt++){
+                        var mtt = s.trail[mt];
+                        var ma = mt / s.trail.length;
+                        c.fillStyle = 'rgba(220,220,220,' + (ma*0.55) + ')';
+                        c.beginPath(); c.arc(mtt.x, mtt.y, 2.4 * ma, 0, Math.PI*2); c.fill();
+                    }
+                    /* shell */
+                    c.fillStyle = '#444';
+                    c.beginPath(); c.arc(s.x, s.y, 3.5, 0, Math.PI*2); c.fill();
+                    /* muzzle flash */
+                    if (s.muzzleFlashT > 0){
+                        var mf2 = s.muzzleFlashT / 200;
+                        c.fillStyle = 'rgba(255,240,140,' + mf2 + ')';
+                        c.beginPath();
+                        c.arc(s.x - s.vx*(s.age/16), s.y - s.vy*(s.age/16), 14*mf2, 0, Math.PI*2);
+                        c.fill();
+                    }
+                } else {
+                    var mf3 = 1 - lp;
+                    c.fillStyle = s.colorA;
+                    c.globalAlpha = mf3*0.9;
+                    c.beginPath(); c.arc(s.x, s.y, 18 + lp*40, 0, Math.PI*2); c.fill();
+                    c.fillStyle = 'rgba(255,255,255,' + (mf3*0.8) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, 7*mf3, 0, Math.PI*2); c.fill();
+                    c.globalAlpha = 1;
+                    for (var msb=0; msb<s.sparks.length; msb++){
+                        var msbp = s.sparks[msb];
+                        var msbf = 1 - msbp.age/msbp.max;
+                        c.fillStyle = s.colorB;
+                        c.globalAlpha = msbf;
+                        c.beginPath(); c.arc(msbp.x, msbp.y, 2 * msbf + 0.4, 0, Math.PI*2); c.fill();
+                    }
+                    c.globalAlpha = 1;
+                }
+            } else if (s.kind === 'chafffleck'){
+                var cff = 1 - lp;
+                c.save();
+                c.translate(s.x, s.y);
+                c.rotate(s.spin);
+                c.fillStyle = 'rgba(240,240,255,' + cff + ')';
+                c.fillRect(-3, -0.5, 6, 1);
+                c.restore();
+            } else if (s.kind === 'napalmdrop'){
+                if (!s.exploded){
+                    /* burning trail */
+                    for (var nt=0; nt<s.trail.length; nt++){
+                        var ntt = s.trail[nt];
+                        var na = nt / s.trail.length;
+                        c.fillStyle = 'rgba(255,' + Math.floor(120+na*100) + ',40,' + (na*0.8) + ')';
+                        c.beginPath(); c.arc(ntt.x, ntt.y, 3*na, 0, Math.PI*2); c.fill();
+                    }
+                    c.fillStyle = '#444';
+                    c.beginPath(); c.arc(s.x, s.y, 3, 0, Math.PI*2); c.fill();
+                    c.fillStyle = '#ffaa30';
+                    c.beginPath(); c.arc(s.x, s.y - 3, 4, 0, Math.PI*2); c.fill();
+                } else {
+                    /* fire pool */
+                    for (var npp2=0; npp2<s.pool.length; npp2++){
+                        var pl = s.pool[npp2];
+                        var plf = 1 - pl.age/pl.max;
+                        c.fillStyle = 'hsla(' + pl.hue + ',95%,55%,' + (plf*0.7) + ')';
+                        c.beginPath();
+                        c.ellipse(pl.x, pl.y, pl.r + plf*3, pl.r*0.5 + plf*2, 0, 0, Math.PI*2);
+                        c.fill();
+                        c.fillStyle = 'rgba(255,240,180,' + (plf*0.5) + ')';
+                        c.beginPath();
+                        c.arc(pl.x, pl.y - 3, pl.r*0.45, 0, Math.PI*2);
+                        c.fill();
+                    }
+                }
+            } else if (s.kind === 'plasmabeam'){
+                /* vertical lightning column with pulsing core */
+                var pf = 1 - lp;
+                var pulse = 0.6 + Math.sin(s.age*0.025) * 0.4;
+                /* halo */
+                var hg = c.createLinearGradient(s.x-12, 0, s.x+12, 0);
+                hg.addColorStop(0,   'rgba(160,200,255,0)');
+                hg.addColorStop(0.5, 'rgba(160,200,255,' + (pf*0.55) + ')');
+                hg.addColorStop(1,   'rgba(160,200,255,0)');
+                c.fillStyle = hg;
+                c.fillRect(s.x-12, s.yTop, 24, s.yBot - s.yTop);
+                /* bright core */
+                c.strokeStyle = 'rgba(255,255,255,' + (pf*pulse) + ')';
+                c.lineWidth = 3.0;
+                c.beginPath(); c.moveTo(s.x, s.yTop); c.lineTo(s.x, s.yBot); c.stroke();
+                /* colored core */
+                c.strokeStyle = s.colorA;
+                c.lineWidth = 1.4;
+                c.beginPath(); c.moveTo(s.x, s.yTop); c.lineTo(s.x, s.yBot); c.stroke();
+                /* impact glow at bottom */
+                c.fillStyle = 'rgba(255,255,255,' + (pf*0.9) + ')';
+                c.beginPath(); c.arc(s.x, s.yBot, 10*pf, 0, Math.PI*2); c.fill();
+            } else if (s.kind === 'empring'){
+                var ef = 1 - lp;
+                /* expanding ring */
+                var rr = 14 + lp*70;
+                c.strokeStyle = 'rgba(160,210,255,' + (ef*0.9) + ')';
+                c.lineWidth = 2.4;
+                c.beginPath(); c.arc(s.x, s.y, rr, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,' + (ef*0.7) + ')';
+                c.lineWidth = 1.2;
+                c.beginPath(); c.arc(s.x, s.y, rr*0.55, 0, Math.PI*2); c.stroke();
+                /* lightning forks */
+                c.strokeStyle = 'rgba(220,235,255,' + (ef*0.95) + ')';
+                c.lineWidth = 1.5;
+                for (var efk=0; efk<s.forks.length; efk++){
+                    var fk = s.forks[efk];
+                    if (fk.segs.length < 2) continue;
+                    c.beginPath();
+                    c.moveTo(s.x, s.y);
+                    for (var fs=0; fs<fk.segs.length; fs++){
+                        c.lineTo(fk.segs[fs].x, fk.segs[fs].y);
+                    }
+                    c.stroke();
+                }
+                /* center pulse */
+                c.fillStyle = 'rgba(255,255,255,' + ef + ')';
+                c.beginPath(); c.arc(s.x, s.y, 5*ef, 0, Math.PI*2); c.fill();
+            } else if (s.kind === 'shrapnel'){
+                for (var pi2=0; pi2<s.pieces.length; pi2++){
+                    var pc2 = s.pieces[pi2];
+                    var pcf = 1 - pc2.age/pc2.max;
+                    c.save();
+                    c.translate(pc2.x, pc2.y);
+                    c.rotate(pc2.rot);
+                    c.fillStyle = (pi2 % 3 === 0 ? s.colorA : (pi2 % 3 === 1 ? s.colorB : '#6a5a4a'));
+                    c.globalAlpha = pcf;
+                    c.fillRect(-pc2.size, -pc2.size*0.4, pc2.size*2, pc2.size*0.8);
+                    c.restore();
+                }
+                c.globalAlpha = 1;
+                /* central flash early on */
+                if (lp < 0.15){
+                    c.fillStyle = 'rgba(255,240,180,' + (1 - lp/0.15) + ')';
+                    c.beginPath(); c.arc(s.x, s.y, 12, 0, Math.PI*2); c.fill();
+                }
+            } else if (s.kind === 'starshell'){
+                var sslp = 1 - lp;
+                /* drifting smoke puffs above */
+                for (var ssp=0; ssp<s.puffs.length; ssp++){
+                    var sppu = s.puffs[ssp];
+                    var spf2 = 1 - sppu.age/sppu.max;
+                    c.fillStyle = 'rgba(220,220,220,' + (spf2*0.4) + ')';
+                    c.beginPath(); c.arc(sppu.x, sppu.y, sppu.r, 0, Math.PI*2); c.fill();
+                }
+                /* corona */
+                c.fillStyle = 'rgba(255,255,200,' + (sslp*0.35) + ')';
+                c.beginPath(); c.arc(s.x, s.y, 22, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'rgba(255,255,180,' + (sslp*0.75) + ')';
+                c.beginPath(); c.arc(s.x, s.y, 8, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'rgba(255,255,255,' + sslp + ')';
+                c.beginPath(); c.arc(s.x, s.y, 3, 0, Math.PI*2); c.fill();
+            } else if (s.kind === 'shockwave'){
+                var sf = 1 - lp;
+                /* ground ring expanding outward */
+                var sr = 8 + lp*50;
+                c.strokeStyle = 'rgba(180,160,130,' + (sf*0.85) + ')';
+                c.lineWidth = 3;
+                c.beginPath();
+                c.ellipse(s.x, s.y, sr, sr*0.35, 0, 0, Math.PI*2);
+                c.stroke();
+                c.strokeStyle = 'rgba(255,240,200,' + (sf*0.6) + ')';
+                c.lineWidth = 1.4;
+                c.beginPath();
+                c.ellipse(s.x, s.y, sr*0.65, sr*0.22, 0, 0, Math.PI*2);
+                c.stroke();
+            } else if (s.kind === 'dustparticle'){
+                var df = 1 - lp;
+                c.fillStyle = s.colorA;
+                c.globalAlpha = df * 0.7;
+                c.beginPath(); c.arc(s.x, s.y, 2.5 + lp*3, 0, Math.PI*2); c.fill();
+                c.globalAlpha = 1;
+            } else if (s.kind === 'airburst'){
+                var aff = 1 - lp;
+                c.fillStyle = s.colorA;
+                c.globalAlpha = aff*0.85;
+                c.beginPath(); c.arc(s.x, s.y, 18 + lp*36, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'rgba(255,255,255,' + (aff*0.95) + ')';
+                c.beginPath(); c.arc(s.x, s.y, 8*aff, 0, Math.PI*2); c.fill();
+                c.globalAlpha = 1;
+                for (var ab=0; ab<s.sparks.length; ab++){
+                    var abs2 = s.sparks[ab];
+                    var absf = 1 - abs2.age/abs2.max;
+                    c.fillStyle = s.colorB;
+                    c.globalAlpha = absf;
+                    c.beginPath(); c.arc(abs2.x, abs2.y, 1.8*absf + 0.3, 0, Math.PI*2); c.fill();
+                }
+                c.globalAlpha = 1;
+            } else if (s.kind === 'dragon'){
+                for (var dpi3=0; dpi3<s.particles.length; dpi3++){
+                    var dp2 = s.particles[dpi3];
+                    if (dp2.subBurst) continue;
+                    var dpf = 1 - dp2.age/dp2.max;
+                    c.fillStyle = 'hsla(' + dp2.hue + ',95%,65%,' + dpf + ')';
+                    c.beginPath(); c.arc(dp2.x, dp2.y, 2.5*dpf + 0.4, 0, Math.PI*2); c.fill();
+                    c.strokeStyle = 'hsla(' + dp2.hue + ',95%,65%,' + (dpf*0.4) + ')';
+                    c.lineWidth = 0.9;
+                    c.beginPath();
+                    c.moveTo(dp2.x, dp2.y);
+                    c.lineTo(dp2.x - dp2.vx*2, dp2.y - dp2.vy*2);
+                    c.stroke();
+                }
+                for (var ssi=0; ssi<s.subSparks.length; ssi++){
+                    var ssp3 = s.subSparks[ssi];
+                    var sspf = 1 - ssp3.age/ssp3.max;
+                    c.fillStyle = 'hsla(' + ssp3.hue + ',95%,65%,' + sspf + ')';
+                    c.beginPath(); c.arc(ssp3.x, ssp3.y, 1.8*sspf + 0.3, 0, Math.PI*2); c.fill();
+                }
+            }
+        }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ALIEN ABDUCTION SYSTEM
+       ─────────────────────────────────────────────────────────────
+       Round-shaped alien ships swarm in from above. Most are shot
+       down by city defence missiles in mid-air; the survivors lock
+       onto pedestrians, lower a tractor beam, and lift the ped into
+       the ship. After the abduction wave finishes, a SECOND wave of
+       ships returns to the same spots, beams down equal-count
+       replacement aliens that walk like the originals, then
+       shapeshift into ordinary humans (added back into the `peds`
+       array as normal pedestrians).
+
+       Public API:
+         window.toggleAbduction()         → boolean (new state)
+         window.startAbduction()
+         window.stopAbduction()
+         window.isAbductionOn()           → boolean
+         window.getAbductionStats()       → { ships, abducted, target, phase }
+         window.setAbductionShipIndex(i)
+         window.getAbductionShipIndex()   → number
+         window.getAbductionShipName()    → string
+         window.getAbductionShipIcon()    → string
+         window.getAllAbductionShips()    → array
+       ═══════════════════════════════════════════════════════════ */
+    var ABDUCTION_SHIPS = [
+        { id:'saucer',     name:'Classic Saucer',  icon:'fa-circle' },
+        { id:'scout',      name:'Scout Pod',       icon:'fa-bullseye' },
+        { id:'mothership', name:'Mothership',      icon:'fa-cloud' },
+        { id:'orb',        name:'Plasma Orb',      icon:'fa-sun-o' },
+        { id:'biomech',    name:'Biomech Hive',    icon:'fa-bug' },
+        { id:'harvester',  name:'Harvester Rig',   icon:'fa-industry' },
+        { id:'prism',      name:'Prism Crystal',   icon:'fa-certificate' }
+    ];
+    var abductionOn = false;
+    var abductionShipIdx = 0;
+    var abductionSaucers = [];      /* attack-wave ships */
+    var abductionReplacers = [];    /* return-wave ships */
+    var abductionMissiles = [];     /* defence interceptors */
+    var abductionWreckage = [];     /* destroyed ship debris */
+    var alienWalkers = [];          /* landed aliens that walk + morph */
+    var abductionAbducted = 0;
+    var abductionTargetCount = 0;
+    var abductionPhase = 'idle';    /* 'attack' | 'lull' | 'return' | 'walking' | 'done' */
+    var abductionPhaseT = 0;
+    var abductionTotalShips = 0;
+    var abductionDefenceTimer = 0;
+    var abductionReturnTimer = 0;
+    var abductionReturned = 0;
+    /* MISSILE STRENGTH (0-100) — % of saucers that the interceptors
+       will hit. Computed from the inverse-difficulty curve in
+       setAbductionShipCount. Initial value corresponds to default
+       difficulty 40 → ~62% hits. */
+    var abductionMissileStrength = 62;
+    var ABDUCTION_HIT_CAP = 9999;    /* effectively unlimited; per-ship hit decided at spawn */
+    var ABDUCTION_HIT_RATIO = 0.40;
+    var abductionHitCount = 0;
+    /* black holes that have opened from interceptor hits */
+    var abductionBlackHoles = [];
+    function sizeBhRng(sh){ return sh.size * 0.5; }
+    /* global FX overlay — screen-wide flashes and shockwaves
+       triggered at each missile impact */
+    var abductionGlobalFX = [];
+    /* target-lock rings — shown briefly on a ship the moment the
+       user clicks to fire at it */
+    var abductionTargetLocks = [];
+    /* continuous spawn — keeps the wave coming until user toggles off */
+    var abductionContinuousTimer = 0;
+    var ABDUCTION_TARGET_AIRBORNE = 14;  /* try to keep ~14 saucers in flight */
+    var abductionSpeedMul = 1.0;         /* set by ship-count slider */
+    /* did WE flip defence on for the duration? remember so we can
+       restore the user's previous state on stopAbduction. */
+    var abductionDefencePrev = null;
+    /* weather pin — abduction forces the city's weather event to
+       "gravity well" while the wave is active. Restored on stop. */
+    var abductionWeatherPrev = -1;
+    var abductionForcedWeatherPin = false;
+
+    /* per-ship style profile — controls flight wobble, beam shape,
+       hull palette, explosion type. Lookups via ABD_STYLE[shipType]. */
+    var ABD_STYLE = {
+        saucer: {
+            wobbleAmp: 6,  wobbleFreq: 2.4, vxMax: 1.4, vyMax: 0.9,
+            hullA: '#7c8a92', hullB: '#3a4248',
+            domeA: '#a0e8ff', domeB: '#2c5a78',
+            beamA: 'rgba(160,255,210,0.55)', beamB: 'rgba(40,180,140,0.05)',
+            explosionStyle: 'shockring', sizeBase: 38
+        },
+        scout: {
+            wobbleAmp: 14, wobbleFreq: 5.0, vxMax: 2.2, vyMax: 1.6,
+            hullA: '#5c6c4a', hullB: '#2a3220',
+            domeA: '#d0ff80', domeB: '#3a5018',
+            beamA: 'rgba(220,255,120,0.55)', beamB: 'rgba(150,200,40,0.05)',
+            explosionStyle: 'sparkle', sizeBase: 24
+        },
+        mothership: {
+            wobbleAmp: 2,  wobbleFreq: 0.8, vxMax: 0.8, vyMax: 0.5,
+            hullA: '#6a5a6c', hullB: '#2a1e30',
+            domeA: '#ffa0d0', domeB: '#5c1c4a',
+            beamA: 'rgba(255,150,220,0.50)', beamB: 'rgba(200,80,180,0.05)',
+            explosionStyle: 'mushroom', sizeBase: 58
+        },
+        orb: {
+            wobbleAmp: 10, wobbleFreq: 3.2, vxMax: 1.8, vyMax: 1.2,
+            hullA: '#ffd060', hullB: '#a04020',
+            domeA: '#ffffff', domeB: '#ff8020',
+            beamA: 'rgba(255,210,120,0.65)', beamB: 'rgba(255,120,40,0.08)',
+            explosionStyle: 'fireball', sizeBase: 30
+        },
+        biomech: {
+            wobbleAmp: 8,  wobbleFreq: 1.8, vxMax: 1.2, vyMax: 0.9,
+            hullA: '#5a3a52', hullB: '#1c1024',
+            domeA: '#b0ffa0', domeB: '#2c5a30',
+            beamA: 'rgba(180,255,160,0.55)', beamB: 'rgba(80,200,80,0.06)',
+            explosionStyle: 'tendril', sizeBase: 42
+        },
+        harvester: {
+            wobbleAmp: 3,  wobbleFreq: 1.0, vxMax: 1.0, vyMax: 0.6,
+            hullA: '#3d4a30', hullB: '#1a2410',
+            domeA: '#80ff60', domeB: '#2a5a20',
+            beamA: 'rgba(140,255,80,0.55)', beamB: 'rgba(80,180,40,0.07)',
+            explosionStyle: 'industrial', sizeBase: 50
+        },
+        prism: {
+            wobbleAmp: 12, wobbleFreq: 3.6, vxMax: 1.6, vyMax: 1.1,
+            hullA: '#90c0ff', hullB: '#2050a0',
+            domeA: '#ffffff', domeB: '#a060ff',
+            beamA: 'rgba(200,220,255,0.60)', beamB: 'rgba(120,160,255,0.08)',
+            explosionStyle: 'crystal', sizeBase: 34
+        }
+    };
+    function abdShipType(){
+        /* When AUTO is on, every newly-spawned saucer picks a RANDOM
+           ship type from the 7 available — the swarm becomes mixed
+           (saucer / scout / mothership / orb / biomech / harvester /
+           prism), not all the currently-selected chip. When AUTO is
+           OFF the user's manual chip pick is honoured exactly. */
+        if (typeof abductionAutoFire !== 'undefined' && abductionAutoFire){
+            var n = ABDUCTION_SHIPS.length;
+            return ABDUCTION_SHIPS[Math.floor(Math.random() * n)].id;
+        }
+        return ABDUCTION_SHIPS[abductionShipIdx].id;
+    }
+
+    /* ── 7 ANTI-ALIEN MISSILE TYPES ──────────────────────────────
+       Each missile type has a unique flight pattern, impact effect,
+       and blast style. The currently-selected type drives every
+       interceptor spawn (auto AND manual click). */
+    var ABDUCTION_MISSILES = [
+        { id:'plasma',  name:'Plasma Bolt',    icon:'fa-bolt',
+          coreA:'#a060ff', coreB:'#ffffff', trailHue:280,
+          flight:'plasma', impact:'electric', blast:'shockring' },
+        { id:'rocket',  name:'Hyper Rocket',   icon:'fa-rocket',
+          coreA:'#ff5040', coreB:'#ffd060', trailHue:30,
+          flight:'rocket', impact:'fire', blast:'prismaticbloom' },
+        { id:'swarm',   name:'Nano Swarm',     icon:'fa-snowflake-o',
+          coreA:'#60ffe0', coreB:'#ffffff', trailHue:160,
+          flight:'swarm', impact:'fragment', blast:'matrixshatter' },
+        { id:'singular',name:'Singularity',    icon:'fa-circle',
+          coreA:'#000000', coreB:'#a060ff', trailHue:270,
+          flight:'singular', impact:'collapse', blast:'minihole' },
+        { id:'solar',   name:'Solar Flare',    icon:'fa-sun-o',
+          coreA:'#ffd000', coreB:'#ff6020', trailHue:40,
+          flight:'solar', impact:'corona', blast:'coronaflare' },
+        { id:'ion',     name:'Ion Beam',       icon:'fa-flash',
+          coreA:'#80c0ff', coreB:'#ffffff', trailHue:210,
+          flight:'beam', impact:'arc', blast:'arcburst' },
+        { id:'quantum', name:'Quantum Strike', icon:'fa-asterisk',
+          coreA:'#ff60ff', coreB:'#60ffff', trailHue:300,
+          flight:'quantum', impact:'tear', blast:'realitytear' }
+    ];
+    var abductionMissileTypeIdx = 0;
+    function abdMissileType(){
+        return ABDUCTION_MISSILES[abductionMissileTypeIdx];
+    }
+
+    function createAbductionSaucer(idx, total, targetPedIdx){
+        var st = abdShipType();
+        var prof = ABD_STYLE[st];
+        var size = prof.sizeBase * rng(0.92, 1.10);
+        /* fan formation — staggered across width and altitude */
+        var lane = idx % 6;
+        var startX = W * (0.10 + lane * 0.14) + rng(-30, 30);
+        var startY = -size - rng(0, 120);
+        /* 50/50 — saucer targets a CAR or a pedestrian. The two
+           swarms run in parallel, equal abduction counts over time. */
+        var pedRef = null, carRef = null, targetKind = 'ped';
+        var goesForCar = (Math.random() < 0.50);
+        if (goesForCar && vehicles && vehicles.length){
+            /* find an on-screen, not-yet-abducted car */
+            for (var vc=0; vc<20; vc++){
+                var vCand = vehicles[Math.floor(Math.random()*vehicles.length)];
+                if (!vCand._absHidden && !vCand._absLifting
+                    && !vCand._alienized
+                    && vCand.x > 0 && vCand.x < W){
+                    carRef = vCand;
+                    targetKind = 'car';
+                    break;
+                }
+            }
+        }
+        if (targetKind === 'ped'){
+            pedRef = (targetPedIdx >= 0 && targetPedIdx < peds.length) ? peds[targetPedIdx] : null;
+        }
+        return {
+            shipType: st,
+            x: startX, y: startY,
+            vx: rng(-0.4, 0.4), vy: prof.vyMax * rng(0.6, 1.0),
+            size: size,
+            phase: 'enter', phaseT: 0,
+            bob: rng(0, Math.PI*2),
+            spin: rng(0, Math.PI*2),
+            spinV: rng(2.5, 5.0) * (rng(0,1) < 0.5 ? -1 : 1),
+            targetPed: targetPedIdx,
+            targetKind: targetKind,    /* 'ped' or 'car' */
+            pedSlot: pedRef,           /* direct reference — survives array mutation */
+            carSlot: carRef,           /* if targetKind==='car' */
+            dropX: carRef ? carRef.x : (pedRef ? pedRef.x : startX),  /* abduction spot, also drop spot */
+            targetX: 0, targetY: 0,
+            capturedAt: -1,
+            beamPower: 0,         /* 0..1 — beam ramp during abduct */
+            beamParticles: [],
+            hp: (st === 'mothership' ? 4 :
+                 st === 'harvester'  ? 4 :
+                 st === 'biomech'    ? 3 :
+                 st === 'prism'      ? 2 : 2),
+            alive: true,
+            hitFlash: 0,
+            escapeY: -size - 100,
+            captured: false,
+            dropped: false,
+            goneDelay: 0,
+            /* roll once at spawn — does this saucer ever get hit?
+               If true, the interceptor system will pick it as a
+               target. If false, it abducts uninterrupted. */
+            willBeHit: (Math.random() * 100 < abductionMissileStrength),
+            dying: false,           /* set when actually hit */
+            dyingT: 0,
+            sizeMul: 1,             /* shrinks toward 0 during black hole */
+            consumedBy: null        /* black hole reference once swallowed */
+        };
+    }
+
+    function createReplacerSaucer(idx, dropX){
+        var st = abdShipType();
+        var prof = ABD_STYLE[st];
+        var size = prof.sizeBase * rng(0.92, 1.10);
+        return {
+            shipType: st,
+            x: dropX + rng(-60, 60), y: -size - 40,
+            vx: 0, vy: prof.vyMax * rng(0.5, 0.9),
+            size: size,
+            phase: 'enter', phaseT: 0,
+            bob: rng(0, Math.PI*2),
+            spin: rng(0, Math.PI*2),
+            spinV: rng(2.0, 4.5) * (rng(0,1) < 0.5 ? -1 : 1),
+            dropX: dropX,
+            dropY: GROUND + (H-GROUND) * 0.58,
+            hoverY: 0, /* computed when entering hover */
+            beamPower: 0,
+            beamParticles: [],
+            alien: { coat: rngI(0,5), dir: (rng(0,1) < 0.5 ? -1 : 1) },
+            alive: true
+        };
+    }
+
+    function pickAbductionTargets(){
+        /* Pick ped indices to abduct. Each saucer gets one. If we run
+           out of unique peds, allow duplicates (multiple saucers may
+           briefly converge — visually fine, will spread out via beam
+           jitter). */
+        var n = Math.min(peds.length, 18);     /* up to 18 saucers */
+        var indices = [];
+        for (var i = 0; i < peds.length; i++) indices.push(i);
+        /* shuffle */
+        for (var i = indices.length - 1; i > 0; i--){
+            var j = Math.floor(rng(0, i+1));
+            var tmp = indices[i]; indices[i] = indices[j]; indices[j] = tmp;
+        }
+        return indices.slice(0, n);
+    }
+
+    function startAbduction(){
+        if (abductionOn) return;
+
+        /* MUTUAL EXCLUSION — same family as parade. Cancel attack,
+           defence, strategy, parade, in-progress reconstruction so
+           the city is pristine for the alien event. */
+        if (typeof missileArmed !== 'undefined' && missileArmed){
+            missileArmed = false;
+            if (canvas && canvas.style) canvas.style.cursor = '';
+            if (typeof document !== 'undefined'){
+                var mWrap = document.getElementById('missileBtn');
+                if (mWrap) mWrap.classList.remove('armed');
+            }
+        }
+        if (typeof strategyMode !== 'undefined' && strategyMode){
+            strategyMode = false;
+        }
+        if (paradeOn) stopParade();
+        if (typeof finalizeReconstruction === 'function') finalizeReconstruction();
+        if (typeof reconstructOn !== 'undefined') reconstructOn = false;
+        if (typeof autoAttackOn !== 'undefined') autoAttackOn = false;
+        if (typeof autoDefenceOn !== 'undefined') autoDefenceOn = false;
+
+        /* DO NOT activate the real defence widget or any attack mode.
+           The alien wave runs its OWN self-contained interceptor
+           system. The city's normal attack/defence systems stay in
+           whatever state the user left them in. */
+        abductionDefencePrev = null;
+
+        abductionOn = true;
+        abductionHitCount = 0;
+        /* CROSSHAIR CURSOR for manual click-to-fire. If Auto is on
+           we leave the cursor alone (no crosshair) since the user
+           isn't aiming. */
+        if (!abductionAutoFire && canvas && canvas.style){
+            canvas.style.cursor = 'crosshair';
+        }
+
+        /* PIN the weather to GRAVITY WELL for the duration of the
+           alien wave — the city literally has an alien anomaly
+           overhead, weather should reflect it. Restore previous
+           event + pin state on stopAbduction. */
+        abductionWeatherPrev = (typeof eventIndex !== 'undefined') ? eventIndex : -1;
+        if (typeof EVENTS !== 'undefined' && EVENTS && typeof setEvent === 'function'){
+            var gwIdx = -1;
+            for (var ei=0; ei<EVENTS.length; ei++){
+                if (EVENTS[ei].type === 'gravityWell'){ gwIdx = ei; break; }
+            }
+            if (gwIdx >= 0){
+                setEvent(gwIdx);
+                if (typeof weatherPinned !== 'undefined' && !weatherPinned){
+                    weatherPinned = true;
+                    abductionForcedWeatherPin = true;
+                }
+            }
+        }
+        abductionPhase = 'attack';
+        abductionPhaseT = 0;
+        abductionAbducted = 0;
+        abductionReturned = 0;
+        abductionDefenceTimer = 0;
+        abductionReturnTimer = 0;
+        abductionSaucers.length = 0;
+        abductionReplacers.length = 0;
+        abductionMissiles.length = 0;
+        abductionWreckage.length = 0;
+        alienWalkers.length = 0;
+
+        /* spawn the attack wave — MANY ships, most will be shot down */
+        var targets = pickAbductionTargets();
+        var spawn = Math.max(12, Math.min(18, targets.length || 14));
+        if (targets.length === 0){
+            for (var ti=0; ti<spawn; ti++) targets.push(-1);
+        }
+        abductionTotalShips = spawn;
+        abductionTargetCount = spawn;
+        /* compute the hit cap based on fleet size — 10% of saucers
+           will take a single hit (visual only; they always survive). */
+        ABDUCTION_HIT_CAP = Math.max(1, Math.round(spawn * ABDUCTION_HIT_RATIO));
+        for (var i=0; i<spawn; i++){
+            abductionSaucers.push(createAbductionSaucer(i, spawn,
+                targets[i % targets.length]));
+        }
+    }
+
+    function stopAbduction(){
+        var was = abductionOn;
+        abductionOn = false;
+        abductionPhase = 'idle';
+        /* clear the crosshair cursor when abduction ends */
+        if (was && canvas && canvas.style && canvas.style.cursor === 'crosshair'){
+            canvas.style.cursor = '';
+        }
+        /* free any peds AND cars still hidden inside a saucer/beam */
+        for (var sci=0; sci<abductionSaucers.length; sci++){
+            var sCancel = abductionSaucers[sci];
+            if (sCancel.pedSlot){
+                sCancel.pedSlot._absLifting = false;
+                sCancel.pedSlot._absHidden = false;
+                sCancel.pedSlot._absDropping = false;
+                sCancel.pedSlot._absCaptured = false;
+                sCancel.pedSlot._absY = undefined;
+                sCancel.pedSlot._absOrigY = undefined;
+                sCancel.pedSlot._absHostX = undefined;
+            }
+            if (sCancel.carSlot){
+                sCancel.carSlot._absLifting = false;
+                sCancel.carSlot._absHidden = false;
+                sCancel.carSlot._absY = undefined;
+                sCancel.carSlot._absOrigY = undefined;
+                sCancel.carSlot._absHostX = undefined;
+                sCancel.carSlot._alienized = false;
+                sCancel.carSlot._morphing = false;
+            }
+        }
+        /* also free any pedSlots referenced by orphaned walkers */
+        for (var wkj=0; wkj<alienWalkers.length; wkj++){
+            var wkCancel = alienWalkers[wkj].pedSlot;
+            if (wkCancel){
+                wkCancel._absLifting = false;
+                wkCancel._absHidden = false;
+                wkCancel._absDropping = false;
+                wkCancel._absCaptured = false;
+                wkCancel._absY = undefined;
+                wkCancel._absOrigY = undefined;
+                wkCancel._absHostX = undefined;
+            }
+        }
+        abductionSaucers.length = 0;
+        abductionReplacers.length = 0;
+        abductionMissiles.length = 0;
+        abductionWreckage.length = 0;
+        abductionBlackHoles.length = 0;
+        abductionGlobalFX.length = 0;
+        abductionTargetLocks.length = 0;
+        alienWalkers.length = 0;
+        abductionHitCount = 0;
+        abductionContinuousTimer = 0;
+        /* nothing to restore — we never touched the user's defence
+           state on startAbduction */
+        abductionDefencePrev = null;
+        /* unpin gravity-well weather if WE were the one that pinned it.
+           Leave it alone if the user had a different pin before the
+           wave started. */
+        if (was){
+            if (abductionForcedWeatherPin && typeof weatherPinned !== 'undefined'){
+                weatherPinned = false;
+                abductionForcedWeatherPin = false;
+            }
+        }
+        abductionWeatherPrev = -1;
+        if (was && typeof document !== 'undefined'){
+            var w = document.getElementById('abductionBtn');
+            if (w) w.classList.remove('active');
+        }
+    }
+
+    function spawnAbductionInterceptor(targetSaucer){
+        if (targetSaucer.beingIntercepted || targetSaucer.tagged) return;
+        targetSaucer.beingIntercepted = true;
+        var mtype = abdMissileType();
+        /* prefer an actual defence battery for the launch point */
+        var sx, sy;
+        if (typeof airDefence !== 'undefined' && airDefence && airDefence.length){
+            var bat = airDefence[Math.floor(Math.random() * airDefence.length)];
+            sx = bat.x;
+            sy = bat.y - 14;
+            bat.flashT = 280;
+        } else {
+            sx = rng(W*0.05, W*0.95);
+            sy = GROUND - rng(20, 80);
+        }
+        var ang = Math.atan2(targetSaucer.y - sy, targetSaucer.x - sx);
+        var spd = (mtype.flight === 'beam') ? 12.0 : 4.8;   /* ion beams are nearly instant */
+        var m = {
+            x: sx, y: sy,
+            sx: sx, sy: sy,   /* origin */
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd,
+            target: targetSaucer,
+            age: 0, life: 0,
+            trail: [],
+            helix: 0,
+            helixV: rng(0.20, 0.40) * (rng(0,1) < 0.5 ? 1 : -1),
+            sparkEmit: 0,
+            sparks: [],
+            launchFlashT: 350,
+            alive: true,
+            seekStrength: 0.20,
+            maxSpeed: (mtype.flight === 'beam') ? 14.0 : 7.0,
+            /* missile-type-specific state */
+            mtype: mtype,
+            jitterT: 0,
+            ghosts: [],          /* for quantum teleport ghosting */
+            swarmlets: (mtype.flight === 'swarm') ? (function(){
+                var arr = [];
+                for (var k=0; k<6; k++){
+                    arr.push({ phase: k*Math.PI*2/6, r: 6 + rng(-1,1) });
+                }
+                return arr;
+            })() : null
+        };
+        abductionMissiles.push(m);
+    }
+
+    function createWreckage(s){
+        return {
+            x: s.x, y: s.y,
+            vx: s.vx + rng(-0.6, 0.6),
+            vy: rng(-1.0, 0.4),
+            rot: 0,
+            rotV: rng(-0.10, 0.10),
+            age: 0, maxAge: 3.2,
+            shipType: s.shipType,
+            size: s.size,
+            exploded: false,
+            sparks: [],
+            smoke: []
+        };
+    }
+
+    function updateAbduction(dt){
+        if (!abductionOn) return;
+        var k = dt / 16;
+        abductionPhaseT += dt;
+
+        /* AUTO ROTATION — when Auto is on, cycle the selected SHIP
+           type every 3s so the swarm parades through every alien
+           variant. (Missile type now cycles per-fire below.) */
+        if (abductionAutoFire){
+            abductionAutoCycleTimer -= dt;
+            if (abductionAutoCycleTimer <= 0){
+                abductionShipIdx = (abductionShipIdx + 1) % ABDUCTION_SHIPS.length;
+                abductionAutoCycleTimer = ABDUCTION_AUTO_CYCLE_MS;
+            }
+        }
+
+        /* ── ALIEN WALKERS — update EVERY frame regardless of wave
+              phase, so dropped aliens immediately start walking the
+              moment they touch the street, even while the saucer
+              that dropped them is still flying away. */
+        for (var wkA = alienWalkers.length - 1; wkA >= 0; wkA--){
+            var wkE = alienWalkers[wkA];
+            wkE.t += dt * 0.003;
+            if (wkE.phase === 'descend'){
+                wkE.descendT += dt;
+                var dpA = Math.min(1, wkE.descendT / wkE.descendDur);
+                var dpEaseA = 1 - (1-dpA)*(1-dpA);
+                var groundYA = GROUND + (H-GROUND)*0.58 + wkE.row*6;
+                wkE._renderY = wkE.startY + (groundYA - wkE.startY) * dpEaseA;
+                /* shuffle slightly during descent so the alien isn't a
+                   static figure under the beam */
+                wkE.x += wkE.dir * wkE.speed * dt * 0.012;
+                if (dpA >= 1){ wkE.phase = 'walk'; wkE._renderY = groundYA; }
+            } else if (wkE.phase === 'walk'){
+                wkE.walkT += dt;
+                wkE.x += wkE.dir * wkE.speed * dt * 0.038;
+                if (wkE.x < -20) wkE.x = W + 20;
+                if (wkE.x > W+20) wkE.x = -20;
+                if (wkE.walkT > wkE.walkDur){ wkE.phase = 'morph'; wkE.morphT = 0; }
+            } else if (wkE.phase === 'morph'){
+                wkE.morphT += dt;
+                /* keep walking through the morph so the shape-shift
+                   happens IN MOTION, not standing still */
+                wkE.x += wkE.dir * wkE.speed * dt * 0.038;
+                if (wkE.morphT >= wkE.morphDur){
+                    var slotA = wkE.pedSlot;
+                    if (slotA){
+                        slotA.x = wkE.x;
+                        slotA.dir = wkE.dir;
+                        slotA._absHidden = false;
+                        slotA._absDropping = false;
+                        slotA._absLifting = false;
+                        slotA._absY = undefined;
+                        slotA._absOrigY = undefined;
+                        slotA._absHostX = undefined;
+                        slotA._absCaptured = false;
+                        slotA.coat = wkE.coat;
+                        slotA.row = wkE.row;
+                    }
+                    alienWalkers.splice(wkA, 1);
+                }
+            }
+        }
+
+        /* CONTINUOUS SPAWN — while abduction is on, keep replenishing
+           the swarm so saucers keep coming until the user toggles it
+           off. Maintains roughly ABDUCTION_TARGET_AIRBORNE ships in
+           flight at all times. */
+        abductionContinuousTimer -= dt;
+        if (abductionContinuousTimer <= 0 && abductionOn && abductionPhase !== 'done'){
+            var current = abductionSaucers.length;
+            if (current < ABDUCTION_TARGET_AIRBORNE){
+                var need = Math.min(ABDUCTION_TARGET_AIRBORNE - current, 5);
+                /* pick fresh targets that aren't already being abducted */
+                var freshPeds = [];
+                for (var fp=0; fp<peds.length; fp++){
+                    if (!peds[fp]._absHidden && !peds[fp]._absLifting
+                        && !peds[fp]._absDropping)
+                        freshPeds.push(fp);
+                }
+                /* shuffle */
+                for (var sh=freshPeds.length-1; sh>0; sh--){
+                    var swh = Math.floor(rng(0, sh+1));
+                    var ttmp = freshPeds[sh]; freshPeds[sh] = freshPeds[swh]; freshPeds[swh] = ttmp;
+                }
+                for (var ns=0; ns<need; ns++){
+                    var tIdx = (freshPeds.length > ns) ? freshPeds[ns] : -1;
+                    abductionSaucers.push(createAbductionSaucer(
+                        abductionTotalShips + ns, ABDUCTION_TARGET_AIRBORNE, tIdx));
+                }
+                abductionTotalShips += need;
+            }
+            abductionContinuousTimer = rng(1800, 3200);
+        }
+
+        /* ── ATTACK PHASE ─────────────────────────────────────── */
+        if (abductionPhase === 'attack'){
+            /* AUTO-FIRE — when AUTO is on, fire continuously,
+               cycling through all 7 missile types in sequence
+               regardless of willBeHit. Difficulty controls fire
+               rate INVERSELY: low diff = rapid fire (lots of hits),
+               high diff = sparse fire (most ships survive). Also
+               cap total in-flight missiles to keep the particle
+               budget bounded. */
+            if (abductionAutoFire && abductionMissiles.length < 12){
+                abductionDefenceTimer -= dt;
+                if (abductionDefenceTimer <= 0){
+                    var live = [];
+                    for (var li=0; li<abductionSaucers.length; li++){
+                        var s = abductionSaucers[li];
+                        if (s.alive && !s.captured && !s.tagged
+                            && !s.dying && !s.beingIntercepted
+                            && (s.phase === 'hover' || s.phase === 'abduct' || s.phase === 'drop'))
+                            live.push(s);
+                    }
+                    if (live.length){
+                        var pick = live[Math.floor(rng(0, live.length))];
+                        /* sequence-cycle missile type on EVERY fire so
+                           all 7 types parade through during Auto */
+                        abductionMissileTypeIdx = (abductionMissileTypeIdx + 1) % ABDUCTION_MISSILES.length;
+                        pick.willBeHit = true;   /* force the hit */
+                        spawnAbductionInterceptor(pick);
+                    }
+                    /* inverse-difficulty fire rate */
+                    var diffN = abductionDifficulty / 100;     /* 0..1 */
+                    var minT = 60 + diffN * 700;
+                    var maxT = 120 + diffN * 1400;
+                    abductionDefenceTimer = rng(minT, maxT);
+                }
+            }
+
+            /* update missiles — homing + accelerating + spiral trail */
+            for (var mi = abductionMissiles.length - 1; mi >= 0; mi--){
+                var m = abductionMissiles[mi];
+                m.age += dt;
+                if (m.launchFlashT > 0) m.launchFlashT -= dt;
+                m.helix += m.helixV * dt * 0.025;
+                m.jitterT += dt;
+                /* QUANTUM teleport ghosts — every ~80ms record a ghost
+                   position; the missile also visibly "jumps" forward */
+                if (m.mtype && m.mtype.flight === 'quantum'){
+                    if (m.jitterT > 80){
+                        m.jitterT = 0;
+                        m.ghosts.push({ x:m.x, y:m.y, age:0, max:300 });
+                        /* small teleport forward */
+                        m.x += m.vx * 0.6;
+                        m.y += m.vy * 0.6;
+                    }
+                    for (var gh=m.ghosts.length-1; gh>=0; gh--){
+                        m.ghosts[gh].age += dt;
+                        if (m.ghosts[gh].age > m.ghosts[gh].max) m.ghosts.splice(gh,1);
+                    }
+                }
+                /* homing — steer toward target with ramping strength */
+                if (m.target && m.target.alive && !m.target.captured){
+                    var dx = m.target.x - m.x, dy = m.target.y - m.y;
+                    var dlen = Math.sqrt(dx*dx + dy*dy) || 1;
+                    /* seek ramps up — after 1.6s missile is locked
+                       hard onto the target and will not miss */
+                    var seek = Math.min(0.95, m.seekStrength + m.age * 0.0005);
+                    var aimSpd = Math.min(m.maxSpeed, 4.6 + m.age * 0.0015);
+                    m.vx = m.vx*(1-seek) + (dx/dlen)*aimSpd*seek;
+                    m.vy = m.vy*(1-seek) + (dy/dlen)*aimSpd*seek;
+                }
+                /* renormalise to current target speed */
+                var spm = Math.sqrt(m.vx*m.vx + m.vy*m.vy) || 1;
+                var cruise = Math.min(m.maxSpeed, 4.8 + m.age * 0.0015);
+                m.vx = m.vx/spm * cruise;
+                m.vy = m.vy/spm * cruise;
+                /* heavy trail history for layered rendering */
+                m.trail.push({ x:m.x, y:m.y, helix: m.helix });
+                if (m.trail.length > 28) m.trail.shift();
+                /* continuous spark emission */
+                m.sparkEmit += dt;
+                if (m.sparkEmit > 18){
+                    m.sparkEmit = 0;
+                    var perp = Math.atan2(m.vy, m.vx) + Math.PI/2;
+                    m.sparks.push({
+                        x: m.x - m.vx*0.4,
+                        y: m.y - m.vy*0.4,
+                        vx: -m.vx*0.15 + Math.cos(perp + rng(-0.5, 0.5)) * rng(0.4, 1.2),
+                        vy: -m.vy*0.15 + Math.sin(perp + rng(-0.5, 0.5)) * rng(0.4, 1.2),
+                        age:0, max: rng(280, 600),
+                        hue: rng(20, 60)
+                    });
+                }
+                for (var sk=m.sparks.length-1; sk>=0; sk--){
+                    var spk = m.sparks[sk];
+                    spk.x += spk.vx * k;
+                    spk.y += spk.vy * k;
+                    spk.vy += 0.03 * k;
+                    spk.age += dt;
+                    if (spk.age > spk.max) m.sparks.splice(sk, 1);
+                }
+                m.x += m.vx * k;
+                m.y += m.vy * k;
+                /* hit detection — ship swerves briefly then is pulled
+                   into the WEATHER gravity well (single shared black
+                   hole) until it crosses the event horizon. */
+                var hit = false;
+                if (m.target && m.target.alive && !m.target.tagged){
+                    var dx2 = m.target.x - m.x, dy2 = m.target.y - m.y;
+                    var hitR = m.target.size * 0.62;
+                    if (dx2*dx2 + dy2*dy2 < hitR*hitR){
+                        m.target.tagged = true;
+                        m.target.beingIntercepted = false;
+                        m.target.dying = true;
+                        m.target.dyingT = 0;
+                        hit = true;
+                        abductionHitCount++;
+                        /* short-lived impact portal at the hit site —
+                           NOT a destination, just a visual flash that
+                           fades. The actual pull goes to the shared
+                           weather gravity well. */
+                        abductionBlackHoles.push({
+                            x: m.x, y: m.y,
+                            r: 4, rTarget: m.target.size * 0.55,
+                            age: 0, max: 900,
+                            phase: 'opening',
+                            phaseT: 0,
+                            spin: 0,
+                            spinV: rng(0.05, 0.12),
+                            ship: null,        /* no ship attached — just a flash */
+                            accretion: [],
+                            shockRings: [
+                                { r: 0, max: 90, age: 0, alpha: 0.9 },
+                                { r: 0, max: 80, age: -120, alpha: 0.85 }
+                            ]
+                        });
+                        /* mark ship for pull toward gravityWell */
+                        m.target.consumedBy = 'weatherWell';
+
+                        /* ── EPIC GLOBAL FX (capped to keep frame budget bounded) */
+                        if (abductionGlobalFX.length < 8){
+                            abductionGlobalFX.push({
+                                x: m.x, y: m.y,
+                                age: 0, max: 900,
+                                kind: 'megaHit'
+                            });
+                            abductionGlobalFX.push({
+                                x: m.x, y: m.y,
+                                age: 0, max: 1400,
+                                kind: 'skyRing'
+                            });
+                        }
+                        /* DEBRIS FRAGMENTS — 6 chunks (reduced from
+                           14 to bound per-hit particle cost) */
+                        if (!m.target.debrisChunks) m.target.debrisChunks = [];
+                        for (var df=0; df<6; df++){
+                            var dfa = df/6 * Math.PI*2 + rng(-0.2,0.2);
+                            m.target.debrisChunks.push({
+                                ox: m.x - m.target.x + rng(-3,3),
+                                oy: m.y - m.target.y + rng(-3,3),
+                                vx: Math.cos(dfa) * rng(1.8, 4.2),
+                                vy: Math.sin(dfa) * rng(1.8, 4.2),
+                                age:0, max: rng(700, 1100),
+                                rot: rng(0, Math.PI*2),
+                                rotV: rng(-0.18, 0.18),
+                                size: rng(3, 6)
+                            });
+                        }
+                        /* RAINBOW CONFETTI — 10 sparks (reduced from 22).
+                           CRITICAL: init hitSparks here before pushing —
+                           it isn't created until the ember-shower block
+                           further down, so without this guard the first
+                           hit throws TypeError on .push of undefined
+                           and FREEZES the entire update loop. */
+                        if (!m.target.hitSparks) m.target.hitSparks = [];
+                        for (var cf=0; cf<10; cf++){
+                            var cfa = cf/10 * Math.PI*2;
+                            m.target.hitSparks.push({
+                                ox: m.x - m.target.x,
+                                oy: m.y - m.target.y,
+                                vx: Math.cos(cfa) * rng(3.5, 6.5),
+                                vy: Math.sin(cfa) * rng(3.5, 6.5),
+                                age:0, max: rng(700, 1200),
+                                hue: rng(0, 360),
+                                isWhite: false
+                            });
+                        }
+                        /* if this saucer was carrying a ped OR car,
+                           free them — they survive when the ship dies
+                           before completing the drop. */
+                        var pSlotH = m.target.pedSlot;
+                        if (pSlotH){
+                            pSlotH._absLifting = false;
+                            pSlotH._absHidden = false;
+                            pSlotH._absDropping = false;
+                            pSlotH._absCaptured = false;
+                            pSlotH._absY = undefined;
+                            pSlotH._absOrigY = undefined;
+                            pSlotH._absHostX = undefined;
+                        }
+                        var cSlotH = m.target.carSlot;
+                        if (cSlotH){
+                            cSlotH._absLifting = false;
+                            cSlotH._absHidden = false;
+                            cSlotH._absY = undefined;
+                            cSlotH._absOrigY = undefined;
+                            cSlotH._absHostX = undefined;
+                        }
+                        /* impact local coordinates (relative to ship) */
+                        var ix = m.x - m.target.x;
+                        var iy = m.y - m.target.y;
+                        /* KINETIC KNOCKBACK — missile pushes the ship
+                           in the direction it was traveling, then the
+                           swerve damps over ~1 second */
+                        m.target.vx += m.vx * 0.85;
+                        m.target.vy += m.vy * 0.40;
+                        m.target.swerveT    = 1100;
+                        m.target.swerveMax  = 1100;
+                        m.target.swerveAng  = Math.atan2(m.vy, m.vx) * 0.45;
+                        m.target.swerveAngV = m.target.swerveAng * 0.008;
+                        m.target.hitJitter  = 6;          /* px wobble at peak */
+                        m.target.hitFreezeT = 220;        /* brief slow-mo */
+                        m.target.hitFlash   = 520;
+                        m.target.hitImpact  = { ox:ix, oy:iy, age:0, max:550 };
+                        /* LENS-FLARE CROSS — 4 long beams from impact */
+                        m.target.lensFlare = { ox:ix, oy:iy, age:0, max:600 };
+                        /* MULTI-RING SHOCKWAVE — 3 expanding rings at
+                           different speeds */
+                        if (!m.target.hitRipples) m.target.hitRipples = [];
+                        for (var rr=0; rr<3; rr++){
+                            m.target.hitRipples.push({
+                                hitDX: ix, hitDY: iy,
+                                age: -rr*60, max: 950,
+                                speed: 1.0 + rr*0.45,
+                                hue: 200 - rr*15
+                            });
+                        }
+                        /* PLASMA ARCS — 5 lightning bolts radiating
+                           across the hull surface from the impact */
+                        if (!m.target.plasmaArcs) m.target.plasmaArcs = [];
+                        for (var pa=0; pa<5; pa++){
+                            var paAng = pa/5 * Math.PI*2 + rng(-0.3, 0.3);
+                            var paLen = m.target.size * (0.55 + Math.random()*0.30);
+                            var segs = [];
+                            var nseg = 6;
+                            var lx = ix, ly = iy;
+                            for (var sg=0; sg<nseg; sg++){
+                                var step = paLen / nseg;
+                                lx += Math.cos(paAng + rng(-0.35, 0.35)) * step;
+                                ly += Math.sin(paAng + rng(-0.35, 0.35)) * step;
+                                segs.push({ x:lx, y:ly });
+                            }
+                            m.target.plasmaArcs.push({ segs:segs, age:0, max:rng(300, 500) });
+                        }
+                        /* EMBER + SPARK SHOWER — 18 hot particles
+                           (reduced from 48 for performance) */
+                        if (!m.target.hitSparks) m.target.hitSparks = [];
+                        for (var sp=0; sp<18; sp++){
+                            var sa = sp/18 * Math.PI*2 + rng(-0.15,0.15);
+                            var speed = rng(2.0, 5.5);
+                            m.target.hitSparks.push({
+                                ox: ix, oy: iy,
+                                vx: Math.cos(sa) * speed,
+                                vy: Math.sin(sa) * speed,
+                                age:0, max: rng(500, 1000),
+                                hue: (sp%4===0) ? 200
+                                   : (sp%4===1) ? 40
+                                   : (sp%4===2) ? 20
+                                   : 0,
+                                isWhite: (sp%4===3)
+                            });
+                        }
+                        /* heat distortion ring — single big visible
+                           heat-haze halo that expands and fades */
+                        m.target.heatRing = { ox:ix, oy:iy, age:0, max:850 };
+                    }
+                }
+                if (hit || m.y < -40 || m.y > H + 40 || m.x < -40 || m.x > W + 40 || m.age > 4500){
+                    abductionMissiles.splice(mi, 1);
+                }
+            }
+
+            /* update saucers */
+            for (var si = abductionSaucers.length - 1; si >= 0; si--){
+                var sc = abductionSaucers[si];
+                sc.phaseT += dt;
+                sc.bob += 0.005 * dt;
+                sc.spin += sc.spinV * dt * 0.001;
+                if (sc.hitFlash > 0) sc.hitFlash -= dt;
+                /* swerve decay — hit knockback slowly damps out */
+                if (sc.swerveT && sc.swerveT > 0){
+                    sc.swerveT -= dt;
+                    /* angle eases back toward 0 with a wobble */
+                    sc.swerveAng *= 0.965;
+                    /* random jitter that fades with swerve */
+                    sc.hitJitter *= 0.985;
+                }
+                /* hit-freeze brief slow-mo */
+                if (sc.hitFreezeT && sc.hitFreezeT > 0){
+                    sc.hitFreezeT -= dt;
+                }
+                /* impact flash point + heat ring + lens flare ages */
+                if (sc.hitImpact){
+                    sc.hitImpact.age += dt;
+                    if (sc.hitImpact.age > sc.hitImpact.max) sc.hitImpact = null;
+                }
+                if (sc.heatRing){
+                    sc.heatRing.age += dt;
+                    if (sc.heatRing.age > sc.heatRing.max) sc.heatRing = null;
+                }
+                if (sc.lensFlare){
+                    sc.lensFlare.age += dt;
+                    if (sc.lensFlare.age > sc.lensFlare.max) sc.lensFlare = null;
+                }
+                /* plasma arcs — short-lived */
+                if (sc.plasmaArcs){
+                    for (var pai=sc.plasmaArcs.length-1; pai>=0; pai--){
+                        sc.plasmaArcs[pai].age += dt;
+                        if (sc.plasmaArcs[pai].age > sc.plasmaArcs[pai].max)
+                            sc.plasmaArcs.splice(pai,1);
+                    }
+                }
+                /* age hit ripples + sparks (saucers always survive a
+                   hit — these are visual fireworks only) */
+                if (sc.hitRipples){
+                    for (var hri=sc.hitRipples.length-1; hri>=0; hri--){
+                        sc.hitRipples[hri].age += dt;
+                        if (sc.hitRipples[hri].age > sc.hitRipples[hri].max)
+                            sc.hitRipples.splice(hri,1);
+                    }
+                }
+                if (sc.hitSparks){
+                    var kk2 = dt/16;
+                    for (var hsj=sc.hitSparks.length-1; hsj>=0; hsj--){
+                        var hsx = sc.hitSparks[hsj];
+                        hsx.ox += hsx.vx * kk2;
+                        hsx.oy += hsx.vy * kk2;
+                        hsx.vy += 0.04 * kk2;
+                        hsx.vx *= 0.985;
+                        hsx.age += dt;
+                        if (hsx.age > hsx.max) sc.hitSparks.splice(hsj,1);
+                    }
+                }
+                /* age debris chunks — tumble and gravity-fall */
+                if (sc.debrisChunks){
+                    var kk3 = dt/16;
+                    for (var dci=sc.debrisChunks.length-1; dci>=0; dci--){
+                        var dc = sc.debrisChunks[dci];
+                        dc.ox += dc.vx * kk3;
+                        dc.oy += dc.vy * kk3;
+                        dc.vy += 0.06 * kk3;
+                        dc.vx *= 0.99;
+                        dc.rot += dc.rotV * kk3;
+                        dc.age += dt;
+                        if (dc.age > dc.max) sc.debrisChunks.splice(dci,1);
+                    }
+                }
+
+                if (!sc.alive){
+                    abductionSaucers.splice(si, 1);
+                    continue;
+                }
+                var prof = ABD_STYLE[sc.shipType];
+                var ped = (sc.targetPed >= 0 && sc.targetPed < peds.length) ? peds[sc.targetPed] : null;
+
+                /* DYING — the ship was just hit. Pulled toward the
+                   weather gravity well, crosses the event horizon,
+                   then despawns. Hardened with explicit NaN guards
+                   so a bad coord can never freeze the loop. */
+                if (sc.dying){
+                    sc.dyingT += dt;
+                    /* find a valid gravity well target — if the
+                       weather hole isn't initialised yet, use a
+                       sensible fallback so the ship still vanishes */
+                    var wb = null;
+                    if (typeof gravityState !== 'undefined' && gravityState
+                        && typeof gravityState.cx === 'number'
+                        && typeof gravityState.cy === 'number'
+                        && !isNaN(gravityState.cx) && !isNaN(gravityState.cy)){
+                        wb = gravityState;
+                    }
+                    if (!wb){
+                        wb = { cx: W * 0.72, cy: GROUND * 0.28, r: 48 };
+                    }
+                    if (sc.dyingT > 350){
+                        var bdx = wb.cx - sc.x;
+                        var bdy = wb.cy - sc.y;
+                        var bdlen = Math.sqrt(bdx*bdx + bdy*bdy);
+                        if (!isFinite(bdlen) || bdlen < 0.001) bdlen = 1;
+                        var pull = 0.05 + Math.min(0.28, sc.dyingT / 6000);
+                        var newVx = sc.vx*(1-pull) + (bdx/bdlen) * 5.0 * pull;
+                        var newVy = sc.vy*(1-pull) + (bdy/bdlen) * 5.0 * pull;
+                        if (isFinite(newVx)) sc.vx = newVx;
+                        if (isFinite(newVy)) sc.vy = newVy;
+                        sc.x += sc.vx * k;
+                        sc.y += sc.vy * k;
+                        if (!isFinite(sc.x) || !isFinite(sc.y)){
+                            /* abort dying saucer if coords blew up */
+                            abductionSaucers.splice(si, 1);
+                            continue;
+                        }
+                        var horizon = (wb.r || 48) * 1.8;
+                        var distToHole = bdlen;
+                        if (distToHole < horizon){
+                            sc.sizeMul = Math.max(0, distToHole / horizon);
+                        }
+                        sc.spin += 0.016 * dt * (1 + (1 - sc.sizeMul));
+                        if (distToHole < (wb.r || 48) * 0.55 || sc.sizeMul < 0.05){
+                            abductionSaucers.splice(si, 1);
+                            continue;
+                        }
+                    }
+                    /* age the per-ship FX (hit ripples, sparks, etc.)
+                       so they don't accumulate forever on a dying ship */
+                    if (sc.hitFlash > 0) sc.hitFlash -= dt;
+                    if (sc.hitRipples){
+                        for (var dyR=sc.hitRipples.length-1; dyR>=0; dyR--){
+                            sc.hitRipples[dyR].age += dt;
+                            if (sc.hitRipples[dyR].age > sc.hitRipples[dyR].max)
+                                sc.hitRipples.splice(dyR,1);
+                        }
+                    }
+                    if (sc.hitSparks){
+                        var kk4 = dt/16;
+                        for (var dyS=sc.hitSparks.length-1; dyS>=0; dyS--){
+                            var dySp = sc.hitSparks[dyS];
+                            dySp.ox += dySp.vx * kk4;
+                            dySp.oy += dySp.vy * kk4;
+                            dySp.vy += 0.04 * kk4;
+                            dySp.vx *= 0.985;
+                            dySp.age += dt;
+                            if (dySp.age > dySp.max) sc.hitSparks.splice(dyS,1);
+                        }
+                    }
+                    if (sc.lensFlare){
+                        sc.lensFlare.age += dt;
+                        if (sc.lensFlare.age > sc.lensFlare.max) sc.lensFlare = null;
+                    }
+                    if (sc.hitImpact){
+                        sc.hitImpact.age += dt;
+                        if (sc.hitImpact.age > sc.hitImpact.max) sc.hitImpact = null;
+                    }
+                    if (sc.heatRing){
+                        sc.heatRing.age += dt;
+                        if (sc.heatRing.age > sc.heatRing.max) sc.heatRing = null;
+                    }
+                    if (sc.plasmaArcs){
+                        for (var dyP=sc.plasmaArcs.length-1; dyP>=0; dyP--){
+                            sc.plasmaArcs[dyP].age += dt;
+                            if (sc.plasmaArcs[dyP].age > sc.plasmaArcs[dyP].max)
+                                sc.plasmaArcs.splice(dyP,1);
+                        }
+                    }
+                    if (sc.debrisChunks){
+                        var kk5 = dt/16;
+                        for (var dyD=sc.debrisChunks.length-1; dyD>=0; dyD--){
+                            var dch = sc.debrisChunks[dyD];
+                            dch.ox += dch.vx * kk5;
+                            dch.oy += dch.vy * kk5;
+                            dch.vy += 0.06 * kk5;
+                            dch.vx *= 0.99;
+                            dch.rot += dch.rotV * kk5;
+                            dch.age += dt;
+                            if (dch.age > dch.max) sc.debrisChunks.splice(dyD,1);
+                        }
+                    }
+                    /* skip normal phase logic while dying */
+                    continue;
+                }
+
+                /* lookup the current target x — ped or car */
+                var tgtX;
+                if (sc.targetKind === 'car' && sc.carSlot){
+                    tgtX = sc.carSlot.x;
+                } else if (ped){
+                    tgtX = ped.x;
+                } else {
+                    tgtX = sc.x;
+                }
+
+                if (sc.phase === 'enter'){
+                    /* descend toward target column with wobble; speed
+                       scaled by difficulty multiplier */
+                    var spdM = sc.speedMul || abductionSpeedMul || 1.0;
+                    sc.targetX = tgtX;
+                    var dx = tgtX - sc.x;
+                    sc.vx = sc.vx*0.94 + (dx*0.012);
+                    sc.x += sc.vx * k * spdM + Math.sin(sc.bob*prof.wobbleFreq)*prof.wobbleAmp*0.01*dt;
+                    sc.y += sc.vy * k * spdM;
+                    var hoverY = GROUND + (H-GROUND)*0.30 - sc.size * 1.1;
+                    if (sc.y >= hoverY){
+                        sc.y = hoverY;
+                        sc.phase = 'hover';
+                        sc.phaseT = 0;
+                    }
+                } else if (sc.phase === 'hover'){
+                    /* short hover, lock on, then start beam */
+                    sc.vx = sc.vx*0.85 + (tgtX - sc.x)*0.02;
+                    sc.x += sc.vx * k;
+                    sc.y += Math.sin(sc.bob*0.8)*0.4;
+                    if (sc.phaseT > 600){
+                        sc.phase = 'abduct';
+                        sc.phaseT = 0;
+                        sc.capturedAt = -1;
+                    }
+                } else if (sc.phase === 'abduct'){
+                    /* ramp beam power, lift the target (ped OR car) */
+                    sc.beamPower = Math.min(1, sc.beamPower + dt*0.0025);
+                    /* DEFENSIVE — if our car target was destroyed or
+                       reset (e.g. by city switch), fall through to
+                       the no-target branch so the saucer doesn't get
+                       stuck staring at a null carSlot. */
+                    if (sc.targetKind === 'car' && !sc.carSlot){
+                        sc.targetKind = 'ped';
+                    }
+                    /* car-target branch — lift a vehicle off the road */
+                    if (sc.targetKind === 'car' && sc.carSlot){
+                        var car = sc.carSlot;
+                        /* drift to follow car */
+                        sc.vx = sc.vx*0.88 + (car.x - sc.x)*0.015;
+                        sc.x += sc.vx * k;
+                        /* car stops moving while abducted */
+                        var rdHc = H - GROUND;
+                        var laneOffC = (car.dir===1) ? rdHc*0.06 : -rdHc*0.06;
+                        var carBaseY = GROUND + rdHc*0.10 + laneOffC;
+                        if (car._absOrigY === undefined){
+                            car._absOrigY = carBaseY;
+                        }
+                        /* particle stream from car */
+                        if (Math.random() < 0.7){
+                            sc.beamParticles.push({
+                                x: car.x + rng(-8, 8),
+                                y: carBaseY + rng(-2, 4),
+                                vy: -rng(0.6, 1.4),
+                                life: 0, maxLife: 900,
+                                hue: rng(80, 180)
+                            });
+                        }
+                        var liftC = Math.min(1, (sc.phaseT - 300) / 1400);
+                        if (liftC < 0) liftC = 0;
+                        var liftedYC = car._absOrigY - (car._absOrigY - sc.y) * liftC;
+                        car._absY = liftedYC;
+                        car._absLifting = true;
+                        car._absHostX = sc.x;
+                        if (liftC >= 1){
+                            /* car sucked into ship — switch to drop */
+                            sc.captured = true;
+                            sc.phase = 'drop';
+                            sc.phaseT = 0;
+                            abductionAbducted++;
+                            sc.dropX = car.x;
+                            car._absLifting = false;
+                            car._absHidden = true;
+                            sc.beamParticles = [];
+                        }
+                    } else {
+                        /* PED branch (original) */
+                        if (ped){
+                            sc.vx = sc.vx*0.88 + (ped.x - sc.x)*0.015;
+                            sc.x += sc.vx * k;
+                        }
+                        if (Math.random() < 0.6 && ped){
+                            sc.beamParticles.push({
+                                x: ped.x + rng(-3,3),
+                                y: GROUND + (H-GROUND)*0.58 + rng(-6, 0),
+                                vy: -rng(0.6, 1.4),
+                                life: 0, maxLife: 800,
+                                hue: rng(80, 180)
+                            });
+                        }
+                        if (ped){
+                            if (ped._absOrigY === undefined){
+                                ped._absOrigY = GROUND + (H-GROUND)*0.58 + ped.row*6;
+                                ped._absStart = sc.phaseT;
+                            }
+                            var lift = Math.min(1, (sc.phaseT - 300) / 1200);
+                            if (lift < 0) lift = 0;
+                            var liftedY = ped._absOrigY - (ped._absOrigY - sc.y) * lift;
+                            ped._absY = liftedY;
+                            ped._absLifting = true;
+                            ped._absHostX = sc.x;
+                            if (lift >= 1){
+                                ped._absCaptured = true;
+                                sc.captured = true;
+                                sc.phase = 'drop';
+                                sc.phaseT = 0;
+                                abductionAbducted++;
+                                sc.dropX = ped.x;
+                                sc.pedSlot = ped;
+                                ped._absLifting = false;
+                                ped._absHidden = true;
+                                sc.beamParticles = [];
+                            }
+                        } else {
+                            if (sc.phaseT > 1800){
+                                sc.captured = true;
+                                sc.phase = 'leave';
+                                sc.phaseT = 0;
+                                abductionAbducted++;
+                            }
+                        }
+                    }
+                    /* update beam particles */
+                    for (var bp = sc.beamParticles.length-1; bp >= 0; bp--){
+                        var p = sc.beamParticles[bp];
+                        p.y += p.vy * k * 2;
+                        p.life += dt;
+                        if (p.life > p.maxLife || p.y < sc.y) sc.beamParticles.splice(bp, 1);
+                    }
+                } else if (sc.phase === 'drop'){
+                    sc.beamPower = Math.min(1, sc.beamPower + dt*0.0025);
+                    /* beam particles fall DOWN */
+                    if (Math.random() < 0.7){
+                        sc.beamParticles.push({
+                            x: sc.dropX + rng(-3,3),
+                            y: sc.y + sc.size * 0.4,
+                            vy: rng(0.6, 1.4),
+                            life: 0, maxLife: 900,
+                            hue: rng(80, 180)
+                        });
+                    }
+                    /* spawn the alien walker / alien car after beam
+                       ramps up. CAR drops put the existing vehicle
+                       back on the road tagged `_alienized` — it
+                       drives normally with a green-glow effect, then
+                       morphs back to a normal car. */
+                    if (sc.phaseT > 1400 && !sc.dropped){
+                        sc.dropped = true;
+                        if (sc.targetKind === 'car' && sc.carSlot){
+                            var car2 = sc.carSlot;
+                            car2._absHidden = false;
+                            car2._absLifting = false;
+                            car2._absY = undefined;
+                            car2._absOrigY = undefined;
+                            car2._absHostX = undefined;
+                            car2.x = sc.dropX;
+                            /* alien-car flag — visible glow, lasts
+                               ~4-6s, then shape-shifts back to normal */
+                            car2._alienized = true;
+                            car2._alienizedT = 0;
+                            car2._alienizedDur = rng(3600, 5600);
+                            car2._morphT = 0;
+                            car2._morphDur = 900;
+                            car2._morphing = false;
+                        } else {
+                            var walkRow = sc.pedSlot ? sc.pedSlot.row : rngI(0,2);
+                            var walkDir = sc.pedSlot ? sc.pedSlot.dir : (rng(0,1) < 0.5 ? -1 : 1);
+                            alienWalkers.push({
+                                x: sc.dropX,
+                                y: GROUND + (H-GROUND)*0.58 + walkRow*6,
+                                startY: sc.y + sc.size*0.4,
+                                dir: walkDir,
+                                speed: rng(0.22, 0.55),
+                                row: walkRow,
+                                coat: rngI(0,5),
+                                t: 0,
+                                descendT: 0,
+                                descendDur: 700,
+                                phase: 'descend',
+                                walkT: 0,
+                                walkDur: rng(2400, 3600),
+                                morphT: 0,
+                                morphDur: 1100,
+                                shipType: sc.shipType,
+                                pedSlot: sc.pedSlot
+                            });
+                        }
+                    }
+                    if (sc.phaseT > 2400){
+                        sc.phase = 'leave';
+                        sc.phaseT = 0;
+                    }
+                    /* beam particles updates */
+                    for (var bp4 = sc.beamParticles.length-1; bp4 >= 0; bp4--){
+                        var p4 = sc.beamParticles[bp4];
+                        p4.y += p4.vy * k * 2;
+                        p4.life += dt;
+                        var floor4 = GROUND + (H-GROUND)*0.58;
+                        if (p4.life > p4.maxLife || p4.y > floor4) sc.beamParticles.splice(bp4, 1);
+                    }
+                } else if (sc.phase === 'leave'){
+                    sc.beamPower *= 0.92;
+                    sc.vy = -2.4;
+                    sc.vx *= 0.96;
+                    sc.x += sc.vx * k;
+                    sc.y += sc.vy * k;
+                    if (sc.y < -sc.size - 40){
+                        abductionSaucers.splice(si, 1);
+                        continue;
+                    }
+                }
+            }
+
+            /* update global FX (screen-wide flashes / shockwaves) */
+            for (var gfx = abductionGlobalFX.length - 1; gfx >= 0; gfx--){
+                abductionGlobalFX[gfx].age += dt;
+                if (abductionGlobalFX[gfx].age > abductionGlobalFX[gfx].max){
+                    abductionGlobalFX.splice(gfx, 1);
+                }
+            }
+            /* update target-lock rings — track their ship's position
+               and age out */
+            for (var tlu = abductionTargetLocks.length - 1; tlu >= 0; tlu--){
+                var tlx = abductionTargetLocks[tlu];
+                tlx.age += dt;
+                if (tlx.ship && tlx.ship.alive){
+                    tlx.x = tlx.ship.x;
+                    tlx.y = tlx.ship.y;
+                }
+                if (tlx.age > tlx.max) abductionTargetLocks.splice(tlu, 1);
+            }
+
+            /* update black holes — open, consume, then collapse */
+            for (var bhi = abductionBlackHoles.length - 1; bhi >= 0; bhi--){
+                var bh = abductionBlackHoles[bhi];
+                bh.age += dt;
+                bh.phaseT += dt;
+                bh.spin += bh.spinV * dt * 0.06;
+                if (bh.phase === 'opening'){
+                    bh.r = Math.min(bh.rTarget, bh.r + 0.18 * dt);
+                    if (bh.r >= bh.rTarget * 0.98){
+                        bh.phase = 'consuming';
+                        bh.phaseT = 0;
+                    }
+                } else if (bh.phase === 'consuming'){
+                    /* if the ship dies somehow without us noticing,
+                       transition to collapsing after a safety timeout */
+                    if (!bh.ship || bh.phaseT > 4500){
+                        bh.phase = 'collapsing';
+                        bh.phaseT = 0;
+                    }
+                    /* spawn accretion-disk particles around the rim */
+                    if (Math.random() < 0.6){
+                        var aaa = rng(0, Math.PI*2);
+                        bh.accretion.push({
+                            ang: aaa,
+                            r: bh.r * rng(1.0, 1.4),
+                            age: 0, max: rng(500, 900),
+                            spinV: rng(0.20, 0.40),
+                            hue: rng(20, 70)
+                        });
+                    }
+                } else if (bh.phase === 'collapsing'){
+                    bh.r *= 0.94;
+                    /* fade-out */
+                    if (bh.r < 1.5){
+                        abductionBlackHoles.splice(bhi, 1);
+                        continue;
+                    }
+                }
+                /* update accretion particles */
+                for (var aci = bh.accretion.length-1; aci >= 0; aci--){
+                    var ac = bh.accretion[aci];
+                    ac.ang += ac.spinV * dt * 0.06;
+                    ac.r *= 0.992;
+                    ac.age += dt;
+                    if (ac.age > ac.max || ac.r < bh.r * 0.3){
+                        bh.accretion.splice(aci, 1);
+                    }
+                }
+                /* update shock rings (expanding outward) */
+                for (var sri=0; sri<bh.shockRings.length; sri++){
+                    var sr = bh.shockRings[sri];
+                    sr.age += dt;
+                    if (sr.age >= 0){
+                        sr.r = (sr.age / 600) * sr.max + bh.r;
+                    }
+                }
+            }
+
+            /* update wreckage (debris falling, exploding, smoking) */
+            for (var wi = abductionWreckage.length - 1; wi >= 0; wi--){
+                var wr = abductionWreckage[wi];
+                wr.age += dt / 1000;
+                if (!wr.exploded){
+                    wr.x += wr.vx * k;
+                    wr.y += wr.vy * k;
+                    wr.vy += 0.06 * k;
+                    wr.rot += wr.rotV * k;
+                    if (Math.random() < 0.5){
+                        wr.smoke.push({ x: wr.x + rng(-6,6), y: wr.y + rng(-6,6),
+                                        r: rng(4,10), life: 0, max: rng(700, 1200) });
+                    }
+                    /* explode when hits ground OR after age */
+                    if (wr.y >= GROUND - 10 || wr.age > 2.0){
+                        wr.exploded = true;
+                        wr.age = 0;
+                        /* burst sparks */
+                        for (var sp=0; sp<22; sp++){
+                            wr.sparks.push({
+                                x: wr.x, y: wr.y,
+                                vx: rng(-3, 3), vy: rng(-3, 0.5),
+                                life: 0, max: rng(500, 1400),
+                                hue: rng(20, 80)
+                            });
+                        }
+                    }
+                } else {
+                    for (var sk=wr.sparks.length-1; sk>=0; sk--){
+                        var sp2 = wr.sparks[sk];
+                        sp2.x += sp2.vx * k;
+                        sp2.y += sp2.vy * k;
+                        sp2.vy += 0.05 * k;
+                        sp2.life += dt;
+                        if (sp2.life > sp2.max) wr.sparks.splice(sk,1);
+                    }
+                }
+                for (var sm=wr.smoke.length-1; sm>=0; sm--){
+                    var sx2 = wr.smoke[sm];
+                    sx2.y -= 0.3 * k;
+                    sx2.r += 0.04 * k;
+                    sx2.life += dt;
+                    if (sx2.life > sx2.max) wr.smoke.splice(sm,1);
+                }
+                if (wr.age > 3.4 && wr.sparks.length === 0 && wr.smoke.length === 0){
+                    abductionWreckage.splice(wi, 1);
+                }
+            }
+
+            /* The attack phase NEVER auto-completes anymore — the
+               wave keeps coming until the user clicks the abduction
+               button to toggle it off. (The continuous spawn loop
+               at the top of updateAbduction keeps the swarm full.) */
+        } else if (abductionPhase === 'morphing'){
+            /* walkers update is now handled by the global loop at the
+               top of updateAbduction — just wait for them to finish */
+            if (alienWalkers.length === 0){
+                abductionPhase = 'done';
+                abductionPhaseT = 0;
+            }
+        } else if (abductionPhase === '__unused_return'){
+            /* spawn replacement ships at staggered intervals — one per
+               abducted ped. Each drops an alien at the abduction site. */
+            abductionReturnTimer -= dt;
+            if (abductionReturnTimer <= 0 && abductionReturned < abductionAbducted){
+                /* find a hidden ped to restore at */
+                var dropPed = null;
+                for (var pi=0; pi<peds.length; pi++){
+                    var pp = peds[pi];
+                    if (pp._absHidden && !pp._absDropping){
+                        dropPed = pp;
+                        pp._absDropping = true;
+                        break;
+                    }
+                }
+                var dropX = dropPed ? dropPed.x : rng(W*0.1, W*0.9);
+                var rep = createReplacerSaucer(abductionReturned, dropX);
+                rep.dropPedRef = dropPed;
+                abductionReplacers.push(rep);
+                abductionReturned++;
+                abductionReturnTimer = rng(550, 950);
+            }
+
+            /* update replacement ships */
+            for (var ri = abductionReplacers.length - 1; ri >= 0; ri--){
+                var rp = abductionReplacers[ri];
+                rp.phaseT += dt;
+                rp.bob += 0.005 * dt;
+                rp.spin += rp.spinV * dt * 0.001;
+                var rprof = ABD_STYLE[rp.shipType];
+
+                if (rp.phase === 'enter'){
+                    rp.hoverY = GROUND + (H-GROUND)*0.30 - rp.size * 1.1;
+                    rp.vx = rp.vx*0.92 + (rp.dropX - rp.x)*0.012;
+                    rp.x += rp.vx * k;
+                    rp.y += rp.vy * k;
+                    if (rp.y >= rp.hoverY){
+                        rp.y = rp.hoverY;
+                        rp.phase = 'hover';
+                        rp.phaseT = 0;
+                    }
+                } else if (rp.phase === 'hover'){
+                    rp.vx *= 0.88;
+                    rp.y += Math.sin(rp.bob*0.7)*0.3;
+                    if (rp.phaseT > 500){
+                        rp.phase = 'drop';
+                        rp.phaseT = 0;
+                    }
+                } else if (rp.phase === 'drop'){
+                    rp.beamPower = Math.min(1, rp.beamPower + dt*0.0025);
+                    /* spawn beam particles flowing DOWN */
+                    if (Math.random() < 0.7){
+                        rp.beamParticles.push({
+                            x: rp.dropX + rng(-3,3),
+                            y: rp.y + rp.size * 0.4,
+                            vy: rng(0.6, 1.4),
+                            life: 0, maxLife: 900,
+                            hue: rng(80, 180)
+                        });
+                    }
+                    /* spawn the alien walker once beam ramps up */
+                    if (rp.phaseT > 1400 && !rp.dropped){
+                        rp.dropped = true;
+                        var walkRow = rp.dropPedRef ? rp.dropPedRef.row : rngI(0,2);
+                        var walkDir = rp.dropPedRef ? rp.dropPedRef.dir : (rng(0,1) < 0.5 ? -1 : 1);
+                        alienWalkers.push({
+                            x: rp.dropX,
+                            y: GROUND + (H-GROUND)*0.58 + walkRow*6,
+                            startY: rp.y + rp.size*0.4,
+                            dir: walkDir,
+                            speed: rng(0.22, 0.55),
+                            row: walkRow,
+                            coat: rp.alien.coat,
+                            t: 0,
+                            descendT: 0,
+                            descendDur: 700,
+                            phase: 'descend',
+                            walkT: 0,
+                            walkDur: rng(2400, 3600),
+                            morphT: 0,
+                            morphDur: 1100,
+                            shipType: rp.shipType,
+                            pedSlot: rp.dropPedRef
+                        });
+                    }
+                    if (rp.phaseT > 2400){
+                        rp.phase = 'retreat';
+                        rp.phaseT = 0;
+                    }
+                    /* beam particles falling */
+                    for (var bp2 = rp.beamParticles.length-1; bp2 >= 0; bp2--){
+                        var p2 = rp.beamParticles[bp2];
+                        p2.y += p2.vy * k * 2;
+                        p2.life += dt;
+                        var floor = GROUND + (H-GROUND)*0.58;
+                        if (p2.life > p2.maxLife || p2.y > floor) rp.beamParticles.splice(bp2, 1);
+                    }
+                } else if (rp.phase === 'retreat'){
+                    rp.beamPower *= 0.92;
+                    rp.vy = -2.4;
+                    rp.x += rp.vx * k;
+                    rp.y += rp.vy * k;
+                    if (rp.y < -rp.size - 40){
+                        abductionReplacers.splice(ri, 1);
+                        continue;
+                    }
+                }
+            }
+
+            /* update walkers (alien shape → human shapeshift) */
+            for (var wkI = alienWalkers.length - 1; wkI >= 0; wkI--){
+                var wk = alienWalkers[wkI];
+                wk.t += dt * 0.003;
+                if (wk.phase === 'descend'){
+                    wk.descendT += dt;
+                    var dp = Math.min(1, wk.descendT / wk.descendDur);
+                    var dpEase = 1 - (1-dp)*(1-dp);
+                    var groundY = GROUND + (H-GROUND)*0.58 + wk.row*6;
+                    wk._renderY = wk.startY + (groundY - wk.startY) * dpEase;
+                    if (dp >= 1){
+                        wk.phase = 'walk';
+                        wk._renderY = groundY;
+                    }
+                } else if (wk.phase === 'walk'){
+                    wk.walkT += dt;
+                    wk.x += wk.dir * wk.speed * dt * 0.038;
+                    if (wk.x < -20) wk.x = W + 20;
+                    if (wk.x > W+20) wk.x = -20;
+                    if (wk.walkT > wk.walkDur){
+                        wk.phase = 'morph';
+                        wk.morphT = 0;
+                    }
+                } else if (wk.phase === 'morph'){
+                    wk.morphT += dt;
+                    wk.x += wk.dir * wk.speed * dt * 0.038;
+                    if (wk.morphT >= wk.morphDur){
+                        /* unhide the original ped, restoring it as a
+                           normal human in the regular peds array */
+                        var slot = wk.pedSlot;
+                        if (slot){
+                            slot.x = wk.x;
+                            slot.dir = wk.dir;
+                            slot._absHidden = false;
+                            slot._absDropping = false;
+                            slot._absLifting = false;
+                            slot._absY = undefined;
+                            slot._absOrigY = undefined;
+                            slot._absHostX = undefined;
+                            slot._absCaptured = false;
+                            slot.coat = wk.coat;
+                            slot.row = wk.row;
+                        }
+                        alienWalkers.splice(wkI, 1);
+                    }
+                }
+            }
+
+            /* phase transition — all replacements landed + morphed */
+            if (abductionReturned >= abductionAbducted &&
+                abductionReplacers.length === 0 &&
+                alienWalkers.length === 0){
+                abductionPhase = 'done';
+                abductionPhaseT = 0;
+            }
+            /* edge case: nothing was abducted — go straight to done */
+            if (abductionAbducted === 0 && abductionPhaseT > 1500){
+                abductionPhase = 'done';
+            }
+        } else if (abductionPhase === 'done'){
+            if (abductionPhaseT > 800){
+                stopAbduction();
+            }
+        }
+    }
+
+    /* ── DRAW HELPERS ─────────────────────────────────────────── */
+    function drawAbductionShipHull(c, s, sizeMul){
+        var prof = ABD_STYLE[s.shipType];
+        /* sizeMul honours BOTH the explicit override (used during
+           the drop-beam) AND the ship's own sizeMul which shrinks
+           toward zero when it's being pulled into a black hole. */
+        var sz = s.size * (sizeMul || 1) * (s.sizeMul !== undefined ? s.sizeMul : 1);
+        if (sz < 1) return;
+        var t = s.shipType;
+        c.save();
+        /* SWERVE jitter — small random offset peaks at impact and
+           damps with swerveT */
+        var jit = 0;
+        if (s.hitJitter && s.swerveT > 0){
+            var sP = s.swerveT / (s.swerveMax || 1100);
+            jit = s.hitJitter * sP;
+        }
+        c.translate(s.x + (Math.random()-0.5)*jit, s.y + (Math.random()-0.5)*jit*0.6);
+        /* SWERVE rotation — tilt toward impact direction, eases back */
+        if (s.swerveAng){
+            c.rotate(s.swerveAng);
+        }
+
+        /* underglow shadow */
+        c.fillStyle = 'rgba(0,0,0,0.25)';
+        c.beginPath();
+        c.ellipse(0, sz*0.45, sz*0.95, sz*0.18, 0, 0, Math.PI*2);
+        c.fill();
+
+        if (t === 'saucer'){
+            /* ── CLASSIC SAUCER — 3-tier hull, glowing seams, hover
+               jets underneath, blinking antenna, panel detail ── */
+            /* underbelly hover glow */
+            var ugrad = c.createRadialGradient(0, sz*0.45, 1, 0, sz*0.45, sz*0.85);
+            ugrad.addColorStop(0, 'rgba(160,255,210,0.75)');
+            ugrad.addColorStop(1, 'rgba(160,255,210,0)');
+            c.fillStyle = ugrad;
+            c.beginPath(); c.ellipse(0, sz*0.45, sz*0.75, sz*0.22, 0, 0, Math.PI*2); c.fill();
+            /* lower hull tier */
+            c.fillStyle = prof.hullB;
+            c.beginPath();
+            c.ellipse(0, sz*0.18, sz*0.92, sz*0.18, 0, 0, Math.PI*2);
+            c.fill();
+            /* main disc */
+            var grad = c.createLinearGradient(0, -sz*0.18, 0, sz*0.20);
+            grad.addColorStop(0, prof.hullA);
+            grad.addColorStop(0.5, '#a8b6bc');
+            grad.addColorStop(1, prof.hullB);
+            c.fillStyle = grad;
+            c.beginPath();
+            c.ellipse(0, sz*0.02, sz*1.00, sz*0.32, 0, 0, Math.PI*2);
+            c.fill();
+            /* panel seams — radial lines */
+            c.strokeStyle = 'rgba(20,28,32,0.65)';
+            c.lineWidth = 0.8;
+            for (var ps=0; ps<8; ps++){
+                var psa = ps*Math.PI/4;
+                c.beginPath();
+                c.moveTo(0, sz*0.02);
+                c.lineTo(Math.cos(psa)*sz*0.95, Math.sin(psa)*sz*0.30 + sz*0.02);
+                c.stroke();
+            }
+            /* equator stripe with rim lights */
+            c.fillStyle = '#2a3238';
+            c.beginPath();
+            c.ellipse(0, sz*0.02, sz*0.95, sz*0.04, 0, 0, Math.PI*2);
+            c.fill();
+            /* rim lights — 14, rotating, multi-hue */
+            for (var ri=0; ri<14; ri++){
+                var ang = (ri / 14) * Math.PI*2 + s.spin;
+                var rx = Math.cos(ang) * sz*0.88;
+                var ry = Math.sin(ang) * sz*0.30 + sz*0.02;
+                var pulse = 0.5 + Math.sin(s.spin*5 + ri)*0.5;
+                c.fillStyle = 'hsla('+(110 + ri*6)+',95%,'+(55 + pulse*15)+'%,'+(0.7 + pulse*0.3)+')';
+                c.beginPath(); c.arc(rx, ry, sz*0.055, 0, Math.PI*2); c.fill();
+                /* light bloom halo */
+                c.fillStyle = 'hsla('+(110 + ri*6)+',95%,75%,'+(pulse*0.35)+')';
+                c.beginPath(); c.arc(rx, ry, sz*0.10, 0, Math.PI*2); c.fill();
+            }
+            /* glass dome — radial highlight with rim */
+            var dgrad = c.createRadialGradient(-sz*0.18, -sz*0.32, 1, 0, -sz*0.10, sz*0.55);
+            dgrad.addColorStop(0, prof.domeA);
+            dgrad.addColorStop(0.55, '#5a8aa8');
+            dgrad.addColorStop(1, prof.domeB);
+            c.fillStyle = dgrad;
+            c.beginPath();
+            c.ellipse(0, -sz*0.10, sz*0.46, sz*0.42, 0, Math.PI, 0);
+            c.fill();
+            /* dome cross-bracing */
+            c.strokeStyle = 'rgba(30,60,80,0.55)';
+            c.lineWidth = 0.9;
+            c.beginPath();
+            c.moveTo(-sz*0.46, -sz*0.10); c.lineTo(sz*0.46, -sz*0.10);
+            c.moveTo(0, -sz*0.52); c.lineTo(0, -sz*0.10);
+            c.stroke();
+            /* dome highlight */
+            c.fillStyle = 'rgba(255,255,255,0.65)';
+            c.beginPath();
+            c.ellipse(-sz*0.18, -sz*0.30, sz*0.15, sz*0.08, 0, 0, Math.PI*2);
+            c.fill();
+            /* small pilot silhouette inside dome */
+            c.fillStyle = 'rgba(0,20,30,0.75)';
+            c.beginPath();
+            c.arc(0, -sz*0.18, sz*0.08, 0, Math.PI*2);
+            c.fill();
+            c.fillRect(-sz*0.06, -sz*0.18, sz*0.12, sz*0.10);
+            /* blinking antenna */
+            c.strokeStyle = '#888';
+            c.lineWidth = 1.2;
+            c.beginPath();
+            c.moveTo(0, -sz*0.52); c.lineTo(0, -sz*0.70);
+            c.stroke();
+            var abp = 0.5 + Math.sin(s.spin*8) * 0.5;
+            c.fillStyle = 'hsla(0,95%,'+(50+abp*30)+'%,'+(0.6+abp*0.4)+')';
+            c.beginPath(); c.arc(0, -sz*0.72, sz*0.06, 0, Math.PI*2); c.fill();
+        } else if (t === 'scout'){
+            /* ── SCOUT POD — fighter-style with cockpit canopy,
+               twin engines + glow, side wings, sensor cluster ── */
+            /* wing extensions */
+            c.fillStyle = prof.hullB;
+            c.beginPath();
+            c.moveTo(-sz*0.95, sz*0.10);
+            c.lineTo(-sz*1.20, sz*0.18);
+            c.lineTo(-sz*0.85, sz*0.20);
+            c.closePath();
+            c.fill();
+            c.beginPath();
+            c.moveTo(sz*0.95, sz*0.10);
+            c.lineTo(sz*1.20, sz*0.18);
+            c.lineTo(sz*0.85, sz*0.20);
+            c.closePath();
+            c.fill();
+            /* main hull — sleek arrowhead */
+            var scgrad = c.createLinearGradient(0, -sz*0.55, 0, sz*0.20);
+            scgrad.addColorStop(0, '#9a9c80');
+            scgrad.addColorStop(1, prof.hullB);
+            c.fillStyle = scgrad;
+            c.beginPath();
+            c.moveTo(-sz*0.85, sz*0.10);
+            c.lineTo( sz*0.85, sz*0.10);
+            c.lineTo( sz*0.55, -sz*0.30);
+            c.lineTo( 0,        -sz*0.55);
+            c.lineTo(-sz*0.55, -sz*0.30);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#1a2010';
+            c.lineWidth = 1.2;
+            c.stroke();
+            /* hull panel lines */
+            c.strokeStyle = 'rgba(20,30,15,0.55)';
+            c.lineWidth = 0.6;
+            c.beginPath();
+            c.moveTo(-sz*0.55, -sz*0.30); c.lineTo(0, -sz*0.20); c.lineTo(sz*0.55, -sz*0.30);
+            c.moveTo(-sz*0.30, sz*0.10); c.lineTo(-sz*0.20, -sz*0.10);
+            c.moveTo( sz*0.30, sz*0.10); c.lineTo( sz*0.20, -sz*0.10);
+            c.stroke();
+            /* underbelly bar with vents */
+            c.fillStyle = prof.hullB;
+            c.fillRect(-sz*0.75, sz*0.10, sz*1.5, sz*0.10);
+            for (var vt=0; vt<5; vt++){
+                c.fillStyle = '#d0ff80';
+                c.fillRect(-sz*0.65 + vt*sz*0.30, sz*0.13, sz*0.10, sz*0.04);
+            }
+            /* twin engines with hot core glow */
+            for (var ei=-1; ei<=1; ei+=2){
+                var egr = c.createRadialGradient(ei*sz*0.40, sz*0.24, 1, ei*sz*0.40, sz*0.24, sz*0.18);
+                egr.addColorStop(0, '#ffffff');
+                egr.addColorStop(0.4, 'rgba(220,255,120,0.95)');
+                egr.addColorStop(1, 'rgba(220,255,120,0)');
+                c.fillStyle = egr;
+                c.beginPath(); c.arc(ei*sz*0.40, sz*0.24, sz*0.18, 0, Math.PI*2); c.fill();
+                /* exhaust streak */
+                c.fillStyle = 'rgba(220,255,120,0.45)';
+                c.beginPath();
+                c.ellipse(ei*sz*0.40, sz*0.40, sz*0.05, sz*0.16, 0, 0, Math.PI*2);
+                c.fill();
+            }
+            /* canopy — translucent blue-green */
+            var scd = c.createLinearGradient(0, -sz*0.45, 0, -sz*0.05);
+            scd.addColorStop(0, '#ffffff');
+            scd.addColorStop(0.5, prof.domeA);
+            scd.addColorStop(1, prof.domeB);
+            c.fillStyle = scd;
+            c.beginPath();
+            c.ellipse(0, -sz*0.18, sz*0.20, sz*0.28, 0, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#1a2010';
+            c.lineWidth = 0.8;
+            c.stroke();
+            /* canopy reflection */
+            c.fillStyle = 'rgba(255,255,255,0.65)';
+            c.beginPath();
+            c.ellipse(-sz*0.08, -sz*0.28, sz*0.06, sz*0.10, 0, 0, Math.PI*2);
+            c.fill();
+            /* sensor cluster on nose */
+            c.fillStyle = '#ff5050';
+            c.beginPath(); c.arc(0, -sz*0.50, sz*0.05, 0, Math.PI*2); c.fill();
+            c.fillStyle = 'rgba(255,200,200,0.85)';
+            c.beginPath(); c.arc(0, -sz*0.50, sz*0.03, 0, Math.PI*2); c.fill();
+        } else if (t === 'mothership'){
+            /* ── MOTHERSHIP — 3-tier massive hull with hangar bay,
+               24 rim lights, multiple spotlights, antenna arrays ── */
+            /* underglow / hangar bay light */
+            var ubg = c.createRadialGradient(0, sz*0.30, 1, 0, sz*0.30, sz*1.0);
+            ubg.addColorStop(0, 'rgba(255,180,220,0.55)');
+            ubg.addColorStop(1, 'rgba(255,180,220,0)');
+            c.fillStyle = ubg;
+            c.beginPath(); c.ellipse(0, sz*0.30, sz*1.10, sz*0.45, 0, 0, Math.PI*2); c.fill();
+            /* bottom tier — dark hangar layer */
+            c.fillStyle = prof.hullB;
+            c.beginPath();
+            c.ellipse(0, sz*0.20, sz*1.15, sz*0.16, 0, 0, Math.PI*2);
+            c.fill();
+            /* hangar door slit */
+            c.fillStyle = '#ffa0d0';
+            c.fillRect(-sz*0.30, sz*0.22, sz*0.60, sz*0.04);
+            /* middle tier — main hull */
+            var mgrad = c.createLinearGradient(0, -sz*0.4, 0, sz*0.4);
+            mgrad.addColorStop(0, prof.hullA);
+            mgrad.addColorStop(0.5, '#8a7a8c');
+            mgrad.addColorStop(1, prof.hullB);
+            c.fillStyle = mgrad;
+            c.beginPath();
+            c.ellipse(0, 0, sz*1.22, sz*0.38, 0, 0, Math.PI*2);
+            c.fill();
+            /* panel seams */
+            c.strokeStyle = 'rgba(15,8,20,0.55)';
+            c.lineWidth = 0.7;
+            for (var mps=0; mps<12; mps++){
+                var mpa = mps*Math.PI/6;
+                c.beginPath();
+                c.moveTo(0, 0);
+                c.lineTo(Math.cos(mpa)*sz*1.15, Math.sin(mpa)*sz*0.35);
+                c.stroke();
+            }
+            /* upper hull ring */
+            c.fillStyle = prof.hullA;
+            c.beginPath();
+            c.ellipse(0, -sz*0.08, sz*0.95, sz*0.16, 0, 0, Math.PI*2);
+            c.fill();
+            /* rim lights — 24 */
+            for (var rmi=0; rmi<24; rmi++){
+                var an = (rmi / 24) * Math.PI*2 + s.spin*0.5;
+                var rxx = Math.cos(an) * sz*1.12;
+                var ryy = Math.sin(an) * sz*0.32;
+                var pl = 0.5 + Math.sin(s.spin*4 + rmi)*0.5;
+                c.fillStyle = 'hsla('+(290 + rmi*3)+',95%,'+(55 + pl*15)+'%,'+(0.7 + pl*0.3)+')';
+                c.beginPath(); c.arc(rxx, ryy, sz*0.055, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'hsla('+(290 + rmi*3)+',95%,80%,'+(pl*0.3)+')';
+                c.beginPath(); c.arc(rxx, ryy, sz*0.10, 0, Math.PI*2); c.fill();
+            }
+            /* central command dome */
+            var mdg = c.createRadialGradient(-sz*0.25, -sz*0.45, 1, 0, -sz*0.20, sz*0.6);
+            mdg.addColorStop(0, prof.domeA);
+            mdg.addColorStop(0.55, '#c870a0');
+            mdg.addColorStop(1, prof.domeB);
+            c.fillStyle = mdg;
+            c.beginPath();
+            c.ellipse(0, -sz*0.15, sz*0.55, sz*0.45, 0, Math.PI, 0);
+            c.fill();
+            /* dome bracing */
+            c.strokeStyle = 'rgba(40,10,50,0.55)';
+            c.lineWidth = 0.9;
+            for (var dbr=0; dbr<3; dbr++){
+                var dby = -sz*0.18 - dbr*sz*0.12;
+                c.beginPath();
+                c.ellipse(0, dby + sz*0.04*dbr, sz*(0.55 - dbr*0.10), sz*0.06, 0, Math.PI, 0);
+                c.stroke();
+            }
+            /* dome highlight */
+            c.fillStyle = 'rgba(255,255,255,0.55)';
+            c.beginPath();
+            c.ellipse(-sz*0.22, -sz*0.42, sz*0.13, sz*0.08, 0, 0, Math.PI*2);
+            c.fill();
+            /* multiple antennae */
+            c.strokeStyle = '#444';
+            c.lineWidth = 1.3;
+            for (var ant=-1; ant<=1; ant++){
+                c.beginPath();
+                c.moveTo(ant*sz*0.35, -sz*0.55);
+                c.lineTo(ant*sz*0.35, -sz*0.78);
+                c.stroke();
+                var apb = 0.5 + Math.sin(s.spin*7 + ant)*0.5;
+                c.fillStyle = 'hsla(330,95%,65%,'+(0.5+apb*0.5)+')';
+                c.beginPath(); c.arc(ant*sz*0.35, -sz*0.80, sz*0.05, 0, Math.PI*2); c.fill();
+            }
+            /* spotlights underneath */
+            for (var sl=-1; sl<=1; sl++){
+                c.fillStyle = 'rgba(255,220,255,0.65)';
+                c.beginPath();
+                c.moveTo(sl*sz*0.45, sz*0.26);
+                c.lineTo(sl*sz*0.45 - sz*0.15, sz*0.50);
+                c.lineTo(sl*sz*0.45 + sz*0.15, sz*0.50);
+                c.closePath();
+                c.fill();
+            }
+        } else if (t === 'orb'){
+            /* ── PLASMA ORB — multi-layered energy sphere with
+               swirling rings, lightning arcs, hot core ── */
+            /* outer glow halo */
+            var ohlo = c.createRadialGradient(0, 0, sz*0.55, 0, 0, sz*1.0);
+            ohlo.addColorStop(0, 'rgba(255,210,120,0.4)');
+            ohlo.addColorStop(1, 'rgba(255,210,120,0)');
+            c.fillStyle = ohlo;
+            c.beginPath(); c.arc(0, 0, sz*1.0, 0, Math.PI*2); c.fill();
+            /* plasma sphere */
+            var ogr = c.createRadialGradient(0, 0, sz*0.05, 0, 0, sz*0.95);
+            ogr.addColorStop(0,    '#ffffff');
+            ogr.addColorStop(0.25, prof.domeA);
+            ogr.addColorStop(0.55, prof.hullA);
+            ogr.addColorStop(1,    prof.hullB);
+            c.fillStyle = ogr;
+            c.beginPath();
+            c.arc(0, 0, sz*0.65, 0, Math.PI*2);
+            c.fill();
+            /* swirling rings — 5, with light gradient */
+            for (var rr=0; rr<5; rr++){
+                c.strokeStyle = 'hsla('+(30 + rr*15)+',95%,65%,0.85)';
+                c.lineWidth = 1.8;
+                c.beginPath();
+                c.ellipse(0, 0, sz*0.80, sz*0.20, s.spin + rr*Math.PI/4, 0, Math.PI*2);
+                c.stroke();
+                /* highlight on ring */
+                c.strokeStyle = 'rgba(255,255,255,0.6)';
+                c.lineWidth = 0.6;
+                c.beginPath();
+                c.ellipse(0, 0, sz*0.80, sz*0.20, s.spin + rr*Math.PI/4, -0.3, 0.5);
+                c.stroke();
+            }
+            /* internal lightning arcs */
+            for (var la=0; la<4; la++){
+                var lap = (s.spin + la*Math.PI/2) % (Math.PI*2);
+                var lax = Math.cos(lap) * sz*0.4;
+                var lay = Math.sin(lap) * sz*0.4;
+                var lax2 = -lax + rng(-sz*0.1, sz*0.1);
+                var lay2 = -lay + rng(-sz*0.1, sz*0.1);
+                c.strokeStyle = 'rgba(255,255,200,0.7)';
+                c.lineWidth = 1.2;
+                c.beginPath();
+                c.moveTo(lax, lay);
+                c.lineTo((lax+lax2)/2 + rng(-3,3), (lay+lay2)/2 + rng(-3,3));
+                c.lineTo(lax2, lay2);
+                c.stroke();
+            }
+            /* hot core */
+            c.fillStyle = 'rgba(255,255,200,0.95)';
+            c.beginPath();
+            c.arc(-sz*0.10, -sz*0.10, sz*0.18, 0, Math.PI*2);
+            c.fill();
+            c.fillStyle = 'rgba(255,255,255,1)';
+            c.beginPath();
+            c.arc(-sz*0.12, -sz*0.12, sz*0.08, 0, Math.PI*2);
+            c.fill();
+            /* corona spikes */
+            for (var cs=0; cs<8; cs++){
+                var csa = cs*Math.PI/4 + s.spin*0.5;
+                c.strokeStyle = 'rgba(255,220,120,0.55)';
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.moveTo(Math.cos(csa)*sz*0.60, Math.sin(csa)*sz*0.60);
+                c.lineTo(Math.cos(csa)*sz*0.85, Math.sin(csa)*sz*0.85);
+                c.stroke();
+            }
+        } else if (t === 'biomech'){
+            /* ── BIOMECH HIVE — organic chitinous, segmented plates
+               with veins, pulsing eye cluster, dangling tentacles ── */
+            /* main body */
+            c.fillStyle = prof.hullB;
+            c.beginPath();
+            c.ellipse(0, sz*0.05, sz*0.98, sz*0.44, 0, 0, Math.PI*2);
+            c.fill();
+            /* veins / ridges — curved lines on body */
+            c.strokeStyle = 'rgba(100,180,90,0.55)';
+            c.lineWidth = 1.0;
+            for (var vn=0; vn<6; vn++){
+                var vna = vn*Math.PI/6 - Math.PI/2;
+                c.beginPath();
+                c.moveTo(Math.cos(vna)*sz*0.20, sz*0.05);
+                c.quadraticCurveTo(
+                    Math.cos(vna)*sz*0.6, sz*0.05,
+                    Math.cos(vna)*sz*0.85, sz*0.25);
+                c.stroke();
+            }
+            /* segmented plates — 7 */
+            for (var sg=0; sg<7; sg++){
+                var sgx = -sz*0.84 + sg*sz*0.28;
+                var sgRot = Math.sin(s.bob*0.5 + sg) * 0.06;
+                c.save();
+                c.translate(sgx, -sz*0.15);
+                c.rotate(sgRot);
+                c.fillStyle = prof.hullA;
+                c.beginPath();
+                c.ellipse(0, 0, sz*0.18, sz*0.16, 0, 0, Math.PI*2);
+                c.fill();
+                /* plate highlight */
+                c.fillStyle = 'rgba(160,80,160,0.55)';
+                c.beginPath();
+                c.ellipse(-sz*0.05, -sz*0.04, sz*0.06, sz*0.04, 0, 0, Math.PI*2);
+                c.fill();
+                c.strokeStyle = prof.hullB;
+                c.lineWidth = 1.0;
+                c.beginPath();
+                c.ellipse(0, 0, sz*0.18, sz*0.16, 0, 0, Math.PI*2);
+                c.stroke();
+                c.restore();
+            }
+            /* writhing tentacles — 5, animated */
+            for (var tl=-2; tl<=2; tl++){
+                c.strokeStyle = prof.hullB;
+                c.lineWidth = 2.4;
+                c.beginPath();
+                var tlx = tl*sz*0.22;
+                c.moveTo(tlx, sz*0.30);
+                c.bezierCurveTo(
+                    tlx + Math.sin(s.bob + tl)*10, sz*0.42,
+                    tlx + Math.sin(s.bob*1.5 + tl)*16, sz*0.55,
+                    tlx + Math.sin(s.bob*2 + tl)*18, sz*0.75);
+                c.stroke();
+                /* sucker pads */
+                for (var sp=1; sp<=3; sp++){
+                    var spy = sz*0.30 + sp*sz*0.14;
+                    var spx = tlx + Math.sin(s.bob*sp + tl)*8;
+                    c.fillStyle = '#1a0820';
+                    c.beginPath(); c.arc(spx, spy, sz*0.025, 0, Math.PI*2); c.fill();
+                }
+            }
+            /* glowing eye-cluster dome */
+            var bmg = c.createRadialGradient(-sz*0.15, -sz*0.35, 1, 0, -sz*0.20, sz*0.5);
+            bmg.addColorStop(0, '#b0ffa0');
+            bmg.addColorStop(1, prof.domeB);
+            c.fillStyle = bmg;
+            c.beginPath();
+            c.ellipse(0, -sz*0.20, sz*0.45, sz*0.32, 0, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#1c2a18';
+            c.lineWidth = 1.0;
+            c.stroke();
+            /* eye cluster — 7 eyes */
+            for (var ey=0; ey<7; ey++){
+                var eang = ey*Math.PI*2/7 + s.spin*0.4;
+                var ex = Math.cos(eang) * sz*0.20;
+                var eyY = Math.sin(eang) * sz*0.14 - sz*0.20;
+                var pulse = 0.6 + Math.sin(s.spin*6 + ey)*0.4;
+                c.fillStyle = 'hsla(110,95%,'+(55+pulse*15)+'%,'+(0.85)+')';
+                c.beginPath(); c.arc(ex, eyY, sz*0.065 * pulse, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#0a1a08';
+                c.beginPath(); c.arc(ex, eyY, sz*0.025, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'rgba(255,255,255,0.85)';
+                c.beginPath(); c.arc(ex - sz*0.012, eyY - sz*0.012, sz*0.012, 0, Math.PI*2); c.fill();
+            }
+        } else if (t === 'harvester'){
+            /* ── HARVESTER RIG — heavy industrial ship with extending
+               claws, cargo holds, engine pods, conveyor lights ── */
+            /* dropped lower platform */
+            c.fillStyle = prof.hullB;
+            c.beginPath();
+            c.ellipse(0, sz*0.20, sz*0.90, sz*0.10, 0, 0, Math.PI*2);
+            c.fill();
+            /* main rectangular industrial hull */
+            var hgr = c.createLinearGradient(0, -sz*0.30, 0, sz*0.20);
+            hgr.addColorStop(0, '#5c6a48');
+            hgr.addColorStop(0.5, prof.hullA);
+            hgr.addColorStop(1, prof.hullB);
+            c.fillStyle = hgr;
+            c.fillRect(-sz*0.85, -sz*0.20, sz*1.70, sz*0.42);
+            c.strokeStyle = '#10180a';
+            c.lineWidth = 1.4;
+            c.strokeRect(-sz*0.85, -sz*0.20, sz*1.70, sz*0.42);
+            /* hull panel grid */
+            c.strokeStyle = 'rgba(15,25,10,0.45)';
+            c.lineWidth = 0.6;
+            for (var pg=0; pg<5; pg++){
+                var pgx = -sz*0.85 + (pg+1)*sz*0.28;
+                c.beginPath();
+                c.moveTo(pgx, -sz*0.20); c.lineTo(pgx, sz*0.22);
+                c.stroke();
+            }
+            c.beginPath();
+            c.moveTo(-sz*0.85, 0); c.lineTo(sz*0.85, 0);
+            c.stroke();
+            /* cargo hold windows */
+            for (var ch=0; ch<6; ch++){
+                var chx = -sz*0.72 + ch*sz*0.28;
+                c.fillStyle = '#80ff60';
+                c.fillRect(chx, -sz*0.12, sz*0.12, sz*0.06);
+                c.fillStyle = 'rgba(220,255,200,0.85)';
+                c.fillRect(chx + sz*0.02, -sz*0.10, sz*0.06, sz*0.02);
+            }
+            /* conveyor lights — animated */
+            for (var cv=0; cv<8; cv++){
+                var cvx = -sz*0.78 + cv*sz*0.22;
+                var cvOn = ((cv + Math.floor(s.spin*4)) % 2 === 0);
+                c.fillStyle = cvOn ? '#80ff80' : '#1a2a10';
+                c.beginPath(); c.arc(cvx, sz*0.10, sz*0.025, 0, Math.PI*2); c.fill();
+            }
+            /* engine pods on top with hot exhausts */
+            for (var ep=-1; ep<=1; ep++){
+                if (ep === 0) continue;
+                var epx = ep*sz*0.55;
+                /* pod housing */
+                c.fillStyle = prof.hullB;
+                c.fillRect(epx - sz*0.18, -sz*0.40, sz*0.36, sz*0.22);
+                /* hot exhaust glow */
+                var eg = c.createRadialGradient(epx, -sz*0.35, 1, epx, -sz*0.35, sz*0.18);
+                eg.addColorStop(0, '#ffffff');
+                eg.addColorStop(0.4, '#80ff60');
+                eg.addColorStop(1, 'rgba(80,180,40,0)');
+                c.fillStyle = eg;
+                c.beginPath(); c.arc(epx, -sz*0.35, sz*0.16, 0, Math.PI*2); c.fill();
+            }
+            /* extending claws / tractor arms underneath */
+            for (var cl=-1; cl<=1; cl+=2){
+                var clx = cl * sz*0.50;
+                c.strokeStyle = prof.hullA;
+                c.lineWidth = 4;
+                c.beginPath();
+                c.moveTo(clx, sz*0.22);
+                c.lineTo(clx + cl*sz*0.10, sz*0.42);
+                c.lineTo(clx + cl*sz*0.20, sz*0.55);
+                c.stroke();
+                /* claw tip */
+                c.strokeStyle = '#80ff60';
+                c.lineWidth = 2.2;
+                c.beginPath();
+                c.moveTo(clx + cl*sz*0.20, sz*0.55);
+                c.lineTo(clx + cl*sz*0.25, sz*0.60);
+                c.moveTo(clx + cl*sz*0.20, sz*0.55);
+                c.lineTo(clx + cl*sz*0.10, sz*0.60);
+                c.stroke();
+            }
+            /* command bridge dome on top */
+            c.fillStyle = prof.domeB;
+            c.beginPath();
+            c.ellipse(0, -sz*0.20, sz*0.30, sz*0.15, 0, Math.PI, 0);
+            c.fill();
+            /* bridge windows — lit */
+            for (var bw=0; bw<3; bw++){
+                c.fillStyle = '#80ff60';
+                c.fillRect(-sz*0.20 + bw*sz*0.15, -sz*0.26, sz*0.08, sz*0.04);
+            }
+            /* central spotlight underneath */
+            c.fillStyle = 'rgba(160,255,80,0.55)';
+            c.beginPath();
+            c.moveTo(-sz*0.18, sz*0.22);
+            c.lineTo(-sz*0.30, sz*0.55);
+            c.lineTo( sz*0.30, sz*0.55);
+            c.lineTo( sz*0.18, sz*0.22);
+            c.closePath();
+            c.fill();
+            /* warning lights — flashing red */
+            var wlp = 0.5 + Math.sin(s.spin*10) * 0.5;
+            c.fillStyle = 'hsla(0,95%,'+(50+wlp*30)+'%,'+(0.5+wlp*0.5)+')';
+            c.beginPath(); c.arc(-sz*0.78, -sz*0.20, sz*0.05, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc( sz*0.78, -sz*0.20, sz*0.05, 0, Math.PI*2); c.fill();
+        } else if (t === 'prism'){
+            /* ── PRISM CRYSTAL — triangular crystalline ship with
+               refraction colors, internal glowing core visible
+               through translucent facets, kaleidoscope edges ── */
+            /* outer prismatic glow */
+            var pog = c.createRadialGradient(0, 0, sz*0.20, 0, 0, sz*1.1);
+            pog.addColorStop(0, 'rgba(255,255,255,0.55)');
+            pog.addColorStop(0.5, 'rgba(160,200,255,0.30)');
+            pog.addColorStop(1, 'rgba(160,200,255,0)');
+            c.fillStyle = pog;
+            c.beginPath(); c.arc(0, 0, sz*0.95, 0, Math.PI*2); c.fill();
+            /* main octahedral body (diamond shape from front) */
+            var pgr = c.createLinearGradient(0, -sz*0.70, 0, sz*0.50);
+            pgr.addColorStop(0,    '#ffffff');
+            pgr.addColorStop(0.3,  prof.domeB);
+            pgr.addColorStop(0.55, prof.hullA);
+            pgr.addColorStop(0.85, prof.hullB);
+            pgr.addColorStop(1,    '#3060a0');
+            c.fillStyle = pgr;
+            c.beginPath();
+            c.moveTo(0, -sz*0.70);
+            c.lineTo( sz*0.55, -sz*0.10);
+            c.lineTo( sz*0.42,  sz*0.40);
+            c.lineTo(-sz*0.42,  sz*0.40);
+            c.lineTo(-sz*0.55, -sz*0.10);
+            c.closePath();
+            c.fill();
+            /* prismatic edges — multi-color outline */
+            var edgeHues = [330, 280, 220, 160, 100, 40];
+            var pts = [
+                {x: 0, y: -sz*0.70},
+                {x: sz*0.55, y: -sz*0.10},
+                {x: sz*0.42, y:  sz*0.40},
+                {x:-sz*0.42, y:  sz*0.40},
+                {x:-sz*0.55, y: -sz*0.10}
+            ];
+            for (var pe=0; pe<pts.length; pe++){
+                var p1 = pts[pe], p2 = pts[(pe+1)%pts.length];
+                var huePe = (edgeHues[pe] + s.spin*30) % 360;
+                c.strokeStyle = 'hsla(' + huePe + ',95%,70%,0.95)';
+                c.lineWidth = 2.0;
+                c.beginPath();
+                c.moveTo(p1.x, p1.y);
+                c.lineTo(p2.x, p2.y);
+                c.stroke();
+            }
+            /* internal facet lines */
+            c.strokeStyle = 'rgba(255,255,255,0.55)';
+            c.lineWidth = 0.8;
+            c.beginPath();
+            c.moveTo(0, -sz*0.70); c.lineTo(0, sz*0.40);
+            c.moveTo(-sz*0.55, -sz*0.10); c.lineTo(sz*0.55, -sz*0.10);
+            c.moveTo(-sz*0.42, sz*0.40); c.lineTo(sz*0.55, -sz*0.10);
+            c.moveTo( sz*0.42, sz*0.40); c.lineTo(-sz*0.55, -sz*0.10);
+            c.stroke();
+            /* internal glowing core — pulsing */
+            var pcp = 0.5 + Math.sin(s.spin*4) * 0.5;
+            var pcg = c.createRadialGradient(0, -sz*0.05, 1, 0, -sz*0.05, sz*0.30);
+            pcg.addColorStop(0, 'rgba(255,255,255,' + (0.7 + pcp*0.3) + ')');
+            pcg.addColorStop(0.4, 'hsla(' + (s.spin*120 % 360) + ',95%,75%,0.65)');
+            pcg.addColorStop(1, 'rgba(200,160,255,0)');
+            c.fillStyle = pcg;
+            c.beginPath(); c.arc(0, -sz*0.05, sz*0.25, 0, Math.PI*2); c.fill();
+            /* facet highlights — rotating shines */
+            for (var fh=0; fh<3; fh++){
+                var fha = (s.spin * 0.8 + fh*Math.PI*2/3) % (Math.PI*2);
+                var fhx = Math.cos(fha) * sz*0.35;
+                var fhy = Math.sin(fha) * sz*0.30 - sz*0.10;
+                c.fillStyle = 'rgba(255,255,255,0.75)';
+                c.beginPath();
+                c.ellipse(fhx, fhy, sz*0.06, sz*0.02, fha, 0, Math.PI*2);
+                c.fill();
+            }
+            /* refraction streaks coming off corners */
+            for (var rs=0; rs<5; rs++){
+                var p = pts[rs];
+                var rh = (rs*72 + s.spin*40) % 360;
+                c.strokeStyle = 'hsla(' + rh + ',95%,75%,0.55)';
+                c.lineWidth = 1.0;
+                c.beginPath();
+                c.moveTo(p.x, p.y);
+                c.lineTo(p.x*1.18, p.y*1.18);
+                c.stroke();
+            }
+        }
+
+        /* hit flash overlay — bright white wash over the entire hull */
+        if (s.hitFlash && s.hitFlash > 0){
+            var ffrac = s.hitFlash / 520;
+            c.fillStyle = 'rgba(255,255,255,' + Math.min(0.92, ffrac) + ')';
+            c.beginPath();
+            c.arc(0, 0, sz*1.10, 0, Math.PI*2);
+            c.fill();
+            /* outer glow halo */
+            c.fillStyle = 'rgba(180,220,255,' + (ffrac*0.55) + ')';
+            c.beginPath();
+            c.arc(0, 0, sz*1.55, 0, Math.PI*2);
+            c.fill();
+        }
+        /* HEAT RING — heat-haze distortion ring expanding across
+           the hull surface from the impact point */
+        if (s.heatRing){
+            var hrp = s.heatRing.age / s.heatRing.max;
+            var hrf = 1 - hrp;
+            var hrR = 6 + hrp * sz * 1.6;
+            c.strokeStyle = 'rgba(255,200,140,' + (hrf*0.55) + ')';
+            c.lineWidth = 6 * hrf + 1;
+            c.beginPath();
+            c.arc(s.heatRing.ox, s.heatRing.oy, hrR, 0, Math.PI*2);
+            c.stroke();
+        }
+        /* MULTI-RING SHOCKWAVE — concentric rings expand at different
+           speeds, each with its own hue */
+        if (s.hitRipples && s.hitRipples.length){
+            for (var rpi=0; rpi<s.hitRipples.length; rpi++){
+                var rp = s.hitRipples[rpi];
+                if (rp.age < 0) continue;
+                var rpf = 1 - rp.age/rp.max;
+                if (rpf <= 0) continue;
+                var rr = 4 + (rp.age/rp.max) * sz * 1.7 * rp.speed;
+                c.strokeStyle = 'hsla(' + rp.hue + ',95%,72%,' + (rpf*0.92) + ')';
+                c.lineWidth = 2.6 * rpf + 0.6;
+                c.beginPath();
+                c.arc(rp.hitDX, rp.hitDY, rr, 0, Math.PI*2);
+                c.stroke();
+                /* white inner edge */
+                c.strokeStyle = 'rgba(255,255,255,' + (rpf*0.55) + ')';
+                c.lineWidth = 1.0 * rpf + 0.3;
+                c.beginPath();
+                c.arc(rp.hitDX, rp.hitDY, rr*0.78, 0, Math.PI*2);
+                c.stroke();
+            }
+        }
+        /* LENS-FLARE CROSS — 4 long bright beams shooting from the
+           impact point in a + shape, plus 4 diagonal shorter beams */
+        if (s.lensFlare){
+            var lf = s.lensFlare;
+            var lfp = lf.age / lf.max;
+            var lff = 1 - lfp;
+            if (lff > 0){
+                var lfLen = sz * (1.4 + lfp*1.4);
+                var lfWide = (4 + lff*10);
+                /* 4 cardinal beams */
+                for (var lb=0; lb<4; lb++){
+                    var lba = lb * Math.PI/2;
+                    var grad = c.createLinearGradient(
+                        lf.ox, lf.oy,
+                        lf.ox + Math.cos(lba)*lfLen, lf.oy + Math.sin(lba)*lfLen);
+                    grad.addColorStop(0,   'rgba(255,255,255,' + (lff*0.95) + ')');
+                    grad.addColorStop(0.5, 'rgba(180,220,255,' + (lff*0.55) + ')');
+                    grad.addColorStop(1,   'rgba(180,220,255,0)');
+                    c.strokeStyle = grad;
+                    c.lineWidth = lfWide;
+                    c.beginPath();
+                    c.moveTo(lf.ox, lf.oy);
+                    c.lineTo(lf.ox + Math.cos(lba)*lfLen, lf.oy + Math.sin(lba)*lfLen);
+                    c.stroke();
+                }
+                /* 4 diagonal shorter beams */
+                for (var ld=0; ld<4; ld++){
+                    var lda = ld * Math.PI/2 + Math.PI/4;
+                    var dlen = lfLen * 0.65;
+                    c.strokeStyle = 'rgba(255,240,200,' + (lff*0.55) + ')';
+                    c.lineWidth = lfWide * 0.45;
+                    c.beginPath();
+                    c.moveTo(lf.ox, lf.oy);
+                    c.lineTo(lf.ox + Math.cos(lda)*dlen, lf.oy + Math.sin(lda)*dlen);
+                    c.stroke();
+                }
+                /* central white-hot core */
+                c.fillStyle = 'rgba(255,255,255,' + lff + ')';
+                c.beginPath();
+                c.arc(lf.ox, lf.oy, 6 * lff + 1.5, 0, Math.PI*2);
+                c.fill();
+            }
+        }
+        /* PLASMA ARCS — jagged lightning from impact across the hull */
+        if (s.plasmaArcs && s.plasmaArcs.length){
+            for (var pai=0; pai<s.plasmaArcs.length; pai++){
+                var pa = s.plasmaArcs[pai];
+                var paf = 1 - pa.age/pa.max;
+                if (paf <= 0 || pa.segs.length < 2) continue;
+                /* outer cyan glow */
+                c.strokeStyle = 'rgba(180,230,255,' + (paf*0.55) + ')';
+                c.lineWidth = 2.8;
+                c.beginPath();
+                c.moveTo(pa.segs[0].x, pa.segs[0].y);
+                for (var sg=1; sg<pa.segs.length; sg++) c.lineTo(pa.segs[sg].x, pa.segs[sg].y);
+                c.stroke();
+                /* inner white bolt */
+                c.strokeStyle = 'rgba(255,255,255,' + paf + ')';
+                c.lineWidth = 1.3;
+                c.beginPath();
+                c.moveTo(pa.segs[0].x, pa.segs[0].y);
+                for (var sg2=1; sg2<pa.segs.length; sg2++) c.lineTo(pa.segs[sg2].x, pa.segs[sg2].y);
+                c.stroke();
+            }
+        }
+        /* IMPACT POINT CORE — bright white-hot dot that fades */
+        if (s.hitImpact){
+            var hip = s.hitImpact.age / s.hitImpact.max;
+            var hif = 1 - hip;
+            c.fillStyle = 'rgba(255,255,255,' + hif + ')';
+            c.beginPath();
+            c.arc(s.hitImpact.ox, s.hitImpact.oy, 5 + hif*8, 0, Math.PI*2);
+            c.fill();
+            c.fillStyle = 'rgba(255,220,150,' + (hif*0.85) + ')';
+            c.beginPath();
+            c.arc(s.hitImpact.ox, s.hitImpact.oy, 9 + hif*14, 0, Math.PI*2);
+            c.fill();
+        }
+        /* DEBRIS CHUNKS — chunks of the hull flying outward, tumbling
+           with smoke trails (drawn under sparks so sparks read on top) */
+        if (s.debrisChunks && s.debrisChunks.length){
+            var prof = ABD_STYLE[s.shipType];
+            for (var dcj=0; dcj<s.debrisChunks.length; dcj++){
+                var dch = s.debrisChunks[dcj];
+                var dcf = 1 - dch.age/dch.max;
+                if (dcf <= 0) continue;
+                /* smoke streak */
+                c.fillStyle = 'rgba(60,55,65,' + (dcf*0.45) + ')';
+                c.beginPath();
+                c.arc(dch.ox - dch.vx*0.6, dch.oy - dch.vy*0.6, dch.size*0.9, 0, Math.PI*2);
+                c.fill();
+                /* chunk */
+                c.save();
+                c.translate(dch.ox, dch.oy);
+                c.rotate(dch.rot);
+                c.fillStyle = prof.hullA;
+                c.globalAlpha = dcf;
+                c.fillRect(-dch.size, -dch.size*0.5, dch.size*2, dch.size);
+                c.fillStyle = prof.hullB;
+                c.fillRect(-dch.size, -dch.size*0.5, dch.size*2, dch.size*0.3);
+                c.globalAlpha = 1;
+                /* ember on edge */
+                c.fillStyle = 'rgba(255,180,60,' + dcf + ')';
+                c.beginPath(); c.arc(dch.size*0.7, 0, 0.9, 0, Math.PI*2); c.fill();
+                c.restore();
+            }
+        }
+        /* HIT SPARKS — cyan/gold/orange/white-hot shower with trails */
+        if (s.hitSparks && s.hitSparks.length){
+            for (var hsi=0; hsi<s.hitSparks.length; hsi++){
+                var hs = s.hitSparks[hsi];
+                var hsf = 1 - hs.age/hs.max;
+                if (hsf <= 0) continue;
+                if (hs.isWhite){
+                    c.fillStyle = 'rgba(255,255,255,' + hsf + ')';
+                } else {
+                    c.fillStyle = 'hsla(' + hs.hue + ',95%,' + (60 + hsf*20) + '%,' + hsf + ')';
+                }
+                c.beginPath();
+                c.arc(hs.ox, hs.oy, 2.2 * hsf + 0.4, 0, Math.PI*2);
+                c.fill();
+                /* glowing streak */
+                if (hs.isWhite){
+                    c.strokeStyle = 'rgba(255,255,255,' + (hsf*0.75) + ')';
+                } else {
+                    c.strokeStyle = 'hsla(' + hs.hue + ',95%,72%,' + (hsf*0.65) + ')';
+                }
+                c.lineWidth = 1.0;
+                c.beginPath();
+                c.moveTo(hs.ox, hs.oy);
+                c.lineTo(hs.ox - hs.vx*2.2, hs.oy - hs.vy*2.2);
+                c.stroke();
+            }
+        }
+        c.restore();
+    }
+
+    function drawAbductionBeam(c, s, beamTopY, beamBottomY, isDown){
+        var prof = ABD_STYLE[s.shipType];
+        if (s.beamPower <= 0.01) return;
+        var pw = s.beamPower;
+        c.save();
+        var topW = s.size * 0.18;
+        var botW = s.size * 0.55;
+        /* downward cone, optionally inverted for beam-down */
+        var x = s.x;
+        var topY = beamTopY;
+        var botY = beamBottomY;
+        var grad = c.createLinearGradient(x, topY, x, botY);
+        grad.addColorStop(0, prof.beamA);
+        grad.addColorStop(1, prof.beamB);
+        c.fillStyle = grad;
+        c.globalAlpha = pw;
+        c.beginPath();
+        c.moveTo(x - topW, topY);
+        c.lineTo(x + topW, topY);
+        c.lineTo(x + botW, botY);
+        c.lineTo(x - botW, botY);
+        c.closePath();
+        c.fill();
+        /* energy rings climbing/falling along beam */
+        var ringCount = 4;
+        var t = (performance.now()/300) % 1;
+        for (var ri=0; ri<ringCount; ri++){
+            var tt = ((ri/ringCount) + (isDown ? t : (1-t))) % 1;
+            var ry = topY + (botY - topY) * tt;
+            var rw = topW + (botW - topW) * tt;
+            c.strokeStyle = prof.beamA;
+            c.lineWidth = 1.4;
+            c.globalAlpha = pw * (1 - tt) * 0.85;
+            c.beginPath();
+            c.ellipse(x, ry, rw, rw*0.18, 0, 0, Math.PI*2);
+            c.stroke();
+        }
+        c.globalAlpha = 1;
+        /* particles */
+        c.fillStyle = prof.beamA;
+        var parts = s.beamParticles || [];
+        for (var pi=0; pi<parts.length; pi++){
+            var pp = parts[pi];
+            c.globalAlpha = pw * (1 - pp.life/pp.maxLife);
+            c.beginPath();
+            c.arc(pp.x, pp.y, 1.6, 0, Math.PI*2);
+            c.fill();
+        }
+        c.globalAlpha = 1;
+        c.restore();
+    }
+
+    function drawAbductionMissile(c, m){
+        c.save();
+        var mt = m.mtype || { flight:'rocket', coreA:'#dddddd', coreB:'#ffffff', trailHue:200 };
+        /* ── LAUNCH FLASH at origin (fades over ~350ms) ── */
+        if (m.launchFlashT > 0 && m.trail.length){
+            var first = m.trail[0];
+            var lff = Math.max(0, Math.min(1, m.launchFlashT / 350));
+            var lfg = c.createRadialGradient(first.x, first.y, 1, first.x, first.y, 22);
+            lfg.addColorStop(0,   'rgba(255,255,255,' + lff + ')');
+            lfg.addColorStop(0.5, 'rgba(255,220,140,' + (lff*0.6) + ')');
+            lfg.addColorStop(1,   'rgba(255,220,140,0)');
+            c.fillStyle = lfg;
+            c.beginPath(); c.arc(first.x, first.y, 22, 0, Math.PI*2); c.fill();
+        }
+        /* ── PER-MISSILE-TYPE flight rendering ──────────────────────
+           For each type the trail/body changes dramatically. ── */
+        if (mt.flight === 'beam'){
+            /* ION BEAM — instant straight line from origin to target */
+            var endX = (m.target && m.target.alive) ? m.target.x : m.x;
+            var endY = (m.target && m.target.alive) ? m.target.y : m.y;
+            /* outer wide glow */
+            c.strokeStyle = 'rgba(120,200,255,0.85)';
+            c.lineWidth = 9;
+            c.beginPath(); c.moveTo(m.sx, m.sy); c.lineTo(endX, endY); c.stroke();
+            c.strokeStyle = 'rgba(200,235,255,0.95)';
+            c.lineWidth = 4;
+            c.beginPath(); c.moveTo(m.sx, m.sy); c.lineTo(endX, endY); c.stroke();
+            c.strokeStyle = '#ffffff';
+            c.lineWidth = 1.5;
+            c.beginPath(); c.moveTo(m.sx, m.sy); c.lineTo(endX, endY); c.stroke();
+            /* electric jitter spikes along the beam */
+            for (var bj=0; bj<6; bj++){
+                var bt = (bj+1) / 7;
+                var bjx = m.sx + (endX - m.sx)*bt;
+                var bjy = m.sy + (endY - m.sy)*bt;
+                var perpA = Math.atan2(endY-m.sy, endX-m.sx) + Math.PI/2;
+                var bjJit = rng(-4, 4);
+                c.strokeStyle = 'rgba(255,255,255,' + rng(0.4, 0.85) + ')';
+                c.lineWidth = 1.0;
+                c.beginPath();
+                c.moveTo(bjx, bjy);
+                c.lineTo(bjx + Math.cos(perpA)*bjJit, bjy + Math.sin(perpA)*bjJit);
+                c.stroke();
+            }
+            c.restore();
+            return;
+        }
+        if (mt.flight === 'quantum'){
+            /* QUANTUM ghosting trails — multiple flickering after-images */
+            for (var ghi=0; ghi<m.ghosts.length; ghi++){
+                var gho = m.ghosts[ghi];
+                var ghF = 1 - gho.age/gho.max;
+                c.fillStyle = 'hsla(' + (mt.trailHue + ghi*8) + ',95%,75%,' + (ghF*0.85) + ')';
+                c.beginPath();
+                c.arc(gho.x + rng(-2,2), gho.y + rng(-2,2), 3.5*ghF + 1, 0, Math.PI*2);
+                c.fill();
+                c.strokeStyle = 'hsla(' + (mt.trailHue + 180 + ghi*5) + ',95%,75%,' + (ghF*0.55) + ')';
+                c.lineWidth = 1.2;
+                c.beginPath();
+                c.arc(gho.x, gho.y, 6 * ghF + 2, 0, Math.PI*2);
+                c.stroke();
+            }
+            /* core glyph — flickering 6-point star */
+            c.save();
+            c.translate(m.x + rng(-2,2), m.y + rng(-2,2));
+            c.rotate(performance.now() * 0.015);
+            for (var qi=0; qi<6; qi++){
+                var qa = qi * Math.PI/3;
+                c.strokeStyle = qi%2 ? mt.coreA : mt.coreB;
+                c.lineWidth = 2;
+                c.beginPath();
+                c.moveTo(0,0);
+                c.lineTo(Math.cos(qa)*7, Math.sin(qa)*7);
+                c.stroke();
+            }
+            c.fillStyle = '#ffffff';
+            c.beginPath(); c.arc(0,0,2.5,0,Math.PI*2); c.fill();
+            c.restore();
+            c.restore();
+            return;
+        }
+        if (mt.flight === 'swarm'){
+            /* NANO SWARM — 6 spiraling micro-missiles around the path */
+            var swP = Math.atan2(m.vy, m.vx);
+            for (var sw=0; sw<m.swarmlets.length; sw++){
+                var sl = m.swarmlets[sw];
+                var swPhase = sl.phase + m.age*0.012;
+                var swR = sl.r;
+                var perpSw = swP + Math.PI/2;
+                var sx2 = m.x + Math.cos(perpSw)*Math.cos(swPhase)*swR
+                              + Math.cos(swP)*Math.sin(swPhase)*swR*0.3;
+                var sy2 = m.y + Math.sin(perpSw)*Math.cos(swPhase)*swR
+                              + Math.sin(swP)*Math.sin(swPhase)*swR*0.3;
+                /* outer glow */
+                c.fillStyle = 'hsla(' + mt.trailHue + ',95%,70%,0.75)';
+                c.beginPath(); c.arc(sx2, sy2, 3, 0, Math.PI*2); c.fill();
+                /* core */
+                c.fillStyle = mt.coreB;
+                c.beginPath(); c.arc(sx2, sy2, 1.3, 0, Math.PI*2); c.fill();
+                /* short trail to centre */
+                c.strokeStyle = 'hsla(' + mt.trailHue + ',95%,70%,0.4)';
+                c.lineWidth = 0.8;
+                c.beginPath();
+                c.moveTo(sx2, sy2);
+                c.lineTo(m.x, m.y);
+                c.stroke();
+            }
+        }
+        /* per-type trail color hint (hue from mtype) */
+        var trH = mt.trailHue;
+        /* ── HELIX SPIRAL TRAIL — two counter-rotating bright dots
+           spiral around the missile's path, giving the trail a
+           dynamic 3D-screw look ── */
+        for (var ti=0; ti<m.trail.length; ti++){
+            var tt = m.trail[ti];
+            var aT = ti / m.trail.length;
+            var dxh = (ti < m.trail.length-1) ? (m.trail[ti+1].x - tt.x) : (m.x - tt.x);
+            var dyh = (ti < m.trail.length-1) ? (m.trail[ti+1].y - tt.y) : (m.y - tt.y);
+            var perpA = Math.atan2(dyh, dxh) + Math.PI/2;
+            var helixR = 5 * aT + 1;
+            var hx1 = tt.x + Math.cos(perpA) * Math.cos(tt.helix) * helixR;
+            var hy1 = tt.y + Math.sin(perpA) * Math.cos(tt.helix) * helixR;
+            var hx2 = tt.x + Math.cos(perpA) * Math.cos(tt.helix + Math.PI) * helixR;
+            var hy2 = tt.y + Math.sin(perpA) * Math.cos(tt.helix + Math.PI) * helixR;
+            c.fillStyle = 'hsla(' + trH + ',95%,70%,' + (aT*0.45) + ')';
+            c.beginPath(); c.arc(hx1, hy1, 2.6*aT + 0.4, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(hx2, hy2, 2.6*aT + 0.4, 0, Math.PI*2); c.fill();
+            c.fillStyle = 'hsla(' + trH + ',95%,85%,' + aT + ')';
+            c.beginPath(); c.arc(hx1, hy1, 1.4*aT + 0.2, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(hx2, hy2, 1.4*aT + 0.2, 0, Math.PI*2); c.fill();
+        }
+        /* ── MAIN TRAIL — 3 layered colors along the flight path ── */
+        /* outer wide glow */
+        for (var oi=0; oi<m.trail.length; oi++){
+            var oot = m.trail[oi];
+            var aO = oi / m.trail.length;
+            c.fillStyle = 'hsla(' + trH + ',95%,70%,' + (aO*0.35) + ')';
+            c.beginPath(); c.arc(oot.x, oot.y, 5.5 * aO + 1.0, 0, Math.PI*2); c.fill();
+        }
+        /* middle hot core */
+        for (var hi=0; hi<m.trail.length; hi++){
+            var hht = m.trail[hi];
+            var aH = hi / m.trail.length;
+            c.fillStyle = 'rgba(255,220,140,' + (aH*0.85) + ')';
+            c.beginPath(); c.arc(hht.x, hht.y, 2.8 * aH + 0.5, 0, Math.PI*2); c.fill();
+        }
+        /* white-hot center line */
+        for (var ci=0; ci<m.trail.length; ci++){
+            var ct = m.trail[ci];
+            var aC = ci / m.trail.length;
+            c.fillStyle = 'rgba(255,255,255,' + (aC*0.95) + ')';
+            c.beginPath(); c.arc(ct.x, ct.y, 1.2 * aC + 0.2, 0, Math.PI*2); c.fill();
+        }
+        /* ── SHED SPARKS (lateral micro-sparks emitted by the body) ── */
+        for (var si2=0; si2<m.sparks.length; si2++){
+            var spk = m.sparks[si2];
+            var sf = 1 - spk.age/spk.max;
+            c.fillStyle = 'hsla(' + spk.hue + ',95%,70%,' + sf + ')';
+            c.beginPath(); c.arc(spk.x, spk.y, 1.6 * sf + 0.3, 0, Math.PI*2); c.fill();
+            c.strokeStyle = 'hsla(' + spk.hue + ',95%,70%,' + (sf*0.5) + ')';
+            c.lineWidth = 0.7;
+            c.beginPath();
+            c.moveTo(spk.x, spk.y);
+            c.lineTo(spk.x - spk.vx*1.3, spk.y - spk.vy*1.3);
+            c.stroke();
+        }
+        /* ── BODY (rotated to flight vector) ── */
+        var ang = Math.atan2(m.vy, m.vx);
+        c.translate(m.x, m.y);
+        c.rotate(ang);
+        /* motion blur shadow under body */
+        c.fillStyle = 'rgba(120,200,255,0.55)';
+        c.beginPath();
+        c.ellipse(-3, 0, 16, 2.5, 0, 0, Math.PI*2);
+        c.fill();
+        /* tail fins — back */
+        c.fillStyle = '#2a2a30';
+        c.beginPath();
+        c.moveTo(-4, -2.0); c.lineTo(-9, -5.2); c.lineTo(-6, -2.0); c.closePath(); c.fill();
+        c.beginPath();
+        c.moveTo(-4,  2.0); c.lineTo(-9,  5.2); c.lineTo(-6,  2.0); c.closePath(); c.fill();
+        /* fin LED tips */
+        c.fillStyle = 'rgba(180,240,255,0.95)';
+        c.beginPath(); c.arc(-9, -5.2, 1.2, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc(-9,  5.2, 1.2, 0, Math.PI*2); c.fill();
+        /* mid fins */
+        c.fillStyle = '#3a3a44';
+        c.beginPath();
+        c.moveTo(0, -2.0); c.lineTo(-2, -4.0); c.lineTo(-3, -2.0); c.closePath(); c.fill();
+        c.beginPath();
+        c.moveTo(0,  2.0); c.lineTo(-2,  4.0); c.lineTo(-3,  2.0); c.closePath(); c.fill();
+        /* main body — metallic chrome gradient */
+        var bgr = c.createLinearGradient(0, -2.4, 0, 2.4);
+        bgr.addColorStop(0,    '#f0f4fa');
+        bgr.addColorStop(0.5,  '#9ca4ad');
+        bgr.addColorStop(1,    '#54595e');
+        c.fillStyle = bgr;
+        c.fillRect(-9, -2.4, 18, 4.8);
+        /* upper highlight stripe */
+        c.fillStyle = 'rgba(255,255,255,0.65)';
+        c.fillRect(-9, -2.4, 18, 0.8);
+        /* panel lines */
+        c.strokeStyle = 'rgba(20,30,50,0.55)';
+        c.lineWidth = 0.5;
+        c.beginPath();
+        c.moveTo(-5, -2.4); c.lineTo(-5, 2.4);
+        c.moveTo( 2, -2.4); c.lineTo( 2, 2.4);
+        c.stroke();
+        /* cockpit blue glow ring */
+        c.fillStyle = 'rgba(120,200,255,0.90)';
+        c.beginPath(); c.arc(-1, 0, 2.0, 0, Math.PI*2); c.fill();
+        c.fillStyle = 'rgba(255,255,255,0.95)';
+        c.beginPath(); c.arc(-1, 0, 0.9, 0, Math.PI*2); c.fill();
+        /* nose cone — red with hot glow */
+        c.fillStyle = '#c8203a';
+        c.beginPath();
+        c.moveTo(9, -2.4); c.lineTo(15, 0); c.lineTo(9, 2.4); c.closePath(); c.fill();
+        /* nose vapor cone — bright white tip */
+        var ngr = c.createRadialGradient(15, 0, 0.5, 15, 0, 6);
+        ngr.addColorStop(0, 'rgba(255,255,255,1)');
+        ngr.addColorStop(0.5, 'rgba(255,220,180,0.95)');
+        ngr.addColorStop(1, 'rgba(255,160,80,0)');
+        c.fillStyle = ngr;
+        c.beginPath(); c.arc(15, 0, 6, 0, Math.PI*2); c.fill();
+        /* nose sensor dot */
+        c.fillStyle = '#ffffff';
+        c.beginPath(); c.arc(13, 0, 1.0, 0, Math.PI*2); c.fill();
+        /* TAIL — 4-layer exhaust + corona */
+        /* outer corona — wide soft halo */
+        var egr2 = c.createRadialGradient(-10, 0, 1, -10, 0, 12);
+        egr2.addColorStop(0, 'rgba(180,240,255,0.85)');
+        egr2.addColorStop(0.5, 'rgba(255,220,140,0.55)');
+        egr2.addColorStop(1, 'rgba(255,180,80,0)');
+        c.fillStyle = egr2;
+        c.beginPath(); c.arc(-10, 0, 12, 0, Math.PI*2); c.fill();
+        /* exhaust plume — 3 stacked flame petals */
+        c.fillStyle = '#ff8030';
+        c.beginPath();
+        c.moveTo(-9, -2.4); c.lineTo(-18, -3.2); c.lineTo(-15, 0);
+        c.lineTo(-18, 3.2); c.lineTo(-9, 2.4); c.closePath(); c.fill();
+        c.fillStyle = '#ffd060';
+        c.beginPath();
+        c.moveTo(-9, -1.6); c.lineTo(-15, -2.0); c.lineTo(-13, 0);
+        c.lineTo(-15, 2.0); c.lineTo(-9, 1.6); c.closePath(); c.fill();
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.moveTo(-9, -0.8); c.lineTo(-12, 0); c.lineTo(-9, 0.8); c.closePath(); c.fill();
+        /* hot core dot at nozzle */
+        c.fillStyle = 'rgba(180,240,255,0.95)';
+        c.beginPath(); c.arc(-9, 0, 1.8, 0, Math.PI*2); c.fill();
+        c.restore();
+    }
+
+    function drawAbductionWreckage(c, wr){
+        c.save();
+        if (!wr.exploded){
+            /* tumbling debris */
+            c.translate(wr.x, wr.y);
+            c.rotate(wr.rot);
+            var prof = ABD_STYLE[wr.shipType];
+            c.fillStyle = prof.hullA;
+            c.beginPath();
+            c.ellipse(0, 0, wr.size*0.5, wr.size*0.18, 0, 0, Math.PI*2);
+            c.fill();
+            c.fillStyle = prof.hullB;
+            c.beginPath();
+            c.arc(0, 0, wr.size*0.18, 0, Math.PI*2);
+            c.fill();
+            c.restore();
+            /* trailing smoke */
+            for (var sm=0; sm<wr.smoke.length; sm++){
+                var ss = wr.smoke[sm];
+                var aa = 1 - ss.life/ss.max;
+                c.fillStyle = 'rgba(60,55,55,' + (aa*0.55) + ')';
+                c.beginPath();
+                c.arc(ss.x, ss.y, ss.r, 0, Math.PI*2);
+                c.fill();
+            }
+        } else {
+            c.restore();
+            /* explosion: style depends on ship */
+            var prof2 = ABD_STYLE[wr.shipType];
+            var ax = wr.x, ay = wr.y;
+            var fl = Math.min(1, wr.age * 2.5);
+            var fade = Math.max(0, 1 - wr.age * 1.5);
+            if (prof2.explosionStyle === 'shockring'){
+                c.strokeStyle = 'rgba(160,255,210,' + (fade*0.9) + ')';
+                c.lineWidth = 3;
+                c.beginPath();
+                c.arc(ax, ay, wr.size * (1 + fl*2.5), 0, Math.PI*2);
+                c.stroke();
+                c.fillStyle = 'rgba(255,255,255,' + (fade*0.9) + ')';
+                c.beginPath();
+                c.arc(ax, ay, wr.size * 0.35 * fade, 0, Math.PI*2);
+                c.fill();
+            } else if (prof2.explosionStyle === 'sparkle'){
+                for (var sk2=0; sk2<wr.sparks.length; sk2++){
+                    var sps = wr.sparks[sk2];
+                    var sa = 1 - sps.life/sps.max;
+                    c.fillStyle = 'hsla('+(sps.hue+60)+',95%,65%,' + sa + ')';
+                    c.beginPath();
+                    c.arc(sps.x, sps.y, 2.2 * sa + 0.5, 0, Math.PI*2);
+                    c.fill();
+                }
+            } else if (prof2.explosionStyle === 'mushroom'){
+                c.fillStyle = 'rgba(255,180,220,' + (fade*0.65) + ')';
+                c.beginPath();
+                c.arc(ax, ay - fl*30, wr.size * (0.8 + fl*1.5), 0, Math.PI*2);
+                c.fill();
+                c.fillStyle = 'rgba(255,100,180,' + (fade*0.5) + ')';
+                c.fillRect(ax - 8, ay - fl*30, 16, fl*40);
+            } else if (prof2.explosionStyle === 'fireball'){
+                c.fillStyle = 'rgba(255,210,80,' + (fade*0.9) + ')';
+                c.beginPath();
+                c.arc(ax, ay, wr.size * (0.8 + fl*1.2), 0, Math.PI*2);
+                c.fill();
+                c.fillStyle = 'rgba(255,80,30,' + (fade*0.65) + ')';
+                c.beginPath();
+                c.arc(ax, ay, wr.size * (0.55 + fl*0.8), 0, Math.PI*2);
+                c.fill();
+            } else if (prof2.explosionStyle === 'tendril'){
+                c.strokeStyle = 'rgba(180,255,160,' + (fade*0.75) + ')';
+                c.lineWidth = 2.6;
+                for (var tg=0; tg<8; tg++){
+                    var ta = tg * Math.PI/4;
+                    var tx0 = ax, ty0 = ay;
+                    var tx1 = ax + Math.cos(ta) * wr.size * (0.5 + fl*1.8);
+                    var ty1 = ay + Math.sin(ta) * wr.size * (0.5 + fl*1.8);
+                    c.beginPath();
+                    c.moveTo(tx0, ty0);
+                    c.quadraticCurveTo(
+                        (tx0+tx1)/2 + Math.sin(performance.now()*0.01 + tg)*8,
+                        (ty0+ty1)/2 + Math.cos(performance.now()*0.01 + tg)*8,
+                        tx1, ty1);
+                    c.stroke();
+                }
+            }
+            for (var sk3=0; sk3<wr.sparks.length; sk3++){
+                var sp4 = wr.sparks[sk3];
+                var sa2 = 1 - sp4.life/sp4.max;
+                c.fillStyle = 'hsla('+sp4.hue+',95%,60%,' + sa2 + ')';
+                c.beginPath();
+                c.arc(sp4.x, sp4.y, 1.8 * sa2 + 0.4, 0, Math.PI*2);
+                c.fill();
+            }
+            for (var sm2=0; sm2<wr.smoke.length; sm2++){
+                var ss2 = wr.smoke[sm2];
+                var aa2 = 1 - ss2.life/ss2.max;
+                c.fillStyle = 'rgba(40,35,35,' + (aa2*0.55) + ')';
+                c.beginPath();
+                c.arc(ss2.x, ss2.y, ss2.r, 0, Math.PI*2);
+                c.fill();
+            }
+        }
+    }
+
+    function drawAlienWalker(c, wk){
+        var x = wk.x;
+        var y = wk._renderY || wk.y;
+        var t = wk.t;
+        var swing = Math.sin(t*4.5) * 3;
+
+        if (wk.phase === 'descend'){
+            /* glowing energy as it lowers */
+            var dp = wk.descendT / wk.descendDur;
+            var gl = 1 - dp;
+            c.fillStyle = 'rgba(180,255,160,' + (gl*0.5) + ')';
+            c.beginPath();
+            c.arc(x, y, 9, 0, Math.PI*2);
+            c.fill();
+        }
+
+        if (wk.phase === 'morph'){
+            /* shapeshift flash + ripple */
+            var mp = wk.morphT / wk.morphDur;
+            var pulse = Math.sin(mp * Math.PI * 6) * 0.5 + 0.5;
+            c.save();
+            var blendAlpha = pulse;
+            c.globalAlpha = 0.55 + blendAlpha*0.45;
+            drawAlienBody(c, x, y, t, swing, true);
+            c.globalAlpha = 0.55 + (1-blendAlpha)*0.45;
+            drawAlienBody(c, x, y, t, swing, false);
+            c.restore();
+            /* ripple ring */
+            c.strokeStyle = 'rgba(160,255,200,' + (1-mp) + ')';
+            c.lineWidth = 1.4;
+            c.beginPath();
+            c.arc(x, y - 8, 6 + mp*22, 0, Math.PI*2);
+            c.stroke();
+        } else {
+            drawAlienBody(c, x, y, t, swing, true);
+        }
+    }
+
+    function drawAlienBody(c, x, y, t, swing, asAlien){
+        var COATS = ['#c8cce0','#e0e4f0','#8898b0','#a0a8c0','#e8d0b0'];
+        if (asAlien){
+            /* lanky alien — green skin, big oval head, antennae */
+            c.fillStyle = '#5ca068';
+            c.fillRect(x-2, y-13, 4, 8);              /* torso */
+            /* legs */
+            c.strokeStyle = '#3a7048';
+            c.lineWidth = 1.5;
+            c.beginPath();
+            c.moveTo(x, y-5);
+            c.lineTo(x - 2 + Math.sin(t*4.5)*1.5, y);
+            c.moveTo(x, y-5);
+            c.lineTo(x + 2 + Math.cos(t*4.5)*1.5, y);
+            c.stroke();
+            /* arms */
+            c.beginPath();
+            c.moveTo(x-2, y-11);
+            c.lineTo(x-4 + Math.sin(t*4.5+1)*1.5, y-6);
+            c.moveTo(x+2, y-11);
+            c.lineTo(x+4 + Math.cos(t*4.5+1)*1.5, y-6);
+            c.stroke();
+            /* large oval head */
+            c.fillStyle = '#7ac888';
+            c.beginPath();
+            c.ellipse(x, y-17, 3.0, 3.8, 0, 0, Math.PI*2);
+            c.fill();
+            /* black almond eyes */
+            c.fillStyle = '#000';
+            c.beginPath();
+            c.ellipse(x-1.2, y-17, 0.8, 1.2, -0.4, 0, Math.PI*2);
+            c.fill();
+            c.beginPath();
+            c.ellipse(x+1.2, y-17, 0.8, 1.2, 0.4, 0, Math.PI*2);
+            c.fill();
+            /* antennae */
+            c.strokeStyle = '#3a7048';
+            c.lineWidth = 0.7;
+            c.beginPath();
+            c.moveTo(x-1, y-20);
+            c.lineTo(x-2 + Math.sin(t*3)*0.8, y-22);
+            c.moveTo(x+1, y-20);
+            c.lineTo(x+2 + Math.cos(t*3)*0.8, y-22);
+            c.stroke();
+            c.fillStyle = '#b0ff80';
+            c.beginPath(); c.arc(x-2 + Math.sin(t*3)*0.8, y-22, 0.7, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(x+2 + Math.cos(t*3)*0.8, y-22, 0.7, 0, Math.PI*2); c.fill();
+        } else {
+            /* normal human */
+            c.fillStyle = COATS[2];
+            c.fillRect(x-2, y-13, 4, 8);
+            c.fillStyle = '#d4a578';
+            c.beginPath();
+            c.arc(x, y-16, 3, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#444';
+            c.lineWidth = 1.2;
+            c.beginPath();
+            c.moveTo(x, y-5);
+            c.lineTo(x + Math.sin(t*4.5)*2, y);
+            c.moveTo(x, y-5);
+            c.lineTo(x + Math.cos(t*4.5)*2, y);
+            c.stroke();
+        }
+    }
+
+    /* draw lifted ped riding a saucer's tractor beam */
+    function drawAbductedPed(c, ped, sc){
+        var x = ped._absHostX !== undefined ? ped._absHostX : ped.x;
+        var y = ped._absY;
+        if (y === undefined) return;
+        var t = ped.t || 0;
+        /* slowly tumbling */
+        c.save();
+        c.translate(x, y);
+        c.rotate(Math.sin(performance.now()*0.004) * 0.4);
+        var COATS = ['#c8cce0','#e0e4f0','#8898b0','#a0a8c0','#e8d0b0'];
+        c.fillStyle = COATS[ped.coat || 0];
+        c.fillRect(-2, -13, 4, 8);
+        c.fillStyle = '#d4a578';
+        c.beginPath();
+        c.arc(0, -16, 3, 0, Math.PI*2);
+        c.fill();
+        /* limp limbs */
+        c.strokeStyle = '#444';
+        c.lineWidth = 1.0;
+        c.beginPath();
+        c.moveTo(0, -5);
+        c.lineTo(-3, -1);
+        c.moveTo(0, -5);
+        c.lineTo(3, -1);
+        c.stroke();
+        c.restore();
+    }
+
+    function drawAbductionBlackHole(c, bh){
+        /* outer gravitational lensing — dark halo */
+        var lhg = c.createRadialGradient(bh.x, bh.y, bh.r*0.6, bh.x, bh.y, bh.r*2.6);
+        lhg.addColorStop(0,    'rgba(0,0,0,0.92)');
+        lhg.addColorStop(0.35, 'rgba(20,10,40,0.65)');
+        lhg.addColorStop(0.7,  'rgba(60,30,90,0.20)');
+        lhg.addColorStop(1,    'rgba(60,30,90,0)');
+        c.fillStyle = lhg;
+        c.beginPath(); c.arc(bh.x, bh.y, bh.r*2.6, 0, Math.PI*2); c.fill();
+        /* accretion disk — tilted ellipse, hot edges */
+        var diskR = bh.r * 1.5;
+        c.save();
+        c.translate(bh.x, bh.y);
+        c.rotate(bh.spin);
+        /* hot inner glow ring */
+        var dkg = c.createRadialGradient(0, 0, bh.r*0.95, 0, 0, diskR*1.1);
+        dkg.addColorStop(0,   'rgba(255,180,80,0.95)');
+        dkg.addColorStop(0.4, 'rgba(255,80,40,0.55)');
+        dkg.addColorStop(1,   'rgba(80,30,160,0)');
+        c.fillStyle = dkg;
+        c.beginPath();
+        c.ellipse(0, 0, diskR*1.1, diskR*0.40, 0, 0, Math.PI*2);
+        c.fill();
+        /* accretion particle ring */
+        for (var ai=0; ai<bh.accretion.length; ai++){
+            var ac = bh.accretion[ai];
+            var acf = 1 - ac.age/ac.max;
+            var ax = Math.cos(ac.ang) * ac.r;
+            var ay = Math.sin(ac.ang) * ac.r * 0.36;
+            c.fillStyle = 'hsla(' + ac.hue + ',95%,65%,' + acf + ')';
+            c.beginPath(); c.arc(ax, ay, 1.6 * acf + 0.4, 0, Math.PI*2); c.fill();
+            /* streak trail */
+            c.strokeStyle = 'hsla(' + ac.hue + ',95%,65%,' + (acf*0.5) + ')';
+            c.lineWidth = 0.7;
+            c.beginPath();
+            c.moveTo(ax, ay);
+            c.lineTo(Math.cos(ac.ang - 0.15)*ac.r,
+                     Math.sin(ac.ang - 0.15)*ac.r*0.36);
+            c.stroke();
+        }
+        c.restore();
+        /* event horizon — perfectly black disc */
+        c.fillStyle = '#000';
+        c.beginPath(); c.arc(bh.x, bh.y, bh.r, 0, Math.PI*2); c.fill();
+        /* photon ring — bright thin halo right at the edge */
+        c.strokeStyle = 'rgba(255,220,160,0.85)';
+        c.lineWidth = 1.6;
+        c.beginPath(); c.arc(bh.x, bh.y, bh.r*1.05, 0, Math.PI*2); c.stroke();
+        c.strokeStyle = 'rgba(255,255,255,0.55)';
+        c.lineWidth = 0.8;
+        c.beginPath(); c.arc(bh.x, bh.y, bh.r*1.10, 0, Math.PI*2); c.stroke();
+        /* shock rings — expanding outward when freshly opened */
+        for (var sri=0; sri<bh.shockRings.length; sri++){
+            var sr = bh.shockRings[sri];
+            if (sr.age < 0) continue;
+            var srf = Math.max(0, 1 - sr.age/600);
+            if (srf <= 0) continue;
+            c.strokeStyle = 'rgba(180,150,255,' + (srf*sr.alpha) + ')';
+            c.lineWidth = 2.2 * srf;
+            c.beginPath(); c.arc(bh.x, bh.y, sr.r, 0, Math.PI*2); c.stroke();
+        }
+    }
+
+    function drawAbductionTargetLocks(c){
+        for (var ti=0; ti<abductionTargetLocks.length; ti++){
+            var tl = abductionTargetLocks[ti];
+            var lp = tl.age / tl.max;
+            var fade = 1 - lp;
+            /* ring contracts from large to small over the lock,
+               then expands fast as fire commits */
+            var r = (lp < 0.5)
+                ? tl.size * 1.8 * (1 - lp*1.4)   /* contract */
+                : tl.size * 0.8 + lp * 30;        /* expand on fire */
+            /* outer red ring */
+            c.strokeStyle = 'rgba(255,60,60,' + fade + ')';
+            c.lineWidth = 2.4 * fade + 0.5;
+            c.beginPath();
+            c.arc(tl.x, tl.y, r, 0, Math.PI*2);
+            c.stroke();
+            /* inner white ring */
+            c.strokeStyle = 'rgba(255,255,255,' + (fade*0.8) + ')';
+            c.lineWidth = 1.0 * fade + 0.3;
+            c.beginPath();
+            c.arc(tl.x, tl.y, r*0.78, 0, Math.PI*2);
+            c.stroke();
+            /* 4 corner crosshair brackets */
+            var bracketSize = r * 0.35;
+            var bracketGap  = r * 0.10;
+            c.strokeStyle = 'rgba(255,80,80,' + fade + ')';
+            c.lineWidth = 2.0;
+            for (var bk=0; bk<4; bk++){
+                var ba = bk * Math.PI/2 + Math.PI/4;
+                var bx = tl.x + Math.cos(ba) * r;
+                var by = tl.y + Math.sin(ba) * r;
+                /* short L-shape bracket */
+                c.beginPath();
+                c.moveTo(bx, by - bracketSize);
+                c.lineTo(bx, by - bracketGap);
+                c.moveTo(bx - bracketSize, by);
+                c.lineTo(bx - bracketGap, by);
+                c.stroke();
+            }
+            /* central + crosshair */
+            c.strokeStyle = 'rgba(255,80,80,' + (fade*0.85) + ')';
+            c.lineWidth = 1.0;
+            c.beginPath();
+            c.moveTo(tl.x - 8, tl.y); c.lineTo(tl.x + 8, tl.y);
+            c.moveTo(tl.x, tl.y - 8); c.lineTo(tl.x, tl.y + 8);
+            c.stroke();
+            /* center dot */
+            c.fillStyle = 'rgba(255,255,255,' + fade + ')';
+            c.beginPath();
+            c.arc(tl.x, tl.y, 1.5, 0, Math.PI*2);
+            c.fill();
+        }
+    }
+
+    function drawAbductionGlobalFX(c){
+        if (abductionGlobalFX.length === 0) return;
+        for (var gfi=0; gfi<abductionGlobalFX.length; gfi++){
+            var gfe = abductionGlobalFX[gfi];
+            var lp = gfe.age / gfe.max;
+            var fade = 1 - lp;
+            if (gfe.kind === 'megaHit'){
+                /* screen-wide white flash overlay (early frames only) */
+                if (lp < 0.25){
+                    var fa = (1 - lp/0.25) * 0.45;
+                    c.fillStyle = 'rgba(255,255,255,' + fa + ')';
+                    c.fillRect(0, 0, W, H);
+                }
+                /* radial glow centered on impact */
+                var rg = c.createRadialGradient(gfe.x, gfe.y, 4, gfe.x, gfe.y, 240);
+                rg.addColorStop(0, 'rgba(255,255,255,' + (fade*0.75) + ')');
+                rg.addColorStop(0.4, 'rgba(180,220,255,' + (fade*0.45) + ')');
+                rg.addColorStop(1, 'rgba(180,220,255,0)');
+                c.fillStyle = rg;
+                c.beginPath(); c.arc(gfe.x, gfe.y, 240, 0, Math.PI*2); c.fill();
+                /* lens cross — huge */
+                if (lp < 0.55){
+                    var lf = 1 - lp/0.55;
+                    var lLen = 380 * (1 + lp*0.5);
+                    for (var lcb=0; lcb<4; lcb++){
+                        var lcA = lcb * Math.PI/2;
+                        var grL = c.createLinearGradient(
+                            gfe.x, gfe.y,
+                            gfe.x + Math.cos(lcA)*lLen, gfe.y + Math.sin(lcA)*lLen);
+                        grL.addColorStop(0,   'rgba(255,255,255,' + lf + ')');
+                        grL.addColorStop(0.5, 'rgba(180,220,255,' + (lf*0.55) + ')');
+                        grL.addColorStop(1,   'rgba(180,220,255,0)');
+                        c.strokeStyle = grL;
+                        c.lineWidth = 8 + (1-lp)*20;
+                        c.beginPath();
+                        c.moveTo(gfe.x, gfe.y);
+                        c.lineTo(gfe.x + Math.cos(lcA)*lLen, gfe.y + Math.sin(lcA)*lLen);
+                        c.stroke();
+                    }
+                }
+            } else if (gfe.kind === 'skyRing'){
+                /* giant expanding ring across the sky */
+                var srR = lp * 380;
+                c.strokeStyle = 'rgba(220,240,255,' + (fade*0.85) + ')';
+                c.lineWidth = 5 * fade + 0.5;
+                c.beginPath(); c.arc(gfe.x, gfe.y, srR, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,' + (fade*0.65) + ')';
+                c.lineWidth = 2.0 * fade;
+                c.beginPath(); c.arc(gfe.x, gfe.y, srR*0.92, 0, Math.PI*2); c.stroke();
+                /* secondary inner ring */
+                c.strokeStyle = 'rgba(180,210,255,' + (fade*0.55) + ')';
+                c.lineWidth = 1.5 * fade;
+                c.beginPath(); c.arc(gfe.x, gfe.y, srR*0.55, 0, Math.PI*2); c.stroke();
+            }
+        }
+    }
+
+    function drawAbduction(c){
+        if (!abductionOn) return;
+
+        /* missiles (defence) — drawn under saucers but over wreckage smoke.
+           Wrapped per-missile so one bad missile can't kill the loop. */
+        for (var mi=0; mi<abductionMissiles.length; mi++){
+            try { drawAbductionMissile(c, abductionMissiles[mi]); } catch(_e){}
+        }
+        /* black holes — drawn BEHIND ships so a dying ship spirals
+           visibly INTO the hole and the photon ring rims it */
+        for (var bhi=0; bhi<abductionBlackHoles.length; bhi++)
+            drawAbductionBlackHole(c, abductionBlackHoles[bhi]);
+
+        /* saucers — wrapped per-ship so one bad ship doesn't kill
+           the whole loop */
+        for (var si=0; si<abductionSaucers.length; si++){
+            try {
+                var sc = abductionSaucers[si];
+                if (!sc || typeof sc.x !== 'number' || typeof sc.y !== 'number') continue;
+                if (isNaN(sc.x) || isNaN(sc.y)) continue;
+                if (sc.phase === 'abduct' || sc.phase === 'hover'){
+                    var beamTop = sc.y + sc.size * 0.30;
+                    var beamBot = GROUND + (H-GROUND)*0.58 + 8;
+                    drawAbductionBeam(c, sc, beamTop, beamBot, false);
+                }
+                if (sc.phase === 'drop' || sc.phase === 'hoverDrop'){
+                    var beamTopD = sc.y + sc.size * 0.30;
+                    var beamBotD = GROUND + (H-GROUND)*0.58 + 8;
+                    drawAbductionBeam(c, sc, beamTopD, beamBotD, true);
+                }
+                drawAbductionShipHull(c, sc);
+                var ped = sc.pedSlot;
+                if (ped && ped._absLifting){
+                    drawAbductedPed(c, ped, sc);
+                }
+            } catch(_e){}
+        }
+
+        /* legacy replacement-ship loop — kept for safety; the array
+           is unused but harmless if empty */
+        for (var ri=0; ri<abductionReplacers.length; ri++){
+            var rp = abductionReplacers[ri];
+            if (rp.phase === 'drop' || rp.phase === 'hover'){
+                var beamTop2 = rp.y + rp.size * 0.30;
+                var beamBot2 = GROUND + (H-GROUND)*0.58 + 8;
+                drawAbductionBeam(c, rp, beamTop2, beamBot2, true);
+            }
+            drawAbductionShipHull(c, rp);
+        }
+
+        /* alien walkers */
+        for (var wkI=0; wkI<alienWalkers.length; wkI++) drawAlienWalker(c, alienWalkers[wkI]);
+
+        /* wreckage on top (smoke needs to read over ships) */
+        for (var wri=0; wri<abductionWreckage.length; wri++) drawAbductionWreckage(c, abductionWreckage[wri]);
+        /* TARGET-LOCK RINGS — drawn on top of ships so the user
+           sees the lock confirmed on their click */
+        drawAbductionTargetLocks(c);
+        /* GLOBAL FX overlay — screen-wide flash + giant shockwave on
+           each missile hit, drawn LAST so it briefly washes over the
+           whole scene */
+        drawAbductionGlobalFX(c);
+    }
+
+    /* PUBLIC API ───────────────────────────────────────────────── */
+    window.startAbduction = startAbduction;
+    window.stopAbduction  = stopAbduction;
+    window.isAbductionOn  = function(){ return abductionOn; };
+    window.toggleAbduction = function(){
+        if (abductionOn){ stopAbduction(); return false; }
+        startAbduction(); return true;
+    };
+    window.getAbductionStats = function(){
+        return {
+            ships: abductionSaucers.length + abductionReplacers.length,
+            abducted: abductionAbducted,
+            target: abductionTargetCount,
+            phase: abductionPhase
+        };
+    };
+    window.getAllAbductionShips = function(){
+        return ABDUCTION_SHIPS.map(function(s,i){
+            var prof = ABD_STYLE[s.id] || {};
+            return { index:i, id:s.id, name:s.name, icon:s.icon,
+                     colorA: prof.hullA || '#a855f7',
+                     colorB: prof.domeA || '#7c3aed' };
+        });
+    };
+    window.getAbductionShipIndex = function(){ return abductionShipIdx; };
+    window.getAbductionShipName  = function(){
+        return (ABDUCTION_SHIPS[abductionShipIdx]||ABDUCTION_SHIPS[0]).name;
+    };
+    window.getAbductionShipIcon  = function(){
+        return (ABDUCTION_SHIPS[abductionShipIdx]||ABDUCTION_SHIPS[0]).icon;
+    };
+    window.setAbductionShipIndex = function(i){
+        var n = ABDUCTION_SHIPS.length;
+        if (typeof i !== 'number') return;
+        abductionShipIdx = ((i%n)+n)%n;
+    };
+    /* missile-strength slider — kept for back-compat */
+    window.getAbductionMissileStrength = function(){ return abductionMissileStrength; };
+    window.setAbductionMissileStrength = function(v){
+        if (typeof v !== 'number') v = parseFloat(v);
+        if (isNaN(v)) return;
+        abductionMissileStrength = Math.max(0, Math.min(100, v));
+        for (var ssi=0; ssi<abductionSaucers.length; ssi++){
+            var ss = abductionSaucers[ssi];
+            if (!ss.tagged && !ss.dying && !ss.beingIntercepted){
+                ss.willBeHit = (Math.random() * 100 < abductionMissileStrength);
+            }
+        }
+    };
+
+    /* ── MISSILE TYPE PICKER ─────────────────────────────────────── */
+    window.getAllAbductionMissileTypes = function(){
+        return ABDUCTION_MISSILES.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon,
+                     colorA: m.coreA, colorB: m.coreB };
+        });
+    };
+    window.getAbductionMissileTypeIndex = function(){ return abductionMissileTypeIdx; };
+    window.getAbductionMissileTypeName  = function(){ return ABDUCTION_MISSILES[abductionMissileTypeIdx].name; };
+    window.getAbductionMissileTypeIcon  = function(){ return ABDUCTION_MISSILES[abductionMissileTypeIdx].icon; };
+    window.setAbductionMissileTypeIndex = function(i){
+        var n = ABDUCTION_MISSILES.length;
+        if (typeof i !== 'number') return;
+        abductionMissileTypeIdx = ((i%n)+n)%n;
+    };
+
+    /* ── DIFFICULTY SLIDER (1..100) ───────────────────────────────
+       Controls:
+         - fleet size (5..28 airborne)
+         - saucer speed (1.0..1.45)
+         - INVERSE hit rate (1% diff → 95% hits, 100% diff → 10% hits)
+           so higher difficulty means MORE aliens survive. */
+    var abductionDifficulty = 40;
+    window.getAbductionShipCount = function(){ return abductionDifficulty; };
+    window.setAbductionShipCount = function(v){
+        if (typeof v !== 'number') v = parseFloat(v);
+        if (isNaN(v)) return;
+        abductionDifficulty = Math.max(1, Math.min(100, v));
+        ABDUCTION_TARGET_AIRBORNE = Math.round(5 + (abductionDifficulty/100) * 23);
+        abductionSpeedMul = 1.0 + (abductionDifficulty/100) * 0.45;
+        /* INVERSE strength curve: easy = many hits, hard = few hits */
+        abductionMissileStrength = Math.max(10, 95 - (abductionDifficulty - 1) * (85/99));
+        for (var ai=0; ai<abductionSaucers.length; ai++){
+            abductionSaucers[ai].speedMul = abductionSpeedMul;
+            /* re-roll willBeHit for any saucer that hasn't been
+               committed to a fate yet, so slider changes feel live */
+            var ssC = abductionSaucers[ai];
+            if (!ssC.tagged && !ssC.dying && !ssC.beingIntercepted){
+                ssC.willBeHit = (Math.random() * 100 < abductionMissileStrength);
+            }
+        }
+    };
+
+    /* ── AUTO FIRE toggle ────────────────────────────────────────
+       Default OFF. While Auto is ON the system runs hands-off:
+         - Cycles `abductionShipIdx` and `abductionMissileTypeIdx`
+           every ~3s so the user sees every alien type and every
+           missile type in the tooltip
+         - If abduction isn't running, AUTO ON also auto-starts it
+       Hit rate is ALWAYS driven by Difficulty (inverse) — higher
+       difficulty = fewer hits = more aliens survive. */
+    var abductionAutoFire = false;
+    var abductionAutoCycleTimer = 0;
+    var ABDUCTION_AUTO_CYCLE_MS = 3000;
+    window.isAbductionAutoFire = function(){ return abductionAutoFire; };
+    window.setAbductionAutoFire = function(on){
+        var wasOn = !!abductionAutoFire;
+        abductionAutoFire = !!on;
+        /* AUTO ON while abduction is off → start the simulation */
+        if (abductionAutoFire && !abductionOn){
+            startAbduction();
+            if (typeof document !== 'undefined'){
+                var aWrap = document.getElementById('abductionBtn');
+                if (aWrap) aWrap.classList.add('active');
+            }
+        }
+        /* AUTO transitioned ON → OFF → fully stop the abduction so
+           the parent abduction widget button visibly unclicks,
+           matching the attack/defence Auto-off behaviour. */
+        if (wasOn && !abductionAutoFire && abductionOn){
+            stopAbduction();
+            if (typeof document !== 'undefined'){
+                var aWrapOff = document.getElementById('abductionBtn');
+                if (aWrapOff) aWrapOff.classList.remove('active');
+            }
+        }
+        /* CURSOR — Auto ON: no crosshair. Auto OFF (if abduction was
+           started manually): show the crosshair so user can aim. */
+        if (canvas && canvas.style){
+            if (abductionAutoFire){
+                if (canvas.style.cursor === 'crosshair') canvas.style.cursor = '';
+            } else if (abductionOn){
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+        if (abductionAutoFire){
+            abductionAutoCycleTimer = 0;
+        }
+    };
+
+    /* MANUAL FIRE — every click fires a missile at the nearest LIVE
+       saucer on screen, regardless of phase, distance, or whether a
+       missile is already inbound to that ship. Only excludes
+       already-dying ships (they're past the point of return). NO
+       distance cap — clicking anywhere finds the closest ship and
+       fires; the user is never left without a target. */
+    window.fireAbductionManual = function(clickX, clickY){
+        try {
+            if (!abductionOn) return false;
+            if (typeof clickX !== 'number' || isNaN(clickX)) return false;
+            if (typeof clickY !== 'number' || isNaN(clickY)) return false;
+            var best = null, bestD = Infinity;
+            for (var s2i=0; s2i<abductionSaucers.length; s2i++){
+                var s2 = abductionSaucers[s2i];
+                if (!s2 || !s2.alive) continue;
+                /* skip only ships already dying — they're being
+                   pulled into the gravity well and a new missile
+                   would whiff. Tagged-but-not-dying could happen
+                   on the same frame as a hit, so allow those. */
+                if (s2.dying) continue;
+                if (typeof s2.x !== 'number' || typeof s2.y !== 'number') continue;
+                if (isNaN(s2.x) || isNaN(s2.y)) continue;
+                var ddx = s2.x - clickX, ddy = s2.y - clickY;
+                var d2 = ddx*ddx + ddy*ddy;
+                if (d2 < bestD){ bestD = d2; best = s2; }
+            }
+            if (best){
+                /* always allow re-firing — clear the inbound flag
+                   so spawnAbductionInterceptor accepts the target */
+                best.beingIntercepted = false;
+                best.tagged = false;
+                abductionTargetLocks.push({
+                    ship: best,
+                    x: best.x, y: best.y,
+                    age: 0, max: 700,
+                    size: best.size
+                });
+                best.willBeHit = true;
+                spawnAbductionInterceptor(best);
+                return true;
+            }
+        } catch (e){
+            /* swallow — the next click can retry */
+        }
+        return false;
+    };
+
+    /* ═══════════════════════════════════════════════════════════
+       SUPERHERO BATTLE SYSTEM
+       ─────────────────────────────────────────────────────────────
+       Spawns a roster of heroes from a chosen "universe" who fight
+       in the city until one winner remains. Each hero has a
+       distinct power type with a unique render (beam, projectile,
+       shield-throw, melee dash, AOE pulse). Universes use legally-
+       safe codenames + iconography so no real brand is invoked.
+       ═══════════════════════════════════════════════════════════ */
+
+    /* ── HEROES — 7 distinctive picks inspired by classic comic
+       archetypes. Each has its own palette + style + emblem so
+       they all render distinctly. */
+    /* ── HERO STAT DESIGN ──
+       Each hero is a distinct strategic pick. Stats:
+         hp        — total health (1 villain hit = 35 dmg)
+         speed     — pursue / cruise velocity in px/frame
+         range     — attack range from target before firing
+         atkR      — AOE / impact radius on hit
+         dmg       — per-shot damage (heroes auto-1shot robots
+                     for now, but dmg drives FX intensity)
+         fireRate  — ms between shots (lower = faster)
+         maxTgts   — simultaneous targets per volley (multi-beam)
+         autoTarget— hero auto-queues robots without user clicks
+       The 7 heroes are tuned so each has a clear role: tank,
+       sniper, brawler, swarmer, glass-cannon, etc. */
+    var SUPERHERO_UNIVERSES = [
+        { id:'sentinel',   name:'Steel Sentinel',     icon:'fa-globe',
+          power:'beam',       tag:'S',  archIdx:9,
+          colorA:'#1e40af', colorB:'#dc2626',
+          primary:'#1e40af', cape:'#dc2626', accent:'#fde047', mask:'#0a0a4a',
+          style:'classic',  emblem:'diamond', face:'human',
+          /* Heavily nerfed sniper. Fragile, sluggish, full ONE
+             SECOND beat between every laser shot. */
+          stats:{ hp:55, speed:5, range:260, atkR:12, dmg:8,
+                  fireRate:1000, maxTgts:1, autoTarget:false,
+                  role:'Slow precision laser', flavor:'1s cooldown between targets. Very fragile.' } },
+        { id:'liberty',    name:'Liberty Captain',    icon:'fa-star',
+          power:'shield',     tag:'L',  archIdx:10,
+          colorA:'#1e40af', colorB:'#dc2626',
+          primary:'#1e40af', cape:'#ffffff', accent:'#dc2626', mask:'#0a2a5a',
+          style:'patriot',  emblem:'star', face:'masked',
+          /* Tank. Highest HP, slow, mid-range bouncing shield. */
+          stats:{ hp:220, speed:8, range:160, atkR:30, dmg:18,
+                  fireRate:380, maxTgts:1, autoTarget:false,
+                  role:'Tank / shield-bounce', flavor:'Heavy armor, ricocheting shield.' } },
+        { id:'ironvan',    name:'Iron Vanguard',      icon:'fa-rocket',
+          power:'thunderbolt', tag:'I',  archIdx:0,
+          colorA:'#dc2626', colorB:'#fde047',
+          primary:'#dc2626', cape:'#7c1d1d', accent:'#fde047', mask:'#4a1e1e',
+          style:'armor',    emblem:'arc', face:'helmet',
+          /* Thunderbolt with BLAST RADIUS. Heavy slow brawler —
+             must close the distance before firing. Cruise speed
+             cut hard so he lumbers between AOE strikes. */
+          stats:{ hp:140, speed:3, range:55, atkR:90, dmg:16,
+                  fireRate:1000, maxTgts:1, autoTarget:false,
+                  role:'AOE lightning', flavor:'Slow brawler. Has to get point-blank for short-range AOE strikes.' } },
+        { id:'webcrawl',   name:'Web Crawler',        icon:'fa-bug',
+          power:'webdrag',    tag:'W',  archIdx:2,
+          colorA:'#dc2626', colorB:'#1e3a8a',
+          primary:'#dc2626', cape:'#1e3a8a', accent:'#0a0a0a', mask:'#7c1d1d',
+          style:'agile',    emblem:'web', face:'spider',
+          /* TWIN-WEB SLINGSHOT. Webs two robots that are far
+             apart and yanks them toward each other — every
+             robot caught between the closing pair dies on the
+             collision line. */
+          stats:{ hp:100, speed:22, range:9999, atkR:90, dmg:12,
+                  fireRate:900, maxTgts:1, autoTarget:false,
+                  role:'Twin-web slingshot', flavor:'Webs two far-apart robots, yanks them together, kills everything between.' } },
+        { id:'ragetitan',  name:'Rage Titan',         icon:'fa-hand-rock-o',
+          power:'melee',      tag:'R',  archIdx:3,
+          colorA:'#16a34a', colorB:'#7e22ce',
+          primary:'#16a34a', cape:'#7e22ce', accent:'#15803d', mask:'#14532d',
+          style:'brute',    emblem:'fist', face:'angry',
+          /* Sword brawler. Charges each robot in turn and slashes
+             them dead in melee. HP further reduced — still tankier
+             than the rest of the roster, but no longer a fortress. */
+          stats:{ hp:800, speed:14, range:38, atkR:18, dmg:40,
+                  fireRate:280, maxTgts:1, autoTarget:false,
+                  role:'Melee sword tank', flavor:'Sturdy. Charges robot to robot, sword-slashes each.' } },
+        { id:'inferno',    name:'Inferno Sage',       icon:'fa-fire',
+          power:'firespray',  tag:'F',  archIdx:4,
+          colorA:'#dc2626', colorB:'#fbbf24',
+          primary:'#dc2626', cape:'#7c2d12', accent:'#fbbf24', mask:'#7c1d1d',
+          style:'mythical', emblem:'flame', face:'masked',
+          /* Mobile fire mage now — flies in toward each focus
+             target until it's inside spray range, then unleashes
+             a long-reach cone of tight-radius fireballs. */
+          stats:{ hp:110, speed:6, range:500, atkR:20, dmg:3,
+                  fireRate:140, maxTgts:1, autoTarget:false,
+                  role:'Mobile firestorm', flavor:'Closes the distance, then sprays long-reach fire on the target.' } },
+        { id:'nightknight',name:'Night Knight',       icon:'fa-moon-o',
+          power:'iceshot',    tag:'B',  archIdx:5,
+          colorA:'#3f3f46', colorB:'#a5f3fc',
+          primary:'#3f3f46', cape:'#0a0a0a', accent:'#a5f3fc', mask:'#18181b',
+          style:'detective',emblem:'bat', face:'bat',
+          /* SIMULTANEOUS ICE STORM. Hits EVERY alive robot at
+             once with a separate ice bolt. Damage scales with
+             distance — close = crushing, far = chip. Movement
+             speed tripled again — now a teleport-fast blur. */
+          stats:{ hp:110, speed:270, range:99999, atkR:20, dmg:30,
+                  fireRate:380, maxTgts:99, autoTarget:false,
+                  role:'Teleport-blur ice storm', flavor:'Hits every robot at once. Tears across the screen.' } }
+    ];
+
+    /* HERO POWER TWEAK — all heroes that were originally melee or
+       aoe now ALSO shoot a projectile so every pick has a ranged
+       attack. We override the power tag at fire time below. */
+    function heroEffectivePower(h){
+        var p = h.power || 'projectile';
+        /* the new power suite (thunderbolt / webdrag / firespray /
+           iceshot / melee) is preserved as-is. Only the legacy
+           'aoe' type still degrades to a projectile. */
+        if (p === 'aoe')   return 'projectile';
+        return p;
+    }
+
+    /* ── HERO TEMPLATES — 6 archetypes per universe ──────────
+       Each universe spawns one of each; templates define the
+       hero's power type + color tint + max HP. */
+    var HERO_POWER_TYPES = ['beam','projectile','shield','melee','aoe','sword'];
+
+    var superheroOn = false;
+    var superheroIdx = 0;
+    var superheroAutoFight = false;
+    var superheroIntensity = 50;   /* 1..100 */
+    var superheroFighters = [];
+    var superheroPowers = [];      /* in-flight attacks */
+    var superheroFX = [];          /* hit sparks, AOE rings, etc. */
+    var superheroWinner = null;
+    var superheroVictoryT = 0;
+    var superheroFocusTarget = null;   /* head of the target queue */
+    var superheroTargetQueue = [];     /* FIFO list of clicked villains */
+    /* VILLAINS — spawn in WAVES; next wave waits for current to clear */
+    var superheroVillains = [];
+    var superheroVillainSpawnTimer = 0;
+    var superheroTargetLocks = [];
+    var superheroWaveNum = 0;
+    var superheroWaveCleanT = 0;   /* countdown after a wipeout to next wave */
+    var superheroWaveActive = false;
+    /* FROZEN STATE — when true, robots hover in place with wing
+       flaps but do NOT move, fire, or attack. They unfreeze the
+       moment EVERY alive robot has been added to the user's queue. */
+    var superheroFrozen = true;
+    /* GAME-STARTED COUNTDOWN — ms remaining after the wave's
+       robots have all reached formation before any hero opens
+       fire. Reset to 900ms each time the formation breaks (new
+       wave, robots still inbound). Heroes hold fire while > 0. */
+    var superheroGameStartT = 900;
+    /* AUTO-MODE continuous dragon stream timer */
+    var superheroAutoSpawnT = 0;
+    /* weather-pin state for the battle (forces blizzard backdrop) */
+    var superheroForcedPin = false;
+    var superheroPrevEventIdx = -1;
+
+    function superheroSel(){ return SUPERHERO_UNIVERSES[superheroIdx]; }
+
+    /* Hero colour palette per archetype + universe — mixes the
+       archetype hue with the universe's primary color so heroes
+       are visually distinct AND clearly faction-coded. */
+    function heroColors(univ, archIdx){
+        var archHues = [
+            { primary:'#dc2626', cape:'#7c1d1d', accent:'#fde047' },  /* power-armor */
+            { primary:'#2563eb', cape:'#1e3a8a', accent:'#fbbf24' },  /* speedster */
+            { primary:'#7c3aed', cape:'#4c1d95', accent:'#f0abfc' },  /* psychic */
+            { primary:'#16a34a', cape:'#14532d', accent:'#bef264' },  /* nature/brute */
+            { primary:'#0ea5e9', cape:'#0c4a6e', accent:'#a5f3fc' },  /* tech */
+            { primary:'#f97316', cape:'#7c2d12', accent:'#fed7aa' }   /* fire/blade */
+        ];
+        var a = archHues[archIdx % archHues.length];
+        return {
+            primary: a.primary,
+            cape:    univ.colorA,
+            accent:  univ.colorB,
+            mask:    a.cape
+        };
+    }
+
+    /* Tallest-building roof y on screen — heroes always hover at
+       least this high (smaller y = higher). Recomputed each call so
+       it stays accurate if buildings change. */
+    function citySkyTopY(){
+        var topY = GROUND * 0.30;   /* default: upper 30% of sky */
+        if (typeof BGBUILDS !== 'undefined' && BGBUILDS){
+            for (var bi=0; bi<BGBUILDS.length; bi++){
+                var rt = GROUND - BGBUILDS[bi].h;
+                if (rt < topY) topY = rt;
+            }
+        }
+        /* heroes hover at least 90-150px above the highest roof so
+           they read as flying WAY above the city */
+        return topY - 100;
+    }
+
+    /* Pick a sky position roughly above a building, but the hero
+       hovers HIGH ABOVE the rooftop (not on it). */
+    function pickHeroRoof(){
+        var topY = citySkyTopY();
+        if (typeof BGBUILDS === 'undefined' || !BGBUILDS || BGBUILDS.length === 0){
+            return { x: rng(W*0.10, W*0.90),
+                     y: topY + rng(-30, 30),
+                     w: 60, building: null };
+        }
+        for (var tries=0; tries<30; tries++){
+            var b = BGBUILDS[Math.floor(Math.random() * BGBUILDS.length)];
+            if (!b) continue;
+            var cx = b.x + b.w * 0.5;
+            if (cx > 40 && cx < W - 40 && b.h > 25){
+                /* y is HIGH in the sky — not on the rooftop. Heroes
+                   patrol the open sky above the skyline. */
+                return {
+                    x: cx + rng(-b.w * 0.3, b.w * 0.3),
+                    y: topY + rng(-40, 20),
+                    w: b.w,
+                    building: b
+                };
+            }
+        }
+        return { x: rng(W*0.15, W*0.85), y: topY + rng(-30, 30), w: 60, building: null };
+    }
+
+    function createSuperhero(univ, archIdx, idx, total){
+        var roof = pickHeroRoof();
+        var x = roof ? roof.x : rng(W*0.10, W*0.90);
+        var y = roof ? roof.y - 16 : GROUND * 0.45;
+        /* universe-level archIdx override — each hero in
+           SUPERHERO_UNIVERSES picks its own archetype so the
+           archetype-specific render (helmet / mask / muscles / etc.)
+           reflects the hero, not the loop index */
+        if (univ && typeof univ.archIdx === 'number') archIdx = univ.archIdx;
+        /* PER-HERO STATS — taken from SUPERHERO_UNIVERSES.stats so
+           each hero has its own HP / range / speed / fire-rate.
+           Difficulty slider scales HP up to give late-game some
+           durability without erasing the per-hero tuning. */
+        var st = (univ && univ.stats) ? univ.stats : null;
+        var baseHp = st ? st.hp : 120;
+        var hp = baseHp + Math.round(superheroIntensity * 0.4);
+        var pwr = HERO_POWER_TYPES[archIdx % HERO_POWER_TYPES.length];
+        var cols = heroColors(univ, archIdx);
+        return {
+            univ: univ.id,
+            tag: univ.tag,
+            archIdx: archIdx,
+            power: pwr,
+            /* per-hero combat stats (cloned so per-hero tweaks at
+               runtime don't bleed into the template) */
+            stats: st ? {
+                hp: hp, speed: st.speed, range: st.range,
+                atkR: st.atkR, dmg: st.dmg,
+                fireRate: st.fireRate, maxTgts: st.maxTgts,
+                autoTarget: !!st.autoTarget
+            } : null,
+            x: x, y: y, vx: 0, vy: 0,
+            face: rng(0,1) < 0.5 ? 1 : -1,
+            hp: hp, maxHp: hp,
+            cooldown: st ? st.fireRate : rng(600, 1500),
+            phase: 'patrol',
+            phaseT: 0,
+            target: null,
+            cols: cols,
+            anim: 0,
+            walkT: rng(0, Math.PI*2),
+            hurtT: 0,
+            attackT: 0,
+            flightT: 0,
+            cape: rng(0, Math.PI*2),
+            alive: true,
+            name: 'Hero-' + (idx+1),
+            /* ── flying / building movement ── */
+            mode: 'landed',           /* 'landed' | 'flying' */
+            roof: roof,               /* current/last rooftop */
+            landT: rng(800, 1800),    /* idle time before takeoff */
+            takeoffT: 0,
+            arcStartX: x, arcStartY: y,
+            arcEndX: x,   arcEndY: y,
+            arcDur: 1, arcT: 0,
+            arcApex: y - 40,
+            trailJets: []
+        };
+    }
+
+    function startSuperhero(){
+        if (superheroOn) return;
+        /* mutual exclusion — kill parade / rebuild / abduction first */
+        if (typeof paradeOn !== 'undefined' && paradeOn) stopParade();
+        if (typeof reconstructOn !== 'undefined' && reconstructOn) stopReconstruction();
+        if (typeof abductionOn !== 'undefined' && abductionOn && typeof stopAbduction === 'function') stopAbduction();
+        if (typeof finalizeReconstruction === 'function') finalizeReconstruction();
+        if (typeof autoAttackOn !== 'undefined') autoAttackOn = false;
+        if (typeof autoDefenceOn !== 'undefined') autoDefenceOn = false;
+
+        superheroOn = true;
+        superheroFighters.length = 0;
+        superheroPowers.length = 0;
+        superheroFX.length = 0;
+        superheroWinner = null;
+        superheroVictoryT = 0;
+        superheroFocusTarget = null;
+        /* reset the "game started" countdown so no hero fires
+           until the first wave forms up */
+        superheroGameStartT = 900;
+
+        /* PIN WEATHER to blizzard for the duration of the battle.
+           Records the previous event so stopSuperhero can restore. */
+        superheroPrevEventIdx = (typeof eventIndex !== 'undefined') ? eventIndex : -1;
+        if (typeof EVENTS !== 'undefined' && EVENTS && typeof setEvent === 'function'){
+            var bzIdx = -1;
+            for (var ei=0; ei<EVENTS.length; ei++){
+                if (EVENTS[ei].type === 'blizzard'){ bzIdx = ei; break; }
+            }
+            if (bzIdx >= 0){
+                setEvent(bzIdx);
+                if (typeof weatherPinned !== 'undefined' && !weatherPinned){
+                    weatherPinned = true;
+                    superheroForcedPin = true;
+                }
+            }
+        }
+
+        /* spawn the SINGLE selected hero in the center sky */
+        var univ = superheroSel();
+        var soloHero = createSuperhero(univ, 0, 0, 1);
+        soloHero.solo = true;
+        soloHero.heroTpl = univ;
+        soloHero.power = univ.power;
+        soloHero.x = W * 0.5;
+        soloHero.y = GROUND * 0.30;
+        if (soloHero.roof){
+            soloHero.roof.x = W * 0.5;
+            soloHero.roof.y = GROUND * 0.30;
+        }
+        superheroFighters.push(soloHero);
+        /* wave system handles all spawning — wave 1 spawns FROZEN,
+           waiting for the user to mark every robot. Until then the
+           dragons hover with wing flaps but don't move or attack. */
+        superheroVillains.length = 0;
+        superheroVillainSpawnTimer = 0;
+        superheroWaveActive = false;
+        superheroWaveCleanT = 0;
+        superheroWaveNum = 0;
+        superheroFrozen = true;
+        /* crosshair cursor is ALWAYS on during a superhero battle —
+           the user can target villains at any time. */
+        if (canvas && canvas.style){
+            canvas.style.cursor = 'crosshair';
+        }
+    }
+
+    function stopSuperhero(){
+        var was = superheroOn;
+        superheroOn = false;
+        superheroFighters.length = 0;
+        superheroVillains.length = 0;
+        superheroPowers.length = 0;
+        superheroFX.length = 0;
+        superheroTargetLocks.length = 0;
+        superheroWinner = null;
+        superheroVictoryT = 0;
+        superheroFocusTarget = null;
+        superheroTargetQueue.length = 0;
+        superheroVillainSpawnTimer = 0;
+        superheroWaveActive = false;
+        superheroWaveCleanT = 0;
+        superheroWaveNum = 0;
+        superheroFrozen = true;
+        /* UNPIN blizzard weather if WE were the one that pinned it */
+        if (was && superheroForcedPin && typeof weatherPinned !== 'undefined'){
+            weatherPinned = false;
+            superheroForcedPin = false;
+        }
+        superheroPrevEventIdx = -1;
+        if (was && canvas && canvas.style && canvas.style.cursor === 'crosshair'){
+            canvas.style.cursor = '';
+        }
+        if (was && typeof document !== 'undefined'){
+            var sw = document.getElementById('superheroBtn');
+            if (sw) sw.classList.remove('active');
+        }
+        /* AUTO-TRIGGER reconstruction so the city repairs itself
+           after the battle — matches attack/defence/parade behavior */
+        if (was && typeof startReconstruction === 'function'){
+            try { startReconstruction(); } catch(_re){}
+        }
+    }
+
+    /* ── DRAGON-BOT TEMPLATES — each spits a different element ──
+       Every dragon has its own elemental breath (fire / lightning /
+       water / ice / acid / plasma / earth) with unique projectile
+       rendering and impact FX. */
+    var VILLAIN_TEMPLATES = [
+        { id:'pyro',     element:'fire',        primary:'#5a1a0a',
+          accent:'#ff5020', mask:'#1a0000', tag:'F' },
+        { id:'volt',     element:'electricity', primary:'#1e3066',
+          accent:'#80c0ff', mask:'#000c1a', tag:'V' },
+        { id:'aqua',     element:'water',       primary:'#0c3a4a',
+          accent:'#40b0e0', mask:'#001020', tag:'A' },
+        { id:'cryo',     element:'ice',         primary:'#1a4060',
+          accent:'#a0e0ff', mask:'#000c1a', tag:'C' },
+        { id:'toxic',    element:'acid',        primary:'#1a3a14',
+          accent:'#80ff20', mask:'#001000', tag:'T' },
+        { id:'plasma',   element:'plasma',      primary:'#2a1040',
+          accent:'#e040ff', mask:'#100020', tag:'P' },
+        { id:'inferno',  element:'magma',       primary:'#5a2010',
+          accent:'#ffaa20', mask:'#1a0500', tag:'I' }
+    ];
+
+    function createVillain(idx, total){
+        var vt = VILLAIN_TEMPLATES[Math.floor(Math.random() * VILLAIN_TEMPLATES.length)];
+        /* enter from a random edge in the upper sky */
+        var fromSide = (Math.random() < 0.5);
+        var sx = fromSide ? -50 : W + 50;
+        var sy = rng(GROUND * 0.08, GROUND * 0.35);
+        var hp = 70 + Math.round(superheroIntensity * 0.5);
+        /* AUTO-MODE streaming dragons skip formation entirely:
+           they spawn pre-arrived, fly straight across the screen
+           at a velocity that scales with the difficulty slider,
+           and start attacking the city/hero immediately. */
+        var autoStream = !!superheroAutoFight;
+        /* RANDOM CITYWIDE PLACEMENT — each dragon gets a unique
+           arrival position scattered across the visible area.
+           Tightened from 0.08-0.92 of width to 0.15-0.85 so the
+           dragon body (≈ 100px at S=1.35) never clips off-screen,
+           and Y bumped down so the wing-tips don't poke above
+           the navbar. */
+        var arrX = rng(W * 0.15, W * 0.85);
+        var arrY = rng(GROUND * 0.18, GROUND * 0.55);
+        return {
+            kind: 'villain',
+            tpl: vt,
+            element: vt.element,
+            power: 'projectile',    /* all dragons fire elemental projectiles */
+            x: sx, y: sy,
+            vx: 0, vy: 0,
+            face: fromSide ? 1 : -1,
+            hp: hp, maxHp: hp,
+            cooldown: rng(1200, 2400),
+            phase: 'patrol',
+            phaseT: 0,
+            target: null,
+            anim: 0,
+            walkT: rng(0, Math.PI*2),
+            hurtT: 0,
+            attackT: 0,
+            flightT: rng(0, Math.PI*2),
+            cape: rng(0, Math.PI*2),
+            alive: true,
+            mode: 'flying',
+            roof: null,
+            landT: 0,
+            arcStartX: sx, arcStartY: sy,
+            arcEndX: sx,   arcEndY: sy,
+            arcDur: 1, arcT: 0,
+            arcApex: sy - 40,
+            trailJets: [],
+            cols: {
+                primary: vt.primary,
+                cape:    vt.mask,
+                accent:  vt.accent,
+                mask:    vt.mask
+            },
+            tag: vt.tag,
+            archIdx: 0,
+            /* CENTRAL ARRIVAL — assigned formation position. Dragon
+               flies here from the spawn edge and waits frozen until
+               the player marks every robot. After unfreeze, this
+               also seeds the perch wander system. */
+            arrivalX: arrX,
+            arrivalY: arrY,
+            arrived: autoStream,
+            autoStream: autoStream,
+            /* sky patrol (used only after unfreeze) */
+            perchX: arrX,
+            perchY: arrY,
+            perchT: rng(2000, 5000)
+        };
+    }
+
+    function pickHeroTarget(self){
+        /* HEROES only attack when the user has DESIGNATED a target.
+           Without a click-focused villain, heroes float idle. */
+        if (superheroFocusTarget && superheroFocusTarget.alive){
+            return superheroFocusTarget;
+        }
+        return null;
+    }
+
+    /* Synthetic "city" target — robots fire at this to bombard
+       buildings / cars / pedestrians. Coordinates are picked at
+       random along the street, hit detection just creates collateral
+       FX where the shell lands. */
+    function makeCityTarget(){
+        return {
+            x: rng(W*0.08, W*0.92),
+            y: GROUND - rng(0, 30),
+            alive: true,
+            kind: 'city',
+            hp: 9999,
+            isCity: true
+        };
+    }
+
+    function pickVillainTarget(self){
+        /* Once unfrozen, dragons attack BOTH heroes and the city.
+           60% city bombardment, 40% hero strafe. */
+        if (Math.random() < 0.40){
+            var best = null, bestD = Infinity;
+            for (var i=0; i<superheroFighters.length; i++){
+                var hr = superheroFighters[i];
+                if (!hr.alive) continue;
+                var dx = hr.x - self.x, dy = hr.y - self.y;
+                var d = dx*dx + dy*dy;
+                if (d < bestD){ bestD = d; best = hr; }
+            }
+            if (best) return best;
+        }
+        return makeCityTarget();
+    }
+
+    function fireHeroPower(h, target){
+        if (!target || !target.alive) return;
+        var dx = target.x - h.x, dy = target.y - h.y;
+        var dist = Math.sqrt(dx*dx + dy*dy) || 1;
+        var ang = Math.atan2(dy, dx);
+        h.face = (dx >= 0) ? 1 : -1;
+        /* DRAGON MUZZLE FLASH — when a villain fires, spawn a heavy
+           element-colored burst at the jaw with sparks, plus give
+           the dragon a recoil kick. */
+        if (h.kind === 'villain'){
+            var elem = h.element || 'fire';
+            var col = ELEMENT_COLORS[elem] || '#ff5020';
+            var hue = ELEMENT_HUES[elem] || 20;
+            /* jaw position — roughly +20*S, -12*S in local space;
+               use ~40 absolute */
+            var jx = h.x + h.face * 26;
+            var jy = h.y - 18;
+            /* element-colored flash */
+            superheroFX.push({ kind:'flash', x:jx, y:jy, age:0, max:280, r:18 });
+            /* 12 muzzle sparks shooting forward */
+            for (var ms=0; ms<12; ms++){
+                var msa = ang + rng(-0.4, 0.4);
+                var msSpd = rng(2.0, 5.0);
+                superheroFX.push({
+                    kind:'deathSpark',
+                    x: jx, y: jy,
+                    vx: Math.cos(msa) * msSpd,
+                    vy: Math.sin(msa) * msSpd,
+                    age:0, max: rng(300, 600),
+                    hue: hue + rng(-10, 10)
+                });
+            }
+            /* element-tinted ring at muzzle */
+            superheroFX.push({
+                kind:'impactRing', x:jx, y:jy, age:0, max:400,
+                hue:hue, col:col, r:6, maxR:30
+            });
+            /* recoil — small upward + backward kick */
+            h.vx -= h.face * 0.6;
+            h.vy -= 0.4;
+        }
+        /* heroes always shoot — even melee/aoe picks fire a
+           projectile so every selectable hero has a ranged attack */
+        var effPower = (h.kind === 'villain') ? h.power : heroEffectivePower(h);
+        var p = {
+            kind: effPower,
+            element: h.element || null,    /* villain elemental tag */
+            x: h.x, y: h.y - 12, sx: h.x, sy: h.y - 12,
+            tx: target.x, ty: target.y - 8,
+            vx: 0, vy: 0,
+            angle: ang,
+            owner: h,
+            target: target,
+            age: 0, max: 800,
+            cols: h.cols,
+            sparks: [],
+            arcs: []
+        };
+        if (effPower === 'beam'){
+            p.max = 360;     /* instant beam */
+            p.life = 360;
+        } else if (effPower === 'projectile'){
+            /* Villain dragons fire harder, faster, and longer-lived
+               projectiles so they reliably reach the ground from
+               their high-sky perch. Heroes use snappier values. */
+            var isVillFire = h.kind === 'villain';
+            var spd = isVillFire ? 7.5 : 7.0;
+            p.vx = Math.cos(ang) * spd;
+            p.vy = Math.sin(ang) * spd + (isVillFire ? 1.5 : 0);
+            p.max = isVillFire ? 6000 : 1800;
+            p.gravity = isVillFire ? 0.18 : 0;
+        } else if (effPower === 'shield'){
+            /* Bouncing shield — very fast, very long-lived since it
+               can chain through multiple villains */
+            var sspd = 11.0;
+            p.vx = Math.cos(ang) * sspd;
+            p.vy = Math.sin(ang) * sspd;
+            p.max = 9000;       /* plenty of time to clear the queue */
+            p.spin = 0;
+            p.returning = false;
+            p.alreadyHit = [];  /* track hit list for chained bounces */
+        } else if (h.power === 'melee'){
+            /* hero dashes toward target — no projectile, just a slash arc on hit */
+            h.phase = 'charge';
+            h.phaseT = 0;
+            h.chargeTarget = target;
+            return;
+        } else if (h.power === 'aoe'){
+            p.x = h.x;
+            p.y = h.y - 10;
+            p.r = 4;
+            p.max = 700;
+            p.kind = 'aoe';
+        } else if (h.power === 'sword'){
+            var sspd2 = 6.5;
+            p.vx = Math.cos(ang) * sspd2;
+            p.vy = Math.sin(ang) * sspd2;
+            p.max = 1100;
+            p.spin = 0;
+        } else if (effPower === 'thunderbolt'){
+            /* Iron Vanguard — instant lightning to target. On
+               impact it AOE-kills every robot inside h.stats.atkR
+               around the target. Spawned as a one-shot beam. */
+            p.kind = 'thunderbolt';
+            p.max = 420;
+            p.blastR = (h.stats && h.stats.atkR) ? h.stats.atkR : 90;
+            /* pre-compute jagged segments for the lightning line */
+            p.segs = [];
+            var segN = 8;
+            for (var li=0; li<=segN; li++){
+                var t = li / segN;
+                var mx = p.sx + (p.tx - p.sx) * t;
+                var my = p.sy + (p.ty - p.sy) * t;
+                if (li > 0 && li < segN){
+                    mx += rng(-12, 12);
+                    my += rng(-12, 12);
+                }
+                p.segs.push({ x: mx, y: my });
+            }
+        } else if (effPower === 'webdrag'){
+            /* Web Crawler — web latches the focus, then slings
+               it into the nearest robots, killing each on
+               collision. The hit chain is built right here from
+               the live villain list. */
+            /* SINGLE-TARGET WEB PULL.
+               One robot at a time: web latches the focus,
+               yanks it from its position to a point right in
+               front of Web Crawler. Every robot caught in the
+               narrow corridor between hero and the moving
+               target dies on the way. */
+            p.kind = 'webdrag';
+            p.max = 1400;
+            p.endA = target;
+            p.endAStart = { x: target.x, y: target.y };
+            /* pull target to a point just below the hero — close
+               enough to look like she yanked it to her web */
+            p.pullEndX = h.x + (target.x < h.x ? -28 : 28);
+            p.pullEndY = h.y;
+            p.pullDur = 700;
+            p.pullT = 0;
+            p.victimsDealt = {};
+            /* mark target so the villain AI doesn't fight the
+               override movement during the pull */
+            target.webPulled = true;
+            p.latched = true;
+            p.x = target.x;
+            p.y = target.y - 12;
+            p.vx = 0; p.vy = 0;
+        } else if (effPower === 'firespray'){
+            /* Inferno Sage — wide cone of fire emitters. Multiple
+               small fireballs span a 90° arc toward the target.
+               Each fireball has long range and big AOE. */
+            p.kind = 'firespray';
+            p.max = 1400;
+            p.gravity = 0;
+            /* fan out into 9 sub-projectiles so all 9 ride along
+               in superheroPowers. Speed + lifetime are now MUCH
+               higher so the spray reaches across the map, but
+               each fireball's per-impact blast radius is tighter
+               so it only clips robots it grazes. */
+            var fanN = 9;
+            var fanArc = Math.PI * 0.5;     /* 90° spread */
+            var fSpd = 9.0;
+            for (var fi=0; fi<fanN; fi++){
+                var fa = ang - fanArc/2 + (fi/(fanN-1)) * fanArc;
+                var fp = {
+                    kind: 'firespray',
+                    x: h.x, y: h.y - 6,
+                    vx: Math.cos(fa) * fSpd,
+                    vy: Math.sin(fa) * fSpd,
+                    angle: fa,
+                    owner: h, target: null,
+                    age: 0, max: 1300,
+                    cols: h.cols,
+                    blastR: (h.stats && h.stats.atkR) ? h.stats.atkR : 20,
+                    sparkles: []
+                };
+                superheroPowers.push(fp);
+            }
+            return;     /* skip the default push at the end */
+        } else if (effPower === 'iceshot'){
+            /* Night Knight — ice projectile. Super-fast bolt
+               with long lifespan so it can cross the whole
+               battlefield instantly. On hit, target freezes and
+               the knight zips in for the finishing slash.
+               DAMAGE FALLOFF — closer targets take massive
+               damage, far ones only a chip. */
+            p.kind = 'iceshot';
+            var iSpd = 22.0;
+            p.vx = Math.cos(ang) * iSpd;
+            p.vy = Math.sin(ang) * iSpd;
+            p.max = 6000;
+            p.gravity = 0;
+            var iDx = target.x - h.x, iDy = target.y - h.y;
+            var iDist = Math.sqrt(iDx*iDx + iDy*iDy);
+            /* Close-range brawler — point-blank ice bolts hit hard
+               but not lethal; steep falloff keeps the Knight from
+               sniping across the map. (Halved from previous values.)
+               0px → 80, 200px → 58, 500px → 25, 700+px → 2 */
+            p.iceDmg = Math.max(2, Math.round(80 - iDist * 0.11));
+        }
+        superheroPowers.push(p);
+    }
+
+    /* damageHero works for both heroes AND villains — same hit/death
+       FX, just different array membership */
+    /* Ground impact when a dragon shell hits the street — REAL
+       persistent damage to buildings/cars/peds via the engine's
+       existing destruction helpers. Buildings break apart with
+       rebar + fires, cars become burning wrecks, peds vanish. */
+    function spawnCityExplosion(cx, cy, element){
+        var BLAST_R = 75;
+        element = element || 'fire';
+        /* ── ENGINE-LEVEL DAMAGE — uses the city's own shred + flatten
+           helpers that the real missile attack system uses, so the
+           destruction is PERMANENT (until reconstruction runs): cars
+           become burning wreckage, peds get blown away, buildings
+           crack open with rebar exposed and start fires. */
+        try {
+            if (typeof _shredInRadius === 'function'){
+                _shredInRadius(cx, cy, BLAST_R, { fire: true });
+            }
+            /* if the impact is high enough to hit a building, break it */
+            if (typeof _flattenBuilding === 'function' && cy < GROUND - 10){
+                _flattenBuilding(cx, cy, BLAST_R);
+            }
+            /* even ground-level impacts spawn building damage if there
+               IS a building above the impact point — try a flatten at
+               the building's roof level */
+            if (typeof _flattenBuilding === 'function' && cy >= GROUND - 10
+                && typeof BGBUILDS !== 'undefined' && BGBUILDS){
+                for (var bi=0; bi<BGBUILDS.length; bi++){
+                    var bb = BGBUILDS[bi];
+                    if (cx > bb.x - 8 && cx < bb.x + bb.w + 8 && bb.h > 30){
+                        var roofY = GROUND - bb.h + rng(8, Math.min(40, bb.h*0.4));
+                        _flattenBuilding(bb.x + bb.w*0.5, roofY, BLAST_R * 0.85);
+                        break;
+                    }
+                }
+            }
+        } catch(_dErr){}
+        /* PERSISTENT FIRE FIELD on the ground at impact site */
+        if (typeof fireFields !== 'undefined' && fireFields){
+            for (var ff=0; ff<3; ff++){
+                fireFields.push({
+                    x: cx + rng(-BLAST_R*0.5, BLAST_R*0.5),
+                    y: GROUND - rng(0, 6),
+                    scale: rng(0.7, 1.3),
+                    life: 0,
+                    maxLife: rng(6000, 10000),
+                    phase: rng(0, 1000)
+                });
+            }
+        }
+        /* PERSISTENT SMOKE PLUMES rising from the wreckage */
+        if (typeof smokePlumes !== 'undefined' && smokePlumes){
+            for (var sm=0; sm<4; sm++){
+                smokePlumes.push({
+                    x: cx + rng(-BLAST_R*0.3, BLAST_R*0.3),
+                    y: cy + rng(-10, 10),
+                    r: rng(20, 40),
+                    vy: rng(0.4, 1.0),
+                    life: 0,
+                    maxLife: rng(5000, 9000),
+                    op: rng(0.45, 0.75)
+                });
+            }
+        }
+        /* the engine's standard fire bloom + shock rings + flash */
+        if (typeof explosions !== 'undefined' && explosions){
+            explosions.push({ x:cx, y:cy, r:0, maxR:65, life:0, maxLife:520, kind:'fire' });
+            explosions.push({ x:cx, y:cy, r:0, maxR:120, life:0, maxLife:600, kind:'shock' });
+            explosions.push({ x:cx, y:cy, r:0, maxR:36, life:0, maxLife:240, kind:'flash' });
+        }
+        if (typeof debrisParts !== 'undefined' && debrisParts){
+            for (var dz=0; dz<26; dz++){
+                var dza = Math.random() * Math.PI*2;
+                debrisParts.push({
+                    x:cx, y:cy,
+                    vx: Math.cos(dza) * rng(2.5, 7.5),
+                    vy: Math.sin(dza) * rng(2.5, 6) - rng(1, 5),
+                    rot: rng(0, Math.PI*2),
+                    spin: rng(-0.4, 0.4),
+                    size: rng(1.5, 4.5),
+                    shade: rngI(0, 4),
+                    life: 0, maxLife: rng(700, 1500)
+                });
+            }
+        }
+        if (typeof screenFlash !== 'undefined'){
+            screenFlash = Math.max(screenFlash, 0.45);
+        }
+        /* superhero FX layer — orange embers + rising smoke (additive
+           on top of the engine's destruction so the dragons feel
+           extra punchy) */
+        superheroFX.push({ kind:'cityRing', x:cx, y:cy, age:0, max:900 });
+        /* central fireball */
+        for (var ce=0; ce<16; ce++){
+            var ca = ce/16 * Math.PI*2;
+            superheroFX.push({
+                kind:'cityEmber',
+                x: cx, y: cy,
+                vx: Math.cos(ca) * rng(2.0, 4.5),
+                vy: Math.sin(ca) * rng(2.0, 4.5) - rng(1.0, 3.0),
+                age:0, max: rng(700, 1400),
+                hue: 20 + rng(0, 40)
+            });
+        }
+        /* rising smoke plume */
+        for (var cs=0; cs<6; cs++){
+            superheroFX.push({
+                kind:'citySmoke',
+                x: cx + rng(-8, 8), y: cy - rng(0, 4),
+                vx: rng(-0.3, 0.3), vy: -rng(0.4, 1.0),
+                age:0, max: rng(1200, 2000),
+                r: rng(6, 12)
+            });
+        }
+        /* debris chunks */
+        for (var cd=0; cd<8; cd++){
+            superheroFX.push({
+                kind:'cityDebris',
+                x: cx, y: cy,
+                vx: rng(-3.0, 3.0), vy: rng(-4.5, -1.0),
+                age:0, max: rng(900, 1500),
+                rot: rng(0, Math.PI*2), rotV: rng(-0.15, 0.15)
+            });
+        }
+        /* white-hot flash */
+        superheroFX.push({ kind:'flash', x:cx, y:cy, age:0, max:200, r:24 });
+    }
+
+    /* Element → hue map for impact effects */
+    var ELEMENT_HUES = {
+        fire: 20, electricity: 210, water: 200, ice: 195,
+        acid: 110, plasma: 300, magma: 30
+    };
+    var ELEMENT_COLORS = {
+        fire:'#ff4020', electricity:'#80c0ff', water:'#40b0e0', ice:'#a0e0ff',
+        acid:'#80ff20', plasma:'#e040ff', magma:'#ffaa20'
+    };
+
+    /* Impact FX when a villain projectile strikes the hero — heavy
+       element-themed burst on the hero's chest. */
+    function spawnHeroImpactFX(hero, ix, iy, element){
+        var hue = ELEMENT_HUES[element] || 30;
+        var col = ELEMENT_COLORS[element] || '#ff8030';
+        /* central explosion flash */
+        superheroFX.push({ kind:'flash', x:ix, y:iy, age:0, max:280, r:22 });
+        /* element-tinted ring */
+        superheroFX.push({
+            kind:'impactRing', x:ix, y:iy, age:0, max:600,
+            hue:hue, col:col, r:8, maxR: 60
+        });
+        /* 18 element sparks radial */
+        for (var hi=0; hi<18; hi++){
+            var ha = hi/18 * Math.PI*2 + rng(-0.2, 0.2);
+            superheroFX.push({
+                kind:'deathSpark',
+                x: ix, y: iy,
+                vx: Math.cos(ha) * rng(2.5, 5.0),
+                vy: Math.sin(ha) * rng(2.5, 5.0),
+                age:0, max: rng(500, 900),
+                hue: hue + rng(-15, 15)
+            });
+        }
+        /* element-specific lingering effect */
+        for (var li=0; li<6; li++){
+            superheroFX.push({
+                kind:'elemDrip',
+                x: ix + rng(-6, 6), y: iy + rng(-6, 6),
+                vx: rng(-0.6, 0.6), vy: rng(-1.4, -0.2),
+                age:0, max: rng(700, 1200),
+                col: col
+            });
+        }
+    }
+
+    /* HERO DAMAGE — always one-shot a robot regardless of
+       difficulty. Difficulty governs how MANY robots spawn in a
+       wave + how aggressive they are once unfrozen, not whether
+       they survive a hit. */
+    function heroDmg(base){
+        return 9999;
+    }
+
+    function damageHero(h, amount, srcX, srcY){
+        if (!h || !h.alive) return;
+        h.hp -= amount;
+        h.hurtT = 220;
+        /* hit sparks */
+        for (var sk=0; sk<10; sk++){
+            var sa = sk/10 * Math.PI*2 + rng(-0.15,0.15);
+            superheroFX.push({
+                kind:'spark',
+                x: h.x + rng(-4, 4),
+                y: h.y - 12 + rng(-4, 4),
+                vx: Math.cos(sa) * rng(1.5, 3.5),
+                vy: Math.sin(sa) * rng(1.5, 3.5),
+                age:0, max: rng(400, 800),
+                hue: rng(20, 60)
+            });
+        }
+        /* tiny warm impact flash — small, not a screen-filling square */
+        superheroFX.push({
+            kind:'flash', x:h.x, y:h.y - 12, age:0, max:160, r:6
+        });
+        if (h.hp <= 0){
+            h.hp = 0;
+            h.alive = false;
+            h.phase = 'dead';
+            h.phaseT = 0;
+            spawnDustDeath(h);
+        }
+    }
+
+    /* ── DUST-DISSOLUTION DEATH ──
+       Replaces the old "fade-out body + white flash" with a particle
+       disintegration: dozens of dust motes sampled from a body-shaped
+       silhouette drift upward and outward, tumbling debris chunks
+       arc to the ground, a warm ash ring pulses, and a soft ground
+       puff settles. Uses the entity's own costume colors so each
+       hero/villain dissolves in a way that still feels like THEM
+       crumbling away — never a flat white rectangle. */
+    function spawnDustDeath(h){
+        var cols = h.cols || {};
+        var bodyCol = cols.primary || cols.cape || '#7a6450';
+        var accent  = cols.accent  || cols.cape || '#d6a36b';
+        /* approximate body silhouette: head (top ellipse) + torso (rect) +
+           legs (rect). Sample point distributions matching that shape so
+           the dust visibly takes on the figure's outline as it bursts. */
+        var bw = 16;          /* body half-width */
+        var bh = 34;          /* body half-height */
+        var headR = 7;
+        var cx = h.x;
+        var cy = h.y - 12;
+        var headCy = cy - bh*0.55;
+
+        /* one-frame silhouette flare — a colored ghost of the body that
+           shatters outward. Reads as "the figure broke apart", not a
+           fade. */
+        superheroFX.push({
+            kind:'silhouetteBlast',
+            x:cx, y:cy, age:0, max:260,
+            col: bodyCol, accent: accent,
+            w: bw*2 + 4, h: bh*2 + 6, headR: headR + 2,
+            headCy: headCy - cy
+        });
+
+        /* DUST MOTES — many tiny soft warm particles, sampled from body
+           shape, drifting up and out with slow gravity. */
+        var motes = 140;
+        for (var dm=0; dm<motes; dm++){
+            var inHead = Math.random() < 0.22;
+            var sx, sy;
+            if (inHead){
+                var ha = Math.random() * Math.PI*2;
+                var hr = Math.sqrt(Math.random()) * headR;
+                sx = cx + Math.cos(ha) * hr;
+                sy = headCy + Math.sin(ha) * hr;
+            } else {
+                sx = cx + (Math.random()*2 - 1) * bw;
+                sy = cy + (Math.random()*2 - 1) * bh*0.85;
+            }
+            /* outward velocity from body center, biased upward so dust
+               rises like ash */
+            var ddx = sx - cx;
+            var ddy = sy - cy;
+            var dlen = Math.sqrt(ddx*ddx + ddy*ddy) || 1;
+            var spd = rng(0.4, 2.6);
+            /* hue palette: warm browns/ambers/tans — never pure white */
+            var hueP = rng(20, 45);
+            var satP = rng(15, 55);
+            var litP = rng(55, 80);
+            superheroFX.push({
+                kind:'dustMote',
+                x: sx, y: sy,
+                vx: (ddx/dlen) * spd + rng(-0.3, 0.3),
+                vy: (ddy/dlen) * spd * 0.7 + rng(-1.2, -0.3),  /* upward bias */
+                r:  rng(1.2, 3.2),
+                grow: rng(0.005, 0.020),
+                grav: rng(0.005, 0.025),
+                drag: rng(0.985, 0.995),
+                age: 0, max: rng(900, 1700),
+                hue: hueP, sat: satP, lit: litP
+            });
+        }
+
+        /* SOOT MOTES — darker shadow particles for depth */
+        for (var sm=0; sm<60; sm++){
+            var sma = Math.random() * Math.PI*2;
+            var smr = Math.sqrt(Math.random()) * bw * 0.9;
+            superheroFX.push({
+                kind:'dustMote',
+                x: cx + Math.cos(sma) * smr,
+                y: cy + Math.sin(sma) * smr * 1.1,
+                vx: Math.cos(sma) * rng(0.3, 1.8) + rng(-0.2, 0.2),
+                vy: Math.sin(sma) * rng(0.3, 1.4) - rng(0.4, 1.3),
+                r: rng(1.8, 4.2),
+                grow: rng(0.010, 0.028),
+                grav: rng(0.004, 0.018),
+                drag: rng(0.985, 0.995),
+                age: 0, max: rng(1100, 1900),
+                hue: rng(25, 40), sat: rng(8, 22), lit: rng(28, 42)
+            });
+        }
+
+        /* CHUNKS — tumbling debris that arcs and falls (gives weight). */
+        for (var ck=0; ck<22; ck++){
+            var cka = Math.random() * Math.PI*2;
+            var ckspd = rng(1.5, 4.2);
+            superheroFX.push({
+                kind:'dustChunk',
+                x: cx + rng(-bw*0.6, bw*0.6),
+                y: cy + rng(-bh*0.5, bh*0.4),
+                vx: Math.cos(cka) * ckspd,
+                vy: Math.sin(cka) * ckspd - rng(1.0, 2.4),
+                rot: Math.random() * Math.PI*2,
+                rotV: rng(-0.18, 0.18),
+                sz: rng(1.6, 3.6),
+                col: (Math.random() < 0.55) ? bodyCol : accent,
+                age: 0, max: rng(800, 1500)
+            });
+        }
+
+        /* EMBERS — a few warm sparks for energy contrast */
+        for (var eb=0; eb<10; eb++){
+            var eba = Math.random() * Math.PI*2;
+            superheroFX.push({
+                kind:'dustMote',
+                x: cx + rng(-4,4), y: cy + rng(-4,4),
+                vx: Math.cos(eba) * rng(1.0, 2.5),
+                vy: Math.sin(eba) * rng(1.0, 2.5) - rng(0.3, 1.0),
+                r: rng(0.8, 1.6),
+                grow: -0.005,
+                grav: 0.005,
+                drag: 0.985,
+                age: 0, max: rng(500, 900),
+                hue: rng(18, 35), sat: 95, lit: rng(60, 75)
+            });
+        }
+
+        /* ASH RING — warm dusty expanding ring (replaces the harsh
+           white deathRing). Two slightly offset rings for depth. */
+        superheroFX.push({
+            kind:'ashRing', x:cx, y:cy, age:0, max:1100,
+            maxR: 46, col: 'rgba(210,170,120,'
+        });
+        superheroFX.push({
+            kind:'ashRing', x:cx, y:cy + 4, age:-120, max:1300,
+            maxR: 58, col: 'rgba(150,120,90,'
+        });
+
+        /* GROUND PUFF — settles onto the street under the body. */
+        var puffY = Math.min(GROUND + (H - GROUND) * 0.45, cy + bh + 10);
+        for (var gp=0; gp<5; gp++){
+            superheroFX.push({
+                kind:'dustPuff',
+                x: cx + rng(-10, 10),
+                y: puffY + rng(-2, 2),
+                r0: rng(6, 10),
+                grow: rng(0.025, 0.045),
+                vx: rng(-0.4, 0.4),
+                age: -gp * 80, max: rng(1100, 1700),
+                hue: rng(28, 40), sat: rng(15, 30), lit: rng(55, 70)
+            });
+        }
+    }
+
+    function updateSuperhero(dt){
+        if (!superheroOn) return;
+        var k = dt / 16;
+        var rdH = H - GROUND;
+        var groundY = GROUND + rdH * 0.52;
+        var intMul = 0.5 + (superheroIntensity / 100) * 1.5;   /* attack speed mul */
+
+        /* ── GAME-STARTED GATE ──
+           Manual mode: hero waits until the wave is unfrozen
+           (every robot queued by the player).
+           Auto mode: hero fires the moment there's any alive
+           robot on the field — no wave/frozen gating because
+           dragons are streaming in continuously. */
+        var gameStarted;
+        if (superheroAutoFight){
+            gameStarted = false;
+            for (var gsai=0; gsai<superheroVillains.length; gsai++){
+                if (superheroVillains[gsai].alive){ gameStarted = true; break; }
+            }
+        } else {
+            gameStarted = superheroWaveActive
+                       && !superheroFrozen
+                       && superheroVillains.length > 0;
+        }
+
+        /* update fighters */
+        var alive = 0;
+        var lastAlive = null;
+        for (var i = superheroFighters.length - 1; i >= 0; i--){
+            var h = superheroFighters[i];
+            if (h.alive){
+                alive++;
+                lastAlive = h;
+                h.phaseT += dt;
+                h.walkT += dt * 0.005;
+                h.cape += dt * 0.004;
+                h.flightT += dt * 0.003;
+                if (h.hurtT > 0) h.hurtT -= dt;
+                /* attack cooldown — beam heroes fire MULTI-LASER:
+                   on each tick they emit up to 5 beams at once,
+                   one to each of the next queued villains. Shield
+                   and other powers fire one shot at the focus. */
+                /* ── HOLD FIRE while the wave is still forming up.
+                   Cooldown still ticks down so the hero is ready to
+                   fire the instant the game starts — but no shot
+                   leaves the body until gameStarted flips. */
+                h.cooldown -= dt * intMul;
+                if (h.cooldown <= 0 && h.alive && gameStarted){
+                    /* per-hero stats drive fire rate + multi-target */
+                    var hSt = h.stats || null;
+                    var fireRate = hSt ? hSt.fireRate : 600;
+                    var maxTgts = hSt ? (hSt.maxTgts || 1) : 1;
+                    if (h.power === 'beam' || maxTgts > 1){
+                        /* Multi-target heroes (Sentinel: 5 beams,
+                           Storm Lord: 3 forks, Iron Vanguard: 1 beam)
+                           fire at the FRONT of the queue. Each shot
+                           is an instant kill on robots. */
+                        var beamTargets = [];
+                        for (var qBi=0; qBi<superheroTargetQueue.length && beamTargets.length<maxTgts; qBi++){
+                            var qBt = superheroTargetQueue[qBi];
+                            if (qBt && qBt.alive && beamTargets.indexOf(qBt) === -1){
+                                beamTargets.push(qBt);
+                            }
+                        }
+                        if (beamTargets.length === 0){
+                            /* nothing queued — fall back to single
+                               focus target if any */
+                            var fbT = pickHeroTarget(h);
+                            if (fbT) beamTargets.push(fbT);
+                        }
+                        for (var bbi=0; bbi<beamTargets.length; bbi++){
+                            h.target = beamTargets[bbi];
+                            fireHeroPower(h, beamTargets[bbi]);
+                        }
+                        if (beamTargets.length > 0) h.attackT = 200;
+                        /* multiply by intMul so the wall-clock
+                           cooldown equals fireRate regardless of
+                           the difficulty intensity setting */
+                        h.cooldown = fireRate * intMul;
+                    } else {
+                        var t = pickHeroTarget(h);
+                        if (t){
+                            h.target = t;
+                            fireHeroPower(h, t);
+                            h.attackT = 200;
+                        }
+                        h.cooldown = fireRate;
+                    }
+                }
+                if (h.attackT > 0) h.attackT -= dt;
+
+                if (h.departing){
+                    /* old hero exiting — fly off the screen with a
+                       blazing trail, then despawn */
+                    h.departT += dt;
+                    h.x += h.vx * k;
+                    h.y += h.vy * k;
+                    h.vy -= 0.20 * k;          /* extra lift */
+                    /* dense bright trail */
+                    if (Math.random() < 0.95){
+                        h.trailJets.push({ x:h.x, y:h.y, age:0, max:480 });
+                        if (h.trailJets.length > 30) h.trailJets.shift();
+                    }
+                    if (h.departT > 1400 || h.x < -120 || h.x > W + 120 || h.y < -120){
+                        /* despawn the leaving hero */
+                        superheroFighters.splice(i, 1);
+                    }
+                    /* age its existing trail */
+                    for (var jtL=h.trailJets.length-1; jtL>=0; jtL--){
+                        h.trailJets[jtL].age += dt;
+                        if (h.trailJets[jtL].age > h.trailJets[jtL].max) h.trailJets.splice(jtL, 1);
+                    }
+                    continue;
+                }
+                if (h.entering){
+                    /* new hero entering — fly to center sky with a
+                       dramatic trail; switch to normal patrol once
+                       arrived */
+                    h.enterT += dt;
+                    var cnX = W * 0.5;
+                    var cnY = GROUND * 0.30;
+                    var edx = cnX - h.x;
+                    var edy = cnY - h.y;
+                    var edl = Math.sqrt(edx*edx + edy*edy) || 1;
+                    if (edl < 24){
+                        h.entering = false;
+                        h.vx = 0; h.vy = 0;
+                        h.x = cnX; h.y = cnY;
+                    } else {
+                        /* fast steady glide */
+                        h.vx = h.vx * 0.88 + (edx/edl) * 14 * 0.12;
+                        h.vy = h.vy * 0.88 + (edy/edl) * 10 * 0.12;
+                        h.x += h.vx * k;
+                        h.y += h.vy * k;
+                        h.face = (edx > 0) ? 1 : -1;
+                    }
+                    /* bright entering trail */
+                    if (Math.random() < 0.9){
+                        h.trailJets.push({ x:h.x, y:h.y, age:0, max:420 });
+                        if (h.trailJets.length > 28) h.trailJets.shift();
+                    }
+                    for (var jtE=h.trailJets.length-1; jtE>=0; jtE--){
+                        h.trailJets[jtE].age += dt;
+                        if (h.trailJets[jtE].age > h.trailJets[jtE].max) h.trailJets.splice(jtE, 1);
+                    }
+                    continue;
+                }
+                if (h.phase === 'patrol'){
+                    /* ── ATTACK-ONLY BEHAVIOR ──
+                       Heroes don't wander or hop rooftops anymore.
+                       They hover in place. If the user has designated
+                       a focus villain, they fly toward it; otherwise
+                       they just float at their spawn position.
+                       Inferno Sage has stayPut=true and NEVER chases —
+                       it stays anchored in the center sky and rains
+                       fire from extreme range. */
+                    var stayPut = h.stats && h.stats.stayPut;
+                    if (superheroFocusTarget && superheroFocusTarget.alive && !stayPut){
+                        /* per-hero stats drive both PURSUE speed and
+                           the engagement range. Heroes with long
+                           range hover and snipe; brawlers must close
+                           the distance. */
+                        var pStats = h.stats || null;
+                        var tdx = superheroFocusTarget.x - h.x;
+                        var tdy = (superheroFocusTarget.y) - h.y;
+                        var tdl = Math.sqrt(tdx*tdx + tdy*tdy) || 1;
+                        var rangeR = pStats ? pStats.range : 200;
+                        var inRange = tdl < rangeR;
+                        var apprDes = inRange ? 0.0 : 1.0;
+                        var maxSpd = pStats ? pStats.speed : 10.0;
+                        var pursueSpd = inRange ? 0.0 :
+                            Math.min(maxSpd, 6.0 + tdl * 0.035);
+                        h.vx = h.vx * 0.78 + (tdx/tdl) * pursueSpd * apprDes;
+                        h.vy = h.vy * 0.78 + (tdy/tdl) * pursueSpd * 0.7 * apprDes;
+                        h.face = (tdx > 0) ? 1 : -1;
+                        h.mode = inRange ? 'landed' : 'flying';
+                        h.x += h.vx * k;
+                        h.y += h.vy * k;
+                        /* snap cooldown ONLY on the frame the hero
+                           transitions out-of-range → in-range, so
+                           the very first kill shot lands quickly,
+                           but each subsequent fireRate cooldown is
+                           fully respected (no rapid-fire bug). */
+                        if (inRange && !h.wasInRange && h.cooldown > 80){
+                            h.cooldown = 60;
+                        }
+                        h.wasInRange = inRange;
+                        /* jet trail while flying */
+                        if (!inRange && Math.random() < 0.75){
+                            h.trailJets.push({
+                                x: h.x - h.face * 4,
+                                y: h.y + 2,
+                                age: 0, max: 420
+                            });
+                            if (h.trailJets.length > 24) h.trailJets.shift();
+                        }
+                    } else if (superheroAutoFight){
+                        /* AUTO MODE — no need to wait in the middle;
+                           hero patrols the sky toward a wander point
+                           that re-rolls every few seconds. */
+                        h.mode = 'flying';
+                        if (typeof h.wanderT !== 'number' || h.wanderT <= 0
+                            || typeof h.wanderX !== 'number'){
+                            h.wanderX = rng(W * 0.18, W * 0.82);
+                            h.wanderY = rng(GROUND * 0.18, GROUND * 0.42);
+                            h.wanderT = rng(1800, 3600);
+                        }
+                        h.wanderT -= dt;
+                        var wpdx = h.wanderX - h.x;
+                        var wpdy = h.wanderY - h.y;
+                        var wpdl = Math.sqrt(wpdx*wpdx + wpdy*wpdy) || 1;
+                        var wandSpd = h.stats ? Math.min(h.stats.speed, 14) : 8;
+                        h.vx = h.vx * 0.88 + (wpdx/wpdl) * wandSpd * 0.10;
+                        h.vy = h.vy * 0.88 + (wpdy/wpdl) * wandSpd * 0.08;
+                        h.face = (wpdx > 0) ? 1 : -1;
+                        h.x += h.vx * k;
+                        h.y += h.vy * k;
+                        if (wpdl < 28) h.wanderT = 0;
+                    } else {
+                        /* MANUAL MODE — drifts back to center sky
+                           and hovers there while user marks robots. */
+                        h.mode = 'landed';
+                        h.vx *= 0.90;
+                        h.vy *= 0.90;
+                        var cenX = W * 0.5;
+                        var cenY = GROUND * 0.30;
+                        var bobY = Math.sin(h.flightT * 2.5) * 5;
+                        h.x = h.x * 0.92 + cenX * 0.08;
+                        h.y = h.y * 0.92 + (cenY + bobY) * 0.08;
+                        /* stayPut + has target → snap cooldown */
+                        if (stayPut && superheroFocusTarget && superheroFocusTarget.alive){
+                            h.face = (superheroFocusTarget.x > h.x) ? 1 : -1;
+                            if (h.cooldown > 80) h.cooldown = 60;
+                        }
+                    }
+                    /* age the (unused but legacy) jet-trail array */
+                    for (var jtA=h.trailJets.length-1; jtA>=0; jtA--){
+                        h.trailJets[jtA].age += dt;
+                        if (h.trailJets[jtA].age > h.trailJets[jtA].max) h.trailJets.splice(jtA,1);
+                    }
+                } else if (h.phase === 'charge'){
+                    /* dash at target */
+                    if (h.chargeTarget && h.chargeTarget.alive){
+                        var cdx = h.chargeTarget.x - h.x;
+                        var cdy = h.chargeTarget.y - h.y;
+                        var clen = Math.sqrt(cdx*cdx + cdy*cdy) || 1;
+                        h.vx = (cdx/clen) * 8.5;
+                        h.vy = (cdy/clen) * 8.5;
+                        h.x += h.vx * k;
+                        h.y += h.vy * k;
+                        h.face = (cdx > 0) ? 1 : -1;
+                        /* close enough → slash + damage */
+                        if (clen < 28 || h.phaseT > 500){
+                            if (clen < 36 && h.chargeTarget.alive){
+                                damageHero(h.chargeTarget, heroDmg(18), h.x, h.y);
+                                /* slash arc FX */
+                                superheroFX.push({
+                                    kind:'slash',
+                                    x: h.chargeTarget.x,
+                                    y: h.chargeTarget.y - 12,
+                                    angle: Math.atan2(cdy, cdx),
+                                    age:0, max:300,
+                                    cols: h.cols
+                                });
+                            }
+                            h.phase = 'patrol';
+                            h.phaseT = 0;
+                        }
+                    } else {
+                        h.phase = 'patrol';
+                    }
+                }
+                /* keep on-screen */
+                if (h.x < 30) { h.x = 30; h.vx *= -0.4; }
+                if (h.x > W - 30) { h.x = W - 30; h.vx *= -0.4; }
+            } else if (h.phase === 'dead'){
+                /* corpse fades, then removes */
+                h.phaseT += dt;
+                if (h.phaseT > 1400){
+                    superheroFighters.splice(i, 1);
+                }
+            }
+        }
+
+        /* update powers (projectiles, beams, AOE) */
+        for (var pi = superheroPowers.length - 1; pi >= 0; pi--){
+            var p = superheroPowers[pi];
+            p.age += dt;
+            if (p.kind === 'beam'){
+                /* beam is instantaneous — damage applied once on spawn frame */
+                if (p.age < 50 && p.target && p.target.alive){
+                    damageHero(p.target, heroDmg(14), p.tx, p.ty);
+                }
+                if (p.age > p.max){ superheroPowers.splice(pi, 1); continue; }
+            } else if (p.kind === 'projectile'){
+                /* villain projectiles arc DOWN under gravity so they
+                   reliably reach the city street */
+                if (p.gravity) p.vy += p.gravity * k;
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                var pHit = false;
+                var ownerIsVillain = p.owner && p.owner.kind === 'villain';
+                if (!ownerIsVillain){
+                    /* HERO projectile — hits VILLAINS only */
+                    for (var hi=0; hi<superheroVillains.length; hi++){
+                        var th = superheroVillains[hi];
+                        if (!th.alive) continue;
+                        var hdx = th.x - p.x, hdy = (th.y - 16) - p.y;
+                        if (hdx*hdx + hdy*hdy < 28*28){
+                            damageHero(th, heroDmg(12), p.x, p.y);
+                            superheroPowers.splice(pi, 1);
+                            pHit = true;
+                            break;
+                        }
+                    }
+                    if (pHit) continue;
+                } else {
+                    /* VILLAIN (dragon) projectile — damages heroes
+                       AND the city. */
+                    var vpHit = false;
+                    for (var vphi=0; vphi<superheroFighters.length; vphi++){
+                        var vph = superheroFighters[vphi];
+                        if (!vph.alive) continue;
+                        var vphdx = vph.x - p.x, vphdy = (vph.y - 16) - p.y;
+                        if (vphdx*vphdx + vphdy*vphdy < 36*36){
+                            damageHero(vph, 35, p.x, p.y);
+                            spawnHeroImpactFX(vph, p.x, p.y, p.element);
+                            superheroPowers.splice(pi, 1);
+                            vpHit = true;
+                            break;
+                        }
+                    }
+                    if (vpHit) continue;
+                    if (p.y >= GROUND - 10){
+                        spawnCityExplosion(p.x, GROUND - 5, p.element);
+                        superheroPowers.splice(pi, 1);
+                        continue;
+                    }
+                }
+                if (p.age > p.max || p.x < -20 || p.x > W+20 || p.y < -20 || p.y > H+20){
+                    superheroPowers.splice(pi, 1);
+                }
+            } else if (p.kind === 'shield'){
+                /* ── BOUNCING SHIELD ─────────────────────────────
+                   The shield hits one villain, kills it, then
+                   bounces to the NEXT villain in the user's target
+                   queue. Hits each in click order. When the queue
+                   is empty, returns to owner. */
+                p.spin += 0.9 * k;
+                if (!p.bounceTrail) p.bounceTrail = [];
+                p.bounceTrail.push({ x:p.x, y:p.y, age:0 });
+                if (p.bounceTrail.length > 12) p.bounceTrail.shift();
+                if (!p.returning){
+                    p.x += p.vx * k;
+                    p.y += p.vy * k;
+                    /* check hit against the SPECIFIC bounce target if
+                       set, otherwise any villain */
+                    var hitVillain = null;
+                    for (var hi2=0; hi2<superheroVillains.length; hi2++){
+                        var th2 = superheroVillains[hi2];
+                        if (!th2.alive) continue;
+                        if (p.alreadyHit && p.alreadyHit.indexOf(th2) !== -1) continue;
+                        var sdx = th2.x - p.x, sdy = (th2.y-16) - p.y;
+                        if (sdx*sdx + sdy*sdy < 32*32){
+                            hitVillain = th2;
+                            break;
+                        }
+                    }
+                    if (hitVillain){
+                        damageHero(hitVillain, heroDmg(11), p.x, p.y);
+                        if (!p.alreadyHit) p.alreadyHit = [];
+                        p.alreadyHit.push(hitVillain);
+                        /* pick next queue target — must be alive AND
+                           not already hit by this shield throw */
+                        var nextTgt = null;
+                        for (var qi3=0; qi3<superheroTargetQueue.length; qi3++){
+                            var qt = superheroTargetQueue[qi3];
+                            if (qt && qt.alive && p.alreadyHit.indexOf(qt) === -1){
+                                nextTgt = qt; break;
+                            }
+                        }
+                        /* if no queue target, pick ANY remaining villain
+                           — shield ricochets greedily through the
+                           battlefield as long as there's stuff to hit */
+                        if (!nextTgt){
+                            for (var vqi=0; vqi<superheroVillains.length; vqi++){
+                                var vqt = superheroVillains[vqi];
+                                if (vqt.alive && p.alreadyHit.indexOf(vqt) === -1){
+                                    nextTgt = vqt; break;
+                                }
+                            }
+                        }
+                        if (nextTgt){
+                            /* BOUNCE — redirect toward next target at
+                               higher speed for dramatic ricochet */
+                            var bdx = nextTgt.x - p.x;
+                            var bdy = (nextTgt.y - 16) - p.y;
+                            var blen = Math.sqrt(bdx*bdx + bdy*bdy) || 1;
+                            var bspd = 11.0;
+                            p.vx = (bdx/blen) * bspd;
+                            p.vy = (bdy/blen) * bspd;
+                            /* small bounce burst */
+                            superheroFX.push({
+                                kind:'flash', x:p.x, y:p.y,
+                                age:0, max:240, r:14
+                            });
+                        } else {
+                            /* no more enemies — return to owner */
+                            p.returning = true;
+                        }
+                    }
+                } else {
+                    /* return to owner */
+                    if (p.owner && p.owner.alive){
+                        var rdx = p.owner.x - p.x, rdy = (p.owner.y-12) - p.y;
+                        var rlen = Math.sqrt(rdx*rdx + rdy*rdy) || 1;
+                        p.vx = (rdx/rlen) * 8.0;
+                        p.vy = (rdy/rlen) * 8.0;
+                        p.x += p.vx * k;
+                        p.y += p.vy * k;
+                        if (rlen < 14){ superheroPowers.splice(pi, 1); continue; }
+                    } else {
+                        if (p.age > 2000) { superheroPowers.splice(pi, 1); continue; }
+                    }
+                }
+                if (p.age > p.max){ superheroPowers.splice(pi, 1); }
+            } else if (p.kind === 'aoe'){
+                /* AOE pulse — damages VILLAINS in radius (no friendly fire) */
+                p.r += 0.18 * dt;
+                if (!p.dealt) p.dealt = {};
+                for (var hi3=0; hi3<superheroVillains.length; hi3++){
+                    var th3 = superheroVillains[hi3];
+                    if (!th3.alive || p.dealt[hi3]) continue;
+                    var adx = th3.x - p.x, ady = (th3.y-12) - p.y;
+                    var adist = Math.sqrt(adx*adx + ady*ady);
+                    if (adist < p.r){
+                        damageHero(th3, heroDmg(10), th3.x, th3.y);
+                        p.dealt[hi3] = true;
+                    }
+                }
+                if (p.age > p.max){ superheroPowers.splice(pi, 1); }
+            } else if (p.kind === 'sword'){
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                p.spin += 0.45 * k;
+                /* sword hits VILLAINS only */
+                for (var hi4=0; hi4<superheroVillains.length; hi4++){
+                    var th4 = superheroVillains[hi4];
+                    if (!th4.alive) continue;
+                    var sw_dx = th4.x - p.x, sw_dy = (th4.y-12) - p.y;
+                    if (sw_dx*sw_dx + sw_dy*sw_dy < 20*20){
+                        damageHero(th4, heroDmg(15), p.x, p.y);
+                        superheroPowers.splice(pi, 1);
+                        break;
+                    }
+                }
+                if (p.age > p.max || p.x < -20 || p.x > W+20){
+                    superheroPowers.splice(pi, 1);
+                }
+            } else if (p.kind === 'thunderbolt'){
+                /* Iron Vanguard — instant lightning + blast radius.
+                   On the spawn frame we damage the focus AND
+                   every villain inside p.blastR. */
+                if (p.age < 50){
+                    var tbR = p.blastR || 90;
+                    if (p.target && p.target.alive){
+                        damageHero(p.target, heroDmg(20), p.tx, p.ty);
+                    }
+                    for (var tbi=0; tbi<superheroVillains.length; tbi++){
+                        var tbv = superheroVillains[tbi];
+                        if (!tbv.alive || tbv === p.target) continue;
+                        var tbdx = tbv.x - p.tx, tbdy = tbv.y - p.ty;
+                        if (tbdx*tbdx + tbdy*tbdy < tbR*tbR){
+                            damageHero(tbv, heroDmg(20), tbv.x, tbv.y);
+                            /* secondary arc visual */
+                            superheroFX.push({
+                                kind:'arcZap',
+                                x1: p.tx, y1: p.ty,
+                                x2: tbv.x, y2: tbv.y - 12,
+                                age:0, max:240
+                            });
+                        }
+                    }
+                    /* big blast ring */
+                    superheroFX.push({
+                        kind:'impactRing', x:p.tx, y:p.ty,
+                        age:0, max:520, hue:60, col:'#fde047',
+                        r:6, maxR:tbR
+                    });
+                    /* flash */
+                    superheroFX.push({ kind:'flash', x:p.tx, y:p.ty, age:0, max:260, r:tbR*0.45 });
+                }
+                if (p.age > p.max){ superheroPowers.splice(pi, 1); continue; }
+            } else if (p.kind === 'webdrag'){
+                /* Web Crawler — single-target pull with corridor
+                   sweep. Each frame the target lerps from its
+                   start point toward p.pullEndX/Y. Any robot
+                   within p.corridorW px of the moving line dies.
+                   When the pull completes (or the target reaches
+                   the hero), the target itself is killed. */
+                var endA = p.endA;
+                if (!endA || !endA.alive){
+                    if (endA && endA.webPulled) endA.webPulled = false;
+                    superheroPowers.splice(pi, 1); continue;
+                }
+                p.pullT += dt;
+                var pt = Math.min(1, p.pullT / p.pullDur);
+                /* ease-in so the robot accelerates as it's yanked */
+                var pe = pt * pt;
+                var nx = p.endAStart.x + (p.pullEndX - p.endAStart.x) * pe;
+                var ny = p.endAStart.y + (p.pullEndY - p.endAStart.y) * pe;
+                endA.x = nx;
+                endA.y = ny;
+                endA.vx = 0; endA.vy = 0;
+                /* CORRIDOR SWEEP — every other alive robot whose
+                   distance to the line from owner-hero to the
+                   pulled target is below corridorW dies, once. */
+                var corridorW = (p.owner && p.owner.stats && p.owner.stats.atkR)
+                    ? p.owner.stats.atkR : 60;
+                var ox = p.owner ? p.owner.x : nx;
+                var oy = p.owner ? p.owner.y : ny;
+                var lineDx = nx - ox, lineDy = ny - oy;
+                var lineLen2 = lineDx*lineDx + lineDy*lineDy || 1;
+                for (var wpvi=0; wpvi<superheroVillains.length; wpvi++){
+                    var wpvv = superheroVillains[wpvi];
+                    if (!wpvv.alive || wpvv === endA) continue;
+                    if (p.victimsDealt[wpvi]) continue;
+                    /* projection of robot onto the line segment */
+                    var rxd = wpvv.x - ox, ryd = wpvv.y - oy;
+                    var u = (rxd*lineDx + ryd*lineDy) / lineLen2;
+                    if (u < 0 || u > 1) continue;
+                    var px2 = ox + lineDx * u, py2 = oy + lineDy * u;
+                    var pxd = wpvv.x - px2, pyd = wpvv.y - py2;
+                    if (pxd*pxd + pyd*pyd < corridorW*corridorW){
+                        damageHero(wpvv, heroDmg(50), wpvv.x, wpvv.y);
+                        superheroFX.push({
+                            kind:'impactRing', x:wpvv.x, y:wpvv.y - 12,
+                            age:0, max:340, hue:220, col:'#1e3a8a',
+                            r:4, maxR:30
+                        });
+                        p.victimsDealt[wpvi] = true;
+                    }
+                }
+                /* completed → kill the pulled target */
+                if (pt >= 1){
+                    damageHero(endA, heroDmg(50), endA.x, endA.y);
+                    endA.webPulled = false;
+                    superheroFX.push({
+                        kind:'impactRing', x:endA.x, y:endA.y - 12,
+                        age:0, max:420, hue:220, col:'#1e3a8a',
+                        r:4, maxR:36
+                    });
+                    superheroPowers.splice(pi, 1); continue;
+                }
+                if (p.age > p.max){
+                    endA.webPulled = false;
+                    superheroPowers.splice(pi, 1); continue;
+                }
+            } else if (p.kind === 'firespray'){
+                /* Inferno Sage — fireballs sail outward. Damage
+                   scales sharply with proximity to Inferno: a
+                   point-blank robot is melted in one fireball,
+                   a distant robot only takes chip damage. */
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                if (!p.dealt) p.dealt = {};
+                var fsR = p.blastR || 34;
+                for (var fhi=0; fhi<superheroVillains.length; fhi++){
+                    var fhv = superheroVillains[fhi];
+                    if (!fhv.alive || p.dealt[fhi]) continue;
+                    var fhdx = fhv.x - p.x, fhdy = (fhv.y-12) - p.y;
+                    if (fhdx*fhdx + fhdy*fhdy < fsR*fsR){
+                        /* distance from Inferno to the victim
+                           drives damage (significantly reduced):
+                             0px   → 40
+                             80px  → 31
+                             200px → 16
+                             400+px → 1  (chip) */
+                        var oxv = p.owner ? p.owner.x : p.x;
+                        var oyv = p.owner ? p.owner.y : p.y;
+                        var fodx = fhv.x - oxv, fody = fhv.y - oyv;
+                        var fod = Math.sqrt(fodx*fodx + fody*fody);
+                        var chipDmg = Math.max(1, Math.round(40 - fod * 0.12));
+                        damageHero(fhv, chipDmg, fhv.x, fhv.y);
+                        p.dealt[fhi] = true;
+                    }
+                }
+                if (p.age > p.max || p.x < -40 || p.x > W+40 || p.y > H+40){
+                    superheroPowers.splice(pi, 1); continue;
+                }
+            } else if (p.kind === 'iceshot'){
+                /* Night Knight — ice bolt. Damage scales with
+                   distance the bolt travelled (set at spawn).
+                   Closer targets = massive damage; far targets =
+                   chip damage. Target freezes either way. */
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                var iceHit = false;
+                for (var ihi=0; ihi<superheroVillains.length; ihi++){
+                    var ihv = superheroVillains[ihi];
+                    if (!ihv.alive) continue;
+                    var idx = ihv.x - p.x, idy = (ihv.y-12) - p.y;
+                    if (idx*idx + idy*idy < 24*24){
+                        /* apply scaled damage instead of one-shot */
+                        damageHero(ihv, p.iceDmg || 50, ihv.x, ihv.y);
+                        if (!ihv.alive){ iceHit = true; superheroPowers.splice(pi, 1); break; }
+                        ihv.frozen = true;
+                        ihv.frozenT = 2400;
+                        ihv.vx = 0; ihv.vy = 0;
+                        /* freeze visual cloud */
+                        superheroFX.push({
+                            kind:'impactRing', x:ihv.x, y:ihv.y - 12,
+                            age:0, max:420, hue:190, col:'#a5f3fc',
+                            r:4, maxR:34
+                        });
+                        for (var ifc=0; ifc<10; ifc++){
+                            var ifca = ifc/10 * Math.PI*2;
+                            superheroFX.push({
+                                kind:'spark',
+                                x: ihv.x, y: ihv.y - 12,
+                                vx: Math.cos(ifca) * rng(1.0, 2.5),
+                                vy: Math.sin(ifca) * rng(1.0, 2.5),
+                                age:0, max: rng(500, 900),
+                                hue: 190 + rng(-10, 10)
+                            });
+                        }
+                        /* Knight charges in to finish */
+                        if (p.owner && p.owner.alive){
+                            p.owner.phase = 'charge';
+                            p.owner.phaseT = 0;
+                            p.owner.chargeTarget = ihv;
+                        }
+                        iceHit = true;
+                        superheroPowers.splice(pi, 1);
+                        break;
+                    }
+                }
+                if (iceHit) continue;
+                if (p.age > p.max || p.x < -40 || p.x > W+40 || p.y > H+40){
+                    superheroPowers.splice(pi, 1); continue;
+                }
+            }
+        }
+
+        /* update FX */
+        for (var fi = superheroFX.length - 1; fi >= 0; fi--){
+            var fx = superheroFX[fi];
+            fx.age += dt;
+            if (fx.kind === 'spark' || fx.kind === 'deathSpark'){
+                fx.x += fx.vx * k;
+                fx.y += fx.vy * k;
+                fx.vy += 0.05 * k;
+            }
+            if (fx.age > fx.max){ superheroFX.splice(fi, 1); }
+        }
+
+        /* ── WAVE-BASED SPAWN — next wave waits for current wipeout ──
+           Wave size scales with Difficulty: 3 at 1% → 12 at 100%.
+           After all dragons in a wave are dead, a brief pause, then
+           the next wave deploys. */
+        var aliveCount = 0;
+        for (var avi=0; avi<superheroVillains.length; avi++){
+            if (superheroVillains[avi].alive) aliveCount++;
+        }
+        if (superheroWaveActive && aliveCount === 0){
+            superheroWaveActive = false;
+            superheroWaveCleanT = 2200;
+            /* clear any leftover queue + focus so the next wave
+               starts fresh; the user re-targets the new wave */
+            superheroTargetQueue.length = 0;
+            superheroFocusTarget = null;
+        }
+        if (!superheroWaveActive){
+            superheroWaveCleanT -= dt;
+            if (superheroWaveCleanT <= 0){
+                /* spawn next wave — in manual mode robots start
+                   FROZEN, waiting for the user to mark every one
+                   of them as a target. In AUTO mode the dragons
+                   skip formation entirely and fly straight in
+                   attacking. */
+                var waveSize = Math.max(3, Math.round(3 + (superheroIntensity / 100) * 9));
+                for (var ws=0; ws<waveSize; ws++){
+                    superheroVillains.push(createVillain(ws, waveSize));
+                }
+                superheroWaveNum++;
+                superheroWaveActive = true;
+                superheroFrozen = !superheroAutoFight;
+                /* fresh wave — reset the "game started" countdown
+                   so heroes hold fire until this wave's formation
+                   is fully arrived (manual mode only) */
+                superheroGameStartT = superheroAutoFight ? 0 : 900;
+            }
+        }
+
+        /* ── CONTINUOUS DRAGON STREAM (AUTO MODE) ──
+           In auto mode dragons keep flooding the screen even
+           while a wave is still active. Spawn cadence ramps with
+           the intensity slider — at 1% one new dragon every
+           ~2.6s, at 100% one every ~0.4s. They fly across the
+           screen attacking and never take formation positions. */
+        if (superheroAutoFight){
+            if (typeof superheroAutoSpawnT !== 'number') superheroAutoSpawnT = 0;
+            superheroAutoSpawnT -= dt;
+            if (superheroAutoSpawnT <= 0){
+                var streamCap = Math.round(6 + superheroIntensity * 0.18); /* 7-24 alive cap */
+                var aliveStream = 0;
+                for (var asi=0; asi<superheroVillains.length; asi++){
+                    if (superheroVillains[asi].alive) aliveStream++;
+                }
+                if (aliveStream < streamCap){
+                    superheroVillains.push(createVillain(aliveStream, 1));
+                }
+                /* spawn cadence scales inversely with intensity */
+                var spawnGap = 2600 - superheroIntensity * 22; /* 2600ms → 400ms */
+                superheroAutoSpawnT = Math.max(300, spawnGap);
+            }
+        }
+
+        /* ── AUTO-TARGET (Iron Vanguard OR Auto-Fight mode) ──
+           When auto-fight is enabled, EVERY hero behaves
+           autonomously: the game itself queues every alive robot,
+           so the user just watches the heroes work through the
+           waves. Iron Vanguard's per-hero autoTarget flag triggers
+           the same behaviour even when auto-fight is off. */
+        if (superheroFighters.length > 0){
+            var heroSelf = superheroFighters[0];
+            var autoOnNow = superheroAutoFight ||
+                (heroSelf && heroSelf.stats && heroSelf.stats.autoTarget);
+            if (heroSelf && heroSelf.alive && autoOnNow && superheroVillains.length > 0){
+                /* In AUTO mode dragons stream in already-arrived, so
+                   we skip the formation-arrived gate and just queue
+                   every alive robot every frame. In manual Iron
+                   Vanguard mode we still wait for the formation. */
+                var ready = superheroAutoFight;
+                if (!ready){
+                    var allArrived = superheroWaveActive;
+                    var anyAlive = false;
+                    for (var atci=0; atci<superheroVillains.length; atci++){
+                        var atc = superheroVillains[atci];
+                        if (!atc.alive) continue;
+                        anyAlive = true;
+                        if (!atc.arrived){ allArrived = false; break; }
+                    }
+                    if (anyAlive && allArrived){
+                        if (typeof heroSelf.autoStartT !== 'number'){
+                            heroSelf.autoStartT = 600;
+                        }
+                        if (heroSelf.autoStartT > 0){
+                            heroSelf.autoStartT -= dt;
+                        } else {
+                            ready = true;
+                        }
+                    } else {
+                        heroSelf.autoStartT = 600;
+                    }
+                }
+                if (ready){
+                    for (var atvi=0; atvi<superheroVillains.length; atvi++){
+                        var atv = superheroVillains[atvi];
+                        if (atv.alive && superheroTargetQueue.indexOf(atv) === -1){
+                            superheroTargetQueue.push(atv);
+                        }
+                    }
+                    /* drop dead robots from the queue */
+                    for (var qDi=superheroTargetQueue.length-1; qDi>=0; qDi--){
+                        if (!superheroTargetQueue[qDi] || !superheroTargetQueue[qDi].alive){
+                            superheroTargetQueue.splice(qDi, 1);
+                        }
+                    }
+                    /* unfreeze + advance focus to head of queue */
+                    if (superheroTargetQueue.length > 0){
+                        superheroFrozen = false;
+                        if (!superheroFocusTarget || !superheroFocusTarget.alive){
+                            superheroFocusTarget = superheroTargetQueue[0];
+                        }
+                    }
+                }
+            }
+        }
+
+        /* ── VILLAIN AI ─────────────────────────────────────────── */
+        for (var vi = superheroVillains.length - 1; vi >= 0; vi--){
+            var v = superheroVillains[vi];
+            if (v.alive){
+                v.phaseT += dt;
+                /* flight animation keeps playing even while frozen */
+                v.walkT += dt * 0.005;
+                v.cape += dt * 0.004;
+                v.flightT += dt * 0.003;
+                if (v.hurtT > 0) v.hurtT -= dt;
+                if (superheroFrozen){
+                    /* FROZEN — fly to assigned formation position in
+                       the middle of the screen, then HOLD. No
+                       attacks while frozen. */
+                    if (!v.arrived){
+                        var adx = v.arrivalX - v.x;
+                        var ady = v.arrivalY - v.y;
+                        var adl = Math.sqrt(adx*adx + ady*ady) || 1;
+                        if (adl < 12){
+                            v.arrived = true;
+                            v.vx = 0; v.vy = 0;
+                            v.x = v.arrivalX;
+                            v.y = v.arrivalY;
+                        } else {
+                            /* steady glide into position */
+                            var gSpd = 2.4;
+                            v.vx = v.vx * 0.92 + (adx/adl) * gSpd;
+                            v.vy = v.vy * 0.92 + (ady/adl) * gSpd * 0.7;
+                            v.x += v.vx * k;
+                            v.y += v.vy * k;
+                            v.face = (adx > 0) ? 1 : -1;
+                        }
+                    } else {
+                        /* arrived — hold position with hover bob */
+                        v.vx *= 0.80; v.vy *= 0.80;
+                        v.y = v.arrivalY + Math.sin(v.flightT * 1.8) * 1.5;
+                    }
+                    continue;
+                }
+                /* attack cooldown — ONLY runs when unfrozen */
+                v.cooldown -= dt * intMul;
+                if (v.cooldown <= 0){
+                    var vt = pickVillainTarget(v);
+                    if (vt){
+                        v.target = vt;
+                        fireHeroPower(v, vt);
+                        v.attackT = 200;
+                    }
+                    v.cooldown = rng(1300 / intMul, 2400 / intMul);
+                }
+                if (v.attackT > 0) v.attackT -= dt;
+                /* if Web Crawler has this dragon webbed, skip AI
+                   movement so the power's position override isn't
+                   fought by the patrol code */
+                if (v.webPulled) continue;
+                /* SKY PATROL — drift toward perchX/perchY, retarget
+                   periodically. Dragons end up scattered across the
+                   upper sky. */
+                v.perchT -= dt;
+                if (v.perchT <= 0){
+                    v.perchX = rng(W*0.15, W*0.85);
+                    v.perchY = rng(GROUND*0.18, GROUND*0.40);
+                    v.perchT = rng(2500, 5500);
+                }
+                var pdx = v.perchX - v.x;
+                var pdy = v.perchY - v.y;
+                var pdl = Math.sqrt(pdx*pdx + pdy*pdy) || 1;
+                v.vx = v.vx * 0.97 + (pdx/pdl) * 0.30;
+                v.vy = v.vy * 0.97 + (pdy/pdl) * 0.18;
+                v.face = (pdx > 0) ? 1 : -1;
+                v.x += v.vx * k;
+                v.y += v.vy * k;
+                /* keep dragons in upper-half of canvas (above buildings) */
+                if (v.y > GROUND * 0.50) v.y = GROUND * 0.50;
+                /* gentle gliding undulation */
+                v.y += Math.sin(v.flightT * 1.4) * 0.30;
+                /* clamp so the WHOLE dragon body stays on-screen
+                   — no half-clipped robots hiding at the edge */
+                if (v.x < 60) v.x = 60;
+                if (v.x > W - 60) v.x = W - 60;
+                if (v.y < 60) v.y = 60;
+                if (v.y > GROUND - 30) v.y = GROUND - 30;
+            } else if (v.phase === 'dead'){
+                v.phaseT += dt;
+                if (v.phaseT > 1400){
+                    /* if focused villain dies, clear the focus */
+                    /* advance the target queue — remove this victim
+                       and reset focus to the new head of the queue */
+                    var qi = superheroTargetQueue.indexOf(v);
+                    if (qi !== -1) superheroTargetQueue.splice(qi, 1);
+                    /* prune any other already-dead entries from queue */
+                    for (var qj=superheroTargetQueue.length-1; qj>=0; qj--){
+                        if (!superheroTargetQueue[qj].alive)
+                            superheroTargetQueue.splice(qj, 1);
+                    }
+                    superheroFocusTarget = superheroTargetQueue.length
+                        ? superheroTargetQueue[0]
+                        : null;
+                    superheroVillains.splice(vi, 1);
+                }
+            }
+        }
+
+        /* heroes-vs-heroes victory machinery REMOVED — battle is now
+           continuous defence against villains. No winner state. */
+        superheroWinner = null;
+
+        /* HERO DEATH → RESTART
+           When the hero is killed, the body fades + splices over
+           1.4s. We tick a restart timer that starts the moment a
+           corpse appears in the fighters array and survives even
+           after the corpse is removed. */
+        var anyAliveHero = false;
+        var anyCorpse = false;
+        for (var hLi=0; hLi<superheroFighters.length; hLi++){
+            if (superheroFighters[hLi].alive) anyAliveHero = true;
+            else anyCorpse = true;
+        }
+        if (anyAliveHero){
+            /* hero alive — reset everything */
+            superheroRestartPending = false;
+            superheroRestartT = 0;
+        } else if (anyCorpse || superheroRestartPending){
+            /* dead corpse present OR we already started ticking */
+            superheroRestartPending = true;
+            superheroRestartT += dt;
+            if (superheroRestartT > 1600){
+                superheroRestartT = 0;
+                superheroRestartPending = false;
+                try {
+                    /* AUTO-CYCLE — in auto mode each fallen hero
+                       is replaced by the NEXT one in the universe
+                       list. The waves keep coming, so the next
+                       hero picks up where the last left off. */
+                    if (superheroAutoFight){
+                        var nN = SUPERHERO_UNIVERSES.length;
+                        superheroIdx = (superheroIdx + 1) % nN;
+                    }
+                    stopSuperhero();
+                    startSuperhero();
+                } catch(_rErr){}
+            }
+        }
+    }
+    var superheroRestartT = 0;
+    var superheroRestartPending = false;
+
+    /* ── HERO RENDERING — large, fully-detailed comic-book sprite
+       with archetype-specific accents (helmet visor / speedster
+       lightning / psychic aura / brute muscles / tech visor / fire
+       flames). Each hero has multi-layer shading, flowing cape,
+       armored boots, gauntlets, chest insignia, glowing eyes, and
+       detailed mask. ── */
+    function drawHero(c, h){
+        var cols = h.cols;
+        var hurt = h.hurtT > 0 ? (h.hurtT/220) : 0;
+        var arch = h.archIdx;
+        var isFlying = h.mode === 'flying';
+        /* ── FLYING TRAIL JETS — colored exhaust streak ── */
+        if (h.trailJets && h.trailJets.length){
+            for (var jti=0; jti<h.trailJets.length; jti++){
+                var jt = h.trailJets[jti];
+                var jf = 1 - jt.age/jt.max;
+                /* outer halo */
+                c.fillStyle = cols.cape;
+                c.globalAlpha = jf*0.35;
+                c.beginPath(); c.arc(jt.x, jt.y, 8*jf + 2, 0, Math.PI*2); c.fill();
+                /* hot core */
+                c.fillStyle = cols.accent;
+                c.globalAlpha = jf*0.85;
+                c.beginPath(); c.arc(jt.x, jt.y, 4*jf + 1, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#ffffff';
+                c.globalAlpha = jf;
+                c.beginPath(); c.arc(jt.x, jt.y, 1.8*jf + 0.5, 0, Math.PI*2); c.fill();
+                c.globalAlpha = 1;
+            }
+        }
+        c.save();
+        c.translate(h.x, h.y);
+        var fx = h.face;
+        c.scale(fx, 1);
+        /* ── SCALE — solo hero gets MUCH larger render so the
+           detail reads clearly. Default 2.0 for legacy multi-hero
+           mode, 4.0 (2× larger) for the single hero pick. */
+        var S = h.solo ? 2.4 : 2.0;
+        /* ── DYNAMIC POSE — the body, limbs, and legs animate
+           differently depending on what the hero is doing right
+           now: hovering, flying, charging at a target, attacking,
+           or recoiling from a hit. Each pose modifier is computed
+           here and applied as additive offsets to limb positions
+           later in the render. ── */
+        var bodyLean = 0;        /* radians the torso is tilted */
+        var legMode = 'walk';    /* walk | tucked | sweptBack | crouch */
+        var armMode = 'walk';    /* walk | flight | attack | reach | guard */
+        if (isFlying){
+            bodyLean = -0.35;
+            legMode = 'tucked';
+            armMode = 'flight';
+        } else if (h.phase === 'charge'){
+            bodyLean = -0.55;
+            legMode = 'sweptBack';
+            armMode = 'reach';
+        } else if (h.attackT > 0){
+            bodyLean = -0.12;
+            armMode = 'attack';
+        } else if (h.hurtT > 0){
+            bodyLean = 0.18;
+            legMode = 'crouch';
+            armMode = 'guard';
+        }
+        /* breathing sway when landed and idle */
+        if (h.mode === 'landed' && h.phase === 'patrol' && h.attackT <= 0 && h.hurtT <= 0){
+            bodyLean += Math.sin(h.flightT * 2.0) * 0.04;
+        }
+        c.rotate(bodyLean);
+        /* ── SHADOW underneath (smaller while flying) ── */
+        var shadowA = (h.mode === 'flying') ? 0.18 : 0.45;
+        var shadowW = (h.mode === 'flying') ? 8*S : 14*S;
+        c.fillStyle = 'rgba(0,0,0,' + shadowA + ')';
+        c.beginPath();
+        c.ellipse(0, 9*S, shadowW, 3.5*S, 0, 0, Math.PI*2);
+        c.fill();
+        /* ── REALISTIC FLOWING CAPE — cloth simulation ──────────
+           Models the cape as a rectangular cloth attached at BOTH
+           shoulders. The hem (bottom edge) is composed of 7 control
+           points; a wave travels DOWN the cape over time so the
+           ripple visibly flows from shoulders → hem like real cloth.
+           Vertical fold/pleat lines suggest fabric thickness.
+
+           Flight direction:
+             - Hovering: cape drapes mostly DOWN with subtle backward sway
+             - Flying:   cape streams BEHIND horizontally (catches wind) */
+        var capeFlow = isFlying ? 1.0 : (h.phase === 'charge' ? 0.85 : 0.0);
+        /* attach line along both shoulders */
+        var atLX = -4 * S, atRX = 4 * S, atY = -22 * S;
+        /* cape reach behind + down — bigger when flying */
+        var reachBack = (10 + capeFlow * 22) * S;
+        var dropDown  = (24 - capeFlow * 20) * S;
+        /* travelling-wave phase: ripples emanate from shoulders and
+           travel down to the hem, the way real cloth ripples in wind */
+        var travelPhase = h.cape * 2.4;
+        /* helper: position of a point on the cape parameterised by
+           (s, t) where s∈[0,1] is left→right along the shoulder edge
+           and t∈[0,1] is top (shoulders) → bottom (hem) */
+        function capePt(s, t){
+            /* attach position */
+            var atX = atRX + (atLX - atRX) * s;
+            /* extend back + down based on t (further from shoulders
+               = further behind + lower) */
+            var px = atX - reachBack * t;
+            var py = atY + dropDown * t;
+            /* travelling wave — amplitude grows with t (cloth flaps
+               more at the hem than at the attach point) */
+            var waveAmp = 4 * S * t;
+            var w1 = Math.sin(travelPhase + t*Math.PI*2.2 + s*0.6) * waveAmp;
+            var w2 = Math.cos(travelPhase*0.7 + t*Math.PI*1.4) * waveAmp*0.5;
+            /* in flight the wave warps the cape's horizontal extent;
+               while hovering it sways the cape side-to-side */
+            if (isFlying){
+                px += w1*0.4;
+                py += w2*0.6 + w1*0.2;
+            } else {
+                px += w1*0.5;
+                py += w2*0.3;
+            }
+            return { x:px, y:py };
+        }
+        /* HEM POINTS — 7 control points along the bottom edge */
+        var nHem = 7;
+        var hemPts = [];
+        for (var hi=0; hi<=nHem; hi++){
+            hemPts.push(capePt(hi/nHem, 1.0));
+        }
+        /* CAPE BODY shape — top edge straight across shoulders,
+           bottom edge follows the hem control points */
+        var capeGrad = c.createLinearGradient(0, atY, -reachBack*0.8, atY + dropDown);
+        capeGrad.addColorStop(0,   cols.cape);
+        capeGrad.addColorStop(0.4, cols.cape);
+        capeGrad.addColorStop(1,   cols.mask);
+        c.fillStyle = capeGrad;
+        c.beginPath();
+        c.moveTo(atRX, atY);
+        c.lineTo(atLX, atY);
+        /* trace down the LEFT side (s=1 strand from t=0 → 1) */
+        var midL = capePt(1.0, 0.55);
+        c.quadraticCurveTo(midL.x, midL.y, hemPts[nHem].x, hemPts[nHem].y);
+        /* hem — smooth quadratic curves between hem points */
+        for (var hp=nHem-1; hp>=0; hp--){
+            var prev = hemPts[hp+1];
+            var curr = hemPts[hp];
+            var midH = { x:(prev.x+curr.x)/2, y:(prev.y+curr.y)/2 };
+            c.quadraticCurveTo(prev.x, prev.y, midH.x, midH.y);
+        }
+        c.lineTo(hemPts[0].x, hemPts[0].y);
+        /* up the RIGHT side back to right shoulder */
+        var midR = capePt(0.0, 0.55);
+        c.quadraticCurveTo(midR.x, midR.y, atRX, atY);
+        c.closePath();
+        c.fill();
+        /* INNER SHADOW — narrow strip along the body side of the
+           cape, gives the 3D fold-behind-the-body look */
+        c.fillStyle = 'rgba(0,0,0,0.30)';
+        c.beginPath();
+        c.moveTo(atRX, atY);
+        c.lineTo(atLX, atY);
+        c.lineTo(atLX, atY + dropDown*0.4);
+        c.lineTo(atRX, atY + dropDown*0.4);
+        c.closePath();
+        c.fill();
+        /* CAPE INNER side panel — dark shadow along the body */
+        c.fillStyle = 'rgba(0,0,0,0.20)';
+        c.beginPath();
+        c.moveTo(atRX, atY);
+        c.quadraticCurveTo(midR.x*0.5, midR.y*0.8, hemPts[0].x*0.6, hemPts[0].y);
+        c.lineTo(atRX, atY);
+        c.closePath();
+        c.fill();
+        /* VERTICAL FOLD/PLEAT LINES — 4 darker strokes running
+           down the cape, suggesting cloth thickness + creases.
+           Each fold follows the cape's curvature using parametric
+           points at intermediate s values. */
+        c.strokeStyle = 'rgba(0,0,0,0.28)';
+        c.lineWidth = 0.7;
+        for (var fold=1; fold<=4; fold++){
+            var fs = fold / 5;
+            c.beginPath();
+            for (var ft=0; ft<=4; ft++){
+                var fp = capePt(fs, ft/4);
+                if (ft === 0) c.moveTo(fp.x, fp.y);
+                else c.lineTo(fp.x, fp.y);
+            }
+            c.stroke();
+        }
+        /* HIGHLIGHT FOLDS — bright thin streaks between the dark
+           folds, simulating light catching the raised ridges */
+        c.strokeStyle = 'rgba(255,255,255,0.22)';
+        c.lineWidth = 0.5;
+        for (var fold2=0; fold2<4; fold2++){
+            var fs2 = (fold2 + 0.5) / 5;
+            c.beginPath();
+            for (var ft2=1; ft2<=4; ft2++){
+                var fp2 = capePt(fs2, ft2/4);
+                if (ft2 === 1) c.moveTo(fp2.x, fp2.y);
+                else c.lineTo(fp2.x, fp2.y);
+            }
+            c.stroke();
+        }
+        /* OUTER RIM along the bottom hem — bright accent edge
+           catches the light, defines the silhouette */
+        c.strokeStyle = cols.accent;
+        c.lineWidth = 1.2;
+        c.beginPath();
+        c.moveTo(hemPts[0].x, hemPts[0].y);
+        for (var rh=1; rh<=nHem; rh++){
+            var rPrev = hemPts[rh-1];
+            var rCurr = hemPts[rh];
+            var rMid = { x:(rPrev.x+rCurr.x)/2, y:(rPrev.y+rCurr.y)/2 };
+            c.quadraticCurveTo(rPrev.x, rPrev.y, rMid.x, rMid.y);
+        }
+        c.lineTo(hemPts[nHem].x, hemPts[nHem].y);
+        c.stroke();
+        /* COLLAR — gold trim across both shoulders + dark inner band */
+        c.fillStyle = cols.accent;
+        c.fillRect(atLX - 0.5*S, atY - 0.5*S, (atRX - atLX) + 1*S, 1.4*S);
+        c.fillStyle = cols.mask;
+        c.fillRect(atLX + 0.3*S, atY + 0.5*S, (atRX - atLX) - 0.6*S, 1.2*S);
+        /* SHOULDER CLASPS — circular gem-like studs at each shoulder */
+        c.fillStyle = cols.accent;
+        c.beginPath(); c.arc(atLX, atY, 0.9*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc(atRX, atY, 0.9*S, 0, Math.PI*2); c.fill();
+        c.fillStyle = '#ffffff';
+        c.beginPath(); c.arc(atLX - 0.2*S, atY - 0.2*S, 0.3*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc(atRX - 0.2*S, atY - 0.2*S, 0.3*S, 0, Math.PI*2); c.fill();
+
+        /* ── EVENT-DRIVEN ACTION PROGRESS ─────────────────────────
+           attackP, hurtP go 0..1 over their respective windows so
+           limbs can ease in and out of a punch / flinch instead of
+           jittering continuously. */
+        var attackP = h.attackT > 0 ? (1 - h.attackT / 200) : -1;
+        var hurtP   = h.hurtT   > 0 ? (1 - h.hurtT   / 220) : -1;
+        /* a smooth ease that goes 0 → 1 → 0 over a [0..1] window
+           — used for windup-thrust-retract gestures */
+        function pulse01(p){
+            if (p < 0 || p > 1) return 0;
+            return Math.sin(p * Math.PI);
+        }
+        /* windup-then-strike — quick pull-back, slower thrust */
+        function thrust01(p){
+            if (p < 0 || p > 1) return 0;
+            if (p < 0.3) return -p / 0.3 * 0.35;          /* windup -0.35 */
+            if (p < 0.6) return -0.35 + (p - 0.3) / 0.3 * 1.35;  /* +1.0 */
+            return 1.0 - (p - 0.6) / 0.4 * 1.0;            /* return 0 */
+        }
+        /* ── JOINTED LEG with hip + knee articulation ────────── */
+        function drawLeg(hipX, hipY, thighAng, kneeBend){
+            var thighLen = 5.5 * S;
+            var shinLen  = 5.0 * S;
+            /* knee position from hip + thigh angle (0 = straight down) */
+            var kx = hipX + Math.sin(thighAng) * thighLen;
+            var ky = hipY + Math.cos(thighAng) * thighLen;
+            /* foot position from knee + (thigh angle + knee bend) */
+            var fAng = thighAng - kneeBend;
+            var fx = kx + Math.sin(fAng) * shinLen;
+            var fy = ky + Math.cos(fAng) * shinLen;
+            /* THIGH segment — rectangle rotated around hip */
+            c.save();
+            c.translate(hipX, hipY);
+            c.rotate(-thighAng);
+            c.fillStyle = cols.mask;
+            c.fillRect(-1.2*S, 0, 2.4*S, thighLen);
+            c.fillStyle = 'rgba(255,255,255,0.18)';
+            c.fillRect(-1.2*S, 0, 0.7*S, thighLen);
+            c.restore();
+            /* SHIN segment — from knee */
+            c.save();
+            c.translate(kx, ky);
+            c.rotate(-fAng);
+            c.fillStyle = cols.mask;
+            c.fillRect(-1.0*S, 0, 2.0*S, shinLen);
+            c.fillStyle = 'rgba(255,255,255,0.18)';
+            c.fillRect(-1.0*S, 0, 0.6*S, shinLen);
+            c.restore();
+            /* KNEE pad — bright accent ring at joint */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc(kx, ky, 1.0*S, 0, Math.PI*2);
+            c.fill();
+            /* BOOT — block at foot, rotated to match shin */
+            c.save();
+            c.translate(fx, fy);
+            c.rotate(-fAng);
+            c.fillStyle = cols.accent;
+            c.fillRect(-1.5*S, -0.4*S, 3.0*S, 2.2*S);
+            c.fillStyle = 'rgba(255,255,255,0.45)';
+            c.fillRect(-1.5*S, -0.4*S, 3.0*S, 0.5*S);
+            /* boot toe — slight forward extension */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(1.5*S, -0.4*S);
+            c.lineTo(2.4*S, 0.2*S);
+            c.lineTo(1.5*S, 1.8*S);
+            c.closePath();
+            c.fill();
+            c.restore();
+        }
+        /* ── PER-MODE leg angles — motion only when it makes sense ──
+           Hovering idle: legs hang straight down, still
+           Flying:        legs streamlined back, locked in stable pose
+           Charging:      legs pump (real running motion)
+           Hurt:          brief flinch via hurtP (no continuous shake)
+           Attacking:     subtle weight-shift from punch follow-through */
+        var legL_hip, legL_knee, legR_hip, legR_knee;
+        var hipLX = -1.8 * S, hipRX = 1.8 * S, hipY = 0;
+        if (legMode === 'tucked'){
+            /* FLIGHT — legs streamlined back, no twitching. Tiny
+               sway with the slow flightT bob so they don't read as
+               frozen-stiff. */
+            var fSway = Math.sin(h.flightT * 0.7) * 0.05;
+            legL_hip  = 0.25 + fSway;
+            legL_knee = 0.30;
+            legR_hip  = 0.25 - fSway;
+            legR_knee = 0.30;
+        } else if (legMode === 'sweptBack'){
+            /* CHARGE — full running pedal motion (this is the one
+               mode where continuous limb motion is appropriate) */
+            var cp = h.walkT * 9;
+            legL_hip  = -0.85 + Math.sin(cp) * 0.40;
+            legL_knee = 0.70 + Math.max(0, Math.sin(cp + Math.PI/2)) * 0.50;
+            legR_hip  = -0.85 + Math.sin(cp + Math.PI) * 0.40;
+            legR_knee = 0.70 + Math.max(0, Math.sin(cp + Math.PI*1.5)) * 0.50;
+        } else if (legMode === 'crouch'){
+            /* HURT — wide stance that briefly flinches via hurtP */
+            var flinch = pulse01(hurtP) * 0.18;
+            legL_hip  = 0.35 + flinch;
+            legL_knee = 1.20 + flinch * 0.3;
+            legR_hip  = -0.35 - flinch;
+            legR_knee = 1.20 + flinch * 0.3;
+        } else {
+            /* HOVER / IDLE — legs hang straight down. NO oscillation.
+               Optional subtle weight shift from an attack thrust:
+               legs respond to the punch by leaning slightly forward
+               then back over the attack window. */
+            var attackShift = (attackP > 0) ? thrust01(attackP) * 0.10 : 0;
+            legL_hip  = 0.02 - attackShift;
+            legL_knee = 0.05;
+            legR_hip  = -0.02 - attackShift;
+            legR_knee = 0.05;
+        }
+        drawLeg(hipLX, hipY, legL_hip, legL_knee);
+        drawLeg(hipRX, hipY, legR_hip, legR_knee);
+
+        /* ── TORSO — chest with shading + emblem ── */
+        var torsoGrad = c.createLinearGradient(-5*S, -10*S, 5*S, 2*S);
+        torsoGrad.addColorStop(0,   'rgba(255,255,255,0.25)');
+        torsoGrad.addColorStop(0.4, cols.primary);
+        torsoGrad.addColorStop(1,   cols.mask);
+        c.fillStyle = torsoGrad;
+        /* slightly hexagonal/heroic torso silhouette */
+        c.beginPath();
+        c.moveTo(-5*S, -10*S);
+        c.lineTo(5*S, -10*S);
+        c.lineTo(6*S, -3*S);
+        c.lineTo(5*S, 2*S);
+        c.lineTo(-5*S, 2*S);
+        c.lineTo(-6*S, -3*S);
+        c.closePath();
+        c.fill();
+        /* chest muscle definition */
+        c.strokeStyle = 'rgba(0,0,0,0.30)';
+        c.lineWidth = 0.6;
+        c.beginPath();
+        c.moveTo(0, -10*S); c.lineTo(0, -3*S);
+        c.stroke();
+        /* pec curves */
+        c.beginPath();
+        c.moveTo(-4*S, -8*S); c.quadraticCurveTo(-2*S, -6*S, 0, -7*S);
+        c.moveTo(4*S, -8*S);  c.quadraticCurveTo(2*S, -6*S, 0, -7*S);
+        c.stroke();
+        /* belt with buckle */
+        c.fillStyle = cols.accent;
+        c.fillRect(-6*S, -2*S, 12*S, 2.4*S);
+        c.fillStyle = cols.mask;
+        c.fillRect(-1.5*S, -2*S, 3*S, 2.4*S);
+        c.fillStyle = cols.primary;
+        c.fillRect(-0.8*S, -1.5*S, 1.6*S, 1.4*S);
+        /* CHEST EMBLEM — large universe tag with shaped backing */
+        c.save();
+        /* counter-flip text so it reads correctly even when facing left */
+        c.scale(fx, 1);
+        c.fillStyle = cols.accent;
+        c.beginPath();
+        c.ellipse(0, -6*S, 3.5*S, 3*S, 0, 0, Math.PI*2);
+        c.fill();
+        c.strokeStyle = cols.mask;
+        c.lineWidth = 0.8;
+        c.stroke();
+        c.fillStyle = cols.mask;
+        c.font = 'bold ' + (5*S) + 'px Arial Black, sans-serif';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(h.tag, 0, -6*S);
+        c.restore();
+
+        /* ── ARMS — pose driven by armMode ───────────────────────
+           walk:    alternating counter-swing
+           flight:  one arm forward (lead), one arm back (Superman pose)
+           attack:  front arm raised toward target
+           reach:   both arms forward (dashing grab)
+           guard:   both arms across body (defensive) */
+        var armSwing = Math.sin(h.walkT*5 + Math.PI) * 2.0;
+        /* shoulders */
+        c.fillStyle = cols.primary;
+        c.beginPath(); c.arc(-6*S, -9*S, 2*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc( 6*S, -9*S, 2*S, 0, Math.PI*2); c.fill();
+        var armX1 = -7*S, armX2 = 5*S;
+        /* helper: draw a single arm as upper+forearm with hand */
+        function drawArm(shX, shY, shAng, elbow){
+            var upper = 5.0 * S;
+            var lower = 5.0 * S;
+            var ex = shX + Math.sin(shAng) * upper;
+            var ey = shY + Math.cos(shAng) * upper;
+            var faAng = shAng - elbow;
+            var hx = ex + Math.sin(faAng) * lower;
+            var hy = ey + Math.cos(faAng) * lower;
+            /* upper arm */
+            c.save();
+            c.translate(shX, shY);
+            c.rotate(-shAng);
+            c.fillStyle = cols.primary;
+            c.fillRect(-1.1*S, 0, 2.2*S, upper);
+            c.fillStyle = 'rgba(255,255,255,0.20)';
+            c.fillRect(-1.1*S, 0, 0.6*S, upper);
+            c.restore();
+            /* forearm */
+            c.save();
+            c.translate(ex, ey);
+            c.rotate(-faAng);
+            c.fillStyle = cols.primary;
+            c.fillRect(-1.0*S, 0, 2.0*S, lower);
+            c.fillStyle = 'rgba(255,255,255,0.20)';
+            c.fillRect(-1.0*S, 0, 0.6*S, lower);
+            c.restore();
+            /* elbow pad */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(ex, ey, 0.9*S, 0, Math.PI*2); c.fill();
+            /* glove */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(hx, hy, 1.5*S, 0, Math.PI*2); c.fill();
+            c.fillStyle = 'rgba(255,255,255,0.55)';
+            c.beginPath(); c.arc(hx - 0.4*S, hy - 0.4*S, 0.6*S, 0, Math.PI*2); c.fill();
+        }
+        /* Shoulder anchor points */
+        var shLX = -5.5*S, shLY = -8*S;
+        var shRX =  5.5*S, shRY = -8*S;
+        /* attack thrust progress (0..1 windup→strike→retract) */
+        var atk = thrust01(attackP);
+        if (armMode === 'flight'){
+            /* FLIGHT — lead arm extended forward classic Superman
+               pose, trailing arm tucked behind. Stable, only a very
+               slow gentle bob with flightT (not a frantic wave). */
+            var slowBob = Math.sin(h.flightT * 1.2) * 0.05;
+            /* lead arm: shoulder pointed forward, slight elbow bend */
+            drawArm(shRX, shRY, -1.20 + slowBob, 0.15);
+            /* trail arm: shoulder back, more elbow bend (tucked) */
+            drawArm(shLX, shLY, -2.20 - slowBob, 0.55);
+        } else if (armMode === 'attack'){
+            /* ATTACK — clean windup → punch → retract on lead arm */
+            /* shoulder rotates forward as attack progresses */
+            var atkShAng = -1.0 + atk * 0.5;            /* from -1.0 (raised) to -0.5 (forward) */
+            var atkElbow = 1.2 - atk * 1.2;             /* elbow extends from bent to straight */
+            drawArm(shRX, shRY, atkShAng, atkElbow);
+            /* rear arm — slight counter-pull during the thrust */
+            drawArm(shLX, shLY, -2.0, 0.7 + atk * 0.2);
+        } else if (armMode === 'reach'){
+            /* CHARGE — both arms extended forward (real grab pose).
+               Slow alternating grab is appropriate during sustained
+               dash so they don't read as frozen. */
+            var cp = h.walkT * 9;
+            var grabL = Math.sin(cp) * 0.18;
+            var grabR = Math.sin(cp + Math.PI) * 0.18;
+            drawArm(shRX, shRY, -1.40 + grabR, 0.10);
+            drawArm(shLX, shLY, -1.40 + grabL, 0.10);
+        } else if (armMode === 'guard'){
+            /* HURT — arms cross briefly via hurtP curve, then settle */
+            var gP = pulse01(hurtP);
+            drawArm(shRX, shRY, -2.30 + gP * 0.10, 1.5);
+            drawArm(shLX, shLY, -0.85 - gP * 0.10, 1.5);
+        } else {
+            /* HOVER / IDLE — arms hang straight down naturally. NO
+               continuous oscillation. Only a faint breathing sway
+               from flightT so they aren't frozen-stiff. */
+            var breath = Math.sin(h.flightT * 1.5) * 0.04;
+            drawArm(shLX, shLY, 0.10 - breath, 0.10);
+            drawArm(shRX, shRY, -0.10 + breath, 0.10);
+        }
+
+        /* ── HEAD — sculpted mask with proper shading ── */
+        c.fillStyle = '#e8c4a0';  /* skin under mask */
+        c.beginPath();
+        c.arc(0, -14*S, 3.5*S, 0, Math.PI*2);
+        c.fill();
+        /* MASK — covers top half of head */
+        c.fillStyle = cols.mask;
+        c.beginPath();
+        c.arc(0, -14.5*S, 3.6*S, Math.PI, 0);
+        c.lineTo(3.6*S, -13*S);
+        c.bezierCurveTo(3*S, -12.5*S, -3*S, -12.5*S, -3.6*S, -13*S);
+        c.closePath();
+        c.fill();
+        /* mask cheek line */
+        c.strokeStyle = 'rgba(0,0,0,0.45)';
+        c.lineWidth = 0.6;
+        c.beginPath();
+        c.moveTo(-3.6*S, -13*S);
+        c.bezierCurveTo(-3*S, -12.5*S, 3*S, -12.5*S, 3.6*S, -13*S);
+        c.stroke();
+        /* EYE SLITS — bright white */
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.ellipse(-1.8*S, -14.5*S, 1.2*S, 0.7*S, -0.2, 0, Math.PI*2);
+        c.fill();
+        c.beginPath();
+        c.ellipse(1.8*S, -14.5*S, 1.2*S, 0.7*S, 0.2, 0, Math.PI*2);
+        c.fill();
+        /* eye glow when attacking */
+        if (h.attackT > 0){
+            var eyeG = (h.attackT/200);
+            c.fillStyle = 'hsla(' + (h.archIdx * 60) + ',95%,60%,' + eyeG + ')';
+            c.beginPath();
+            c.ellipse(-1.8*S, -14.5*S, 1.4*S, 0.9*S, -0.2, 0, Math.PI*2); c.fill();
+            c.beginPath();
+            c.ellipse(1.8*S, -14.5*S, 1.4*S, 0.9*S, 0.2, 0, Math.PI*2); c.fill();
+        }
+        /* mouth — small */
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.6;
+        c.beginPath();
+        c.moveTo(-0.8*S, -12.4*S); c.lineTo(0.8*S, -12.4*S);
+        c.stroke();
+        /* hair tuft / forehead detail */
+        c.fillStyle = cols.cape;
+        c.beginPath();
+        c.moveTo(-3*S, -17*S);
+        c.lineTo(-1*S, -18*S);
+        c.lineTo(1*S, -17.5*S);
+        c.lineTo(3*S, -17*S);
+        c.lineTo(2.5*S, -16*S);
+        c.lineTo(-2.5*S, -16*S);
+        c.closePath();
+        c.fill();
+
+        /* ── UNIVERSE-SPECIFIC COSTUME OVERLAY ──────────────────
+           Each universe paints a small distinctive detail on the
+           torso so heroes from the same faction read as related
+           even with different archetypes. */
+        if (h.univ === 'sentinel'){
+            /* ── STEEL SENTINEL — classic flying hero look ──
+               * No helmet/mask — full human face
+               * Iconic spit-curl of black hair on forehead
+               * Big red oval emblem with bold gold "S"
+               * Red briefs over the blue tights
+               * Long red boots up to mid-shin */
+            c.save(); c.scale(fx, 1);
+            /* face — full human, no mask */
+            c.fillStyle = '#e8c4a0';
+            c.beginPath(); c.arc(0, -14*S, 3.4*S, 0, Math.PI*2); c.fill();
+            /* black hair sweep across top */
+            c.fillStyle = '#1a1a1a';
+            c.beginPath();
+            c.arc(0, -15.5*S, 3.6*S, Math.PI, 0);
+            c.lineTo(3.4*S, -14*S);
+            c.lineTo(-3.4*S, -14*S);
+            c.closePath();
+            c.fill();
+            /* iconic spit-curl on forehead */
+            c.strokeStyle = '#1a1a1a';
+            c.lineWidth = 0.9;
+            c.beginPath();
+            c.moveTo(-1*S, -15*S);
+            c.quadraticCurveTo(-1.8*S, -13.5*S, 0.5*S, -13.2*S);
+            c.stroke();
+            /* eyes — open and confident */
+            c.fillStyle = '#000';
+            c.beginPath(); c.arc(-1.6*S, -14*S, 0.5*S, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc( 1.6*S, -14*S, 0.5*S, 0, Math.PI*2); c.fill();
+            /* small smile */
+            c.strokeStyle = '#5a3018';
+            c.lineWidth = 0.6;
+            c.beginPath();
+            c.moveTo(-0.8*S, -12.4*S); c.quadraticCurveTo(0, -12.0*S, 0.8*S, -12.4*S);
+            c.stroke();
+            /* big red oval emblem with shield outline */
+            c.fillStyle = '#dc2626';
+            c.beginPath();
+            c.moveTo(0, -2*S);
+            c.lineTo(-4*S, -4*S);
+            c.lineTo(-4*S, -8*S);
+            c.lineTo(0, -10*S);
+            c.lineTo(4*S, -8*S);
+            c.lineTo(4*S, -4*S);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#fde047';
+            c.lineWidth = 1.2;
+            c.stroke();
+            /* bold gold S */
+            c.fillStyle = '#fde047';
+            c.font = 'bold ' + (5*S) + 'px Arial Black, sans-serif';
+            c.textAlign = 'center'; c.textBaseline = 'middle';
+            c.fillText('S', 0, -6*S);
+            /* RED BRIEFS — over the blue tights */
+            c.restore();
+            c.fillStyle = '#dc2626';
+            c.fillRect(-5*S, -1*S, 10*S, 3*S);
+            c.fillStyle = '#fde047';
+            c.fillRect(-5*S, -1*S, 10*S, 0.6*S);
+            /* RED BOOTS — replace the standard accent boots */
+            c.fillStyle = '#dc2626';
+            c.fillRect(-3.4*S, 5*S, 3.1*S, 4.2*S);
+            c.fillRect(0.3*S, 5*S, 3.1*S, 4.2*S);
+            c.fillStyle = 'rgba(255,255,255,0.45)';
+            c.fillRect(-3.4*S, 5*S, 3.1*S, 0.6*S);
+            c.fillRect(0.3*S, 5*S, 3.1*S, 0.6*S);
+        } else if (h.univ === 'liberty'){
+            /* ── LIBERTY CAPTAIN — patriotic infantry look ──
+               * Winged blue mask covers upper half of face
+               * Blue body with WHITE vertical stripe down middle
+               * Red & white horizontal stripes across belly
+               * SHIELD strapped to lead arm
+               * White star on chest
+               * Short cape (already white via cols.cape) */
+            c.save(); c.scale(fx, 1);
+            /* skin under mask */
+            c.fillStyle = '#e8c4a0';
+            c.beginPath(); c.arc(0, -14*S, 3.4*S, 0, Math.PI*2); c.fill();
+            /* WINGED BLUE MASK covering upper half */
+            c.fillStyle = '#1e40af';
+            c.beginPath();
+            c.arc(0, -14.5*S, 3.5*S, Math.PI, 0);
+            c.lineTo(3.5*S, -13*S);
+            c.bezierCurveTo(3*S, -12.5*S, -3*S, -12.5*S, -3.5*S, -13*S);
+            c.closePath();
+            c.fill();
+            /* tiny mask wings on the sides */
+            c.fillStyle = '#ffffff';
+            c.beginPath();
+            c.moveTo(-3.5*S, -14*S);
+            c.lineTo(-5*S, -15*S);
+            c.lineTo(-3.5*S, -13.5*S);
+            c.closePath(); c.fill();
+            c.beginPath();
+            c.moveTo( 3.5*S, -14*S);
+            c.lineTo( 5*S, -15*S);
+            c.lineTo( 3.5*S, -13.5*S);
+            c.closePath(); c.fill();
+            /* white "A" on forehead */
+            c.fillStyle = '#ffffff';
+            c.font = 'bold ' + (3*S) + 'px Arial Black, sans-serif';
+            c.textAlign = 'center'; c.textBaseline = 'middle';
+            c.fillText('A', 0, -14.7*S);
+            /* eyes */
+            c.fillStyle = '#fff';
+            c.fillRect(-2.2*S, -14.4*S, 1.2*S, 0.7*S);
+            c.fillRect(1.0*S, -14.4*S, 1.2*S, 0.7*S);
+            c.restore();
+            /* WHITE STRIPE DOWN CHEST */
+            c.fillStyle = '#ffffff';
+            c.fillRect(-1.2*S, -10*S, 2.4*S, 8*S);
+            /* RED + WHITE belly stripes */
+            for (var ss=0; ss<5; ss++){
+                c.fillStyle = (ss % 2 === 0) ? '#dc2626' : '#ffffff';
+                c.fillRect(-5*S, -1*S + ss*0.8*S, 10*S, 0.7*S);
+            }
+            /* WHITE STAR on chest */
+            c.save();
+            c.translate(0, -7*S);
+            c.scale(fx, 1);
+            c.fillStyle = '#ffffff';
+            c.beginPath();
+            for (var sti=0; sti<10; sti++){
+                var stAng = sti * Math.PI/5 - Math.PI/2;
+                var stR = (sti%2 === 0) ? 2.6*S : 1.1*S;
+                var stx = Math.cos(stAng)*stR;
+                var sty = Math.sin(stAng)*stR;
+                if (sti === 0) c.moveTo(stx, sty); else c.lineTo(stx, sty);
+            }
+            c.closePath();
+            c.fill();
+            c.restore();
+            /* SHIELD strapped to lead arm — round red/white/blue disc */
+            c.save();
+            c.translate(fx * 6.5*S, -3*S);
+            /* outer red */
+            c.fillStyle = '#dc2626';
+            c.beginPath(); c.arc(0, 0, 3.4*S, 0, Math.PI*2); c.fill();
+            /* white ring */
+            c.fillStyle = '#ffffff';
+            c.beginPath(); c.arc(0, 0, 2.6*S, 0, Math.PI*2); c.fill();
+            /* red center */
+            c.fillStyle = '#dc2626';
+            c.beginPath(); c.arc(0, 0, 1.8*S, 0, Math.PI*2); c.fill();
+            /* blue inner */
+            c.fillStyle = '#1e40af';
+            c.beginPath(); c.arc(0, 0, 1.1*S, 0, Math.PI*2); c.fill();
+            /* white star */
+            c.fillStyle = '#ffffff';
+            c.beginPath();
+            for (var sshi=0; sshi<10; sshi++){
+                var sshAng = sshi * Math.PI/5 - Math.PI/2;
+                var sshR = (sshi%2 === 0) ? 0.9*S : 0.4*S;
+                var sshx = Math.cos(sshAng)*sshR;
+                var sshy = Math.sin(sshAng)*sshR;
+                if (sshi === 0) c.moveTo(sshx, sshy); else c.lineTo(sshx, sshy);
+            }
+            c.closePath();
+            c.fill();
+            /* outline */
+            c.strokeStyle = '#000';
+            c.lineWidth = 0.5;
+            c.beginPath(); c.arc(0, 0, 3.4*S, 0, Math.PI*2); c.stroke();
+            c.restore();
+        } else if (h.univ === 'vanguard'){
+            /* lightning fork emblem under the tag */
+            c.save(); c.scale(fx, 1);
+            c.fillStyle = '#fde047';
+            c.beginPath();
+            c.moveTo(0, -2*S);
+            c.lineTo(-1.5*S, 0); c.lineTo(0.5*S, 0);
+            c.lineTo(-0.5*S, 2.5*S); c.lineTo(1.5*S, -0.5*S);
+            c.lineTo(0.2*S, -0.5*S); c.closePath();
+            c.fill();
+            c.restore();
+        } else if (h.univ === 'mutant'){
+            /* big black X across the chest */
+            c.save(); c.scale(fx, 1);
+            c.strokeStyle = '#1a1a1a';
+            c.lineWidth = 1.6;
+            c.beginPath();
+            c.moveTo(-4*S, -10*S); c.lineTo(4*S, 0);
+            c.moveTo(4*S, -10*S);  c.lineTo(-4*S, 0);
+            c.stroke();
+            c.restore();
+        } else if (h.univ === 'cobalt'){
+            /* silver V on chest */
+            c.save(); c.scale(fx, 1);
+            c.strokeStyle = '#c0c0c0';
+            c.lineWidth = 1.8;
+            c.beginPath();
+            c.moveTo(-3*S, -9*S); c.lineTo(0, -2*S); c.lineTo(3*S, -9*S);
+            c.stroke();
+            c.restore();
+        } else if (h.univ === 'starcrew'){
+            /* bandolier strap diagonal across chest */
+            c.fillStyle = '#7c2d12';
+            c.save(); c.translate(0, 0); c.rotate(-0.4);
+            c.fillRect(-7*S, -8*S, 14*S, 1.4*S);
+            /* pouches */
+            c.fillStyle = cols.accent;
+            c.fillRect(-5*S, -7.5*S, 1.4*S, 1.0*S);
+            c.fillRect(-2*S, -7.5*S, 1.4*S, 1.0*S);
+            c.fillRect( 1*S, -7.5*S, 1.4*S, 1.0*S);
+            c.restore();
+        } else if (h.univ === 'quartet'){
+            /* large white circle with number 4 */
+            c.save(); c.scale(fx, 1);
+            c.fillStyle = '#ffffff';
+            c.beginPath(); c.arc(0, -6*S, 3*S, 0, Math.PI*2); c.fill();
+            c.strokeStyle = cols.mask;
+            c.lineWidth = 0.8;
+            c.stroke();
+            c.fillStyle = cols.primary;
+            c.font = 'bold ' + (4*S) + 'px Arial Black, sans-serif';
+            c.textAlign = 'center'; c.textBaseline = 'middle';
+            c.fillText('4', 0, -6*S);
+            c.restore();
+        } else if (h.univ === 'spirit'){
+            /* flowing scarf trailing horizontally */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(-4*S, -12*S);
+            c.quadraticCurveTo(-10*S, -10*S + Math.sin(h.cape*2)*2*S, -14*S, -8*S);
+            c.lineTo(-14*S, -7*S);
+            c.quadraticCurveTo(-10*S, -9*S + Math.sin(h.cape*2)*2*S, -4*S, -11*S);
+            c.closePath();
+            c.fill();
+            /* cherry-blossom petals around */
+            for (var pet=0; pet<3; pet++){
+                var pAng = h.cape + pet*Math.PI*2/3;
+                c.fillStyle = '#ffc0e0';
+                c.beginPath();
+                c.arc(Math.cos(pAng)*8*S, Math.sin(pAng)*4*S - 8*S, 0.8*S, 0, Math.PI*2);
+                c.fill();
+            }
+        } else if (h.univ === 'indie'){
+            /* utility belt with pouches around waist */
+            c.fillStyle = '#f97316';
+            for (var pp=-2; pp<=2; pp++){
+                c.fillRect(pp*2.5*S - 1*S, -1*S, 1.8*S, 2.4*S);
+            }
+        } else if (h.univ === 'shadow'){
+            /* dark hood pulled over head, only eyes visible */
+            c.fillStyle = '#0a0a14';
+            c.beginPath();
+            c.moveTo(-4.5*S, -17*S);
+            c.quadraticCurveTo(0, -22*S, 4.5*S, -17*S);
+            c.lineTo(4*S, -11*S);
+            c.lineTo(-4*S, -11*S);
+            c.closePath();
+            c.fill();
+            /* glowing red eyes through hood */
+            c.fillStyle = '#dc2626';
+            c.fillRect(-2.0*S, -14.5*S, 1.0*S, 0.6*S);
+            c.fillRect( 1.0*S, -14.5*S, 1.0*S, 0.6*S);
+        } else if (h.univ === 'arachnid'){
+            /* web pattern across body */
+            c.strokeStyle = cols.mask;
+            c.lineWidth = 0.4;
+            for (var wr=0; wr<5; wr++){
+                c.beginPath();
+                c.arc(0, -5*S, 1.5*S + wr*1.2*S, -Math.PI*0.7, -Math.PI*0.3);
+                c.stroke();
+            }
+            for (var ws=0; ws<5; ws++){
+                var wsa = -Math.PI*0.5 + (ws-2) * 0.3;
+                c.beginPath();
+                c.moveTo(0, -5*S);
+                c.lineTo(Math.cos(wsa)*7*S, Math.sin(wsa)*7*S - 5*S);
+                c.stroke();
+            }
+            /* spider emblem */
+            c.save(); c.scale(fx, 1);
+            c.fillStyle = '#1a1a1a';
+            c.beginPath(); c.ellipse(0, -6*S, 1.5*S, 1*S, 0, 0, Math.PI*2); c.fill();
+            for (var lg=-1; lg<=1; lg+=2){
+                for (var lgi=0; lgi<3; lgi++){
+                    c.strokeStyle = '#1a1a1a';
+                    c.lineWidth = 0.5;
+                    c.beginPath();
+                    c.moveTo(0, -6*S);
+                    c.lineTo(lg*(1.8 + lgi*0.6)*S, -6*S - (1 - lgi*0.5)*S);
+                    c.stroke();
+                }
+            }
+            c.restore();
+        } else if (h.univ === 'cyber'){
+            /* glowing circuit lines across torso */
+            c.strokeStyle = '#fde047';
+            c.lineWidth = 0.6;
+            c.beginPath();
+            c.moveTo(-4*S, -8*S); c.lineTo(-2*S, -8*S); c.lineTo(-2*S, -5*S);
+            c.lineTo( 2*S, -5*S); c.lineTo( 2*S, -8*S); c.lineTo( 4*S, -8*S);
+            c.stroke();
+            /* circuit nodes */
+            c.fillStyle = '#fde047';
+            c.beginPath(); c.arc(-2*S, -5*S, 0.5*S, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc( 2*S, -5*S, 0.5*S, 0, Math.PI*2); c.fill();
+        } else if (h.univ === 'eternal'){
+            /* gold filigree across chest */
+            c.strokeStyle = '#fde047';
+            c.lineWidth = 1.2;
+            c.beginPath();
+            c.moveTo(-4*S, -8*S);
+            c.quadraticCurveTo(0, -4*S, 4*S, -8*S);
+            c.stroke();
+            c.beginPath();
+            c.moveTo(-3.5*S, -4*S);
+            c.quadraticCurveTo(0, -1*S, 3.5*S, -4*S);
+            c.stroke();
+            /* crown atop head */
+            c.fillStyle = '#fde047';
+            c.beginPath();
+            c.moveTo(-3*S, -17.5*S); c.lineTo(-2*S, -19.5*S); c.lineTo(-1*S, -17.5*S);
+            c.lineTo(0, -19.5*S); c.lineTo(1*S, -17.5*S); c.lineTo(2*S, -19.5*S);
+            c.lineTo(3*S, -17.5*S); c.lineTo(3*S, -16.5*S); c.lineTo(-3*S, -16.5*S);
+            c.closePath(); c.fill();
+        } else if (h.univ === 'dread'){
+            /* horns + shadowy tendrils */
+            c.fillStyle = '#000000';
+            c.beginPath();
+            c.moveTo(-3*S, -17*S); c.lineTo(-4.5*S, -20.5*S); c.lineTo(-2*S, -17*S);
+            c.closePath(); c.fill();
+            c.beginPath();
+            c.moveTo( 3*S, -17*S); c.lineTo( 4.5*S, -20.5*S); c.lineTo( 2*S, -17*S);
+            c.closePath(); c.fill();
+            /* shadow tendrils from shoulders */
+            c.strokeStyle = '#1a0533';
+            c.lineWidth = 1.2;
+            for (var td=-1; td<=1; td+=2){
+                c.beginPath();
+                c.moveTo(td*5*S, -9*S);
+                c.bezierCurveTo(
+                    td*8*S, -8*S + Math.sin(h.cape*2)*2*S,
+                    td*9*S, -6*S,
+                    td*7*S, -2*S);
+                c.stroke();
+            }
+        } else if (h.univ === 'aqua'){
+            /* fish scale pattern on torso */
+            c.fillStyle = 'rgba(255,255,255,0.25)';
+            for (var sr=0; sr<3; sr++){
+                for (var sc=-2; sc<=2; sc++){
+                    var scx = sc*1.5*S + (sr%2)*0.7*S;
+                    c.beginPath();
+                    c.arc(scx, -7*S + sr*2*S, 1.0*S, 0, Math.PI, true);
+                    c.fill();
+                }
+            }
+            /* fin shoulder pads */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(-6*S, -10*S); c.lineTo(-9*S, -12*S); c.lineTo(-7*S, -8*S);
+            c.closePath(); c.fill();
+            c.beginPath();
+            c.moveTo( 6*S, -10*S); c.lineTo( 9*S, -12*S); c.lineTo( 7*S, -8*S);
+            c.closePath(); c.fill();
+        }
+
+        /* ── ARCHETYPE ACCENT — each hero archetype gets a unique
+           identifying detail so all 6 heroes per universe read
+           distinctly even though they share palette ── */
+        if (arch === 0){
+            /* POWER ARMOR — full-face helmet with T-visor */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc(0, -14*S, 3.8*S, 0, Math.PI*2); c.fill();
+            /* T-shape visor cutout */
+            c.fillStyle = '#0a1020';
+            c.fillRect(-2.6*S, -15.2*S, 5.2*S, 1.4*S);
+            c.fillRect(-0.6*S, -15.2*S, 1.2*S, 2.6*S);
+            /* visor glow */
+            c.fillStyle = '#ff5040';
+            c.fillRect(-2.4*S, -15.0*S, 4.8*S, 0.6*S);
+            /* armor panel lines on chest */
+            c.strokeStyle = 'rgba(0,0,0,0.5)';
+            c.lineWidth = 0.8;
+            c.beginPath();
+            c.moveTo(-5*S, -7*S); c.lineTo(5*S, -7*S);
+            c.moveTo(-5*S, -3*S); c.lineTo(5*S, -3*S);
+            c.stroke();
+            /* arc-reactor chest light */
+            c.save();
+            c.scale(fx, 1);
+            c.fillStyle = '#ffffff';
+            c.beginPath(); c.arc(0, -6*S, 1.6*S, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#80c0ff';
+            c.beginPath(); c.arc(0, -6*S, 1.0*S, 0, Math.PI*2); c.fill();
+            c.restore();
+        } else if (arch === 1){
+            /* SPEEDSTER — lightning bolt emblem + side wings on mask */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(-4*S, -14*S); c.lineTo(-6*S, -13*S);
+            c.lineTo(-4*S, -12.5*S); c.closePath(); c.fill();
+            c.beginPath();
+            c.moveTo(4*S, -14*S); c.lineTo(6*S, -13*S);
+            c.lineTo(4*S, -12.5*S); c.closePath(); c.fill();
+            /* speed-line trail behind hero */
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 1.2;
+            for (var sli=0; sli<4; sli++){
+                c.beginPath();
+                c.moveTo(-9*S - sli*2*S, -6*S + sli*1.5*S);
+                c.lineTo(-13*S - sli*2*S, -6*S + sli*1.5*S);
+                c.stroke();
+            }
+        } else if (arch === 2){
+            /* PSYCHIC — telekinetic aura swirl + open hands */
+            c.save();
+            c.scale(fx, 1);
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 1.5;
+            c.globalAlpha = 0.7;
+            for (var pa=0; pa<3; pa++){
+                var paR = 3*S + pa*1.8*S;
+                c.beginPath();
+                c.ellipse(0, -14*S, paR, paR*0.4, h.flightT*0.5 + pa, 0, Math.PI*2);
+                c.stroke();
+            }
+            c.globalAlpha = 1;
+            c.restore();
+            /* tiara/headpiece */
+            c.fillStyle = cols.accent;
+            c.fillRect(-3.5*S, -17.5*S, 7*S, 1*S);
+            c.beginPath();
+            c.moveTo(0, -18.5*S); c.lineTo(-1*S, -17.5*S); c.lineTo(1*S, -17.5*S);
+            c.closePath();
+            c.fill();
+        } else if (arch === 3){
+            /* BRUTE — bigger muscles, no mask (full face) */
+            c.fillStyle = '#e8c4a0';
+            c.beginPath();
+            c.arc(0, -14*S, 4*S, 0, Math.PI*2); c.fill();
+            /* angry brows */
+            c.strokeStyle = '#5a3018';
+            c.lineWidth = 1.4;
+            c.beginPath();
+            c.moveTo(-2.6*S, -15.5*S); c.lineTo(-1*S, -15*S);
+            c.moveTo( 2.6*S, -15.5*S); c.lineTo( 1*S, -15*S);
+            c.stroke();
+            /* large fists */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc(armX1+1*S, 1.5*S, 2.4*S, 0, Math.PI*2); c.fill();
+            c.beginPath();
+            c.arc(armX2+1*S, 1.5*S, 2.4*S, 0, Math.PI*2); c.fill();
+            /* bicep bulge */
+            c.fillStyle = cols.primary;
+            c.beginPath();
+            c.arc(armX1+1*S, -6*S, 2.4*S, 0, Math.PI*2); c.fill();
+            c.beginPath();
+            c.arc(armX2+1*S, -6*S, 2.4*S, 0, Math.PI*2); c.fill();
+        } else if (arch === 4){
+            /* TECH — visor sunglasses + earpiece */
+            c.fillStyle = cols.mask;
+            c.fillRect(-3.6*S, -15.4*S, 7.2*S, 1.6*S);
+            /* visor cyan glow */
+            c.fillStyle = '#80f0ff';
+            c.fillRect(-3.4*S, -15.2*S, 7*S, 1.0*S);
+            c.fillStyle = 'rgba(255,255,255,0.7)';
+            c.fillRect(-3.4*S, -15.2*S, 7*S, 0.4*S);
+            /* earpiece */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(3.4*S, -13*S, 0.8*S, 0, Math.PI*2); c.fill();
+            /* shoulder pads */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc(-6*S, -10*S, 2.5*S, Math.PI, 0); c.fill();
+            c.beginPath();
+            c.arc( 6*S, -10*S, 2.5*S, Math.PI, 0); c.fill();
+        } else if (arch === 5){
+            /* FIRE/BLADE — flame crown + fire aura around shoulders */
+            c.fillStyle = '#ff6020';
+            for (var fl=0; fl<5; fl++){
+                var fla = fl * Math.PI/4 - Math.PI/2;
+                var flxx = Math.cos(fla)*3.2*S;
+                var flyy = Math.sin(fla)*3.2*S - 14.5*S;
+                c.beginPath();
+                c.moveTo(flxx, flyy);
+                c.lineTo(flxx + Math.cos(fla-0.3)*2.5*S, flyy + Math.sin(fla-0.3)*2.5*S);
+                c.lineTo(flxx + Math.cos(fla+0.3)*2.5*S, flyy + Math.sin(fla+0.3)*2.5*S);
+                c.closePath();
+                c.fill();
+            }
+            /* yellow inner flame */
+            c.fillStyle = '#ffd060';
+            c.beginPath(); c.arc(0, -16*S, 2.2*S, 0, Math.PI*2); c.fill();
+            /* shoulder flames */
+            c.fillStyle = 'rgba(255,140,40,0.6)';
+            for (var sf=0; sf<3; sf++){
+                c.beginPath();
+                c.arc(-6*S, -10*S - sf*1.5*S, 1.8*S - sf*0.3*S, 0, Math.PI*2); c.fill();
+                c.beginPath();
+                c.arc( 6*S, -10*S - sf*1.5*S, 1.8*S - sf*0.3*S, 0, Math.PI*2); c.fill();
+            }
+        }
+
+        /* ── FLYING JET BOOTS — when airborne, flame jets shoot
+           downward from the boots leaving a contrail behind ── */
+        if (isFlying){
+            for (var jb=-1; jb<=1; jb+=2){
+                var jbx = jb*2*S;
+                var jby = 9*S;
+                /* outer flame */
+                c.fillStyle = '#ff6020';
+                c.beginPath();
+                c.moveTo(jbx-1.6*S, jby);
+                c.lineTo(jbx+1.6*S, jby);
+                c.lineTo(jbx, jby + 6*S);
+                c.closePath();
+                c.fill();
+                /* hot core */
+                c.fillStyle = '#ffd060';
+                c.beginPath();
+                c.moveTo(jbx-1.0*S, jby);
+                c.lineTo(jbx+1.0*S, jby);
+                c.lineTo(jbx, jby + 4*S);
+                c.closePath();
+                c.fill();
+                /* white-hot center */
+                c.fillStyle = '#ffffff';
+                c.beginPath();
+                c.moveTo(jbx-0.4*S, jby);
+                c.lineTo(jbx+0.4*S, jby);
+                c.lineTo(jbx, jby + 2.5*S);
+                c.closePath();
+                c.fill();
+            }
+        }
+
+        /* ── POWER CHARGE: glowing fists when about to fire ── */
+        if (h.attackT > 0){
+            var ap = h.attackT / 200;
+            var pcg = c.createRadialGradient(armX1 + 1*S, 1.5*S, 0, armX1 + 1*S, 1.5*S, 6*S);
+            pcg.addColorStop(0, 'rgba(255,255,255,'+ap+')');
+            pcg.addColorStop(0.5, cols.primary);
+            pcg.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = pcg;
+            c.beginPath(); c.arc(armX1 + 1*S, 1.5*S, 6*S, 0, Math.PI*2); c.fill();
+            var pcg2 = c.createRadialGradient(armX2 + 1*S, 1.5*S, 0, armX2 + 1*S, 1.5*S, 6*S);
+            pcg2.addColorStop(0, 'rgba(255,255,255,'+ap+')');
+            pcg2.addColorStop(0.5, cols.primary);
+            pcg2.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = pcg2;
+            c.beginPath(); c.arc(armX2 + 1*S, 1.5*S, 6*S, 0, Math.PI*2); c.fill();
+        }
+
+        /* ── HURT FLASH overlay ── */
+        if (hurt > 0){
+            c.fillStyle = 'rgba(255,255,255,' + (hurt*0.7) + ')';
+            c.fillRect(-9*S, -20*S, 18*S, 30*S);
+        }
+        c.restore();
+
+        /* power-charge body aura when about to fire */
+        if (h.attackT > 0){
+            var ap2 = h.attackT / 200;
+            var auraGrad = c.createRadialGradient(h.x, h.y - 8, 0, h.x, h.y - 8, 36);
+            auraGrad.addColorStop(0, 'rgba(255,255,255,' + (ap2*0.7) + ')');
+            auraGrad.addColorStop(0.4, cols.primary);
+            auraGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = auraGrad;
+            c.globalAlpha = ap2 * 0.5;
+            c.beginPath();
+            c.arc(h.x, h.y - 8, 36, 0, Math.PI*2);
+            c.fill();
+            c.globalAlpha = 1;
+        }
+
+        /* HP BAR — wider for the larger hero */
+        var hpFrac = h.hp / h.maxHp;
+        if (hpFrac < 1 || h.attackT > 0){
+            var bw = 36;
+            var byTop = h.y - 44;
+            c.fillStyle = 'rgba(0,0,0,0.65)';
+            c.fillRect(h.x - bw/2 - 1, byTop - 1, bw + 2, 5);
+            c.fillStyle = 'rgba(255,255,255,0.20)';
+            c.fillRect(h.x - bw/2, byTop, bw, 3);
+            var hpCol = hpFrac > 0.5 ? '#22c55e' : hpFrac > 0.25 ? '#f59e0b' : '#dc2626';
+            var hpGrad = c.createLinearGradient(h.x - bw/2, byTop, h.x - bw/2, byTop+3);
+            hpGrad.addColorStop(0, '#ffffff');
+            hpGrad.addColorStop(0.4, hpCol);
+            hpGrad.addColorStop(1, hpCol);
+            c.fillStyle = hpGrad;
+            c.fillRect(h.x - bw/2, byTop, bw * hpFrac, 3);
+        }
+
+        /* FOCUS marker in manual mode */
+        if (!superheroAutoFight && superheroFocusTarget === h){
+            c.strokeStyle = 'rgba(255,40,40,0.95)';
+            c.lineWidth = 2.5;
+            c.beginPath();
+            c.arc(h.x, h.y - 12, 32, 0, Math.PI*2);
+            c.stroke();
+            c.strokeStyle = 'rgba(255,255,255,0.8)';
+            c.lineWidth = 1.2;
+            c.beginPath();
+            c.moveTo(h.x - 38, h.y - 12); c.lineTo(h.x - 26, h.y - 12);
+            c.moveTo(h.x + 26, h.y - 12); c.lineTo(h.x + 38, h.y - 12);
+            c.moveTo(h.x, h.y - 50); c.lineTo(h.x, h.y - 38);
+            c.moveTo(h.x, h.y + 14); c.lineTo(h.x, h.y + 26);
+            c.stroke();
+        }
+    }
+
+    /* ── MECH-DRAGON VILLAIN RENDERER — serpentine flying beast
+       with metal-plated body segments, mechanical wings, long
+       jawed head with breath-weapon glow, spiked tail, claws.
+       Definitely NOT humanoid. */
+    function drawDragon(c, v){
+        var cols = v.cols;
+        var tpl = v.tpl || { id:'warlord', accent:'#dc2626', primary:'#4a1e1e', mask:'#000' };
+        var hurt = v.hurtT > 0 ? (v.hurtT/220) : 0;
+        var S = 1.35;
+        /* ── FLIGHT ANIMATION PHASES ──
+           Multiple sinusoids at different frequencies layered so
+           the dragon FEELS alive: a slow main bob, a faster wing
+           flap that drives lift, a tail wave delayed behind the
+           body wave, and a banking lean tied to horizontal vel.  */
+        var t  = v.flightT;
+        var bobMain   = Math.sin(t * 1.7) * 2.4;       /* gentle up/down */
+        var bobLift   = Math.sin(t * 3.4 + 0.6) * 0.9; /* fast wing-lift */
+        var wingPhase = t * 3.4;                        /* primary flap */
+        var wingFlap  = Math.sin(wingPhase);
+        var wingCurl  = Math.sin(wingPhase + 1.2);     /* trailing wing-tip curl */
+        var bodyWave  = Math.sin(t * 1.8);              /* spine undulation */
+        var tailWave  = Math.sin(t * 1.8 - 0.9);       /* tail follows spine but delayed */
+        var bankAng   = Math.max(-0.32, Math.min(0.32,
+                          ((v.vx || 0) * (v.face || 1)) * -0.05));   /* lean into turn */
+        c.save();
+        c.translate(v.x, v.y + bobMain + bobLift);
+        c.rotate(bankAng);
+        var fxV = v.face || 1;
+        c.scale(fxV, 1);
+        /* SHADOW underneath — pulses with wing flap (dragon
+           rises on the downstroke, shadow grows then) */
+        var shadowScale = 1 + Math.max(0, -wingFlap) * 0.25;
+        c.fillStyle = 'rgba(0,0,0,' + (0.35 + Math.max(0,-wingFlap)*0.18) + ')';
+        c.beginPath();
+        c.ellipse(0, 14*S - bobMain*0.5, 22*S * shadowScale, 4*S * shadowScale,
+                  0, 0, Math.PI*2);
+        c.fill();
+        /* ── ELEMENT TRAIL — translucent embers drifting back from
+           the dragon's tail, colored to its element. */
+        var elemHue = ELEMENT_HUES[v.element] || 20;
+        var elemCol = ELEMENT_COLORS[v.element] || '#ff5020';
+        for (var tr=0; tr<5; tr++){
+            var trT = (Math.sin(t * 2.0 + tr * 1.3) + 1) * 0.5;
+            var trX = -30*S - tr * 4*S;
+            var trY = -2*S + Math.sin(t * 2.3 + tr) * 3*S;
+            var trA = 0.40 - tr * 0.07;
+            c.fillStyle = 'hsla(' + elemHue + ', 90%, 60%, ' + trA + ')';
+            c.beginPath();
+            c.arc(trX, trY, (2.5 - tr*0.35)*S * (0.7 + trT*0.5), 0, Math.PI*2);
+            c.fill();
+        }
+        /* ── BODY CURVE — serpent shape, parameterised so the
+           dragon undulates smoothly down its length ── */
+        function bodyPt(tt){
+            /* tt∈[0,1]: 0 = tail-tip (back), 1 = neck-base (forward).
+               Wave amplitude grows toward the tail so the rear
+               whips around more than the chest. */
+            var bx = -22*S + tt * 36*S;
+            var by = Math.sin(tt * Math.PI * 1.4 + t * 1.8) * (3 + (1-tt)*2)*S;
+            return { x: bx, y: by };
+        }
+        /* ── TAIL — long taper with sinusoidal sway and segmented
+           membrane fin along the underside */
+        var tailTipY = -8*S + tailWave * 5*S;
+        var tailTipX = -32*S - tailWave * 3*S;
+        var tailMidX = -26*S - tailWave * 1.5*S;
+        var tailMidY = -4*S + tailWave * 2.5*S;
+        c.fillStyle = cols.mask;
+        c.beginPath();
+        c.moveTo(-22*S, -3*S);
+        c.bezierCurveTo(tailMidX, tailMidY - 1*S,
+                        tailTipX + 2*S, tailTipY - 1*S,
+                        tailTipX, tailTipY);
+        c.bezierCurveTo(tailTipX + 4*S, tailTipY + 1*S,
+                        tailMidX, tailMidY + 1.5*S,
+                        -22*S, 3*S);
+        c.closePath();
+        c.fill();
+        /* tail fin webbing — translucent membrane along underside */
+        c.fillStyle = 'rgba(255,255,255,0.10)';
+        c.beginPath();
+        c.moveTo(tailMidX, tailMidY + 1*S);
+        c.lineTo(tailMidX - 1*S, tailMidY + 5*S);
+        c.lineTo(tailTipX + 2*S, tailTipY + 4*S);
+        c.lineTo(tailTipX, tailTipY);
+        c.closePath();
+        c.fill();
+        /* tail spike — bright accent that GLOWS */
+        c.fillStyle = cols.accent;
+        c.beginPath();
+        c.moveTo(tailTipX, tailTipY - 1.5*S);
+        c.lineTo(tailTipX - 5*S, tailTipY + 0.3*S);
+        c.lineTo(tailTipX, tailTipY + 2*S);
+        c.closePath();
+        c.fill();
+        var spikeG = c.createRadialGradient(tailTipX - 2*S, tailTipY, 0,
+                                             tailTipX - 2*S, tailTipY, 3*S);
+        spikeG.addColorStop(0, elemCol);
+        spikeG.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = spikeG;
+        c.beginPath();
+        c.arc(tailTipX - 2*S, tailTipY, 3*S, 0, Math.PI*2);
+        c.fill();
+        /* ── WINGS — bezier flap with FAR + NEAR wing parallax,
+           plus translucent afterimage ghosts trailing the flap.
+           Far wing draws BEHIND the body, near wing draws over. */
+        function drawWing(side, alphaMul, scaleMul){
+            /* side: +1 = near (over-body), -1 = far (under-body)
+               wingTipY computed per wing so far wing arcs slightly
+               offset, giving 3D parallax illusion. */
+            var sideFlap = wingFlap * (side > 0 ? 1.0 : 0.92);
+            var sideCurl = wingCurl * (side > 0 ? 1.0 : 0.88);
+            var wingRootY = (side > 0 ? -4*S : -3*S);
+            var wingTipY  = -22*S * scaleMul - sideFlap * 9*S;
+            var wingTipX  = -8*S - sideFlap * 1.2*S;
+            var midX = -2*S + sideFlap * 0.6*S;
+            var midY = -16*S * scaleMul - sideFlap * 4*S;
+            var trailMidX = -1*S - sideCurl * 1.5*S;
+            var trailMidY = -10*S + sideCurl * 3*S;
+            c.globalAlpha = alphaMul;
+            c.fillStyle = cols.mask;
+            c.beginPath();
+            c.moveTo(-6*S, wingRootY);
+            c.bezierCurveTo(midX, midY,
+                            wingTipX - 4*S, wingTipY,
+                            wingTipX, wingTipY + 2*S);
+            c.bezierCurveTo(wingTipX + 2*S, wingTipY + 4*S,
+                            trailMidX, trailMidY,
+                            2*S, wingRootY);
+            c.closePath();
+            c.fill();
+            /* membrane gradient */
+            var wG = c.createLinearGradient(0, wingRootY, wingTipX, wingTipY);
+            wG.addColorStop(0, cols.primary);
+            wG.addColorStop(0.6, cols.mask);
+            wG.addColorStop(1, 'hsla(' + elemHue + ', 70%, 35%, 1)');
+            c.fillStyle = wG;
+            c.beginPath();
+            c.moveTo(-4*S, wingRootY - 1*S);
+            c.bezierCurveTo(midX + 1*S, midY + 2*S,
+                            wingTipX - 2*S, wingTipY + 1*S,
+                            wingTipX + 1*S, wingTipY + 3*S);
+            c.bezierCurveTo(wingTipX, wingTipY + 5*S,
+                            trailMidX + 1*S, trailMidY + 1*S,
+                            1*S, wingRootY - 1*S);
+            c.closePath();
+            c.fill();
+            /* ribs sweep out toward tip — 4 ribs now (was 3) */
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 1.0;
+            for (var wr=0; wr<4; wr++){
+                var wrT = (wr + 1) / 5;
+                c.beginPath();
+                c.moveTo(-3*S + wr*1.6*S, wingRootY);
+                c.lineTo(wingTipX * (1 - wr*0.18),
+                         wingTipY + wr*1.3*S);
+                c.stroke();
+            }
+            /* membrane sheen — thin highlight band along leading edge */
+            c.strokeStyle = 'rgba(255,255,255,0.28)';
+            c.lineWidth = 0.7;
+            c.beginPath();
+            c.moveTo(-5*S, wingRootY - 0.5*S);
+            c.bezierCurveTo(midX, midY - 0.5*S,
+                            wingTipX - 3*S, wingTipY - 0.5*S,
+                            wingTipX, wingTipY + 1*S);
+            c.stroke();
+            /* glowing wing-tip light + element halo */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc(wingTipX, wingTipY + 2*S, 1.2*S, 0, Math.PI*2);
+            c.fill();
+            var tipG = c.createRadialGradient(wingTipX, wingTipY + 2*S, 0,
+                                              wingTipX, wingTipY + 2*S, 4*S);
+            tipG.addColorStop(0, elemCol);
+            tipG.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = tipG;
+            c.beginPath();
+            c.arc(wingTipX, wingTipY + 2*S, 4*S, 0, Math.PI*2);
+            c.fill();
+            c.fillStyle = '#ffffff';
+            c.beginPath();
+            c.arc(wingTipX, wingTipY + 2*S, 0.5*S, 0, Math.PI*2);
+            c.fill();
+            c.globalAlpha = 1;
+        }
+        /* AFTERIMAGE: previous wing positions, faded */
+        var prevPhase1 = wingPhase - 0.5;
+        var prevPhase2 = wingPhase - 1.0;
+        function drawWingGhost(phase, scaleMul, alpha){
+            var pf = Math.sin(phase);
+            var wingTipY  = -22*S * scaleMul - pf * 9*S;
+            var wingTipX  = -8*S - pf * 1.2*S;
+            var wingRootY = -4*S;
+            c.globalAlpha = alpha;
+            c.fillStyle = cols.mask;
+            c.beginPath();
+            c.moveTo(-6*S, wingRootY);
+            c.bezierCurveTo(-2*S, -16*S*scaleMul - pf*4*S,
+                            wingTipX - 4*S, wingTipY,
+                            wingTipX, wingTipY + 2*S);
+            c.bezierCurveTo(wingTipX + 2*S, wingTipY + 4*S,
+                            -1*S, -10*S,
+                            2*S, wingRootY);
+            c.closePath();
+            c.fill();
+            c.globalAlpha = 1;
+        }
+        /* far wing under-body first */
+        drawWing(-1, 0.65, 0.92);
+        /* ghost trail for primary wing — TWO afterimages */
+        drawWingGhost(prevPhase2, 1.0, 0.10);
+        drawWingGhost(prevPhase1, 1.0, 0.18);
+        /* ── BODY MAIN — 5 armored plate segments along the spine */
+        for (var seg=0; seg<5; seg++){
+            var sT = seg / 5;
+            var sx0 = -22*S + sT * 30*S;
+            var sx1 = -22*S + (sT + 0.18) * 30*S;
+            var swy = Math.sin(sT * Math.PI + v.flightT * 1.5) * 2*S;
+            /* segment dark base */
+            c.fillStyle = cols.mask;
+            c.beginPath();
+            c.moveTo(sx0, swy - 4*S);
+            c.lineTo(sx1, swy - 4*S);
+            c.lineTo(sx1 + 1*S, swy + 4*S);
+            c.lineTo(sx0 - 1*S, swy + 4*S);
+            c.closePath();
+            c.fill();
+            /* armored plate */
+            c.fillStyle = cols.primary;
+            c.fillRect(sx0, swy - 3.5*S, sx1 - sx0, 5*S);
+            /* highlight stripe */
+            c.fillStyle = 'rgba(255,255,255,0.18)';
+            c.fillRect(sx0, swy - 3.5*S, sx1 - sx0, 0.8*S);
+            /* spine ridge — accent triangle on top */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(sx0 + 1*S, swy - 4*S);
+            c.lineTo((sx0+sx1)/2, swy - 7*S);
+            c.lineTo(sx1 - 1*S, swy - 4*S);
+            c.closePath();
+            c.fill();
+            /* glowing rivet */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc((sx0+sx1)/2, swy, 0.6*S, 0, Math.PI*2); c.fill();
+        }
+        /* near wing draws OVER the body so the parallax depth
+           reads — body in middle, near wing in front */
+        drawWing(+1, 1.0, 1.0);
+        /* ── LIMBS — 2 small mechanical legs underneath, claws */
+        for (var lg=0; lg<2; lg++){
+            var lgx = -10*S + lg * 12*S;
+            var lgy = 4*S;
+            /* leg piston */
+            c.fillStyle = cols.mask;
+            c.fillRect(lgx - 1*S, lgy, 2*S, 4*S);
+            c.fillStyle = '#9aa0aa';
+            c.fillRect(lgx - 0.5*S, lgy + 3*S, 1*S, 3*S);
+            /* claw foot — 3 prongs */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(lgx, lgy + 6*S);
+            c.lineTo(lgx - 1.4*S, lgy + 8*S);
+            c.lineTo(lgx - 0.5*S, lgy + 8.5*S);
+            c.lineTo(lgx, lgy + 8*S);
+            c.lineTo(lgx + 0.5*S, lgy + 8.5*S);
+            c.lineTo(lgx + 1.4*S, lgy + 8*S);
+            c.closePath();
+            c.fill();
+        }
+        /* ── NECK — curved cylinder rising forward */
+        c.fillStyle = cols.mask;
+        c.beginPath();
+        c.moveTo(8*S, -4*S);
+        c.bezierCurveTo(13*S, -7*S, 16*S, -10*S, 18*S, -12*S);
+        c.lineTo(20*S, -10*S);
+        c.bezierCurveTo(17*S, -7*S, 13*S, -4*S, 10*S, -2*S);
+        c.closePath();
+        c.fill();
+        /* neck plates — 4 mini segments */
+        for (var nk=0; nk<4; nk++){
+            var nkT = nk / 4;
+            var nx = 8*S + nkT * 10*S;
+            var ny = -4*S - nkT * 7*S;
+            c.fillStyle = cols.primary;
+            c.fillRect(nx - 1.2*S, ny - 1.2*S, 2.4*S, 2.4*S);
+            c.fillStyle = cols.accent;
+            c.fillRect(nx - 1.2*S, ny - 1.6*S, 2.4*S, 0.5*S);
+        }
+        /* ── HEAD — triangular jaws with horns ── */
+        c.save();
+        c.translate(20*S, -12*S);
+        /* lower jaw */
+        c.fillStyle = cols.mask;
+        c.beginPath();
+        c.moveTo(0, 0);
+        c.lineTo(8*S, 0.5*S);
+        c.lineTo(10*S, 2*S);
+        c.lineTo(7*S, 3.5*S);
+        c.lineTo(0, 2*S);
+        c.closePath();
+        c.fill();
+        /* upper jaw / head */
+        c.fillStyle = cols.primary;
+        c.beginPath();
+        c.moveTo(-1*S, -2*S);
+        c.lineTo(8*S, -2.5*S);
+        c.lineTo(10*S, -1*S);
+        c.lineTo(10*S, 1*S);
+        c.lineTo(8*S, 0.5*S);
+        c.lineTo(0, 0);
+        c.lineTo(-1*S, -2*S);
+        c.closePath();
+        c.fill();
+        /* head plate highlight */
+        c.fillStyle = 'rgba(255,255,255,0.22)';
+        c.beginPath();
+        c.moveTo(-1*S, -2*S);
+        c.lineTo(8*S, -2.5*S);
+        c.lineTo(10*S, -1*S);
+        c.lineTo(0, -1.4*S);
+        c.closePath();
+        c.fill();
+        /* HORNS — 2 swept-back horns */
+        c.fillStyle = cols.accent;
+        c.beginPath();
+        c.moveTo(2*S, -2*S);
+        c.lineTo(-1*S, -6*S);
+        c.lineTo(3*S, -2.5*S);
+        c.closePath();
+        c.fill();
+        c.beginPath();
+        c.moveTo(5*S, -2.3*S);
+        c.lineTo(2*S, -6.5*S);
+        c.lineTo(6*S, -2.7*S);
+        c.closePath();
+        c.fill();
+        /* GLOWING EYE — slit pupil */
+        var eyeCol = tpl.id === 'overlord' ? '#80f0ff'
+                   : tpl.id === 'fiend'    ? '#80ff60'
+                   : tpl.id === 'reaper'   ? '#c060ff'
+                   : tpl.id === 'inferno'  ? '#ffd040'
+                   : '#ff4040';
+        c.fillStyle = '#000';
+        c.beginPath();
+        c.ellipse(4*S, -1*S, 1.6*S, 1.0*S, -0.2, 0, Math.PI*2);
+        c.fill();
+        var eyeBright = 0.6 + Math.sin(v.flightT * 6) * 0.4;
+        c.fillStyle = eyeCol;
+        c.beginPath();
+        c.ellipse(4*S, -1*S, 1.2*S, 0.7*S, -0.2, 0, Math.PI*2);
+        c.fill();
+        /* pupil slit */
+        c.fillStyle = '#000';
+        c.fillRect(3.7*S, -1.4*S, 0.4*S, 0.8*S);
+        /* eye glow halo — simple faint white radial */
+        c.fillStyle = 'rgba(255,255,255,' + (eyeBright*0.25) + ')';
+        c.beginPath();
+        c.arc(4*S, -1*S, 4*S, 0, Math.PI*2); c.fill();
+        /* TEETH — thin white triangles in mouth */
+        c.fillStyle = '#e8e8ec';
+        for (var tt=0; tt<4; tt++){
+            var ttx = 6*S + tt*0.8*S;
+            c.beginPath();
+            c.moveTo(ttx, 0);
+            c.lineTo(ttx + 0.4*S, 1.2*S);
+            c.lineTo(ttx + 0.8*S, 0);
+            c.closePath();
+            c.fill();
+        }
+        /* JAW GLOW — power building in the mouth when attacking */
+        if (v.attackT > 0){
+            var apJ = v.attackT / 200;
+            var jg = c.createRadialGradient(8*S, 0, 0.5, 8*S, 0, 4*S);
+            jg.addColorStop(0, 'rgba(255,255,255,' + apJ + ')');
+            jg.addColorStop(0.5, eyeCol);
+            jg.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = jg;
+            c.beginPath(); c.arc(8*S, 0, 4*S, 0, Math.PI*2); c.fill();
+        }
+        c.restore();
+        /* hurt flash */
+        if (hurt > 0){
+            c.fillStyle = 'rgba(255,255,255,' + (hurt*0.7) + ')';
+            c.fillRect(-36*S, -22*S, 60*S, 36*S);
+        }
+        c.restore();
+        /* HP BAR overhead */
+        var hpFrac = v.hp / v.maxHp;
+        if (hpFrac < 1){
+            var bw = 44;
+            var byTop = v.y - 28;
+            c.fillStyle = 'rgba(0,0,0,0.7)';
+            c.fillRect(v.x - bw/2 - 1, byTop - 1, bw + 2, 5);
+            var hpCol = hpFrac > 0.5 ? '#dc2626' : hpFrac > 0.25 ? '#f59e0b' : '#fbbf24';
+            c.fillStyle = hpCol;
+            c.fillRect(v.x - bw/2, byTop, bw * hpFrac, 3);
+        }
+    }
+
+    /* ── ROBOT VILLAIN RENDERER — fully-detailed military mech ──
+       Boxy industrial body, single glowing eye, shoulder cannons,
+       hydraulic arms, riveted plating, exhaust pipes, antenna.
+       Each template (warlord, reaper, fiend, brutus, overlord,
+       inferno) gets a unique color palette and shoulder weapon. */
+    function drawRobot(c, v){
+        var cols = v.cols;
+        var tpl = v.tpl || { id:'warlord', accent:'#dc2626', primary:'#4a1e1e', mask:'#000' };
+        var hurt = v.hurtT > 0 ? (v.hurtT/220) : 0;
+        var S = 1.35;
+        c.save();
+        c.translate(v.x, v.y);
+        var fxV = v.face || 1;
+        c.scale(fxV, 1);
+        /* hovering bob */
+        var bob = Math.sin(v.flightT * 1.8) * 1.4;
+        c.translate(0, bob);
+        /* ── SHADOW underneath */
+        c.fillStyle = 'rgba(0,0,0,0.50)';
+        c.beginPath();
+        c.ellipse(0, 10*S, 16*S, 4*S, 0, 0, Math.PI*2);
+        c.fill();
+        /* ── HYDRAULIC LEG PISTONS — short stout legs */
+        for (var lg=-1; lg<=1; lg+=2){
+            var lgx = lg * 2.5*S;
+            /* hip cylinder */
+            c.fillStyle = cols.primary;
+            c.fillRect(lgx - 1.4*S, -1*S, 2.8*S, 4*S);
+            c.strokeStyle = '#000';
+            c.lineWidth = 0.6;
+            c.strokeRect(lgx - 1.4*S, -1*S, 2.8*S, 4*S);
+            /* piston shaft (silver cylinder) */
+            c.fillStyle = '#9aa0aa';
+            c.fillRect(lgx - 0.6*S, 3*S, 1.2*S, 4*S);
+            /* boot/foot — wide armored plate */
+            c.fillStyle = cols.mask;
+            c.fillRect(lgx - 1.8*S, 7*S, 3.6*S, 2.2*S);
+            c.fillStyle = '#444';
+            c.fillRect(lgx - 1.8*S, 9*S, 3.6*S, 0.6*S);
+            /* rivets on foot */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(lgx - 1.2*S, 8*S, 0.4*S, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(lgx + 1.2*S, 8*S, 0.4*S, 0, Math.PI*2); c.fill();
+        }
+        /* ── BOXY TORSO with armor plates */
+        var bodyGrad = c.createLinearGradient(0, -10*S, 0, 2*S);
+        bodyGrad.addColorStop(0, '#4a4a52');
+        bodyGrad.addColorStop(0.4, cols.primary);
+        bodyGrad.addColorStop(1, cols.mask);
+        c.fillStyle = bodyGrad;
+        c.fillRect(-7*S, -10*S, 14*S, 12*S);
+        /* armor plates */
+        c.fillStyle = cols.primary;
+        c.fillRect(-6*S, -9*S, 12*S, 4*S);
+        c.fillStyle = 'rgba(255,255,255,0.18)';
+        c.fillRect(-6*S, -9*S, 12*S, 1*S);
+        /* central reactor port */
+        c.fillStyle = cols.mask;
+        c.beginPath(); c.arc(0, -4*S, 2.4*S, 0, Math.PI*2); c.fill();
+        var coreP = 0.5 + Math.sin(v.flightT * 4) * 0.5;
+        c.fillStyle = cols.accent;
+        c.beginPath(); c.arc(0, -4*S, 1.6*S * (0.7 + coreP*0.3), 0, Math.PI*2); c.fill();
+        c.fillStyle = '#ffffff';
+        c.beginPath(); c.arc(0, -4*S, 0.8*S * coreP, 0, Math.PI*2); c.fill();
+        /* rivets at corners */
+        c.fillStyle = '#9aa0aa';
+        c.beginPath(); c.arc(-6*S, -9*S, 0.6*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc( 6*S, -9*S, 0.6*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc(-6*S,  1*S, 0.6*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc( 6*S,  1*S, 0.6*S, 0, Math.PI*2); c.fill();
+        /* panel lines */
+        c.strokeStyle = 'rgba(0,0,0,0.55)';
+        c.lineWidth = 0.7;
+        c.beginPath();
+        c.moveTo(-7*S, -5*S); c.lineTo(7*S, -5*S);
+        c.moveTo(0, -10*S); c.lineTo(0, -7*S);
+        c.stroke();
+        /* ── SHOULDER CANNONS — weapon pods per template */
+        for (var sp=-1; sp<=1; sp+=2){
+            var spx = sp * 7*S;
+            /* mount housing */
+            c.fillStyle = cols.mask;
+            c.fillRect(spx - 1.2*S, -12*S, 2.4*S, 3*S);
+            c.fillStyle = cols.primary;
+            c.fillRect(spx - 1*S, -11.5*S, 2*S, 2*S);
+            /* the cannon barrel itself */
+            c.fillStyle = '#444';
+            c.fillRect(spx - 0.8*S, -13.5*S, 1.6*S, 2*S);
+            /* glowing muzzle */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(spx, -13.5*S, 0.6*S, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#fff';
+            c.beginPath(); c.arc(spx, -13.5*S, 0.25*S, 0, Math.PI*2); c.fill();
+        }
+        /* ── ARMS — hydraulic with claw hands. Pose them with
+           windup/thrust when attacking. */
+        var atkP_v = v.attackT > 0 ? (1 - v.attackT / 200) : -1;
+        var atkV = (atkP_v >= 0 && atkP_v <= 1) ? Math.sin(atkP_v * Math.PI) : 0;
+        for (var ar=-1; ar<=1; ar+=2){
+            var arx = ar * 7.5*S;
+            /* shoulder joint cap */
+            c.fillStyle = cols.mask;
+            c.beginPath(); c.arc(arx, -8*S, 2*S, 0, Math.PI*2); c.fill();
+            c.fillStyle = cols.primary;
+            c.beginPath(); c.arc(arx, -8*S, 1.5*S, 0, Math.PI*2); c.fill();
+            /* upper arm — armored rectangle, angled outward */
+            var uaAng = (ar < 0 ? -0.4 : 0.4) - atkV * 0.35;
+            c.save();
+            c.translate(arx, -8*S);
+            c.rotate(uaAng);
+            c.fillStyle = cols.primary;
+            c.fillRect(-1.4*S, 0, 2.8*S, 5*S);
+            c.fillStyle = 'rgba(255,255,255,0.18)';
+            c.fillRect(-1.4*S, 0, 0.7*S, 5*S);
+            /* hydraulic piston rings */
+            c.fillStyle = '#9aa0aa';
+            c.fillRect(-1.4*S, 1.5*S, 2.8*S, 0.4*S);
+            c.fillRect(-1.4*S, 3.5*S, 2.8*S, 0.4*S);
+            /* elbow + forearm */
+            c.fillStyle = cols.mask;
+            c.beginPath(); c.arc(0, 5*S, 1.4*S, 0, Math.PI*2); c.fill();
+            var faAng = (ar < 0 ? 0.3 : -0.3) + atkV * 0.6;
+            c.save();
+            c.translate(0, 5*S);
+            c.rotate(faAng);
+            c.fillStyle = '#666';
+            c.fillRect(-1*S, 0, 2.0*S, 4.5*S);
+            c.fillStyle = 'rgba(255,255,255,0.18)';
+            c.fillRect(-1*S, 0, 0.6*S, 4.5*S);
+            /* claw hand — 3 prongs */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.moveTo(0, 4.5*S);
+            c.lineTo(-1.3*S, 6*S);
+            c.lineTo(-0.4*S, 6.5*S);
+            c.lineTo(0, 6*S);
+            c.lineTo(0.4*S, 6.5*S);
+            c.lineTo(1.3*S, 6*S);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#000';
+            c.lineWidth = 0.5;
+            c.stroke();
+            c.restore();
+            c.restore();
+        }
+        /* ── HEAD / DOMED COMMAND POD */
+        c.fillStyle = cols.mask;
+        c.beginPath();
+        c.arc(0, -13*S, 3.6*S, 0, Math.PI*2);
+        c.fill();
+        c.fillStyle = cols.primary;
+        c.beginPath();
+        c.arc(0, -13*S, 3.0*S, 0, Math.PI*2);
+        c.fill();
+        /* CYCLOPS EYE — single glowing red optic */
+        c.fillStyle = '#000';
+        c.fillRect(-2.4*S, -13.5*S, 4.8*S, 1.4*S);
+        var eyeBright = 0.7 + Math.sin(v.flightT * 6) * 0.3;
+        c.fillStyle = 'rgba(' + (tpl.id === 'overlord' ? '120,200,255' :
+                                  tpl.id === 'fiend'    ? '120,255,80'  :
+                                  tpl.id === 'reaper'   ? '180,80,255'  :
+                                  tpl.id === 'inferno'  ? '255,200,40'  :
+                                  '255,40,40') + ',' + eyeBright + ')';
+        c.fillRect(-2.2*S, -13.35*S, 4.4*S, 1.0*S);
+        c.fillStyle = '#ffffff';
+        c.fillRect(-2.2*S, -13.35*S, 4.4*S, 0.25*S);
+        /* eye-glow halo */
+        var ehg = c.createRadialGradient(0, -13*S, 0.5, 0, -13*S, 8*S);
+        ehg.addColorStop(0, 'rgba(255,255,255,' + (eyeBright*0.4) + ')');
+        ehg.addColorStop(1, 'rgba(255,40,40,0)');
+        c.fillStyle = ehg;
+        c.beginPath(); c.arc(0, -13*S, 8*S, 0, Math.PI*2); c.fill();
+        /* ANTENNAE */
+        c.strokeStyle = '#444';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.moveTo(-2*S, -16*S); c.lineTo(-3*S, -19*S);
+        c.moveTo( 2*S, -16*S); c.lineTo( 3*S, -19*S);
+        c.stroke();
+        c.fillStyle = cols.accent;
+        c.beginPath(); c.arc(-3*S, -19*S, 0.6*S, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc( 3*S, -19*S, 0.6*S, 0, Math.PI*2); c.fill();
+        /* CENTRAL ANTENNA with blinking tip */
+        c.strokeStyle = '#555';
+        c.lineWidth = 0.9;
+        c.beginPath();
+        c.moveTo(0, -16.5*S); c.lineTo(0, -21*S);
+        c.stroke();
+        var blink = Math.sin(v.flightT * 9) > 0;
+        c.fillStyle = blink ? '#ff4040' : '#400';
+        c.beginPath(); c.arc(0, -21*S, 0.8*S, 0, Math.PI*2); c.fill();
+        /* EXHAUST PIPES at the back */
+        c.fillStyle = '#333';
+        c.fillRect(-8*S, -8*S, 1.2*S, 3*S);
+        c.fillRect(-8*S, -4*S, 1.2*S, 3*S);
+        /* exhaust steam */
+        c.fillStyle = 'rgba(180,180,180,0.55)';
+        var stP = (v.flightT * 100) % 30;
+        c.beginPath();
+        c.arc(-9*S, -6.5*S - stP*0.2, 1.2*S + stP*0.1, 0, Math.PI*2);
+        c.fill();
+        /* WARNING LIGHTS along the torso edge */
+        var lights = [-5*S, -2*S, 2*S, 5*S];
+        for (var li=0; li<lights.length; li++){
+            var lOn = ((Math.floor(v.flightT*4) + li) % 2 === 0);
+            c.fillStyle = lOn ? cols.accent : '#220000';
+            c.beginPath(); c.arc(lights[li], -1*S, 0.5*S, 0, Math.PI*2); c.fill();
+        }
+        /* CHEST EMBLEM — single bold letter on the chest plate */
+        c.save();
+        c.scale(fxV, 1);
+        c.fillStyle = cols.accent;
+        c.font = 'bold ' + (5*S) + 'px Arial Black, sans-serif';
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText(tpl.tag || 'V', 0, -7*S);
+        c.restore();
+        /* hurt flash overlay */
+        if (hurt > 0){
+            c.fillStyle = 'rgba(255,255,255,' + (hurt*0.7) + ')';
+            c.fillRect(-9*S, -22*S, 18*S, 32*S);
+        }
+        c.restore();
+        /* HP BAR overhead */
+        var hpFrac = v.hp / v.maxHp;
+        if (hpFrac < 1){
+            var bw = 38;
+            var byTop = v.y - 46;
+            c.fillStyle = 'rgba(0,0,0,0.7)';
+            c.fillRect(v.x - bw/2 - 1, byTop - 1, bw + 2, 5);
+            var hpCol = hpFrac > 0.5 ? '#dc2626' : hpFrac > 0.25 ? '#f59e0b' : '#fbbf24';
+            c.fillStyle = hpCol;
+            c.fillRect(v.x - bw/2, byTop, bw * hpFrac, 3);
+        }
+    }
+
+    function drawHeroPower(c, p){
+        var cols = p.cols || { primary:'#ffffff', accent:'#ffd040', cape:'#404040' };
+        if (p.kind === 'beam'){
+            /* ── MASSIVE multi-layer beam with lightning forks ── */
+            var lp = 1 - (p.age / p.max);
+            if (lp <= 0) return;
+            var beamAng = Math.atan2(p.ty - p.sy, p.tx - p.sx);
+            var perp = beamAng + Math.PI/2;
+            /* outer halo — wide soft glow */
+            c.strokeStyle = cols.primary;
+            c.lineWidth = 22 * lp;
+            c.globalAlpha = 0.25 * lp;
+            c.beginPath(); c.moveTo(p.sx, p.sy); c.lineTo(p.tx, p.ty); c.stroke();
+            c.globalAlpha = 1;
+            /* middle saturated color */
+            c.strokeStyle = cols.primary;
+            c.lineWidth = 12 * lp;
+            c.globalAlpha = 0.55 * lp;
+            c.beginPath(); c.moveTo(p.sx, p.sy); c.lineTo(p.tx, p.ty); c.stroke();
+            /* hot accent core */
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 6 * lp;
+            c.globalAlpha = lp;
+            c.beginPath(); c.moveTo(p.sx, p.sy); c.lineTo(p.tx, p.ty); c.stroke();
+            /* white-hot center line */
+            c.strokeStyle = '#ffffff';
+            c.lineWidth = 2.4 * lp;
+            c.beginPath(); c.moveTo(p.sx, p.sy); c.lineTo(p.tx, p.ty); c.stroke();
+            c.globalAlpha = 1;
+            /* lightning forks branching off the beam */
+            for (var lf=0; lf<5; lf++){
+                var lft = (lf + 1) / 6;
+                var bx0 = p.sx + (p.tx - p.sx) * lft;
+                var by0 = p.sy + (p.ty - p.sy) * lft;
+                var jitter = (Math.random()*2 - 1) * 8;
+                c.strokeStyle = 'rgba(255,255,255,' + (lp*0.85) + ')';
+                c.lineWidth = 1.2;
+                c.beginPath();
+                c.moveTo(bx0, by0);
+                c.lineTo(bx0 + Math.cos(perp) * jitter, by0 + Math.sin(perp) * jitter);
+                c.stroke();
+            }
+            /* muzzle flash at hero */
+            var mfG = c.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, 18);
+            mfG.addColorStop(0, 'rgba(255,255,255,' + lp + ')');
+            mfG.addColorStop(0.5, cols.accent);
+            mfG.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = mfG;
+            c.beginPath(); c.arc(p.sx, p.sy, 18, 0, Math.PI*2); c.fill();
+            /* impact burst at target */
+            var imG = c.createRadialGradient(p.tx, p.ty, 0, p.tx, p.ty, 22);
+            imG.addColorStop(0, 'rgba(255,255,255,' + lp + ')');
+            imG.addColorStop(0.4, cols.primary);
+            imG.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = imG;
+            c.beginPath(); c.arc(p.tx, p.ty, 22, 0, Math.PI*2); c.fill();
+        } else if (p.kind === 'projectile'){
+            /* ── ELEMENT-SPECIFIC dragon breath / hero shot ── */
+            var elem = p.element;
+            if (elem === 'fire'){
+                /* FIRE — flickering fireball with flame tongues */
+                var fT = p.age * 0.01;
+                /* heat halo */
+                var fG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 20);
+                fG.addColorStop(0, '#fff7c2');
+                fG.addColorStop(0.25, '#ffd040');
+                fG.addColorStop(0.6, '#ff5020');
+                fG.addColorStop(1, 'rgba(120,20,0,0)');
+                c.fillStyle = fG;
+                c.beginPath(); c.arc(p.x, p.y, 20, 0, Math.PI*2); c.fill();
+                /* flame tongues — 5 oscillating tongues */
+                for (var fi=0; fi<5; fi++){
+                    var fa = fi*Math.PI*2/5 + fT;
+                    var fr = 8 + Math.sin(fT*4 + fi)*3;
+                    c.fillStyle = 'rgba(255,160,40,0.85)';
+                    c.beginPath();
+                    c.moveTo(p.x, p.y);
+                    c.lineTo(p.x + Math.cos(fa)*fr, p.y + Math.sin(fa)*fr);
+                    c.lineTo(p.x + Math.cos(fa+0.3)*fr*0.5, p.y + Math.sin(fa+0.3)*fr*0.5);
+                    c.closePath(); c.fill();
+                }
+                /* white-hot core */
+                c.fillStyle = '#ffffff';
+                c.beginPath(); c.arc(p.x, p.y, 3.5, 0, Math.PI*2); c.fill();
+                /* smoke trail */
+                for (var fs=0; fs<3; fs++){
+                    c.fillStyle = 'rgba(60,30,20,' + (0.5 - fs*0.15) + ')';
+                    c.beginPath();
+                    c.arc(p.x - p.vx*(fs+1)*0.6, p.y - p.vy*(fs+1)*0.6, 4+fs, 0, Math.PI*2);
+                    c.fill();
+                }
+            } else if (elem === 'electricity'){
+                /* LIGHTNING — jagged electric bolt */
+                /* halo */
+                var eG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 18);
+                eG.addColorStop(0, '#ffffff');
+                eG.addColorStop(0.3, '#a0d8ff');
+                eG.addColorStop(1, 'rgba(40,80,200,0)');
+                c.fillStyle = eG;
+                c.beginPath(); c.arc(p.x, p.y, 18, 0, Math.PI*2); c.fill();
+                /* zigzag bolt — random angular path behind */
+                c.strokeStyle = '#ffffff';
+                c.lineWidth = 2.4;
+                c.beginPath();
+                var ex = p.x, ey = p.y;
+                c.moveTo(ex, ey);
+                for (var ei=0; ei<5; ei++){
+                    ex -= p.vx*0.6 + rng(-3, 3);
+                    ey -= p.vy*0.6 + rng(-3, 3);
+                    c.lineTo(ex, ey);
+                }
+                c.stroke();
+                c.strokeStyle = '#80c0ff';
+                c.lineWidth = 4.5;
+                c.globalAlpha = 0.55;
+                c.beginPath();
+                c.moveTo(p.x, p.y);
+                var fx2 = p.x, fy2 = p.y;
+                for (var ei2=0; ei2<5; ei2++){
+                    fx2 -= p.vx*0.6;
+                    fy2 -= p.vy*0.6;
+                    c.lineTo(fx2 + rng(-2,2), fy2 + rng(-2,2));
+                }
+                c.stroke();
+                c.globalAlpha = 1;
+                /* radiating sparks at head */
+                for (var sp=0; sp<4; sp++){
+                    var spa = sp*Math.PI/2 + p.age*0.02;
+                    c.strokeStyle = 'rgba(180,220,255,0.85)';
+                    c.lineWidth = 1.2;
+                    c.beginPath();
+                    c.moveTo(p.x, p.y);
+                    c.lineTo(p.x + Math.cos(spa)*9, p.y + Math.sin(spa)*9);
+                    c.stroke();
+                }
+                c.fillStyle = '#ffffff';
+                c.beginPath(); c.arc(p.x, p.y, 3, 0, Math.PI*2); c.fill();
+            } else if (elem === 'water'){
+                /* WATER — droplet with rippling tail */
+                var wG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 14);
+                wG.addColorStop(0, '#ffffff');
+                wG.addColorStop(0.4, '#a0e0ff');
+                wG.addColorStop(1, 'rgba(20,80,160,0)');
+                c.fillStyle = wG;
+                c.beginPath(); c.arc(p.x, p.y, 14, 0, Math.PI*2); c.fill();
+                /* droplet body */
+                c.fillStyle = '#40b0e0';
+                c.beginPath();
+                c.ellipse(p.x, p.y, 6, 8, Math.atan2(p.vy, p.vx) + Math.PI/2, 0, Math.PI*2);
+                c.fill();
+                /* highlight */
+                c.fillStyle = 'rgba(255,255,255,0.8)';
+                c.beginPath();
+                c.ellipse(p.x-2, p.y-2, 2, 3, 0, 0, Math.PI*2);
+                c.fill();
+                /* bubbles trail */
+                for (var bi=0; bi<5; bi++){
+                    var bal = 0.7 - bi*0.13;
+                    c.fillStyle = 'rgba(160,220,255,' + bal + ')';
+                    c.beginPath();
+                    c.arc(p.x - p.vx*(bi+1)*0.7 + rng(-2,2),
+                          p.y - p.vy*(bi+1)*0.7 + rng(-2,2),
+                          2 - bi*0.2, 0, Math.PI*2);
+                    c.fill();
+                }
+            } else if (elem === 'ice'){
+                /* ICE — crystalline shard with frost mist */
+                var iG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 16);
+                iG.addColorStop(0, '#ffffff');
+                iG.addColorStop(0.4, '#d0eeff');
+                iG.addColorStop(1, 'rgba(160,200,240,0)');
+                c.fillStyle = iG;
+                c.beginPath(); c.arc(p.x, p.y, 16, 0, Math.PI*2); c.fill();
+                /* hexagonal crystal shape */
+                c.save();
+                c.translate(p.x, p.y);
+                c.rotate(Math.atan2(p.vy, p.vx));
+                c.fillStyle = '#a0e0ff';
+                c.beginPath();
+                c.moveTo(-7, 0); c.lineTo(-3, -4); c.lineTo(5, -3);
+                c.lineTo(9, 0); c.lineTo(5, 3); c.lineTo(-3, 4);
+                c.closePath(); c.fill();
+                /* highlight stripe */
+                c.fillStyle = 'rgba(255,255,255,0.85)';
+                c.fillRect(-6, -1, 13, 0.8);
+                /* edge facets */
+                c.strokeStyle = '#ffffff';
+                c.lineWidth = 0.6;
+                c.beginPath();
+                c.moveTo(-7, 0); c.lineTo(9, 0);
+                c.moveTo(-3, -4); c.lineTo(5, 3);
+                c.moveTo(5, -3); c.lineTo(-3, 4);
+                c.stroke();
+                c.restore();
+                /* frost mist trail */
+                for (var mi=0; mi<4; mi++){
+                    c.fillStyle = 'rgba(220,240,255,' + (0.5-mi*0.1) + ')';
+                    c.beginPath();
+                    c.arc(p.x - p.vx*(mi+1)*0.7, p.y - p.vy*(mi+1)*0.7,
+                          3+mi, 0, Math.PI*2);
+                    c.fill();
+                }
+            } else if (elem === 'acid'){
+                /* ACID — bubbling green sludge */
+                var aG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 16);
+                aG.addColorStop(0, '#e0ff80');
+                aG.addColorStop(0.4, '#80ff20');
+                aG.addColorStop(1, 'rgba(40,120,20,0)');
+                c.fillStyle = aG;
+                c.beginPath(); c.arc(p.x, p.y, 16, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#80ff20';
+                c.beginPath(); c.arc(p.x, p.y, 7, 0, Math.PI*2); c.fill();
+                /* bubbles on surface */
+                for (var ai=0; ai<5; ai++){
+                    var aa = ai*Math.PI*2/5 + p.age*0.005;
+                    c.fillStyle = 'rgba(180,255,80,0.85)';
+                    c.beginPath();
+                    c.arc(p.x + Math.cos(aa)*4, p.y + Math.sin(aa)*4, 1.6, 0, Math.PI*2);
+                    c.fill();
+                }
+                /* dripping drops behind */
+                for (var di=0; di<4; di++){
+                    c.fillStyle = 'rgba(120,200,40,' + (0.7-di*0.15) + ')';
+                    c.beginPath();
+                    c.arc(p.x - p.vx*(di+1)*0.5 + rng(-3,3),
+                          p.y - p.vy*(di+1)*0.5 + rng(-3,3),
+                          2-di*0.3, 0, Math.PI*2);
+                    c.fill();
+                }
+            } else if (elem === 'plasma' || elem === 'magma'){
+                /* PLASMA / MAGMA — orb with electric arcs / lava cracks */
+                var col1 = (elem === 'plasma') ? '#e040ff' : '#ffaa20';
+                var col2 = (elem === 'plasma') ? '#ff80ff' : '#ff5020';
+                var pG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 20);
+                pG.addColorStop(0, '#ffffff');
+                pG.addColorStop(0.4, col1);
+                pG.addColorStop(1, 'rgba(0,0,0,0)');
+                c.fillStyle = pG;
+                c.beginPath(); c.arc(p.x, p.y, 20, 0, Math.PI*2); c.fill();
+                c.fillStyle = col2;
+                c.beginPath(); c.arc(p.x, p.y, 6, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#ffffff';
+                c.beginPath(); c.arc(p.x, p.y, 2.5, 0, Math.PI*2); c.fill();
+                /* electric arcs / lava cracks */
+                for (var pa=0; pa<5; pa++){
+                    var paAng = pa*Math.PI*2/5 + p.age*0.008;
+                    c.strokeStyle = col1;
+                    c.lineWidth = 1.4;
+                    c.beginPath();
+                    c.moveTo(p.x, p.y);
+                    c.lineTo(p.x + Math.cos(paAng)*10 + rng(-1,1),
+                             p.y + Math.sin(paAng)*10 + rng(-1,1));
+                    c.stroke();
+                }
+            } else {
+                /* fallback — generic energy orb (heroes) */
+                var orbG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 18);
+                orbG.addColorStop(0, '#ffffff');
+                orbG.addColorStop(0.3, cols.accent);
+                orbG.addColorStop(0.7, cols.primary);
+                orbG.addColorStop(1, 'rgba(255,255,255,0)');
+                c.fillStyle = orbG;
+                c.beginPath(); c.arc(p.x, p.y, 18, 0, Math.PI*2); c.fill();
+                c.fillStyle = '#ffffff';
+                c.beginPath(); c.arc(p.x, p.y, 4, 0, Math.PI*2); c.fill();
+                for (var cs=0; cs<6; cs++){
+                    var csA = cs * Math.PI/3 + p.age * 0.01;
+                    c.strokeStyle = cols.accent;
+                    c.lineWidth = 1.4;
+                    c.beginPath();
+                    c.moveTo(p.x + Math.cos(csA)*6, p.y + Math.sin(csA)*6);
+                    c.lineTo(p.x + Math.cos(csA)*14, p.y + Math.sin(csA)*14);
+                    c.stroke();
+                }
+                for (var tr=0; tr<3; tr++){
+                    c.strokeStyle = tr === 0 ? cols.primary : tr === 1 ? cols.accent : '#ffffff';
+                    c.lineWidth = (7 - tr*2);
+                    c.globalAlpha = 0.55 - tr*0.15;
+                    c.beginPath();
+                    c.moveTo(p.x, p.y);
+                    c.lineTo(p.x - p.vx * (4 - tr), p.y - p.vy * (4 - tr));
+                    c.stroke();
+                }
+                c.globalAlpha = 1;
+            }
+        } else if (p.kind === 'shield'){
+            /* ── SPINNING THROWING DISC — multi-tier with rivets ── */
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.spin);
+            /* outer rim */
+            c.fillStyle = cols.primary;
+            c.beginPath(); c.arc(0, 0, 14, 0, Math.PI*2); c.fill();
+            c.strokeStyle = cols.mask || cols.cape;
+            c.lineWidth = 1.5;
+            c.stroke();
+            /* inner ring */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(0, 0, 11, 0, Math.PI*2); c.fill();
+            /* middle ring */
+            c.fillStyle = cols.primary;
+            c.beginPath(); c.arc(0, 0, 7, 0, Math.PI*2); c.fill();
+            /* center star */
+            c.fillStyle = '#ffffff';
+            var starPts = 5;
+            c.beginPath();
+            for (var si=0; si<starPts*2; si++){
+                var sang = si * Math.PI/starPts - Math.PI/2;
+                var sr = (si%2 === 0) ? 5 : 2.2;
+                var sxx = Math.cos(sang)*sr, syy = Math.sin(sang)*sr;
+                if (si === 0) c.moveTo(sxx, syy); else c.lineTo(sxx, syy);
+            }
+            c.closePath();
+            c.fill();
+            /* rivets around outer rim */
+            for (var rv=0; rv<8; rv++){
+                var rvA = rv * Math.PI/4;
+                c.fillStyle = cols.mask || cols.cape;
+                c.beginPath(); c.arc(Math.cos(rvA)*12.5, Math.sin(rvA)*12.5, 0.8, 0, Math.PI*2); c.fill();
+            }
+            /* edge gleam */
+            c.strokeStyle = 'rgba(255,255,255,0.85)';
+            c.lineWidth = 1.0;
+            c.beginPath();
+            c.arc(0, 0, 14, -0.4, 0.4);
+            c.stroke();
+            c.restore();
+            /* motion blur halo */
+            c.strokeStyle = cols.primary;
+            c.lineWidth = 2;
+            c.globalAlpha = 0.4;
+            c.beginPath();
+            c.arc(p.x, p.y, 16, 0, Math.PI*2);
+            c.stroke();
+            c.globalAlpha = 1;
+        } else if (p.kind === 'aoe'){
+            /* ── MULTI-RING AOE pulse with energy crackle ── */
+            var ap = p.age / p.max;
+            var ff = 1 - ap;
+            /* outer expanding ring */
+            c.strokeStyle = cols.primary;
+            c.lineWidth = 5 * ff + 1;
+            c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI*2); c.stroke();
+            /* inner ring */
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 3 * ff + 0.6;
+            c.beginPath(); c.arc(p.x, p.y, p.r * 0.7, 0, Math.PI*2); c.stroke();
+            /* white core ring */
+            c.strokeStyle = '#ffffff';
+            c.lineWidth = 1.8 * ff;
+            c.beginPath(); c.arc(p.x, p.y, p.r * 0.45, 0, Math.PI*2); c.stroke();
+            /* filled inner glow */
+            var aoeG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, p.r);
+            aoeG.addColorStop(0, 'rgba(255,255,255,' + (ff*0.6) + ')');
+            aoeG.addColorStop(0.5, cols.primary);
+            aoeG.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = aoeG;
+            c.globalAlpha = ff * 0.4;
+            c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI*2); c.fill();
+            c.globalAlpha = 1;
+            /* energy arcs zapping outward */
+            for (var ea=0; ea<8; ea++){
+                var eaA = ea * Math.PI/4 + p.age * 0.008;
+                var eaR1 = p.r * 0.5;
+                var eaR2 = p.r * 0.9;
+                c.strokeStyle = 'rgba(255,255,255,' + (ff*0.8) + ')';
+                c.lineWidth = 1.4;
+                c.beginPath();
+                c.moveTo(p.x + Math.cos(eaA)*eaR1, p.y + Math.sin(eaA)*eaR1);
+                c.lineTo(p.x + Math.cos(eaA)*eaR2 + (Math.random()-0.5)*4,
+                         p.y + Math.sin(eaA)*eaR2 + (Math.random()-0.5)*4);
+                c.stroke();
+            }
+        } else if (p.kind === 'sword'){
+            /* ── SPINNING BLADE — gleaming sword with arc blur ── */
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.spin);
+            /* blade body — metallic gradient */
+            var bldG = c.createLinearGradient(0, -3, 0, 3);
+            bldG.addColorStop(0, '#ffffff');
+            bldG.addColorStop(0.4, '#dcdce0');
+            bldG.addColorStop(1, '#6a6a72');
+            c.fillStyle = bldG;
+            c.beginPath();
+            c.moveTo(-12, -2);
+            c.lineTo(14, -1);
+            c.lineTo(17, 0);
+            c.lineTo(14, 1);
+            c.lineTo(-12, 2);
+            c.closePath();
+            c.fill();
+            /* fuller groove */
+            c.strokeStyle = 'rgba(0,0,0,0.45)';
+            c.lineWidth = 0.6;
+            c.beginPath(); c.moveTo(-10, 0); c.lineTo(13, 0); c.stroke();
+            /* hilt guard */
+            c.fillStyle = cols.accent;
+            c.fillRect(-3, -4, 4.5, 8);
+            c.fillStyle = 'rgba(255,255,255,0.4)';
+            c.fillRect(-3, -4, 4.5, 1.5);
+            /* handle */
+            c.fillStyle = cols.cape;
+            c.fillRect(-9, -2, 6, 4);
+            /* handle wrap rings */
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 0.5;
+            for (var hr=0; hr<3; hr++){
+                c.beginPath();
+                c.moveTo(-9 + hr*2, -2); c.lineTo(-9 + hr*2, 2);
+                c.stroke();
+            }
+            /* pommel */
+            c.fillStyle = cols.accent;
+            c.beginPath(); c.arc(-10, 0, 1.6, 0, Math.PI*2); c.fill();
+            /* edge gleam */
+            c.fillStyle = 'rgba(255,255,255,0.9)';
+            c.fillRect(-12, -2, 26, 0.6);
+            c.restore();
+            /* spinning arc blur */
+            c.strokeStyle = cols.accent;
+            c.lineWidth = 1.5;
+            c.globalAlpha = 0.45;
+            c.beginPath();
+            c.arc(p.x, p.y, 16, p.spin - Math.PI*0.4, p.spin + Math.PI*0.4);
+            c.stroke();
+            c.globalAlpha = 1;
+        } else if (p.kind === 'thunderbolt'){
+            /* jagged lightning line from hero to target */
+            var tbFade = 1 - Math.min(1, p.age / 300);
+            if (tbFade > 0 && p.segs){
+                c.save();
+                c.strokeStyle = 'rgba(253,224,71,' + (0.9 * tbFade) + ')';
+                c.lineWidth = 3.5;
+                c.beginPath();
+                c.moveTo(p.segs[0].x, p.segs[0].y);
+                for (var tbsi=1; tbsi<p.segs.length; tbsi++){
+                    c.lineTo(p.segs[tbsi].x, p.segs[tbsi].y);
+                }
+                c.stroke();
+                /* glowing core */
+                c.strokeStyle = 'rgba(255,255,255,' + (0.95 * tbFade) + ')';
+                c.lineWidth = 1.5;
+                c.stroke();
+                c.restore();
+            }
+        } else if (p.kind === 'webdrag'){
+            /* Single web from hero to the pulled target. Corridor
+               sweep visualised by a translucent ribbon. */
+            if (p.endA && p.owner){
+                c.save();
+                var ox = p.owner.x, oy = p.owner.y - 6;
+                var tx2 = p.endA.x, ty2 = p.endA.y - 12;
+                /* corridor ribbon — translucent purple band */
+                var ldx = tx2 - ox, ldy = ty2 - oy;
+                var ll = Math.sqrt(ldx*ldx + ldy*ldy) || 1;
+                var nxv = -ldy / ll, nyv = ldx / ll;
+                var corW = (p.owner.stats && p.owner.stats.atkR) ? p.owner.stats.atkR : 60;
+                var ribbonW = corW * 0.45;
+                c.fillStyle = 'rgba(124,29,237,0.18)';
+                c.beginPath();
+                c.moveTo(ox + nxv * ribbonW, oy + nyv * ribbonW);
+                c.lineTo(tx2 + nxv * ribbonW, ty2 + nyv * ribbonW);
+                c.lineTo(tx2 - nxv * ribbonW, ty2 - nyv * ribbonW);
+                c.lineTo(ox - nxv * ribbonW, oy - nyv * ribbonW);
+                c.closePath();
+                c.fill();
+                /* the web cable itself */
+                c.strokeStyle = 'rgba(240,240,255,0.9)';
+                c.lineWidth = 1.6;
+                c.beginPath();
+                c.moveTo(ox, oy);
+                c.lineTo(tx2, ty2);
+                c.stroke();
+                /* short cross-hatch threads along the cable for web look */
+                var hatchN = 6;
+                c.strokeStyle = 'rgba(240,240,255,0.45)';
+                c.lineWidth = 0.7;
+                for (var hci=1; hci<hatchN; hci++){
+                    var hct = hci / hatchN;
+                    var hcx = ox + ldx * hct, hcy = oy + ldy * hct;
+                    c.beginPath();
+                    c.moveTo(hcx + nxv * 4, hcy + nyv * 4);
+                    c.lineTo(hcx - nxv * 4, hcy - nyv * 4);
+                    c.stroke();
+                }
+                /* target ring */
+                c.strokeStyle = 'rgba(240,240,255,0.85)';
+                c.lineWidth = 1.2;
+                c.beginPath(); c.arc(tx2, ty2, 12, 0, Math.PI*2); c.stroke();
+                c.restore();
+            }
+        } else if (p.kind === 'firespray'){
+            /* fireball — orange + red gradient blob with sparkles */
+            var fG = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, 14);
+            fG.addColorStop(0, '#ffffff');
+            fG.addColorStop(0.3, '#fde047');
+            fG.addColorStop(0.7, '#f97316');
+            fG.addColorStop(1, 'rgba(220,38,38,0)');
+            c.fillStyle = fG;
+            c.beginPath(); c.arc(p.x, p.y, 14, 0, Math.PI*2); c.fill();
+            /* hot core */
+            c.fillStyle = '#fff7ed';
+            c.beginPath(); c.arc(p.x, p.y, 3.5, 0, Math.PI*2); c.fill();
+        } else if (p.kind === 'iceshot'){
+            /* ice bolt — pale blue diamond with cold trail */
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.angle || 0);
+            /* trail */
+            c.strokeStyle = 'rgba(165,243,252,0.6)';
+            c.lineWidth = 2.4;
+            c.beginPath();
+            c.moveTo(-22, 0); c.lineTo(0, 0);
+            c.stroke();
+            /* shard body */
+            var ig = c.createLinearGradient(-6, 0, 8, 0);
+            ig.addColorStop(0, '#e0f7ff');
+            ig.addColorStop(0.5, '#a5f3fc');
+            ig.addColorStop(1, '#67e8f9');
+            c.fillStyle = ig;
+            c.beginPath();
+            c.moveTo(-6, 0);
+            c.lineTo(0, -3);
+            c.lineTo(8, 0);
+            c.lineTo(0, 3);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = 'rgba(255,255,255,0.9)';
+            c.lineWidth = 0.7;
+            c.stroke();
+            c.restore();
+        }
+    }
+
+    function drawSuperhero(c){
+        if (!superheroOn) return;
+        /* NOTE: dead heroes/villains are NOT drawn as a fading sprite —
+           the dust-dissolution FX spawned in spawnDustDeath() *is* the
+           death visual. Drawing the intact corpse on top of the dust
+           reads as a flat rectangular fade (the bug we fixed). */
+        /* powers / projectiles */
+        for (var pi=0; pi<superheroPowers.length; pi++){
+            try { drawHeroPower(c, superheroPowers[pi]); } catch(_e){}
+        }
+        /* live VILLAINS (so heroes draw on top of them) */
+        for (var lvi=0; lvi<superheroVillains.length; lvi++){
+            var vL = superheroVillains[lvi];
+            if (!vL.alive) continue;
+            try { drawDragon(c, vL); } catch(_e){}
+        }
+        /* live HEROES on top */
+        for (var li=0; li<superheroFighters.length; li++){
+            var hh = superheroFighters[li];
+            if (!hh.alive) continue;
+            try { drawHero(c, hh); } catch(_e){}
+        }
+        /* target-lock crosshair on focused villain */
+        for (var tli=superheroTargetLocks.length-1; tli>=0; tli--){
+            var tl = superheroTargetLocks[tli];
+            tl.age += 16;
+            if (tl.villain && tl.villain.alive){
+                tl.x = tl.villain.x;
+                tl.y = tl.villain.y - 16;
+            }
+            if (tl.age > tl.max){ superheroTargetLocks.splice(tli, 1); continue; }
+            var lp = tl.age / tl.max;
+            var lff = 1 - lp;
+            var r = (lp < 0.5) ? tl.size * 1.8 * (1 - lp*1.4) : tl.size * 0.8 + lp * 25;
+            c.strokeStyle = 'rgba(255,60,60,' + lff + ')';
+            c.lineWidth = 2.4 * lff + 0.6;
+            c.beginPath(); c.arc(tl.x, tl.y, r, 0, Math.PI*2); c.stroke();
+            c.strokeStyle = 'rgba(255,255,255,' + (lff*0.8) + ')';
+            c.lineWidth = 1.2 * lff + 0.3;
+            c.beginPath(); c.arc(tl.x, tl.y, r*0.78, 0, Math.PI*2); c.stroke();
+            /* + crosshair */
+            c.strokeStyle = 'rgba(255,80,80,' + lff + ')';
+            c.lineWidth = 1.2;
+            c.beginPath();
+            c.moveTo(tl.x - 8, tl.y); c.lineTo(tl.x + 8, tl.y);
+            c.moveTo(tl.x, tl.y - 8); c.lineTo(tl.x, tl.y + 8);
+            c.stroke();
+        }
+        /* QUEUE INDICATORS — numbered rings on each queued villain
+           in click order, brightest on the current focus */
+        for (var qi2=0; qi2<superheroTargetQueue.length; qi2++){
+            var qv = superheroTargetQueue[qi2];
+            if (!qv || !qv.alive) continue;
+            var isHead = (qi2 === 0);
+            var qr = isHead ? 34 : 28;
+            c.strokeStyle = isHead ? 'rgba(255,40,40,0.95)' : 'rgba(255,100,100,0.6)';
+            c.lineWidth = isHead ? 2.5 : 1.5;
+            c.beginPath();
+            c.arc(qv.x, qv.y - 16, qr, 0, Math.PI*2);
+            c.stroke();
+            /* number badge above the target */
+            c.fillStyle = isHead ? '#dc2626' : 'rgba(80,0,0,0.85)';
+            c.beginPath();
+            c.arc(qv.x + 20, qv.y - 36, 9, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#fff';
+            c.lineWidth = 1.2;
+            c.stroke();
+            c.fillStyle = '#fff';
+            c.font = 'bold 11px Arial Black, sans-serif';
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(String(qi2 + 1), qv.x + 20, qv.y - 36);
+        }
+        /* FX overlay (sparks, flashes, death rings) */
+        for (var fi=0; fi<superheroFX.length; fi++){
+            var fx = superheroFX[fi];
+            var ff = 1 - fx.age/fx.max;
+            if (ff <= 0) continue;
+            if (fx.kind === 'spark'){
+                c.fillStyle = 'hsla(' + fx.hue + ',95%,65%,' + ff + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, 1.6 * ff + 0.3, 0, Math.PI*2); c.fill();
+            } else if (fx.kind === 'deathSpark'){
+                c.fillStyle = 'hsla(' + fx.hue + ',95%,70%,' + ff + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, 2.4 * ff + 0.4, 0, Math.PI*2); c.fill();
+                c.strokeStyle = 'hsla(' + fx.hue + ',95%,75%,' + (ff*0.5) + ')';
+                c.lineWidth = 0.8;
+                c.beginPath();
+                c.moveTo(fx.x, fx.y);
+                c.lineTo(fx.x - fx.vx*1.5, fx.y - fx.vy*1.5);
+                c.stroke();
+            } else if (fx.kind === 'flash'){
+                c.fillStyle = 'rgba(255,255,255,' + ff + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r * ff, 0, Math.PI*2); c.fill();
+            } else if (fx.kind === 'deathRing'){
+                var dp = fx.age / fx.max;
+                c.strokeStyle = 'rgba(255,255,255,' + ff + ')';
+                c.lineWidth = 2.5 * ff + 0.5;
+                c.beginPath(); c.arc(fx.x, fx.y, 8 + dp*40, 0, Math.PI*2); c.stroke();
+            } else if (fx.kind === 'silhouetteBlast'){
+                /* one-frame colored silhouette of the body, scaling out
+                   and fading — sells "the figure shattered" before the
+                   dust takes over. */
+                var sbp = fx.age / fx.max;
+                var sbScale = 1 + sbp * 0.6;
+                var sbAlpha = ff * 0.55;
+                c.save();
+                c.translate(fx.x, fx.y);
+                c.scale(sbScale, sbScale);
+                c.globalAlpha = sbAlpha;
+                c.fillStyle = fx.col;
+                /* torso */
+                c.fillRect(-fx.w*0.5, -fx.h*0.45, fx.w, fx.h*0.9);
+                /* head */
+                c.beginPath();
+                c.arc(0, fx.headCy, fx.headR, 0, Math.PI*2);
+                c.fill();
+                /* warm accent rim */
+                c.globalAlpha = sbAlpha * 0.6;
+                c.strokeStyle = fx.accent;
+                c.lineWidth = 1.4;
+                c.strokeRect(-fx.w*0.5, -fx.h*0.45, fx.w, fx.h*0.9);
+                c.restore();
+                c.globalAlpha = 1;
+            } else if (fx.kind === 'dustMote'){
+                fx.x += fx.vx;
+                fx.y += fx.vy;
+                fx.vy += fx.grav;
+                fx.vx *= fx.drag;
+                fx.vy *= fx.drag;
+                fx.r += fx.grow;
+                /* age-curve alpha: pop in fast, linger, fade out */
+                var dmA;
+                if (fx.age < 80){
+                    dmA = fx.age / 80;
+                } else {
+                    dmA = Math.pow(ff, 1.2);
+                }
+                dmA *= 0.85;
+                c.fillStyle = 'hsla(' + fx.hue + ',' + fx.sat + '%,' + fx.lit + '%,' + dmA + ')';
+                c.beginPath();
+                c.arc(fx.x, fx.y, Math.max(0.3, fx.r), 0, Math.PI*2);
+                c.fill();
+            } else if (fx.kind === 'dustChunk'){
+                fx.x += fx.vx;
+                fx.y += fx.vy;
+                fx.vy += 0.16;          /* gravity */
+                fx.vx *= 0.985;
+                fx.rot += fx.rotV;
+                /* trail dust */
+                if (Math.random() < 0.45 && fx.age < fx.max * 0.7){
+                    superheroFX.push({
+                        kind:'dustMote',
+                        x: fx.x, y: fx.y,
+                        vx: rng(-0.2, 0.2), vy: rng(-0.6, -0.1),
+                        r: rng(0.8, 1.6),
+                        grow: 0.012, grav: 0.004, drag: 0.99,
+                        age:0, max: rng(400, 700),
+                        hue: rng(25, 40), sat: 18, lit: 55
+                    });
+                }
+                c.save();
+                c.translate(fx.x, fx.y);
+                c.rotate(fx.rot);
+                c.globalAlpha = ff;
+                c.fillStyle = fx.col;
+                c.fillRect(-fx.sz, -fx.sz*0.7, fx.sz*2, fx.sz*1.4);
+                /* darker edge for chunkiness */
+                c.fillStyle = 'rgba(0,0,0,0.35)';
+                c.fillRect(-fx.sz, fx.sz*0.4, fx.sz*2, fx.sz*0.3);
+                c.restore();
+                c.globalAlpha = 1;
+            } else if (fx.kind === 'ashRing'){
+                if (fx.age < 0) continue;
+                var arP = fx.age / fx.max;
+                var arR = 4 + arP * fx.maxR;
+                var arA = Math.pow(ff, 1.4) * 0.7;
+                c.strokeStyle = fx.col + arA + ')';
+                c.lineWidth = 2 * ff + 0.6;
+                c.beginPath();
+                c.arc(fx.x, fx.y, arR, 0, Math.PI*2);
+                c.stroke();
+            } else if (fx.kind === 'dustPuff'){
+                if (fx.age < 0) continue;
+                fx.x += fx.vx;
+                fx.r0 += fx.grow * 16;
+                var dpA = Math.pow(ff, 1.6) * 0.55;
+                /* two-tone soft puff */
+                c.fillStyle = 'hsla(' + fx.hue + ',' + fx.sat + '%,' + fx.lit + '%,' + dpA + ')';
+                c.beginPath();
+                c.arc(fx.x, fx.y, fx.r0, 0, Math.PI*2);
+                c.fill();
+                c.fillStyle = 'hsla(' + fx.hue + ',' + (fx.sat*0.6) + '%,' + (fx.lit*0.7) + '%,' + (dpA*0.5) + ')';
+                c.beginPath();
+                c.arc(fx.x - fx.r0*0.25, fx.y - fx.r0*0.15, fx.r0*0.7, 0, Math.PI*2);
+                c.fill();
+            } else if (fx.kind === 'slash'){
+                c.save();
+                c.translate(fx.x, fx.y);
+                c.rotate(fx.angle);
+                c.strokeStyle = 'rgba(255,255,255,' + ff + ')';
+                c.lineWidth = 3 * ff;
+                c.beginPath();
+                c.arc(0, 0, 22, -Math.PI*0.45, Math.PI*0.45);
+                c.stroke();
+                c.restore();
+            } else if (fx.kind === 'cityRing'){
+                /* expanding shockwave on the street */
+                var crP = fx.age / fx.max;
+                var crR = 8 + crP * 70;
+                c.strokeStyle = 'rgba(255,200,100,' + ff + ')';
+                c.lineWidth = 3 * ff + 0.5;
+                c.beginPath(); c.arc(fx.x, fx.y, crR, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,' + (ff*0.7) + ')';
+                c.lineWidth = 1.2 * ff;
+                c.beginPath(); c.arc(fx.x, fx.y, crR*0.65, 0, Math.PI*2); c.stroke();
+            } else if (fx.kind === 'cityEmber'){
+                fx.x += fx.vx * 0.6;
+                fx.y += fx.vy * 0.6;
+                fx.vy += 0.10;
+                c.fillStyle = 'hsla(' + fx.hue + ',95%,60%,' + ff + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, 2.5 * ff + 0.5, 0, Math.PI*2); c.fill();
+                /* trail */
+                c.strokeStyle = 'hsla(' + fx.hue + ',95%,70%,' + (ff*0.55) + ')';
+                c.lineWidth = 0.9;
+                c.beginPath();
+                c.moveTo(fx.x, fx.y);
+                c.lineTo(fx.x - fx.vx, fx.y - fx.vy);
+                c.stroke();
+            } else if (fx.kind === 'citySmoke'){
+                fx.x += fx.vx * 0.6;
+                fx.y += fx.vy * 0.6;
+                fx.r += 0.04;
+                c.fillStyle = 'rgba(50,50,55,' + (ff*0.55) + ')';
+                c.beginPath(); c.arc(fx.x, fx.y, fx.r, 0, Math.PI*2); c.fill();
+                c.fillStyle = 'rgba(80,80,85,' + (ff*0.35) + ')';
+                c.beginPath(); c.arc(fx.x - fx.r*0.3, fx.y - fx.r*0.2, fx.r*0.7, 0, Math.PI*2); c.fill();
+            } else if (fx.kind === 'cityDebris'){
+                fx.x += fx.vx * 0.6;
+                fx.y += fx.vy * 0.6;
+                fx.vy += 0.18;
+                fx.rot += fx.rotV;
+                c.save();
+                c.translate(fx.x, fx.y);
+                c.rotate(fx.rot);
+                c.fillStyle = 'rgba(120,100,80,' + ff + ')';
+                c.fillRect(-2, -1, 4, 2);
+                c.fillStyle = 'rgba(255,180,80,' + (ff*0.6) + ')';
+                c.fillRect(1.5, -0.5, 1.2, 0.8);
+                c.restore();
+            } else if (fx.kind === 'impactRing'){
+                /* element-colored expanding ring */
+                var irP = fx.age / fx.max;
+                var irR = fx.r + irP * (fx.maxR - fx.r);
+                c.strokeStyle = fx.col;
+                c.lineWidth = 3 * ff + 0.5;
+                c.beginPath(); c.arc(fx.x, fx.y, irR, 0, Math.PI*2); c.stroke();
+                c.strokeStyle = 'rgba(255,255,255,' + ff + ')';
+                c.lineWidth = 1.2 * ff;
+                c.beginPath(); c.arc(fx.x, fx.y, irR*0.6, 0, Math.PI*2); c.stroke();
+            } else if (fx.kind === 'arcZap'){
+                /* secondary lightning arc between thunderbolt
+                   chain points — quick zigzag flash */
+                var azP = fx.age / fx.max;
+                var azA = 1 - azP;
+                c.save();
+                c.strokeStyle = 'rgba(253,224,71,' + (0.9 * azA) + ')';
+                c.lineWidth = 2.2;
+                var azDx = fx.x2 - fx.x1, azDy = fx.y2 - fx.y1;
+                var azL = Math.sqrt(azDx*azDx + azDy*azDy) || 1;
+                var azNx = -azDy / azL, azNy = azDx / azL;
+                c.beginPath();
+                c.moveTo(fx.x1, fx.y1);
+                var azN = 5;
+                for (var azi=1; azi<azN; azi++){
+                    var azt = azi / azN;
+                    var azx = fx.x1 + azDx * azt;
+                    var azy = fx.y1 + azDy * azt;
+                    var azo = (Math.random() - 0.5) * 16 * (1 - Math.abs(azt - 0.5)*2);
+                    c.lineTo(azx + azNx * azo, azy + azNy * azo);
+                }
+                c.lineTo(fx.x2, fx.y2);
+                c.stroke();
+                /* white-hot core */
+                c.strokeStyle = 'rgba(255,255,255,' + (0.95 * azA) + ')';
+                c.lineWidth = 1;
+                c.stroke();
+                c.restore();
+            } else if (fx.kind === 'elemDrip'){
+                /* element-themed lingering drip — drips downward from impact */
+                fx.x += fx.vx * 0.6;
+                fx.y += fx.vy * 0.6;
+                fx.vy += 0.04;
+                c.fillStyle = fx.col;
+                c.globalAlpha = ff * 0.85;
+                c.beginPath();
+                c.arc(fx.x, fx.y, 1.8 * ff + 0.5, 0, Math.PI*2);
+                c.fill();
+                c.globalAlpha = 1;
+            }
+        }
+        /* NO winner banner — battle just rolls into the next round
+           when running in Auto mode (handled in updateSuperhero). */
+    }
+
+    /* MANUAL CLICK — APPEND a villain to the kill queue. Hero flies
+       to the head of the queue, kills, then advances to the next
+       in click order. If the same villain is clicked twice it stays
+       at its existing position in the queue. */
+    function fireSuperheroManual(clickX, clickY){
+        if (!superheroOn) return false;
+        var best = null, bestD = Infinity;
+        for (var i=0; i<superheroVillains.length; i++){
+            var v = superheroVillains[i];
+            if (!v.alive) continue;
+            var dx = v.x - clickX, dy = (v.y - 16) - clickY;
+            var d = dx*dx + dy*dy;
+            if (d < bestD){ bestD = d; best = v; }
+        }
+        if (best){
+            /* dedupe — don't add the same villain twice */
+            if (superheroTargetQueue.indexOf(best) === -1){
+                superheroTargetQueue.push(best);
+            }
+            superheroTargetLocks.push({
+                villain: best,
+                x: best.x, y: best.y - 16,
+                age: 0, max: 900,
+                size: 40,
+                queuePos: superheroTargetQueue.indexOf(best) + 1
+            });
+            /* check if every alive robot is now in the queue — if so,
+               UNFREEZE the swarm AND set the focus so the hero starts
+               attacking them in order */
+            var aliveQueued = 0;
+            var totalAlive = 0;
+            for (var qci=0; qci<superheroVillains.length; qci++){
+                if (superheroVillains[qci].alive){
+                    totalAlive++;
+                    if (superheroTargetQueue.indexOf(superheroVillains[qci]) !== -1){
+                        aliveQueued++;
+                    }
+                }
+            }
+            if (totalAlive > 0 && aliveQueued >= totalAlive){
+                superheroFrozen = false;
+                superheroFocusTarget = superheroTargetQueue[0];
+            }
+            /* if user is still marking, no focus yet — hero waits */
+            return true;
+        }
+        return false;
+    }
+
+    /* ── PUBLIC API ──────────────────────────────────────────────── */
+    window.startSuperhero = startSuperhero;
+    window.stopSuperhero  = stopSuperhero;
+    window.isSuperheroOn  = function(){ return superheroOn; };
+    window.toggleSuperhero = function(){
+        try {
+            if (superheroOn){ stopSuperhero(); return false; }
+            startSuperhero(); return true;
+        } catch(_e){
+            /* if startSuperhero or stopSuperhero throws, ensure
+               the rest of the page keeps running */
+            superheroOn = false;
+            return false;
+        }
+    };
+    window.getAllSuperheroUniverses = function(){
+        return SUPERHERO_UNIVERSES.map(function(u,i){
+            return { index:i, id:u.id, name:u.name, icon:u.icon,
+                     colorA:u.colorA, colorB:u.colorB };
+        });
+    };
+    window.getSuperheroUniverseIndex = function(){ return superheroIdx; };
+    window.getSuperheroUniverseName  = function(){ return SUPERHERO_UNIVERSES[superheroIdx].name; };
+    window.setSuperheroUniverseIndex = function(i){
+        var n = SUPERHERO_UNIVERSES.length;
+        if (typeof i !== 'number') return;
+        var prevIdx = superheroIdx;
+        superheroIdx = ((i%n)+n)%n;
+        if (superheroOn && prevIdx !== superheroIdx){
+            try {
+                var prev = superheroFighters[0];
+                /* mark old hero DEPARTING — it'll boost up and to
+                   the side with a bright jet trail until offscreen */
+                if (prev){
+                    prev.departing = true;
+                    prev.departT = 0;
+                    /* huge initial kick away from center */
+                    var awayDir = (prev.x > W * 0.5) ? 1 : -1;
+                    prev.vx = awayDir * 16;
+                    prev.vy = -8;
+                }
+                /* spawn the new hero offscreen on the opposite side,
+                   flying toward the center sky */
+                var univNew = superheroSel();
+                var newHero = createSuperhero(univNew, 0, 0, 1);
+                newHero.solo = true;
+                newHero.heroTpl = univNew;
+                newHero.power = univNew.power;
+                var enterFromRight = (prev ? prev.x : W * 0.5) < W * 0.5;
+                newHero.x = enterFromRight ? W + 60 : -60;
+                newHero.y = GROUND * 0.30 + rng(-20, 20);
+                newHero.vx = enterFromRight ? -16 : 16;
+                newHero.vy = 0;
+                newHero.face = enterFromRight ? -1 : 1;
+                newHero.entering = true;
+                newHero.enterT = 0;
+                /* fresh hero comes in at full HP for a new chapter */
+                superheroFighters.push(newHero);
+            } catch(_swErr){}
+        }
+    };
+    window.getSuperheroIntensity = function(){ return superheroIntensity; };
+    window.setSuperheroIntensity = function(v){
+        if (typeof v !== 'number') v = parseFloat(v);
+        if (isNaN(v)) return;
+        superheroIntensity = Math.max(1, Math.min(100, v));
+        /* LIVE re-balance: scale the current wave to the new target
+           size. Add robots that fly in, remove excess by despawning
+           the latest spawned ones. Only acts on a frozen wave (so
+           the user is still in the targeting phase). */
+        if (superheroOn && superheroFrozen){
+            try {
+                var targetSize = Math.max(3,
+                    Math.round(3 + (superheroIntensity / 100) * 9));
+                var aliveList = [];
+                for (var ii=0; ii<superheroVillains.length; ii++){
+                    if (superheroVillains[ii].alive) aliveList.push(superheroVillains[ii]);
+                }
+                if (aliveList.length < targetSize){
+                    /* spawn the missing dragons in unique formation
+                       slots */
+                    var need = targetSize - aliveList.length;
+                    for (var ni=0; ni<need; ni++){
+                        superheroVillains.push(
+                            createVillain(aliveList.length + ni, targetSize));
+                    }
+                } else if (aliveList.length > targetSize){
+                    /* remove the LAST-spawned excess dragons and clear
+                       them from any queue entry */
+                    var over = aliveList.length - targetSize;
+                    for (var rmI=aliveList.length-1; rmI >= aliveList.length - over; rmI--){
+                        var vRm = aliveList[rmI];
+                        /* drop from target queue if present */
+                        var qIdx = superheroTargetQueue.indexOf(vRm);
+                        if (qIdx !== -1) superheroTargetQueue.splice(qIdx, 1);
+                        if (superheroFocusTarget === vRm) superheroFocusTarget = null;
+                        /* remove from villains array */
+                        var vIdx = superheroVillains.indexOf(vRm);
+                        if (vIdx !== -1) superheroVillains.splice(vIdx, 1);
+                    }
+                }
+            } catch(_diErr){}
+        }
+    };
+    window.isSuperheroAutoFight = function(){ return superheroAutoFight; };
+    window.setSuperheroAutoFight = function(on){
+        var wasOn = !!superheroAutoFight;
+        superheroAutoFight = !!on;
+        if (superheroAutoFight && !superheroOn){
+            startSuperhero();
+            if (typeof document !== 'undefined'){
+                var sw = document.getElementById('superheroBtn');
+                if (sw) sw.classList.add('active');
+            }
+        }
+        if (wasOn && !superheroAutoFight && superheroOn){
+            stopSuperhero();
+        }
+        if (canvas && canvas.style){
+            if (superheroAutoFight){
+                if (canvas.style.cursor === 'crosshair') canvas.style.cursor = '';
+            } else if (superheroOn){
+                canvas.style.cursor = 'crosshair';
+            }
+        }
+    };
+    window.getSuperheroStats = function(){
+        var alive = 0;
+        for (var i=0; i<superheroFighters.length; i++)
+            if (superheroFighters[i].alive) alive++;
+        return {
+            alive: alive,
+            winner: superheroWinner ? superheroWinner.name : null
+        };
+    };
+    window.fireSuperheroManual = fireSuperheroManual;
+
     window.startParade = startParade;
     window.stopParade  = stopParade;
     window.isParadeOn  = function(){ return paradeOn; };
     window.toggleParade = function(){
         if (paradeOn) { stopParade(); return false; }
         startParade(); return true;
+    };
+    /* ── parade theme API (drives the picker in the tooltip) ─── */
+    window.getAllParadeThemes = function(){
+        return PARADE_THEMES.map(function(t,i){
+            var sal = t.salute || {};
+            return { index:i, id:t.id, name:t.name, icon:t.icon,
+                     colorA: sal.colorA || '#7a9040',
+                     colorB: sal.colorB || '#556b2f' };
+        });
+    };
+    window.getParadeThemeIndex = function(){ return paradeThemeIdx; };
+    window.getParadeThemeName  = function(){
+        return (PARADE_THEMES[paradeThemeIdx]||PARADE_THEMES[0]).name;
+    };
+    window.getParadeThemeIcon  = function(){
+        return (PARADE_THEMES[paradeThemeIdx]||PARADE_THEMES[0]).icon;
+    };
+    window.setParadeThemeIndex = function(i){
+        var n = PARADE_THEMES.length;
+        if (typeof i !== 'number') return;
+        var prev = paradeThemeIdx;
+        paradeThemeIdx = ((i%n)+n)%n;
+        /* If the parade is already on, restart it so the new theme's
+           unit counts take effect immediately. */
+        if (paradeOn && prev !== paradeThemeIdx){
+            stopParade();
+            startParade();
+            if (typeof document !== 'undefined'){
+                var pWrap = document.getElementById('paradeBtn');
+                if (pWrap) pWrap.classList.add('active');
+            }
+        }
     };
     window.getParadeStats = function(){
         return {
@@ -15861,21 +25814,114 @@
     };
 
     /* Wrap setAutoAttackEnabled / setAutoDefenceEnabled to record
-       the start time and to auto-trigger reconstruction on turn-off. */
+       the start time, to auto-trigger reconstruction on turn-off, and
+       (per user spec) to enforce the same mutual-exclusion as a manual
+       click on the attack / defence widget button: turning AUTO on
+       dismisses any active parade and any in-progress rebuild, then
+       starts the corresponding mode if it isn't already running. */
+    /* ── STORM WEATHER PIN ──────────────────────────────────────
+       Attack control, Defence control, and their AUTO modes ALL
+       pin the weather to "storm" (thunderstorm) for the duration.
+       Multiple modes can hold the pin simultaneously; we ref-count
+       holders so the pin only releases when the LAST holder
+       toggles off. */
+    var stormPinHolders = 0;
+    var stormForcedPin = false;
+    var stormPrevEventIdx = -1;
+    function acquireStormPin(){
+        if (stormPinHolders === 0){
+            stormPrevEventIdx = (typeof eventIndex !== 'undefined') ? eventIndex : -1;
+            if (typeof EVENTS !== 'undefined' && EVENTS && typeof setEvent === 'function'){
+                var stIdx = -1;
+                for (var i=0; i<EVENTS.length; i++){
+                    if (EVENTS[i].type === 'storm'){ stIdx = i; break; }
+                }
+                if (stIdx >= 0){
+                    setEvent(stIdx);
+                    if (typeof weatherPinned !== 'undefined' && !weatherPinned){
+                        weatherPinned = true;
+                        stormForcedPin = true;
+                    }
+                }
+            }
+        }
+        stormPinHolders++;
+    }
+    function releaseStormPin(){
+        if (stormPinHolders > 0){
+            stormPinHolders--;
+            if (stormPinHolders === 0){
+                if (stormForcedPin && typeof weatherPinned !== 'undefined'){
+                    weatherPinned = false;
+                    stormForcedPin = false;
+                }
+                stormPrevEventIdx = -1;
+            }
+        }
+    }
+
     var _origSetAutoAttack = window.setAutoAttackEnabled;
     window.setAutoAttackEnabled = function(on){
+        var wasOn = !!autoAttackOn;
         if (on){
+            if (paradeOn) stopParade();
+            if (reconstructOn) stopReconstruction();
+            if (!missileArmed && typeof _origArm === 'function') {
+                _origArm();
+                if (typeof document !== 'undefined'){
+                    var mWrap = document.getElementById('missileBtn');
+                    if (mWrap) mWrap.classList.toggle('armed', !!missileArmed);
+                }
+            }
             autoAttackStartT = (typeof performance !== 'undefined' && performance.now)
                                ? performance.now() : Date.now();
+            defenceActive = true;
+            if (!wasOn) acquireStormPin();
+        } else {
+            if (wasOn) releaseStormPin();
+            /* AUTO OFF must ALSO disarm the attack — Auto and the
+               attack widget button are paired, so turning Auto off
+               releases the missile-armed state and clears the visible
+               .armed ring on the widget. */
+            if (missileArmed && typeof _origArm === 'function'){
+                _origArm();   /* toggles armed → false */
+            }
+            if (typeof document !== 'undefined'){
+                var mWrapOff = document.getElementById('missileBtn');
+                if (mWrapOff) mWrapOff.classList.toggle('armed', !!missileArmed);
+            }
         }
         _origSetAutoAttack(on);
         if (!on) startReconstruction();
     };
     var _origSetAutoDefence = window.setAutoDefenceEnabled;
     window.setAutoDefenceEnabled = function(on){
+        var wasOnD = !!autoDefenceOn;
         if (on){
+            if (paradeOn) stopParade();
+            if (reconstructOn) stopReconstruction();
+            if (!defenceMode && typeof _origTogDef === 'function') {
+                _origTogDef();
+                if (typeof document !== 'undefined'){
+                    var dWrap = document.getElementById('defenceBtn');
+                    if (dWrap) dWrap.classList.toggle('offline', !defenceMode);
+                }
+            }
             autoDefenceStartT = (typeof performance !== 'undefined' && performance.now)
                                 ? performance.now() : Date.now();
+            if (!wasOnD) acquireStormPin();
+        } else {
+            if (wasOnD) releaseStormPin();
+            /* AUTO OFF must ALSO unclick the defence widget — toggle
+               defenceMode back off and visibly return the button to
+               the offline state. */
+            if (defenceMode && typeof _origTogDef === 'function'){
+                _origTogDef();   /* toggles defenceMode → false */
+            }
+            if (typeof document !== 'undefined'){
+                var dWrapOff = document.getElementById('defenceBtn');
+                if (dWrapOff) dWrapOff.classList.toggle('offline', !defenceMode);
+            }
         }
         _origSetAutoDefence(on);
         if (!on) startReconstruction();
@@ -15895,14 +25941,14 @@
     if (typeof _origArm === 'function'){
         window.armMissile = function(){
             var wasArmed = !!missileArmed;
-            /* turning ON attack while another mode is active →
-               dismiss parade AND finish any in-progress rebuild so
-               the city is pristine for the launch. */
             if (!wasArmed) {
                 if (paradeOn) stopParade();
                 if (reconstructOn) stopReconstruction();
             }
             var r = _origArm.apply(this, arguments);
+            /* Storm pin while attack is armed */
+            if (!wasArmed && missileArmed) acquireStormPin();
+            else if (wasArmed && !missileArmed) releaseStormPin();
             if (wasArmed && !missileArmed) startReconstruction();
             return r;
         };
@@ -15916,6 +25962,9 @@
                 if (reconstructOn) stopReconstruction();
             }
             var r = _origTogDef.apply(this, arguments);
+            /* Storm pin while defence game is on */
+            if (!wasDM && defenceMode) acquireStormPin();
+            else if (wasDM && !defenceMode) releaseStormPin();
             if (wasDM && !defenceMode) startReconstruction();
             return r;
         };
@@ -15955,8 +26004,15 @@
         updateMissileSystem(dt);
         updateAutoSliders(dt);
         updateAutoTimers();
+        maybeAutoSwitchCity(dt);
         updateReconstruction(dt);
         updateParade(dt);
+        /* Abduction is the most complex subsystem and has the highest
+           risk of an unguarded null dereference. Wrap it so the rAF
+           loop CAN NEVER freeze from a transient abduction error —
+           the frame still renders, the simulation continues. */
+        try { updateAbduction(dt); } catch (_aerr) {}
+        try { updateSuperhero(dt); } catch (_serr) {}
     };
     /* Offscreen buffer used to composite the reconstruction layer
        BEHIND the existing dynamic content. _origDrw clears dynC at
@@ -16006,5 +26062,10 @@
         /* Military parade — air + ground units. Drawn after everything
            so it reads as the headline event when active. */
         drawParade(dynC);
+        /* Alien abduction — ships + beams + walkers + wreckage. Drawn
+           last so it sits on top of everything (parade also). */
+        drawAbduction(dynC);
+        /* Superhero battle — fighters + powers + FX on top */
+        try { drawSuperhero(dynC); } catch (_sderr) {}
     };
 })();

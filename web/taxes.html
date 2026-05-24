@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tax Calculators · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Tax Calculators');</script>
+<script src="taxes.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Tax Calculators</h1><p>Six tools using 2024 U.S. brackets: federal income tax with bracket visualizer, self-employment tax, sales tax (add or back-out), capital gains (short vs long term), W-4 withholding, and bill+tip+tax splitter.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Income Tax Estimator <span class="fa-pill">2024 single</span></h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Gross income</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="it_income" type="number" value="85000"></div></div>
+<div class="fa-field"><label>Deduction (standard 14600)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="it_deduction" type="number" value="14600"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcIncomeTax()">Calculate</button></div>
+<div class="fa-hint fa-err" id="it_err" style="display:none"></div>
+<div class="fa-results" id="it_results"><div class="fa-stats" id="it_stats"></div>
+<div class="fa-chart-wrap" style="height:280px"><canvas id="it_chart"></canvas></div><div id="it_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Self-Employment Tax</h2></div>
+<div class="fa-grid"><div class="fa-field"><label>Net earnings (Schedule C profit)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="se_net" type="number" value="50000"></div></div></div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcSelfEmp()">Calculate</button></div>
+<div class="fa-hint fa-err" id="se_err" style="display:none"></div>
+<div class="fa-results" id="se_results"><div class="fa-stats" id="se_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="se_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Sales Tax / VAT</h2></div>
+<input type="hidden" id="st_dir" value="add">
+<div class="fa-tabs" style="margin-bottom:14px">
+<button class="st-tab fa-btn" data-dir="add" onclick="toggleSalesDir('add')">Add tax to price</button>
+<button class="st-tab fa-btn-ghost" data-dir="extract" onclick="toggleSalesDir('extract')">Extract tax from total</button>
+</div>
+<div class="fa-grid">
+<div class="fa-field"><label>Amount</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="st_price" type="number" step="0.01" value="100"></div></div>
+<div class="fa-field"><label>Tax rate</label><div class="fa-input-wrap"><input id="st_rate" type="number" step="0.01" value="6"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcSalesTax()">Calculate</button></div>
+<div class="fa-hint fa-err" id="st_err" style="display:none"></div>
+<div class="fa-results" id="st_results"><div class="fa-stats" id="st_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="st_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Capital Gains Tax</h2><p class="fa-card-blurb">Holding ≥ 12 months → long-term rates (0/15/20%). Shorter → ordinary income.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Cost basis</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="cg_basis" type="number" value="10000"></div></div>
+<div class="fa-field"><label>Sale proceeds</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="cg_proceeds" type="number" value="18000"></div></div>
+<div class="fa-field"><label>Held (months)</label><div class="fa-input-wrap"><input id="cg_heldMonths" type="number" value="14"></div></div>
+<div class="fa-field"><label>Your ordinary income</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="cg_income" type="number" value="80000"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcCapGains()">Calculate</button></div>
+<div class="fa-hint fa-err" id="cg_err" style="display:none"></div>
+<div class="fa-results" id="cg_results"><div class="fa-stats" id="cg_stats"></div>
+<div class="fa-section-heading">Short-term vs long-term tax</div>
+<div class="fa-chart-wrap" style="height:240px"><canvas id="cg_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">W-4 Withholding Estimator</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Weekly gross wages</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="w4_wages" type="number" value="1500"></div></div>
+<div class="fa-field"><label>Extra weekly withholding</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="w4_extra" type="number" value="0"></div></div>
+<div class="fa-field"><label>Filing status</label><div class="fa-input-wrap"><select id="w4_filing"><option value="single">Single</option><option value="married">Married filing jointly</option></select></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcWithholding()">Calculate</button></div>
+<div class="fa-hint fa-err" id="w4_err" style="display:none"></div>
+<div class="fa-results" id="w4_results"><div class="fa-stats" id="w4_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="w4_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Bill + Tip + Tax Splitter</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Bill (pre-tax)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="bs_bill" type="number" step="0.01" value="120"></div></div>
+<div class="fa-field"><label>Tax</label><div class="fa-input-wrap"><input id="bs_tax" type="number" step="0.1" value="6.5"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Tip</label><div class="fa-input-wrap"><input id="bs_tip" type="number" step="1" value="20"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>People</label><div class="fa-input-wrap"><input id="bs_people" type="number" value="4"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcBillSplit()">Split</button></div>
+<div class="fa-hint fa-err" id="bs_err" style="display:none"></div>
+<div class="fa-results" id="bs_results"><div class="fa-stats" id="bs_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="bs_chart"></canvas></div></div>
+</section>
+
+</body></html>

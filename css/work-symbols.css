@@ -127,9 +127,13 @@ body.polish #app_work .w3-card > * {
    below, keeping the icon centered inside the glass tile. */
 body.polish #mymapshowButton,
 body.polish #mymaphideButton {
-    width: 45px !important;
-    height: 45px !important;
-    padding: 6px !important;
+    /* responsive sizing — shrinks down to 22px on narrow viewports,
+       caps at 45px on wide ones. Matches the clamp() used in the
+       inline style on the <img> markup so the wrapper + icon scale
+       together. */
+    width: clamp(22px, 5.5vw, 45px) !important;
+    height: clamp(22px, 5.5vw, 45px) !important;
+    padding: clamp(2px, 0.8vw, 6px) !important;
     margin: 1px 4px !important;
     object-fit: contain;
     background-color: #fff !important;

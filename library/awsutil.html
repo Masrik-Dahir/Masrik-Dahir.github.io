@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="../css/glowing.css">
   <link rel="stylesheet" href="../css/code.css">
   <link rel="stylesheet" href="../css/new.css">
-  <link rel="stylesheet" href="../css/popup.css">
+  <link rel="stylesheet" href="../css/popup.css?v=4">
   <link rel="stylesheet" href="../css/vintage.css">
   <script src="../js/vendor/code.jquery.com.jquery-1.10.2.js"></script>
   <script src="../js/icon-animation.js"></script>
@@ -22,7 +22,7 @@
   <script src="../js/expand_jquery.js"></script>
   <script src="../js/briefcase.js" defer></script>
   <script src="../js/aesthetics.js" crossorigin="anonymous"></script>
-  <script src="../js/components.js" defer></script>
+  <script src="../js/components.js?v=active2" defer></script>
   <script src="../js/vendor/vue@3.2.36.dist.vue.global.js"></script>
   <script src="../vueJs/default.js" defer></script>
   <script src="../js/vendor/ajax.googleapis.com.ajax.libs.jquery.3.6.0.jquery.min.js"></script>
@@ -32,9 +32,27 @@
   <script src="../js/vendor/bootstrap-tooltip-3.4.1.min.js"></script>
   <script src="../js/random.js" defer></script>
   <link rel="stylesheet" href="../css/awsutil-home.css">
+  <!-- For the .lang-bar / .glow-sm styles used by the second top nav -->
+  <link rel="stylesheet" href="../css/awsutil-docs.css">
 </head>
 <body class="w3-white">
 <div id="nav-placeholder"></div>
+<!-- Second top nav — breadcrumb: Software › AwsUtil (current page) -->
+<div class="lang-bar">
+    <a class="lang-home" href="../software.html" style="text-decoration:none" title="Software">
+        <button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent">
+            <div class="w3-padding-small"><div>
+                <b style="color:black;font-size:calc(11px + 0.3vw)">Software</b>
+            </div></div>
+        </button>
+    </a>
+    <span style="margin:0 6px;color:#9ca3af;font-size:calc(12px + 0.3vw)">&rsaquo;</span>
+    <button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent;cursor:default">
+        <div class="w3-padding-small"><div>
+            <b style="color:red;font-size:calc(11px + 0.3vw)">AwsUtil</b>
+        </div></div>
+    </button>
+</div>
 
 <div class="hero">
   <div class="particle" style="width:50px;height:50px;left:8%;top:15%;--dur:7.0s;--del:0.0s"></div>

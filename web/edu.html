@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Education & Career · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Education & Career');</script>
+<script src="edu.js?v=6" defer></script>
+<style>
+.ty-target { background: linear-gradient(180deg,#fff,#f7f8ff); padding: 18px; border-radius: 12px; border: 1px solid var(--fa-border); font-family: "JetBrains Mono", monospace; font-size: 15px; line-height: 1.6; color: var(--fa-text); margin: 12px 0; }
+.ty-input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid rgba(99,102,241,0.30); font-family: "JetBrains Mono", monospace; font-size: 15px; outline: none; box-sizing: border-box; }
+.ty-input:focus { border-color: var(--fa-indigo); box-shadow: 0 0 0 4px rgba(99,102,241,0.18); }
+</style>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Education & Career</h1><p>Five tools: GPA calculator + grade-needed predictor, salary raise impact, job offer comparison (COL-adjusted), student budget planner, and a real interactive typing-speed (WPM) test.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">GPA + Grade-Needed</h2></div>
+<div class="fa-row-list" id="gp_rows"></div>
+<div class="fa-grid" style="margin-top:14px">
+<div class="fa-field"><label>Target GPA</label><div class="fa-input-wrap"><input id="gp_target" type="number" step="0.01" value="3.7"></div></div>
+<div class="fa-field"><label>Future credits</label><div class="fa-input-wrap"><input id="gp_futureCredits" type="number" value="3"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addGradeRow('Course',3,'A')">+ Add course</button><button class="fa-btn" onclick="calcGPA()">Calculate</button></div>
+<div class="fa-hint fa-err" id="gp_err" style="display:none"></div>
+<div class="fa-results" id="gp_results"><div class="fa-stats" id="gp_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="gp_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Raise Impact</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Current salary</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ra_current" type="number" value="80000"></div></div>
+<div class="fa-field"><label>Raise</label><div class="fa-input-wrap"><input id="ra_pct" type="number" step="0.1" value="8"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Project over</label><div class="fa-input-wrap"><input id="ra_years" type="number" value="10"><span class="fa-input-suffix">yr</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcRaise()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ra_err" style="display:none"></div>
+<div class="fa-results" id="ra_results"><div class="fa-stats" id="ra_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="ra_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Job Offer Comparison</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Offer A salary</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="jo_sal1" type="number" value="120000"></div></div>
+<div class="fa-field"><label>A bonus</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="jo_bonus1" type="number" value="15000"></div></div>
+<div class="fa-field"><label>A equity /yr</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="jo_equity1" type="number" value="20000"></div></div>
+<div class="fa-field"><label>A city COL</label><div class="fa-input-wrap"><input id="jo_col1" type="number" value="180"></div></div>
+<div class="fa-field"><label>Offer B salary</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="jo_sal2" type="number" value="100000"></div></div>
+<div class="fa-field"><label>B bonus</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="jo_bonus2" type="number" value="10000"></div></div>
+<div class="fa-field"><label>B equity /yr</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="jo_equity2" type="number" value="8000"></div></div>
+<div class="fa-field"><label>B city COL</label><div class="fa-input-wrap"><input id="jo_col2" type="number" value="100"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcOffer()">Compare</button></div>
+<div class="fa-hint fa-err" id="jo_err" style="display:none"></div>
+<div class="fa-results" id="jo_results"><div class="fa-stats" id="jo_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="jo_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Student Budget Planner</h2></div>
+<div class="fa-row-list" id="sb_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addBudgetRow('Item',50,'exp')">+ Add line</button><button class="fa-btn" onclick="calcStudentBudget()">Budget</button></div>
+<div class="fa-hint fa-err" id="sb_err" style="display:none"></div>
+<div class="fa-results" id="sb_results"><div class="fa-stats" id="sb_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="sb_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Typing Speed (WPM) <span class="fa-pill">Interactive</span></h2><p class="fa-card-blurb">Click Start and type the sample text. Results appear when you match it exactly.</p></div>
+<div class="ty-target" id="ty_target">Click "Start" to load the sample text.</div>
+<textarea id="ty_input" class="ty-input" placeholder="Type here once you've started…" oninput="checkTyping()" disabled rows="3"></textarea>
+<div class="fa-actions" style="margin-top:12px"><button class="fa-btn" onclick="startTypingTest()">Start</button></div>
+<div class="fa-results" id="ty_results"><div class="fa-stats" id="ty_stats"></div><div class="fa-section-heading">vs benchmarks</div><div class="fa-chart-wrap" style="height:240px"><canvas id="ty_chart"></canvas></div></div>
+</section>
+
+</body></html>

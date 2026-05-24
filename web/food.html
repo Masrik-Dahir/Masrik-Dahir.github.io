@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Food & Nutrition · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Food & Nutrition');</script>
+<script src="food.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Food & Nutrition</h1><p>Seven kitchen & nutrition tools: recipe scaler, cooking measurement converter, coffee brew-ratio, BAC estimator (Widmark), meal-prep cost-per-serving, baking pan-size converter, daily caffeine tracker with metabolism curve.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Recipe Scaler</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Original servings</label><div class="fa-input-wrap"><input id="rs_orig" type="number" value="4"></div></div>
+<div class="fa-field"><label>Servings you want</label><div class="fa-input-wrap"><input id="rs_want" type="number" value="6"></div></div>
+</div>
+<div class="fa-section-heading">Ingredients</div>
+<div class="fa-row-list" id="rs_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addRecipeRow('Ingredient',100,'g')">+ Add ingredient</button><button class="fa-btn" onclick="calcRecipeScale()">Scale</button></div>
+<div class="fa-hint fa-err" id="rs_err" style="display:none"></div>
+<div class="fa-results" id="rs_results"><div class="fa-stats" id="rs_stats"></div><div id="rs_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Measurement Converter</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Amount</label><div class="fa-input-wrap"><input id="cm_amount" type="number" step="0.01" value="1"></div></div>
+<div class="fa-field"><label>From</label><div class="fa-input-wrap"><select id="cm_from"><option>tsp</option><option>tbsp</option><option>fl oz</option><option selected>cup</option><option>pint</option><option>quart</option><option>gallon</option><option>ml</option><option>l</option></select></div></div>
+<div class="fa-field"><label>To</label><div class="fa-input-wrap"><select id="cm_to"><option selected>ml</option><option>tsp</option><option>tbsp</option><option>fl oz</option><option>cup</option><option>pint</option><option>quart</option><option>gallon</option><option>l</option></select></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="convertMeasure()">Convert</button></div>
+<div class="fa-hint fa-err" id="cm_err" style="display:none"></div>
+<div class="fa-results" id="cm_results"><div class="fa-stats" id="cm_stats"></div><div id="cm_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Coffee Brew Ratio</h2><p class="fa-card-blurb">Standard pour-over is 1:16. Stronger goes lower (1:14), milder higher (1:18).</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Ratio (1 :)</label><div class="fa-input-wrap"><input id="cf_ratio" type="number" step="0.5" value="16"></div></div>
+<div class="fa-field"><label>Water (g)</label><div class="fa-input-wrap"><input id="cf_water" type="number" value="500"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcCoffeeRatio()">Brew</button></div>
+<div class="fa-hint fa-err" id="cf_err" style="display:none"></div>
+<div class="fa-results" id="cf_results"><div class="fa-stats" id="cf_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="cf_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">BAC Estimator <span class="fa-pill">Widmark</span></h2><p class="fa-card-blurb">Educational only. Real BAC varies — don't drive after drinking.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Drinks</label><div class="fa-input-wrap"><input id="bc_drinks" type="number" step="0.5" value="3"></div></div>
+<div class="fa-field"><label>Oz per drink</label><div class="fa-input-wrap"><input id="bc_oz" type="number" step="0.1" value="1.5"><span class="fa-input-suffix">fl oz</span></div></div>
+<div class="fa-field"><label>ABV</label><div class="fa-input-wrap"><input id="bc_abv" type="number" step="0.1" value="40"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Weight (kg)</label><div class="fa-input-wrap"><input id="bc_weight" type="number" value="75"></div></div>
+<div class="fa-field"><label>Sex</label><div class="fa-input-wrap"><select id="bc_sex"><option value="male">Male</option><option value="female">Female</option></select></div></div>
+<div class="fa-field"><label>Hours since drinking</label><div class="fa-input-wrap"><input id="bc_hours" type="number" step="0.5" value="1"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcBAC()">Estimate</button></div>
+<div class="fa-hint fa-err" id="bc_err" style="display:none"></div>
+<div class="fa-results" id="bc_results"><div class="fa-stats" id="bc_stats"></div><div class="fa-section-heading">BAC decay</div><div class="fa-chart-wrap" style="height:280px"><canvas id="bc_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Meal-Prep Cost</h2></div>
+<div class="fa-row-list" id="mp_rows"></div>
+<div class="fa-grid" style="margin-top:14px">
+<div class="fa-field"><label>Servings produced</label><div class="fa-input-wrap"><input id="mp_servings" type="number" value="5"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addMealRow('Ingredient',5)">+ Add ingredient</button><button class="fa-btn" onclick="calcMealCost()">Total</button></div>
+<div class="fa-hint fa-err" id="mp_err" style="display:none"></div>
+<div class="fa-results" id="mp_results"><div class="fa-stats" id="mp_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="mp_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Baking Pan-Size Converter</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>From shape</label><div class="fa-input-wrap"><select id="pan_fromShape"><option value="round">Round</option><option value="square">Square</option><option value="rect">Rectangular</option></select></div></div>
+<div class="fa-field"><label>From width/diameter (cm)</label><div class="fa-input-wrap"><input id="pan_fromW" type="number" value="22"></div></div>
+<div class="fa-field"><label>From length (rect only)</label><div class="fa-input-wrap"><input id="pan_fromH" type="number" value="0"></div></div>
+<div class="fa-field"><label>To shape</label><div class="fa-input-wrap"><select id="pan_toShape"><option value="round">Round</option><option value="square">Square</option><option value="rect">Rectangular</option></select></div></div>
+<div class="fa-field"><label>To width/diameter (cm)</label><div class="fa-input-wrap"><input id="pan_toW" type="number" value="26"></div></div>
+<div class="fa-field"><label>To length (rect only)</label><div class="fa-input-wrap"><input id="pan_toH" type="number" value="0"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPanSize()">Convert</button></div>
+<div class="fa-hint fa-err" id="pan_err" style="display:none"></div>
+<div class="fa-results" id="pan_results"><div class="fa-stats" id="pan_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="pan_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Daily Caffeine Tracker</h2><p class="fa-card-blurb">Caffeine has a 5-hour half-life. Late-afternoon doses linger past bedtime.</p></div>
+<div class="fa-row-list" id="ca_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addCaffeineRow('Drink',95,9)">+ Add drink</button><button class="fa-btn" onclick="calcCaffeine()">Track</button></div>
+<div class="fa-hint fa-err" id="ca_err" style="display:none"></div>
+<div class="fa-results" id="ca_results"><div class="fa-stats" id="ca_stats"></div><div class="fa-section-heading">Caffeine in bloodstream throughout day</div><div class="fa-chart-wrap" style="height:280px"><canvas id="ca_chart"></canvas></div></div>
+</section>
+
+</body></html>
