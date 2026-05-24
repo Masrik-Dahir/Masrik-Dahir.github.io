@@ -287,6 +287,61 @@
             .positioning-cta a { width: 100%; text-align: center; }
             .positioning-bio li { font-size: 13.5px; }
         }
+
+        /* ════════════════════════════════════════════════════════════
+           Hero photo nameplate — clean, formal liquid-glass plate
+           anchored at the bottom-left of the Masrik Dahir headshot.
+           No animations, no rainbows, no outlines — just a frosted
+           translucent surface with editorial typography that scales
+           cleanly from mobile through desktop.
+           ════════════════════════════════════════════════════════════ */
+        .hero-nameplate {
+            position: absolute;
+            left:   clamp(12px, 3.5vw, 20px);
+            bottom: clamp(12px, 3.5vw, 20px);
+            width: -moz-fit-content;
+            width: fit-content;
+            max-width: calc(100% - 2 * clamp(12px, 3.5vw, 20px));
+            padding: clamp(10px, 2.6vw, 14px) clamp(16px, 4vw, 22px);
+            border-radius: 10px;
+            /* Liquid-glass surface: soft white wash + heavy backdrop
+               blur so the photo behind is visibly defocused without
+               disappearing. */
+            background: rgba(255, 255, 255, 0.38);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.80) inset,
+                0 10px 30px rgba(15, 23, 42, 0.22);
+            color: #0f172a;
+            /* Don't inherit hover paint from polish.css decorations
+               applied to the parent card. */
+            isolation: isolate;
+        }
+        .hero-nameplate-ring,
+        .hero-nameplate::after,
+        .hero-nameplate::before { display: none !important; }
+        .hero-nameplate-title {
+            margin: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: clamp(20px, 5.6vw, 26px);
+            font-weight: 600;
+            letter-spacing: 0.005em;
+            line-height: 1.15;
+            color: #0f172a;
+        }
+        .hero-nameplate-sub {
+            margin: 4px 0 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: clamp(10.5px, 2.6vw, 12px);
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(30, 41, 59, 0.78);
+        }
+        .hero-nameplate, .hero-nameplate * { transition: none; }
+
         /* TASK-007 reverted — Milestones and Travel kept in the primary nav.
            The .nav-demoted class is left on the markup but no longer hides anything. */
 
@@ -1139,11 +1194,10 @@
                 <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom no-polish-hover">
                     <div class="w3-display-container">
                         <img src="https://d3dw5jtb3w1kgy.cloudfront.net/masrikdahir.jpg" style="width:100%" alt="Masrik Dahir">
-                        <div class="w3-display-bottomleft w3-container w3-text-black">
-                            <h2 style="background:#ffffff;opacity: 0.7;">
-                                <div class="no_new_line">Masrik Dahir
-                                </div>
-                            </h2>
+                        <div class="hero-nameplate" aria-label="Masrik Dahir nameplate">
+                            <span class="hero-nameplate-ring" aria-hidden="true"></span>
+                            <div class="hero-nameplate-title">Masrik Dahir</div>
+                            <div class="hero-nameplate-sub">Software Engineer · Capital&nbsp;One</div>
                         </div>
                     </div>
 
