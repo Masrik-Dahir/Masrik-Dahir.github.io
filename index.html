@@ -462,8 +462,18 @@
             width: 26px;
             text-align: center;
         }
+        /* Image logo — used when neither FontAwesome nor a letter
+           badge fits (e.g. the official C language logo). Sized to
+           match the FontAwesome icon footprint. */
+        .skill-chips li > .lang-logo {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            flex: 0 0 auto;
+            margin-top: 2px;
+        }
         /* Letter badge — used when FontAwesome doesn't have a brand
-           icon for the language (C/C++, Go, Rust, TypeScript). */
+           icon for the language (Go, Rust, TypeScript). */
         .skill-chips li > .lang-badge {
             display: inline-flex;
             align-items: center;
@@ -519,177 +529,154 @@
         }
 
         /* ─────────────────────────────────────────────────────────────
-           SUMMARY CTA BUTTONS — copy of the work.html expand/collapse
-           liquid-glass style. Both "See projects" and "See Experiences"
-           now use the same model:
-             • Always-on conic-gradient rotating rainbow border
-             • Always-on white glint sweep across the surface
-             • Hex shimmer overlay on hover (sweep + hue-cycle)
-             • Hover: indigo solid border, slight lift
-             • Click (:active): switches to the crimson active theme
+           SUMMARY CTA BUTTONS — "See projects" + "See Experiences"
+             • Rest: clean whitish surface, soft neutral border.
+             • Hover: BORDER ONLY glitters — a rainbow conic gradient
+               rotates around the perimeter (mask trick keeps it as
+               a 2 px ring, so the interior stays whitish). Tiny
+               sparkle dots twinkle along the edge.
+             • Click (:active): background fills with a different
+               color (indigo→violet gradient) and text inverts.
            ───────────────────────────────────────────────────────────── */
         @property --cta-edge-angle {
             syntax: '<angle>';
             initial-value: 0deg;
             inherits: false;
         }
-        @property --cta-glint-pos {
-            syntax: '<percentage>';
-            initial-value: -25%;
-            inherits: false;
-        }
-        @keyframes cta-edge-spin { to { --cta-edge-angle: 360deg; } }
-        @keyframes cta-glint     { 0% { --cta-glint-pos: -25%; } 100% { --cta-glint-pos: 125%; } }
+        @keyframes cta-edge-spin    { to { --cta-edge-angle: 360deg; } }
+        @keyframes cta-sparkle-pan  { from { background-position: 0 0; } to { background-position: 60px 0; } }
 
-        .positioning-cta a {
+        /* Both selectors include body.polish so they beat the polish.css
+           hex-mask rules that ALSO target .positioning-cta a (same
+           specificity = 0,2,2). Every property uses !important so the
+           polish hex pattern, conic ring, and shimmer animations are
+           all overridden to none. */
+        body.polish .positioning-cta a {
             position: relative !important;
             isolation: isolate !important;
             overflow: hidden !important;
-            display: inline-block;
+            display: inline-block !important;
             padding: 11px 22px !important;
             border-radius: 10px !important;
-            font-family: 'Arial Black', Arial, sans-serif;
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            text-decoration: none;
+            font-family: 'Arial Black', Arial, sans-serif !important;
+            font-size: 13px !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.08em !important;
+            text-transform: uppercase !important;
+            text-decoration: none !important;
             color: #1e3a8a !important;
             --cta-edge-angle: 0deg;
-            --cta-glint-pos: -25%;
-            background:
-                radial-gradient(ellipse 100% 60% at 50% -25%,
-                    rgba(255,255,255,0.85) 0%,
-                    rgba(255,255,255,0.30) 35%,
-                    rgba(255,255,255,0.00) 70%) padding-box,
-                radial-gradient(ellipse 60% 90% at 0% 0%,
-                    rgba(255,255,255,0.55) 0%,
-                    rgba(255,255,255,0.00) 60%) padding-box,
-                radial-gradient(ellipse 90% 65% at 50% 120%,
-                    rgba(15,20,40,0.08) 0%,
-                    rgba(15,20,40,0.00) 60%) padding-box,
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.94) 0%,
-                    rgba(248,250,255,0.88) 100%) padding-box,
-                conic-gradient(from var(--cta-edge-angle),
-                    rgba(255,179,198,0.65),
-                    rgba(255,209,168,0.65),
-                    rgba(255,240,168,0.65),
-                    rgba(196,242,197,0.65),
-                    rgba(184,217,255,0.65),
-                    rgba(212,193,255,0.65),
-                    rgba(255,193,229,0.65),
-                    rgba(255,179,198,0.65)) border-box !important;
-            border: 1.5px solid transparent !important;
-            backdrop-filter: blur(8px) saturate(130%);
-            -webkit-backdrop-filter: blur(8px) saturate(130%);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.90),
-                inset 0 -1px 0 rgba(20,15,30,0.05),
-                0 0 0 1.5px rgba(15,20,40,0.55),
-                0 0 10px rgba(220,225,235,0.30),
-                0 2px 6px rgba(15,20,40,0.12) !important;
-            transition: transform 0.18s ease, box-shadow 0.22s ease, color 0.22s ease;
-            animation:
-                cta-edge-spin 4.5s linear infinite,
-                cta-glint     6.0s linear infinite !important;
-        }
-        /* Hex shimmer layer — fades in on hover, never on at rest */
-        .positioning-cta a::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-            pointer-events: none;
-            border-radius: inherit;
-            background: linear-gradient(90deg,
-                #ffb3c6 0%,  #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
-                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%);
-            background-size: 300% 100%;
-            background-position: 0% 50%;
-            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>");
-                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>");
-            -webkit-mask-size: 9px 10.3px;
-                    mask-size: 9px 10.3px;
-            -webkit-mask-repeat: repeat;
-                    mask-repeat: repeat;
-            opacity: 0;
-            animation: none;
-            transition: opacity 0.30s ease;
-        }
-        /* White glint diagonal sweep */
-        .positioning-cta a::after {
-            content: '';
-            position: absolute;
-            top: 0; bottom: 0;
-            left: var(--cta-glint-pos);
-            width: 35%;
-            background: linear-gradient(115deg,
-                rgba(255,255,255,0) 0%,
-                rgba(255,255,255,0.55) 50%,
-                rgba(255,255,255,0) 100%);
-            transform: skewX(-20deg);
-            pointer-events: none;
-            z-index: 1;
-        }
-        .positioning-cta a:hover::before {
-            opacity: 0.55;
-            animation:
-                sc-hex-sweep      2.4s linear infinite,
-                sc-hex-hue-cycle  3.6s linear infinite;
-            filter: saturate(0.85) brightness(1.05);
-        }
-        .positioning-cta a:hover {
-            transform: translateY(-1px);
-            color: #1e3a8a !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.97) 0%,
-                    rgba(248,250,255,0.93) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(99, 102, 241, 0.85),
-                    rgba(99, 102, 241, 0.85)) border-box !important;
-            border: 1.5px solid transparent !important;
+            background: linear-gradient(135deg,
+                rgba(255,255,255,0.97) 0%,
+                rgba(248,250,255,0.93) 100%) !important;
+            border: 1.5px solid rgba(15,20,40,0.30) !important;
+            backdrop-filter: blur(8px) saturate(130%) !important;
+            -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
             box-shadow:
                 inset 0 1px 0 rgba(255,255,255,0.95),
                 0 1px 3px rgba(15,20,40,0.10) !important;
+            transition: transform 0.18s ease,
+                        color 0.22s ease,
+                        box-shadow 0.25s ease,
+                        background 0.25s ease,
+                        border-color 0.25s ease !important;
+            animation: none !important;
         }
-        /* CLICK (:active) — switch to the work.html crimson "active" theme */
-        .positioning-cta a:active {
-            transform: translateY(0) scale(0.98);
-            color: #fff !important;
+
+        /* ── HOVER GLITTERING BORDER ──
+           ::before paints a rotating rainbow conic gradient clipped
+           to a 2px ring via mask-composite, so ONLY the border
+           glitters. No hexagon mask anywhere — the polish hex SVG
+           mask is explicitly overridden to `none`. ::after paints
+           tiny white sparkles tracking around the same ring. */
+        body.polish .positioning-cta a::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            border-radius: inherit !important;
+            pointer-events: none !important;
+            padding: 2px !important;
+            background: conic-gradient(from var(--cta-edge-angle),
+                #ec4899, #f59e0b, #fde047, #10b981,
+                #06b6d4, #3b82f6, #8b5cf6, #ec4899) !important;
+            background-size: 100% 100% !important;
+            background-position: 0 0 !important;
+            -webkit-mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0) !important;
+            -webkit-mask-composite: xor !important;
+                    mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0) !important;
+                    mask-composite: exclude !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            filter: none !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+            z-index: 2 !important;
+        }
+        body.polish .positioning-cta a::after {
+            content: '' !important;
+            position: absolute !important;
+            inset: -1px !important;
+            border-radius: inherit !important;
+            pointer-events: none !important;
+            padding: 3px !important;
             background:
-                radial-gradient(ellipse 100% 60% at 50% -25%,
-                    rgba(255,255,255,0.55) 0%,
-                    rgba(255,255,255,0.20) 35%,
-                    rgba(255,255,255,0.00) 70%) padding-box,
-                radial-gradient(ellipse 60% 90% at 0% 0%,
-                    rgba(255,255,255,0.40) 0%,
-                    rgba(255,255,255,0.00) 60%) padding-box,
-                linear-gradient(135deg,
-                    rgba(220, 38, 38, 0.95) 0%,
-                    rgba(185, 28, 28, 0.94) 50%,
-                    rgba(239, 68, 68, 0.93) 100%) padding-box,
-                conic-gradient(from var(--cta-edge-angle),
-                    #ef4444, #dc2626, #b91c1c, #f87171,
-                    #c0202a, #ff6b7a, #991b1b, #ef4444) border-box !important;
-            border: 1.5px solid transparent !important;
+                radial-gradient(circle 1.5px at 5px 50%,  #fff 95%, transparent 100%),
+                radial-gradient(circle 1.2px at 20px 50%, #fff 95%, transparent 100%),
+                radial-gradient(circle 1.8px at 38px 50%, #fff 95%, transparent 100%),
+                radial-gradient(circle 1.2px at 52px 50%, #fff 95%, transparent 100%) !important;
+            background-size: 60px 100% !important;
+            background-position: 0 0 !important;
+            background-repeat: repeat-x !important;
+            -webkit-mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0) !important;
+            -webkit-mask-composite: xor !important;
+                    mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0) !important;
+                    mask-composite: exclude !important;
+            opacity: 0 !important;
+            filter: drop-shadow(0 0 3px rgba(255,255,255,0.95)) !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+            z-index: 3 !important;
+        }
+        body.polish .positioning-cta a:hover {
+            transform: translateY(-1px) !important;
+            border: 1.5px solid rgba(15,23,42,0.85) !important;
             box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                inset 0 -1px 0 rgba(80,8,15,0.18),
-                0 0 14px rgba(255,80,100,0.55),
-                0 2px 8px rgba(80,8,15,0.25) !important;
+                inset 0 1px 0 rgba(255,255,255,0.98),
+                0 4px 14px rgba(99,102,241,0.18) !important;
         }
-        .positioning-cta a:active::before {
-            opacity: 0.55;
-            background: linear-gradient(90deg,
-                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
-                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%);
-            background-size: 300% 100%;
-            animation:
-                sc-hex-sweep      2.4s linear infinite,
-                sc-hex-hue-cycle  3.6s linear infinite;
+        body.polish .positioning-cta a:hover::before {
+            opacity: 1 !important;
+            animation: cta-edge-spin 3.6s linear infinite !important;
         }
+        body.polish .positioning-cta a:hover::after {
+            opacity: 1 !important;
+            animation: cta-sparkle-pan 1.6s linear infinite !important;
+        }
+
+        /* ── CLICK (:active) — background snaps to indigo → violet → magenta */
+        body.polish .positioning-cta a:active {
+            transform: translateY(0) scale(0.97) !important;
+            color: #fff !important;
+            background: linear-gradient(135deg,
+                #4f46e5 0%,
+                #7c3aed 50%,
+                #c026d3 100%) !important;
+            border-color: transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.55),
+                0 6px 18px rgba(124,58,237,0.45),
+                0 0 0 3px rgba(192,38,211,0.18) !important;
+        }
+        body.polish .positioning-cta a:active::before { opacity: 1 !important; }
+        body.polish .positioning-cta a:active::after  { opacity: 1 !important; }
         .skills-context-title {
             font-family: 'Arial Black', Arial, sans-serif;
             font-size: 11px;
@@ -1199,7 +1186,7 @@
                             <li><span class="lang-badge" style="background:#3178c6">TS</span><div><span>TypeScript</span><p>React + .NET REST APIs at CoStar Group.</p></div></li>
                             <li><i class="fab fa-python"      style="color:#3776ab"></i><div><span>Python</span><p>Automation, NLP/NLTK research, Cronus concept-map tool, scrapers.</p></div></li>
                             <li><i class="fab fa-java"        style="color:#007396"></i><div><span>Java</span><p>Spring Boot work at Capital One, JVM coursework, algorithms.</p></div></li>
-                            <li><span class="lang-badge" style="background:#a8b9cc;color:#1f2937">C/C++</span><div><span>C / C++</span><p>Volatility &amp; Libvmi memory-introspection research at VCU SAFE Lab.</p></div></li>
+                            <li><img class="lang-logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/c2.png" alt="C language logo"><div><span>C / C++</span><p>Volatility &amp; Libvmi memory-introspection research at VCU SAFE Lab.</p></div></li>
                             <li><i class="fab fa-microsoft"   style="color:#512bd4"></i><div><span>C# / .NET</span><p>ASP.NET Core + Entity Framework + NUnit for CoStar microservices.</p></div></li>
                             <li><span class="lang-badge" style="background:#00add8">Go</span><div><span>Go</span><p>AwsUtil multi-language SDK wrappers — full AWS API surface in Go.</p></div></li>
                             <li><span class="lang-badge" style="background:#dc2626">Rs</span><div><span>Rust</span><p>Exploratory systems projects + AwsUtil Rust SDK wrappers.</p></div></li>
@@ -1262,27 +1249,27 @@
                         <span class="liquid-glass" aria-hidden="true"></span>
                         <p class="section-card-title">Certifications</p>
                         <ul class="cert-grid">
-                            <li data-toggle="tooltip" title="AWS Cloud Practitioner Certification">
+                            <li>
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png" alt="AWS Cloud Practitioner certification badge">
                                 <span>AWS Cloud Practitioner</span>
                             </li>
-                            <li data-toggle="tooltip" title="AWS Certified Developer Associate">
+                            <li>
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png" alt="AWS Certified Developer Associate badge">
                                 <span>AWS Developer Associate</span>
                             </li>
-                            <li data-toggle="tooltip" title="AWS Certified Solutions Architect Associate">
+                            <li>
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png" alt="AWS Certified Solutions Architect Associate badge">
                                 <span>AWS Solutions Architect Associate</span>
                             </li>
-                            <li data-toggle="tooltip" title="Postman API Student Expert">
+                            <li>
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png" alt="Postman API Student Expert badge">
                                 <span>Postman API Student Expert</span>
                             </li>
-                            <li data-toggle="tooltip" title="Databricks Fundamentals">
+                            <li>
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png" alt="Databricks Fundamentals badge">
                                 <span>Databricks Fundamentals</span>
                             </li>
-                            <li data-toggle="tooltip" title="Databricks Generative AI Fundamentals">
+                            <li>
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png" alt="Databricks Generative AI Fundamentals badge">
                                 <span>Databricks Generative AI Fundamentals</span>
                             </li>
@@ -1298,27 +1285,27 @@
                         <span class="liquid-glass" aria-hidden="true"></span>
                         <p class="section-card-title">Work history</p>
                         <ul class="work-history-grid">
-                            <li data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
+                            <li>
                                 <img alt="Capital One logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
                                 <span>Capital One</span>
                             </li>
-                            <li data-toggle="tooltip" data-html="true" title="CoStar Group">
+                            <li>
                                 <img alt="CoStar Group logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
                                 <span>CoStar Group</span>
                             </li>
-                            <li data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
+                            <li>
                                 <img alt="Virginia Department of Elections logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
                                 <span>VA Dept. of Elections</span>
                             </li>
-                            <li data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
+                            <li>
                                 <img alt="Virginia Commonwealth University logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
                                 <span>VCU</span>
                             </li>
-                            <li data-toggle="tooltip" data-html="true" title="Roanoke County">
+                            <li>
                                 <img alt="Roanoke County logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
                                 <span>Roanoke County</span>
                             </li>
-                            <li data-toggle="tooltip" data-html="true" title="AT&amp;T Inc.">
+                            <li>
                                 <img alt="AT&amp;T logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
                                 <span>AT&amp;T</span>
                             </li>
