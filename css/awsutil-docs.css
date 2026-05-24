@@ -22,8 +22,11 @@
 
 :root {
   --sidebar-w: 320px;
-  --nav-h: 60px;
-  --lang-bar-h: 62px;
+  /* --nav-h matches the actual rendered height of the main site
+     topnav (.topnav.navbar-fixed-top from components.js, ≈68px tall)
+     so the .lang-bar below it doesn't overlap. */
+  --nav-h: 68px;
+  --lang-bar-h: 76px;
   --accent: #3776AB;
   --accent-dk: #2B5E8C;
   --bg-side: #f7f8fa;
@@ -44,12 +47,11 @@
 
 html { scroll-behavior:smooth }
 
-/* ── Scroll progress ── */
-.scroll-progress {
-  position:fixed; top:var(--nav-h); left:0; height:3px;
-  background:linear-gradient(90deg, var(--accent), var(--accent-dk));
-  z-index:999; width:0; transition:width .1s;
-}
+/* ── Scroll progress (REMOVED per design)
+   The scroll-position progress bar that used to sit between the
+   topnav and the lang-bar has been hidden — it competed visually
+   with the lang-bar's own bottom border. */
+.scroll-progress { display: none !important; }
 
 
 /* ── Sidebar (Stripe-inspired) ── */
@@ -87,23 +89,51 @@ html { scroll-behavior:smooth }
 }
 .sidebar-resize:hover::after { opacity:1 }
 
-/* ── Search bar (lives in lang-bar now) ── */
+/* ── Search bar (lives in lang-bar now) ──
+   Sized to mirror the wider search bar on software.html / map.html:
+   the .search-wrap stretches to fill the remaining horizontal
+   space in the lang-bar via flex:1, and the input fills the wrap.
+   The .search-cross-btn (loaded from css/search-cross.css) replaces
+   the legacy emoji clear button. */
 #side-search {
-  padding:7px 14px 7px 34px; width:220px;
-  background:#f4f5f7; border:1px solid #e3e5e8; border-radius:8px;
-  color:#1a1a1a; font-size:.88em; font-family:var(--mono); outline:none;
-  transition:border-color .2s, box-shadow .2s, background .2s, width .25s ease;
-  margin-left:auto;
+  flex: 1;
+  width: 100%;
+  padding: 9px 38px 9px 38px;
+  background: #f4f5f7; border: 1px solid #e3e5e8; border-radius: 8px;
+  color: #1a1a1a; font-size: .92em; font-family: var(--mono); outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
 }
-#side-search::placeholder { color:#9ca3af }
-#side-search:focus { border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px rgba(0,0,0,.06); width:280px }
+#side-search::placeholder { color: #9ca3af; }
+#side-search:focus {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+}
 .search-wrap {
-  position:relative; display:flex; align-items:center; margin-left:auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;                       /* stretch to fill remaining lang-bar width */
+  min-width: 220px;
+  max-width: 720px;              /* but not absurdly wide on huge monitors */
+  margin-left: auto;
 }
 .search-wrap .search-icon {
-  position:absolute; left:10px; top:50%; transform:translateY(-50%);
-  width:16px; height:16px; pointer-events:none; opacity:.5;
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; pointer-events: none; opacity: .5;
 }
+/* The clear (cross) button — positioned inside the input on the right. */
+.search-wrap .search-cross-btn {
+  position: absolute !important;
+  right: 8px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+.search-wrap .search-cross-btn i.fa {
+  color: #6b7280;
+  transition: color .15s ease;
+}
+.search-wrap .search-cross-btn:hover i.fa { color: #1a1a1a; }
 
 #sidebar ul { list-style:none; margin:0; padding:0 }
 #sidebar li { margin:0; padding:0 }
@@ -140,13 +170,32 @@ html { scroll-behavior:smooth }
 }
 .fn-link:hover { color:#0a2540; background:#edeef1 }
 
-/* ── Lang switcher (fixed bar below site nav — identical structure to topnav) ── */
+/* ── Lang switcher (fixed bar below site nav — identical structure to topnav) ──
+   To make the bar render IDENTICALLY on awsutil.html (where it lives
+   at top level and inherits body styles) AND on language pages where
+   it sits inside #api-docs-wrapper (which sets its own font-family
+   and line-height), we pin all relevant typographic properties on
+   .lang-bar AND its descendants — `font-family`, `font-size`,
+   `line-height` — with the same explicit values on both contexts. */
+/* Apply to text descendants only — leave <i.fa> icon glyphs and
+   <input> (search bar uses monospace) alone. */
+.lang-bar,
+#api-docs-wrapper .lang-bar {
+  font-family: "georgia", sans-serif !important;
+  line-height: 1.5 !important;
+}
+.lang-bar *:not(i):not(.fa):not(.fas):not(.fab):not(.far):not(input):not(.search-icon),
+#api-docs-wrapper .lang-bar *:not(i):not(.fa):not(.fas):not(.fab):not(.far):not(input):not(.search-icon) {
+  font-family: "georgia", sans-serif !important;
+  line-height: 1.5 !important;
+}
 .lang-bar {
   position:fixed; top:var(--nav-h); left:0; right:0;
   z-index:101;
   border-bottom:black 2px solid;
   padding:14px 16px;
   display:flex; align-items:center;
+  background: white;
 }
 .lang-bar::after {
   content:''; position:absolute; inset:0; background:white; z-index:-2;
@@ -157,6 +206,19 @@ html { scroll-behavior:smooth }
 /* kill the site-nav glow on buttons that DON'T have glow-sm */
 .lang-bar .glow-on-hover-nav:not(.glow-sm)::before,
 .lang-bar .glow-on-hover-nav:not(.glow-sm)::after { display:none !important }
+
+/* ── Match work.html / academia.html topnav button padding ──
+   On those pages, polish.css applies `padding: revert` to
+   `.topnav button`, which restores the browser's UA default
+   (≈1px 6px). That widens each nav item ~12px. awsutil pages
+   don't load polish.css, so glowing.css's `.glow-on-hover-nav
+   { padding: 0 }` would otherwise win and make our nav items
+   slightly tighter than the rest of the site. Replicate the
+   revert here so spacing is identical. */
+.topnav button.glow-on-hover-nav,
+.topnav-2 button.glow-on-hover-nav {
+    padding: revert !important;
+}
 
 /* ── Compact glow hover for lang-bar buttons ── */
 .glow-sm {

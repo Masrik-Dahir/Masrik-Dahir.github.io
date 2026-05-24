@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Productivity & Work · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Productivity & Work');</script>
+<script src="work.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Productivity & Work</h1><p>Seven tools: exact age + birthday countdown, date-difference, freelance hourly rate, project quote builder, Pomodoro session planner, reading-time & books-per-year, meeting cost (the "ouch" number).</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Exact Age & Birthday Countdown</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Date of birth</label><div class="fa-input-wrap"><input id="ag_dob" type="date" value="1995-06-15"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcAge()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ag_err" style="display:none"></div>
+<div class="fa-results" id="ag_results"><div class="fa-stats" id="ag_stats"></div><div class="fa-section-heading">Milestones</div><div id="ag_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Date Difference</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Date 1</label><div class="fa-input-wrap"><input id="dd_d1" type="date" value="2020-01-01"></div></div>
+<div class="fa-field"><label>Date 2</label><div class="fa-input-wrap"><input id="dd_d2" type="date" value="2026-05-22"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcDateDiff()">Calculate</button></div>
+<div class="fa-hint fa-err" id="dd_err" style="display:none"></div>
+<div class="fa-results" id="dd_results"><div class="fa-stats" id="dd_stats"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Freelance Hourly Rate</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Target take-home /yr</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fr_income" type="number" value="90000"></div></div>
+<div class="fa-field"><label>Business expenses /yr</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fr_exp" type="number" value="6000"></div></div>
+<div class="fa-field"><label>Vacation weeks</label><div class="fa-input-wrap"><input id="fr_vac" type="number" value="4"></div></div>
+<div class="fa-field"><label>Hours per week</label><div class="fa-input-wrap"><input id="fr_hrs" type="number" value="30"></div></div>
+<div class="fa-field"><label>% billable</label><div class="fa-input-wrap"><input id="fr_billable" type="number" value="70"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcFreelanceRate()">Calculate</button></div>
+<div class="fa-hint fa-err" id="fr_err" style="display:none"></div>
+<div class="fa-results" id="fr_results"><div class="fa-stats" id="fr_stats"></div><div class="fa-section-heading">Required rate vs % billable</div><div class="fa-chart-wrap" style="height:240px"><canvas id="fr_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Project Quote Builder</h2></div>
+<div class="fa-row-list" id="pq_rows"></div>
+<div class="fa-grid" style="margin-top:14px">
+<div class="fa-field"><label>Contingency</label><div class="fa-input-wrap"><input id="pq_contingency" type="number" value="15"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addQuoteRow('Task',1,85)">+ Add task</button><button class="fa-btn" onclick="calcProject()">Quote</button></div>
+<div class="fa-hint fa-err" id="pq_err" style="display:none"></div>
+<div class="fa-results" id="pq_results"><div class="fa-stats" id="pq_stats"></div><div id="pq_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Pomodoro Session Planner</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Pomodoros</label><div class="fa-input-wrap"><input id="pm_tasks" type="number" value="8"></div></div>
+<div class="fa-field"><label>Focus (min)</label><div class="fa-input-wrap"><input id="pm_focus" type="number" value="25"></div></div>
+<div class="fa-field"><label>Short break (min)</label><div class="fa-input-wrap"><input id="pm_break" type="number" value="5"></div></div>
+<div class="fa-field"><label>Long break (every 4th)</label><div class="fa-input-wrap"><input id="pm_long" type="number" value="15"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPomodoro()">Plan</button></div>
+<div class="fa-hint fa-err" id="pm_err" style="display:none"></div>
+<div class="fa-results" id="pm_results"><div class="fa-stats" id="pm_stats"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Reading Time</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Total pages</label><div class="fa-input-wrap"><input id="rd_pages" type="number" value="320"></div></div>
+<div class="fa-field"><label>Your WPM</label><div class="fa-input-wrap"><input id="rd_wpm" type="number" value="250"></div></div>
+<div class="fa-field"><label>Words per page</label><div class="fa-input-wrap"><input id="rd_wordsPerPage" type="number" value="250"></div></div>
+<div class="fa-field"><label>Daily reading (min)</label><div class="fa-input-wrap"><input id="rd_daily" type="number" value="30"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcReading()">Calculate</button></div>
+<div class="fa-hint fa-err" id="rd_err" style="display:none"></div>
+<div class="fa-results" id="rd_results"><div class="fa-stats" id="rd_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="rd_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Meeting Cost <span class="fa-pill">The "ouch" number</span></h2></div>
+<div class="fa-row-list" id="mt_rows"></div>
+<div class="fa-grid" style="margin-top:14px">
+<div class="fa-field"><label>Meeting duration</label><div class="fa-input-wrap"><input id="mt_hours" type="number" step="0.25" value="1"><span class="fa-input-suffix">h</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addMeetingRow('Role',100000,1)">+ Add attendee role</button><button class="fa-btn" onclick="calcMeetingCost()">Calculate</button></div>
+<div class="fa-hint fa-err" id="mt_err" style="display:none"></div>
+<div class="fa-results" id="mt_results"><div class="fa-stats" id="mt_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="mt_chart"></canvas></div></div>
+</section>
+
+</body></html>

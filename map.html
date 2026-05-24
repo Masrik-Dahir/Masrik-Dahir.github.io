@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/glowing.css">
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
-    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/popup.css?v=4">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/vendor/bootstrap-grid.css"/>
     <link rel="stylesheet" href="css/vintage.css">
@@ -304,6 +304,26 @@
         body.polish .pop-up-button:nth-child(6n+4) { --c-r: 236; --c-g: 72; --c-b:153; --c-r2:244; --c-g2:114; --c-b2:182; } /* pink */
         body.polish .pop-up-button:nth-child(6n+5) { --c-r:   6; --c-g:182; --c-b:212; --c-r2: 34; --c-g2:211; --c-b2:238; } /* cyan */
         body.polish .pop-up-button:nth-child(6n+6) { --c-r: 139; --c-g: 92; --c-b:246; --c-r2:167; --c-g2:139; --c-b2:250; } /* violet */
+
+        /* ── DESKTOP: clear the fixed .lang-bar ───────────────────
+           The second top nav (.lang-bar with continent buttons) is
+           position:fixed at top:var(--nav-h) and stands --lang-bar-h
+           (76 px) tall. components.js's <br><br><br> spacer only
+           clears the main topnav (~68 px), so without extra offset
+           the .lang-bar overlays — and visually cuts off — the
+           search bar / country tiles that follow.
+
+           Push the main content down by --lang-bar-h on desktop
+           only; on mobile (≤1026px) the .lang-bar is hidden via
+           .resizing-1026-more, so the components.js mobile nav
+           placeholder (`margin-bottom: 70px`) already gives the
+           same gap every other page uses between the top nav and
+           the first content row — leave it alone. */
+        @media only screen and (min-width: 1027px) {
+            body.polish > div.w3-content {
+                padding-top: var(--lang-bar-h);
+            }
+        }
     </style>
 
 
@@ -311,16 +331,35 @@
 <body class="w3-white polish" data-page-graphics="world-dots">
 <div id="nav-placeholder"></div>
 
-<div style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap; width: 100%;">
-    <a href="map/northamerica" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>North America</b></div></div></button></a>
-    <a href="map/southamerica" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>South America</b></div></div></button></a>
-    <a href="map/europe" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Europe</b></div></div></button></a>
-    <a href="map/asia" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Asia</b></div></div></button></a>
-    <a href="map/australia" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Australia</b></div></div></button></a>
-    <a href="map/africa" style="text-decoration: none"><button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent"><div class="w3-padding-small"><div><b style="color: black; font-size: calc(15px + 0.4vw)"><div class="wrapper"></div>Africa</b></div></div></button></a>
+<!-- Continent selector bar — desktop only. On mobile (≤1026px) it is
+     suppressed via .resizing-1026-more so the page does not show two
+     stacked navigation bars under each other. The continent links are
+     still reachable through the main mobile nav popup. -->
+<!-- Second top nav — same .lang-bar style used site-wide on
+     library/awsutil*, web/<app>*.html etc. Travel home button on
+     the left, then the six continent links centered. -->
+<div class="lang-bar resizing-1026-more">
+    <a class="lang-home" href="map.html" title="Travel">
+        <button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent">
+            <div class="w3-padding-small"><div>
+                <b style="color:red;font-size:calc(11px + 0.3vw)">Travel</b>
+            </div></div>
+        </button>
+    </a>
+    <span style="margin:0 6px;color:#9ca3af;font-size:calc(12px + 0.3vw)">&rsaquo;</span>
+    <div class="lang-links">
+        <a href="map/northamerica"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">North America</b></div></div></button></a>
+        <a href="map/southamerica"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">South America</b></div></div></button></a>
+        <a href="map/europe"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Europe</b></div></div></button></a>
+        <a href="map/asia"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Asia</b></div></div></button></a>
+        <a href="map/australia"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Australia</b></div></div></button></a>
+        <a href="map/africa"><button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent"><div class="w3-padding-small"><div><b style="color:black;font-size:calc(11px + 0.3vw)">Africa</b></div></div></button></a>
+    </div>
 </div>
 
-<div class="w3-content" style="max-width: min(1800px, 95%); background-color: white; margin: 0 auto; padding: 1px;">
+<!-- padding-top accounts for the fixed second top nav (.lang-bar
+     ≈66px) so the search bar isn't clipped by it. -->
+<div class="w3-content" style="max-width: min(1800px, 95%); background-color: white; margin: 0 auto; padding: 90px 1px 1px;">
 
     <div id="app_country">
         <div class="">

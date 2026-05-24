@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loans & Debt · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Loans & Debt Calculators');</script>
+<script src="loans.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Loans & Debt Calculators</h1><p>Ten tools: mortgage with full amortization, early-payoff savings, auto loans, student loans, snowball-vs-avalanche, debt consolidation, refinance break-even, affordability, interest-only vs amortizing, and APR↔APY.</p></header>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Mortgage Calculator <span class="fa-pill">Amortization</span></h2><p class="fa-card-blurb">Full monthly payment + year-by-year amortization showing how each payment splits between principal and interest.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Home price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="mtg_price" type="number" value="400000"></div></div>
+<div class="fa-field"><label>Down payment</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="mtg_down" type="number" value="80000"></div></div>
+<div class="fa-field"><label>Interest rate</label><div class="fa-input-wrap"><input id="mtg_rate" type="number" step="0.01" value="6.75"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Loan term</label><div class="fa-input-wrap"><input id="mtg_years" type="number" value="30"><span class="fa-input-suffix">yr</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcMortgage()">Calculate</button></div>
+<div class="fa-hint fa-err" id="mtg_err" style="display:none"></div>
+<div class="fa-results" id="mtg_results"><div class="fa-stats" id="mtg_stats"></div>
+<div class="fa-section-heading">Principal vs interest by year</div>
+<div class="fa-chart-wrap" style="height:320px"><canvas id="mtg_chart"></canvas></div>
+<div class="fa-section-heading">Year-by-year amortization</div><div id="mtg_table"></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Early-Payoff Calculator</h2><p class="fa-card-blurb">Add an extra amount to every monthly payment — see how much interest and time you save.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Loan principal</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ep_principal" type="number" value="320000"></div></div>
+<div class="fa-field"><label>Interest rate</label><div class="fa-input-wrap"><input id="ep_rate" type="number" step="0.01" value="6.75"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Loan term</label><div class="fa-input-wrap"><input id="ep_years" type="number" value="30"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Extra payment /mo</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ep_extra" type="number" value="200"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcExtraPayment()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ep_err" style="display:none"></div>
+<div class="fa-results" id="ep_results"><div class="fa-stats" id="ep_stats"></div>
+<div class="fa-section-heading">Principal vs interest comparison</div>
+<div class="fa-chart-wrap" style="height:280px"><canvas id="ep_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Auto Loan Calculator</h2><p class="fa-card-blurb">Out-the-door cost including tax, trade-in, and down payment.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Vehicle price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="al_price" type="number" value="35000"></div></div>
+<div class="fa-field"><label>Down payment</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="al_down" type="number" value="5000"></div></div>
+<div class="fa-field"><label>Trade-in value</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="al_trade" type="number" value="0"></div></div>
+<div class="fa-field"><label>Sales tax</label><div class="fa-input-wrap"><input id="al_tax" type="number" step="0.1" value="6"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>APR</label><div class="fa-input-wrap"><input id="al_rate" type="number" step="0.01" value="7.5"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Term</label><div class="fa-input-wrap"><input id="al_years" type="number" value="5"><span class="fa-input-suffix">yr</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcAutoLoan()">Calculate</button></div>
+<div class="fa-hint fa-err" id="al_err" style="display:none"></div>
+<div class="fa-results" id="al_results"><div class="fa-stats" id="al_stats"></div>
+<div class="fa-section-heading">Cost breakdown</div>
+<div class="fa-chart-wrap" style="height:280px"><canvas id="al_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Student Loan</h2><p class="fa-card-blurb">Standard 10-year repayment vs income-driven plans with PSLF forgiveness estimate.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Loan balance</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sl_balance" type="number" value="45000"></div></div>
+<div class="fa-field"><label>Interest rate</label><div class="fa-input-wrap"><input id="sl_rate" type="number" step="0.01" value="6.8"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Repayment term</label><div class="fa-input-wrap"><input id="sl_years" type="number" value="10"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Annual income</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sl_salary" type="number" value="60000"></div></div>
+<div class="fa-field"><label>IDR % of income</label><div class="fa-input-wrap"><input id="sl_incomePct" type="number" step="0.5" value="10"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcStudentLoan()">Calculate</button></div>
+<div class="fa-hint fa-err" id="sl_err" style="display:none"></div>
+<div class="fa-results" id="sl_results"><div class="fa-stats" id="sl_stats"></div>
+<div class="fa-section-heading">Total cost comparison</div>
+<div class="fa-chart-wrap" style="height:260px"><canvas id="sl_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Snowball vs Avalanche</h2><p class="fa-card-blurb">List every card / debt. Snowball pays smallest balance first (psychology). Avalanche pays highest APR first (math). Side-by-side comparison.</p></div>
+<div class="fa-row-list" id="cc_rows"></div>
+<div class="fa-actions">
+<button class="fa-btn fa-btn-ghost" onclick="addCard()">+ Add card</button>
+<button class="fa-btn" onclick="calcSnowball()">Compare strategies</button>
+</div>
+<div class="fa-grid" style="margin-top:14px"><div class="fa-field"><label>Extra payment /mo (above minimums)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="cc_extra" type="number" value="200"></div></div></div>
+<div class="fa-hint fa-err" id="cc_err" style="display:none"></div>
+<div class="fa-results" id="cc_results"><div class="fa-stats" id="cc_stats"></div>
+<div class="fa-chart-wrap" style="height:280px"><canvas id="cc_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Debt Consolidation</h2><p class="fa-card-blurb">List existing debts, enter a new consolidation rate, and see if it saves money.</p></div>
+<div class="fa-row-list" id="dc_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addDcRow('New debt',1000,15,50)">+ Add debt</button></div>
+<div class="fa-grid" style="margin-top:14px">
+<div class="fa-field"><label>Consolidation rate</label><div class="fa-input-wrap"><input id="dc_newRate" type="number" step="0.01" value="9.99"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>New term</label><div class="fa-input-wrap"><input id="dc_newYears" type="number" value="5"><span class="fa-input-suffix">yr</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcConsolidation()">Compare</button></div>
+<div class="fa-hint fa-err" id="dc_err" style="display:none"></div>
+<div class="fa-results" id="dc_results"><div class="fa-stats" id="dc_stats"></div>
+<div class="fa-chart-wrap" style="height:260px"><canvas id="dc_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Refinance Break-Even</h2><p class="fa-card-blurb">How many months until refi savings cover closing costs.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Current balance</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rf_balance" type="number" value="280000"></div></div>
+<div class="fa-field"><label>Current rate</label><div class="fa-input-wrap"><input id="rf_curRate" type="number" step="0.01" value="6.75"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Years remaining</label><div class="fa-input-wrap"><input id="rf_curYearsLeft" type="number" value="27"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>New rate</label><div class="fa-input-wrap"><input id="rf_newRate" type="number" step="0.01" value="5.50"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>New term</label><div class="fa-input-wrap"><input id="rf_newYears" type="number" value="30"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Closing costs</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rf_closing" type="number" value="6000"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcRefi()">Calculate</button></div>
+<div class="fa-hint fa-err" id="rf_err" style="display:none"></div>
+<div class="fa-results" id="rf_results"><div class="fa-stats" id="rf_stats"></div>
+<div class="fa-section-heading">Cumulative cost over time</div>
+<div class="fa-chart-wrap" style="height:300px"><canvas id="rf_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Loan Affordability</h2><p class="fa-card-blurb">How much you can borrow given income, existing debt payments, and a target debt-to-income ratio.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Annual income</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_income" type="number" value="85000"></div></div>
+<div class="fa-field"><label>Existing monthly debt</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_debts" type="number" value="450"></div></div>
+<div class="fa-field"><label>Interest rate</label><div class="fa-input-wrap"><input id="af_rate" type="number" step="0.01" value="6.75"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Term</label><div class="fa-input-wrap"><input id="af_years" type="number" value="30"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Target DTI</label><div class="fa-input-wrap"><input id="af_dti" type="number" step="1" value="36"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcAffordability()">Calculate</button></div>
+<div class="fa-hint fa-err" id="af_err" style="display:none"></div>
+<div class="fa-results" id="af_results"><div class="fa-stats" id="af_stats"></div>
+<div class="fa-section-heading">Max loan at varying DTI</div>
+<div class="fa-chart-wrap" style="height:260px"><canvas id="af_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">Interest-Only vs Amortizing</h2><p class="fa-card-blurb">Compare a hybrid IO loan (low payments now, balloon later) against straight amortization.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Loan amount</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="io_principal" type="number" value="400000"></div></div>
+<div class="fa-field"><label>Rate</label><div class="fa-input-wrap"><input id="io_rate" type="number" step="0.01" value="7"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>IO period</label><div class="fa-input-wrap"><input id="io_ioYears" type="number" value="10"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Total term</label><div class="fa-input-wrap"><input id="io_amYears" type="number" value="30"><span class="fa-input-suffix">yr</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcInterestOnly()">Calculate</button></div>
+<div class="fa-hint fa-err" id="io_err" style="display:none"></div>
+<div class="fa-results" id="io_results"><div class="fa-stats" id="io_stats"></div>
+<div class="fa-chart-wrap" style="height:260px"><canvas id="io_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card">
+<div class="fa-card-head"><h2 class="fa-card-title">APR ↔ APY</h2><p class="fa-card-blurb">Convert between APR (nominal rate) and APY (effective rate). Visualizes how compounding frequency boosts effective yield.</p></div>
+<input type="hidden" id="aa_mode" value="aprToApy">
+<div class="fa-actions" style="margin-bottom:10px">
+<button class="aa-tab fa-btn" data-mode="aprToApy" onclick="toggleAprApy('aprToApy')">APR → APY</button>
+<button class="aa-tab fa-btn-ghost" data-mode="apyToApr" onclick="toggleAprApy('apyToApr')">APY → APR</button>
+</div>
+<div class="fa-grid">
+<div class="fa-field"><label>Rate</label><div class="fa-input-wrap"><input id="aa_rate" type="number" step="0.01" value="5"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Compounding periods /yr</label><div class="fa-input-wrap"><input id="aa_periods" type="number" value="12"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcAprApy()">Convert</button></div>
+<div class="fa-hint fa-err" id="aa_err" style="display:none"></div>
+<div class="fa-results" id="aa_results"><div class="fa-stats" id="aa_stats"></div>
+<div class="fa-section-heading">Effective yield vs compounding frequency</div>
+<div class="fa-chart-wrap" style="height:260px"><canvas id="aa_chart"></canvas></div></div>
+</section>
+
+</body></html>

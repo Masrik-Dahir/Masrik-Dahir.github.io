@@ -1,0 +1,258 @@
+/* nyc-widgets.css
+   Standalone widget-tooltip chrome for the NYC simulation popups
+   (nyc.html). index.html ships these styles inline; this file
+   re-implements just enough for nyc.html's dark popup panels.
+   Selectors target the structure built by js/nyc-widgets.js:
+     .widget-tooltip > .tt-row / .tt-grid / .tt-slider-row / .tt-toggle-row / .tt-hint
+     each chip is a button.tt-chip inside .tt-grid. */
+
+/* ── rows ─────────────────────────────────────────────────────── */
+.widget-tooltip .tt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 13px;
+}
+.widget-tooltip .tt-row-hover { display: none; }
+.widget-tooltip .tt-row-hover.active { display: flex; }
+.widget-tooltip .tt-label {
+    flex: 0 0 auto;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 11px;
+    color: rgba(165,180,252,1);
+}
+.widget-tooltip .tt-value {
+    flex: 1 1 auto;
+    text-align: right;
+    font-weight: 700;
+    color: #f8fafc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── chip grid ────────────────────────────────────────────────── */
+.widget-tooltip .tt-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 6px;
+}
+.widget-tooltip .tt-grid-icons { gap: 8px; }
+
+/* ── individual chip ──────────────────────────────────────────── */
+.widget-tooltip .tt-chip {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s ease, color 0.15s ease,
+                border-color 0.15s ease, transform 0.12s ease;
+    user-select: none;
+}
+.widget-tooltip .tt-chip:hover {
+    background: rgba(51, 65, 85, 0.95);
+    border-color: rgba(165, 180, 252, 0.65);
+    color: #f8fafc;
+}
+.widget-tooltip .tt-chip:active { transform: translateY(1px); }
+.widget-tooltip .tt-chip.active {
+    background: linear-gradient(135deg, rgba(99,102,241,0.95), rgba(79,70,229,0.95));
+    border-color: rgba(165,180,252,0.85);
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(165,180,252,0.55), 0 4px 12px rgba(79,70,229,0.40);
+}
+
+/* Icon-only chips (.tt-grid-icons buttons) get a compact square */
+.widget-tooltip .tt-grid-icons .tt-chip {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 8px;
+    justify-content: center;
+    font-size: 16px;
+}
+.widget-tooltip .tt-grid-icons .tt-chip > i { line-height: 1; }
+
+/* css/icons.css ships a global `.fa { padding:10px; font-size:30px;
+   width:50px }` that swells our compact chip icons. Reset it back
+   to inline glyph size so each fa-* glyph fits its parent chip. */
+.widget-tooltip .tt-chip .fa,
+.nyc-dock-btn .fa {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: inherit !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    text-align: center !important;
+    background: transparent !important;
+}
+.widget-tooltip .tt-grid-icons .tt-chip .fa { font-size: 16px !important; }
+.widget-tooltip .tt-chip-flag .fa { font-size: 11.5px !important; }
+
+/* Diamond-tinted variants (Parade / Abduction / Superhero) — when a
+   chip exposes --diamond-a / --diamond-b via inline style, the
+   active gradient picks those colours instead of the indigo default. */
+.widget-tooltip .tt-chip.active[style*="--diamond-a"] {
+    background: linear-gradient(135deg, var(--diamond-a, #6366f1), var(--diamond-b, #4f46e5));
+}
+
+/* Flag prefix on city chips */
+.widget-tooltip .tt-flag {
+    font-size: 14px;
+    line-height: 1;
+    margin-right: 2px;
+}
+
+/* ── slider row ───────────────────────────────────────────────── */
+.widget-tooltip .tt-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+}
+.widget-tooltip .tt-slider-label {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(165,180,252,1);
+}
+.widget-tooltip .tt-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1 1 auto;
+    min-width: 80px;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(99,102,241,0.85), rgba(79,70,229,0.50));
+    outline: none;
+    cursor: pointer;
+}
+.widget-tooltip .tt-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 2px solid #6366f1;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(15,23,42,0.55);
+}
+.widget-tooltip .tt-slider::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #f8fafc;
+    border: 2px solid #6366f1;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(15,23,42,0.55);
+}
+.widget-tooltip .tt-slider-val {
+    flex: 0 0 auto;
+    min-width: 38px;
+    text-align: right;
+    font-weight: 700;
+    color: #f8fafc;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── toggle row ───────────────────────────────────────────────── */
+.widget-tooltip .tt-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 0;
+}
+.widget-tooltip .tt-toggle-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(165,180,252,1);
+}
+.widget-tooltip .tt-toggle {
+    appearance: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.45);
+    background: rgba(30,41,59,0.85);
+    color: #e2e8f0;
+    transition: background 0.18s ease, color 0.18s ease,
+                border-color 0.18s ease, transform 0.12s ease;
+}
+.widget-tooltip .tt-toggle:hover {
+    background: rgba(51,65,85,0.95);
+    border-color: rgba(165,180,252,0.65);
+    color: #f8fafc;
+}
+.widget-tooltip .tt-toggle.on {
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    border-color: #16a34a;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(22,163,74,0.40);
+}
+
+/* Per-widget toggle accent overrides */
+.widget-tooltip .tt-toggle-superhero.on {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-color: #b45309;
+    box-shadow: 0 4px 10px rgba(245,158,11,0.40);
+}
+.widget-tooltip .tt-toggle-abduction.on {
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    border-color: #5b21b6;
+    box-shadow: 0 4px 10px rgba(124,58,237,0.40);
+}
+
+/* ── rebuild-now action button ────────────────────────────────── */
+.widget-tooltip .tt-rcn-instant {
+    appearance: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1px solid #fb923c;
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+    color: #fff;
+    text-transform: uppercase;
+    transition: transform 0.12s ease, box-shadow 0.18s ease;
+    box-shadow: 0 4px 10px rgba(234,88,12,0.40);
+}
+.widget-tooltip .tt-rcn-instant:hover { transform: translateY(-1px); }
+.widget-tooltip .tt-rcn-instant:active { transform: translateY(0); }
+
+/* ── helper hint at the bottom of each tooltip ────────────────── */
+.widget-tooltip .tt-hint {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(99,102,241,0.30);
+    font-size: 11.5px;
+    color: rgba(165,180,252,0.75);
+    line-height: 1.4;
+}

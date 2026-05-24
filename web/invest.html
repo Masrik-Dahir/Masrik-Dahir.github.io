@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Investing & Retirement · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Investing & Retirement');</script>
+<script src="invest.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Investing & Retirement</h1><p>Twelve tools: compound interest, retirement projector, FIRE, DCA simulator, allocation visualizer, DRIP, Roth vs Traditional, Rule of 72, position-size, crypto P/L, annuity payout, fee-drag.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Compound Interest</h2><p class="fa-card-blurb">Starting principal + recurring contributions + compound rate over time.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Starting principal</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ci_principal" type="number" value="10000"></div></div>
+<div class="fa-field"><label>Monthly contribution</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ci_contrib" type="number" value="500"></div></div>
+<div class="fa-field"><label>Annual return</label><div class="fa-input-wrap"><input id="ci_rate" type="number" step="0.1" value="7"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Years</label><div class="fa-input-wrap"><input id="ci_years" type="number" value="30"></div></div>
+<div class="fa-field"><label>Compoundings /yr</label><div class="fa-input-wrap"><input id="ci_freq" type="number" value="12"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcCompound()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ci_err" style="display:none"></div>
+<div class="fa-results" id="ci_results"><div class="fa-stats" id="ci_stats"></div><div class="fa-chart-wrap" style="height:320px"><canvas id="ci_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Retirement Projector <span class="fa-pill">401(k) + match</span></h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Current age</label><div class="fa-input-wrap"><input id="rp_age" type="number" value="30"></div></div>
+<div class="fa-field"><label>Retirement age</label><div class="fa-input-wrap"><input id="rp_retire" type="number" value="65"></div></div>
+<div class="fa-field"><label>Annual salary</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_salary" type="number" value="80000"></div></div>
+<div class="fa-field"><label>Your contribution %</label><div class="fa-input-wrap"><input id="rp_pct" type="number" step="0.5" value="10"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Employer match (of your contribution)</label><div class="fa-input-wrap"><input id="rp_match" type="number" step="1" value="50"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Match cap (% of salary)</label><div class="fa-input-wrap"><input id="rp_cap" type="number" step="0.5" value="6"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Current balance</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_current" type="number" value="25000"></div></div>
+<div class="fa-field"><label>Expected return</label><div class="fa-input-wrap"><input id="rp_rate" type="number" step="0.1" value="7"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcRetirement()">Project</button></div>
+<div class="fa-hint fa-err" id="rp_err" style="display:none"></div>
+<div class="fa-results" id="rp_results"><div class="fa-stats" id="rp_stats"></div><div class="fa-chart-wrap" style="height:320px"><canvas id="rp_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">FIRE Calculator</h2><p class="fa-card-blurb">Financial Independence, Retire Early: 25× your annual expenses (4% rule).</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Annual income (net)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fi_income" type="number" value="80000"></div></div>
+<div class="fa-field"><label>Annual expenses</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fi_exp" type="number" value="40000"></div></div>
+<div class="fa-field"><label>Current portfolio</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fi_current" type="number" value="50000"></div></div>
+<div class="fa-field"><label>Expected return</label><div class="fa-input-wrap"><input id="fi_rate" type="number" step="0.1" value="7"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcFire()">Calculate</button></div>
+<div class="fa-hint fa-err" id="fi_err" style="display:none"></div>
+<div class="fa-results" id="fi_results"><div class="fa-stats" id="fi_stats"></div><div class="fa-chart-wrap" style="height:300px"><canvas id="fi_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Dollar-Cost Averaging</h2><p class="fa-card-blurb">Simulates investing a fixed amount monthly through a market that drifts from start to end price with volatility.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Monthly investment</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="dc_perMo" type="number" value="500"></div></div>
+<div class="fa-field"><label>Years</label><div class="fa-input-wrap"><input id="dc_years" type="number" value="20"></div></div>
+<div class="fa-field"><label>Starting share price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="dc_start" type="number" value="100"></div></div>
+<div class="fa-field"><label>Ending share price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="dc_end" type="number" value="350"></div></div>
+<div class="fa-field"><label>Volatility</label><div class="fa-input-wrap"><input id="dc_vol" type="number" step="1" value="20"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcDCA()">Simulate</button></div>
+<div class="fa-hint fa-err" id="dc_err" style="display:none"></div>
+<div class="fa-results" id="dc_results"><div class="fa-stats" id="dc_stats"></div><div class="fa-chart-wrap" style="height:320px"><canvas id="dc_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Portfolio Allocation</h2><p class="fa-card-blurb">Compare target vs actual allocation, see drift, and get rebalance suggestions.</p></div>
+<div class="fa-row-list" id="pa_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addAllocation('Asset',10,1000)">+ Add asset</button><button class="fa-btn" onclick="calcAllocation()">Analyze</button></div>
+<div class="fa-hint fa-err" id="pa_err" style="display:none"></div>
+<div class="fa-results" id="pa_results"><div class="fa-stats" id="pa_stats"></div><div class="fa-chart-wrap" style="height:300px"><canvas id="pa_chart"></canvas></div><div id="pa_table"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">DRIP (Dividend Reinvestment)</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Starting shares</label><div class="fa-input-wrap"><input id="dp_shares" type="number" value="100"></div></div>
+<div class="fa-field"><label>Share price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="dp_price" type="number" step="0.01" value="50"></div></div>
+<div class="fa-field"><label>Annual dividend /share</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="dp_div" type="number" step="0.01" value="2.0"></div></div>
+<div class="fa-field"><label>Dividend growth rate</label><div class="fa-input-wrap"><input id="dp_divGrowth" type="number" step="0.1" value="5"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Price growth rate</label><div class="fa-input-wrap"><input id="dp_priceGrow" type="number" step="0.1" value="6"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Years</label><div class="fa-input-wrap"><input id="dp_years" type="number" value="20"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcDrip()">Reinvest</button></div>
+<div class="fa-hint fa-err" id="dp_err" style="display:none"></div>
+<div class="fa-results" id="dp_results"><div class="fa-stats" id="dp_stats"></div><div class="fa-chart-wrap" style="height:300px"><canvas id="dp_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Roth vs Traditional IRA</h2><p class="fa-card-blurb">Pay tax now (Roth) or later (Traditional)? Depends on tax rates today vs in retirement.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Annual contribution</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ri_contrib" type="number" value="6500"></div></div>
+<div class="fa-field"><label>Years until retirement</label><div class="fa-input-wrap"><input id="ri_years" type="number" value="30"></div></div>
+<div class="fa-field"><label>Annual return</label><div class="fa-input-wrap"><input id="ri_rate" type="number" step="0.1" value="7"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Tax rate now</label><div class="fa-input-wrap"><input id="ri_taxNow" type="number" step="0.1" value="24"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Tax rate at retirement</label><div class="fa-input-wrap"><input id="ri_taxRet" type="number" step="0.1" value="22"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcRoth()">Compare</button></div>
+<div class="fa-hint fa-err" id="ri_err" style="display:none"></div>
+<div class="fa-results" id="ri_results"><div class="fa-stats" id="ri_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="ri_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Rule of 72</h2><p class="fa-card-blurb">Years to double = 72 ÷ rate. Mental-math approximation vs exact value.</p></div>
+<div class="fa-grid"><div class="fa-field"><label>Annual return</label><div class="fa-input-wrap"><input id="r72_rate" type="number" step="0.1" value="8"><span class="fa-input-suffix">%</span></div></div></div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcRule72()">Calculate</button></div>
+<div class="fa-hint fa-err" id="r72_err" style="display:none"></div>
+<div class="fa-results" id="r72_results"><div class="fa-stats" id="r72_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="r72_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Position Size / Risk</h2><p class="fa-card-blurb">Don't risk more than 1-2% of your account per trade. Calculates max shares given entry, stop, and risk %.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Account size</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ps_account" type="number" value="50000"></div></div>
+<div class="fa-field"><label>Risk %</label><div class="fa-input-wrap"><input id="ps_riskPct" type="number" step="0.1" value="1"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Entry price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ps_entry" type="number" step="0.01" value="100"></div></div>
+<div class="fa-field"><label>Stop-loss price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ps_stop" type="number" step="0.01" value="95"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPosSize()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ps_err" style="display:none"></div>
+<div class="fa-results" id="ps_results"><div class="fa-stats" id="ps_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="ps_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Crypto Cost-Basis & P/L</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Buy price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="cp_buyPrice" type="number" step="0.01" value="30000"></div></div>
+<div class="fa-field"><label>Quantity</label><div class="fa-input-wrap"><input id="cp_qty" type="number" step="0.0001" value="0.5"></div></div>
+<div class="fa-field"><label>Sell price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="cp_sellPrice" type="number" step="0.01" value="42000"></div></div>
+<div class="fa-field"><label>Fee per side</label><div class="fa-input-wrap"><input id="cp_fee" type="number" step="0.05" value="0.5"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcCrypto()">Calculate</button></div>
+<div class="fa-hint fa-err" id="cp_err" style="display:none"></div>
+<div class="fa-results" id="cp_results"><div class="fa-stats" id="cp_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="cp_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Annuity Payout</h2><p class="fa-card-blurb">Lump sum → monthly payments over N years at a given rate.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Starting balance</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="an_balance" type="number" value="500000"></div></div>
+<div class="fa-field"><label>Annual rate</label><div class="fa-input-wrap"><input id="an_rate" type="number" step="0.1" value="4"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Years</label><div class="fa-input-wrap"><input id="an_years" type="number" value="25"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcAnnuity()">Calculate</button></div>
+<div class="fa-hint fa-err" id="an_err" style="display:none"></div>
+<div class="fa-results" id="an_results"><div class="fa-stats" id="an_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="an_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Fee-Drag Calculator <span class="fa-pill">Dramatic chart</span></h2><p class="fa-card-blurb">How a 1% annual fee silently erodes 30 years of compounding.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Starting balance</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fd_principal" type="number" value="50000"></div></div>
+<div class="fa-field"><label>Monthly contribution</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="fd_contrib" type="number" value="500"></div></div>
+<div class="fa-field"><label>Years</label><div class="fa-input-wrap"><input id="fd_years" type="number" value="30"></div></div>
+<div class="fa-field"><label>Gross return</label><div class="fa-input-wrap"><input id="fd_gross" type="number" step="0.1" value="7"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Annual fee</label><div class="fa-input-wrap"><input id="fd_fee" type="number" step="0.01" value="1.0"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcFeeDrag()">Visualize</button></div>
+<div class="fa-hint fa-err" id="fd_err" style="display:none"></div>
+<div class="fa-results" id="fd_results"><div class="fa-stats" id="fd_stats"></div><div class="fa-chart-wrap" style="height:320px"><canvas id="fd_chart"></canvas></div></div>
+</section>
+
+</body></html>

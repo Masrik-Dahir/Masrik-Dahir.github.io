@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="css/glowing.css">
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
-    <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/popup.css?v=4">
     <link rel="stylesheet" href="css/search.css">
     <link rel="stylesheet" href="css/vendor/bootstrap-grid.css"/>
     <link rel="stylesheet" href="css/vintage.css">
@@ -56,7 +56,7 @@
     <script src="js/animations.js" defer></script>
 
     <!--    NYC city canvas animation (matrix.js archived as dead code) -->
-    <script src="js/nyc-city.js" defer></script>
+    <script src="js/nyc-city.js?v=1.0.4-abduction-auto" defer></script>
 
     <link rel="stylesheet" href="css/index.css">
 
@@ -67,24 +67,20 @@
 <!-- Page Container -->
 <div class="w3-content info" style="max-width:1400px; background-color: white;">
 
-    <!-- Positioning hero — leads with point of view, not credentials -->
-    <section id="positioning" class="positioning-hero" aria-label="Introduction">
-        <h1 class="positioning-name">Masrik Dahir</h1>
-        <p class="positioning-line">
-            Software engineer building developer tools, AWS-heavy backends, and interactive web experiences.
-        </p>
-        <p class="positioning-status">Open to roles and collaboration.</p>
-        <div class="positioning-cta">
-            <a href="https://www.masrikdahir.com/software" class="positioning-cta-primary">See projects</a>
-            <a href="#featured-projects" class="positioning-cta-secondary">Featured work ↓</a>
-        </div>
-    </section>
+    <!-- Positioning hero moved below the Masrik Dahir picture — see
+         `id="positioning"` further down inside the left-column bio
+         card so the picture is the first visual hit on every viewport. -->
 
     <style>
-        .positioning-hero {
-            max-width: 720px;
-            margin: 24px auto 28px;
-            padding: 28px 24px 24px;
+        /* Unified card wrapper used by every post-photo section
+           (Summary / Skills / Certifications / Featured projects /
+           Work history). Each section reads as its own labelled card. */
+        .section-card {
+            position: relative;
+            overflow: hidden;
+            max-width: 1080px;
+            margin: 28px auto;
+            padding: 26px 26px 24px;
             background: linear-gradient(135deg, #ffffff 0%, #fbfcfe 100%);
             backdrop-filter: blur(18px) saturate(180%);
             -webkit-backdrop-filter: blur(18px) saturate(180%);
@@ -95,6 +91,99 @@
                 0 6px 24px rgba(0,0,0,0.10),
                 0 2px 8px rgba(0,0,0,0.05);
             text-align: left;
+            transition: box-shadow 0.4s ease, transform 0.4s ease;
+        }
+        .section-card:hover {
+            box-shadow:
+                0 1px 0 rgba(255,255,255,1.00) inset,
+                0 14px 40px rgba(30,111,208,0.22),
+                0 4px 14px rgba(0,0,0,0.08);
+        }
+        .liquid-glass { display: none; }
+
+        /* ── Section-card hover glisten — copy of the academia.html
+           hex shimmer (same SVG hex-outline mask, same sweep +
+           hue-cycle, same subtle opacity). Plays infinitely while
+           hovered, NEVER fades out partway. Mobile/touch devices
+           (no real :hover) get the same shimmer always-on. */
+        @keyframes sc-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+        @keyframes sc-hex-hue-cycle  {
+            from { filter: saturate(1.25) brightness(1.05) hue-rotate(0deg); }
+            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
+        }
+        body.polish .section-card.pretty::before {
+            content: '' !important;
+            position: absolute !important;
+            inset: 0 !important;
+            z-index: -1 !important;
+            pointer-events: none !important;
+            border-radius: inherit !important;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%,  #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
+            background-size: 300% 100% !important;
+            background-position: 0% 50% !important;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
+            -webkit-mask-size: 18px 20.5px !important;
+                    mask-size: 18px 20.5px !important;
+            -webkit-mask-repeat: repeat !important;
+                    mask-repeat: repeat !important;
+            mix-blend-mode: normal !important;
+            opacity: 0 !important;
+            animation: none !important;
+            transition: opacity 0.30s ease !important;
+        }
+        body.polish .section-card.pretty:hover::before {
+            opacity: 0.22 !important;
+            animation:
+                sc-hex-sweep      5s linear infinite,
+                sc-hex-hue-cycle  6s linear infinite !important;
+            filter: saturate(0.55) brightness(1.02);
+        }
+        /* Touch / no-hover devices: shimmer is permanently on */
+        @media (hover: none), (pointer: coarse) {
+            body.polish .section-card.pretty::before {
+                opacity: 0.22 !important;
+                animation:
+                    sc-hex-sweep      5s linear infinite,
+                    sc-hex-hue-cycle  6s linear infinite !important;
+                filter: saturate(0.55) brightness(1.02);
+            }
+        }
+        /* polish.css also adds ::after (rotating rainbow ring) on
+           .positioning-hero / .featured-card — kill it on our section
+           cards so the only hover effect is the academia-style hex
+           glisten. */
+        body.polish .section-card.pretty::after {
+            display: none !important;
+        }
+        .section-card-title {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #1e6fd0;
+            margin: 0 0 14px;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           SUMMARY CARD — hero introduction card with extra polish.
+           Same padding/margin/width as every other section-card, but
+           layered with: an animated aurora gradient backdrop, a top
+           rainbow accent strip, a gradient-text headline, and a
+           floating-particles canvas behind the content.
+           ───────────────────────────────────────────────────────────── */
+        /* Summary card uses the same section-card frame — no extra
+           rainbow strip or top color band, so the only hover effect is
+           the shared diamond/hexagonal liquid-glass overlay. */
+        .positioning-hero .section-card-title {
+            background: linear-gradient(90deg, #2480e0, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
         .positioning-name {
             margin: 0 0 10px;
@@ -162,19 +251,49 @@
             background: rgba(255,255,255,0.9);
             border-color: #1e6fd0;
         }
+        /* Mobile-only bio list inside the positioning hero. The same
+           four items live further down the page (briefcase / grad cap /
+           cert / home rows) for desktop. On phones those scroll way
+           off-screen, so we mirror them right under the name. */
+        .positioning-bio {
+            display: none;
+            list-style: none;
+            margin: 4px 0 16px;
+            padding: 0;
+        }
+        .positioning-bio li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 0;
+            font-size: 14px;
+            line-height: 1.4;
+            color: #1a1a2e;
+            border-bottom: 1px solid rgba(200,212,228,0.55);
+        }
+        .positioning-bio li:last-child { border-bottom: 0; }
+        .positioning-bio li i {
+            color: #2f4f4f;
+            font-size: 15px;
+            margin-top: 2px;
+            flex: 0 0 auto;
+        }
+        .positioning-bio li span { flex: 1 1 auto; }
+        @media (max-width: 768px) {
+            .positioning-bio { display: block; }
+        }
         @media (max-width: 480px) {
             .positioning-hero { margin: 16px auto 20px; padding: 22px 18px 18px; }
             .positioning-cta a { width: 100%; text-align: center; }
+            .positioning-bio li { font-size: 13.5px; }
         }
         /* TASK-007 reverted — Milestones and Travel kept in the primary nav.
            The .nav-demoted class is left on the markup but no longer hides anything. */
 
         /* TASK-004 — Featured Projects */
-        .featured-projects {
-            max-width: 1080px;
-            margin: 8px auto 28px;
-            padding: 0 18px;
-        }
+        /* .featured-projects is now wrapped by .section-card —
+           layout (max-width / margin / padding) comes from that. */
+        .featured-projects { /* legacy hook intentionally empty */ }
         .featured-projects-title {
             font-family: 'Arial Black', Arial, sans-serif;
             font-size: 11px;
@@ -193,18 +312,68 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(232,242,255,0.88) 100%);
             border: 1px solid rgba(120,180,255,0.30);
             border-radius: 12px;
-            padding: 18px 18px 16px;
+            padding: 0 0 16px;            /* zero top so the cover image sits flush */
             box-shadow: 0 4px 14px rgba(0,0,0,0.06);
             transition: transform 0.18s ease, box-shadow 0.22s ease;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         .featured-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 28px rgba(30,111,208,0.18);
         }
+        /* Cover image at the top of every card — gradient background +
+           project-specific icon. Always stacks first; on every viewport
+           width it sits above the title and body so mobile readers see
+           the visual hook before the text. */
+        .featured-cover {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            font-size: clamp(48px, 9vw, 84px);
+            line-height: 1;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 4px 18px rgba(0,0,0,0.20);
+            user-select: none;
+            border-bottom: 1px solid rgba(120,180,255,0.30);
+            overflow: hidden;
+        }
+        .featured-cover::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 14px;
+            bottom: 10px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 2px 6px rgba(0,0,0,0.30);
+        }
+        .featured-cover.cv-nyc    { background: linear-gradient(135deg, #1e3a8a 0%, #4338ca 50%, #ef4444 100%); }
+        .featured-cover.cv-games  { background: linear-gradient(135deg, #7c2d12 0%, #c026d3 50%, #f59e0b 100%); }
+        .featured-cover.cv-travel { background: linear-gradient(135deg, #0e7490 0%, #10b981 50%, #84cc16 100%); }
+        .featured-cover.cv-aws    { background: linear-gradient(135deg, #232f3e 0%, #ff9900 100%); }
+        .featured-cover.cv-formula{ background: linear-gradient(135deg, #047857 0%, #0ea5e9 50%, #6366f1 100%); }
+        .featured-cover.cv-cronus { background: linear-gradient(135deg, #6d28d9 0%, #db2777 50%, #facc15 100%); }
+        /* Stars / orbiting halo background — subtle radial gradients */
+        .featured-cover.cv-nyc::before    { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.25), transparent 35%), radial-gradient(circle at 75% 70%, rgba(255,255,255,0.18), transparent 30%); }
+        .featured-cover.cv-games::before  { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 80% 30%, rgba(255,255,255,0.20), transparent 35%); }
+        .featured-cover.cv-travel::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.20), transparent 50%); }
+        .featured-cover.cv-aws::before    { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 25% 30%, rgba(255,255,255,0.20), transparent 40%), radial-gradient(circle at 80% 75%, rgba(255,255,255,0.15), transparent 35%); }
+        .featured-cover.cv-formula::before{ content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.22), transparent 40%), radial-gradient(circle at 25% 75%, rgba(255,255,255,0.16), transparent 35%); }
+        .featured-cover.cv-cronus::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.20), transparent 40%), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.16), transparent 35%); }
+        .featured-cover > span { position: relative; z-index: 1; }
+        /* Card padding inside (below the cover image) */
+        .featured-card > h3 { margin-top: 18px; padding: 0 18px; }
+        .featured-card > p, .featured-card > .featured-links { padding-left: 18px; padding-right: 18px; }
         .featured-card h3 {
-            margin: 0 0 8px;
+            margin: 18px 0 8px;
             font-family: 'Arial Black', Arial, sans-serif;
             font-size: 16px;
             font-weight: 800;
@@ -256,10 +425,270 @@
 
     <style>
         /* TASK-006 — Skills in context */
-        .skills-context {
-            max-width: 1080px;
-            margin: 8px auto 32px;
-            padding: 0 18px;
+        /* .skills-context is now wrapped by .section-card —
+           layout (max-width / margin / padding) comes from that. */
+        .skills-context { /* legacy hook intentionally empty */ }
+
+        /* ── Compact skill chip grid — small icon + name + tight
+              description. Many more skills fit per row than the old
+              gradient-cover tiles. ── */
+        .skill-chips {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .skill-chips li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(232,242,255,0.85) 100%);
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: transform 0.14s ease, box-shadow 0.18s ease;
+        }
+        .skill-chips li:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(30,111,208,0.14);
+        }
+        .skill-chips li > i {
+            font-size: 22px;
+            flex: 0 0 auto;
+            margin-top: 2px;
+            width: 26px;
+            text-align: center;
+        }
+        /* Letter badge — used when FontAwesome doesn't have a brand
+           icon for the language (C/C++, Go, Rust, TypeScript). */
+        .skill-chips li > .lang-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.02em;
+            flex: 0 0 auto;
+            margin-top: 2px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.30);
+        }
+        .skill-chips li > div {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .skill-chips li span {
+            display: block;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-weight: 800;
+            font-size: 13px;
+            color: #1e6fd0;
+            margin-bottom: 2px;
+        }
+        .skill-chips li p {
+            margin: 0;
+            font-size: 12.5px;
+            line-height: 1.4;
+            color: rgba(10,10,25,0.74);
+        }
+
+        /* ── Outer photo wrapper opts OUT of the site-wide polish.css
+              hover hex shimmer. Without this rule the parent card
+              behind every section-card lights up too whenever the
+              cursor enters the column, which the user didn't want. */
+        body.polish .no-polish-hover,
+        body.polish .no-polish-hover:hover {
+            transform: none !important;
+        }
+        body.polish .no-polish-hover::before,
+        body.polish .no-polish-hover::after,
+        body.polish .no-polish-hover:hover::before,
+        body.polish .no-polish-hover:hover::after {
+            content: none !important;
+            display: none !important;
+            opacity: 0 !important;
+            animation: none !important;
+            background: none !important;
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           SUMMARY CTA BUTTONS — copy of the work.html expand/collapse
+           liquid-glass style. Both "See projects" and "See Experiences"
+           now use the same model:
+             • Always-on conic-gradient rotating rainbow border
+             • Always-on white glint sweep across the surface
+             • Hex shimmer overlay on hover (sweep + hue-cycle)
+             • Hover: indigo solid border, slight lift
+             • Click (:active): switches to the crimson active theme
+           ───────────────────────────────────────────────────────────── */
+        @property --cta-edge-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+        @property --cta-glint-pos {
+            syntax: '<percentage>';
+            initial-value: -25%;
+            inherits: false;
+        }
+        @keyframes cta-edge-spin { to { --cta-edge-angle: 360deg; } }
+        @keyframes cta-glint     { 0% { --cta-glint-pos: -25%; } 100% { --cta-glint-pos: 125%; } }
+
+        .positioning-cta a {
+            position: relative !important;
+            isolation: isolate !important;
+            overflow: hidden !important;
+            display: inline-block;
+            padding: 11px 22px !important;
+            border-radius: 10px !important;
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #1e3a8a !important;
+            --cta-edge-angle: 0deg;
+            --cta-glint-pos: -25%;
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.85) 0%,
+                    rgba(255,255,255,0.30) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                radial-gradient(ellipse 90% 65% at 50% 120%,
+                    rgba(15,20,40,0.08) 0%,
+                    rgba(15,20,40,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.94) 0%,
+                    rgba(248,250,255,0.88) 100%) padding-box,
+                conic-gradient(from var(--cta-edge-angle),
+                    rgba(255,179,198,0.65),
+                    rgba(255,209,168,0.65),
+                    rgba(255,240,168,0.65),
+                    rgba(196,242,197,0.65),
+                    rgba(184,217,255,0.65),
+                    rgba(212,193,255,0.65),
+                    rgba(255,193,229,0.65),
+                    rgba(255,179,198,0.65)) border-box !important;
+            border: 1.5px solid transparent !important;
+            backdrop-filter: blur(8px) saturate(130%);
+            -webkit-backdrop-filter: blur(8px) saturate(130%);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.90),
+                inset 0 -1px 0 rgba(20,15,30,0.05),
+                0 0 0 1.5px rgba(15,20,40,0.55),
+                0 0 10px rgba(220,225,235,0.30),
+                0 2px 6px rgba(15,20,40,0.12) !important;
+            transition: transform 0.18s ease, box-shadow 0.22s ease, color 0.22s ease;
+            animation:
+                cta-edge-spin 4.5s linear infinite,
+                cta-glint     6.0s linear infinite !important;
+        }
+        /* Hex shimmer layer — fades in on hover, never on at rest */
+        .positioning-cta a::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: inherit;
+            background: linear-gradient(90deg,
+                #ffb3c6 0%,  #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%);
+            background-size: 300% 100%;
+            background-position: 0% 50%;
+            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>");
+                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>");
+            -webkit-mask-size: 9px 10.3px;
+                    mask-size: 9px 10.3px;
+            -webkit-mask-repeat: repeat;
+                    mask-repeat: repeat;
+            opacity: 0;
+            animation: none;
+            transition: opacity 0.30s ease;
+        }
+        /* White glint diagonal sweep */
+        .positioning-cta a::after {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            left: var(--cta-glint-pos);
+            width: 35%;
+            background: linear-gradient(115deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,0.55) 50%,
+                rgba(255,255,255,0) 100%);
+            transform: skewX(-20deg);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .positioning-cta a:hover::before {
+            opacity: 0.55;
+            animation:
+                sc-hex-sweep      2.4s linear infinite,
+                sc-hex-hue-cycle  3.6s linear infinite;
+            filter: saturate(0.85) brightness(1.05);
+        }
+        .positioning-cta a:hover {
+            transform: translateY(-1px);
+            color: #1e3a8a !important;
+            background:
+                linear-gradient(135deg,
+                    rgba(255,255,255,0.97) 0%,
+                    rgba(248,250,255,0.93) 100%) padding-box,
+                linear-gradient(135deg,
+                    rgba(99, 102, 241, 0.85),
+                    rgba(99, 102, 241, 0.85)) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 1px 3px rgba(15,20,40,0.10) !important;
+        }
+        /* CLICK (:active) — switch to the work.html crimson "active" theme */
+        .positioning-cta a:active {
+            transform: translateY(0) scale(0.98);
+            color: #fff !important;
+            background:
+                radial-gradient(ellipse 100% 60% at 50% -25%,
+                    rgba(255,255,255,0.55) 0%,
+                    rgba(255,255,255,0.20) 35%,
+                    rgba(255,255,255,0.00) 70%) padding-box,
+                radial-gradient(ellipse 60% 90% at 0% 0%,
+                    rgba(255,255,255,0.40) 0%,
+                    rgba(255,255,255,0.00) 60%) padding-box,
+                linear-gradient(135deg,
+                    rgba(220, 38, 38, 0.95) 0%,
+                    rgba(185, 28, 28, 0.94) 50%,
+                    rgba(239, 68, 68, 0.93) 100%) padding-box,
+                conic-gradient(from var(--cta-edge-angle),
+                    #ef4444, #dc2626, #b91c1c, #f87171,
+                    #c0202a, #ff6b7a, #991b1b, #ef4444) border-box !important;
+            border: 1.5px solid transparent !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                inset 0 -1px 0 rgba(80,8,15,0.18),
+                0 0 14px rgba(255,80,100,0.55),
+                0 2px 8px rgba(80,8,15,0.25) !important;
+        }
+        .positioning-cta a:active::before {
+            opacity: 0.55;
+            background: linear-gradient(90deg,
+                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
+                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%);
+            background-size: 300% 100%;
+            animation:
+                sc-hex-sweep      2.4s linear infinite,
+                sc-hex-hue-cycle  3.6s linear infinite;
         }
         .skills-context-title {
             font-family: 'Arial Black', Arial, sans-serif;
@@ -275,90 +704,317 @@
             padding: 0;
             margin: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 10px 22px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
         }
+        /* Card-with-cover pattern: icon banner on top, name + blurb under */
         .skills-context-list li {
             display: flex;
-            align-items: baseline;
-            gap: 10px;
-            padding: 8px 0;
+            flex-direction: column;
+            padding: 0 0 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(232,242,255,0.88));
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            transition: transform 0.18s ease, box-shadow 0.22s ease;
+        }
+        .skills-context-list li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(30,111,208,0.18);
+        }
+        .skill-cover {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 5 / 2;
+            font-size: clamp(34px, 6.5vw, 48px);
+            line-height: 1;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 3px 14px rgba(0,0,0,0.18);
+            user-select: none;
+            border-bottom: 1px solid rgba(120,180,255,0.30);
+        }
+        .skill-cover.sk-js     { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .skill-cover.sk-vue    { background: linear-gradient(135deg, #10b981, #047857); }
+        .skill-cover.sk-aws    { background: linear-gradient(135deg, #f97316, #c2410c); }
+        .skill-cover.sk-py     { background: linear-gradient(135deg, #2563eb, #1e3a8a); }
+        .skill-cover.sk-jc     { background: linear-gradient(135deg, #64748b, #334155); }
+        .skill-cover.sk-sql    { background: linear-gradient(135deg, #8b5cf6, #5b21b6); }
+        .skill-cover.sk-css    { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .skill-cover.sk-rust   { background: linear-gradient(135deg, #dc2626, #7f1d1d); }
+        .skill-cover::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.20), transparent 40%);
+        }
+        .skill-cover > span {
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            transform-origin: center;
+            will-change: transform, filter;
+        }
+        /* ─── Live cover animations — per-skill micro motion so each
+              card has its own visual heartbeat (no two alike). ─── */
+        .skill-cover.sk-js   > span { animation: anim-zap     1.4s ease-in-out infinite alternate; }
+        .skill-cover.sk-vue  > span { animation: anim-spin    7s   linear infinite; }
+        .skill-cover.sk-aws  > span { animation: anim-float   3.2s ease-in-out infinite alternate; }
+        .skill-cover.sk-py   > span { animation: anim-wave    2.4s ease-in-out infinite; }
+        .skill-cover.sk-jc   > span { animation: anim-steam   2.4s ease-in-out infinite; }
+        .skill-cover.sk-sql  > span { animation: anim-blink   1.6s steps(2, end) infinite; }
+        .skill-cover.sk-css  > span { animation: anim-shift   2.6s ease-in-out infinite alternate; }
+        .skill-cover.sk-rust > span { animation: anim-gear    9s   linear infinite; }
+        /* Featured-card covers get bigger versions of the same motion */
+        .featured-cover > span {
+            display: inline-block;
+            transform-origin: center;
+            will-change: transform, filter;
+        }
+        .featured-cover.cv-aws     > span { animation: anim-float 3.6s ease-in-out infinite alternate; }
+        .featured-cover.cv-games   > span { animation: anim-bounce 1.5s ease-in-out infinite; }
+        .featured-cover.cv-formula > span { animation: anim-flip   3.8s ease-in-out infinite; }
+        .featured-cover.cv-nyc     > span { animation: anim-launch 2.4s ease-in-out infinite; }
+        .featured-cover.cv-travel  > span { animation: anim-spin   12s linear infinite; }
+        .featured-cover.cv-cronus  > span { animation: anim-pulse  2.4s ease-in-out infinite; }
+        @keyframes anim-pulse {
+            0%, 100% { transform: scale(1)    rotate(-3deg); filter: drop-shadow(0 0 0 rgba(255,255,255,0)); }
+            50%      { transform: scale(1.16) rotate(3deg);  filter: drop-shadow(0 0 16px rgba(255,255,255,0.6)); }
+        }
+
+        @keyframes anim-zap {
+            0%   { transform: scale(1) rotate(-4deg); filter: drop-shadow(0 0 0 rgba(255,235,140,0)); }
+            50%  { transform: scale(1.18) rotate(6deg); filter: drop-shadow(0 0 12px rgba(255,235,140,0.9)); }
+            100% { transform: scale(1.04) rotate(-2deg); filter: drop-shadow(0 0 6px rgba(255,235,140,0.5)); }
+        }
+        @keyframes anim-spin   { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes anim-float {
+            0%   { transform: translateY(-4px); }
+            100% { transform: translateY(4px); }
+        }
+        @keyframes anim-wave {
+            0%, 100% { transform: translateX(-6px) rotate(-6deg); }
+            50%      { transform: translateX(6px)  rotate(6deg); }
+        }
+        @keyframes anim-steam {
+            0%   { transform: translateY(0) scale(1);   filter: blur(0); opacity: 1; }
+            70%  { transform: translateY(-3px) scale(1.04); filter: blur(0.5px); opacity: 0.95; }
+            100% { transform: translateY(0) scale(1);   filter: blur(0); opacity: 1; }
+        }
+        @keyframes anim-blink {
+            0%   { opacity: 1;   filter: drop-shadow(0 0 8px rgba(180,140,255,0.8)); }
+            100% { opacity: 0.55; filter: drop-shadow(0 0 0  rgba(180,140,255,0)); }
+        }
+        @keyframes anim-shift {
+            0%   { transform: scale(1) rotate(-8deg); filter: hue-rotate(0deg); }
+            100% { transform: scale(1.10) rotate(8deg); filter: hue-rotate(60deg); }
+        }
+        @keyframes anim-gear {
+            from { transform: rotate(0deg) scale(1.05); }
+            to   { transform: rotate(360deg) scale(1.05); }
+        }
+        @keyframes anim-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            45%      { transform: translateY(-10px) scale(1.06); }
+            60%      { transform: translateY(4px) scale(0.97); }
+        }
+        @keyframes anim-flip {
+            0%, 100% { transform: rotateY(0deg); }
+            50%      { transform: rotateY(180deg); }
+        }
+        @keyframes anim-launch {
+            0%   { transform: translateY(6px) rotate(-8deg); }
+            50%  { transform: translateY(-8px) rotate(8deg); filter: drop-shadow(0 6px 14px rgba(255,255,255,0.5)); }
+            100% { transform: translateY(6px) rotate(-8deg); }
+        }
+
+        /* ─── Web Formula link grid — small pill buttons for every
+              calculator page so the whole suite is one click away. ─── */
+        .formula-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            list-style: none;
+            padding: 0;
+            margin: 14px 18px 12px;
+        }
+        .formula-links li { margin: 0; }
+        .formula-links a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #1e6fd0;
+            text-decoration: none;
+            border: 1.2px solid rgba(30,111,208,0.30);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.7);
+            transition: transform 0.14s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
+        }
+        .formula-links a:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, #2480e0, #1e6fd0);
+            color: #fff;
+            border-color: #1856a8;
+            box-shadow: 0 4px 12px rgba(30,111,208,0.30);
+        }
+        .formula-links a i { font-size: 13px; opacity: 0.9; flex: 0 0 auto; }
+        .skill-body {
+            padding: 12px 14px 0;
             font-size: 13px;
-            line-height: 1.45;
+            line-height: 1.5;
             color: rgba(10,10,25,0.78);
-            border-bottom: 1px dashed rgba(120,180,255,0.30);
         }
         .skill-name {
+            display: block;
+            margin: 0 0 6px;
             font-family: 'Arial Black', Arial, sans-serif;
             font-weight: 800;
-            font-size: 12px;
+            font-size: 13px;
             letter-spacing: 0.04em;
             color: #1e6fd0;
-            white-space: nowrap;
         }
-        .skill-name::after { content: ' —'; color: rgba(10,10,25,0.40); }
+        .skill-name::after { content: ''; }
+
+        /* Tier 2 — supplemental logo strip for languages not narrated above */
+        .skills-strip-label {
+            font-family: 'Arial Black', Arial, sans-serif;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #1e6fd0;
+            margin: 22px 0 10px;
+        }
+        .skills-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            list-style: none;
+            padding: 0;
+            margin: 0 0 6px;
+        }
+        .skills-strip li {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px 6px 8px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(232,242,255,0.85) 100%);
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 22px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            transition: transform 0.14s ease, box-shadow 0.18s ease;
+        }
+        .skills-strip li:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30,111,208,0.16);
+        }
+        .skills-strip li img {
+            width: 22px; height: 22px;
+            object-fit: contain;
+        }
+        .skills-strip li span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        /* Tier 3 — certifications grid with names */
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .cert-grid li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(232,242,255,0.88) 100%);
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: transform 0.14s ease, box-shadow 0.18s ease;
+        }
+        .cert-grid li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30,111,208,0.14);
+        }
+        .cert-grid li img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            flex: 0 0 auto;
+        }
+        .cert-grid li span {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0a0a19;
+            line-height: 1.3;
+        }
+
+        /* Work history grid — uniform tiles with company logo + name */
+        .work-history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .work-history-grid li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 12px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(232,242,255,0.88) 100%);
+            border: 1px solid rgba(120,180,255,0.30);
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: transform 0.14s ease, box-shadow 0.18s ease;
+            text-align: center;
+        }
+        .work-history-grid li:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30,111,208,0.14);
+        }
+        .work-history-grid li img {
+            width: auto;
+            max-width: 100%;
+            max-height: 56px;
+            object-fit: contain;
+        }
+        .work-history-grid li span {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #0a0a19;
+            line-height: 1.3;
+        }
+
+        /* Mobile tweaks — both grids stack to 1 column under ~640 px */
+        @media (max-width: 640px) {
+            .featured-grid { grid-template-columns: 1fr; }
+            .skills-context-list { grid-template-columns: 1fr; }
+            .featured-cover { aspect-ratio: 16 / 8; }
+            .skill-cover    { aspect-ratio: 5 / 1.6; }
+            .cert-grid { grid-template-columns: 1fr; }
+            .skills-strip li span { font-size: 12.5px; }
+        }
     </style>
 
-    <section id="skills-context" class="skills-context" aria-label="Skills in context">
-        <p class="skills-context-title">Skills, with the projects that prove them</p>
-        <ul class="skills-context-list">
-            <li><span class="skill-name">Vanilla JS &amp; Canvas 2D</span> the NYC missile-defence simulation and 100+ retro arcade games on this site (no game engine, no physics lib).</li>
-            <li><span class="skill-name">Vue 3</span> the 250-region travel atlas, software gallery, and dynamic UI sections of this site.</li>
-            <li><span class="skill-name">AWS (S3, CloudFront)</span> static-asset hosting and CDN for this site (<code>d3dw5jtb3w1kgy.cloudfront.net</code>) — plus AWS certifications.</li>
-            <li><span class="skill-name">Python</span> automation scripts, data scrapers, and personal tooling.</li>
-            <li><span class="skill-name">Java &amp; C</span> systems coursework, algorithm work, and competitive-programming archive.</li>
-            <li><span class="skill-name">SQL</span> backend data work at Capital One and CoStar Group.</li>
-            <li><span class="skill-name">CSS / Responsive UI</span> the glass-morphism widget tooltips, sliders, and animated landing pages across this site.</li>
-            <li><span class="skill-name">Rust</span> exploratory systems projects and language fundamentals.</li>
-        </ul>
-    </section>
-
-    <section id="featured-projects" class="featured-projects" aria-label="Featured projects">
-        <p class="featured-projects-title">Featured projects</p>
-        <div class="featured-grid">
-            <article class="featured-card">
-                <h3>NYC Missile-Defence Simulation</h3>
-                <p class="featured-outcome">
-                    Real-time Canvas 2D simulation: 23 missile classes, 6 interceptor types,
-                    weather and severity controls, AUTO modes that cycle every combination.
-                    Built from scratch — no game engine, no physics library.
-                </p>
-                <p class="featured-tech">Vanilla JS, Canvas 2D, custom physics</p>
-                <div class="featured-links">
-                    <a class="featured-link-primary" href="#nyc-canvas-figure">Try it ↑</a>
-                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/blob/master/js/nyc-city.js" target="_blank" rel="noopener">Source</a>
-                </div>
-            </article>
-
-            <article class="featured-card">
-                <h3>Retro Arcade Gallery (100+ games)</h3>
-                <p class="featured-outcome">
-                    Custom-built playable canvas games — physics, AI, mobile controls, gallery
-                    previews. Every game tested for winnability and medium difficulty per a
-                    documented spec.
-                </p>
-                <p class="featured-tech">Vanilla JS, Canvas 2D, mobile touch</p>
-                <div class="featured-links">
-                    <a class="featured-link-primary" href="https://www.masrikdahir.com/games">Play</a>
-                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/tree/master/js/games" target="_blank" rel="noopener">Source</a>
-                </div>
-            </article>
-
-            <article class="featured-card">
-                <h3>Travel Atlas (250+ regions)</h3>
-                <p class="featured-outcome">
-                    Interactive atlas of US states, Canadian provinces, and 200+ countries with
-                    per-region pages, photo galleries, and continent-level navigation.
-                    Static-site architecture on AWS S3 + CloudFront.
-                </p>
-                <p class="featured-tech">Vue 3, AWS S3, CloudFront</p>
-                <div class="featured-links">
-                    <a class="featured-link-primary" href="https://www.masrikdahir.com/map">Browse</a>
-                    <a class="featured-link-secondary" href="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io" target="_blank" rel="noopener">Source</a>
-                </div>
-            </article>
-        </div>
-    </section>
+    <!-- Skills + Featured projects moved below the Masrik Dahir picture
+         so on mobile (and desktop) the photo is the first visual hit and
+         the new image-first cards stack underneath it. -->
+    <!-- (sections live further down — search for sec-after-photo) -->
 
     <!-- The Grid -->
     <div class="w3-row-padding">
@@ -493,7 +1149,7 @@
             </div>
             <br>
             <div class="" style="margin-left: 0px">
-                <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom">
+                <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom no-polish-hover">
                     <div class="w3-display-container">
                         <img src="https://d3dw5jtb3w1kgy.cloudfront.net/masrikdahir.jpg" style="width:100%" alt="Masrik Dahir">
                         <div class="w3-display-bottomleft w3-container w3-text-black">
@@ -503,372 +1159,179 @@
                             </h2>
                         </div>
                     </div>
-                    <br>
-                    <div class="w3-container">
-                        <div style="color: black"><TABLE WIDTH="100%"><TR>
-                            <TD WIDTH="1%">
-                                <i class="fa fa-briefcase fa-fw w3-margin-right w3-large"
-                                   style="color:#2f4f4f ;"></i>
-                            </TD>
-                            <TD WIDTH="99%">
-                                Software Engineer, Capital One
-                            </TD>
-                        </TR></TABLE>
-                        </div>
-                        <br>
-                        <div style="color: black"><TABLE WIDTH="100%"><TR>
-                            <TD WIDTH="1%">
-                                <i class="fa fa-graduation-cap fa-fw w3-margin-right w3-large" style="color:#2f4f4f;"></i>
-                            </TD>
-                            <TD WIDTH="99%">
-                                MSc (AI & CyberSecurity), BSc (Software Engineering)
-                            </TD>
-                        </TR></TABLE>
-                        </div>
-                        <br>
-                        <div style="color: black"><TABLE WIDTH="100%"><TR>
-                            <TD WIDTH="1%">
-                                <i class="fa fa-certificate fa-fw w3-margin-right w3-large" style="color:#2f4f4f;"></i>
-                            </TD>
-                            <TD WIDTH="99%">
-                                Amazon Web Services, Azure, Google Cloud Platform, Databricks, Snowflake, Postman
-                            </TD>
-                        </TR></TABLE>
-                        </div>
-                        <br>
 
-                        <div style="color: black"><TABLE WIDTH="100%"><TR>
-                            <TD WIDTH="1%">
-                                <i class="fa fa-home fa-fw w3-margin-right w3-large"
-                                   style="color:#2f4f4f ;"></i>
-                            </TD>
-                            <TD WIDTH="99%">
-                                Virginia, United States
-                            </TD>
-                        </TR></TABLE>
+                    <!-- sec-after-photo: each section is its own card so
+                         Summary / Skills / Certifications / Featured /
+                         Work history all read as distinct, parallel
+                         blocks underneath the photo. -->
+
+                    <!-- ── 1. Summary ── -->
+                    <section id="positioning" class="section-card pretty positioning-hero" aria-label="Summary">
+                        <span class="liquid-glass" aria-hidden="true"></span>
+                        <p class="section-card-title">Summary</p>
+                        <p class="positioning-line">
+                            Software engineer building developer tools, AWS-heavy backends, and interactive web experiences.
+                        </p>
+                        <ul class="positioning-bio" aria-label="Quick bio">
+                            <li>Software Engineer, Capital One</li>
+                            <li>MSc (AI &amp; CyberSecurity), BSc (Software Engineering)</li>
+                            <li>Amazon Web Services, Azure, Google Cloud Platform, Databricks, Snowflake, Postman</li>
+                            <li>Virginia, United States</li>
+                        </ul>
+                        <p class="positioning-status">Open to roles and collaboration.</p>
+                        <div class="positioning-cta">
+                            <a href="https://www.masrikdahir.com/software" class="positioning-cta-primary">See projects</a>
+                            <a href="work.html" class="positioning-cta-secondary">See Experiences</a>
                         </div>
+                    </section>
 
-                        <div style="color: black"><TABLE WIDTH="100%">
+                    <!-- ── 2. Skills with the projects that prove them ──
+                         Compact icon-chip grid: each tile is just a
+                         language/library icon + name + a tight one-line
+                         project context. No big gradient cover tiles, so
+                         many more skills fit per row. -->
+                    <section id="skills-context" class="section-card pretty skills-context" aria-label="Skills with projects">
+                        <span class="liquid-glass" aria-hidden="true"></span>
+                        <p class="section-card-title">Skills, with the projects that prove them</p>
+                        <ul class="skill-chips">
+                            <!-- Core languages -->
+                            <li><i class="fab fa-js"          style="color:#f59e0b"></i><div><span>Vanilla JS &amp; Canvas 2D</span><p>NYC missile-defence sim + 100+ retro games (no engine, no physics lib).</p></div></li>
+                            <li><span class="lang-badge" style="background:#3178c6">TS</span><div><span>TypeScript</span><p>React + .NET REST APIs at CoStar Group.</p></div></li>
+                            <li><i class="fab fa-python"      style="color:#3776ab"></i><div><span>Python</span><p>Automation, NLP/NLTK research, Cronus concept-map tool, scrapers.</p></div></li>
+                            <li><i class="fab fa-java"        style="color:#007396"></i><div><span>Java</span><p>Spring Boot work at Capital One, JVM coursework, algorithms.</p></div></li>
+                            <li><span class="lang-badge" style="background:#a8b9cc;color:#1f2937">C/C++</span><div><span>C / C++</span><p>Volatility &amp; Libvmi memory-introspection research at VCU SAFE Lab.</p></div></li>
+                            <li><i class="fab fa-microsoft"   style="color:#512bd4"></i><div><span>C# / .NET</span><p>ASP.NET Core + Entity Framework + NUnit for CoStar microservices.</p></div></li>
+                            <li><span class="lang-badge" style="background:#00add8">Go</span><div><span>Go</span><p>AwsUtil multi-language SDK wrappers — full AWS API surface in Go.</p></div></li>
+                            <li><span class="lang-badge" style="background:#dc2626">Rs</span><div><span>Rust</span><p>Exploratory systems projects + AwsUtil Rust SDK wrappers.</p></div></li>
+                            <li><i class="fas fa-gem"         style="color:#cc342d"></i><div><span>Ruby</span><p>AwsUtil Ruby SDK wrappers.</p></div></li>
+                            <li><i class="fab fa-php"         style="color:#777bb4"></i><div><span>PHP</span><p>VCU School of Pharmacy CMS work and lab websites.</p></div></li>
+                            <li><i class="fas fa-square-root-alt" style="color:#1a5490"></i><div><span>SageMath</span><p>Symbolic math coursework and exploration.</p></div></li>
+                            <li><i class="fab fa-html5"       style="color:#e34f26"></i><div><span>HTML5</span><p>Semantic markup across every page of this site.</p></div></li>
+                            <li><i class="fab fa-css3-alt"    style="color:#2965f1"></i><div><span>CSS / Responsive UI</span><p>Glass-morphism tooltips, sliders, animated landing pages.</p></div></li>
 
-                        </TABLE>
-                        </div>
-                        <br>
+                            <!-- Front-end frameworks -->
+                            <li><i class="fab fa-vuejs"       style="color:#42b883"></i><div><span>Vue 3</span><p>250-region travel atlas, software gallery, dynamic UI sections.</p></div></li>
+                            <li><i class="fab fa-react"       style="color:#61dafb"></i><div><span>React</span><p>TypeScript + REST API frontend architecture at CoStar Group.</p></div></li>
+                            <li><i class="fab fa-angular"     style="color:#dd0031"></i><div><span>Angular / AngularJS</span><p>Blockchain insurance app (Mizzou) + earlier-gen SPAs.</p></div></li>
+                            <li><i class="fab fa-bootstrap"   style="color:#7952b3"></i><div><span>Bootstrap</span><p>Grid + components powering the layout on this site.</p></div></li>
+                            <li><i class="fas fa-dollar-sign" style="color:#0769ad"></i><div><span>jQuery</span><p>Legacy DOM scripting for tooltips, popups, and widgets.</p></div></li>
+                            <li><i class="fas fa-chart-pie"   style="color:#ff6384"></i><div><span>Chart.js</span><p>Live finance-formula charts in the Web Formula calculator suite.</p></div></li>
 
-                    </div>
+                            <!-- Back-end & runtime -->
+                            <li><i class="fab fa-node-js"     style="color:#339933"></i><div><span>Node.js</span><p>Fastify HTTP APIs + DynamoDB at Capital One.</p></div></li>
+                            <li><i class="fas fa-leaf"        style="color:#6db33f"></i><div><span>Spring Boot</span><p>Capital One Java microservices.</p></div></li>
+                            <li><i class="fas fa-cog"         style="color:#512bd4"></i><div><span>ASP.NET Core</span><p>CoStar REST APIs with Entity Framework.</p></div></li>
+                            <li><i class="fas fa-fire"        style="color:#ffa000"></i><div><span>Firebase</span><p>Real-time data + auth for blockchain research project.</p></div></li>
+
+                            <!-- Cloud / infra -->
+                            <li><i class="fab fa-aws"         style="color:#ff9900"></i><div><span>AWS</span><p>Lambda, DynamoDB, EKS, ECS, SQS, SNS, S3, Athena, Glue, Secrets Manager.</p></div></li>
+                            <li><i class="fab fa-docker"      style="color:#2496ed"></i><div><span>Docker</span><p>Containerized microservice deployments on EKS/ECS.</p></div></li>
+                            <li><i class="fas fa-dharmachakra" style="color:#326ce5"></i><div><span>Kubernetes</span><p>Scaling microservice APIs at CoStar Group.</p></div></li>
+                            <li><i class="fas fa-cubes"       style="color:#7c3aed"></i><div><span>Terraform</span><p>Infrastructure-as-code for AWS resources at CoStar.</p></div></li>
+                            <li><i class="fab fa-linux"       style="color:#222"></i><div><span>Linux / Shell</span><p>Daily driver for development, scripting, and ops.</p></div></li>
+
+                            <!-- Data / streaming / observability -->
+                            <li><i class="fas fa-database"    style="color:#8b5cf6"></i><div><span>SQL</span><p>Microsoft SQL Server &amp; PostgreSQL at Capital One and CoStar.</p></div></li>
+                            <li><i class="fas fa-database"    style="color:#dc382d"></i><div><span>Redis</span><p>API-route caching to cut latency on CoStar microservices.</p></div></li>
+                            <li><i class="fas fa-database"    style="color:#4db33d"></i><div><span>MySQL</span><p>Hyperledger blockchain insurance system (NSF-funded research).</p></div></li>
+                            <li><i class="fas fa-stream"      style="color:#231f20"></i><div><span>Apache Kafka</span><p>Dynamic message transmitter routing SQS / SNS / Kafka at CoStar.</p></div></li>
+                            <li><i class="fas fa-server"      style="color:#ffcc66"></i><div><span>Hadoop / HDFS</span><p>Big-data analysis for blockchain fraud detection.</p></div></li>
+                            <li><i class="fas fa-bolt"        style="color:#ff3621"></i><div><span>Databricks</span><p>ETL + analytics at CoStar (Fundamentals + Generative AI certified).</p></div></li>
+                            <li><i class="fas fa-snowflake"   style="color:#29b5e8"></i><div><span>Snowflake</span><p>Data-warehouse work and analytics queries.</p></div></li>
+                            <li><i class="fas fa-chart-area"  style="color:#632ca6"></i><div><span>Datadog</span><p>Observability and alerting for CoStar microservices.</p></div></li>
+
+                            <!-- Testing / tooling -->
+                            <li><i class="fas fa-theater-masks" style="color:#2ead33"></i><div><span>Playwright</span><p>Migrated CI tests from Puppeteer → Playwright at Capital One.</p></div></li>
+                            <li><i class="fas fa-vial"        style="color:#15c213"></i><div><span>NUnit / pytest</span><p>.NET and Python test suites across job projects.</p></div></li>
+                            <li><i class="fas fa-paper-plane" style="color:#ff6c37"></i><div><span>Postman</span><p>API design, testing, and integration (Student Expert certified).</p></div></li>
+                            <li><i class="fab fa-git-alt"     style="color:#f05033"></i><div><span>Git / GitHub</span><p>Version control + CI workflows for every project.</p></div></li>
+                            <li><i class="fab fa-jira"        style="color:#0052cc"></i><div><span>Jira / Agile</span><p>Sprint planning and ticket-driven workflow at Capital One.</p></div></li>
+
+                            <!-- Specialized / research -->
+                            <li><i class="fas fa-link"        style="color:#f7931a"></i><div><span>Blockchain</span><p>Hyperledger Composer fraud-prevention research at Mizzou (NSF-funded).</p></div></li>
+                            <li><i class="fas fa-shield-alt"  style="color:#d32f2f"></i><div><span>Cybersecurity</span><p>Cyber Navigator @ VA Dept. of Elections; DDoS / Sybil-attack research.</p></div></li>
+                            <li><i class="fas fa-language"    style="color:#16a34a"></i><div><span>NLP / NLTK</span><p>Concept-map similarity research (Cronus) at VCU SAFE Lab.</p></div></li>
+                            <li><i class="fas fa-project-diagram" style="color:#0288d1"></i><div><span>Graph Theory / Graphviz</span><p>Cronus map-comparison algorithms + graph visualization.</p></div></li>
+                            <li><i class="fas fa-microchip"   style="color:#c51a4a"></i><div><span>Raspberry Pi / IoT</span><p>Automated Rampantries food cart at VCU Monroe Park Campus.</p></div></li>
+                            <li><i class="fab fa-wordpress"   style="color:#21759b"></i><div><span>WordPress / cPanel</span><p>School of Pharmacy lab sites + Terminal 4 CMS.</p></div></li>
+                        </ul>
+                    </section>
+
+                    <!-- ── 3. Certifications ── -->
+                    <section id="certifications" class="section-card pretty" aria-label="Certifications">
+                        <span class="liquid-glass" aria-hidden="true"></span>
+                        <p class="section-card-title">Certifications</p>
+                        <ul class="cert-grid">
+                            <li data-toggle="tooltip" title="AWS Cloud Practitioner Certification">
+                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png" alt="AWS Cloud Practitioner certification badge">
+                                <span>AWS Cloud Practitioner</span>
+                            </li>
+                            <li data-toggle="tooltip" title="AWS Certified Developer Associate">
+                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png" alt="AWS Certified Developer Associate badge">
+                                <span>AWS Developer Associate</span>
+                            </li>
+                            <li data-toggle="tooltip" title="AWS Certified Solutions Architect Associate">
+                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png" alt="AWS Certified Solutions Architect Associate badge">
+                                <span>AWS Solutions Architect Associate</span>
+                            </li>
+                            <li data-toggle="tooltip" title="Postman API Student Expert">
+                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png" alt="Postman API Student Expert badge">
+                                <span>Postman API Student Expert</span>
+                            </li>
+                            <li data-toggle="tooltip" title="Databricks Fundamentals">
+                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png" alt="Databricks Fundamentals badge">
+                                <span>Databricks Fundamentals</span>
+                            </li>
+                            <li data-toggle="tooltip" title="Databricks Generative AI Fundamentals">
+                                <img src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png" alt="Databricks Generative AI Fundamentals badge">
+                                <span>Databricks Generative AI Fundamentals</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Featured work card removed — Summary card now
+                         links straight to work.html via "See Experience". -->
+
+
+                    <!-- ── 5. Work history ── -->
+                    <section id="work-history" class="section-card pretty" aria-label="Work history">
+                        <span class="liquid-glass" aria-hidden="true"></span>
+                        <p class="section-card-title">Work history</p>
+                        <ul class="work-history-grid">
+                            <li data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
+                                <img alt="Capital One logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
+                                <span>Capital One</span>
+                            </li>
+                            <li data-toggle="tooltip" data-html="true" title="CoStar Group">
+                                <img alt="CoStar Group logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
+                                <span>CoStar Group</span>
+                            </li>
+                            <li data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
+                                <img alt="Virginia Department of Elections logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
+                                <span>VA Dept. of Elections</span>
+                            </li>
+                            <li data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
+                                <img alt="Virginia Commonwealth University logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
+                                <span>VCU</span>
+                            </li>
+                            <li data-toggle="tooltip" data-html="true" title="Roanoke County">
+                                <img alt="Roanoke County logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
+                                <span>Roanoke County</span>
+                            </li>
+                            <li data-toggle="tooltip" data-html="true" title="AT&amp;T Inc.">
+                                <img alt="AT&amp;T logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
+                                <span>AT&amp;T</span>
+                            </li>
+                        </ul>
+                    </section>
                 </div>
 
-                <!--                Work History -->
-                <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom">
-                    <div class="w3-container" style="color:transparent;">
-                        <h4><p style="color: black;">
-                            <i class="fa fa-history fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Work History</p></h4>
 
+                <!-- Programming Language / Certifications card removed —
+                     content merged into #skills-context above the photo. -->
 
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Capital One -->
-                                    <div data-toggle="tooltip" data-html="true" title="Capital One Financial Corporation">
-                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="Capital One logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/capitalone.png"/>
-                                    </div>
-                                </TD>
+                <!-- Travel card removed by request. -->
 
-                                <TD>
-                                    <!--          CoStar -->
-                                    <div data-toggle="tooltip" data-html="true" title="CoStar Group">
-                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="CoStar Group logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/costar.png"/>
-                                    </div>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Dept of Election -->
-                                    <div data-toggle="tooltip" data-html="true" title="Virginia Department of Elections">
-                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="Virginia Department of Elections logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/dept-of-elections-logo.png"/>
-                                    </div>
-                                </TD>
-                                <TD>
-                                    <!--          VCU -->
-                                    <div data-toggle="tooltip" data-html="true" title="Virginia Commonwealth University">
-                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="Virginia Commonwealth University logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/vcu_ram.png"/>
-                                    </div>
-
-
-                                </TD>
-                            </TR>
-                        </TABLE>
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Roanoke -->
-                                    <div data-toggle="tooltip" data-html="true" title="Roanoke County">
-                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="Roanoke County logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/roanoke.png"/>
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          Att -->
-                                    <div data-toggle="tooltip" data-html="true" title="AT&T Inc.">
-                                        <img class="box2 w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="AT&amp;T logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/att.png"/>
-                                    </div>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-
-                        <div class="w3-white w3-round-xlarge w3-small">
-                            <div class="w3-container w3-center w3-round-xlarge "
-                                 style="width:100%; margin-left: -5px;"></div>
-                        </div>
-
-                        <br>
-                    </div>
-                </div>
-
-
-                <!--                Programming Language-->
-                <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom">
-                    <div class="w3-container" style="color:transparent;">
-                        <h4><p style="color: black;">
-                            <i class="fa fa-code fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Skill</p></h4>
-
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Python-->
-                                    <div data-toggle="tooltip" data-html="true" title="Python Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="Python logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/python.png"/>
-                                    </div>
-                                </TD>
-                                <TD>
-                                    <!--          Java-->
-                                    <div data-toggle="tooltip" data-html="true" title="Java Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="Java logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/java.png"/>
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          C-->
-                                    <div data-toggle="tooltip" data-html="true" title="C Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="C language logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/c2.png"/>
-
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          Nodejs-->
-                                    <div data-toggle="tooltip" data-html="true" title="Node JS Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="Node.js logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/nodejs.png"/>
-
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          SageMath-->
-                                    <div data-toggle="tooltip" data-html="true" title="Sage Math Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="SageMath logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/sage.png"/>
-
-                                    </div>
-                                </TD>
-
-                            </TR>
-                        </TABLE>
-
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Rust-->
-                                    <div data-toggle="tooltip" data-html="true" title="Rust Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="Rust logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/Rust_programming_language_black_logo.svg.png" />
-
-                                    </div>
-                                </TD>
-                                <TD>
-                                    <!--          HTML-->
-                                    <div data-toggle="tooltip" data-html="true" title="HTML Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="HTML5 logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/html.png"/>
-
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          CSS-->
-                                    <div data-toggle="tooltip" data-html="true" title="CSS Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="CSS3 logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/css.png"/>
-
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          SQL-->
-                                    <div data-toggle="tooltip" data-html="true" title="SQL Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="SQL logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/sql.png"/>
-
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--          PHP-->
-                                    <div data-toggle="tooltip" data-html="true" title="PHP Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="PHP logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/php.png" />
-
-                                    </div>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--          Angular JS-->
-                                    <div data-toggle="tooltip" data-html="true" title="Angular JS Programming Language">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px"
-                                             alt="AngularJS logo" src="https://d3dw5jtb3w1kgy.cloudfront.net/AngularJS-Shield.png" />
-
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--        AWS Cloud Practitioner-->
-                                    <div data-toggle="tooltip" data-html="true" title="AWS Cloud Practitioner Certification">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="AWS Cloud Practitioner certification badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-cloud-practitioner.png"/>
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--        AWS Certified Developer-->
-                                    <div data-toggle="tooltip" data-html="true" title="AWS Certified Developer">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="AWS Certified Developer Associate badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-developer-associate.png"/>
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--        Postman Student Expert-->
-                                    <div data-toggle="tooltip" data-html="true" title="Postman API Student Expert">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="Postman API Student Expert badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/pafse.png"/>
-                                    </div>
-                                </TD>
-
-                                <TD>
-                                    <!--        Databricks Fundamentals-->
-                                    <div data-toggle="tooltip" data-html="true" title="Databricks Fundamentals">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="Databricks Fundamentals badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksfundamental.png"/>
-                                    </div>
-                                </TD>
-                            </TR>
-                        </TABLE>
-                        <TABLE>
-                            <TR>
-                                <TD>
-                                    <!--        Databricks Generative AI Fundamentals-->
-                                    <div data-toggle="tooltip" data-html="true" title="Databricks Generative AI Fundamentals">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="Databricks Generative AI Fundamentals badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/databricksgenerativeai.png"/>
-                                    </div>
-                                </TD>
-                                <TD>
-                                    <!--        AWS Solutions Architect-->
-                                    <div data-toggle="tooltip" data-html="true" title="AWS Solutions Architect">
-                                        <img class="box w3-hover-opacity" style="float: left; width:auto; vertical-align: middle; margin: 5px; "
-                                             alt="AWS Certified Solutions Architect Associate badge" src="https://d3dw5jtb3w1kgy.cloudfront.net/aws-certified-solutions-architect-associate.png"/>
-                                    </div>
-                                </TD>
-                            </TR>
-                        </TABLE>
-
-                        <div class="w3-white w3-round-xlarge w3-small">
-                            <div class="w3-container w3-center w3-round-xlarge "
-                                 style="width:100%; margin-left: -5px;"></div>
-                        </div>
-
-                        <br>
-                    </div>
-                </div>
-
-                <!--                Travel-->
-                <div class="w3-Azure w3-text-grey w3-card-2 w3-margin-bottom">
-
-                    <div class="w3-container" style="color:transparent;">
-                        <h4><p style="color: black;">
-                            <i class="fa fa-map-marked-alt fa-fw w3-margin-right w3-text-teal;" style="color:#2f4f4f; font-size: medium; "></i>Travel</p></h4>
-
-
-                        <div id="app_pic" style="">
-
-                            <div class="" style="color:transparent;">
-                                <div style="display: inline-block">
-
-                                    <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
-
-                                        <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
-                                            <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
-                                                <div data-toggle="tooltip" data-html="true" :title="item.title">
-                                                    <center>
-                                                        <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                            <img :src="item.image" :alt="item.title" loading="lazy" @error="$event.target.style.opacity='0.3'" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
-                                                        </button>
-                                                    </center>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div id="app_pic_can" style="">
-
-                            <div class="" style="color:transparent;">
-                                <div style="display: inline-block">
-
-                                    <div style="display: flex; flex-wrap: wrap;margin-left: 10px">
-
-                                        <div v-if="resources.length" class="table" style="display: flex; flex-wrap: wrap;">
-                                            <div v-for="(item, index) in resultQuery" :key="index" style="margin-right: 15px; margin-bottom: 15px; ">
-                                                <div data-toggle="tooltip" data-html="true" :title="item.title">
-                                                    <button class="" style="background-color: transparent; border: none; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                                        <img :src="item.image" :alt="item.title" loading="lazy" @error="$event.target.style.opacity='0.3'" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="w3-white w3-round-xlarge w3-small">
-                            <div class="w3-container w3-center w3-round-xlarge "
-                                 style="width:100%; margin-left: -5px;"></div>
-                        </div>
-
-                        <br>
-                    </div>
-                </div>
 
 
             </div>
@@ -1369,7 +1832,11 @@
                 </button>
                 <span class="prd-pulse"></span>
                 <div class="widget-tooltip tt-parade" role="tooltip">
-                    <div class="tt-title tt-title-parade">Military Parade</div>
+                    <div class="tt-title tt-title-parade">Parade</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Theme</span>
+                        <span class="tt-value tt-prd-status" id="ttPrdTheme">—</span>
+                    </div>
                     <div class="tt-row">
                         <span class="tt-label">Status</span>
                         <span class="tt-value tt-prd-status" id="ttPrdStatus">IDLE</span>
@@ -1382,7 +1849,131 @@
                         <span class="tt-label">Ground units</span>
                         <span class="tt-value tt-prd-status" id="ttPrdGround">—</span>
                     </div>
-                    <div class="tt-hint">Fighter jets &amp; attack helicopters fly overhead • Tanks &amp; missile carriers roll down the road • Click again to dismiss the parade</div>
+                    <div class="tt-row tt-row-hover" id="ttParadeHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-prd-status" id="ttParadeHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons" id="ttParadeGrid"></div>
+                </div>
+            </div>
+
+            <!-- ALIEN ABDUCTION — fleets of round saucers swarm in,
+                 most get shot down by the city's defence missiles, and
+                 the survivors abduct pedestrians one by one. A second
+                 wave of ships returns to the same spots and beams down
+                 disguised aliens that walk briefly, shapeshift, and
+                 rejoin the crowd as ordinary humans. -->
+            <div id="abductionBtn" class="abduction-btn icon-only">
+                <button class="abd-core" onclick="
+                    if(window.toggleAbduction){
+                        var on = window.toggleAbduction();
+                        var wrap = document.getElementById('abductionBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-rocket abd-icon" id="abdIcon" aria-hidden="true"></i>
+                </button>
+                <span class="abd-pulse"></span>
+                <div class="widget-tooltip tt-abduction" role="tooltip">
+                    <div class="tt-title tt-title-abduction">Alien Abduction</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Ship</span>
+                        <span class="tt-value tt-abd-status" id="ttAbdShip">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Missile</span>
+                        <span class="tt-value tt-abd-status" id="ttAbdMissile">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Phase</span>
+                        <span class="tt-value tt-abd-status" id="ttAbdPhase">IDLE</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Abducted</span>
+                        <span class="tt-value tt-abd-status" id="ttAbdAbducted">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttAbductionHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-abd-status" id="ttAbductionHover">—</span>
+                    </div>
+                    <!-- 7 ship chips, locked to ONE row -->
+                    <div class="tt-grid tt-grid-icons tt-grid-ships" id="ttAbductionGrid"></div>
+                    <!-- 7 missile chips, locked to ONE row -->
+                    <div class="tt-grid tt-grid-icons tt-grid-missiles" id="ttAbductionMissileGrid"></div>
+                    <div class="tt-slider-row tt-slider-row-abduction">
+                        <span class="tt-slider-label tt-slider-label-abduction">Difficulty</span>
+                        <input type="range" min="1" max="100" value="40" class="tt-slider tt-slider-abduction" id="ttAbductionCountSlider" aria-label="Alien ship count / difficulty"
+                               oninput="if(window.setAbductionShipCount)window.setAbductionShipCount(this.value); document.getElementById('ttAbductionCountVal').textContent=this.value+'%';">
+                        <span class="tt-slider-val tt-slider-val-abduction" id="ttAbductionCountVal">40%</span>
+                    </div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-abduction">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-abduction" id="ttAbductionAutoBtn" aria-pressed="false"
+                                onclick="
+                                    var on = this.getAttribute('aria-pressed') !== 'true';
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                    this.textContent = on ? 'ON' : 'OFF';
+                                    if(window.setAbductionAutoFire) window.setAbductionAutoFire(on);
+                                ">OFF</button>
+                    </div>
+                    <div class="tt-hint">Missiles auto-fire based on Difficulty • Auto: 100% hit rate • Click any saucer for bonus shot</div>
+                </div>
+            </div>
+
+            <!-- SUPERHERO BATTLE — spawn a roster of heroes from the
+                 selected universe to fight in the city until one
+                 winner remains. AUTO: heroes fight each other. MANUAL:
+                 click any hero and ALL other heroes (plus collateral
+                 damage on buildings / cars / peds) gang up on them. -->
+            <div id="superheroBtn" class="superhero-btn icon-only">
+                <button class="sup-core" onclick="
+                    if(window.toggleSuperhero){
+                        var on = window.toggleSuperhero();
+                        var wrap = document.getElementById('superheroBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-bolt sup-icon" id="supIcon" aria-hidden="true"></i>
+                </button>
+                <span class="sup-pulse"></span>
+                <div class="widget-tooltip tt-superhero" role="tooltip">
+                    <div class="tt-title tt-title-superhero">Superhero Battle</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Hero</span>
+                        <span class="tt-value tt-sup-status" id="ttSupUniverse">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Alive</span>
+                        <span class="tt-value tt-sup-status" id="ttSupAlive">—</span>
+                    </div>
+                    <div class="tt-row">
+                        <span class="tt-label">Winner</span>
+                        <span class="tt-value tt-sup-status" id="ttSupWinner">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttSuperheroHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-sup-status" id="ttSuperheroHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-universes" id="ttSuperheroGrid"></div>
+                    <div class="tt-slider-row tt-slider-row-superhero">
+                        <span class="tt-slider-label tt-slider-label-superhero">Difficulty</span>
+                        <input type="range" min="1" max="100" value="50" class="tt-slider tt-slider-superhero" id="ttSuperheroIntensitySlider" aria-label="Difficulty"
+                               oninput="if(window.setSuperheroIntensity)window.setSuperheroIntensity(this.value); document.getElementById('ttSuperheroIntensityVal').textContent=this.value+'%';">
+                        <span class="tt-slider-val tt-slider-val-superhero" id="ttSuperheroIntensityVal">50%</span>
+                    </div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-superhero">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-superhero" id="ttSuperheroAutoBtn" aria-pressed="false"
+                                onclick="
+                                    var on = this.getAttribute('aria-pressed') !== 'true';
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                    this.textContent = on ? 'ON' : 'OFF';
+                                    if(window.setSuperheroAutoFight) window.setSuperheroAutoFight(on);
+                                ">OFF</button>
+                    </div>
+                    <div class="tt-hint">Auto: heroes fight each other to one winner • Manual: CLICK any hero — everyone targets them</div>
                 </div>
             </div>
         </div>
@@ -1415,6 +2006,8 @@
             .city-switcher-wrap > .defence-btn,
             .city-switcher-wrap > .reconstruct-btn,
             .city-switcher-wrap > .parade-btn,
+            .city-switcher-wrap > .abduction-btn,
+            .city-switcher-wrap > .superhero-btn,
             .city-switcher-wrap > .flight-wrap {
                 height: 44px;
                 box-sizing: border-box;
@@ -2399,7 +2992,392 @@
             /* tooltip olive title accent */
             .widget-tooltip .tt-title-parade { color: #556b2f; }
             .widget-tooltip .tt-prd-status   { color: #556b2f; }
-            .tt-parade { width: 240px; }
+            /* 14 themes laid out as 2 rows × 7 chips. 7*32 + 6*4 = 248px
+               chip area; plus 14px padding each side = 276px tooltip
+               width minimum. Set 304px so chips have a small inner
+               margin and the tooltip feels balanced. */
+            .tt-parade { width: 304px; }
+            .tt-parade .tt-row-hover .tt-label { color: #556b2f; }
+            .tt-parade .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(7, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-parade .tt-grid.tt-grid-icons .tt-chip {
+                width: 32px;
+                height: 32px;
+                box-sizing: border-box !important;
+            }
+            /* PARADE ACTIVE — single ARMY GREEN active color across
+               every theme. Mirrors the defence widget exactly: solid
+               army-green gradient on rest, and on active:hover the
+               existing hex-shimmer system runs its tt-hex-sweep +
+               tt-active-shimmer animations over an army-green
+               7-stop gradient (see "OLIVE family" block where the
+               other widget families live). */
+            .tt-parade .tt-chip.active {
+                background: linear-gradient(135deg,#6b8e23,#4a5d23);
+                border-color:#2e3d18;
+            }
+
+            /* ── ABDUCTION widget (mirrors parade, sci-fi PURPLE-GREEN theme) ── */
+            .abduction-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(160,120,200,0.08) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px  rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            .abduction-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .abduction-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                /* Same multi-color rainbow halo as the other widget
+                   buttons (reconstruct / defence / attack / parade /
+                   city switcher) so the abduction button reads as
+                   part of the same family on hover. */
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .abduction-btn:hover {
+                /* Same neutral white-warm hover wash as the other
+                   widget buttons so the abduction button feels like
+                   a sibling — identical shadow stack, identical lift. */
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(255,210,150,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px  rgba(0,0,0,0.08);
+                transform: translateY(-1px);
+            }
+            .abduction-btn:hover::after { opacity: 1; }
+            .abduction-btn:active { transform: translateY(0) scale(0.97); }
+            .abduction-btn .abd-core {
+                width: 100%;
+                height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                background-image: none !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                position: relative;
+                z-index: 1;
+            }
+            .abduction-btn .abd-core::before,
+            .abduction-btn .abd-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                -webkit-mask-image: none !important;
+                        mask-image: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .abduction-btn .abd-core:hover {
+                background: rgba(255,255,255,0.10) !important;
+            }
+            .abduction-btn .abd-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            .abduction-btn .abd-core:hover .abd-icon { transform: translateY(-2px) scale(1.08); }
+            .abduction-btn.active .abd-icon {
+                color: #7c3aed;
+                text-shadow: 0 0 10px rgba(124,58,237,0.85);
+                animation: abd-hover 1.6s ease-in-out infinite;
+            }
+            @keyframes abd-hover {
+                0%, 100% { transform: translateY(-1px) rotate(-4deg); }
+                50%      { transform: translateY(2px)  rotate(4deg); }
+            }
+            .abduction-btn .abd-pulse { display: none; }
+            .abduction-btn.active .abd-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(124,58,237,0.60);
+                animation: abd-pulse 1.4s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes abd-pulse {
+                0%   { transform: scale(0.94); opacity: 0.80; box-shadow: 0 0 14px rgba(160,255,180,0.4); }
+                100% { transform: scale(1.45); opacity: 0;    box-shadow: 0 0 0    rgba(160,255,180,0); }
+            }
+            /* tooltip purple-green accents */
+            .widget-tooltip .tt-title-abduction { color: #7c3aed; }
+            .widget-tooltip .tt-abd-status      { color: #7c3aed; }
+            /* 7 chips × 32px + 6 gaps × 4px = 248px chip area;
+               + 14px padding each side = 276px → set 308px so chips
+               have breathing room. */
+            .tt-abduction {
+                /* Match the wide attack tooltip width so all
+                   "widget" tooltips render at the same visual
+                   width. The other widget tooltips that use the
+                   wider layout (tt-attack-wide) are 440px. */
+                width: min(440px, calc(100vw - 40px));
+                max-width: calc(100vw - 40px);
+            }
+            .tt-abduction .tt-row-hover .tt-label { color: #7c3aed; }
+            .tt-abduction .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(7, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-abduction .tt-grid.tt-grid-icons .tt-chip {
+                width: 32px;
+                height: 32px;
+                box-sizing: border-box !important;
+            }
+            /* missile-picker row gets a small top margin to read as a
+               separate row from the ship picker */
+            .tt-abduction .tt-grid.tt-grid-missiles {
+                margin-top: 6px;
+            }
+            /* Difficulty row — generous gap so the label, slider, and
+               percentage value all have breathing room. Slider gets
+               flex:1 to fill the middle gap. */
+            .tt-abduction .tt-slider-row.tt-slider-row-abduction {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 10px;
+                padding: 2px 2px;
+            }
+            .tt-abduction .tt-slider-label-abduction {
+                flex: 0 0 auto;
+                white-space: nowrap;
+            }
+            .tt-abduction .tt-slider-abduction {
+                flex: 1 1 auto;
+                min-width: 80px;
+            }
+            .tt-abduction .tt-slider-val-abduction {
+                flex: 0 0 auto;
+                min-width: 36px;
+                text-align: right;
+                white-space: nowrap;
+            }
+            /* ABDUCTION ACTIVE — single VIOLET active color across all
+               ship picks, mirroring the parade pattern: solid violet
+               gradient on rest, and on active:hover the existing
+               hex-shimmer system runs over a violet 7-stop gradient
+               (see "VIOLET family" block below). */
+            .tt-abduction .tt-chip.active {
+                background: linear-gradient(135deg,#a855f7,#7c3aed);
+                border-color:#5b21b6;
+            }
+
+            /* ── SUPERHERO widget (mirrors abduction, FIERY GOLD theme) ── */
+            .superhero-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(255,200,80,0.10) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                font-family: 'Arial Black', Arial, sans-serif;
+                font-size: 11px;
+                font-weight: 800;
+                letter-spacing: 0.12em;
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            .superhero-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            .superhero-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                /* Same multi-color rainbow halo as every other widget */
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .superhero-btn:hover {
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.22) 0%,
+                    rgba(255,210,150,0.14) 100%);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px rgba(0,0,0,0.08);
+                transform: translateY(-1px);
+            }
+            .superhero-btn:hover::after { opacity: 1; }
+            .superhero-btn:active { transform: translateY(0) scale(0.97); }
+            .superhero-btn .sup-core {
+                width: 100%; height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                position: relative;
+                z-index: 1;
+            }
+            .superhero-btn .sup-core::before,
+            .superhero-btn .sup-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                -webkit-mask-image: none !important;
+                        mask-image: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            .superhero-btn .sup-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            .superhero-btn .sup-core:hover .sup-icon { transform: rotate(-10deg) scale(1.1); }
+            .superhero-btn.active .sup-icon {
+                color: #f59e0b;
+                text-shadow: 0 0 12px rgba(245,158,11,0.85);
+                animation: sup-zap 0.9s ease-in-out infinite;
+            }
+            @keyframes sup-zap {
+                0%, 100% { transform: scale(1) rotate(0deg); }
+                50%      { transform: scale(1.15) rotate(8deg); }
+            }
+            .superhero-btn .sup-pulse { display: none; }
+            .superhero-btn.active .sup-pulse {
+                display: block;
+                position: absolute;
+                inset: -4px;
+                border-radius: 60px;
+                border: 2px solid rgba(245,158,11,0.60);
+                animation: sup-pulse 1.2s ease-out infinite;
+                pointer-events: none;
+            }
+            @keyframes sup-pulse {
+                0%   { transform: scale(0.94); opacity: 0.80; }
+                100% { transform: scale(1.45); opacity: 0; }
+            }
+            /* tooltip — fiery gold accents */
+            .widget-tooltip .tt-title-superhero { color: #f59e0b; }
+            .widget-tooltip .tt-sup-status      { color: #f59e0b; }
+            .tt-superhero                       { width: 308px; }
+            .tt-superhero .tt-row-hover .tt-label { color: #f59e0b; }
+            /* 7 hero picks laid out as one row. */
+            .tt-superhero .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(7, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-superhero .tt-grid.tt-grid-icons .tt-chip {
+                width: 32px;
+                height: 32px;
+                box-sizing: border-box !important;
+            }
+            .tt-superhero .tt-chip.active {
+                background: linear-gradient(135deg,#fbbf24,#f59e0b);
+                border-color:#b45309;
+            }
+            .tt-superhero .tt-slider-row.tt-slider-row-superhero {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 10px;
+                padding: 2px 2px;
+            }
+            .tt-superhero .tt-slider-label-superhero { flex: 0 0 auto; white-space: nowrap; }
+            .tt-superhero .tt-slider-superhero       { flex: 1 1 auto; min-width: 80px; }
+            .tt-superhero .tt-slider-val-superhero   { flex: 0 0 auto; min-width: 36px; text-align: right; white-space: nowrap; }
+            .tt-toggle-abduction.on  { background: linear-gradient(135deg,#a855f7,#7c3aed); border-color:#5b21b6; }
+            .tt-toggle-superhero.on  { background: linear-gradient(135deg,#fbbf24,#f59e0b); border-color:#b45309; }
 
             .tt-slider-rcn::-webkit-slider-thumb {
                 -webkit-appearance: none;
@@ -2942,6 +3920,65 @@
                 ) !important;
             }
 
+            /* ── OLIVE / ARMY GREEN family (Parade control) ───────────
+               Same hex-shimmer mechanism as the other families. The
+               7-stop gradient stays inside the army-green/olive band
+               so the ±15° hue-rotate of tt-active-shimmer never
+               leaves the family, while tt-hex-sweep slides through
+               every shade so each hex visibly cycles through the
+               full olive palette. */
+            body.polish .widget-tooltip.tt-parade .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #1a2a08 0%,    /* darkest olive   */
+                    #4a5d23 14%,   /* army green base */
+                    #6b8e23 28%,   /* mid olive       */
+                    #8aa030 42%,   /* bright olive    */
+                    #0c1804 56%,   /* deepest forest  */
+                    #354817 70%,   /* hunter olive    */
+                    #2a3d12 85%,   /* pine olive      */
+                    #1a2a08 100%   /* loop back       */
+                ) !important;
+            }
+
+            /* ── VIOLET family (Alien Abduction control) ──────────────
+               Mirrors every other family. 7-stop violet gradient: deep
+               indigo → royal violet → bright orchid → magenta → deep
+               purple, so each hex visibly cycles through the full
+               violet/purple band on hover-of-active. */
+            body.polish .widget-tooltip.tt-abduction .tt-chip.active:hover::before,
+            body.polish .tt-toggle.tt-toggle-abduction.on:hover::before {
+                background: linear-gradient(90deg,
+                    #2a0c5a 0%,    /* deep indigo     */
+                    #5b21b6 14%,   /* royal violet    */
+                    #7c3aed 28%,   /* base violet     */
+                    #a855f7 42%,   /* bright orchid   */
+                    #1a0540 56%,   /* darkest indigo  */
+                    #6020c0 70%,   /* deep grape      */
+                    #c084fc 85%,   /* light orchid    */
+                    #2a0c5a 100%   /* loop back       */
+                ) !important;
+            }
+
+            /* ── GOLD family (Superhero Battle) — close to active ──
+               Active chip is gold (#fbbf24 → #f59e0b). The hover hex
+               palette stays in the SAME gold band — slightly darker
+               and slightly lighter than the base color — so the
+               hexagons read as glistening over the active surface
+               rather than fighting it with contrast. */
+            body.polish .widget-tooltip.tt-superhero .tt-chip.active:hover::before,
+            body.polish .tt-toggle.tt-toggle-superhero.on:hover::before {
+                background: linear-gradient(90deg,
+                    #b45309 0%,    /* darker amber       */
+                    #d97706 14%,   /* deep gold          */
+                    #ea8a0c 28%,   /* warm gold          */
+                    #f59e0b 42%,   /* base active gold   */
+                    #fbbf24 56%,   /* light active gold  */
+                    #fcd34d 70%,   /* slightly brighter  */
+                    #ea8a0c 85%,
+                    #b45309 100%
+                ) !important;
+            }
+
             /* ── ORANGE family (Reconstruction REBUILD NOW button) ── */
             body.polish .widget-tooltip.tt-rcn .tt-rcn-instant.active:hover::before {
                 background: linear-gradient(90deg,
@@ -3099,6 +4136,9 @@
             .defence-btn:hover .widget-tooltip,
             .reconstruct-btn:hover .widget-tooltip,
             .strategy-btn:hover .widget-tooltip,
+            .parade-btn:hover .widget-tooltip,
+            .abduction-btn:hover .widget-tooltip,
+            .superhero-btn:hover .widget-tooltip,
             .widget-host:hover .widget-tooltip,
             .widget-tooltip:hover {
                 opacity: 1;
@@ -3648,8 +4688,9 @@
                     0 1px 0 rgba(255,255,255,0.55) inset,
                     0 3px 12px rgba(0,0,0,0.18);
             }
-            .tt-toggle-attack.on  { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
-            .tt-toggle-defence.on { background: linear-gradient(135deg,#2da64a,#1e7838); border-color:#155a28; }
+            .tt-toggle-attack.on    { background: linear-gradient(135deg,#d83040,#c0202a); border-color:#8a181e; }
+            .tt-toggle-defence.on   { background: linear-gradient(135deg,#2da64a,#1e7838); border-color:#155a28; }
+            .tt-toggle-abduction.on { background: linear-gradient(135deg,#a855f7,#7c3aed); border-color:#5b21b6; }
 
             /* social media tooltip is rendered by the global [data-tip]::before rule below,
                with a weather-widget-style white background override */
@@ -4140,6 +5181,134 @@
             });
             host._built = true;
         }
+        function buildParadeGrid(){
+            var host = document.getElementById('ttParadeGrid');
+            if(!host || host._built) return;
+            if(!window.getAllParadeThemes) return;
+            var themes = window.getAllParadeThemes();
+            host.innerHTML = '';
+            themes.forEach(function(t){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = t.index;
+                /* diamond colors — chip tints itself with the theme's
+                   actual salute palette when active */
+                if(t.colorA) b.style.setProperty('--diamond-a', t.colorA);
+                if(t.colorB) b.style.setProperty('--diamond-b', t.colorB);
+                b.innerHTML = '<i class="fa ' + t.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttParadeHoverRow');
+                    var val = document.getElementById('ttParadeHover');
+                    if(val) val.textContent = t.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttParadeHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setParadeThemeIndex) window.setParadeThemeIndex(t.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildSuperheroGrid(){
+            var host = document.getElementById('ttSuperheroGrid');
+            if(!host || host._built) return;
+            if(!window.getAllSuperheroUniverses) return;
+            var us = window.getAllSuperheroUniverses();
+            host.innerHTML = '';
+            us.forEach(function(u){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = u.index;
+                if(u.colorA) b.style.setProperty('--diamond-a', u.colorA);
+                if(u.colorB) b.style.setProperty('--diamond-b', u.colorB);
+                b.innerHTML = '<i class="fa ' + u.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttSuperheroHoverRow');
+                    var val = document.getElementById('ttSuperheroHover');
+                    if(val) val.textContent = u.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttSuperheroHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setSuperheroUniverseIndex) window.setSuperheroUniverseIndex(u.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildAbductionMissileGrid(){
+            var host = document.getElementById('ttAbductionMissileGrid');
+            if(!host || host._built) return;
+            if(!window.getAllAbductionMissileTypes) return;
+            var ms = window.getAllAbductionMissileTypes();
+            host.innerHTML = '';
+            ms.forEach(function(m){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = m.index;
+                if(m.colorA) b.style.setProperty('--diamond-a', m.colorA);
+                if(m.colorB) b.style.setProperty('--diamond-b', m.colorB);
+                b.innerHTML = '<i class="fa ' + m.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttAbductionHoverRow');
+                    var val = document.getElementById('ttAbductionHover');
+                    if(val) val.textContent = m.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttAbductionHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setAbductionMissileTypeIndex) window.setAbductionMissileTypeIndex(m.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildAbductionGrid(){
+            var host = document.getElementById('ttAbductionGrid');
+            if(!host || host._built) return;
+            if(!window.getAllAbductionShips) return;
+            var ships = window.getAllAbductionShips();
+            host.innerHTML = '';
+            ships.forEach(function(s){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = s.index;
+                /* diamond colors — chip tints itself with the ship's
+                   actual hull palette when active */
+                if(s.colorA) b.style.setProperty('--diamond-a', s.colorA);
+                if(s.colorB) b.style.setProperty('--diamond-b', s.colorB);
+                b.innerHTML = '<i class="fa ' + s.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById('ttAbductionHoverRow');
+                    var val = document.getElementById('ttAbductionHover');
+                    if(val) val.textContent = s.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById('ttAbductionHoverRow');
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window.setAbductionShipIndex) window.setAbductionShipIndex(s.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
         function syncActive(hostId, currentIdx){
             var host = document.getElementById(hostId);
             if(!host) return;
@@ -4151,6 +5320,8 @@
         function pollCity(){
             /* lazy-build the grids once the APIs are available */
             buildCityGrid(); buildWeatherGrid(); buildMissileGrid(); buildDefenceGrid();
+            buildParadeGrid(); buildAbductionGrid(); buildAbductionMissileGrid();
+            buildSuperheroGrid();
             /* ── FLIGHT widget ── */
             if(window.getCityName)     setText('ttCityFrom', window.getCityName());
             if(window.getNextCityName) setText('ttCityTo',   window.getNextCityName());
@@ -4215,6 +5386,64 @@
                 setText('ttDefenceStatus', dm ? 'DEFEND CITY!' : 'OFFLINE');
             }
             if(window.getDefenceTypeIndex) syncActive('ttDefenceGrid', window.getDefenceTypeIndex());
+
+            /* ── PARADE widget polling ── */
+            if(window.isParadeOn){
+                var pOn = window.isParadeOn();
+                var pWrap = document.getElementById('paradeBtn');
+                if(pWrap) pWrap.classList.toggle('active', pOn);
+                setText('ttPrdStatus', pOn ? 'MARCHING' : 'IDLE');
+                if(window.getParadeStats){
+                    var ps = window.getParadeStats();
+                    setText('ttPrdAir',    pOn ? String(ps.air)    : '—');
+                    setText('ttPrdGround', pOn ? String(ps.ground) : '—');
+                }
+            }
+            if(window.getParadeThemeName)  setText('ttPrdTheme', window.getParadeThemeName());
+            if(window.getParadeThemeIndex) syncActive('ttParadeGrid', window.getParadeThemeIndex());
+
+            /* ── ABDUCTION widget polling ── */
+            if(window.isAbductionOn){
+                var aOn = window.isAbductionOn();
+                var aWrap = document.getElementById('abductionBtn');
+                if(aWrap) aWrap.classList.toggle('active', aOn);
+                if(window.getAbductionStats){
+                    var as = window.getAbductionStats();
+                    var phaseLabel = aOn ? (as.phase || '—').toUpperCase() : 'IDLE';
+                    setText('ttAbdPhase', phaseLabel);
+                    setText('ttAbdAbducted', aOn ? (as.abducted + ' / ' + as.target) : '—');
+                } else {
+                    setText('ttAbdPhase', aOn ? 'ACTIVE' : 'IDLE');
+                }
+            }
+            if(window.getAbductionShipName)  setText('ttAbdShip', window.getAbductionShipName());
+            if(window.getAbductionShipIndex) syncActive('ttAbductionGrid', window.getAbductionShipIndex());
+            if(window.getAbductionMissileTypeName)  setText('ttAbdMissile', window.getAbductionMissileTypeName());
+            if(window.getAbductionMissileTypeIndex) syncActive('ttAbductionMissileGrid', window.getAbductionMissileTypeIndex());
+            if(window.getAbductionShipIcon){
+                var ai = document.getElementById('abdIcon');
+                if(ai){
+                    var aIc = window.getAbductionShipIcon();
+                    if(ai._cur !== aIc){
+                        ai.className = 'fa abd-icon ' + aIc;
+                        ai._cur = aIc;
+                    }
+                }
+            }
+
+            /* ── SUPERHERO widget polling ── */
+            if(window.isSuperheroOn){
+                var supOn = window.isSuperheroOn();
+                var sWrap = document.getElementById('superheroBtn');
+                if(sWrap) sWrap.classList.toggle('active', supOn);
+                if(window.getSuperheroStats){
+                    var ss = window.getSuperheroStats();
+                    setText('ttSupAlive',  supOn ? String(ss.alive) : '—');
+                    setText('ttSupWinner', ss.winner ? ss.winner : (supOn ? '—' : 'NONE'));
+                }
+            }
+            if(window.getSuperheroUniverseName)  setText('ttSupUniverse', window.getSuperheroUniverseName());
+            if(window.getSuperheroUniverseIndex) syncActive('ttSuperheroGrid', window.getSuperheroUniverseIndex());
 
             /* ── RECONSTRUCTION widget polling ── */
             if(window.isReconstructing){

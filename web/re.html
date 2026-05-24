@@ -1,657 +1,257 @@
 <!DOCTYPE html>
-<html style="caret-color: transparent;">
+<html lang="en">
 <head>
-    <!--    Metadata imports-->
-    <link rel="icon" type="image/gif/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
-    <title>Masrik Dahir</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!--    CSS imports-->
-    <link rel="stylesheet" href="../css/vendor/www.w3schools.com.w3css.4.w3.css">
-    <link rel="stylesheet" href="../css/vendor/cdnjs.cloudflare.com.ajax.libs.font-awesome.4.7.0.css.font-awesome.min.css">
-
-    <link rel="stylesheet" href="../css/icons.css">
-    <link rel="stylesheet" href="../css/box.css">
-    <link rel="stylesheet" href="../css/default.css">
-    <link rel="stylesheet" href="../css/glowing.css">
-    <link rel="stylesheet" href="../css/popup.css">
-    <link rel="stylesheet" href="../css/vintage.css">
-    <link rel="stylesheet" href="../css/re.css">
-
-
-    <!--    JS imports-->
-    <script src="../js/vendor/code.jquery.com.jquery-1.10.2.js"></script>
-    <script src="../js/icon-animation.js"></script>
-    <script src="../js/hourglass.js"></script>
-    <script src="../js/expand_jquery.js"></script>
-    <script src="../js/briefcase.js" defer></script>
-    <script src='../js/aesthetics.js' crossorigin='anonymous'></script>
-
-    <!--    Functional JS imports-->
-    <script src="fv.js" defer></script>
-
-    <!--    Vue JS imports-->
-    <script src="../js/vendor/vue@3.2.36.dist.vue.global.js"></script>
-    <script src="../vueJs/default.js" defer></script>
-    <script src="../js/components.js" defer></script>
-
-    <!--   Info Tooltip -->
-    <link rel="stylesheet" href="../css/d.css">
-    <script src="../js/vendor/jquery-3.6.1.min.js"></script>
-    <script src="../js/vendor/bootstrap-tooltip-3.4.1.min.js"></script>
-    <script src="../js/random.js" defer></script>
-
-    <!-- ════════════════════════════════════════════════════════════
-         DIAMOND-HEX LIQUID GLASS NORM — applied to every button on
-         this page: collapse/extend (.btn1–.btn4), action buttons
-         (.glow-on-hover Blazing — Calculate / Clear / ?), and
-         breadcrumb + trash icon buttons (.glow-on-hover_nav Blazing).
-
-         – Hex-outline shimmer on ::before (fine pastel mesh, hover)
-         – CLEAR solid themed border on hover (indigo by default,
-           crimson for active toggle pairs)
-         – Frosted backdrop-filter, multi-layer white surface
-         – Rotating conic-gradient rainbow rim at rest
-         ════════════════════════════════════════════════════════════ -->
-    <style>
-        @property --rcn-edge-angle {
-            syntax: '<angle>'; initial-value: 0deg; inherits: false;
-        }
-        @property --rcn-glint-pos {
-            syntax: '<percentage>'; initial-value: -25%; inherits: false;
-        }
-        @keyframes tt-rcn-edge-spin  { to { --rcn-edge-angle: 360deg; } }
-        @keyframes tt-rcn-glint      { 0% { --rcn-glint-pos: -25%; } 100% { --rcn-glint-pos: 125%; } }
-        @keyframes tt-hex-sweep      { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
-        @keyframes tt-hex-hue-cycle  {
-            from { filter: saturate(1.25) brightness(1.05) hue-rotate(  0deg); }
-            to   { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); }
-        }
-        @keyframes tt-active-shimmer {
-            0%, 100% { filter: saturate(1.30) brightness(0.95) hue-rotate(-15deg); }
-            50%      { filter: saturate(1.90) brightness(1.30) hue-rotate( 15deg); }
-        }
-
-        /* ── Collapse/extend wrappers (.btn1–.btn4) — work.html style ── */
-        body .btn1, body .btn2, body .btn3, body .btn4 {
-            display: inline-block !important;
-            position: relative !important;
-            isolation: isolate !important;
-            overflow: hidden !important;
-            border-radius: 12px !important;
-            padding: 6px !important;            /* whitish glass halo around icon */
-            margin: 1px !important;
-            line-height: 0 !important;
-            cursor: pointer !important;
-            float: right !important;
-            --hex-size: 8px;
-            --rcn-edge-angle: 0deg;
-            --rcn-glint-pos: -25%;
-            /* MULTI-LAYER liquid-glass background (mirrors work.html) */
-            background:
-                radial-gradient(ellipse 100% 60% at 50% -25%,
-                    rgba(255,255,255,0.85) 0%,
-                    rgba(255,255,255,0.30) 35%,
-                    rgba(255,255,255,0.00) 70%) padding-box,
-                radial-gradient(ellipse 60% 90% at 0% 0%,
-                    rgba(255,255,255,0.55) 0%,
-                    rgba(255,255,255,0.00) 60%) padding-box,
-                radial-gradient(ellipse 90% 65% at 50% 120%,
-                    rgba(15,20,40,0.08) 0%,
-                    rgba(15,20,40,0.00) 60%) padding-box,
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.94) 0%,
-                    rgba(248,250,255,0.88) 100%) padding-box,
-                conic-gradient(from var(--rcn-edge-angle),
-                    rgba(255,179,198,0.50), rgba(255,209,168,0.50),
-                    rgba(255,240,168,0.50), rgba(196,242,197,0.50),
-                    rgba(184,217,255,0.50), rgba(212,193,255,0.50),
-                    rgba(255,193,229,0.50), rgba(255,179,198,0.50)
-                ) border-box !important;
-            border: 1.5px solid transparent !important;
-            backdrop-filter: blur(8px) saturate(130%) !important;
-            -webkit-backdrop-filter: blur(8px) saturate(130%) !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.90),
-                inset 0 -1px 0 rgba(20,15,30,0.05),
-                0 0 0 1.5px rgba(15,20,40,0.55),   /* visible border ring at rest */
-                0 0 10px rgba(220,225,235,0.30),
-                0 2px 6px rgba(15,20,40,0.12) !important;
-            transition: transform 0.18s ease, box-shadow 0.22s ease !important;
-            animation:
-                tt-rcn-edge-spin 4.5s linear infinite,
-                tt-rcn-glint     6.0s linear infinite !important;
-        }
-        body .btn1::before, body .btn2::before,
-        body .btn3::before, body .btn4::before {
-            content: '' !important;
-            position: absolute !important;
-            inset: 0 !important;
-            z-index: -1 !important;
-            pointer-events: none !important;
-            border-radius: inherit !important;
-            background: linear-gradient(90deg,
-                #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
-                #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%) !important;
-            background-size: 300% 100% !important;
-            background-position: 0% 50% !important;
-            -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
-                    mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>") !important;
-            -webkit-mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
-                    mask-size: var(--hex-size) calc(var(--hex-size) * 1.14) !important;
-            -webkit-mask-repeat: repeat !important;
-                    mask-repeat: repeat !important;
-            mix-blend-mode: normal !important;
-            opacity: 0 !important;
-            animation: none !important;
-            transition: opacity 0.30s ease !important;
-        }
-        body .btn1:hover::before, body .btn2:hover::before,
-        body .btn3:hover::before, body .btn4:hover::before {
-            opacity: 0.55 !important;
-            animation:
-                tt-hex-sweep      2.4s linear infinite,
-                tt-hex-hue-cycle  3.6s linear infinite !important;
-            filter: saturate(0.85) brightness(1.05);
-        }
-        /* Inactive hover — solid indigo border replaces rotating rim */
-        body .btn1:hover, body .btn2:hover, body .btn3:hover, body .btn4:hover {
-            transform: translateY(-1px) !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.97) 0%,
-                    rgba(248,250,255,0.93) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(99, 102, 241, 0.85),
-                    rgba(99, 102, 241, 0.85)) border-box !important;
-            border: 1.5px solid transparent !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                0 1px 3px rgba(15,20,40,0.10) !important;
-        }
-        /* Keep the inner img clean — strip the inline border/background
-           that the markup adds (border: 1px solid black; background:
-           lightcoral on the extend btn) so the wrapper is the sole
-           visual surface. */
-        body .btn1 > #mymapshowButton,
-        body .btn2 > #mymaphideButton,
-        body .btn1 > img, body .btn2 > img,
-        body .btn3 > img, body .btn4 > img {
-            display: block !important;
-            position: relative !important;
-            z-index: 2 !important;
-            width: 45px !important;
-            height: 45px !important;
-            border: none !important;
-            background: transparent !important;
-            background-color: transparent !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            float: none !important;
-            border-radius: 10px !important;
-            box-shadow: none !important;
-        }
-        body .btn1 > #mymapshowButton:hover,
-        body .btn2 > #mymaphideButton:hover {
-            transform: none !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-        }
-
-        /* ── ACTIVE state (matches work.html) ─────────────────────────
-           If JS toggles `.active` on the inner img, the wrapper picks
-           up a crimson multi-layer surface + rotating red conic rim,
-           and the icon flips to white via brightness(0) invert(1). */
-        body .btn1:has(> img.active),
-        body .btn2:has(> img.active),
-        body .btn3:has(> img.active),
-        body .btn4:has(> img.active) {
-            background:
-                radial-gradient(ellipse 100% 60% at 50% -25%,
-                    rgba(255,255,255,0.55) 0%,
-                    rgba(255,255,255,0.20) 35%,
-                    rgba(255,255,255,0.00) 70%) padding-box,
-                radial-gradient(ellipse 60% 90% at 0% 0%,
-                    rgba(255,255,255,0.40) 0%,
-                    rgba(255,255,255,0.00) 60%) padding-box,
-                linear-gradient(135deg,
-                    rgba(220, 38, 38,0.95) 0%,
-                    rgba(185, 28, 28,0.94) 50%,
-                    rgba(239, 68, 68,0.93) 100%) padding-box,
-                conic-gradient(from var(--rcn-edge-angle),
-                    #ef4444, #dc2626, #b91c1c, #f87171,
-                    #c0202a, #ff6b7a, #991b1b, #ef4444
-                ) border-box !important;
-            border: 1.5px solid transparent !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                inset 0 -1px 0 rgba(80,8,15,0.18),
-                0 0 14px rgba(255,80,100,0.55),
-                0 2px 8px rgba(80,8,15,0.25) !important;
-        }
-        body .btn1 > img.active, body .btn2 > img.active,
-        body .btn3 > img.active, body .btn4 > img.active {
-            filter: brightness(0) invert(1) !important;
-            background: transparent !important;
-            background-color: transparent !important;
-            border: none !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-        }
-        body .btn1:has(> img.active)::before,
-        body .btn2:has(> img.active)::before,
-        body .btn3:has(> img.active)::before,
-        body .btn4:has(> img.active)::before {
-            background: linear-gradient(90deg,
-                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
-                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%) !important;
-            background-size: 300% 100% !important;
-        }
-        body .btn1:has(> img.active):hover,
-        body .btn2:has(> img.active):hover,
-        body .btn3:has(> img.active):hover,
-        body .btn4:has(> img.active):hover {
-            background:
-                linear-gradient(135deg,
-                    rgba(220, 38, 38,0.97) 0%,
-                    rgba(185, 28, 28,0.96) 50%,
-                    rgba(239, 68, 68,0.95) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(185, 28, 28, 1.00),
-                    rgba(185, 28, 28, 1.00)) border-box !important;
-            border: 1.5px solid transparent !important;
-            transform: translateY(-1px) !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.55),
-                0 1px 3px rgba(80,8,15,0.18) !important;
-        }
-        body .btn1:has(> img.active):hover::before,
-        body .btn2:has(> img.active):hover::before,
-        body .btn3:has(> img.active):hover::before,
-        body .btn4:has(> img.active):hover::before {
-            opacity: 1 !important;
-            background: linear-gradient(90deg,
-                #8a0a14 0%, #c0202a 14%, #e04050 28%, #c04020 42%,
-                #6a0a14 56%, #a02030 70%, #d83040 85%, #8a0a14 100%) !important;
-            background-size: 300% 100% !important;
-            background-position: 0% 50% !important;
-            mix-blend-mode: normal !important;
-            animation:
-                tt-hex-sweep      1.6s linear infinite,
-                tt-active-shimmer 1.4s ease-in-out infinite !important;
-        }
-        body .btn1::before, body .btn2::before,
-        body .btn3::before, body .btn4::before {
-            border-radius: 10px !important;
-        }
-
-        /* glowing.css's .glow-on-hover::after paints a #111 (black)
-           layer over the entire button at z-index: -1 — that's why
-           Calculate / Clear / ? show as black rectangles. Kill that
-           layer entirely so my white liquid-glass surface shows. */
-        body button.glow-on-hover.Blazing::after {
-            content: none !important;
-            display: none !important;
-            background: transparent !important;
-        }
-        /* Same .glow-on-hover::before exists as a rainbow blur halo.
-           Disable it too so our hex-mesh ::before can take over. */
-        body button.glow-on-hover.Blazing::before {
-            background: linear-gradient(90deg,
-                #ffb3c6, #ffd1a8, #fff0a8, #c4f2c5,
-                #b8d9ff, #d4c1ff, #ffc1e5, #ffb3c6) !important;
-            filter: none !important;
-            width: 100% !important;
-            height: 100% !important;
-            top: 0 !important;
-            left: 0 !important;
-        }
-        /* Same dark-overlay treatment from .glow-on-hover_nav (used
-           by the breadcrumb + trash icon buttons) gets suppressed. */
-        body button.glow-on-hover_nav.Blazing::after {
-            content: none !important;
-            display: none !important;
-            background: transparent !important;
-        }
-        body button.glow-on-hover_nav.Blazing::before {
-            background: transparent !important;
-            filter: none !important;
-        }
-
-        /* ── Action buttons (Calculate / Clear / ? — .glow-on-hover Blazing)
-              Mirrors the .glow-on-hover_nav.Blazing breadcrumb buttons
-              ("Software", "Real Estate Analyzer") so the whole top
-              cluster reads as one button family. */
-        body button.glow-on-hover.Blazing {
-            position: relative !important;
-            isolation: isolate !important;
-            overflow: hidden !important;
-            padding: 6px 12px !important;
-            border-radius: 8px !important;
-            width: auto !important;
-            height: auto !important;
-            min-width: 0 !important;
-            min-height: 0 !important;
-            cursor: pointer !important;
-            color: #334155 !important;
-            font-weight: 600;
-            --rcn-edge-angle: 0deg;
-            background:
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.94) 0%,
-                    rgba(248,250,255,0.90) 100%) padding-box,
-                conic-gradient(from var(--rcn-edge-angle),
-                    rgba(255,179,198,0.50), rgba(255,209,168,0.50),
-                    rgba(255,240,168,0.50), rgba(196,242,197,0.50),
-                    rgba(184,217,255,0.50), rgba(212,193,255,0.50),
-                    rgba(255,193,229,0.50), rgba(255,179,198,0.50)
-                ) border-box !important;
-            border: 1.5px solid transparent !important;
-            outline: none !important;
-            backdrop-filter: blur(6px) saturate(130%);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.85),
-                0 1px 3px rgba(15,20,40,0.08) !important;
-            transition: transform 0.18s ease, box-shadow 0.22s ease,
-                        background 0.22s ease !important;
-            animation: tt-rcn-edge-spin 4.5s linear infinite !important;
-        }
-        /* Suppress hex-mesh ::before so action buttons match the
-           plain-rim look of the .glow-on-hover_nav.Blazing breadcrumb
-           buttons ("Software", "Real Estate Analyzer"). */
-        body button.glow-on-hover.Blazing::before {
-            content: none !important;
-            display: none !important;
-            background: transparent !important;
-            -webkit-mask-image: none !important;
-                    mask-image: none !important;
-            animation: none !important;
-            opacity: 0 !important;
-        }
-        body button.glow-on-hover.Blazing > * {
-            position: relative;
-            z-index: 2;
-            margin: 0 !important;
-            padding: 0 !important;
-            line-height: 1.2 !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-        }
-        body button.glow-on-hover.Blazing:hover::before {
-            content: none !important;
-            display: none !important;
-            opacity: 0 !important;
-            animation: none !important;
-        }
-        body button.glow-on-hover.Blazing:hover {
-            transform: translateY(-1px) !important;
-            color: rgba(99, 102, 241, 1.00) !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.97) 0%,
-                    rgba(248,250,255,0.93) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(99, 102, 241, 0.85),
-                    rgba(99, 102, 241, 0.85)) border-box !important;
-            border: 1.5px solid transparent !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                0 1px 3px rgba(15,20,40,0.12) !important;
-        }
-        /* Active press — deeper crimson accent */
-        body button.glow-on-hover.Blazing:active {
-            transform: translateY(0) scale(0.98) !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(220, 38, 38,0.97) 0%,
-                    rgba(185, 28, 28,0.96) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(185, 28, 28, 1.00),
-                    rgba(185, 28, 28, 1.00)) border-box !important;
-            color: #ffffff !important;
-        }
-
-        /* ── Breadcrumb + trash icon buttons (.glow-on-hover_nav Blazing) ── */
-        body button.glow-on-hover_nav.Blazing {
-            position: relative !important;
-            isolation: isolate !important;
-            overflow: hidden !important;
-            padding: 6px 12px !important;
-            border-radius: 8px !important;
-            cursor: pointer !important;
-            color: #334155 !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.94) 0%,
-                    rgba(248,250,255,0.90) 100%) padding-box,
-                conic-gradient(from var(--rcn-edge-angle),
-                    rgba(255,179,198,0.50), rgba(255,209,168,0.50),
-                    rgba(255,240,168,0.50), rgba(196,242,197,0.50),
-                    rgba(184,217,255,0.50), rgba(212,193,255,0.50),
-                    rgba(255,193,229,0.50), rgba(255,179,198,0.50)
-                ) border-box !important;
-            border: 1.5px solid transparent !important;
-            backdrop-filter: blur(6px) saturate(130%);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.85),
-                0 1px 3px rgba(15,20,40,0.08) !important;
-            transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease !important;
-            animation: tt-rcn-edge-spin 4.5s linear infinite !important;
-            --rcn-edge-angle: 0deg;
-        }
-        body button.glow-on-hover_nav.Blazing:hover {
-            transform: translateY(-1px) !important;
-            color: rgba(99, 102, 241, 1.00) !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(255,255,255,0.97) 0%,
-                    rgba(248,250,255,0.93) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(99, 102, 241, 0.85),
-                    rgba(99, 102, 241, 0.85)) border-box !important;
-            border: 1.5px solid transparent !important;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                0 1px 3px rgba(15,20,40,0.12) !important;
-        }
-        body button.glow-on-hover_nav.Blazing:active {
-            transform: translateY(0) scale(0.97) !important;
-            background:
-                linear-gradient(135deg,
-                    rgba(220, 38, 38,0.97) 0%,
-                    rgba(185, 28, 28,0.96) 100%) padding-box,
-                linear-gradient(135deg,
-                    rgba(185, 28, 28, 1.00),
-                    rgba(185, 28, 28, 1.00)) border-box !important;
-            color: #ffffff !important;
-        }
-        body button.glow-on-hover_nav.Blazing img {
-            filter: brightness(0.7) contrast(1.3);
-        }
-    </style>
-
+    <title>Real Estate Analyzer · Masrik Dahir</title>
+    <link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+    <link rel="stylesheet" href="../css/finance-app.css?v=20">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="../js/finance-app.js?v=18"></script>
+    <script src="fv.js?v=redesign1" defer></script>
 </head>
-<body class="w3-white">
+<body class="fa-page">
 
-<div id="nav-placeholder"></div>
+<script>FA.installTopnav('Real Estate Analyzer');</script>
 
+<header class="fa-hero">
+    <h1>Real Estate Analyzer</h1>
+    <p>Five focused real-estate &amp; finance calculators — annuity (time-value-of-money), discounted cash-flow (NPV/IRR), rental property analyzer, mortgage affordability under the 28/36 rule, and a rent-vs-buy comparison. Every result includes live Chart.js visualizations.</p>
+</header>
 
-<!-- Page Container -->
-<div class="w3-content w3-margin-top" style="background-color: white; max-width: min(1800px, 95%);">
-
-    <!-- Right Column -->
-    <div>
-
-        <div class="w3-container w3-white w3-margin-bottom" style="margin-left: 0px; padding-left: 0px">
-            <div class="" style="">
-                <bdi style="float: left;">
-                    <a href="https://www.masrikdahir.com/software"><button class="glow-on-hover_nav Blazing" type="button" >
-                        <div style="margin: 0px; padding: 0px;">Software</div>
-                    </button></a>
-                </bdi>
-
-                <bdi style="float: left; margin-top: 7px;">
-                    <img src="https://d3dw5jtb3w1kgy.cloudfront.net/arr.png" style="width: 20px;margin: 0px; padding: 0px; margin-top: 2px;">
-                </bdi>
-
-                <bdi style="float: left;">
-                    <button class="glow-on-hover_nav Blazing" type="button">
-                        <h6 style="margin: 0px; padding: 0px">Real Estate Analyzer</h6>
-                    </button>
-                </bdi>
-
-
-            </div>
-        </div>
-
-        <div class="w3-container w3-card w3-white w3-margin-bottom">
-            <h2 style="color: black; text-align: center"><i class="fa w3-xxlarge w3-text-teal;"
-                                                            style="color:DarkSlateGray;"></i>Annuity&nbsp;&nbsp;
-                <b>
-                    <a class="btn1">
-                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/collapse.png" ;/>
-                    </a>
-                    <a class="btn2">
-                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/extend.png" ;/>
-                    </a>
-
-                </b>
-            </h2>
-            <p1>
-            <div class="w3-container">
-
-
-
-                <table>
-                    <tr>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                    <tr>
-                        <td>
-                            <table>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                                <tr>
-                                    <td><h4><b><label for="input_fv" style="color: black">FV = </label></b>
-                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
-                                    <td><input type="text" id="input_fv"></td>
-                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_fv`)" style="margin-left: 10px; width: fit-content"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
-
-                                </tr>
-                                <tr>
-                                    <td><h4><b><label for="input_pv" style="color: black">PV = </label></b>
-                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
-                                    <td><input type="text" id="input_pv"></td>
-                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_pv`)" style="margin-left: 10px; width: fit-content"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
-
-                                </tr>
-                                <tr>
-                                    <td><h4><b><label for="input_1_y" style="color: black">I/Y = </label></b>
-                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
-                                    <td><input type="text" id="input_1_y"></td>
-                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_1_y`)" style="margin-left: 10px; width: fit-content"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
-
-                                </tr>
-                                <tr>
-                                    <td><h4><b><label for="input_n" style="color: black">N = </label></b>
-                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
-                                    <td><input type="text" id="input_n"></td>
-                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_n`)" style="margin-left: 10px; width: fit-content"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
-
-                                </tr>
-                                <tr>
-                                    <td><h4><b><label for="input_pmt" style="color: black">PMT = </label></b>
-                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
-                                    <td><input type="text" id="input_pmt"></td>
-
-                                    <td ><button class="glow-on-hover_nav Blazing" type="button" onclick="clean(`input_pmt`)" style="margin-left: 10px; width: fit-content"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/trash.png" style="width: 20px;margin: 0px; padding: 0px;"> </button></td>
-
-                                </tr>
-                                <tr>
-                                    <td><h4><b style="color: black"><label for="input_type">Type = </label></b>
-                                        <b class="color w3-text-teal;" style="color:DarkSlateGray;"></b></h4></td>
-
-                                    <td><select id="input_type" name="input_type">
-                                        <option value="0">End of the Period</option>
-                                        <option value="1">Beginning of the Period</option>
-                                    </select> </td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td>
-
-
-                        </td>
-                    </tr>
-                </table>
-                <br>
-                <bdi style="float: left;">
-                    <button class="glow-on-hover_nav Blazing" type="button" >
-                        <div style="margin: 0px; padding: 0px;">?</div>
-                    </button>
-                </bdi>
-                <bdi style="float: left;">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </bdi>
-                <bdi style="float: left;">
-                    <button class="glow-on-hover_nav Blazing" type="button" >
-                        <div style="margin: 0px; padding: 0px;" onclick="clean_data()">Clear</div>
-                    </button>
-                </bdi>
-                <bdi style="float: left;">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                </bdi>
-                <bdi style="float: left;">
-                    <a id="calculate">
-                        <button class="glow-on-hover_nav Blazing" type="submit" onclick="operation()" >
-                            <div style="margin: 0px; padding: 0px;" onclick="clean_data()">Calculate</div>
-                        </button>
-                    </a>
-                </bdi>
-
-            </div>
-            <br><br>
-
-            </p1>
-            <br>
-        </div>
-
-        <div class="w3-container w3-card w3-white w3-margin-bottom">
-            <h2 style="color: black; text-align: center"><i class="fa w3-xxlarge w3-text-teal;"
-                                                            style="color:DarkSlateGray;"></i>Cash Flow&nbsp;&nbsp;
-                <b>
-                    <a class="btn3">
-                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/collapse.png" ;/>
-                    </a>
-                    <a class="btn4">
-                        <img style="width: min(calc(5% + 10px), 50px); height:min(calc(5% + 10px), 50px); margin: 1px"
-                             src="https://d3dw5jtb3w1kgy.cloudfront.net/Icons/extend.png" ;/>
-                    </a>
-
-                </b>
-            </h2>
-
-            <p34>
-            </p34>
-            <br>
-        </div>
-
+<!-- ════════════════════════════════════════════════════════════════
+     1. ANNUITY / TIME-VALUE-OF-MONEY
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card" id="sec-annuity">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">1. Annuity (Time-Value-of-Money) <span class="fa-pill">5 unknowns</span></h2>
+        <p class="fa-card-blurb">Fill any 4 of <strong>FV</strong>, <strong>PV</strong>, <strong>I/Y</strong>, <strong>N</strong>, <strong>PMT</strong> and leave the 5th blank. Solves the standard identity <code>PV + PMT·(1 + r·type)·(1 − v^n)/r + FV·v^n = 0</code>.</p>
     </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Future Value (FV)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="an_fv" type="number" step="0.01" placeholder="leave one blank"></div></div>
+        <div class="fa-field"><label>Present Value (PV)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="an_pv" type="number" step="0.01" placeholder="leave one blank"></div></div>
+        <div class="fa-field"><label>Interest rate / period (I/Y)</label>
+            <div class="fa-input-wrap"><input id="an_iy" type="number" step="0.001" placeholder="0.5"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Number of periods (N)</label>
+            <div class="fa-input-wrap"><input id="an_n" type="number" step="1" placeholder="360"></div></div>
+        <div class="fa-field"><label>Payment / period (PMT)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="an_pmt" type="number" step="0.01" placeholder="-1199.10"></div></div>
+        <div class="fa-field"><label>Annuity type</label>
+            <div class="fa-input-wrap"><select id="an_type">
+                <option value="0">End of period (ordinary)</option>
+                <option value="1">Start of period (due)</option>
+            </select></div></div>
+    </div>
+    <div class="fa-actions">
+        <button class="fa-btn fa-btn-ghost" onclick="reAnnuityExample()">Example</button>
+        <button class="fa-btn fa-btn-ghost" onclick="reAnnuityClear()">Clear</button>
+        <button class="fa-btn" onclick="reAnnuityCalc()">Solve</button>
+    </div>
+    <div class="fa-hint fa-err" id="an_err" style="display:none"></div>
+    <div class="fa-results" id="an_results">
+        <div class="fa-section-heading">Summary</div>
+        <div class="fa-stats" id="an_stats"></div>
+        <div class="fa-section-heading">Balance &amp; cumulative cash flow</div>
+        <div class="fa-chart-wrap" style="height:340px"><canvas id="an_chart_line"></canvas></div>
+        <div class="fa-section-heading">Per-period principal vs interest</div>
+        <div class="fa-chart-wrap" style="height:300px"><canvas id="an_chart_bar"></canvas></div>
+        <div class="fa-section-heading">Amortization schedule (first 60 periods)</div>
+        <div id="an_table"></div>
+    </div>
+</section>
 
-    <!-- End Page Container -->
-</div>
+<!-- ════════════════════════════════════════════════════════════════
+     2. CASH FLOW — NPV / IRR / Payback
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card" id="sec-cashflow">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">2. Discounted Cash Flow <span class="fa-pill">NPV · IRR · Payback</span></h2>
+        <p class="fa-card-blurb">Enter a discount rate and a stream of period cash flows (CF₀ is typically the negative initial investment). Add as many additional periods as you need with <strong>+ Add cash flow</strong>.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Discount rate / period</label>
+            <div class="fa-input-wrap"><input id="cf_rate" type="number" step="0.1" placeholder="10"><span class="fa-input-suffix">%</span></div></div>
+    </div>
+    <div class="fa-section-heading">Cash flows</div>
+    <div class="fa-row-list" id="cf_rows"></div>
+    <div class="fa-actions">
+        <button class="fa-btn fa-btn-ghost" onclick="cfAddRow()">+ Add cash flow</button>
+        <button class="fa-btn fa-btn-ghost" onclick="reCashflowExample()">Example</button>
+        <button class="fa-btn fa-btn-ghost" onclick="reCashflowClear()">Clear</button>
+        <button class="fa-btn" onclick="reCashflowCalc()">Analyze</button>
+    </div>
+    <div class="fa-hint fa-err" id="cf_err" style="display:none"></div>
+    <div class="fa-results" id="cf_results">
+        <div class="fa-section-heading">Summary</div>
+        <div class="fa-stats" id="cf_stats"></div>
+        <div class="fa-section-heading">Cash flow by period</div>
+        <div class="fa-chart-wrap" style="height:280px"><canvas id="cf_chart_bar"></canvas></div>
+        <div class="fa-section-heading">Cumulative cash flow</div>
+        <div class="fa-chart-wrap" style="height:280px"><canvas id="cf_chart_cum"></canvas></div>
+        <div class="fa-section-heading">NPV across discount rates</div>
+        <div class="fa-chart-wrap" style="height:260px"><canvas id="cf_chart_profile"></canvas></div>
+    </div>
+</section>
 
+<!-- ════════════════════════════════════════════════════════════════
+     3. RENTAL PROPERTY ANALYZER
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card" id="sec-rental">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">3. Rental Property Analyzer <span class="fa-pill">Cap rate · CoC · DSCR · IRR</span></h2>
+        <p class="fa-card-blurb">Evaluates a residential rental. Computes NOI, cap rate, cash-on-cash return, DSCR, GRM, the 1% and 50% rule checks, plus year-by-year wealth projection and IRR through the holding period.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Purchase price</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_price" type="number" placeholder="350000"></div></div>
+        <div class="fa-field"><label>Down payment</label>
+            <div class="fa-input-wrap"><input id="rp_down" type="number" step="0.1" placeholder="25"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Loan rate (APR)</label>
+            <div class="fa-input-wrap"><input id="rp_rate" type="number" step="0.01" placeholder="7.0"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Loan term (years)</label>
+            <div class="fa-input-wrap"><input id="rp_term" type="number" placeholder="30"></div></div>
+        <div class="fa-field"><label>Monthly rent</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_rent" type="number" placeholder="3000"></div></div>
+        <div class="fa-field"><label>Other monthly income</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_otherinc" type="number" placeholder="0"></div></div>
+        <div class="fa-field"><label>Property tax (of price /yr)</label>
+            <div class="fa-input-wrap"><input id="rp_tax" type="number" step="0.01" placeholder="1.2"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Insurance (per year)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_ins" type="number" placeholder="1800"></div></div>
+        <div class="fa-field"><label>HOA (per month)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_hoa" type="number" placeholder="0"></div></div>
+        <div class="fa-field"><label>Maintenance (of rent)</label>
+            <div class="fa-input-wrap"><input id="rp_maint" type="number" step="0.1" placeholder="8"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Vacancy (of rent)</label>
+            <div class="fa-input-wrap"><input id="rp_vac" type="number" step="0.1" placeholder="5"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Management (of rent)</label>
+            <div class="fa-input-wrap"><input id="rp_mgmt" type="number" step="0.1" placeholder="8"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Closing costs</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rp_close" type="number" placeholder="8000"></div></div>
+        <div class="fa-field"><label>Appreciation (per year)</label>
+            <div class="fa-input-wrap"><input id="rp_appr" type="number" step="0.1" placeholder="3"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Holding period (years)</label>
+            <div class="fa-input-wrap"><input id="rp_hold" type="number" placeholder="10"></div></div>
+    </div>
+    <div class="fa-actions">
+        <button class="fa-btn fa-btn-ghost" onclick="reRentalExample()">Example</button>
+        <button class="fa-btn fa-btn-ghost" onclick="reRentalClear()">Clear</button>
+        <button class="fa-btn" onclick="reRentalCalc()">Analyze</button>
+    </div>
+    <div class="fa-hint fa-err" id="rp_err" style="display:none"></div>
+    <div class="fa-results" id="rp_results">
+        <div class="fa-section-heading">Investment metrics</div>
+        <div class="fa-stats" id="rp_stats"></div>
+        <div class="fa-section-heading">Rule-of-thumb checks</div>
+        <div class="fa-stats" id="rp_rules"></div>
+        <div class="fa-section-heading">Monthly expense breakdown</div>
+        <div class="fa-chart-wrap" style="height:300px"><canvas id="rp_chart_pie"></canvas></div>
+        <div class="fa-section-heading">Wealth build-up over holding period</div>
+        <div class="fa-chart-wrap" style="height:340px"><canvas id="rp_chart_wealth"></canvas></div>
+        <div class="fa-section-heading">Operating breakdown</div>
+        <div id="rp_table"></div>
+    </div>
+</section>
 
-<div id="footer-placeholder"></div>
+<!-- ════════════════════════════════════════════════════════════════
+     4. MORTGAGE AFFORDABILITY (28 / 36 rule)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card" id="sec-afford">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">4. Mortgage Affordability <span class="fa-pill">28 / 36 rule</span></h2>
+        <p class="fa-card-blurb">Uses the classic lender rule: housing &le; 28% of gross monthly income (front-end), total debt &le; 36% (back-end). Returns the maximum home price you can afford under the tighter of the two ratios.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Gross annual income</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_income" type="number" placeholder="120000"></div></div>
+        <div class="fa-field"><label>Other monthly debts</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_debts" type="number" placeholder="400"></div></div>
+        <div class="fa-field"><label>Down payment</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_down" type="number" placeholder="60000"></div></div>
+        <div class="fa-field"><label>Mortgage rate (APR)</label>
+            <div class="fa-input-wrap"><input id="af_rate" type="number" step="0.01" placeholder="7.0"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Loan term (years)</label>
+            <div class="fa-input-wrap"><input id="af_term" type="number" placeholder="30"></div></div>
+        <div class="fa-field"><label>Property tax (of price /yr)</label>
+            <div class="fa-input-wrap"><input id="af_tax" type="number" step="0.01" placeholder="1.2"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Home insurance (per year)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_ins" type="number" placeholder="1500"></div></div>
+        <div class="fa-field"><label>HOA (per month)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="af_hoa" type="number" placeholder="0"></div></div>
+    </div>
+    <div class="fa-actions">
+        <button class="fa-btn fa-btn-ghost" onclick="reAffordExample()">Example</button>
+        <button class="fa-btn fa-btn-ghost" onclick="reAffordClear()">Clear</button>
+        <button class="fa-btn" onclick="reAffordCalc()">Calculate</button>
+    </div>
+    <div class="fa-hint fa-err" id="af_err" style="display:none"></div>
+    <div class="fa-results" id="af_results">
+        <div class="fa-section-heading">Affordability summary</div>
+        <div class="fa-stats" id="af_stats"></div>
+        <div class="fa-section-heading">Monthly housing cost breakdown</div>
+        <div class="fa-chart-wrap" style="height:300px"><canvas id="af_chart_pie"></canvas></div>
+        <div class="fa-section-heading">Income allocation</div>
+        <div class="fa-chart-wrap" style="height:160px"><canvas id="af_chart_bar"></canvas></div>
+    </div>
+</section>
 
+<!-- ════════════════════════════════════════════════════════════════
+     5. RENT vs BUY
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card" id="sec-rentvsbuy">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">5. Rent vs Buy</h2>
+        <p class="fa-card-blurb">Compares net wealth and cumulative cost over your time horizon: buying (with down payment, mortgage, taxes, maintenance, appreciation) vs renting (paying rent and investing the down payment + monthly savings).</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Home price</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rb_price" type="number" placeholder="400000"></div></div>
+        <div class="fa-field"><label>Down payment</label>
+            <div class="fa-input-wrap"><input id="rb_down" type="number" step="0.1" placeholder="20"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Mortgage rate (APR)</label>
+            <div class="fa-input-wrap"><input id="rb_rate" type="number" step="0.01" placeholder="7.0"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Loan term (years)</label>
+            <div class="fa-input-wrap"><input id="rb_term" type="number" placeholder="30"></div></div>
+        <div class="fa-field"><label>Property tax per year</label>
+            <div class="fa-input-wrap"><input id="rb_tax" type="number" step="0.01" placeholder="1.2"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Home insurance (per year)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rb_ins" type="number" placeholder="1500"></div></div>
+        <div class="fa-field"><label>Maintenance (of price /yr)</label>
+            <div class="fa-input-wrap"><input id="rb_maint" type="number" step="0.1" placeholder="1"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Appreciation per year</label>
+            <div class="fa-input-wrap"><input id="rb_appr" type="number" step="0.1" placeholder="3"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Closing costs</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rb_close" type="number" placeholder="10000"></div></div>
+        <div class="fa-field"><label>Comparable monthly rent</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rb_rent" type="number" placeholder="2500"></div></div>
+        <div class="fa-field"><label>Rent increase per year</label>
+            <div class="fa-input-wrap"><input id="rb_rentinc" type="number" step="0.1" placeholder="3"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Renter's insurance (per year)</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rb_rentins" type="number" placeholder="200"></div></div>
+        <div class="fa-field"><label>Investment return per year</label>
+            <div class="fa-input-wrap"><input id="rb_invret" type="number" step="0.1" placeholder="7"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Time horizon (years)</label>
+            <div class="fa-input-wrap"><input id="rb_years" type="number" placeholder="15"></div></div>
+    </div>
+    <div class="fa-actions">
+        <button class="fa-btn fa-btn-ghost" onclick="reRentVsBuyExample()">Example</button>
+        <button class="fa-btn fa-btn-ghost" onclick="reRentVsBuyClear()">Clear</button>
+        <button class="fa-btn" onclick="reRentVsBuyCalc()">Compare</button>
+    </div>
+    <div class="fa-hint fa-err" id="rb_err" style="display:none"></div>
+    <div class="fa-results" id="rb_results">
+        <div class="fa-section-heading">Verdict @ horizon</div>
+        <div class="fa-stats" id="rb_stats"></div>
+        <div class="fa-section-heading">Net wealth over time</div>
+        <div class="fa-chart-wrap" style="height:320px"><canvas id="rb_chart_wealth"></canvas></div>
+        <div class="fa-section-heading">Cumulative cost over time</div>
+        <div class="fa-chart-wrap" style="height:320px"><canvas id="rb_chart_cost"></canvas></div>
+    </div>
+</section>
 
+<script>FA.installFooter('Real Estate Analyzer');</script>
 
 </body>
 </html>

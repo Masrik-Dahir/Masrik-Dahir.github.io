@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personal Finance Calculators · Masrik Dahir</title>
+    <link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+    <link rel="stylesheet" href="../css/finance-app.css?v=20">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="../js/finance-app.js?v=18"></script>
+    <script>FA.bootstrap('Personal Finance Calculators');</script>
+    <script src="budget.js?v=6" defer></script>
+</head>
+<body class="fa-page">
+
+<header class="fa-hero">
+    <h1>Personal Finance Calculators</h1>
+    <p>Ten focused tools — budget allocation, net worth, savings goals, emergency fund, cost-of-living, subscriptions, inflation, salary↔hourly, take-home pay, and the latte-factor visualizer. Every result includes a live chart.</p>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════════
+     1. MONTHLY BUDGET PLANNER (50/30/20)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Monthly Budget Planner <span class="fa-pill">50/30/20</span></h2>
+        <p class="fa-card-blurb">Splits monthly take-home pay across Needs, Wants, and Savings using the classic 50/30/20 rule of thumb.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field">
+            <label for="bp_income">Monthly take-home income</label>
+            <div class="fa-input-wrap">
+                <span class="fa-input-prefix">$</span>
+                <input id="bp_income" type="number" step="100" placeholder="5000">
+            </div>
+        </div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcBudget()">Calculate</button></div>
+    <div class="fa-hint fa-err" id="bp_err" style="display:none"></div>
+    <div class="fa-results" id="bp_results">
+        <div class="fa-section-heading">Allocation</div>
+        <div class="fa-stats" id="bp_stats"></div>
+        <div class="fa-section-heading">Visual breakdown</div>
+        <div id="bp_dashboard"></div>
+        <div class="fa-section-heading">Detailed table</div>
+        <div id="bp_table"></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     2. NET WORTH TRACKER
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Net Worth Tracker</h2>
+        <p class="fa-card-blurb">List every asset (what you own) and every liability (what you owe). Net worth = assets − liabilities. Edit the seeded examples or add your own.</p>
+    </div>
+    <div class="fa-section-heading">Assets</div>
+    <div class="fa-row-list" id="nw_assets"></div>
+    <div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="(function(){
+        var h = document.getElementById('nw_assets'); var r = document.createElement('div'); r.className='fa-row';
+        r.innerHTML = '<div class=&quot;fa-input-wrap&quot;><input type=&quot;text&quot; placeholder=&quot;Asset&quot;></div><div class=&quot;fa-input-wrap&quot;><span class=&quot;fa-input-prefix&quot;>$</span><input type=&quot;number&quot;></div><div></div><button type=&quot;button&quot; class=&quot;fa-row-rm&quot;>&times;</button>';
+        r.querySelector('.fa-row-rm').addEventListener('click', function(){ r.parentNode.removeChild(r); }); h.appendChild(r);
+    })()">+ Add asset</button></div>
+
+    <div class="fa-section-heading">Liabilities</div>
+    <div class="fa-row-list" id="nw_liabilities"></div>
+    <div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="(function(){
+        var h = document.getElementById('nw_liabilities'); var r = document.createElement('div'); r.className='fa-row';
+        r.innerHTML = '<div class=&quot;fa-input-wrap&quot;><input type=&quot;text&quot; placeholder=&quot;Liability&quot;></div><div class=&quot;fa-input-wrap&quot;><span class=&quot;fa-input-prefix&quot;>$</span><input type=&quot;number&quot;></div><div></div><button type=&quot;button&quot; class=&quot;fa-row-rm&quot;>&times;</button>';
+        r.querySelector('.fa-row-rm').addEventListener('click', function(){ r.parentNode.removeChild(r); }); h.appendChild(r);
+    })()">+ Add liability</button></div>
+
+    <div class="fa-actions" style="margin-top:14px"><button class="fa-btn" onclick="calcNetWorth()">Calculate net worth</button></div>
+
+    <div class="fa-results" id="nw_results">
+        <div class="fa-section-heading">Summary</div>
+        <div class="fa-stats" id="nw_stats"></div>
+        <div class="fa-section-heading">Position chart</div>
+        <div class="fa-chart-wrap" style="height:340px"><canvas id="nw_chart"></canvas></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     3. SAVINGS GOAL CALCULATOR
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Savings Goal Calculator</h2>
+        <p class="fa-card-blurb">How long it takes to reach a target balance given a starting balance, monthly contribution, and interest rate. Returns months/years and a growth curve.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Goal amount</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sg_goal" type="number" placeholder="50000"></div></div>
+        <div class="fa-field"><label>Current savings</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sg_current" type="number" placeholder="5000"></div></div>
+        <div class="fa-field"><label>Monthly contribution</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sg_monthly" type="number" placeholder="500"></div></div>
+        <div class="fa-field"><label>Interest rate (APY)</label>
+            <div class="fa-input-wrap"><input id="sg_rate" type="number" step="0.1" placeholder="4.5"><span class="fa-input-suffix">%</span></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcSavingsGoal()">Calculate</button></div>
+    <div class="fa-hint fa-err" id="sg_err" style="display:none"></div>
+    <div class="fa-results" id="sg_results">
+        <div class="fa-section-heading">Time to goal</div>
+        <div class="fa-stats" id="sg_stats"></div>
+        <div class="fa-section-heading">Growth curve</div>
+        <div class="fa-chart-wrap" style="height:300px"><canvas id="sg_chart"></canvas></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     4. EMERGENCY FUND CALCULATOR
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Emergency Fund Calculator</h2>
+        <p class="fa-card-blurb">How many months your current cash buffer covers. Compares your fund against the standard 3-, 6-, and 12-month targets.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Monthly essential expenses</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ef_expenses" type="number" placeholder="3500"></div></div>
+        <div class="fa-field"><label>Current emergency fund</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ef_current" type="number" placeholder="8000"></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcEmergencyFund()">Calculate</button></div>
+    <div class="fa-hint fa-err" id="ef_err" style="display:none"></div>
+    <div class="fa-results" id="ef_results">
+        <div class="fa-stats" id="ef_stats"></div>
+        <div class="fa-section-heading">Current vs targets</div>
+        <div class="fa-chart-wrap" style="height:280px"><canvas id="ef_chart"></canvas></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     5. COST-OF-LIVING COMPARISON
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Cost-of-Living Comparison</h2>
+        <p class="fa-card-blurb">Given two cities' cost-of-living indexes (try Numbeo or BestPlaces, where 100 = U.S. average), find the salary you'd need in the second city to maintain your current standard of living.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Current city name</label>
+            <div class="fa-input-wrap"><input id="col_cityA" type="text" placeholder="Richmond, VA"></div></div>
+        <div class="fa-field"><label>Current annual salary</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="col_salary" type="number" placeholder="85000"></div></div>
+        <div class="fa-field"><label>Current city COL index</label>
+            <div class="fa-input-wrap"><input id="col_idxA" type="number" step="0.1" placeholder="98"></div></div>
+        <div class="fa-field"><label>Destination city name</label>
+            <div class="fa-input-wrap"><input id="col_cityB" type="text" placeholder="San Francisco, CA"></div></div>
+        <div class="fa-field"><label>Destination COL index</label>
+            <div class="fa-input-wrap"><input id="col_idxB" type="number" step="0.1" placeholder="180"></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcCOL()">Compare</button></div>
+    <div class="fa-hint fa-err" id="col_err" style="display:none"></div>
+    <div class="fa-results" id="col_results">
+        <div class="fa-stats" id="col_stats"></div>
+        <div class="fa-section-heading">Side-by-side</div>
+        <div class="fa-chart-wrap" style="height:260px"><canvas id="col_chart"></canvas></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     6. SUBSCRIPTION AUDITOR
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Subscription Auditor</h2>
+        <p class="fa-card-blurb">Total up every monthly subscription you pay for — streaming, gym, software, etc. Shows the painful annual and 10-year totals plus what you'd have if invested instead.</p>
+    </div>
+    <div class="fa-row-list" id="sa_rows"></div>
+    <div class="fa-actions">
+        <button class="fa-btn fa-btn-ghost" onclick="addSubscription()">+ Add subscription</button>
+        <button class="fa-btn" onclick="calcSubscriptions()">Audit total</button>
+    </div>
+    <div class="fa-hint fa-err" id="sa_err" style="display:none"></div>
+    <div class="fa-results" id="sa_results">
+        <div class="fa-stats" id="sa_stats"></div>
+        <div class="fa-section-heading">By annual cost</div>
+        <div class="fa-chart-wrap" style="height:320px"><canvas id="sa_chart"></canvas></div>
+        <div class="fa-section-heading">Detail</div>
+        <div id="sa_table"></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     7. INFLATION CALCULATOR
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Inflation Calculator</h2>
+        <p class="fa-card-blurb">What $X back in YYYY is worth today (or in any future year) at a given average inflation rate. Charts both purchasing power and nominal value side by side.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Amount</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="in_amount" type="number" placeholder="1000"></div></div>
+        <div class="fa-field"><label>Start year</label>
+            <div class="fa-input-wrap"><input id="in_yearFrom" type="number" placeholder="2000"></div></div>
+        <div class="fa-field"><label>End year</label>
+            <div class="fa-input-wrap"><input id="in_yearTo" type="number" placeholder="2026"></div></div>
+        <div class="fa-field"><label>Avg inflation rate</label>
+            <div class="fa-input-wrap"><input id="in_rate" type="number" step="0.1" placeholder="3.2"><span class="fa-input-suffix">%</span></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcInflation()">Calculate</button></div>
+    <div class="fa-hint fa-err" id="in_err" style="display:none"></div>
+    <div class="fa-results" id="in_results">
+        <div class="fa-stats" id="in_stats"></div>
+        <div class="fa-section-heading">Purchasing power over time</div>
+        <div class="fa-chart-wrap" style="height:320px"><canvas id="in_chart"></canvas></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     8. SALARY ↔ HOURLY CONVERTER
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Salary ↔ Hourly Converter</h2>
+        <p class="fa-card-blurb">Convert annual salary to hourly (or hourly to annual) with full per-period breakdown. Adjustable hours/week and weeks/year for part-time, contract, or full-time math.</p>
+    </div>
+    <input type="hidden" id="sh_mode" value="fromSalary">
+    <div class="fa-tabs" style="margin-bottom:14px">
+        <button class="sh-tab fa-btn" data-mode="fromSalary" onclick="toggleSalaryMode('fromSalary')">
+            From annual salary
+        </button>
+        <button class="sh-tab fa-btn-ghost" data-mode="fromHourly" onclick="toggleSalaryMode('fromHourly')">
+            From hourly rate
+        </button>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field" id="sh_salary_wrap"><label>Annual salary</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sh_salary" type="number" placeholder="85000"></div></div>
+        <div class="fa-field" id="sh_hourly_wrap" style="display:none"><label>Hourly rate</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="sh_hourly" type="number" step="0.01" placeholder="42.50"></div></div>
+        <div class="fa-field"><label>Hours per week</label>
+            <div class="fa-input-wrap"><input id="sh_hours" type="number" value="40"></div></div>
+        <div class="fa-field"><label>Weeks per year</label>
+            <div class="fa-input-wrap"><input id="sh_weeks" type="number" value="52"></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcSalary()">Convert</button></div>
+    <div class="fa-hint fa-err" id="sh_err" style="display:none"></div>
+    <div class="fa-results" id="sh_results">
+        <div class="fa-stats" id="sh_stats"></div>
+        <div class="fa-section-heading">Earnings across periods (log scale)</div>
+        <div class="fa-chart-wrap" style="height:280px"><canvas id="sh_chart"></canvas></div>
+        <div class="fa-section-heading">Period breakdown</div>
+        <div id="sh_table"></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     9. TAKE-HOME PAY CALCULATOR
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">Take-Home Pay Calculator</h2>
+        <p class="fa-card-blurb">Subtracts federal, state, FICA, 401(k), and health-insurance premiums from gross to estimate net pay. Defaults are reasonable U.S. averages — override per your state.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Gross annual salary</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="th_gross" type="number" placeholder="85000"></div></div>
+        <div class="fa-field"><label>Federal effective rate</label>
+            <div class="fa-input-wrap"><input id="th_fed" type="number" step="0.1" value="12"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>State effective rate</label>
+            <div class="fa-input-wrap"><input id="th_state" type="number" step="0.1" value="5"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>FICA (SS + Medicare)</label>
+            <div class="fa-input-wrap"><input id="th_fica" type="number" step="0.01" value="7.65"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>401(k) contribution</label>
+            <div class="fa-input-wrap"><input id="th_401k" type="number" step="0.1" value="6"><span class="fa-input-suffix">%</span></div></div>
+        <div class="fa-field"><label>Monthly health premiums</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="th_health" type="number" value="200"></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcTakeHome()">Calculate</button></div>
+    <div class="fa-hint fa-err" id="th_err" style="display:none"></div>
+    <div class="fa-results" id="th_results">
+        <div class="fa-stats" id="th_stats"></div>
+        <div class="fa-section-heading">Where the money goes</div>
+        <div class="fa-chart-wrap" style="height:300px"><canvas id="th_chart"></canvas></div>
+        <div class="fa-section-heading">Deduction breakdown</div>
+        <div id="th_table"></div>
+    </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     10. LATTE FACTOR  (small daily spend compounded)
+     ════════════════════════════════════════════════════════════════ -->
+<section class="fa-card">
+    <div class="fa-card-head">
+        <h2 class="fa-card-title">The Latte-Factor Visualizer</h2>
+        <p class="fa-card-blurb">If you put that $X daily coffee / lunch / habit into an index fund instead, what would it grow into? Shows total invested vs. what compound returns turn it into.</p>
+    </div>
+    <div class="fa-grid">
+        <div class="fa-field"><label>Daily spend</label>
+            <div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="lf_perDay" type="number" step="0.25" placeholder="6.50"></div></div>
+        <div class="fa-field"><label>Years</label>
+            <div class="fa-input-wrap"><input id="lf_years" type="number" value="30"><span class="fa-input-suffix">yr</span></div></div>
+        <div class="fa-field"><label>Annual return</label>
+            <div class="fa-input-wrap"><input id="lf_rate" type="number" step="0.1" value="7"><span class="fa-input-suffix">%</span></div></div>
+    </div>
+    <div class="fa-actions"><button class="fa-btn" onclick="calcLatte()">Visualize</button></div>
+    <div class="fa-hint fa-err" id="lf_err" style="display:none"></div>
+    <div class="fa-results" id="lf_results">
+        <div class="fa-stats" id="lf_stats"></div>
+        <div class="fa-section-heading">Contributions vs. growth</div>
+        <div class="fa-chart-wrap" style="height:320px"><canvas id="lf_chart"></canvas></div>
+    </div>
+</section>
+
+</body>
+</html>

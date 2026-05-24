@@ -486,3 +486,105 @@ html {
     overflow-x: hidden;
 }
 
+
+/* ════════════════════════════════════════════════════════════════
+   Site-wide second top nav (.lang-bar)
+   --------------------------------------------------------------
+   The "second top nav" pattern: a thin fixed bar that sits
+   directly under the main site topnav and contains breadcrumb-
+   style nav items. Originally used by library/awsutil/*.html for
+   the language switcher; now also used by:
+     - library/awsutil.html       (Software › AwsUtil)
+     - library/awsutil/<lang>.html (Software › AwsUtil › Language)
+     - web/<app>.html              (Software › <App name>)
+     - map.html                    (continent buttons)
+   Defining the styles here in default.css (loaded by every page
+   on the site) means every "second top nav" looks identical
+   regardless of which page hosts it.
+   ════════════════════════════════════════════════════════════════ */
+:root {
+    --nav-h: 68px;
+    --lang-bar-h: 76px;
+}
+/* Font override — apply georgia + 1.5 line-height to the lang-bar
+   itself and its text descendants ONLY. Exclude <i>/.fa* icon
+   elements (which need FontAwesome font for their glyphs) and
+   inputs (which use a monospace font for the search bar). */
+.lang-bar {
+    font-family: "georgia", sans-serif !important;
+    line-height: 1.5 !important;
+}
+.lang-bar *:not(i):not(.fa):not(.fas):not(.fab):not(.far):not(input):not(.search-icon) {
+    font-family: "georgia", sans-serif !important;
+    line-height: 1.5 !important;
+}
+.lang-bar {
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+    z-index: 101;
+    border-bottom: 2px solid black;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    background: white;
+}
+.lang-bar a { text-decoration: none; }
+.lang-bar .lang-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    flex: 1;
+}
+/* Compact glow hover used by lang-bar breadcrumb buttons. */
+.glow-sm {
+    position: relative;
+    z-index: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.glow-sm::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: calc(100% + 2px);
+    height: calc(100% + 2px);
+    background: linear-gradient(45deg,
+        firebrick, darkred, red, orangered, firebrick,
+        salmon, palevioletred, coral, firebrick);
+    background-size: 400%;
+    z-index: -1;
+    border-radius: 6px;
+    filter: blur(3px);
+    opacity: 0;
+    transition: opacity .3s ease;
+    animation: glowing-nav 20s linear infinite;
+}
+.glow-sm::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    z-index: -1;
+    border-radius: 6px;
+}
+.glow-sm:hover::before { opacity: 1; }
+
+/* Hide the legacy non-glow-sm pseudo-elements on lang-bar buttons
+   (the full-size site-nav glow) so they don't bleed in. */
+.lang-bar .glow-on-hover-nav:not(.glow-sm)::before,
+.lang-bar .glow-on-hover-nav:not(.glow-sm)::after {
+    display: none !important;
+}
+
+/* On pages with body.polish (e.g. work.html, academia.html, map.html),
+   polish.css applies `padding: revert` to .topnav buttons. Apply the
+   same revert here so awsutil + calculator pages (which don't load
+   polish.css) match the rest of the site's nav-button width. */
+.topnav button.glow-on-hover-nav,
+.topnav-2 button.glow-on-hover-nav {
+    padding: revert !important;
+}

@@ -71,22 +71,33 @@ var CONTINENT_NAV = [
 
 function buildContinentSubNav(activeContinentId) {
     var BASE_URL = "https://www.masrikdahir.com";
-    var html = '<div class="resizing-1026-more">' +
-        '<div class="w3-content" style="max-width: min(1800px, 95%); background-color: white">' +
-        '<div style="display: flex; justify-content: center; background: white; border-bottom: black 2px solid; padding: 5px 10px; flex-wrap: wrap;">';
+    /* Render as a `.lang-bar` — same fixed second top nav used
+       on map.html, library/awsutil*, and web/<app>*.html. The
+       continent links sit in the center; "Travel" is the breadcrumb
+       root on the left, in red when on a continent page. */
+    var html = '<div class="lang-bar resizing-1026-more">' +
+        '<a class="lang-home" href="' + BASE_URL + '/map" title="Travel">' +
+            '<button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent">' +
+                '<div class="w3-padding-small"><div>' +
+                    '<b style="color:black;font-size:calc(11px + 0.3vw)">Travel</b>' +
+                '</div></div>' +
+            '</button>' +
+        '</a>' +
+        '<span style="margin:0 6px;color:#9ca3af;font-size:calc(12px + 0.3vw)">&rsaquo;</span>' +
+        '<div class="lang-links">';
 
     for (var i = 0; i < CONTINENT_NAV.length; i++) {
         var c = CONTINENT_NAV[i];
         var color = (c.id === activeContinentId) ? "red" : "black";
-        html += '<a href="' + BASE_URL + c.path + '" style="text-decoration: none">' +
-            '<button class="glow-on-hover-nav" type="button" style="margin-left: 5px; margin-right: 5px; border: none; background: transparent">' +
-            '<div class="w3-padding-small"><div>' +
-            '<b style="color: ' + color + '; font-size: calc(15px + 0.4vw)">' +
-            '<div class="wrapper"></div>' + c.label + '</b>' +
-            '</div></div></button></a>';
+        html += '<a href="' + BASE_URL + c.path + '" style="text-decoration:none">' +
+            '<button class="glow-on-hover-nav glow-sm" type="button" style="margin-inline:5px;border:none;background:transparent">' +
+                '<div class="w3-padding-small"><div>' +
+                    '<b style="color:' + color + ';font-size:calc(11px + 0.3vw)">' + c.label + '</b>' +
+                '</div></div>' +
+            '</button></a>';
     }
 
-    html += '</div></div></div>';
+    html += '</div></div>';
     return html;
 }
 

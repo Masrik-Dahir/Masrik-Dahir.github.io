@@ -1,0 +1,712 @@
+/* finance-app.css — shared chrome for every web/<app>.html calculator
+   in this site (budget, loans, investing, taxes, etc.).
+   Modeled on the indigo liquid-glass styling of web/re.html but
+   extracted so each new app file stays small. */
+
+/* ── Design tokens ─────────────────────────────────────────────── */
+/* Monochrome editorial palette — every button is text-only on a
+   black/white surface, no colored icons or gradients. The accent
+   names are kept (--fa-indigo*) so any downstream reference still
+   resolves, but they now point at greyscale values. */
+:root {
+    --fa-ink:        #0a0a0a;   /* primary text + button surface */
+    --fa-ink-soft:   #1f2937;   /* hover ink */
+    --fa-paper:      #ffffff;   /* card surface */
+    --fa-paper-2:    #fafafb;   /* page surface */
+    --fa-rule:       #e5e7eb;   /* hairline borders */
+    --fa-rule-soft:  #eef0f3;
+    --fa-mute:       #6b7280;   /* secondary text */
+    --fa-mute-2:     #9ca3af;   /* tertiary */
+    --fa-tint:       #f3f4f6;   /* subtle hover wash */
+    /* Back-compat aliases — kept so rules elsewhere still resolve */
+    --fa-indigo:      var(--fa-ink);
+    --fa-indigo-light:var(--fa-mute);
+    --fa-indigo-dark: var(--fa-ink);
+    --fa-indigo-bg:   var(--fa-tint);
+    --fa-text:        var(--fa-ink);
+    --fa-text-muted:  var(--fa-mute);
+    --fa-card-bg:     var(--fa-paper);
+    --fa-page-bg:     var(--fa-paper-2);
+    --fa-border:      var(--fa-rule);
+    --fa-shadow:
+        0 1px 2px rgba(15,23,42,0.04),
+        0 6px 22px rgba(15,23,42,0.05);
+    --fa-shadow-lg:
+        0 4px 14px rgba(15,23,42,0.06),
+        0 18px 44px rgba(15,23,42,0.10);
+}
+
+body.fa-page {
+    /* Clean white page — no orbs, no canvas, no texture. The page
+       wrap goes edge-to-edge (max-width: 100%) so calculators get
+       the full viewport for tons of charts side-by-side. */
+    color: var(--fa-ink);
+    background: #ffffff;
+    min-height: 100vh;
+}
+/* Scope our modern sans-serif to the content wrap only, so the
+   legacy nav (outside the wrap) keeps georgia like work.html. */
+.fa-page-wrap {
+    padding: 16px 24px 40px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, sans-serif;
+}
+
+/* d.css makes `.navbar-fixed-top` position:fixed; left:0; right:0
+   — the topnav spans the full viewport and the border-bottom on
+   the topnav itself becomes the full-width line, sitting directly
+   under the nav buttons (exactly like work.html). No extra border
+   needed on #nav-placeholder. */
+
+/* ── Second top-nav bar (.lang-bar / .fa-app-bar) ──
+   awsutil-docs.css positions .lang-bar fixed at top:var(--nav-h)
+   with its own border-bottom. We push the content wrap down so its
+   content starts 24px below the lang-bar — matching the 24px gap
+   every other page on the site uses (popup.css gives
+   `.w3-content.w3-margin-top` a 24px margin top globally).
+   Cascade --lang-bar-h on the body so the var resolves correctly
+   on descendant elements (awsutil-docs.css defaults it to 62px on
+   :root which doesn't reflect our 76px tall bar). */
+body.fa-page { --lang-bar-h: 66px; }
+.fa-page-wrap {
+    /* Wrap top sits at ~y=92 (nav-placeholder flow ~68px + w3-
+       margin-top 24px). The first child `.fa-hero` adds 32px
+       margin-top of its own. Lang-bar bottom is at y=134 (top 68 +
+       66px bar), so to put hero top at y=158 (24px below lang-bar):
+         padding-top = 158 - 92 - 32(hero margin) = 34px.
+       Same gap as on map.html / awsutil.html → consistent across
+       the site. */
+    padding-top: 34px;
+}
+/* Use the SAME padding as the standard .lang-bar (defined in
+   default.css) — 14px 16px — so the calculator pages' second nav
+   renders at exactly the same height as the awsutil / map pages'
+   second nav. No override needed; .fa-app-bar inherits .lang-bar. */
+
+/* ── Mobile / narrow viewports — hide the second top nav.
+   Mobile hamburger menu styling (open-below-header + blur backdrop)
+   is now applied site-wide via popup.css so it benefits work.html,
+   academia.html, software.html, milestone.html, map.html, games.html
+   and index.html in addition to the calculator pages.
+
+   On mobile the lang-bar (.fa-app-bar) is hidden, so there's no
+   second nav to clear. Reset the wrap padding-top to 0 — the
+   site-wide `.w3-content.w3-margin-top { margin-top: 24px }` rule
+   in popup.css already provides the 24px gap from the topnav-2 to
+   content, matching every other mobile page on the site. */
+@media (max-width: 1026px) {
+    body.fa-page .lang-bar.fa-app-bar {
+        display: none !important;
+    }
+    body.fa-page .fa-page-wrap {
+        padding-top: 0 !important;
+    }
+}
+/* The breadcrumb sits outside the wrap — give it the same modern font */
+.fa-app-nav {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, sans-serif;
+}
+
+/* ── Page hero ─────────────────────────────────────────────────── */
+.fa-hero {
+    max-width: 1400px;
+    margin: 32px auto 8px;
+    padding: 0 24px;
+    /* override vintage.css `header { background: #953914 }` */
+    background: transparent !important;
+}
+.fa-hero h1 {
+    font-size: clamp(28px, 4.5vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--fa-ink);
+    margin: 0 0 8px;
+}
+.fa-hero p {
+    color: var(--fa-mute);
+    font-size: clamp(14px, 1.6vw, 17px);
+    margin: 0;
+    max-width: 720px;
+}
+/* Thin black underline tucked under the H1 — a quiet editorial flourish */
+.fa-hero h1::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 3px;
+    margin-top: 12px;
+    background: var(--fa-ink);
+    border-radius: 2px;
+}
+
+/* ── Card / calculator container ───────────────────────────────── */
+.fa-card {
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: clamp(16px, 2vw, 28px);
+    background: var(--fa-paper);
+    border-radius: 14px;
+    box-shadow: var(--fa-shadow);
+    border: 1px solid var(--fa-rule);
+}
+/* New: chart-DASHBOARD grid so calculators can render multiple
+   charts side-by-side and edge-to-edge. Two columns on tablet, 3
+   on desktop. Each cell auto-sizes its canvas. */
+.fa-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 18px;
+    margin: 6px 0 18px;
+}
+.fa-chart-grid .fa-chart-wrap { margin: 0; }
+.fa-chart-cell {
+    display: flex;
+    flex-direction: column;
+}
+.fa-chart-cell-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fa-mute);
+    margin: 0 0 6px;
+}
+.fa-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--fa-rule);
+    margin-bottom: 16px;
+}
+.fa-card-title {
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 700;
+    color: var(--fa-ink);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.01em;
+}
+.fa-card-title .fa-pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #ffffff;
+    border: none;
+    padding: 3px 10px;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(99,102,241,0.30);
+}
+.fa-card-blurb {
+    color: var(--fa-mute);
+    font-size: 13.5px;
+    margin: 0;
+    flex: 1 1 100%;
+}
+
+/* ── Input grid ────────────────────────────────────────────────── */
+.fa-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px 18px;
+    margin-bottom: 16px;
+}
+.fa-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.fa-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fa-text);
+}
+.fa-input-wrap {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--fa-rule);
+    border-radius: 8px;
+    background: var(--fa-paper);
+    overflow: hidden;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+.fa-input-wrap:focus-within {
+    border-color: var(--fa-ink);
+    box-shadow: 0 0 0 3px rgba(15,23,42,0.08);
+}
+.fa-input-prefix, .fa-input-suffix {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 11px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--fa-mute);
+    background: var(--fa-paper-2);
+    user-select: none;
+}
+.fa-input-prefix { border-right: 1px solid var(--fa-rule); }
+.fa-input-suffix { border-left:  1px solid var(--fa-rule); }
+.fa-input-wrap input, .fa-input-wrap select {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 9px 12px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--fa-text);
+    outline: none;
+    text-align: right;
+}
+.fa-input-wrap input::placeholder { color: rgba(100,116,139,0.55); font-style: italic; }
+.fa-input-wrap select {
+    text-align: left;
+    cursor: pointer;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+.fa-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+/* Buttons use the same liquid-glass model as work.html .btn1/.btn2
+   (collapse/extend wrappers):
+     • frosted white base with multi-layer radial highlights
+     • rotating conic rainbow border (continuous)
+     • white glint sweep across the surface (continuous)
+     • hex-mesh shimmer ::before (opacity 0 → 0.55 on hover with
+       dual sweep + hue-cycle animations)
+     • hover swaps the rainbow border for a solid indigo border + lift
+   Hex tile size is fixed at 8px so many hexes pack across each
+   button surface, matching the work.html look. */
+@property --fa-edge-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@property --fa-glint-pos  { syntax: '<percentage>'; initial-value: -25%; inherits: false; }
+@keyframes fa-edge-spin    { to { --fa-edge-angle: 360deg; } }
+@keyframes fa-glint-sweep  { 0% { --fa-glint-pos: -25%; } 100% { --fa-glint-pos: 125%; } }
+@keyframes fa-hex-sweep    { from { background-position: 0% 50%; } to { background-position: 200% 50%; } }
+@keyframes fa-hex-hue      { from { filter: saturate(1.25) brightness(1.05) hue-rotate(0deg); } to { filter: saturate(1.25) brightness(1.05) hue-rotate(360deg); } }
+
+.fa-btn {
+    appearance: none;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    color: var(--fa-ink);
+    --fa-hex-size: 8px;
+    --fa-edge-angle: 0deg;
+    --fa-glint-pos: -25%;
+    /* MULTI-LAYER liquid-glass background — same model as work.html .btn1:
+        – Top arc sheen   → light catching the upper curve
+        – Corner glow     → asymmetric secondary highlight
+        – Bottom shadow   → glass-bowl depth
+        – Frosted white   → base pane the text sits on
+        – Conic border    → rotating rainbow rim outside
+        – Glint band      → diagonal white sweep driven by --fa-glint-pos */
+    background:
+        linear-gradient(115deg,
+            transparent calc(var(--fa-glint-pos) - 18%),
+            rgba(255,255,255,0.65) calc(var(--fa-glint-pos) - 2%),
+            rgba(255,255,255,0.90) var(--fa-glint-pos),
+            rgba(255,255,255,0.65) calc(var(--fa-glint-pos) + 2%),
+            transparent calc(var(--fa-glint-pos) + 18%)) padding-box,
+        radial-gradient(ellipse 100% 60% at 50% -25%,
+            rgba(255,255,255,0.85) 0%,
+            rgba(255,255,255,0.30) 35%,
+            rgba(255,255,255,0.00) 70%) padding-box,
+        radial-gradient(ellipse 60% 90% at 0% 0%,
+            rgba(255,255,255,0.55) 0%,
+            rgba(255,255,255,0.00) 60%) padding-box,
+        radial-gradient(ellipse 90% 65% at 50% 120%,
+            rgba(15,20,40,0.08) 0%,
+            rgba(15,20,40,0.00) 60%) padding-box,
+        linear-gradient(135deg,
+            rgba(255,255,255,0.94) 0%,
+            rgba(248,250,255,0.88) 100%) padding-box,
+        conic-gradient(from var(--fa-edge-angle),
+            rgba(255,179,198,0.55), rgba(255,209,168,0.55),
+            rgba(255,240,168,0.55), rgba(196,242,197,0.55),
+            rgba(184,217,255,0.55), rgba(212,193,255,0.55),
+            rgba(255,193,229,0.55), rgba(255,179,198,0.55)
+        ) border-box;
+    border: 1.5px solid transparent;
+    backdrop-filter: blur(8px) saturate(130%);
+    -webkit-backdrop-filter: blur(8px) saturate(130%);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.90),
+        inset 0 -1px 0 rgba(20,15,30,0.05),
+        0 0 0 1px rgba(15,20,40,0.18),
+        0 0 10px rgba(220,225,235,0.30),
+        0 2px 6px rgba(15,20,40,0.10);
+    transition: transform 0.18s ease, box-shadow 0.22s ease, color 0.18s ease;
+    animation:
+        fa-edge-spin  4.5s linear infinite,
+        fa-glint-sweep 6.0s linear infinite;
+}
+/* Hex-mesh shimmer layer — invisible at rest, fades in on hover */
+.fa-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(90deg,
+        #ffb3c6 0%, #ffd1a8 14%, #fff0a8 28%, #c4f2c5 42%,
+        #b8d9ff 56%, #d4c1ff 70%, #ffc1e5 85%, #ffb3c6 100%);
+    background-size: 300% 100%;
+    background-position: 0% 50%;
+    -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>");
+            mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 32'><polygon points='14,1.5 26,8 26,24 14,30.5 2,24 2,8' fill='none' stroke='%23000' stroke-width='3.5'/></svg>");
+    -webkit-mask-size: var(--fa-hex-size) calc(var(--fa-hex-size) * 1.14);
+            mask-size: var(--fa-hex-size) calc(var(--fa-hex-size) * 1.14);
+    -webkit-mask-repeat: repeat;
+            mask-repeat: repeat;
+    opacity: 0;
+    transition: opacity 0.30s ease;
+}
+.fa-btn:hover {
+    transform: translateY(-1px);
+    color: var(--fa-ink);
+    /* On hover the rotating conic-gradient border is REPLACED with a
+       clean solid indigo border line — universal "you are hovering"
+       cue across the site. */
+    background:
+        linear-gradient(135deg,
+            rgba(255,255,255,0.97) 0%,
+            rgba(248,250,255,0.93) 100%) padding-box,
+        linear-gradient(135deg,
+            rgba(99,102,241,0.85),
+            rgba(99,102,241,0.85)) border-box;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.95),
+        0 1px 3px rgba(15,20,40,0.10);
+}
+.fa-btn:hover::before {
+    opacity: 0.55;
+    animation: fa-hex-sweep 2.4s linear infinite, fa-hex-hue 3.6s linear infinite;
+}
+.fa-btn:active { transform: translateY(0); }
+.fa-btn:focus-visible {
+    outline: none;
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.95),
+        0 0 0 3px rgba(99,102,241,0.35);
+}
+/* Ghost variant — identical liquid-glass chrome, slightly muted text
+   so the visual distinction between primary and secondary actions
+   still reads at rest. */
+.fa-btn.fa-btn-ghost {
+    color: var(--fa-mute);
+}
+.fa-btn.fa-btn-ghost:hover { color: var(--fa-ink); }
+
+/* ── Tab-style toggle pair (used by salary↔hourly, APR↔APY etc.) ── */
+.fa-tabs {
+    display: inline-flex;
+    padding: 3px;
+    background: var(--fa-paper-2);
+    border: 1px solid var(--fa-rule);
+    border-radius: 8px;
+    gap: 2px;
+}
+.fa-tabs .fa-btn,
+.fa-tabs .fa-btn-ghost {
+    border-radius: 5px !important;
+    padding: 6px 14px !important;
+    font-size: 12.5px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.fa-tabs .fa-btn-ghost {
+    background: transparent !important;
+    color: var(--fa-mute) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+.fa-tabs .fa-btn-ghost:hover {
+    background: var(--fa-paper) !important;
+    color: var(--fa-ink) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+.fa-tab-ico {
+    font-size: 15px;
+    line-height: 1;
+}
+
+/* ── Results ───────────────────────────────────────────────────── */
+.fa-results {
+    display: none;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--fa-rule);
+    animation: fa-fade-up 0.4s ease-out both;
+}
+.fa-results.fa-active { display: block; }
+@keyframes fa-fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.fa-section-heading {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: #4f46e5;
+    margin: 18px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.fa-section-heading::before {
+    content: "";
+    width: 4px; height: 14px;
+    background: linear-gradient(180deg, #6366f1, #ec4899);
+    border-radius: 2px;
+    flex: 0 0 auto;
+}
+.fa-section-heading::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(99,102,241,0.30), transparent);
+}
+.fa-section-heading:first-child { margin-top: 0; }
+
+/* ── Stat cards (key metrics) ──────────────────────────────────── */
+.fa-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.fa-stat {
+    padding: 14px 16px;
+    background: var(--fa-paper);
+    border: 1px solid var(--fa-rule);
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(99,102,241,0.08);
+    /* Colorful left accent — rotates through the palette */
+    border-left: 4px solid #6366f1;
+    transition: transform 0.18s, box-shadow 0.18s;
+}
+.fa-stat:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(99,102,241,0.16); }
+.fa-stats .fa-stat:nth-child(6n+1) { border-left-color: #6366f1; }
+.fa-stats .fa-stat:nth-child(6n+2) { border-left-color: #ec4899; }
+.fa-stats .fa-stat:nth-child(6n+3) { border-left-color: #10b981; }
+.fa-stats .fa-stat:nth-child(6n+4) { border-left-color: #f59e0b; }
+.fa-stats .fa-stat:nth-child(6n+5) { border-left-color: #3b82f6; }
+.fa-stats .fa-stat:nth-child(6n+6) { border-left-color: #8b5cf6; }
+.fa-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fa-mute);
+    margin: 0 0 4px;
+}
+.fa-stat-value {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 800;
+    color: var(--fa-ink);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+.fa-stat-sub {
+    font-size: 12px;
+    color: var(--fa-mute);
+    margin: 4px 0 0;
+}
+/* Semantic accents retained only as small text colors — never on
+   buttons. These convey real meaning (gain/loss/warning) on the
+   stat values themselves. */
+.fa-stat.fa-positive .fa-stat-value { color: #166534; }
+.fa-stat.fa-negative .fa-stat-value { color: #991b1b; }
+.fa-stat.fa-warning  .fa-stat-value { color: #92400e; }
+
+/* ── Tables ────────────────────────────────────────────────────── */
+.fa-table-wrap { overflow-x: auto; margin: 6px 0 14px; }
+.fa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+.fa-table thead th {
+    text-align: left;
+    padding: 11px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-bottom: 2px solid #4f46e5;
+    white-space: nowrap;
+}
+.fa-table tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--fa-rule-soft);
+    color: var(--fa-ink);
+}
+/* Zebra striping with palette-tinted rows */
+.fa-table tbody tr:nth-child(even) td { background: rgba(99,102,241,0.04); }
+.fa-table tbody tr:hover td { background: rgba(99,102,241,0.12); }
+.fa-table .fa-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Chart canvas wrapper ──────────────────────────────────────── */
+.fa-chart-wrap {
+    position: relative;
+    background: var(--fa-paper);
+    border: 1px solid var(--fa-rule);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 6px 0 14px;
+    min-height: 240px;
+}
+.fa-chart-wrap canvas { max-width: 100%; }
+
+/* ── Inline alert / hint ───────────────────────────────────────── */
+.fa-hint {
+    margin: 10px 0;
+    padding: 10px 14px;
+    background: var(--fa-paper-2);
+    border: 1px solid var(--fa-rule);
+    border-left: 3px solid var(--fa-ink);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--fa-ink);
+}
+.fa-hint.fa-warn { border-left-color: #92400e; }
+.fa-hint.fa-err  { border-left-color: #991b1b; }
+.fa-hint.fa-ok   { border-left-color: #166534; }
+
+/* ── Dynamic list rows (subscriptions, line items) ─────────────── */
+.fa-row-list { display: flex; flex-direction: column; gap: 8px; }
+.fa-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+.fa-row .fa-input-wrap { width: 100%; }
+.fa-row-rm {
+    appearance: none;
+    border: 1px solid var(--fa-rule);
+    background: var(--fa-paper);
+    color: var(--fa-ink);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1;
+    transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+.fa-row-rm:hover { background: var(--fa-ink); color: var(--fa-paper); border-color: var(--fa-ink); }
+
+/* ── Site-wide top nav (injected by FA.installTopnav) ──────────── */
+.fa-topnav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border-bottom: 1px solid var(--fa-rule);
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+}
+.fa-topnav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.fa-topnav-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--fa-text);
+    text-decoration: none;
+    margin-right: 18px;
+}
+.fa-topnav-brand img { width: 26px; height: 26px; border-radius: 6px; }
+.fa-topnav-links { display: flex; flex-wrap: wrap; gap: 2px; }
+.fa-topnav-link {
+    padding: 7px 13px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--fa-text-muted);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+}
+.fa-topnav-link:hover { background: var(--fa-tint); color: var(--fa-ink); }
+.fa-topnav-link.fa-active { color: var(--fa-paper); background: var(--fa-ink); }
+
+/* ── Breadcrumb (under top nav) ───────────────────────────────── */
+.fa-app-nav {
+    max-width: 1400px;
+    margin: 14px auto 0;
+    padding: 0 24px;
+    font-size: 13px;
+    color: var(--fa-text-muted);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.fa-app-nav a {
+    color: var(--fa-ink);
+    text-decoration: none;
+    font-weight: 600;
+}
+.fa-app-nav a:hover { text-decoration: underline; }
+.fa-app-nav .fa-app-nav-sep { color: var(--fa-mute-2); }
+.fa-app-nav .fa-app-nav-current {
+    color: var(--fa-ink);
+    font-weight: 700;
+}
+
+/* ── Footer (injected) ────────────────────────────────────────── */
+.fa-footer {
+    margin-top: 40px;
+    padding: 24px;
+    background: var(--fa-paper-2);
+    border-top: 1px solid var(--fa-rule);
+    text-align: center;
+    color: var(--fa-mute);
+    font-size: 13px;
+}
+.fa-footer a { color: var(--fa-ink); text-decoration: none; font-weight: 600; }
+.fa-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+    .fa-row { grid-template-columns: 1fr 1fr; }
+    .fa-row .fa-row-rm { grid-column: 1 / -1; }
+}

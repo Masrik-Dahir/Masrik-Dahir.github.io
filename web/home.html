@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home & DIY · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Home & DIY');</script>
+<script src="home.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Home & DIY</h1><p>Nine project tools: paint quantity, tile/flooring area, wallpaper rolls, concrete/mulch volume, appliance electricity cost, solar payback, renovation budget tracker, lawn seed coverage, and garden plant spacing.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Paint Quantity</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Room length (m)</label><div class="fa-input-wrap"><input id="pn_length" type="number" step="0.1" value="4"></div></div>
+<div class="fa-field"><label>Room width (m)</label><div class="fa-input-wrap"><input id="pn_width" type="number" step="0.1" value="3.5"></div></div>
+<div class="fa-field"><label>Ceiling height (m)</label><div class="fa-input-wrap"><input id="pn_height" type="number" step="0.1" value="2.5"></div></div>
+<div class="fa-field"><label>Doors</label><div class="fa-input-wrap"><input id="pn_doors" type="number" value="1"></div></div>
+<div class="fa-field"><label>Windows</label><div class="fa-input-wrap"><input id="pn_windows" type="number" value="2"></div></div>
+<div class="fa-field"><label>Coats</label><div class="fa-input-wrap"><input id="pn_coats" type="number" value="2"></div></div>
+<div class="fa-field"><label>Coverage (m²/L)</label><div class="fa-input-wrap"><input id="pn_coverage" type="number" value="32"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPaint()">Calculate</button></div>
+<div class="fa-hint fa-err" id="pn_err" style="display:none"></div>
+<div class="fa-results" id="pn_results"><div class="fa-stats" id="pn_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="pn_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Tile / Flooring</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Floor length (m)</label><div class="fa-input-wrap"><input id="tl_length" type="number" step="0.1" value="5"></div></div>
+<div class="fa-field"><label>Floor width (m)</label><div class="fa-input-wrap"><input id="tl_width" type="number" step="0.1" value="4"></div></div>
+<div class="fa-field"><label>Tile width (cm)</label><div class="fa-input-wrap"><input id="tl_tileW" type="number" value="30"></div></div>
+<div class="fa-field"><label>Tile height (cm)</label><div class="fa-input-wrap"><input id="tl_tileH" type="number" value="30"></div></div>
+<div class="fa-field"><label>Waste allowance</label><div class="fa-input-wrap"><input id="tl_waste" type="number" value="10"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcTile()">Calculate</button></div>
+<div class="fa-hint fa-err" id="tl_err" style="display:none"></div>
+<div class="fa-results" id="tl_results"><div class="fa-stats" id="tl_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="tl_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Wallpaper Rolls</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Room length (m)</label><div class="fa-input-wrap"><input id="wp_length" type="number" step="0.1" value="4"></div></div>
+<div class="fa-field"><label>Room width (m)</label><div class="fa-input-wrap"><input id="wp_width" type="number" step="0.1" value="3.5"></div></div>
+<div class="fa-field"><label>Wall height (m)</label><div class="fa-input-wrap"><input id="wp_height" type="number" step="0.1" value="2.5"></div></div>
+<div class="fa-field"><label>Roll width (cm)</label><div class="fa-input-wrap"><input id="wp_rollW" type="number" value="53"></div></div>
+<div class="fa-field"><label>Roll length (m)</label><div class="fa-input-wrap"><input id="wp_rollL" type="number" value="10"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcWallpaper()">Calculate</button></div>
+<div class="fa-hint fa-err" id="wp_err" style="display:none"></div>
+<div class="fa-results" id="wp_results"><div class="fa-stats" id="wp_stats"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Concrete / Mulch Volume</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Length (m)</label><div class="fa-input-wrap"><input id="cv_length" type="number" step="0.1" value="3"></div></div>
+<div class="fa-field"><label>Width (m)</label><div class="fa-input-wrap"><input id="cv_width" type="number" step="0.1" value="2"></div></div>
+<div class="fa-field"><label>Depth (cm)</label><div class="fa-input-wrap"><input id="cv_depth" type="number" value="10"></div></div>
+<div class="fa-field"><label>Material</label><div class="fa-input-wrap"><select id="cv_material"><option value="concrete">Concrete</option><option value="mulch">Mulch</option><option value="soil">Soil</option></select></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcVolume()">Calculate</button></div>
+<div class="fa-hint fa-err" id="cv_err" style="display:none"></div>
+<div class="fa-results" id="cv_results"><div class="fa-stats" id="cv_stats"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Appliance Electricity Cost</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Power (W)</label><div class="fa-input-wrap"><input id="el_watts" type="number" value="1500"></div></div>
+<div class="fa-field"><label>Hours per day</label><div class="fa-input-wrap"><input id="el_hours" type="number" step="0.1" value="3"></div></div>
+<div class="fa-field"><label>Electricity rate ($/kWh)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="el_rate" type="number" step="0.01" value="0.16"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcElectricity()">Calculate</button></div>
+<div class="fa-hint fa-err" id="el_err" style="display:none"></div>
+<div class="fa-results" id="el_results"><div class="fa-stats" id="el_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="el_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Solar Payback</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>System cost (after rebates)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="so_systemCost" type="number" value="18000"></div></div>
+<div class="fa-field"><label>Current monthly electric bill</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="so_monthlyBill" type="number" value="180"></div></div>
+<div class="fa-field"><label>% offset by solar</label><div class="fa-input-wrap"><input id="so_offset" type="number" value="80"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Annual panel degradation</label><div class="fa-input-wrap"><input id="so_deg" type="number" step="0.1" value="0.5"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Utility rate inflation</label><div class="fa-input-wrap"><input id="so_utilGrow" type="number" step="0.1" value="3"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcSolar()">Calculate</button></div>
+<div class="fa-hint fa-err" id="so_err" style="display:none"></div>
+<div class="fa-results" id="so_results"><div class="fa-stats" id="so_stats"></div><div class="fa-chart-wrap" style="height:300px"><canvas id="so_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Renovation Budget</h2></div>
+<div class="fa-row-list" id="rn_rows"></div>
+<div class="fa-actions"><button class="fa-btn fa-btn-ghost" onclick="addRenoRow('Task',1000,0)">+ Add task</button><button class="fa-btn" onclick="calcReno()">Total</button></div>
+<div class="fa-hint fa-err" id="rn_err" style="display:none"></div>
+<div class="fa-results" id="rn_results"><div class="fa-stats" id="rn_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="rn_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Lawn Seed Coverage</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Length (m)</label><div class="fa-input-wrap"><input id="ln_length" type="number" step="0.1" value="15"></div></div>
+<div class="fa-field"><label>Width (m)</label><div class="fa-input-wrap"><input id="ln_width" type="number" step="0.1" value="10"></div></div>
+<div class="fa-field"><label>Rate (lb / 1000 sqft)</label><div class="fa-input-wrap"><input id="ln_rate" type="number" step="0.5" value="5"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcLawn()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ln_err" style="display:none"></div>
+<div class="fa-results" id="ln_results"><div class="fa-stats" id="ln_stats"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Garden Plant Spacing & Yield</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Garden length (m)</label><div class="fa-input-wrap"><input id="gp_length" type="number" step="0.1" value="3"></div></div>
+<div class="fa-field"><label>Garden width (m)</label><div class="fa-input-wrap"><input id="gp_width" type="number" step="0.1" value="2"></div></div>
+<div class="fa-field"><label>Spacing (cm)</label><div class="fa-input-wrap"><input id="gp_spacing" type="number" value="30"></div></div>
+<div class="fa-field"><label>Yield per plant (kg)</label><div class="fa-input-wrap"><input id="gp_yield" type="number" step="0.1" value="2"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPlant()">Calculate</button></div>
+<div class="fa-hint fa-err" id="gp_err" style="display:none"></div>
+<div class="fa-results" id="gp_results"><div class="fa-stats" id="gp_stats"></div></div>
+</section>
+
+</body></html>

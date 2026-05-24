@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto & Travel · Masrik Dahir</title>
+<link rel="icon" type="image/png" href="https://d3dw5jtb3w1kgy.cloudfront.net/logo.png">
+<link rel="stylesheet" href="../css/finance-app.css?v=20">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="../js/finance-app.js?v=18"></script>
+<script>FA.bootstrap('Auto & Travel');</script>
+<script src="auto.js?v=5" defer></script>
+</head><body class="fa-page">
+<header class="fa-hero"><h1>Automotive & Travel</h1><p>Nine on-the-road tools: trip fuel cost (gas vs EV), EV charging & range, lease-vs-buy, true cost of ownership, road-trip planner, currency converter, time-zone meeting planner, points/miles valuation, country-specific tip.</p></header>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Trip Fuel Cost (Gas vs EV)</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Distance (miles)</label><div class="fa-input-wrap"><input id="tf_miles" type="number" value="300"></div></div>
+<div class="fa-field"><label>Gas car MPG</label><div class="fa-input-wrap"><input id="tf_mpg" type="number" value="28"></div></div>
+<div class="fa-field"><label>Gas price ($/gal)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="tf_gasPrice" type="number" step="0.01" value="3.65"></div></div>
+<div class="fa-field"><label>EV mi/kWh</label><div class="fa-input-wrap"><input id="tf_mpkwh" type="number" step="0.1" value="3.5"></div></div>
+<div class="fa-field"><label>Electric ($/kWh)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="tf_kwhPrice" type="number" step="0.01" value="0.16"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcTripCost()">Compare</button></div>
+<div class="fa-hint fa-err" id="tf_err" style="display:none"></div>
+<div class="fa-results" id="tf_results"><div class="fa-stats" id="tf_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="tf_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">EV Charging & Range</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Battery (kWh)</label><div class="fa-input-wrap"><input id="ev_battery" type="number" value="75"></div></div>
+<div class="fa-field"><label>Efficiency (Wh/mi)</label><div class="fa-input-wrap"><input id="ev_efficiency" type="number" value="280"></div></div>
+<div class="fa-field"><label>Charger (kW)</label><div class="fa-input-wrap"><input id="ev_chargeKw" type="number" step="0.5" value="11.5"></div></div>
+<div class="fa-field"><label>Electric ($/kWh)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ev_kwhPrice" type="number" step="0.01" value="0.16"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcEV()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ev_err" style="display:none"></div>
+<div class="fa-results" id="ev_results"><div class="fa-stats" id="ev_stats"></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Lease vs Buy</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Vehicle price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="lb_price" type="number" value="38000"></div></div>
+<div class="fa-field"><label>Buy down payment</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="lb_buyDown" type="number" value="5000"></div></div>
+<div class="fa-field"><label>Buy APR</label><div class="fa-input-wrap"><input id="lb_rate" type="number" step="0.01" value="7"><span class="fa-input-suffix">%</span></div></div>
+<div class="fa-field"><label>Buy term</label><div class="fa-input-wrap"><input id="lb_buyTerm" type="number" value="5"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Lease down</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="lb_leaseDown" type="number" value="3000"></div></div>
+<div class="fa-field"><label>Lease /mo</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="lb_leaseMo" type="number" value="420"></div></div>
+<div class="fa-field"><label>Lease term</label><div class="fa-input-wrap"><input id="lb_leaseTerm" type="number" value="3"><span class="fa-input-suffix">yr</span></div></div>
+<div class="fa-field"><label>Residual</label><div class="fa-input-wrap"><input id="lb_residual" type="number" value="55"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcLease()">Compare</button></div>
+<div class="fa-hint fa-err" id="lb_err" style="display:none"></div>
+<div class="fa-results" id="lb_results"><div class="fa-stats" id="lb_stats"></div><div class="fa-chart-wrap" style="height:260px"><canvas id="lb_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">True Cost of Ownership</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Vehicle price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="tc_price" type="number" value="35000"></div></div>
+<div class="fa-field"><label>Years owned</label><div class="fa-input-wrap"><input id="tc_years" type="number" value="5"></div></div>
+<div class="fa-field"><label>MPG</label><div class="fa-input-wrap"><input id="tc_mpg" type="number" value="28"></div></div>
+<div class="fa-field"><label>Annual miles</label><div class="fa-input-wrap"><input id="tc_miles" type="number" value="12000"></div></div>
+<div class="fa-field"><label>Gas price</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="tc_gasPrice" type="number" step="0.01" value="3.65"></div></div>
+<div class="fa-field"><label>Insurance /yr</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="tc_ins" type="number" value="1400"></div></div>
+<div class="fa-field"><label>Maintenance /yr</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="tc_maint" type="number" value="600"></div></div>
+<div class="fa-field"><label>Annual depreciation</label><div class="fa-input-wrap"><input id="tc_dep" type="number" step="0.5" value="15"><span class="fa-input-suffix">%</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcTCO()">Calculate</button></div>
+<div class="fa-hint fa-err" id="tc_err" style="display:none"></div>
+<div class="fa-results" id="tc_results"><div class="fa-stats" id="tc_stats"></div><div class="fa-chart-wrap" style="height:300px"><canvas id="tc_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Road Trip Planner</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Distance (miles)</label><div class="fa-input-wrap"><input id="rt_miles" type="number" value="800"></div></div>
+<div class="fa-field"><label>Avg speed (mph)</label><div class="fa-input-wrap"><input id="rt_speed" type="number" value="60"></div></div>
+<div class="fa-field"><label>MPG</label><div class="fa-input-wrap"><input id="rt_mpg" type="number" value="28"></div></div>
+<div class="fa-field"><label>Gas $/gal</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rt_gas" type="number" step="0.01" value="3.65"></div></div>
+<div class="fa-field"><label>Days</label><div class="fa-input-wrap"><input id="rt_days" type="number" value="3"></div></div>
+<div class="fa-field"><label>Nights</label><div class="fa-input-wrap"><input id="rt_nights" type="number" value="2"></div></div>
+<div class="fa-field"><label>$/night</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rt_perNight" type="number" value="120"></div></div>
+<div class="fa-field"><label>$/day food</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="rt_food" type="number" value="60"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcRoadTrip()">Plan</button></div>
+<div class="fa-hint fa-err" id="rt_err" style="display:none"></div>
+<div class="fa-results" id="rt_results"><div class="fa-stats" id="rt_stats"></div><div class="fa-chart-wrap" style="height:280px"><canvas id="rt_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Currency Converter</h2><p class="fa-card-blurb">Enter the current rate from XE or Google. Shows what fees of 2–5% do to your actual landing amount.</p></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Amount</label><div class="fa-input-wrap"><input id="cu_amount" type="number" step="0.01" value="1000"></div></div>
+<div class="fa-field"><label>Mid-market rate</label><div class="fa-input-wrap"><input id="cu_rate" type="number" step="0.0001" value="0.92"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcCurrency()">Convert</button></div>
+<div class="fa-hint fa-err" id="cu_err" style="display:none"></div>
+<div class="fa-results" id="cu_results"><div class="fa-stats" id="cu_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="cu_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Time-Zone Meeting Planner</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Your time</label><div class="fa-input-wrap"><input id="tz_time" type="time" value="09:00"></div></div>
+<div class="fa-field"><label>Your UTC offset</label><div class="fa-input-wrap"><input id="tz_offsetA" type="number" value="-5"></div></div>
+<div class="fa-field"><label>Their UTC offset</label><div class="fa-input-wrap"><input id="tz_offsetB" type="number" value="1"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcTimezone()">Plan</button></div>
+<div class="fa-hint fa-err" id="tz_err" style="display:none"></div>
+<div class="fa-results" id="tz_results"><div class="fa-stats" id="tz_stats"></div><div class="fa-section-heading">Hours where both are 9-18</div><div class="fa-chart-wrap" style="height:200px"><canvas id="tz_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Points / Miles Value</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Points</label><div class="fa-input-wrap"><input id="pt_points" type="number" value="60000"></div></div>
+<div class="fa-field"><label>Cash equivalent ($)</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="pt_cashValue" type="number" step="0.01" value="900"></div></div>
+<div class="fa-field"><label>Target cents/point</label><div class="fa-input-wrap"><input id="pt_targetCpp" type="number" step="0.1" value="1.5"><span class="fa-input-suffix">¢</span></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcPoints()">Value</button></div>
+<div class="fa-hint fa-err" id="pt_err" style="display:none"></div>
+<div class="fa-results" id="pt_results"><div class="fa-stats" id="pt_stats"></div><div class="fa-chart-wrap" style="height:240px"><canvas id="pt_chart"></canvas></div></div>
+</section>
+
+<section class="fa-card"><div class="fa-card-head"><h2 class="fa-card-title">Tip by Country</h2></div>
+<div class="fa-grid">
+<div class="fa-field"><label>Country</label><div class="fa-input-wrap"><select id="ti_country"></select></div></div>
+<div class="fa-field"><label>Bill</label><div class="fa-input-wrap"><span class="fa-input-prefix">$</span><input id="ti_bill" type="number" step="0.01" value="80"></div></div>
+<div class="fa-field"><label>People</label><div class="fa-input-wrap"><input id="ti_people" type="number" value="2"></div></div>
+</div>
+<div class="fa-actions"><button class="fa-btn" onclick="calcTipCountry()">Calculate</button></div>
+<div class="fa-hint fa-err" id="ti_err" style="display:none"></div>
+<div class="fa-results" id="ti_results"><div class="fa-stats" id="ti_stats"></div><div class="fa-section-heading">Customary tipping worldwide</div><div class="fa-chart-wrap" style="height:380px"><canvas id="ti_chart"></canvas></div></div>
+</section>
+
+</body></html>
