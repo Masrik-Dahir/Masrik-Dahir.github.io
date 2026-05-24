@@ -8,3 +8,5 @@ CLAUDE.md
 /docs/
 /.playwright-mcp/
 /node_modules/
+/.claude/
+/test-results/
