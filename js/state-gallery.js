@@ -552,8 +552,65 @@
 
             /* ── Mobile tweaks ───────────────────────────────────── */
             '@media (max-width: 720px) {',
+                /* Hide the Travel › <region> breadcrumb on mobile and
+                   center the slideshow control buttons in the bar. */
+                '.lang-bar-left { display: none !important; }',
+                '.lang-bar { justify-content: center; }',
+                '.lang-bar-controls { margin-left: 0; margin-right: 0; justify-content: center; width: 100%; }',
                 '.lang-bar-controls .lb-ctrl { width: 40px; height: 40px; }',
                 '.lang-bar-controls .lb-ctrl i { font-size: 17px; }',
+                /* Zoom + fit-to-screen controls disabled on mobile —
+                   user cannot zoom or drag photos on small screens. */
+                '.lang-bar-controls .lb-ctrl-zoomin,',
+                '.lang-bar-controls .lb-ctrl-zoomout,',
+                '.lang-bar-controls .lb-ctrl-resize { display: none !important; }',
+                /* Prevent any transform-based pan from sticking and lock
+                   the image cursor back to default on mobile. */
+                '.rg-slide-img { cursor: default !important; touch-action: pan-y !important; }',
+
+                /* Lock the body scrollbar while the lightbox is open so
+                   no scrollbar shows on the right edge of the screen. */
+                'html.rg-lightbox-open, body.rg-lightbox-open {',
+                    'overflow: hidden !important;',
+                    'height: 100% !important;',
+                    'touch-action: none;',
+                '}',
+
+                /* Inside the lightbox: allow vertical gesture scroll if
+                   the image is taller than the viewport, but hide the
+                   visible scrollbar so the user only sees the photo. */
+                '.rg-slideshow {',
+                    'overflow-y: auto !important;',
+                    'overflow-x: hidden !important;',
+                    '-webkit-overflow-scrolling: touch;',
+                    'scrollbar-width: none;',
+                    '-ms-overflow-style: none;',
+                    'align-items: flex-start !important;',
+                '}',
+                '.rg-slideshow::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }',
+
+                /* Each slide is at LEAST viewport-tall (so short images
+                   stay centered) but can grow to fit a tall portrait
+                   image — the parent scroll container then provides
+                   gesture scroll. */
+                '.rg-slide, .rg-slideshow .content-slide {',
+                    'position: relative !important;',
+                    'inset: auto !important;',
+                    'min-height: 100% !important;',
+                    'height: auto !important;',
+                    'padding: 10px !important;',
+                '}',
+
+                /* Image fills the available width; height is natural so
+                   tall portraits overflow the viewport and the parent
+                   becomes scrollable via touch gesture. */
+                '.rg-slide-img {',
+                    'max-width: 100% !important;',
+                    'max-height: none !important;',
+                    'width: 100% !important;',
+                    'height: auto !important;',
+                    'object-fit: contain;',
+                '}',
             '}'
         ].join('\n');
         document.head.appendChild(s);
@@ -634,6 +691,12 @@
         }
         if (sla) sla.style.display = "flex";
         if (gal) gal.style.display = "none";
+        /* Lock the page scrollbar while the lightbox is open so the
+           background page's scrollbar doesn't show on the right edge.
+           Mobile especially: any tall-image scrolling happens INSIDE
+           the lightbox container via touch gesture, not the body. */
+        document.body.classList.add('rg-lightbox-open');
+        document.documentElement.classList.add('rg-lightbox-open');
         /* Force absolute viewport dimensions via JS — bypasses CSS
            vh/inset edge cases that can leave the backdrop short. */
         sizeLightboxToViewport();
@@ -645,6 +708,8 @@
         initDomRefs();
         if (gal) gal.style.display = "block";
         if (sla) sla.style.display = "none";
+        document.body.classList.remove('rg-lightbox-open');
+        document.documentElement.classList.remove('rg-lightbox-open');
         stopSlideShow();
         if (typeof resetZoom === 'function') resetZoom();
         if (window.syncLangBarControls) window.syncLangBarControls('gallery');
@@ -743,7 +808,13 @@
     /* ── Image zoom + pan controls ──
        The active image gets scaled AND translated via CSS transform.
        When zoomed in, the user can click-drag (or touch-drag) to pan
-       around the photo. Reset on slide change / lightbox close. */
+       around the photo. Reset on slide change / lightbox close.
+
+       On mobile (viewport ≤ 720px) zoom + drag are fully disabled —
+       the controls are hidden via CSS and these handlers bail out. */
+    function isMobileViewport() {
+        return window.innerWidth <= 720;
+    }
     var currentZoom = 1;
     var panX = 0, panY = 0;
     var ZOOM_MIN = 1, ZOOM_MAX = 5, ZOOM_STEP = 1.25;
@@ -781,6 +852,7 @@
     var dragMoved = false;
     document.addEventListener('mousedown', function (ev) {
         if (!isSlideShowOpen()) return;
+        if (isMobileViewport()) return;
         if (!ev.target.classList.contains('rg-slide-img')) return;
         dragging = true;
         dragMoved = false;
@@ -812,6 +884,7 @@
     var touchPan = false, touchPanStartX = 0, touchPanStartY = 0, touchPanOriginX = 0, touchPanOriginY = 0;
     document.addEventListener('touchstart', function (ev) {
         if (!isSlideShowOpen()) return;
+        if (isMobileViewport()) return;
         if (!ev.target || !ev.target.classList || !ev.target.classList.contains('rg-slide-img')) return;
         if (ev.touches.length !== 1) return;
         touchPan = true;
@@ -829,6 +902,7 @@
     }, { passive: false });
     document.addEventListener('touchend', function () { touchPan = false; });
     window.zoomInImage  = function () {
+        if (isMobileViewport()) return;
         currentZoom = Math.min(ZOOM_MAX, currentZoom * ZOOM_STEP);
         applyZoom();
         /* If user zooms in, auto-pause the slideshow so the image
@@ -836,15 +910,18 @@
         if (slideInterval && window.pauseSlideShow) window.pauseSlideShow();
     };
     window.zoomOutImage = function () {
+        if (isMobileViewport()) return;
         currentZoom = Math.max(ZOOM_MIN, currentZoom / ZOOM_STEP);
         applyZoom();
     };
     /* Reset zoom + pan to fit-to-screen (used by the Fit button + 0 key) */
     window.resetImageView = function () {
+        if (isMobileViewport()) return;
         resetZoom();
     };
     /* Double-click on the image toggles between 1× and 2× */
     document.addEventListener('dblclick', function (ev) {
+        if (isMobileViewport()) return;
         if (!ev.target.classList.contains('rg-slide-img')) return;
         currentZoom = currentZoom > 1 ? 1 : 2;
         applyZoom();
@@ -855,6 +932,7 @@
        the page doesn\'t scroll behind the lightbox. */
     document.addEventListener('wheel', function (ev) {
         if (!isSlideShowOpen()) return;
+        if (isMobileViewport()) return;
         ev.preventDefault();
         /* Scrolling UP (negative deltaY) → zoom in
            Scrolling DOWN (positive deltaY) → zoom out
