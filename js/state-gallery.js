@@ -616,6 +616,55 @@
         document.head.appendChild(s);
     }
 
+    /* Dynamically pin the second top nav (.lang-bar) flush against
+       the bottom of the FIRST top nav. The default CSS hard-codes
+       `top: var(--nav-h)` (68px), which is correct for desktop but
+       leaves a visible gap on mobile where .topnav-2 renders at a
+       smaller height. Measure once on load and re-measure on resize
+       / orientation change so the bar always sits flush. */
+    function alignLangBarToTopNav() {
+        var bar = document.querySelector('.lang-bar');
+        if (!bar) return;
+        var navBottom = 0;
+        /* Find the largest bottom edge among the first-tier topnav
+           elements (one of these renders on each viewport). Exclude
+           the lang-bar itself so we don't recurse. */
+        var topNavs = document.querySelectorAll(
+            '#nav-placeholder .topnav, #nav-placeholder .topnav-1, #nav-placeholder .topnav-2, #nav-placeholder .navbar-fixed-top'
+        );
+        for (var i = 0; i < topNavs.length; i++) {
+            var el = topNavs[i];
+            /* Skip hidden navs (the desktop nav on mobile, mobile nav
+               on desktop) so we measure the one that's actually visible. */
+            if (getComputedStyle(el).display === 'none' ||
+                getComputedStyle(el).visibility === 'hidden' ||
+                el.offsetHeight === 0) continue;
+            var r = el.getBoundingClientRect();
+            if (r.bottom > navBottom) navBottom = r.bottom;
+        }
+        if (navBottom > 0) {
+            bar.style.top = navBottom + 'px';
+        }
+    }
+    /* Run after nav-placeholder is populated by components.js
+       (DOMContentLoaded handler) — schedule a few attempts so we
+       catch the post-mount render reliably. */
+    function scheduleAlignLangBar() {
+        alignLangBarToTopNav();
+        setTimeout(alignLangBarToTopNav, 0);
+        setTimeout(alignLangBarToTopNav, 50);
+        setTimeout(alignLangBarToTopNav, 200);
+        setTimeout(alignLangBarToTopNav, 500);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scheduleAlignLangBar);
+    } else {
+        scheduleAlignLangBar();
+    }
+    window.addEventListener('load', scheduleAlignLangBar);
+    window.addEventListener('resize', alignLangBarToTopNav);
+    window.addEventListener('orientationchange', alignLangBarToTopNav);
+
     /* Public helper that the slideshow code calls whenever the
        gallery/slideshow/paused state changes, so the lang-bar buttons
        update their visibility without touching Vue. */
