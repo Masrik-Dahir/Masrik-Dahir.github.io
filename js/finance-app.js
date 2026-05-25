@@ -162,6 +162,12 @@
         loadScriptSync('../js/components.js?v=active-aliases');
         loadScriptSync('../js/eagle-loader.js');
         loadScriptSync('../js/page-graphics.js');
+        /* aesthetics.js installs the FontAwesome 5 kit (ka-f.fontawesome.com).
+           components.js's footer uses FA5 brand/solid classes (fab fa-instagram,
+           fas fa-handshake, …); without this kit the local FA 4.7 stylesheet
+           doesn't provide those glyphs, so the social icons render blank. Every
+           library/awsutil page loads aesthetics.js statically — match that here. */
+        loadScriptSync('../js/aesthetics.js');
 
     };
 

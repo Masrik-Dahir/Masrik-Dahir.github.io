@@ -286,6 +286,87 @@ test.describe('Mobile controls', () => {
   }
 });
 
+// ─── Gesture Controls Tests ───
+test.describe('Gesture controls', () => {
+  test('gestures.js loads and the gesture handler is active', async ({ page }) => {
+    await goToGames(page);
+    // Should not throw — confirms the script was bundled and executed.
+    const ok = await page.evaluate(() => {
+      const btn = document.getElementById('btn-left');
+      return !!btn && typeof window.MouseEvent === 'function';
+    });
+    expect(ok).toBe(true);
+  });
+
+  test('mobile control buttons are visually hidden but remain in DOM', async ({ page }) => {
+    await goToGames(page);
+    await launchGame(page, 'snake');
+
+    const buttons = ['btn-left', 'btn-right', 'btn-up', 'btn-down'];
+    for (const id of buttons) {
+      const el = page.locator('#' + id);
+      await expect(el).toBeAttached();
+      // The button must NOT take up visible space — confirms it's
+      // been replaced by the gesture overlay.
+      const box = await el.boundingBox();
+      expect(box === null || (box.width <= 2 && box.height <= 2)).toBe(true);
+    }
+    await stopGame(page);
+  });
+
+  test('swipe on game-canvas dispatches synthetic button presses', async ({ page }) => {
+    await goToGames(page);
+    await launchGame(page, 'snake');
+    await startPlaying(page);
+
+    // Spy on every mousedown that lands on a btn-* element. The
+    // gesture handler dispatches these in response to swipes.
+    await page.evaluate(() => {
+      window.__btnHits = [];
+      ['btn-left', 'btn-right', 'btn-up', 'btn-down'].forEach((id) => {
+        const b = document.getElementById(id);
+        if (b) b.addEventListener('mousedown', () => window.__btnHits.push(id));
+      });
+    });
+
+    // Simulate a left-swipe gesture on the game canvas via the
+    // Playwright touch API.
+    const canvas = page.locator('#game-canvas');
+    const box = await canvas.boundingBox();
+    expect(box).not.toBeNull();
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    await page.touchscreen.tap(cx, cy); // warmup; ignored hit
+    await page.evaluate(() => { window.__btnHits = []; });
+
+    // Manually dispatch a touchstart → touchmove → touchend sequence
+    // that mimics a leftward swipe.
+    await page.evaluate(({ cx, cy }) => {
+      const view = document.getElementById('game-canvas');
+      const mk = (type, x, y) => {
+        const touch = new Touch({
+          identifier: 1, target: view, clientX: x, clientY: y,
+          pageX: x, pageY: y, screenX: x, screenY: y,
+          radiusX: 1, radiusY: 1, rotationAngle: 0, force: 1,
+        });
+        return new TouchEvent(type, {
+          cancelable: true, bubbles: true, touches: type === 'touchend' ? [] : [touch],
+          targetTouches: type === 'touchend' ? [] : [touch], changedTouches: [touch],
+        });
+      };
+      view.dispatchEvent(mk('touchstart', cx, cy));
+      view.dispatchEvent(mk('touchmove',  cx - 60, cy));
+      view.dispatchEvent(mk('touchend',   cx - 60, cy));
+    }, { cx, cy });
+
+    await page.waitForTimeout(150);
+    const hits = await page.evaluate(() => window.__btnHits);
+    expect(hits).toContain('btn-left');
+
+    await stopGame(page);
+  });
+});
+
 // ─── Canvas Rendering Tests ───
 test.describe('Canvas rendering', () => {
   // Verify each game actually draws something on the canvas

@@ -530,6 +530,11 @@ html {
     align-items: center;
     background: white;
 }
+@media only screen and (max-width: 1026px) {
+    .lang-bar.resizing-1026-more {
+        display: none !important;
+    }
+}
 .lang-bar a { text-decoration: none; }
 .lang-bar .lang-links {
     display: flex;

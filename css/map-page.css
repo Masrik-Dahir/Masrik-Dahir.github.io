@@ -3,6 +3,21 @@
  * Extracted from inline <style> blocks in map.html.
  */
 
+/* MOBILE: the continent index pages (africa, asia, australia, europe,
+   northamerica, southamerica) have an inline `padding: 90px 5px 5px`
+   on the main .w3-content sized to clear the fixed .lang-bar second
+   topnav on desktop. On mobile the .lang-bar is hidden, so 90px of
+   top padding stacks on top of the components.js mobile nav's 70px
+   margin-bottom and pushes the gallery far below where the first
+   content row sits on every other page. Trim to 16px (matching the
+   w3-margin-top used site-wide) so the gap between topnav and the
+   first item matches the rest of the site. */
+@media only screen and (max-width: 1026px) {
+    body > div.w3-content {
+        padding-top: 16px !important;
+    }
+}
+
 /* Dots */
 .dot-container {
     text-align: center;
