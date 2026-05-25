@@ -15,7 +15,11 @@
 
     var ROOT_CLASS = "eagle-loader";
     var HIDDEN_CLASS = "is-hidden";
-    var MIN_VISIBLE_MS = 420;
+    /* Purely aesthetic flourish — show the bird for a brief moment so
+       the user registers it, then fade out regardless of whether page
+       resources have finished. Don't gate on window.load. */
+    var MIN_VISIBLE_MS = 280;
+    var AUTO_HIDE_MS   = 280;
     var shownAt = 0;
     var rootEl = null;
     var hideTimer = null;
@@ -963,6 +967,9 @@
         }
         ensureRoot();
         show();
+        /* Aesthetic-only: fade out after a brief moment regardless of
+           whether page resources have finished loading. */
+        setTimeout(hide, AUTO_HIDE_MS);
     }
 
     function onReady() {
@@ -974,18 +981,10 @@
         }
     }
 
-    function onLoad() { hide(); }
-
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", onReady);
     } else {
         onReady();
-    }
-
-    if (document.readyState === "complete") {
-        setTimeout(onLoad, 0);
-    } else {
-        window.addEventListener("load", onLoad);
     }
 
     window.EagleLoader = {
