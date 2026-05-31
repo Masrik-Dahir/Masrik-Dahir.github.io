@@ -7,17 +7,17 @@
 
 *— project —*
 
-<!-- Project Banner: pixel-arcade-cascade -->
+<!-- Project Banner: manhattan-skyline-pulse -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/pixel-arcade-cascade.svg"
-     alt="masrikdahir.com" width="800"/>
+<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/manhattan-skyline-pulse.svg"
+     alt="Masrik-Dahir.github.io" width="800"/>
 </a>
 
 *— author —*
 
-<!-- Author Banner: bioluminescent-reef-pulse -->
+<!-- Author Banner: calligraphy-ink-bloom -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/bioluminescent-reef-pulse.svg"
+<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/calligraphy-ink-bloom.svg"
      alt="Masrik Dahir — masrikdahir.com" width="800"/>
 </a>
 
@@ -400,6 +400,7 @@ Under the following terms:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.7.0 | 2026-05-31 | Six new NYC sim widgets (War / Holiday / Sport / Scene / Visual Filter / Physics), mobile menu border-radius reduced, mobile map tile-strip capped to 5, fresh manhattan-skyline-pulse + calligraphy-ink-bloom banners |
 | v3.0.0 | 2026-04-14 | Expanded to 99 playable games, fixed OutRun/Pole Position rendering, fixed Scramble terrain, fixed Tank maze connectivity, new banners, removed stats workflows |
 | v2.2.0 | 2026-04-10 | Added Games tab with playable Night Racer pseudo-3D racing game, new banners |
 | v2.1.0 | 2026-04-10 | Added 32 canvas retro game animations with shuffle, replaced 4 games, improved 8 games |

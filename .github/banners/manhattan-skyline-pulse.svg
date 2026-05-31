@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 120" width="800" height="120">
+  <defs>
+    <linearGradient id="msp-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0e2a"/>
+      <stop offset="55%" stop-color="#1b2455"/>
+      <stop offset="100%" stop-color="#3a2860"/>
+    </linearGradient>
+    <radialGradient id="msp-moon" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="60%" stop-color="#fbbf24" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="msp-river" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0a1428"/>
+    </linearGradient>
+    <linearGradient id="msp-taxi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+    <filter id="msp-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="msp-window-glow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="0.7"/>
+    </filter>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="800" height="120" fill="url(#msp-sky)"/>
+
+  <!-- Stars -->
+  <g fill="#ffffff">
+    <circle cx="80"  cy="18" r="0.7"><animate attributeName="opacity" values="0.3;1;0.3" dur="3.1s" repeatCount="indefinite"/></circle>
+    <circle cx="160" cy="28" r="0.5"><animate attributeName="opacity" values="0.7;0.2;0.7" dur="2.6s" repeatCount="indefinite"/></circle>
+    <circle cx="250" cy="14" r="0.8"><animate attributeName="opacity" values="0.4;1;0.4" dur="3.7s" repeatCount="indefinite"/></circle>
+    <circle cx="340" cy="22" r="0.6"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="2.3s" repeatCount="indefinite"/></circle>
+    <circle cx="440" cy="11" r="0.7"><animate attributeName="opacity" values="0.2;0.9;0.2" dur="4.1s" repeatCount="indefinite"/></circle>
+    <circle cx="530" cy="20" r="0.5"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="3.3s" repeatCount="indefinite"/></circle>
+    <circle cx="620" cy="13" r="0.8"><animate attributeName="opacity" values="0.3;1;0.3" dur="2.9s" repeatCount="indefinite"/></circle>
+    <circle cx="720" cy="22" r="0.6"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="3.5s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- Moon arcing across the sky -->
+  <g>
+    <circle r="14" fill="url(#msp-moon)" filter="url(#msp-glow)">
+      <animateMotion dur="22s" repeatCount="indefinite"
+        path="M -30,80 Q 400,-25 830,80"/>
+    </circle>
+  </g>
+
+  <!-- Manhattan skyline silhouette (back layer) -->
+  <g fill="#0a0e1f" opacity="0.85">
+    <rect x="0"   y="68" width="42" height="40"/>
+    <rect x="42"  y="58" width="22" height="50"/>
+    <rect x="64"  y="62" width="28" height="46"/>
+    <rect x="92"  y="50" width="20" height="58"/>
+    <rect x="112" y="60" width="36" height="48"/>
+    <rect x="148" y="44" width="18" height="64"/>
+    <!-- Empire State Building -->
+    <rect x="166" y="38" width="14" height="70"/>
+    <rect x="170" y="28" width="6"  height="14"/>
+    <line x1="173" y1="20" x2="173" y2="28" stroke="#0a0e1f" stroke-width="1.5"/>
+    <rect x="180" y="56" width="24" height="52"/>
+    <rect x="204" y="62" width="30" height="46"/>
+    <rect x="234" y="50" width="18" height="58"/>
+    <rect x="252" y="58" width="26" height="50"/>
+    <!-- Chrysler Building -->
+    <rect x="278" y="42" width="14" height="66"/>
+    <polygon points="278,42 285,28 292,42"/>
+    <rect x="292" y="60" width="20" height="48"/>
+    <rect x="312" y="52" width="22" height="56"/>
+    <rect x="334" y="64" width="32" height="44"/>
+    <rect x="366" y="48" width="20" height="60"/>
+    <rect x="386" y="56" width="28" height="52"/>
+    <!-- One World Trade Center -->
+    <rect x="414" y="32" width="16" height="76"/>
+    <line x1="422" y1="14" x2="422" y2="32" stroke="#0a0e1f" stroke-width="1.5"/>
+    <rect x="430" y="60" width="22" height="48"/>
+    <rect x="452" y="50" width="18" height="58"/>
+    <rect x="470" y="62" width="30" height="46"/>
+    <rect x="500" y="54" width="20" height="54"/>
+    <rect x="520" y="60" width="24" height="48"/>
+    <rect x="544" y="46" width="22" height="62"/>
+    <rect x="566" y="58" width="28" height="50"/>
+    <rect x="594" y="52" width="18" height="56"/>
+    <rect x="612" y="62" width="32" height="46"/>
+    <rect x="644" y="56" width="20" height="52"/>
+    <rect x="664" y="64" width="26" height="44"/>
+    <rect x="690" y="50" width="22" height="58"/>
+    <rect x="712" y="58" width="28" height="50"/>
+    <rect x="740" y="64" width="34" height="44"/>
+    <rect x="774" y="60" width="26" height="48"/>
+  </g>
+
+  <!-- Building windows lighting up in waves -->
+  <g fill="#fde047" filter="url(#msp-window-glow)">
+    <!-- Wave 1 -->
+    <rect x="46"  y="72" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0s"   repeatCount="indefinite"/></rect>
+    <rect x="52"  y="72" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.1s" repeatCount="indefinite"/></rect>
+    <rect x="58"  y="72" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.2s" repeatCount="indefinite"/></rect>
+    <rect x="46"  y="78" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.3s" repeatCount="indefinite"/></rect>
+    <rect x="52"  y="78" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.4s" repeatCount="indefinite"/></rect>
+    <rect x="58"  y="78" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.5s" repeatCount="indefinite"/></rect>
+    <!-- Empire State -->
+    <rect x="168" y="52" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.6s" repeatCount="indefinite"/></rect>
+    <rect x="172" y="52" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.7s" repeatCount="indefinite"/></rect>
+    <rect x="176" y="52" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.8s" repeatCount="indefinite"/></rect>
+    <rect x="168" y="60" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.9s" repeatCount="indefinite"/></rect>
+    <rect x="172" y="60" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.0s" repeatCount="indefinite"/></rect>
+    <rect x="176" y="60" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.1s" repeatCount="indefinite"/></rect>
+    <rect x="168" y="68" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.2s" repeatCount="indefinite"/></rect>
+    <rect x="172" y="68" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.3s" repeatCount="indefinite"/></rect>
+    <rect x="176" y="68" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.4s" repeatCount="indefinite"/></rect>
+    <!-- Chrysler -->
+    <rect x="280" y="58" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.5s" repeatCount="indefinite"/></rect>
+    <rect x="285" y="58" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.6s" repeatCount="indefinite"/></rect>
+    <rect x="280" y="65" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.7s" repeatCount="indefinite"/></rect>
+    <rect x="285" y="65" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.8s" repeatCount="indefinite"/></rect>
+    <rect x="280" y="72" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.9s" repeatCount="indefinite"/></rect>
+    <rect x="285" y="72" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.0s" repeatCount="indefinite"/></rect>
+    <!-- One WTC -->
+    <rect x="417" y="46" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.15s" repeatCount="indefinite"/></rect>
+    <rect x="423" y="46" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.35s" repeatCount="indefinite"/></rect>
+    <rect x="417" y="54" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.55s" repeatCount="indefinite"/></rect>
+    <rect x="423" y="54" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.75s" repeatCount="indefinite"/></rect>
+    <rect x="417" y="62" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.95s" repeatCount="indefinite"/></rect>
+    <rect x="423" y="62" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.15s" repeatCount="indefinite"/></rect>
+    <rect x="417" y="70" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.35s" repeatCount="indefinite"/></rect>
+    <rect x="423" y="70" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.55s" repeatCount="indefinite"/></rect>
+    <!-- Mid + right side -->
+    <rect x="548" y="56" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.1s" repeatCount="indefinite"/></rect>
+    <rect x="554" y="56" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.2s" repeatCount="indefinite"/></rect>
+    <rect x="560" y="56" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.3s" repeatCount="indefinite"/></rect>
+    <rect x="548" y="64" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.4s" repeatCount="indefinite"/></rect>
+    <rect x="554" y="64" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.5s" repeatCount="indefinite"/></rect>
+    <rect x="560" y="64" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.6s" repeatCount="indefinite"/></rect>
+    <rect x="695" y="62" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.7s" repeatCount="indefinite"/></rect>
+    <rect x="702" y="62" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.8s" repeatCount="indefinite"/></rect>
+    <rect x="695" y="70" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.9s" repeatCount="indefinite"/></rect>
+    <rect x="702" y="70" width="2" height="2"><animate attributeName="opacity" values="0;1;0" dur="3s" begin="3.0s" repeatCount="indefinite"/></rect>
+  </g>
+
+  <!-- River reflection (foreground) -->
+  <rect x="0" y="108" width="800" height="12" fill="url(#msp-river)"/>
+  <g fill="#fbbf24" opacity="0.4">
+    <rect x="60"  y="110" width="20" height="1"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="2.5s" repeatCount="indefinite"/></rect>
+    <rect x="170" y="111" width="14" height="1"><animate attributeName="opacity" values="0.5;0.2;0.5" dur="3s"   repeatCount="indefinite"/></rect>
+    <rect x="280" y="113" width="18" height="1"><animate attributeName="opacity" values="0.2;0.7;0.2" dur="2.8s" repeatCount="indefinite"/></rect>
+    <rect x="420" y="110" width="16" height="1"><animate attributeName="opacity" values="0.4;0.1;0.4" dur="3.2s" repeatCount="indefinite"/></rect>
+    <rect x="555" y="112" width="14" height="1"><animate attributeName="opacity" values="0.3;0.6;0.3" dur="2.7s" repeatCount="indefinite"/></rect>
+    <rect x="700" y="113" width="20" height="1"><animate attributeName="opacity" values="0.5;0.2;0.5" dur="3.1s" repeatCount="indefinite"/></rect>
+  </g>
+
+  <!-- Yellow taxi crossing the foreground -->
+  <g>
+    <g>
+      <rect x="0" y="100" width="18" height="6" rx="1.5" fill="url(#msp-taxi)"/>
+      <rect x="3" y="97"  width="12" height="4" rx="1" fill="url(#msp-taxi)"/>
+      <rect x="5" y="98"  width="3"  height="2"  fill="#0a0e1f"/>
+      <rect x="10" y="98" width="3"  height="2"  fill="#0a0e1f"/>
+      <circle cx="4"  cy="106" r="1.5" fill="#0a0e1f"/>
+      <circle cx="14" cy="106" r="1.5" fill="#0a0e1f"/>
+      <!-- headlight beam -->
+      <polygon points="18,101 32,98 32,104" fill="#fef3c7" opacity="0.6"/>
+      <animateTransform attributeName="transform" type="translate"
+        values="-40,0; 850,0" dur="9s" repeatCount="indefinite"/>
+    </g>
+  </g>
+
+  <!-- Dark overlay behind text for readability -->
+  <rect x="150" y="30" width="500" height="60" rx="8" fill="#000000" opacity="0.35"/>
+
+  <!-- Project name text -->
+  <text x="400" y="54" font-family="'Segoe UI',sans-serif" font-size="28" font-weight="700"
+        fill="#fef3c7" text-anchor="middle" letter-spacing="3">
+    Masrik-Dahir.github.io<animate attributeName="opacity" values="0;1" dur="1s" fill="freeze"/>
+  </text>
+  <text x="400" y="80" font-family="'Segoe UI',sans-serif" font-size="11"
+        fill="#fbbf24" text-anchor="middle" letter-spacing="1.5">
+    A portfolio, atlas, and arcade — pure HTML5 Canvas, zero build<animate attributeName="opacity" values="0;1" begin="0.6s" dur="0.8s" fill="freeze"/>
+  </text>
+</svg>
