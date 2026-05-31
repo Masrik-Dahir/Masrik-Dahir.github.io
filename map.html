@@ -26,6 +26,8 @@
     <link rel="stylesheet" href="css/eagle-loader.css">
     <link rel="stylesheet" href="css/polish.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/pager.css">
+    <script src="js/pager.js"></script>
 
 
 
@@ -337,6 +339,56 @@
                 padding-top: 16px !important;
             }
         }
+
+        /* ── PERF: defer rendering of inline country / region SVG maps ─────
+           The page contains 23 large inline SVG sections — without help,
+           the browser pays the full layout cost of every one on first paint
+           even though pagination ends up hiding most. Three complementary
+           tricks:
+
+           1. Pre-hide every .w3-card direct child of the content container
+              by default (display:none gate). Vue removes the gate (adds
+              body.map-ready) once it has mounted and called
+              syncContentSectionsToPage — until then, nothing below the
+              search bar renders at all, so first paint is essentially the
+              cost of the navbar + tile strip + pager.
+
+           2. .section-collapsed — applied to sections not on the active
+              page. Uses content-visibility:hidden + height:0 so the
+              browser SKIPS rendering the content (no paint, no layout
+              for the SVG inside) but preserves the rendered state for
+              the next reveal. Switching a section in/out of this class
+              is dramatically faster than display:none/'', because
+              display:'' forces the browser to relayout + repaint the
+              SVG from scratch each time.
+
+           3. content-visibility: auto on the sections that ARE visible.
+              The browser then skips layout/paint for any section currently
+              scrolled off-screen and resumes it only when the user scrolls
+              near it. contain-intrinsic-size reserves approximate space so
+              the scrollbar doesn't jump as sections render in.
+        */
+        .w3-container.w3-margin-top > .w3-card {
+            content-visibility: auto;
+            contain-intrinsic-size: 1px 800px;
+        }
+        .w3-container.w3-margin-top > .w3-card.section-collapsed,
+        .w3-container.w3-margin-top > hr.section-collapsed {
+            content-visibility: hidden !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: 0 !important;
+            overflow: hidden !important;
+            visibility: hidden !important;
+            contain: strict !important;
+            pointer-events: none !important;
+        }
+        body:not(.map-ready) .w3-container.w3-margin-top > .w3-card,
+        body:not(.map-ready) .w3-container.w3-margin-top > hr {
+            display: none !important;
+        }
     </style>
 
 
@@ -392,35 +444,23 @@
                         </div>
                     </div>
                 </div>
-                <div style="display: inline-block; overflow: hidden;">
-                    <div style="display: flex; margin-left: 10px; white-space: nowrap; justify-content: space-between;">
-                        <div v-if="resources.length" v-cloak class="table" style="display: flex;">
-                            <div v-for="(item, index) in resultQuery" :key="index" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
+                <div style="display: inline-block; overflow: hidden; width: 100%;">
+                    <div style="display: flex; flex-wrap: wrap; margin-left: 10px; justify-content: flex-start;">
+                        <div v-if="resources.length" v-cloak class="table" style="display: flex; flex-wrap: wrap;">
+                            <div v-for="(item, index) in pagedResults" :key="item.abv" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
                                 <div data-toggle="tooltip" data-html="true" :title="item.title" style="margin: auto">
                                     <center>
                                         <button @click="scrollToSection(item.id, item.url)" class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
                                             <img :src="item.image" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
                                         </button>
-                                        <div v-cloak style="color: black; text-align: center; width: 50px;">{{ item.abv }}</div> <!-- Set a fixed width -->
-                                    </center>
-                                </div>
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
-                                <div data-toggle="tooltip" data-html="true" title="+190" style="margin: auto">
-                                    <center>
-                                        <button class="pop-up-button" style="background-color: transparent; border: 1px solid black; margin-top: 5px; cursor: pointer; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
-                                            <img src="https://d3dw5jtb3w1kgy.cloudfront.net/three-dots.png" style="width: 50px; height: 100%; object-fit: contain; padding: 2px"/>
-                                        </button>
-                                        <!-- Non-breaking space gives this label div the same line-height
-                                             as the country abbreviation labels (e.g. "USA", "CAN") below
-                                             their tiles, so the outer wrapper measures the same vertical
-                                             extent and the dots button sits on the same baseline. -->
-                                        <div v-cloak style="color: black; text-align: center; width: 50px;">&nbsp;</div>
+                                        <div v-cloak style="color: black; text-align: center; width: 50px;">{{ item.abv }}</div>
                                     </center>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div v-cloak v-if="resultQuery.length === 0" style="margin: 12px; color: #475569; font-style: italic;">No countries match your search.</div>
+                    <div id="country-pager" class="md-pager"></div>
                 </div>
 
 
@@ -4093,6 +4133,9 @@
         <!-- End Right Column -->
     </div>
 
+    <!-- Bottom pager — mirrors the top pager so users can navigate
+         without scrolling back up. Wired by app_country.renderPager(). -->
+    <div id="country-pager-bottom" class="md-pager"></div>
 </div>
 
 <div id="footer-placeholder"></div>

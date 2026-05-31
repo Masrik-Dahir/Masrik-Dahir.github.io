@@ -1183,8 +1183,17 @@
                             <div class="main">Masrik Dahir</div>
                         </h5>
 
-                        <button onclick="togglePopup('3')" class="w3-margin-right w3-margin-left glow-on-hover-nav" style="float: right; padding: 5px; margin-top: 15px; border: none; background: transparent"><img src="https://d3dw5jtb3w1kgy.cloudfront.net/menu.png" width="25" height="20" alt="Masrik Dahir">
-                        </button>
+                        <div role="button" tabindex="0" onclick="togglePopup('3')"
+                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();togglePopup('3');}"
+                             aria-label="Open navigation menu" class="mobile-menu-btn">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                                <rect x="3" y="5" width="18" height="3" rx="1.5" fill="#000000"/>
+                                <rect x="3" y="10.5" width="14" height="3" rx="1.5" fill="#000000"/>
+                                <rect x="3" y="16" width="18" height="3" rx="1.5" fill="#000000"/>
+                            </svg>
+                            <span>MENU</span>
+                        </div>
 
                     </div>
                 </div>
@@ -4123,6 +4132,138 @@
                 width: min(440px, calc(100vw - 40px));
                 max-width: calc(100vw - 40px);
             }
+            /* Desktop (≥1027px) — double every widget-tooltip width so
+               the chip grids fan out horizontally instead of stacking
+               into many vertical rows. Each tooltip stays inside the
+               viewport via the `min(…, calc(100vw - 40px))` clamp.
+
+               For parade / abduction / superhero / rcn the chip grid
+               also widens from 7 columns to 14 so every chip lives on
+               the first line. Math: 14 chips × 32px + 13 gaps × 4px =
+               500px content; plus 14px padding × 2 = 528px minimum
+               tooltip width — we use 560px for breathing room. */
+            @media (min-width: 1027px) {
+                .widget-tooltip { width: min(560px, calc(100vw - 40px)); }
+                .tt-flight      { width: min(480px, calc(100vw - 40px)); }
+                .tt-weather     { width: min(560px, calc(100vw - 40px)); }
+                .tt-attack      { width: min(560px, calc(100vw - 40px)); }
+                .tt-defence     { width: min(560px, calc(100vw - 40px)); }
+                .tt-rcn         { width: min(560px, calc(100vw - 40px)); }
+                .tt-parade      { width: min(560px, calc(100vw - 40px)); }
+                .tt-abduction   { width: min(560px, calc(100vw - 40px)); }
+                .tt-superhero   { width: min(560px, calc(100vw - 40px)); }
+                .tt-attack-wide {
+                    width: min(880px, calc(100vw - 40px));
+                    max-width: calc(100vw - 40px);
+                }
+                /* Up to 14 chips per row on desktop (was 7). Uses the
+                   same auto-fill + justify-content: center recipe as
+                   tt-attack-wide so the chips fill naturally and stay
+                   centered — widgets with fewer than 14 chips (e.g.
+                   superhero, 7) cluster in the middle instead of
+                   left-aligning under 14 fixed columns. */
+                .tt-parade    .tt-grid.tt-grid-icons,
+                .tt-abduction .tt-grid.tt-grid-icons,
+                .tt-abduction .tt-grid.tt-grid-missiles,
+                .tt-superhero .tt-grid.tt-grid-icons {
+                    grid-template-columns: repeat(auto-fill, 32px) !important;
+                    justify-content: center !important;
+                }
+                /* Alien Abduction has TWO grids in its HTML:
+                     • .tt-grid-ships    (7 ship chips)
+                     • .tt-grid-missiles (7 missile chips)
+                   Block-level grids stack vertically (= 2 rows). Make
+                   them inline-grid so they sit side-by-side, then wrap
+                   them in flex centring via the tooltip itself so the
+                   combined 14-chip strip is centered on its own row. */
+                .tt-abduction .tt-grid.tt-grid-ships,
+                .tt-abduction .tt-grid.tt-grid-missiles {
+                    display: inline-grid !important;
+                    grid-template-columns: repeat(7, 32px) !important;
+                    vertical-align: top !important;
+                    margin: 10px 0 6px !important;
+                }
+                /* tiny gap between the ships strip and missiles strip */
+                .tt-abduction .tt-grid.tt-grid-missiles {
+                    margin-left: 12px !important;
+                    margin-top: 10px !important;
+                }
+                /* Wrap them in a single centered "line" via text-align
+                   on the tooltip (cheapest way to centre inline-grids
+                   without adding markup). */
+                .tt-abduction { text-align: center !important; }
+                .tt-abduction .tt-row,
+                .tt-abduction .tt-hint,
+                .tt-abduction .tt-title { text-align: left !important; }
+
+                /* ── Auto button in the title header ──
+                   The Auto on/off toggle is moved out of the
+                   .tt-toggle-row stacked beneath the slider and
+                   placed inline at the right side of the .tt-title
+                   header (e.g. "Attack Control · AUTO ON/OFF"). The
+                   move itself is done by the IIFE at the bottom of
+                   <body>; this CSS just gives the title a flex
+                   layout with space-between and compacts the button
+                   styling so it reads as a header chip. */
+                .widget-tooltip .tt-title {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    gap: 10px !important;
+                }
+                .widget-tooltip .tt-title .tt-toggle.tt-title-auto {
+                    font-size: 10px !important;
+                    padding: 3px 10px !important;
+                    height: auto !important;
+                    min-width: 60px !important;
+                    border-radius: 10px !important;
+                    margin: 0 !important;
+                    flex: 0 0 auto !important;
+                    letter-spacing: 0.08em !important;
+                }
+                /* Reconstruction "instant rebuild" button moved into
+                   the title header — visually IDENTICAL to the Auto
+                   toggle pill. Every property mirrors the .tt-toggle
+                   base + .tt-title-auto override stack so the two
+                   sit side-by-side and read as the same button family
+                   (only the label text differs: "Auto" vs "Rebuild").
+                   Uses !important on every property because the
+                   underlying .tt-rcn-instant rules and the polish.css
+                   button rules each set their own competing values. */
+                .widget-tooltip .tt-title .tt-rcn-instant.tt-title-instant {
+                    font-family: 'Arial Black', Arial, sans-serif !important;
+                    font-size: 10px !important;
+                    font-weight: 800 !important;
+                    letter-spacing: 0.08em !important;
+                    text-transform: uppercase !important;
+                    padding: 3px 10px !important;
+                    margin: 0 !important;
+                    height: auto !important;
+                    min-width: 60px !important;
+                    width: auto !important;
+                    border-radius: 10px !important;
+                    border: 2px solid rgba(10,20,40,0.18) !important;
+                    background: rgba(255,255,255,0.55) !important;
+                    color: rgba(10,10,25,0.65) !important;
+                    box-shadow: none !important;
+                    text-shadow: none !important;
+                    flex: 0 0 auto !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    line-height: 1 !important;
+                    cursor: pointer !important;
+                }
+                /* Hide ONLY the toggle row whose Auto button got
+                   relocated to the title (marked .tt-toggle-row-moved
+                   by the IIFE at the bottom of <body>). The rcn
+                   widget's toggle row holds a "REBUILD NOW" instant
+                   action button instead of an Auto toggle, and must
+                   stay visible. */
+                .widget-tooltip .tt-toggle-row.tt-toggle-row-moved {
+                    display: none !important;
+                }
+            }
             /* two-column status grid inside the wide attack tooltip */
             .tt-cols {
                 display: grid;
@@ -4293,7 +4434,7 @@
                 gap: 4px;
                 margin: 8px 0 2px;
             }
-            .tt-flight .tt-grid { grid-template-columns: repeat(2, 1fr); }
+            .tt-flight .tt-grid { grid-template-columns: repeat(4, 1fr); }
             .tt-weather .tt-grid-icons {
                 grid-template-columns: repeat(auto-fill, 32px);
                 justify-content: center;
@@ -5540,6 +5681,86 @@
            mutation, no transient class. The chip simply turns red /
            green / blue (whichever theme) and that's the whole
            click feedback. */
+    })();
+    </script>
+
+    <script>
+    /* ── Move every widget-tooltip's title-bar action into the
+          title header ─────────────────────────────────────────────
+       Two button kinds get relocated, both into the right side of
+       the .tt-title bar:
+
+       1. .tt-toggle      — the Auto on/off toggle on Attack
+                            Control, Defence Control, Alien
+                            Abduction, Superhero Battle. Label is
+                            forced to "Auto" regardless of state;
+                            visual on/off is driven by aria-pressed
+                            and the .on class.
+
+       2. .tt-rcn-instant — the instant-rebuild button on the
+                            Reconstruction widget. Replaced with a
+                            FontAwesome bolt icon (⚡) so it reads
+                            as a "fast-forward / skip" action while
+                            staying compact next to the title.
+
+       The script doesn't rewrite the markup, it just moves the
+       existing <button> nodes — so all inline onclick handlers,
+       IDs, and ARIA state are preserved. The hosting .tt-toggle-row
+       is hidden via the .tt-toggle-row-moved class which CSS
+       handles in the @media block above. */
+    (function () {
+        function wrapTitleLabel(title) {
+            if (title.querySelector('.tt-title-label')) return;
+            var labelSpan = document.createElement('span');
+            labelSpan.className = 'tt-title-label';
+            while (title.firstChild) labelSpan.appendChild(title.firstChild);
+            title.appendChild(labelSpan);
+        }
+        function moveActionsToTitle() {
+            document.querySelectorAll('.widget-tooltip').forEach(function (tip) {
+                if (tip.dataset.actionMoved === '1') return;
+                var title = tip.querySelector('.tt-title');
+                if (!title) return;
+
+                var moved = false;
+                var toggleRow = tip.querySelector('.tt-toggle-row');
+
+                // 1) Auto on/off toggle
+                var toggleBtn = tip.querySelector('.tt-toggle-row .tt-toggle');
+                if (toggleBtn) {
+                    wrapTitleLabel(title);
+                    toggleBtn.classList.add('tt-title-auto');
+                    title.appendChild(toggleBtn);
+                    toggleBtn.textContent = 'Auto';
+                    toggleBtn.addEventListener('click', function () {
+                        this.textContent = 'Auto';
+                    });
+                    moved = true;
+                }
+
+                // 2) Reconstruction instant-rebuild → "Rebuild" pill
+                var instantBtn = tip.querySelector('.tt-rcn-instant');
+                if (instantBtn) {
+                    wrapTitleLabel(title);
+                    instantBtn.classList.add('tt-title-instant');
+                    instantBtn.setAttribute('aria-label', 'Rebuild now');
+                    instantBtn.setAttribute('title', 'Rebuild now');
+                    instantBtn.textContent = 'Rebuild';
+                    title.appendChild(instantBtn);
+                    moved = true;
+                }
+
+                if (moved && toggleRow) {
+                    toggleRow.classList.add('tt-toggle-row-moved');
+                }
+                if (moved) tip.dataset.actionMoved = '1';
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', moveActionsToTitle);
+        } else {
+            moveActionsToTitle();
+        }
     })();
     </script>
 </body>

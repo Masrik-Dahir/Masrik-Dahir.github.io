@@ -132,13 +132,36 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 0;
+    min-height: 130px;
+    padding: 4px 0;
 }
 
+/* Larger, well-proportioned milestone logos. The data in vueJs/software.js
+   carries an inline `style="width: 1vw; min-width: calc(70px + 0.7vw)"`
+   on each <img> which kept the logos tiny (≈75-85px). Override that here
+   with !important so every milestone tile shows a properly sized logo
+   that fills the button's image area. object-fit: contain preserves the
+   aspect ratio so tall, wide, and square logos all look right. */
 .milestone-img-wrap img {
-    max-height: 100%;
-    max-width: 80%;
-    object-fit: contain;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 180px !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 120px !important;
+    object-fit: contain !important;
+}
+
+/* Mobile (≤1000px) buttons are slightly smaller — keep proportional
+   max-heights so the logo doesn't dominate the entire tile. */
+@media (max-width: 1000px) {
+    .milestone-img-wrap {
+        min-height: 110px;
+    }
+    .milestone-img-wrap img {
+        max-height: 150px !important;
+        min-height: 100px !important;
+    }
 }
 
 .milestone-des {

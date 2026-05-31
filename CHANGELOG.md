@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.6.0] - 2026-05-31
+### Added
+- **7 new superheroes** in the NYC sim's Superhero Battle (`js/nyc-city.js`):
+  - **Tide Lord** — hurls a 3-prong trident with a churning water spiral trail; on hit the prongs detonate a tidal-wave AOE that damages every robot within ~40px of the impact point.
+  - **Swarm Marshal** — fan-fires 5 mini-hero "drone" projectiles in different arcs, each rendered as a tiny caped hero with a halo glow that bobs along its flight path.
+  - **Warhead** — sleek high-velocity rocket with smoke trail, exhaust flame, and a missile-blast AOE on contact (orange/red ring FX).
+  - **Magnetar** — spawns a spinning metallic-scrap chunk from the ground in front of the hero and slings it at the target; reads as torn-from-the-road junk with rust streaks, rivets, and a red magnetic aura.
+  - **Paladin Sentinel** — melee charger that paints a sword + shield arc on attack frame (gold-rimmed blue shield disc + steel longsword with brown hilt).
+  - **Gunsmith** — fires a 4-bullet burst with tracer streaks; each bullet is tinted per weapon (AK yellow / AR orange / machine-gun white) on rotation.
+  - **Dust Storm** — random solid shape (cube, star, hammer, or spike) coalesces from swirling dust motes and flies at the target; per-attack the shape is randomized.
+- **Robot shell overlay** on every hero (`drawHeroRobotShell`): chest arc reactor with pulsing core, luminescent eye visor, metallic shoulder pads, torso plate seams, 8 servo-pivot joints (shoulders/elbows/hips/knees) with highlight dots, and a head-top antenna with a blinking status light. Reads as Tesla Optimus / Iron Man mecha overlay regardless of which hero is selected.
+
+## [1.5.0] - 2026-05-30
+### Added
+- **Shared paginator** (`js/pager.js`, `css/pager.css`) — `window.MDPager.render(mountEl, { totalItems, pageSize, currentPage, onChange })`. Numbered buttons with `‹ / ›` nav and ellipsis when total pages > 7. Liquid-glass styling that matches the existing `.pop-up-button` / `.game-card-tag` look.
+- **Games gallery pagination** (`games.html`, `js/games-gallery.js`) — page size 12 desktop / 6 mobile. Only the active page's cards mount, so at most 12 `requestAnimationFrame` preview loops run concurrently instead of 106. Pager mounts above and below the grid.
+- **Search across all 106 games** — typing in the search box re-filters the full `GAMES` array and re-paginates the filtered list; clearing restores master-list page 1.
+- **Lazy per-game script loading** — the 100 `<script src="js/games/X.js" defer>` tags previously loaded on every visit to `games.html` are gone. The per-game implementation is fetched the first time the user launches that game, then cached.
+- **Map country tile-strip pagination** (`map.html`, `vueJs/software.js` `app_country`) — replaces the old `windowWidth/150` truncation that hid most of the 190 countries. Page size 20 desktop / 8 mobile. Search filters the full country list; clicking a tile still scrolls to the matching `scroll_<ABV>` section or navigates to its sub-page via `fallbackUrl`. `scrollToSection` switches the active page first when the target isn't on the visible page.
+- `docs/SPEC_v1.5.0.md` — full spec driving this release.
+
+### Removed
+- The "+190" three-dots placeholder tile on `map.html` (its role is now served by the pager).
+- The 100 inline per-game `<script>` tags in `games.html` (`gestures.js` is kept since it's shared).
+
+### Changed
+- `app_country.resultQuery` no longer slices — it returns the full filtered list so search reaches every one of the ~190 countries. `pagedResults` (new computed) handles the per-page slice.
+- `app_country.scrollToSection` is page-aware: if the target section is on a different page, it switches to that page, waits a tick, then scrolls.
+
 ## [1.2.0] - 2026-05-20
 ### Added
 - **Positioning hero** on the homepage (`index.html`) — one-line "who I am, what I do, what I want" above all other content, with primary "See projects" and "Featured work" CTAs.
