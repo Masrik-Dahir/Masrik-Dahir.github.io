@@ -32,7 +32,7 @@
 </div>
 
 <p align="center">
-<img width="1267" height="629" alt="image" src="https://github.com/user-attachments/assets/6e35b18e-f9a5-4963-bf90-f4aca4e24afd" />
+<img width="920" height="422" alt="Recording 2026-05-31 102920" src="https://github.com/user-attachments/assets/6beca6c5-eec7-4d51-b190-223dfe6151ed" />
 </p>
 
 ## ⚡ TL;DR
