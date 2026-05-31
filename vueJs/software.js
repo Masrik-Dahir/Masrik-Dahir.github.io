@@ -980,6 +980,14 @@ const app_country = {
             windowWidth: window.innerWidth,
             showingPopupIndex: null, // Index of the currently shown popup
             searchQuery: null,
+            currentPage: 1,
+            // pageSize chosen so total pager pages ≤ inline section count
+            // (23 on map.html). At mobile size 8, ceil(190/8) = 24 pages
+            // which is ONE MORE than there are sections — the proportional
+            // section distribution then leaves page 1 empty. 10 keeps the
+            // total at ceil(190/10) = 19 ≤ 23 so every page gets ≥ 1 section.
+            pageSize: window.innerWidth <= 640 ? 10 : 20,
+            pagerDestroy: null,
             resources: [
                 { title: "United States", abv: "USA", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/United States/img.png", url: "https://www.masrikdahir.com/map", id: "scroll_USA" },
                 { title: "Canada", abv: "CAN", image: "https://d3dw5jtb3w1kgy.cloudfront.net/Thumbnail/Canada/img.png", url: "https://www.masrikdahir.com/map/northamerica", id: "scroll_CAN" },
@@ -1182,42 +1190,297 @@ const app_country = {
         };
     },
     computed: {
+        // The full filtered list — pager paginates this, search filters this.
+        // No truncation here so search always reaches every country.
         resultQuery() {
-            let filteredResults = this.searchQuery
-                ? this.resources.filter((item) => {
-                    return this.searchQuery.toLowerCase().split(' ').every(v =>
-                        item.title.toLowerCase().includes(v)
-                    );
-                })
-                : this.resources;
-
-            // Return only the first 10 items
-            console.log(parseInt(this.windowWidth/150))
-            return filteredResults.slice(0, Math.min(parseInt(this.windowWidth/150), 20));
+            if (!this.searchQuery) return this.resources;
+            const q = this.searchQuery.toLowerCase();
+            return this.resources.filter((item) => {
+                return q.split(' ').every(v =>
+                    item.title.toLowerCase().includes(v) ||
+                    (item.abv && item.abv.toLowerCase().includes(v))
+                );
+            });
+        },
+        // Slice of resultQuery for the active page.
+        pagedResults() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.resultQuery.slice(start, start + this.pageSize);
+        },
+        totalPages() {
+            return Math.max(1, Math.ceil(this.resultQuery.length / this.pageSize));
+        }
+    },
+    watch: {
+        searchQuery() {
+            this.currentPage = 1;
+            this.$nextTick(this.renderPager);
+            this.$nextTick(this.syncContentSectionsToPage);
+        },
+        currentPage() {
+            this.$nextTick(this.renderPager);
+            this.$nextTick(this.syncContentSectionsToPage);
+        },
+        resultQuery() {
+            this.$nextTick(this.renderPager);
+            this.$nextTick(this.syncContentSectionsToPage);
         }
     },
     mounted() {
         this.$nextTick(() => {
             window.addEventListener('resize', this.onResize);
+            this.renderPager();
+            this.syncContentSectionsToPage();
+            // Lift the pre-render gate from map.html so paginated sections
+            // actually appear. We only do this AFTER syncContentSectionsToPage
+            // has set display on each card, so the first paint of any inline
+            // SVG happens for at most ~3 sections instead of 23.
+            document.body.classList.add('map-ready');
+            // After page 1 is interactive, start warming up the rest of the
+            // pages in the background so clicking Next / a higher page number
+            // doesn't pay the full layout cost on demand.
+            this.schedulePrewarm();
         });
     },
     beforeDestroy() {
         window.removeEventListener('resize', this.onResize);
+        if (this.pagerDestroy) this.pagerDestroy();
     },
     methods: {
-        scrollToSection(sectionId, fallbackUrl) {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
-            } else if (fallbackUrl) {
-                window.location.href = fallbackUrl;
+        // ── Background page-warming ────────────────────────────────
+        // After page 1 has rendered and is interactive, kick off two
+        // promise-driven warm-ups during idle time so when the user clicks
+        // page 2, 3, …, the content is already laid out and the country
+        // tile thumbnails are already in the browser cache:
+        //
+        //   1. Prefetch every country thumbnail image (all 190) so paginating
+        //      to higher pages doesn't trigger fresh CloudFront fetches.
+        //   2. Force layout of each currently-hidden inline SVG section by
+        //      briefly positioning it off-screen with visibility:hidden,
+        //      reading offsetHeight to force a synchronous layout, then
+        //      reverting to display:none. The browser's cached layout
+        //      makes the eventual reveal much faster.
+        //
+        // Both phases run incrementally via requestIdleCallback so they
+        // never block user interactions on the current page.
+        schedulePrewarm() {
+            if (this._prewarmStarted) return;
+            this._prewarmStarted = true;
+            const self = this;
+            // Network-cache warm-up only. We DON'T pre-paint the hidden SVG
+            // sections any more — the previous approach forced a synchronous
+            // layout per section on every idle tick, which competed with the
+            // user's hover / click handlers and made the pager feel laggy.
+            // content-visibility on the .section-collapsed class already
+            // preserves render state between reveals, which is the real win.
+            Promise.resolve().then(() => {
+                const thumbs = (self.resources || [])
+                    .map(r => r && r.image)
+                    .filter(Boolean);
+                self._prewarmThumbs(thumbs);
+            });
+        },
+        _prewarmThumbs(urls) {
+            // Browser-cache-warm each thumbnail. Image() with src triggers
+            // a network fetch + memory cache without ever attaching to DOM.
+            const batchSize = 12;
+            let i = 0;
+            const tick = () => {
+                const end = Math.min(i + batchSize, urls.length);
+                for (; i < end; i++) {
+                    try {
+                        const img = new Image();
+                        img.decoding = 'async';
+                        img.loading = 'eager';
+                        img.src = urls[i];
+                    } catch (_) { /* ignore */ }
+                }
+                if (i < urls.length) {
+                    if (window.requestIdleCallback) {
+                        window.requestIdleCallback(tick, { timeout: 1500 });
+                    } else {
+                        setTimeout(tick, 60);
+                    }
+                }
+            };
+            tick();
+        },
+        _prewarmHiddenSections() {
+            const container = document.querySelector('.w3-container.w3-margin-top');
+            if (!container) return;
+            const hidden = Array.from(container.querySelectorAll(':scope > .w3-card.section-collapsed'));
+            const self = this;
+            let i = 0;
+            const warmOne = () => {
+                if (i >= hidden.length) return;
+                const s = hidden[i++];
+                // Temporarily un-collapse this section, force the browser
+                // to compute layout + paint for it, then re-collapse. Since
+                // we use content-visibility: hidden (not display:none) for
+                // collapsed sections, the rendering state is preserved —
+                // so this paint cycle warms the browser cache and the
+                // eventual user-visible reveal is dramatically faster.
+                s.classList.remove('section-collapsed');
+                // Move into an off-screen position so the user doesn't see
+                // the warmup, but keep it visible to the renderer so the
+                // browser actually paints it.
+                const origCssText = s.style.cssText;
+                s.style.cssText = origCssText +
+                    ';position:absolute !important' +
+                    ';left:-10000px !important' +
+                    ';top:0 !important' +
+                    ';opacity:0 !important' +
+                    ';pointer-events:none !important' +
+                    ';will-change:contents,transform !important';
+                // Force synchronous layout + queue paint.
+                void s.offsetHeight;
+                // Revert on the next frame so the paint actually happens,
+                // then re-sync the whole page so that any section that's
+                // supposed to be visible RIGHT NOW (e.g. because the user
+                // navigated during warming) is restored correctly instead
+                // of being blindly re-collapsed.
+                requestAnimationFrame(() => {
+                    s.style.cssText = origCssText;
+                    self.syncContentSectionsToPage();
+                    if (window.requestIdleCallback) {
+                        window.requestIdleCallback(warmOne, { timeout: 1500 });
+                    } else {
+                        setTimeout(warmOne, 80);
+                    }
+                });
+            };
+            warmOne();
+        },
+
+        renderPager() {
+            if (!window.MDPager) return;
+            const self = this;
+            const mounts = [
+                document.getElementById('country-pager'),
+                document.getElementById('country-pager-bottom')
+            ].filter(Boolean);
+            this.pagerDestroy = null;
+            mounts.forEach((el, idx) => {
+                const handle = window.MDPager.render(el, {
+                    totalItems: this.resultQuery.length,
+                    pageSize: this.pageSize,
+                    currentPage: this.currentPage,
+                    onChange(p) {
+                        self.currentPage = p;
+                        // When jumping pages from the bottom pager, scroll
+                        // back up to the top so the user actually sees the
+                        // new page's content.
+                        if (idx === 1) {
+                            const top = document.querySelector('#app_country') ||
+                                        document.querySelector('.w3-content');
+                            if (top && top.scrollIntoView) {
+                                top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                    }
+                });
+                if (idx === 0 && handle && handle.destroy) this.pagerDestroy = handle.destroy;
+            });
+        },
+        // Paginate the large inline content sections (the ~23 <div class="w3-card">
+        // blocks under .w3-container.w3-margin-top — USA detail, Canada detail,
+        // Bangladesh detail, then regional maps like Northern Asia, Europe, etc.).
+        // Each pager page reveals a slice of these so the body content actually
+        // changes when the user clicks Next, not just the tile strip.
+        //
+        // Search mode: only show inline sections whose id matches a country in
+        // the filtered result list. If no results have an inline section (e.g.
+        // searching "Zimbabwe"), nothing is shown below and the tile alone
+        // handles the click (fallback URL to /map/<abv>).
+        syncContentSectionsToPage() {
+            const container = document.querySelector('.w3-container.w3-margin-top');
+            if (!container) return;
+            const allSections = container.querySelectorAll(':scope > .w3-card');
+            if (!allSections.length) return;
+
+            // Which sections should be visible this page?
+            const visible = new Array(allSections.length).fill(false);
+            const hasSearch = this.searchQuery && String(this.searchQuery).trim() !== '';
+            if (hasSearch) {
+                const wantedIds = new Set(this.resultQuery.map(r => r.id));
+                for (let i = 0; i < allSections.length; i++) {
+                    const s = allSections[i];
+                    visible[i] = !!(s.id && wantedIds.has(s.id));
+                }
+            } else {
+                // Distribute the inline sections proportionally across
+                // pager pages so every page has at least one. With 23
+                // sections and 10 pages, ceil(23/10)=3 leaves the last
+                // pages empty (indices 24+ don't exist); proportional
+                // splitting gives a 3,2,2,3,2,2,3,2,2,3 distribution and
+                // every page has content.
+                const total = allSections.length;
+                const pages = Math.max(1, this.totalPages);
+                const start = Math.floor((this.currentPage - 1) * total / pages);
+                const end = Math.floor(this.currentPage * total / pages);
+                for (let i = 0; i < total; i++) {
+                    visible[i] = (i >= start && i < end);
+                }
             }
+            for (let i = 0; i < allSections.length; i++) {
+                allSections[i].classList.toggle('section-collapsed', !visible[i]);
+            }
+
+            // Also collapse any decorative <hr> direct children of the
+            // container when its neighbouring .w3-card sections aren't both
+            // currently visible. Without this you'd see a stack of bars
+            // between non-existent sections on every page.
+            const directChildren = Array.from(container.children);
+            for (let i = 0; i < directChildren.length; i++) {
+                const node = directChildren[i];
+                if (node.tagName !== 'HR') continue;
+                let prevCard = null, nextCard = null;
+                for (let j = i - 1; j >= 0; j--) {
+                    if (directChildren[j].classList && directChildren[j].classList.contains('w3-card')) { prevCard = directChildren[j]; break; }
+                }
+                for (let j = i + 1; j < directChildren.length; j++) {
+                    if (directChildren[j].classList && directChildren[j].classList.contains('w3-card')) { nextCard = directChildren[j]; break; }
+                }
+                const prevVisible = prevCard && !prevCard.classList.contains('section-collapsed');
+                const nextVisible = nextCard && !nextCard.classList.contains('section-collapsed');
+                node.classList.toggle('section-collapsed', !(prevVisible && nextVisible));
+            }
+        },
+        // Find which page contains a given section id (e.g. "scroll_ZWE")
+        pageOf(sectionId) {
+            const idx = this.resultQuery.findIndex(r => r.id === sectionId);
+            if (idx < 0) return null;
+            return Math.floor(idx / this.pageSize) + 1;
+        },
+        scrollToSection(sectionId, fallbackUrl) {
+            // If the target isn't currently in the active page, jump to its page first.
+            const targetPage = this.pageOf(sectionId);
+            if (targetPage && targetPage !== this.currentPage) {
+                this.currentPage = targetPage;
+            }
+            // After Vue reacts to the page change (which triggers syncSectionsToPage),
+            // give the browser a tick to lay out, then scroll.
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    const element = document.getElementById(sectionId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    } else if (fallbackUrl) {
+                        window.location.href = fallbackUrl;
+                    }
+                }, 30);
+            });
         },
         onResize() {
             this.windowHeight = window.innerHeight;
             this.windowWidth = window.innerWidth;
             this.middle = (window.innerWidth - 1000) / 2;
             this.middle2 = (window.innerWidth - 50) / 2;
+            const newSize = window.innerWidth <= 640 ? 10 : 20;
+            if (newSize !== this.pageSize) {
+                this.pageSize = newSize;
+                this.currentPage = 1;
+            }
         },
         toggleBox() {
             this.button_to_activate_box = !this.button_to_activate_box;
@@ -1230,12 +1493,6 @@ const app_country = {
         },
         greet(greeting) {
             console.log(greeting);
-        },
-        onResize() {
-            this.windowHeight = window.innerHeight;
-            this.windowWidth = window.innerWidth;
-            this.middle = (window.innerWidth - 1000) / 2;
-            this.middle2 = (window.innerWidth - 50) / 2;
         },
         modelStyle(slide) {
             if (slide === 'middle') {

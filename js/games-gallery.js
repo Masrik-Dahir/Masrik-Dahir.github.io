@@ -109,12 +109,28 @@
     var cardCanvases = [];
     var cardAnimIds = [];
 
-    // Build cards
-    for (var i = 0; i < GAMES.length; i++) {
-        var g = GAMES[i];
+    // ── Pagination state ───────────────────────────────────────
+    var PAGE_SIZE = window.innerWidth <= 640 ? 6 : 12;
+    var currentPage = 1;
+    var filteredGames = GAMES.slice();
+    var pagerEl = null;
+
+    function totalPages() {
+        return Math.max(1, Math.ceil(filteredGames.length / PAGE_SIZE));
+    }
+
+    function stopAllPreviewAnims() {
+        for (var i = 0; i < cardAnimIds.length; i++) {
+            if (cardAnimIds[i]) cancelAnimationFrame(cardAnimIds[i]);
+        }
+        cardAnimIds = [];
+    }
+
+    function buildCard(g, globalIndex) {
         var card = document.createElement('div');
         card.className = 'game-card';
         card.setAttribute('data-game', g.id);
+        card.setAttribute('data-game-index', String(globalIndex));
         var tagClass = g.tag === 'PLAY' ? 'game-card-tag' : 'game-card-tag coming';
         card.innerHTML =
             '<canvas id="preview-' + g.id + '" width="400" height="240"></canvas>' +
@@ -128,19 +144,71 @@
                 card.addEventListener('click', function() { launchGame(gameId); });
             })(g.id);
         }
-        grid.appendChild(card);
+        return card;
     }
 
-    // Start preview animations
-    function startPreviews() {
-        for (var i = 0; i < GAMES.length; i++) {
-            var cvs = document.getElementById('preview-' + GAMES[i].id);
-            if (cvs) {
+    function renderPage() {
+        if (currentPage > totalPages()) currentPage = totalPages();
+        if (currentPage < 1) currentPage = 1;
+
+        stopAllPreviewAnims();
+        grid.innerHTML = '';
+
+        var start = (currentPage - 1) * PAGE_SIZE;
+        var end = Math.min(start + PAGE_SIZE, filteredGames.length);
+        for (var i = start; i < end; i++) {
+            var g = filteredGames[i];
+            // Pass the game's original index in GAMES so per-game anim seeds stay stable
+            var origIdx = GAMES.indexOf(g);
+            grid.appendChild(buildCard(g, origIdx));
+        }
+
+        startPreviewsForVisible();
+        renderPager();
+    }
+
+    function renderPager() {
+        if (!window.MDPager) return;
+        var mounts = [
+            document.getElementById('games-pager'),
+            document.getElementById('games-pager-bottom')
+        ];
+        for (var i = 0; i < mounts.length; i++) {
+            if (!mounts[i]) continue;
+            window.MDPager.render(mounts[i], {
+                totalItems: filteredGames.length,
+                pageSize: PAGE_SIZE,
+                currentPage: currentPage,
+                onChange: function (p) {
+                    currentPage = p;
+                    renderPage();
+                    var gallery = document.getElementById('gallery-view');
+                    if (gallery && gallery.scrollIntoView) {
+                        gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            });
+        }
+    }
+
+    // Start preview animations only for cards currently in the grid
+    function startPreviewsForVisible() {
+        var cards = grid.querySelectorAll('.game-card');
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            var origIdx = parseInt(card.getAttribute('data-game-index'), 10);
+            var g = GAMES[origIdx];
+            if (!g) continue;
+            var cvs = card.querySelector('canvas');
+            if (cvs && typeof g.anim === 'function') {
                 var cctx = cvs.getContext('2d');
-                GAMES[i].anim(cvs, cctx, i);
+                g.anim(cvs, cctx, origIdx);
             }
         }
     }
+
+    // Back-compat alias — `backToGallery` historically called startPreviews()
+    function startPreviews() { startPreviewsForVisible(); }
 
     // ── Preview animation: Night Racer ──
     function animRacer(cvs, cx) {
@@ -7398,7 +7466,22 @@
     };
     var currentGameId = null;
 
-    window.launchGame = function(id) {
+    // ── Lazy game script loader ────────────────────────────────
+    // night-racer is implemented inline; all other game implementations
+    // live in js/games/<id>.js and are loaded on first launch.
+    var loadedGameScripts = { 'night-racer': true };
+    function ensureGameScript(gameId) {
+        if (loadedGameScripts[gameId]) return Promise.resolve();
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = 'js/games/' + gameId + '.js';
+            s.onload = function () { loadedGameScripts[gameId] = true; resolve(); };
+            s.onerror = function () { reject(new Error('Failed to load ' + s.src)); };
+            document.head.appendChild(s);
+        });
+    }
+
+    function launchGameImpl(id) {
         var gm = GAME_MAP[id];
         if (!gm) return;
         currentGameId = id;
@@ -7408,13 +7491,23 @@
         setGameTitle(gm.title);
         if (window.setTitleBgTheme) window.setTitleBgTheme(id);
         if (window.startTitleBgAnim) window.startTitleBgAnim();
-        for (var i = 0; i < cardAnimIds.length; i++) { if (cardAnimIds[i]) cancelAnimationFrame(cardAnimIds[i]); }
+        stopAllPreviewAnims();
         if (window[gm.init]) window[gm.init]();
         // Trigger resize after game view is visible so canvas gets correct dimensions
-        setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 50);
+        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 50);
+    }
+
+    window.launchGame = function (id) {
+        var gm = GAME_MAP[id];
+        if (!gm) return;
+        ensureGameScript(id).then(function () {
+            launchGameImpl(id);
+        }).catch(function (err) {
+            console.error('Could not launch game ' + id, err);
+        });
     };
 
-    window.backToGallery = function() {
+    window.backToGallery = function () {
         var gv = document.getElementById('game-view');
         gv.classList.remove('active');
         document.getElementById('gallery-view').style.display = '';
@@ -7424,23 +7517,39 @@
         }
         currentGameId = null;
         if (window.stopTitleBgAnim) window.stopTitleBgAnim();
-        startPreviews();
+        startPreviewsForVisible();
     };
 
-    // Search filtering
+    // ── Search across ALL games + paginated filtered list ─────
     var searchInput = document.getElementById('game-search-input');
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             var query = this.value.toLowerCase().trim();
-            var cards = grid.querySelectorAll('.game-card');
-            for (var i = 0; i < cards.length; i++) {
-                var name = cards[i].querySelector('.game-card-name').textContent.toLowerCase();
-                cards[i].style.display = (query === '' || name.indexOf(query) !== -1) ? '' : 'none';
+            if (query === '') {
+                filteredGames = GAMES.slice();
+            } else {
+                filteredGames = GAMES.filter(function (g) {
+                    return g.name.toLowerCase().indexOf(query) !== -1
+                        || (g.id && g.id.toLowerCase().indexOf(query) !== -1);
+                });
             }
+            currentPage = 1;
+            renderPage();
         });
     }
 
-    startPreviews();
+    // Recompute PAGE_SIZE on resize so a desktop resized down to mobile
+    // (or vice versa) picks up the right page size.
+    window.addEventListener('resize', function () {
+        var newSize = window.innerWidth <= 640 ? 6 : 12;
+        if (newSize !== PAGE_SIZE) {
+            PAGE_SIZE = newSize;
+            currentPage = 1;
+            renderPage();
+        }
+    });
+
+    renderPage();
 })();
 
 // ═══════════════════════════════════════════════════

@@ -4000,6 +4000,11 @@
             var v=vehicles[i];
             /* skip cars inside alien saucers — they don't drive */
             if (v._absHidden && !v._absLifting) { continue; }
+            /* Cars being lifted KEEP driving — the alien ship hovers
+               high in the sky and shines a beam down on the moving
+               car. The car only stops moving once the lift completes
+               and it's hidden inside the saucer (handled by
+               _absHidden above). */
             /* alien-car aging — counts toward shape-shift back to
                normal. After _alienizedDur, enter morph for _morphDur,
                then clear the flag. */
@@ -4099,6 +4104,113 @@
         c.beginPath(); c.moveTo(bp,hY); c.lineTo(bp,by); c.stroke();
 
         return {xF:xF,xR:xR,xCF:xCF,xCR:xCR,xWF:xWF,xWR:xWR,hY:hY,rY:rY};
+    }
+
+    /* ── drawAlienCarCraft — replaces the car visual entirely when
+          the vehicle returns from an alien abduction. Paints a
+          hovering saucer-pod with a glowing dome and anti-gravity
+          underglow at the car's position. Cross-faded with the
+          normal car render during the morph-back phase. */
+    function drawAlienCarCraft(c, v){
+        var rdH = H - GROUND;
+        var s   = Math.max(6, rdH * 0.14);                       /* size unit */
+        var laneOff = (v.dir === 1) ? rdH*0.06 : -rdH*0.06;
+        var by  = GROUND + rdH*0.10 + laneOff;                   /* road baseline */
+        var x   = v.x;
+        /* hover BOB so the craft floats above the road, never sits on it */
+        var t   = performance.now() * 0.004;
+        var hover = Math.sin(t + x * 0.04) * s * 0.10 + s * 0.25;
+        var cy = by - hover;                                     /* craft centre Y */
+        c.save();
+        /* ANTI-GRAV UNDERGLOW — soft cyan/green ellipse on the road
+           where the craft would otherwise touch the ground. Pulses
+           slightly with the hover sine. */
+        var glowA = 0.35 + 0.25 * (0.5 + 0.5 * Math.sin(t * 2.2));
+        var ug = c.createRadialGradient(x, by + 2, 1, x, by + 2, s * 1.6);
+        ug.addColorStop(0,   'rgba(140,255,200,' + glowA + ')');
+        ug.addColorStop(0.5, 'rgba(80,200,255,'  + (glowA * 0.55) + ')');
+        ug.addColorStop(1,   'rgba(80,200,255,0)');
+        c.fillStyle = ug;
+        c.beginPath();
+        c.ellipse(x, by + 2, s * 1.6, s * 0.30, 0, 0, Math.PI*2);
+        c.fill();
+        /* SAUCER DISC — flattened ellipse, dark teal body with
+           magenta-violet rim that sells the alien craft look. */
+        var bodyGrad = c.createLinearGradient(x, cy - s*0.30, x, cy + s*0.30);
+        bodyGrad.addColorStop(0,   '#5af0d2');
+        bodyGrad.addColorStop(0.5, '#1c6fa0');
+        bodyGrad.addColorStop(1,   '#16294a');
+        c.fillStyle = bodyGrad;
+        c.beginPath();
+        c.ellipse(x, cy, s * 1.05, s * 0.42, 0, 0, Math.PI*2);
+        c.fill();
+        c.strokeStyle = 'rgba(220,120,255,0.85)';
+        c.lineWidth = 1.4;
+        c.stroke();
+        /* RIM LIGHTS — six pulsing dots around the saucer edge,
+           cycling colours so the craft looks active. */
+        for (var rl = 0; rl < 8; rl++){
+            var ang = (rl / 8) * Math.PI * 2 + t * 0.8;
+            var rx = x + Math.cos(ang) * s * 1.0;
+            var ry = cy + Math.sin(ang) * s * 0.40;
+            var hue = (rl * 45 + (t * 60) % 360);
+            c.fillStyle = 'hsl(' + hue + ',95%,65%)';
+            c.beginPath();
+            c.arc(rx, ry, 1.6, 0, Math.PI*2);
+            c.fill();
+        }
+        /* DOME CANOPY — translucent green hemisphere on top of the
+           saucer with a glowing alien pilot silhouette inside. */
+        var domeY = cy - s * 0.18;
+        var domeGrad = c.createRadialGradient(x, domeY, 1, x, domeY, s * 0.55);
+        domeGrad.addColorStop(0,   'rgba(220,255,230,0.95)');
+        domeGrad.addColorStop(0.5, 'rgba(120,255,180,0.70)');
+        domeGrad.addColorStop(1,   'rgba(40,150,90,0.35)');
+        c.fillStyle = domeGrad;
+        c.beginPath();
+        c.ellipse(x, domeY, s * 0.55, s * 0.42, 0, Math.PI, Math.PI*2);
+        c.fill();
+        c.strokeStyle = 'rgba(220,120,255,0.7)';
+        c.lineWidth = 1.0;
+        c.stroke();
+        /* PILOT — small alien silhouette inside the dome (oval head
+           with two big black eyes). */
+        c.fillStyle = '#143a26';
+        c.beginPath();
+        c.ellipse(x, domeY - s*0.05, s*0.16, s*0.20, 0, 0, Math.PI*2);
+        c.fill();
+        c.fillStyle = '#000';
+        c.beginPath(); c.arc(x - s*0.06, domeY - s*0.08, s*0.04, 0, Math.PI*2); c.fill();
+        c.beginPath(); c.arc(x + s*0.06, domeY - s*0.08, s*0.04, 0, Math.PI*2); c.fill();
+        /* THRUSTER STREAK — short cyan jet pointing backward in the
+           direction the craft is "facing" (matches v.dir). */
+        var thrustDir = -v.dir;
+        var tx0 = x + thrustDir * s * 0.95;
+        var thrustGrad = c.createLinearGradient(
+            tx0, cy + s*0.05, tx0 + thrustDir * s * 0.7, cy + s*0.05
+        );
+        thrustGrad.addColorStop(0, 'rgba(180,255,240,0.85)');
+        thrustGrad.addColorStop(1, 'rgba(180,255,240,0)');
+        c.fillStyle = thrustGrad;
+        c.beginPath();
+        c.moveTo(tx0, cy + s*0.05);
+        c.lineTo(tx0 + thrustDir * s * 0.7, cy);
+        c.lineTo(tx0 + thrustDir * s * 0.7, cy + s*0.10);
+        c.closePath();
+        c.fill();
+        /* DOWNWARD ANTI-GRAV BEAMS — three short translucent beams
+           pointing from the saucer rim toward the road, like
+           tractor stabilisers keeping it level. */
+        c.strokeStyle = 'rgba(160,255,210,0.55)';
+        c.lineWidth = 1.5;
+        for (var bm = -1; bm <= 1; bm++){
+            var bmx = x + bm * s * 0.55;
+            c.beginPath();
+            c.moveTo(bmx, cy + s*0.30);
+            c.lineTo(bmx + bm * 1.5, by + 1);
+            c.stroke();
+        }
+        c.restore();
     }
 
     function drawVehicle(c, v) {
@@ -6822,19 +6934,92 @@
                 if(off || V._absLifting){
                     dynC.save();
                     if (V._absLifting && V._absY !== undefined){
-                        /* during lift, override draw y by translating
-                           so the existing drawVehicle code stays
-                           untouched */
+                        /* During lift: translate to lifted Y +
+                           horizontal wobble, rotate around the car's
+                           own centre, and squeeze X to simulate a 3D
+                           yaw spin. drawVehicle paints the car centred
+                           on (V.x, computedBaseY) so we move the
+                           origin to that point, then unwind below. */
                         var rdHV = H - GROUND;
                         var laneOffV = (V.dir===1) ? rdHV*0.06 : -rdHV*0.06;
                         var baseY = GROUND + rdHV*0.10 + laneOffV;
-                        dynC.translate(0, V._absY - baseY);
+                        var liftDY = V._absY - baseY;
+                        var wobX   = V._absLiftWobbleX || 0;
+                        var rotA   = V._absLiftAngle || 0;
+                        var yawS   = (V._absLiftYawScale === undefined ? 1 : V._absLiftYawScale);
+                        dynC.translate(V.x + wobX, baseY + liftDY);
+                        dynC.rotate(rotA);
+                        dynC.scale(yawS, 1);
+                        dynC.translate(-V.x, -baseY);
+                        /* GREEN ABDUCTION HALO around the car body —
+                           soft glow that reads as the tractor beam's
+                           cone of light enveloping the vehicle. */
+                        var liftProg = Math.min(1, Math.max(0,
+                            ((V._absOrigY||baseY) - V._absY) /
+                            Math.max(1, ((V._absOrigY||baseY) - 0))));
+                        var haloAlpha = 0.18 + 0.42 * liftProg;
+                        var carScaleH = Math.max(7, rdHV*0.14);
+                        var hg = dynC.createRadialGradient(V.x, baseY, 1,
+                                                            V.x, baseY, carScaleH*2.0);
+                        hg.addColorStop(0,   'rgba(180,255,200,' + haloAlpha + ')');
+                        hg.addColorStop(0.5, 'rgba(110,220,255,' + (haloAlpha*0.55) + ')');
+                        hg.addColorStop(1,   'rgba(110,220,255,0)');
+                        dynC.fillStyle = hg;
+                        dynC.beginPath();
+                        dynC.ellipse(V.x, baseY, carScaleH*2.0, carScaleH*0.9,
+                                     0, 0, Math.PI*2);
+                        dynC.fill();
                     } else if (off) {
                         dynC.translate(V.xShake||0, V.yOff||0);
                     }
                 }
-                drawVehicle(dynC,V);
-                drawCarExtras(dynC, V, type);
+                /* ALIEN-SPACESHIP REPLACEMENT — when the car returns
+                   from the saucer it has been transformed into an
+                   alien craft. While `_alienized` and not yet morphing
+                   back, skip the normal car render and paint a
+                   hovering saucer-pod in its place. During the morph
+                   phase, both shapes are crossfaded so the alien
+                   craft smoothly turns back into a normal vehicle. */
+                var _isAlien = !!V._alienized;
+                var _morphProg = V._morphing ? Math.min(1, V._morphT / V._morphDur) : 0;
+                var _alienAlpha = _isAlien ? (V._morphing ? (1 - _morphProg) : 1) : 0;
+                var _carAlpha   = _isAlien ? _morphProg : 1;
+                if (_carAlpha < 0.99){
+                    dynC.save();
+                    dynC.globalAlpha = _carAlpha;
+                    if (_carAlpha > 0){
+                        drawVehicle(dynC, V);
+                        drawCarExtras(dynC, V, type);
+                    }
+                    dynC.restore();
+                } else {
+                    drawVehicle(dynC, V);
+                    drawCarExtras(dynC, V, type);
+                }
+                if (_alienAlpha > 0){
+                    dynC.save();
+                    dynC.globalAlpha = _alienAlpha;
+                    drawAlienCarCraft(dynC, V);
+                    dynC.restore();
+                }
+                /* SPARKS dripping off the lifting car. Drawn AFTER
+                   the vehicle so they read as falling debris. Physics
+                   (position, gravity, lifetime) is updated in the
+                   abduction phase update loop where `k`/`dt` are in
+                   scope — this block is render-only. */
+                if (V._absLifting && V._absSparks && V._absSparks.length){
+                    for (var sp = 0; sp < V._absSparks.length; sp++){
+                        var spk = V._absSparks[sp];
+                        var sa = 1 - (spk.life / spk.maxLife);
+                        if (sa <= 0) continue;
+                        dynC.globalAlpha = sa;
+                        dynC.fillStyle = 'hsl(' + spk.hue + ',95%,65%)';
+                        dynC.beginPath();
+                        dynC.arc(spk.x, spk.y, 1.4, 0, Math.PI*2);
+                        dynC.fill();
+                    }
+                    dynC.globalAlpha = 1;
+                }
                 /* ALIEN-CAR GLOW — green hover-halo + electric arcs
                    while the car is "alienized". During morph phase the
                    glow pulses fast and fades out. */
@@ -17722,13 +17907,15 @@
         var lane = idx % 6;
         var startX = W * (0.10 + lane * 0.14) + rng(-30, 30);
         var startY = -size - rng(0, 120);
-        /* 50/50 — saucer targets a CAR or a pedestrian. The two
-           swarms run in parallel, equal abduction counts over time. */
+        /* 65% — saucer targets a CAR, 35% — a pedestrian. Cars are
+           more visible victims, so bias toward them. The two swarms
+           still run in parallel — both are abducted over the wave. */
         var pedRef = null, carRef = null, targetKind = 'ped';
-        var goesForCar = (Math.random() < 0.50);
+        var goesForCar = (Math.random() < 0.65);
         if (goesForCar && vehicles && vehicles.length){
-            /* find an on-screen, not-yet-abducted car */
-            for (var vc=0; vc<20; vc++){
+            /* find an on-screen, not-yet-abducted car (more tries
+               than before so cars rarely get skipped) */
+            for (var vc=0; vc<40; vc++){
                 var vCand = vehicles[Math.floor(Math.random()*vehicles.length)];
                 if (!vCand._absHidden && !vCand._absLifting
                     && !vCand._alienized
@@ -18604,6 +18791,11 @@
                     continue;
                 }
 
+                /* tremble decays every frame; if abduct-car branch
+                   runs it overwrites with a fresh value. So in non-
+                   abduct phases the tremble fades smoothly to zero. */
+                if (sc.shipTremble) sc.shipTremble *= 0.85;
+
                 /* lookup the current target x — ped or car */
                 var tgtX;
                 if (sc.targetKind === 'car' && sc.carSlot){
@@ -18623,7 +18815,15 @@
                     sc.vx = sc.vx*0.94 + (dx*0.012);
                     sc.x += sc.vx * k * spdM + Math.sin(sc.bob*prof.wobbleFreq)*prof.wobbleAmp*0.01*dt;
                     sc.y += sc.vy * k * spdM;
-                    var hoverY = GROUND + (H-GROUND)*0.30 - sc.size * 1.1;
+                    /* Car-targeting saucers hover MUCH HIGHER in the
+                       sky than pedestrian-targeting ones — they shine
+                       a long beam down on the moving car below. Ped
+                       saucers stay at the original mid-altitude
+                       position because peds are small and the beam
+                       needs to be short for visual punch. */
+                    var hoverY = (sc.targetKind === 'car')
+                        ? GROUND + (H-GROUND)*0.08 - sc.size * 1.1
+                        : GROUND + (H-GROUND)*0.30 - sc.size * 1.1;
                     if (sc.y >= hoverY){
                         sc.y = hoverY;
                         sc.phase = 'hover';
@@ -18652,41 +18852,96 @@
                     /* car-target branch — lift a vehicle off the road */
                     if (sc.targetKind === 'car' && sc.carSlot){
                         var car = sc.carSlot;
-                        /* drift to follow car */
-                        sc.vx = sc.vx*0.88 + (car.x - sc.x)*0.015;
+                        /* Saucer TRACKS the moving car from high above
+                           the sky. Tight tracking with light damping so
+                           the ship stays roughly over the car while
+                           reading as a smooth float, not a hard snap.
+                           The car keeps driving — the beam follows. */
+                        var carFollowDX = car.x - sc.x;
+                        sc.vx = sc.vx * 0.55 + carFollowDX * 0.18;
                         sc.x += sc.vx * k;
+                        /* SHIP TREMBLE — small vertical jitter that
+                           builds with beam power, simulating the
+                           strain of pulling a car off the road. */
+                        sc.shipTremble = Math.sin(sc.phaseT * 0.045) *
+                                         (1.5 + sc.beamPower * 3.0);
                         /* car stops moving while abducted */
                         var rdHc = H - GROUND;
                         var laneOffC = (car.dir===1) ? rdHc*0.06 : -rdHc*0.06;
                         var carBaseY = GROUND + rdHc*0.10 + laneOffC;
                         if (car._absOrigY === undefined){
                             car._absOrigY = carBaseY;
+                            car._absLiftT0 = sc.phaseT;
+                            car._absSpinDir = (Math.random() < 0.5 ? -1 : 1);
                         }
-                        /* particle stream from car */
-                        if (Math.random() < 0.7){
-                            sc.beamParticles.push({
-                                x: car.x + rng(-8, 8),
-                                y: carBaseY + rng(-2, 4),
-                                vy: -rng(0.6, 1.4),
-                                life: 0, maxLife: 900,
-                                hue: rng(80, 180)
+                        /* THICKER particle stream from car — multi-shot
+                           per frame, wider spread, RAINBOW hues so the
+                           tractor beam reads as energetic neon. */
+                        var streamShots = 3;
+                        for (var psh = 0; psh < streamShots; psh++){
+                            if (Math.random() < 0.85){
+                                sc.beamParticles.push({
+                                    x: car.x + rng(-14, 14),
+                                    y: carBaseY + rng(-4, 4),
+                                    vy: -rng(0.9, 2.2),
+                                    life: 0, maxLife: 1100,
+                                    hue: rng(60, 280)
+                                });
+                            }
+                        }
+                        /* SPARKS shooting downward from the underside
+                           of the car — short-lived bright sparks that
+                           arc out as the lift accelerates. Spawned
+                           AND ticked here so the render pass has no
+                           physics work to do (which would otherwise
+                           ReferenceError on `k`/`dt`). */
+                        if (!car._absSparks) car._absSparks = [];
+                        if (Math.random() < 0.75){
+                            car._absSparks.push({
+                                x: car.x + rng(-12, 12),
+                                y: (car._absY !== undefined ? car._absY : carBaseY) + 4,
+                                vx: rng(-1.2, 1.2),
+                                vy: rng(0.6, 2.4),
+                                life: 0, maxLife: 600,
+                                hue: rng(40, 80)
                             });
                         }
+                        for (var spU = car._absSparks.length - 1; spU >= 0; spU--){
+                            var spkU = car._absSparks[spU];
+                            spkU.x += spkU.vx * k;
+                            spkU.y += spkU.vy * k;
+                            spkU.vy += 0.10 * k;
+                            spkU.life += dt;
+                            if (spkU.life > spkU.maxLife) car._absSparks.splice(spU, 1);
+                        }
+                        /* lift progress (0→1) */
                         var liftC = Math.min(1, (sc.phaseT - 300) / 1400);
                         if (liftC < 0) liftC = 0;
                         var liftedYC = car._absOrigY - (car._absOrigY - sc.y) * liftC;
                         car._absY = liftedYC;
+                        /* ROTATION + WOBBLE while ascending — the car
+                           tilts as if yanked, wobbles back and forth,
+                           and rolls slowly around its vertical axis
+                           (scaleX flip oscillation simulates 3D yaw). */
+                        var spinPhase = sc.phaseT * 0.006;
+                        car._absLiftAngle = car._absSpinDir
+                            * (0.10 + liftC * 0.45)
+                            * Math.sin(spinPhase * 1.7);
+                        car._absLiftWobbleX = Math.sin(spinPhase * 2.2) * (4 + liftC * 8);
+                        car._absLiftYawScale = 0.4 + 0.6 * Math.abs(Math.cos(spinPhase * 1.3));
                         car._absLifting = true;
                         car._absHostX = sc.x;
                         if (liftC >= 1){
-                            /* car sucked into ship — switch to drop */
+                            /* car sucked into ship — flash + switch to drop */
                             sc.captured = true;
                             sc.phase = 'drop';
                             sc.phaseT = 0;
                             abductionAbducted++;
                             sc.dropX = car.x;
+                            sc.captureFlashT = 280;        /* white burst */
                             car._absLifting = false;
                             car._absHidden = true;
+                            car._absSparks = [];
                             sc.beamParticles = [];
                         }
                     } else {
@@ -19149,6 +19404,13 @@
         if (sz < 1) return;
         var t = s.shipType;
         c.save();
+        /* SHIP TREMBLE — applied during car abduct phase only. The
+           saucer visibly shakes from the strain of pulling a vehicle
+           off the road. Tremble value is computed in the abduct
+           update phase and stored on the ship. */
+        if (s.shipTremble){
+            c.translate(s.shipTremble * 0.5, s.shipTremble);
+        }
         /* SWERVE jitter — small random offset peaks at impact and
            damps with swerveT */
         var jit = 0;
@@ -20700,12 +20962,36 @@
                 if (isNaN(sc.x) || isNaN(sc.y)) continue;
                 if (sc.phase === 'abduct' || sc.phase === 'hover'){
                     var beamTop = sc.y + sc.size * 0.30;
-                    var beamBot = GROUND + (H-GROUND)*0.58 + 8;
+                    /* For car targets the beam must land on the ROAD
+                       (where the car drives, just under the horizon)
+                       — not on the sidewalk where pedestrians stand.
+                       Use the car's current visible Y if it's already
+                       being lifted, otherwise the road-level baseline. */
+                    var beamBot;
+                    if (sc.targetKind === 'car' && sc.carSlot){
+                        var rdHsc = H - GROUND;
+                        var laneOffSc = (sc.carSlot.dir === 1) ? rdHsc*0.06 : -rdHsc*0.06;
+                        var roadBaselineY = GROUND + rdHsc*0.10 + laneOffSc + 4;
+                        beamBot = (sc.carSlot._absY !== undefined)
+                            ? sc.carSlot._absY + 4
+                            : roadBaselineY;
+                    } else {
+                        beamBot = GROUND + (H-GROUND)*0.58 + 8;
+                    }
                     drawAbductionBeam(c, sc, beamTop, beamBot, false);
                 }
                 if (sc.phase === 'drop' || sc.phase === 'hoverDrop'){
                     var beamTopD = sc.y + sc.size * 0.30;
-                    var beamBotD = GROUND + (H-GROUND)*0.58 + 8;
+                    /* drop beam — same road-target rule for cars */
+                    var beamBotD;
+                    if (sc.targetKind === 'car'){
+                        var rdHsc2 = H - GROUND;
+                        var laneOffSc2 = (sc.carSlot && sc.carSlot.dir === 1)
+                            ? rdHsc2*0.06 : -rdHsc2*0.06;
+                        beamBotD = GROUND + rdHsc2*0.10 + laneOffSc2 + 4;
+                    } else {
+                        beamBotD = GROUND + (H-GROUND)*0.58 + 8;
+                    }
                     drawAbductionBeam(c, sc, beamTopD, beamBotD, true);
                 }
                 drawAbductionShipHull(c, sc);
@@ -21003,12 +21289,12 @@
           colorA:'#16a34a', colorB:'#7e22ce',
           primary:'#16a34a', cape:'#7e22ce', accent:'#15803d', mask:'#14532d',
           style:'brute',    emblem:'fist', face:'angry',
-          /* Sword brawler. Charges each robot in turn and slashes
-             them dead in melee. HP further reduced — still tankier
-             than the rest of the roster, but no longer a fortress. */
-          stats:{ hp:800, speed:14, range:38, atkR:18, dmg:40,
+          /* Sword brawler. HP tripled 800 → 2400 — true fortress
+             tank that can soak a wave's worth of dragon fire while
+             slashing the wave apart in melee. */
+          stats:{ hp:2400, speed:14, range:38, atkR:18, dmg:40,
                   fireRate:280, maxTgts:1, autoTarget:false,
-                  role:'Melee sword tank', flavor:'Sturdy. Charges robot to robot, sword-slashes each.' } },
+                  role:'Melee sword tank', flavor:'Massive HP pool. Charges robot to robot, sword-slashes each.' } },
         { id:'inferno',    name:'Inferno Sage',       icon:'fa-fire',
           power:'firespray',  tag:'F',  archIdx:4,
           colorA:'#dc2626', colorB:'#fbbf24',
@@ -21031,7 +21317,71 @@
              speed tripled again — now a teleport-fast blur. */
           stats:{ hp:110, speed:270, range:99999, atkR:20, dmg:30,
                   fireRate:380, maxTgts:99, autoTarget:false,
-                  role:'Teleport-blur ice storm', flavor:'Hits every robot at once. Tears across the screen.' } }
+                  role:'Teleport-blur ice storm', flavor:'Hits every robot at once. Tears across the screen.' } },
+        /* ──────────── NEW IN v1.6.0 — seven robot heroes ──────────── */
+        { id:'aquaking',   name:'Tide Lord',          icon:'fa-tint',
+          power:'trident',     tag:'A',  archIdx:6,
+          colorA:'#0ea5e9', colorB:'#fbbf24',
+          primary:'#0ea5e9', cape:'#0c4a6e', accent:'#fbbf24', mask:'#082f49',
+          style:'mythical', emblem:'wave', face:'aqua',
+          stats:{ hp:160, speed:11, range:340, atkR:38, dmg:18,
+                  fireRate:520, maxTgts:1, autoTarget:false,
+                  role:'Trident + tidal wave', flavor:'Hurls a 3-prong trident; on impact a water wave rolls through the line and hits everything behind.' } },
+        { id:'swarmlord',  name:'Swarm Marshal',      icon:'fa-users',
+          power:'minispawn',   tag:'M',  archIdx:7,
+          colorA:'#a855f7', colorB:'#22d3ee',
+          primary:'#a855f7', cape:'#581c87', accent:'#22d3ee', mask:'#3b0764',
+          style:'classic',  emblem:'sigil', face:'masked',
+          /* Spawn interval bumped 350 → 1100 ms — fewer, slower
+             waves of mini-clones so they stay disposable rather
+             than flooding the canvas. */
+          stats:{ hp:130, speed:10, range:9999, atkR:22, dmg:6,
+                  fireRate:1100, maxTgts:1, autoTarget:false,
+                  role:'Mini-clone spawner', flavor:'Spawns fragile mini-hero clones that melee the robots; each clone is weak and lives ~5s.' } },
+        { id:'warhead',    name:'Warhead',            icon:'fa-rocket',
+          power:'missile',     tag:'W',  archIdx:8,
+          colorA:'#fb923c', colorB:'#0f172a',
+          primary:'#fb923c', cape:'#9a3412', accent:'#fde047', mask:'#7c2d12',
+          style:'armor',    emblem:'rocket', face:'helmet',
+          stats:{ hp:150, speed:9, range:600, atkR:36, dmg:24,
+                  fireRate:680, maxTgts:1, autoTarget:false,
+                  role:'High-speed missile', flavor:'Launches a rocket that screams across the screen and detonates on contact.' } },
+        { id:'magnetar',   name:'Magnetar',           icon:'fa-magnet',
+          power:'magnet',      tag:'G',  archIdx:9,
+          colorA:'#94a3b8', colorB:'#ef4444',
+          primary:'#94a3b8', cape:'#1e293b', accent:'#ef4444', mask:'#0f172a',
+          style:'armor',    emblem:'magnet', face:'helmet',
+          stats:{ hp:180, speed:8, range:520, atkR:42, dmg:20,
+                  fireRate:760, maxTgts:1, autoTarget:false,
+                  role:'Metal scrap hurl', flavor:'Rips chunks of metal from the road and slings them at robots.' } },
+        { id:'paladin',    name:'Paladin Sentinel',   icon:'fa-shield-alt',
+          power:'swordshield', tag:'P',  archIdx:10,
+          colorA:'#facc15', colorB:'#3b82f6',
+          primary:'#facc15', cape:'#1d4ed8', accent:'#ffffff', mask:'#1e3a8a',
+          style:'patriot',  emblem:'cross', face:'masked',
+          /* speed cranked 13 → 28, damage 34 → 9999 (one-shot any
+             dragon the longsword reaches), fireRate 340 → 200 ms
+             so the Paladin closes in fast and slashes constantly. */
+          stats:{ hp:280, speed:28, range:60, atkR:34, dmg:9999,
+                  fireRate:200, maxTgts:1, autoTarget:false,
+                  role:'Sword + shield melee', flavor:'Charges fast; long sword one-shots robots, shield parries return fire.' } },
+        { id:'gunsmith',   name:'Gunsmith',           icon:'fa-crosshairs',
+          power:'gunfire',     tag:'X',  archIdx:0,
+          colorA:'#0a0a0a', colorB:'#ef4444',
+          primary:'#0a0a0a', cape:'#1f2937', accent:'#ef4444', mask:'#111827',
+          style:'armor',    emblem:'crosshair', face:'helmet',
+          stats:{ hp:110, speed:9, range:480, atkR:14, dmg:5,
+                  fireRate:90, maxTgts:1, autoTarget:false,
+                  role:'Multi-weapon burst', flavor:'Rotates AK-47, AR-15 and a heavy machine gun; sustained bullet stream.' } },
+        { id:'verdant',    name:'Verdant Sage',       icon:'fa-leaf',
+          power:'rootcall',    tag:'V',  archIdx:4,
+          colorA:'#15803d', colorB:'#fde68a',
+          primary:'#15803d', cape:'#14532d', accent:'#fde68a', mask:'#052e16',
+          style:'mythical', emblem:'leaf', face:'masked',
+          stats:{ hp:150, speed:10, range:700, atkR:30, dmg:18,
+                  fireRate:600, maxTgts:1, autoTarget:false,
+                  role:'Airwave + range-scaled roots',
+                  flavor:'Alternates two powers: an air-wave that knocks every robot back, then twin-hand roots that pierce robots — damage scales UP with distance, so push them far first.' } }
     ];
 
     /* HERO POWER TWEAK — all heroes that were originally melee or
@@ -21407,6 +21757,42 @@
     }
 
     function pickHeroTarget(self){
+        /* MINI-HEROES spread out — each one picks the dragon
+           currently being attacked by the FEWEST other mini-heroes,
+           tie-breaking on distance. This stops the entire swarm
+           from converging on a single robot and instead spreads the
+           pressure across every dragon on screen. Falls back to
+           closest alive dragon when no mini-hero counts exist. */
+        if (self && self.miniHero){
+            /* tally how many mini-heroes currently target each villain */
+            var miniCounts = new Map();
+            for (var mci = 0; mci < superheroFighters.length; mci++){
+                var mc = superheroFighters[mci];
+                if (!mc.alive || !mc.miniHero || mc === self) continue;
+                var ct = mc.chargeTarget || mc.target;
+                if (ct && ct.alive){
+                    miniCounts.set(ct, (miniCounts.get(ct) || 0) + 1);
+                }
+            }
+            var bestV = null;
+            var bestScore = Infinity;
+            for (var mvi = 0; mvi < superheroVillains.length; mvi++){
+                var mv = superheroVillains[mvi];
+                if (!mv.alive) continue;
+                var cnt = miniCounts.get(mv) || 0;
+                var ddx = mv.x - self.x, ddy = mv.y - self.y;
+                var dist = Math.sqrt(ddx*ddx + ddy*ddy);
+                /* score: count weighted heavily, distance breaks ties.
+                   1000 per existing attacker pushes the count
+                   dimension well above any distance the screen
+                   could produce, so least-targeted always wins. */
+                var score = cnt * 1000 + dist;
+                if (score < bestScore){ bestScore = score; bestV = mv; }
+            }
+            if (bestV) return bestV;
+            /* no alive villains — let mini-hero idle */
+            return null;
+        }
         /* HEROES only attack when the user has DESIGNATED a target.
            Without a click-focused villain, heroes float idle. */
         if (superheroFocusTarget && superheroFocusTarget.alive){
@@ -21431,8 +21817,21 @@
     }
 
     function pickVillainTarget(self){
-        /* Once unfrozen, dragons attack BOTH heroes and the city.
-           60% city bombardment, 40% hero strafe. */
+        /* Mini-heroes are the dragons' top priority — they swarm
+           in close, so dragons gun them down first to clear the
+           air. Mini-heroes get an 85% targeting chance, full-size
+           heroes 40%, city bombardment fills the rest. */
+        var miniInRange = null, miniD = Infinity;
+        for (var mi = 0; mi < superheroFighters.length; mi++){
+            var mh = superheroFighters[mi];
+            if (!mh.alive || !mh.miniHero) continue;
+            var mdx = mh.x - self.x, mdy = mh.y - self.y;
+            var md = mdx*mdx + mdy*mdy;
+            if (md < miniD){ miniD = md; miniInRange = mh; }
+        }
+        if (miniInRange && Math.random() < 0.85){
+            return miniInRange;
+        }
         if (Math.random() < 0.40){
             var best = null, bestD = Infinity;
             for (var i=0; i<superheroFighters.length; i++){
@@ -21647,6 +22046,531 @@
                sniping across the map. (Halved from previous values.)
                0px → 80, 200px → 58, 500px → 25, 700+px → 2 */
             p.iceDmg = Math.max(2, Math.round(80 - iDist * 0.11));
+        } else if (effPower === 'trident'){
+            /* Tide Lord — three-prong trident hurled at target. On
+               impact a tidal wave rolls along the ground from the
+               hit point, damaging every robot in its sweep. */
+            p.kind = 'trident';
+            var tSpd = 14.0;
+            p.vx = Math.cos(ang) * tSpd;
+            p.vy = Math.sin(ang) * tSpd;
+            p.max = 1600;
+            p.gravity = 0;
+            p.spin = 0;
+            p.spinV = 0.35;
+        } else if (effPower === 'minispawn'){
+            /* Swarm Marshal — ONLY creates a swarm; no projectile
+               or other side effect. Spawns one MELEE mini-hero per
+               currently-alive dragon on screen so the squad scales
+               with the wave. Each clone:
+                 • is half-scale and has 22 HP (dies easily to
+                   dragon retaliation)
+                 • uses `melee` power → charges and slashes its
+                   target dead in close combat (the "hit them to
+                   kill" attack the user asked for)
+                 • lives for 5 seconds before dissolving (or earlier
+                   if a dragon shreds it first)
+                 • is added to superheroFighters so the existing
+                   combat AI handles target selection, charging,
+                   slashing, damage from dragons, and death. */
+            var aliveVillCount = 0;
+            for (var avc = 0; avc < superheroVillains.length; avc++){
+                if (superheroVillains[avc].alive) aliveVillCount++;
+            }
+            /* Swarm size = ⌈aliveRobots / 2⌉ — one mini-hero per
+               two robots on screen, with a floor of 1 so an empty
+               (or single-bot) wave still spawns one. */
+            var miniCount = Math.max(1, Math.ceil(aliveVillCount / 2));
+            for (var mci = 0; mci < miniCount; mci++){
+                var miniAng = (mci / Math.max(1, miniCount)) * Math.PI * 2;
+                var miniOffR = 24 + rng(-4, 4);
+                var miniX = h.x + Math.cos(miniAng) * miniOffR;
+                var miniY = h.y - 6 + Math.sin(miniAng) * miniOffR * 0.5;
+                /* MINI-HEROES — even weaker. HP still 1, damage
+                   formula below dropped further to ⌈maxHp/50⌉,
+                   fireRate slowed 700 → 950 ms so each clone gets
+                   off fewer swings before being shot down. */
+                var miniHp = 1;
+                var miniStats = {
+                    hp: miniHp,
+                    speed: 15,
+                    range: 9999,
+                    atkR: 22,
+                    dmg: 1,
+                    fireRate: 950,
+                    maxTgts: 1,
+                    autoTarget: true
+                };
+                var miniFighter = {
+                    univ: h.univ || 'swarmlord',
+                    tag: 'm',
+                    archIdx: h.archIdx,
+                    /* melee power → the existing AI dashes the hero
+                       INTO the target and lands a close-range slash
+                       that kills the dragon. Exactly the "hit them
+                       to kill them" behaviour the user asked for. */
+                    power: 'melee',
+                    stats: miniStats,
+                    x: miniX, y: miniY, vx: 0, vy: 0,
+                    face: rng(0, 1) < 0.5 ? 1 : -1,
+                    hp: miniHp, maxHp: miniHp,
+                    cooldown: 200 + mci * 40,
+                    phase: 'patrol',
+                    phaseT: 0,
+                    target: null,
+                    cols: h.cols,
+                    anim: 0,
+                    walkT: rng(0, Math.PI * 2),
+                    hurtT: 0,
+                    attackT: 0,
+                    flightT: rng(0, Math.PI * 2),
+                    cape: rng(0, Math.PI * 2),
+                    alive: true,
+                    name: 'MiniHero-' + (mci + 1),
+                    mode: 'flying',
+                    roof: null,
+                    landT: 99999,        /* never lands — always airborne */
+                    takeoffT: 0,
+                    arcStartX: miniX, arcStartY: miniY,
+                    arcEndX: miniX, arcEndY: miniY,
+                    arcDur: 1, arcT: 0,
+                    arcApex: miniY - 30,
+                    trailJets: [],
+                    miniHero: true,
+                    miniLife: 0,
+                    miniMaxLife: 5000,    /* 5 seconds — per user spec */
+                    solo: false
+                };
+                superheroFighters.push(miniFighter);
+                /* spawn flash at the clone's birth point */
+                superheroFX.push({
+                    kind:'impactRing', x:miniX, y:miniY, age:0, max:360,
+                    hue:280, col: h.cols.accent || '#22d3ee',
+                    r: 2, maxR: 14
+                });
+            }
+            /* central burst at the Marshal's hands so the swarm
+               visually launches from the parent hero */
+            superheroFX.push({
+                kind:'impactRing', x:h.x, y:h.y - 6, age:0, max:420,
+                hue:280, col: h.cols.cape || '#a855f7',
+                r: 4, maxR: 28
+            });
+            return;
+        } else if (effPower === 'missile'){
+            /* Warhead — SATURATION volley. Fan-fires 5 super-fast
+               rockets, each launched from the hero with a random
+               offset around the target position so they carpet-bomb
+               the kill zone (same pattern as the Attack Control
+               'saturation' missile, just smaller volley). */
+            var satN = 5;
+            var satTargetVariance = 70;     /* px spread at the target */
+            var satBaseSpd = 24.0;
+            for (var smi = 0; smi < satN; smi++){
+                /* each rocket aims at a slightly different point
+                   inside the saturation zone so the volley fans
+                   out from the launch position */
+                var stx = target.x + rng(-satTargetVariance, satTargetVariance);
+                var sty = (target.y - 8) + rng(-satTargetVariance*0.5, satTargetVariance*0.5);
+                var sang = Math.atan2(sty - (h.y - 12), stx - h.x);
+                var ssp = satBaseSpd + rng(-2, 2);
+                var sm = {
+                    kind: 'missile',
+                    x: h.x + rng(-3, 3),
+                    y: h.y - 12 + rng(-3, 3),
+                    sx: h.x, sy: h.y - 12,
+                    tx: stx, ty: sty,
+                    vx: Math.cos(sang) * ssp,
+                    vy: Math.sin(sang) * ssp,
+                    angle: sang,
+                    owner: h,
+                    target: target,
+                    age: 0, max: 2400,
+                    cols: h.cols,
+                    sparks: [], arcs: [],
+                    trail: [],
+                    gravity: 0,
+                    /* slightly stagger launch so the rockets fire in
+                       a rapid burst instead of all at once */
+                    delay: smi * 30,
+                    blastR: (h.stats && h.stats.atkR ? h.stats.atkR : 36) + 10
+                };
+                superheroPowers.push(sm);
+            }
+            return;     /* skip the default push — we've already
+                           queued every missile in the volley */
+        } else if (effPower === 'magnet'){
+            /* Magnetar — rips a chunk of metal from the CITY and
+               sends shrapnel screaming at the target. The pull
+               point is somewhere on the road between Magnetar and
+               the target, and the fragmentation spreads into 7
+               jagged metal shards that fan out toward the dragon.
+               Each shard kills a robot on impact. */
+            var mgN = 16;
+            /* pull point on the ground in the city — between the
+               hero and the target so it reads as "magnet ripped a
+               car-shaped chunk of metal out of the road". */
+            var pullX = (h.x + target.x) * 0.5 + rng(-30, 30);
+            var pullY = GROUND + rng(-4, 6);
+            /* spawn a ground-rip burst FX so the magnet pull is
+               visibly anchored in the city */
+            superheroFX.push({
+                kind:'impactRing', x:pullX, y:pullY,
+                age:0, max:520, hue:0,
+                col:'#94a3b8', r:4, maxR:26
+            });
+            for (var sj = 0; sj < 12; sj++){
+                /* upward sparks where the metal tears free */
+                var sjA = -Math.PI + rng(-0.4, 0.4);
+                superheroFX.push({
+                    kind: 'spark',
+                    x: pullX + rng(-10, 10),
+                    y: pullY,
+                    vx: Math.cos(sjA) * rng(0.4, 2.0),
+                    vy: Math.sin(sjA) * rng(1.5, 4.5),
+                    age: 0, max: rng(500, 900),
+                    hue: 0 + rng(-5, 15)
+                });
+            }
+            for (var mgi = 0; mgi < mgN; mgi++){
+                /* base direction = from pull point to target, with
+                   a small per-shard angle offset so the shards fan
+                   out as visible shrapnel */
+                var mgAngBase = Math.atan2(target.y - pullY, target.x - pullX);
+                var mgAng = mgAngBase + rng(-0.35, 0.35);
+                var mgSpd = 24.0 + rng(-2, 2);
+
+                /* ── RANDOM JAGGED SHAPE DATA ─────────────────────
+                   Each shard is a wholly-different polygon. Pick
+                   a random number of vertices (6-11), random radii
+                   per vertex (irregular silhouette), random scale,
+                   and a random metal tint + rust pattern so every
+                   shrapnel piece reads as a unique chunk of city
+                   debris (twisted rebar, car panel, lamp pole,
+                   manhole edge, etc.). */
+                var vertCount = 6 + Math.floor(Math.random() * 6);     /* 6..11 */
+                var shardScale = rng(0.7, 1.6);
+                var verts = [];
+                for (var vci = 0; vci < vertCount; vci++){
+                    var vAng = (vci / vertCount) * Math.PI * 2 + rng(-0.18, 0.18);
+                    var vR   = (rng(0.45, 1.0)) * 9 * shardScale;
+                    verts.push({
+                        x: Math.cos(vAng) * vR,
+                        y: Math.sin(vAng) * vR
+                    });
+                }
+                /* metal tint — choose between steel grey, dark
+                   gunmetal, rusted iron, copper, or chrome */
+                var metalTints = [
+                    { base:'#6b7280', edge:'#d1d5db', dark:'#1f2937' },  /* steel */
+                    { base:'#374151', edge:'#9ca3af', dark:'#111827' },  /* gunmetal */
+                    { base:'#7c2d12', edge:'#c2410c', dark:'#451a03' },  /* rusted iron */
+                    { base:'#92400e', edge:'#d97706', dark:'#451a03' },  /* copper */
+                    { base:'#94a3b8', edge:'#f1f5f9', dark:'#475569' }   /* chrome */
+                ];
+                var tint = metalTints[Math.floor(Math.random() * metalTints.length)];
+                /* random rust patches (anchored in the shard's local
+                   space so they stay attached when the shard rotates) */
+                var rustN = 1 + Math.floor(Math.random() * 4);
+                var rust = [];
+                for (var ri = 0; ri < rustN; ri++){
+                    rust.push({
+                        ox: rng(-6, 6) * shardScale,
+                        oy: rng(-6, 6) * shardScale,
+                        rx: rng(1.2, 2.8) * shardScale,
+                        ry: rng(0.6, 1.6) * shardScale,
+                        a:  rng(0, Math.PI),
+                        col: ['rgba(220,38,38,0.55)',
+                              'rgba(120,53,15,0.65)',
+                              'rgba(180,83,9,0.55)'][Math.floor(Math.random()*3)]
+                    });
+                }
+                /* rivets / bolts pinned to the shard */
+                var rivN = 1 + Math.floor(Math.random() * 4);
+                var rivets = [];
+                for (var rvi = 0; rvi < rivN; rvi++){
+                    rivets.push({
+                        ox: rng(-5, 5) * shardScale,
+                        oy: rng(-5, 5) * shardScale,
+                        r:  rng(0.5, 0.9) * shardScale
+                    });
+                }
+                /* scratches — short line segments etched across the
+                   shard surface */
+                var scrN = 2 + Math.floor(Math.random() * 4);
+                var scratches = [];
+                for (var sci = 0; sci < scrN; sci++){
+                    var scA = rng(0, Math.PI * 2);
+                    var scLen = rng(3, 8) * shardScale;
+                    scratches.push({
+                        x1: -Math.cos(scA) * scLen * 0.5,
+                        y1: -Math.sin(scA) * scLen * 0.5,
+                        x2:  Math.cos(scA) * scLen * 0.5,
+                        y2:  Math.sin(scA) * scLen * 0.5,
+                        w:  rng(0.3, 0.7)
+                    });
+                }
+                /* optional hex bolt at center (50% chance) */
+                var hasCenterBolt = Math.random() < 0.5;
+
+                var mgp = {
+                    kind: 'magnet',
+                    x: pullX + rng(-6, 6),
+                    y: pullY + rng(-4, 0),
+                    sx: pullX, sy: pullY,
+                    vx: Math.cos(mgAng) * mgSpd,
+                    vy: Math.sin(mgAng) * mgSpd,
+                    angle: mgAng,
+                    owner: h,
+                    target: target,
+                    age: 0, max: 1600,
+                    cols: h.cols,
+                    sparks: [], arcs: [],
+                    gravity: 0,
+                    spin: rng(0, Math.PI*2),
+                    spinV: rng(0.6, 1.2) * (rng(0,1) < 0.5 ? -1 : 1),
+                    delay: mgi * 10,
+                    /* random visual fingerprints */
+                    verts: verts,
+                    tint: tint,
+                    rust: rust,
+                    rivets: rivets,
+                    scratches: scratches,
+                    hasCenterBolt: hasCenterBolt,
+                    shardScale: shardScale,
+                    /* a smaller satellite chunk attached to the main
+                       shard at a random offset — gives every shrapnel
+                       piece an asymmetric "broken-off" silhouette */
+                    chunkOff: { x: rng(-7, 7)*shardScale, y: rng(-7, 7)*shardScale,
+                                r: rng(2, 4)*shardScale, a: rng(0, Math.PI*2) }
+                };
+                superheroPowers.push(mgp);
+            }
+            return;
+        } else if (effPower === 'swordshield'){
+            /* Paladin Sentinel — same charge logic as 'melee' but
+               attackT also paints a shield arc and a long sword. */
+            h.phase = 'charge';
+            h.phaseT = 0;
+            h.chargeTarget = target;
+            h.swordshield = true;
+            return;
+        } else if (effPower === 'gunfire'){
+            /* Gunsmith — simultaneous fusillade. Fires ONE bullet
+               at EVERY alive robot on screen in the same frame.
+               • Damage on a connecting bullet is lethal (one-shot).
+               • Aim is distance-scaled: robots within ~200 px get
+                 a near-perfect line, beyond that the spread widens
+                 linearly so far targets often miss.
+               • Each bullet is super fast (20 px/frame) with a
+                 short lifespan so it either lands or dies. */
+            var muzzleX = h.x + h.face * 10;
+            var muzzleY = h.y - 6;
+            var gNear = 200;     /* perfect-aim threshold (px) */
+            var gFar  = 800;     /* max spread cap distance (px) */
+            for (var gvi = 0; gvi < superheroVillains.length; gvi++){
+                var gv = superheroVillains[gvi];
+                if (!gv.alive) continue;
+                var gvdx = gv.x - muzzleX;
+                var gvdy = (gv.y - 14) - muzzleY;
+                var gvDist = Math.sqrt(gvdx*gvdx + gvdy*gvdy) || 1;
+                /* aim drift: 0 at gNear, up to ±0.42 rad at gFar */
+                var distNorm = Math.max(0, Math.min(1,
+                    (gvDist - gNear) / (gFar - gNear)));
+                var aimDrift = rng(-0.42, 0.42) * distNorm;
+                var gaa = Math.atan2(gvdy, gvdx) + aimDrift;
+                var gSpd2 = 20.0;
+                var gp = {
+                    kind: 'gunfire',
+                    x: muzzleX + rng(-1, 1),
+                    y: muzzleY + rng(-2, 2),
+                    vx: Math.cos(gaa) * gSpd2,
+                    vy: Math.sin(gaa) * gSpd2,
+                    angle: gaa,
+                    owner: h,
+                    target: gv,
+                    age: 0, max: 1200,
+                    cols: h.cols,
+                    /* stagger so the volley fires as a rapid
+                       brrt rather than all on one frame */
+                    delay: gvi * 12,
+                    weaponIdx: (gvi + Math.floor(h.flightT || 0)) % 3
+                };
+                superheroPowers.push(gp);
+            }
+            /* muzzle flash burst at the hero so the cast reads as
+               sustained autofire */
+            superheroFX.push({
+                kind: 'flash',
+                x: muzzleX, y: muzzleY,
+                age: 0, max: 280, r: 18
+            });
+            return;
+        } else if (effPower === 'rootcall'){
+            /* VERDANT SAGE — alternates two superpowers per cast:
+               Cast 0,2,4,…  AIRWAVE  — every alive robot is shoved
+                              outward from the Sage's position by a
+                              big push impulse + spawn an expanding
+                              green windwave FX. No damage; the goal
+                              is to maximise distance for the NEXT
+                              cast's roots.
+               Cast 1,3,5,…  ROOT STRIKE — a thick brown root sprouts
+                              from EACH of the Sage's hands and snakes
+                              toward every alive robot. Damage scales
+                              UP with distance: the further the robot
+                              is, the more lethal the strike. */
+            h.rootCastN = (h.rootCastN || 0) + 1;
+            var doAirwave = (h.rootCastN % 2) === 1;
+            if (doAirwave){
+                /* AIRWAVE — push every alive villain radially away
+                   from the Sage. Stronger pushback at close range,
+                   tapering with distance. No damage applied. */
+                var awR = 9999;             /* affects every robot */
+                var awPushMax = 220;        /* px velocity impulse */
+                for (var awi = 0; awi < superheroVillains.length; awi++){
+                    var aw = superheroVillains[awi];
+                    if (!aw.alive) continue;
+                    var awdx = aw.x - h.x;
+                    var awdy = aw.y - h.y;
+                    var awD = Math.sqrt(awdx*awdx + awdy*awdy) || 1;
+                    /* push amount: huge at close range, still
+                       meaningful at long range */
+                    var awPush = awPushMax / (1 + awD / 200);
+                    aw.vx = (awdx / awD) * awPush * 0.05;
+                    aw.vy = (awdy / awD) * awPush * 0.05 - 1.5;
+                    /* nudge POSITION too so the push is instantly
+                       visible — slide them outward this frame */
+                    aw.x += (awdx / awD) * awPush * 0.6;
+                    aw.y += (awdy / awD) * awPush * 0.3 - 5;
+                    /* tiny puff at each pushed robot */
+                    superheroFX.push({
+                        kind:'impactRing',
+                        x: aw.x, y: aw.y - 12,
+                        age:0, max:380,
+                        hue: 110, col:'#86efac',
+                        r: 3, maxR: 20
+                    });
+                }
+                /* central green airwave ring at the Sage */
+                superheroFX.push({
+                    kind:'impactRing',
+                    x: h.x, y: h.y - 8,
+                    age: 0, max: 720,
+                    hue: 110, col: '#22c55e',
+                    r: 4, maxR: 280
+                });
+                superheroFX.push({
+                    kind:'impactRing',
+                    x: h.x, y: h.y - 8,
+                    age: 0, max: 560,
+                    hue: 110, col: '#bbf7d0',
+                    r: 4, maxR: 200
+                });
+                /* radial green leaf-sparks */
+                for (var awL = 0; awL < 30; awL++){
+                    var awLA = (awL / 30) * Math.PI * 2 + rng(-0.08, 0.08);
+                    var awLSpd = rng(3.0, 7.0);
+                    superheroFX.push({
+                        kind:'spark',
+                        x: h.x, y: h.y - 8,
+                        vx: Math.cos(awLA) * awLSpd,
+                        vy: Math.sin(awLA) * awLSpd,
+                        age:0, max: rng(700, 1200),
+                        hue: 110 + rng(-15, 15)
+                    });
+                }
+                /* bright centre flash */
+                superheroFX.push({
+                    kind:'flash',
+                    x: h.x, y: h.y - 8,
+                    age:0, max:300, r:34
+                });
+            } else {
+                /* ROOT STRIKE — twin-hand sprawl. One root from each
+                   hand per alive robot, each root's damage scaling
+                   with the distance it had to grow. */
+                var leftHandX  = h.x - h.face * 7;
+                var leftHandY  = h.y + 1;
+                var rightHandX = h.x + h.face * 7;
+                var rightHandY = h.y + 1;
+                /* only fire a root pair at each alive villain */
+                var rootIdxCount = 0;
+                for (var rvi = 0; rvi < superheroVillains.length; rvi++){
+                    var rv = superheroVillains[rvi];
+                    if (!rv.alive) continue;
+                    /* two roots per robot — one from each hand,
+                       slightly different timing for staggered hit */
+                    for (var rhd = 0; rhd < 2; rhd++){
+                        var rOriginX = rhd === 0 ? leftHandX  : rightHandX;
+                        var rOriginY = rhd === 0 ? leftHandY  : rightHandY;
+                        var rDx = rv.x - rOriginX;
+                        var rDy = (rv.y - 14) - rOriginY;
+                        var rDist = Math.sqrt(rDx*rDx + rDy*rDy) || 1;
+                        var rang = Math.atan2(rDy, rDx);
+                        var rspd = 11.0;
+                        var rp = {
+                            kind: 'root',
+                            x: rOriginX, y: rOriginY,
+                            sx: rOriginX, sy: rOriginY,
+                            vx: Math.cos(rang) * rspd,
+                            vy: Math.sin(rang) * rspd,
+                            angle: rang,
+                            owner: h, target: rv,
+                            age: 0, max: 1800,
+                            cols: h.cols,
+                            sparks: [], arcs: [],
+                            gravity: 0,
+                            spawnDist: rDist,
+                            handSide: rhd,
+                            delay: rootIdxCount * 18 + rhd * 60,
+                            /* per-root random wobble seeds so each
+                               root tendril snakes uniquely */
+                            wobblePh: rng(0, Math.PI * 2),
+                            wobbleAmp: rng(2, 6),
+                            thornCount: 5 + Math.floor(Math.random() * 4),
+                            thornSeed: Math.random() * 1000,
+                            trail: []
+                        };
+                        superheroPowers.push(rp);
+                    }
+                    rootIdxCount++;
+                }
+                /* hand burst at each hand */
+                superheroFX.push({
+                    kind:'impactRing',
+                    x: leftHandX, y: leftHandY,
+                    age:0, max:420, hue:110, col:'#15803d',
+                    r:3, maxR:18
+                });
+                superheroFX.push({
+                    kind:'impactRing',
+                    x: rightHandX, y: rightHandY,
+                    age:0, max:420, hue:110, col:'#15803d',
+                    r:3, maxR:18
+                });
+            }
+            return;
+        } else if (effPower === 'dustform'){
+            /* Dust Storm — coalesces dust into a random solid (cube
+               / star / hammer / spike) that flies at the target. */
+            p.kind = 'dustform';
+            var dSpd = 10.0;
+            p.vx = Math.cos(ang) * dSpd;
+            p.vy = Math.sin(ang) * dSpd;
+            p.max = 1600;
+            p.gravity = 0;
+            p.spin = 0;
+            p.spinV = 0.25;
+            /* random shape pick: 0=cube, 1=star, 2=hammer, 3=spike */
+            p.shape = Math.floor(Math.random() * 4);
+            p.dustParticles = [];
+            for (var dpi = 0; dpi < 18; dpi++){
+                p.dustParticles.push({
+                    ox: rng(-10, 10), oy: rng(-10, 10),
+                    a: Math.random() * Math.PI * 2,
+                    r: rng(8, 18)
+                });
+            }
         }
         superheroPowers.push(p);
     }
@@ -22054,6 +22978,59 @@
                 h.cape += dt * 0.004;
                 h.flightT += dt * 0.003;
                 if (h.hurtT > 0) h.hurtT -= dt;
+                /* mini-hero expiration — Swarm Marshal's spawned
+                   clones live for ~12s before dissolving. They can
+                   also die earlier from villain damage like any
+                   regular fighter. */
+                if (h.miniHero){
+                    h.miniLife = (h.miniLife || 0) + dt;
+                    if (h.miniLife > h.miniMaxLife){
+                        h.alive = false;
+                        /* dust-fade FX so they don't just pop out */
+                        if (typeof spawnDustDeath === 'function'){
+                            try { spawnDustDeath(h.x, h.y); } catch(_e){}
+                        }
+                    }
+                }
+
+                /* ── PALADIN PASSIVE SWORD AURA ────────────────────
+                   Any robot within the Paladin's sword reach (180 px)
+                   is INSTANTLY killed every frame — the lightsaber
+                   is so deadly that simply being inside its arc is
+                   fatal, even before the Paladin actually swings.
+                   Each kill spawns a gold impact ring + sparks so
+                   the death reads as a passive sweep. */
+                if (h.swordshield && h.alive && superheroVillains.length){
+                    var auraR = 180;
+                    for (var pavi = 0; pavi < superheroVillains.length; pavi++){
+                        var pav = superheroVillains[pavi];
+                        if (!pav.alive) continue;
+                        var padx = pav.x - h.x;
+                        var pady = (pav.y - 16) - h.y;
+                        if (padx*padx + pady*pady < auraR*auraR){
+                            damageHero(pav, 99999, h.x, h.y);
+                            /* sparkle ring at the victim */
+                            superheroFX.push({
+                                kind:'impactRing',
+                                x: pav.x, y: pav.y - 12,
+                                age: 0, max: 460,
+                                hue: 48, col: '#fde047',
+                                r: 4, maxR: 28
+                            });
+                            for (var pak = 0; pak < 6; pak++){
+                                var paA = rng(0, Math.PI*2);
+                                superheroFX.push({
+                                    kind: 'spark',
+                                    x: pav.x, y: pav.y - 12,
+                                    vx: Math.cos(paA) * rng(1.5, 4.0),
+                                    vy: Math.sin(paA) * rng(1.5, 4.0),
+                                    age: 0, max: rng(500, 900),
+                                    hue: 48 + rng(-10, 15)
+                                });
+                            }
+                        }
+                    }
+                }
                 /* attack cooldown — beam heroes fire MULTI-LASER:
                    on each tick they emit up to 5 beams at once,
                    one to each of the next queued villains. Shield
@@ -22262,27 +23239,210 @@
                         var cdx = h.chargeTarget.x - h.x;
                         var cdy = h.chargeTarget.y - h.y;
                         var clen = Math.sqrt(cdx*cdx + cdy*cdy) || 1;
-                        h.vx = (cdx/clen) * 8.5;
-                        h.vy = (cdy/clen) * 8.5;
+                        /* Paladin Sentinel charges twice as fast as a
+                           regular fighter (his blade reaches further
+                           and he closes in like a knight on horseback);
+                           mini-heroes drift at 5.0, regular fighters
+                           dash at 8.5. */
+                        var chargeSpd = h.miniHero ? 5.0
+                                      : (h.swordshield ? 17.0 : 8.5);
+                        h.vx = (cdx/clen) * chargeSpd;
+                        h.vy = (cdy/clen) * chargeSpd;
                         h.x += h.vx * k;
                         h.y += h.vy * k;
                         h.face = (cdx > 0) ? 1 : -1;
                         /* close enough → slash + damage */
                         if (clen < 28 || h.phaseT > 500){
-                            if (clen < 36 && h.chargeTarget.alive){
-                                damageHero(h.chargeTarget, heroDmg(18), h.x, h.y);
+                            var slashTarget = h.chargeTarget;
+                            if (clen < 36 && slashTarget.alive){
+                                /* SLASH DAMAGE:
+                                   • mini-hero → pinprick (⌈maxHp/50⌉)
+                                   • Paladin Sentinel → 99,999, the
+                                     longsword cleaves any robot in
+                                     one strike.
+                                   • all other melee fighters → the
+                                     existing heroDmg(18) value. */
+                                var slashDmg = h.miniHero
+                                    ? Math.max(1, Math.ceil((slashTarget.maxHp || 90) / 50))
+                                    : (h.swordshield ? 99999 : heroDmg(18));
+                                damageHero(slashTarget, slashDmg, h.x, h.y);
                                 /* slash arc FX */
                                 superheroFX.push({
                                     kind:'slash',
-                                    x: h.chargeTarget.x,
-                                    y: h.chargeTarget.y - 12,
+                                    x: slashTarget.x,
+                                    y: slashTarget.y - 12,
                                     angle: Math.atan2(cdy, cdx),
                                     age:0, max:300,
                                     cols: h.cols
                                 });
+                                /* ── PALADIN SHIELD SHOCKWAVE ─────
+                                   Every slash the Paladin lands also
+                                   triggers a heavy shield bash — a
+                                   concussive blast centred on the
+                                   Paladin that splashes severe
+                                   damage to every dragon caught
+                                   inside `swR`. Visually: three
+                                   concentric expanding gold rings,
+                                   a bright white flash at the
+                                   Paladin's centre, and 24 sparks
+                                   fanning out radially. */
+                                if (h.swordshield){
+                                    /* shockwave radius matches the
+                                       fully-extended longsword reach */
+                                    var swR = 180;
+                                    var swSplash = 99999;       /* per-robot damage */
+                                    for (var swvi = 0; swvi < superheroVillains.length; swvi++){
+                                        var swv = superheroVillains[swvi];
+                                        if (!swv.alive || swv === slashTarget) continue;
+                                        var swvdx = swv.x - h.x;
+                                        var swvdy = (swv.y - 16) - h.y;
+                                        if (swvdx*swvdx + swvdy*swvdy < swR*swR){
+                                            damageHero(swv, swSplash, h.x, h.y);
+                                            /* per-victim impact ring so the
+                                               wave is clearly hitting them */
+                                            superheroFX.push({
+                                                kind:'impactRing',
+                                                x:swv.x, y:swv.y - 12,
+                                                age:0, max:520,
+                                                hue: 48, col:'#facc15',
+                                                r:4, maxR:30
+                                            });
+                                        }
+                                    }
+                                    /* THREE EXPANDING GOLD RINGS at the
+                                       Paladin centre — staggered max-radii
+                                       so they read as a triple shockwave
+                                       pulse rolling outward across the
+                                       full sword-arc reach. */
+                                    superheroFX.push({
+                                        kind:'impactRing', x:h.x, y:h.y - 8,
+                                        age:0, max:780,
+                                        hue:48, col:'#fde047',
+                                        r:6, maxR: swR + 30
+                                    });
+                                    superheroFX.push({
+                                        kind:'impactRing', x:h.x, y:h.y - 8,
+                                        age:0, max:640,
+                                        hue:48, col:'#facc15',
+                                        r:6, maxR: swR - 20
+                                    });
+                                    superheroFX.push({
+                                        kind:'impactRing', x:h.x, y:h.y - 8,
+                                        age:0, max:500,
+                                        hue:48, col:'#ffffff',
+                                        r:6, maxR: swR - 70
+                                    });
+                                    /* CENTRE FLASH — bright white pop */
+                                    superheroFX.push({
+                                        kind:'flash',
+                                        x:h.x, y:h.y - 8,
+                                        age:0, max:300, r:28
+                                    });
+                                    /* RADIAL SPARKS — 24 sparks fanning
+                                       outward in every direction */
+                                    for (var swsp = 0; swsp < 24; swsp++){
+                                        var swspA = (swsp / 24) * Math.PI * 2 +
+                                                    rng(-0.10, 0.10);
+                                        var swspSpd = rng(4.0, 8.0);
+                                        superheroFX.push({
+                                            kind:'spark',
+                                            x: h.x, y: h.y - 8,
+                                            vx: Math.cos(swspA) * swspSpd,
+                                            vy: Math.sin(swspA) * swspSpd,
+                                            age:0, max: rng(700, 1200),
+                                            hue: 48 + rng(-8, 12)
+                                        });
+                                    }
+                                    /* SECONDARY DUST RING — gold rim at
+                                       ground level expanding outward
+                                       like a real shield-bash pressure
+                                       wave kicking up street debris */
+                                    for (var sds = 0; sds < 14; sds++){
+                                        var sdsA = rng(-Math.PI, 0);
+                                        superheroFX.push({
+                                            kind:'spark',
+                                            x: h.x + rng(-8, 8),
+                                            y: h.y + 4,
+                                            vx: Math.cos(sdsA) * rng(2.0, 5.0),
+                                            vy: Math.sin(sdsA) * rng(0.8, 2.5),
+                                            age:0, max: rng(900, 1400),
+                                            hue: 35 + rng(-5, 10)
+                                        });
+                                    }
+                                }
+                                /* KAMIKAZE — if this mini-hero's hit
+                                   was the killing blow, the mini-hero
+                                   dies on impact (sacrifices itself
+                                   into the dragon). Regular fighters
+                                   are unaffected. */
+                                if (h.miniHero && !slashTarget.alive){
+                                    h.hp = 0;
+                                    h.alive = false;
+                                    /* spectacular self-destruct burst */
+                                    superheroFX.push({
+                                        kind:'impactRing',
+                                        x: h.x, y: h.y - 6, age:0, max:480,
+                                        hue: 280, col: h.cols.accent || '#22d3ee',
+                                        r: 4, maxR: 36
+                                    });
+                                    for (var kbi = 0; kbi < 18; kbi++){
+                                        var kba = (kbi / 18) * Math.PI * 2;
+                                        var kbSpd = rng(2.0, 5.0);
+                                        superheroFX.push({
+                                            kind: 'spark',
+                                            x: h.x, y: h.y - 6,
+                                            vx: Math.cos(kba) * kbSpd,
+                                            vy: Math.sin(kba) * kbSpd - rng(0.2, 1.4),
+                                            age: 0, max: rng(500, 900),
+                                            hue: 280 + rng(-20, 20)
+                                        });
+                                    }
+                                    if (typeof spawnDustDeath === 'function'){
+                                        try { spawnDustDeath(h.x, h.y); } catch(_e){}
+                                    }
+                                }
                             }
-                            h.phase = 'patrol';
+                            /* MINI-HERO CHAIN — after the slash lands
+                               (and the kamikaze branch above hasn't
+                               killed this mini-hero), pick the next
+                               dragon using the SAME spread logic as
+                               pickHeroTarget: least-targeted alive
+                               dragon, tie-breaking on distance. Keeps
+                               the swarm fanned across every dragon
+                               instead of stacking on one. */
+                            if (h.miniHero && h.alive){
+                                var nextV = pickHeroTarget(h);
+                                if (nextV && nextV !== h.chargeTarget){
+                                    h.chargeTarget = nextV;
+                                    h.target = nextV;
+                                    h.phase = 'charge';
+                                    h.phaseT = 0;
+                                } else if (nextV){
+                                    /* pickHeroTarget returned the same
+                                       dragon — keep charging it */
+                                    h.phase = 'charge';
+                                    h.phaseT = 0;
+                                } else {
+                                    h.phase = 'patrol';
+                                    h.phaseT = 0;
+                                }
+                            } else if (!h.miniHero){
+                                h.phase = 'patrol';
+                                h.phaseT = 0;
+                            }
+                        }
+                    } else if (h.miniHero){
+                        /* mini-hero's current target died from another
+                           source — re-acquire via the spread-picker
+                           (least-targeted alive dragon) and keep going
+                           instead of patrolling home. */
+                        var altV = pickHeroTarget(h);
+                        if (altV){
+                            h.chargeTarget = altV;
+                            h.target = altV;
                             h.phaseT = 0;
+                        } else {
+                            h.phase = 'patrol';
                         }
                     } else {
                         h.phase = 'patrol';
@@ -22657,6 +23817,192 @@
                 if (p.age > p.max || p.x < -40 || p.x > W+40 || p.y > H+40){
                     superheroPowers.splice(pi, 1); continue;
                 }
+            } else if (p.kind === 'trident'   || p.kind === 'minispawn' ||
+                       p.kind === 'missile'   || p.kind === 'magnet'    ||
+                       p.kind === 'gunfire'   || p.kind === 'dustform'  ||
+                       p.kind === 'swordshield' || p.kind === 'root'){
+                /* Generic v1.6.0 power handler — move, hit-test
+                   against villains, splash AOE for missile/trident. */
+                if (p.delay && p.age < p.delay){ continue; }
+                /* HOMING — trident water tracks its target through
+                   the air so the Tide Lord can stay put and the
+                   stream curves to hit a moving dragon. Steering is
+                   tight (~22%/frame toward target) so the lock is
+                   strong but the stream still has visible curve.
+                   Speed is preserved — only the direction is bent. */
+                if (p.kind === 'trident' && p.target && p.target.alive){
+                    var trDx = p.target.x - p.x;
+                    var trDy = (p.target.y - 14) - p.y;
+                    var trDist = Math.sqrt(trDx*trDx + trDy*trDy) || 1;
+                    var trSpd = Math.sqrt(p.vx*p.vx + p.vy*p.vy) || 14;
+                    var trDesiredVx = (trDx / trDist) * trSpd;
+                    var trDesiredVy = (trDy / trDist) * trSpd;
+                    p.vx = p.vx * 0.78 + trDesiredVx * 0.22;
+                    p.vy = p.vy * 0.78 + trDesiredVy * 0.22;
+                    /* update the rendered angle so the stream
+                       visually points at where it's going */
+                    p.angle = Math.atan2(p.vy, p.vx);
+                }
+                p.x += p.vx * k;
+                p.y += p.vy * k;
+                /* hit radius scales with power */
+                var v16HitR = (p.kind === 'gunfire')   ? 16 :
+                              (p.kind === 'missile')   ? 26 :
+                              (p.kind === 'minispawn') ? 18 :
+                              (p.kind === 'magnet')    ? 22 :
+                              (p.kind === 'dustform')  ? 24 :
+                              (p.kind === 'trident')   ? 30 :
+                              (p.kind === 'root')      ? 22 : 20;
+                /* Trident — tidal-wave one-shot. Missile — multi-
+                   rocket volley at 60 dmg each. Magnet — each
+                   shrapnel shard one-shots. Gunfire — chip damage
+                   sized so it takes exactly 3 successful bullets
+                   to bring a robot down (each bullet deals
+                   ⌈maxHp/3⌉). */
+                var v16Dmg;
+                if (p.kind === 'gunfire'){
+                    var gfTgt = v16t || p.target;
+                    var gfMaxHp = (gfTgt && gfTgt.maxHp) ? gfTgt.maxHp : 90;
+                    v16Dmg = Math.max(1, Math.ceil(gfMaxHp / 3));
+                } else if (p.kind === 'root'){
+                    /* Verdant Sage roots — damage scales UP with the
+                       distance the root had to travel to reach the
+                       victim. 0 px → 8, 200 px → 60, 500 px → 220,
+                       1000 px → 9999 (lethal). The Sage's airwave
+                       knockback (cast just before the root) maximises
+                       this distance, multiplying every root's bite. */
+                    var rDistTravelled = p.spawnDist || 0;
+                    var rdx2 = p.x - p.sx, rdy2 = p.y - p.sy;
+                    var rTrav = Math.sqrt(rdx2*rdx2 + rdy2*rdy2);
+                    var rDistEff = Math.max(rDistTravelled, rTrav);
+                    /* quadratic scale */
+                    v16Dmg = Math.floor(8 + Math.pow(rDistEff / 80, 2.0) * 4);
+                    v16Dmg = Math.min(v16Dmg, 99999);
+                } else {
+                    v16Dmg = (p.kind === 'missile')   ? 60 :
+                             (p.kind === 'minispawn') ? 12 :
+                             (p.kind === 'magnet')    ? 99999 :
+                             (p.kind === 'dustform')  ? 18 :
+                             (p.kind === 'trident')   ? 99999 : 12;
+                }
+                var v16Hit = false;
+                for (var vhi = 0; vhi < superheroVillains.length; vhi++){
+                    var v16t = superheroVillains[vhi];
+                    if (!v16t.alive) continue;
+                    var vhdx = v16t.x - p.x;
+                    var vhdy = (v16t.y - 16) - p.y;
+                    if (vhdx*vhdx + vhdy*vhdy < v16HitR*v16HitR){
+                        damageHero(v16t, v16Dmg, p.x, p.y);
+                        v16Hit = true;
+                        /* AOE follow-up for magnet shrapnel —
+                           a flying chunk of road kills the dragon
+                           on impact AND shreds anything within a
+                           generous radius. Each shard also pushes
+                           a shower of spark FX so the impact reads
+                           as serious metal-on-metal destruction. */
+                        if (p.kind === 'magnet'){
+                            var mgBlast = 50;
+                            for (var mgbi = 0; mgbi < superheroVillains.length; mgbi++){
+                                var mgb = superheroVillains[mgbi];
+                                if (!mgb.alive || mgb === v16t) continue;
+                                var mgbdx = mgb.x - p.x, mgbdy = mgb.y - p.y;
+                                if (mgbdx*mgbdx + mgbdy*mgbdy < mgBlast*mgBlast){
+                                    damageHero(mgb, 99999, p.x, p.y);
+                                }
+                            }
+                            /* impact ring + sparks */
+                            superheroFX.push({
+                                kind:'impactRing', x:p.x, y:p.y, age:0, max:500,
+                                hue:0, col:'#e5e7eb', r:6, maxR: mgBlast + 12
+                            });
+                            for (var mgs = 0; mgs < 22; mgs++){
+                                var mgsA = rng(-Math.PI, Math.PI);
+                                superheroFX.push({
+                                    kind:'spark',
+                                    x: p.x, y: p.y,
+                                    vx: Math.cos(mgsA) * rng(1.5, 5.0),
+                                    vy: Math.sin(mgsA) * rng(1.5, 5.0),
+                                    age:0, max: rng(500, 900),
+                                    hue: rng(20, 40)
+                                });
+                            }
+                        }
+                        /* AOE follow-up for missile & trident */
+                        if (p.kind === 'missile' || p.kind === 'trident'){
+                            /* Trident splash is lethal — any dragon
+                               caught inside the radius is killed
+                               outright by the tidal wave. Radius
+                               tuned down from 130 → 70 so the splash
+                               feels punchy without obliterating an
+                               entire wave on a single hit. */
+                            var v16Blast = (p.kind === 'missile') ? (p.blastR || 36) : 70;
+                            var v16Splash = (p.kind === 'trident')
+                                ? 99999
+                                : Math.round(v16Dmg * 0.6);
+                            for (var vbi = 0; vbi < superheroVillains.length; vbi++){
+                                var v16b = superheroVillains[vbi];
+                                if (!v16b.alive || v16b === v16t) continue;
+                                var bdx = v16b.x - p.x, bdy = v16b.y - p.y;
+                                if (bdx*bdx + bdy*bdy < v16Blast*v16Blast){
+                                    damageHero(v16b, v16Splash, p.x, p.y);
+                                }
+                            }
+                            superheroFX.push({
+                                kind:'impactRing', x:p.x, y:p.y, age:0, max:680,
+                                hue: p.kind === 'missile' ? 30 : 200,
+                                col: p.kind === 'missile' ? '#fb923c' : '#0ea5e9',
+                                r: 6, maxR: v16Blast + 16
+                            });
+                            /* WATER SPLASH on trident impact — many more
+                               droplets and faster spread to fill the
+                               larger lethal radius. */
+                            if (p.kind === 'trident'){
+                                for (var ws = 0; ws < 90; ws++){
+                                    var wsa = (ws / 90) * Math.PI * 2 + rng(-0.15, 0.15);
+                                    var wsSpd = rng(4.0, 11.0);
+                                    superheroFX.push({
+                                        kind: 'spark',
+                                        x: p.x, y: p.y,
+                                        vx: Math.cos(wsa) * wsSpd,
+                                        vy: Math.sin(wsa) * wsSpd - rng(0.5, 3.0),
+                                        age: 0, max: rng(900, 1600),
+                                        hue: 200 + rng(-15, 15)
+                                    });
+                                }
+                                /* secondary inner splash ring */
+                                superheroFX.push({
+                                    kind:'impactRing', x:p.x, y:p.y, age:0, max:520,
+                                    hue: 200, col:'#bae6fd', r: 4, maxR: v16Blast * 0.85
+                                });
+                                /* third outer ring matching the kill radius */
+                                superheroFX.push({
+                                    kind:'impactRing', x:p.x, y:p.y, age:0, max:820,
+                                    hue: 200, col:'#38bdf8', r: 10, maxR: v16Blast + 30
+                                });
+                                /* ground splash if near ground */
+                                if (p.y > GROUND - 30){
+                                    for (var gs = 0; gs < 18; gs++){
+                                        var gsa = rng(-Math.PI, 0);  /* upward fan */
+                                        superheroFX.push({
+                                            kind: 'spark',
+                                            x: p.x + rng(-12, 12),
+                                            y: GROUND - 2,
+                                            vx: Math.cos(gsa) * rng(1.0, 4.0),
+                                            vy: Math.sin(gsa) * rng(2.0, 5.5),
+                                            age: 0, max: rng(900, 1500),
+                                            hue: 200 + rng(-10, 10)
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                if (v16Hit){ superheroPowers.splice(pi, 1); continue; }
+                if (p.age > p.max || p.x < -40 || p.x > W+40 || p.y > H+40){
+                    superheroPowers.splice(pi, 1); continue;
+                }
             }
         }
 
@@ -22949,6 +24295,209 @@
        flames). Each hero has multi-layer shading, flowing cape,
        armored boots, gauntlets, chest insignia, glowing eyes, and
        detailed mask. ── */
+    /* ── drawHeroRobotShell ───────────────────────────────────
+       v1.6.0 — paints Tesla-Optimus / Iron-Man-style mecha
+       details over the existing hero body. Called from drawHero
+       AFTER the body, limbs, head and emblem are drawn, BEFORE
+       the body's c.restore(). Caller has already set the local
+       transform so (0,0) is the hero's centre and the body is
+       drawn at the body-scale S. */
+    function drawHeroRobotShell(c, h, S){
+        if (!h || !h.cols) return;
+        var cols = h.cols;
+        var t = (h.flightT || 0) * 4;
+        /* CHEST ARC REACTOR — bright circular reactor on the chest. */
+        var rx = 0, ry = -7 * S;
+        var arcR = 2.4 * S;
+        var pulse = 0.7 + 0.3 * Math.sin(t);
+        /* outer halo */
+        var arcHalo = c.createRadialGradient(rx, ry, 0, rx, ry, arcR * 1.8);
+        arcHalo.addColorStop(0,   'rgba(255,255,255,' + (0.55 * pulse) + ')');
+        arcHalo.addColorStop(0.4, cols.accent);
+        arcHalo.addColorStop(1,   'rgba(255,255,255,0)');
+        c.fillStyle = arcHalo;
+        c.beginPath();
+        c.arc(rx, ry, arcR * 1.8, 0, Math.PI * 2);
+        c.fill();
+        /* metallic ring */
+        c.strokeStyle = '#1f2937';
+        c.lineWidth = 0.8;
+        c.beginPath();
+        c.arc(rx, ry, arcR, 0, Math.PI * 2);
+        c.stroke();
+        /* hot inner core */
+        c.fillStyle = cols.accent;
+        c.beginPath();
+        c.arc(rx, ry, arcR * 0.65, 0, Math.PI * 2);
+        c.fill();
+        c.fillStyle = '#ffffff';
+        c.beginPath();
+        c.arc(rx, ry, arcR * 0.30 * pulse, 0, Math.PI * 2);
+        c.fill();
+
+        /* TESLA-BOT FACE PLATE — opaque metallic plate covering the
+           hero's original face features (mouth, individual eyes,
+           cheek paint, etc.) so the head reads as a smooth robotic
+           visor head. Drawn BEFORE the visor so the visor lights up
+           on top of the plate. Shape is a rounded rectangle that
+           wraps the full head silhouette. */
+        var fpX = -3.6 * S;
+        var fpY = -24 * S;
+        var fpW = 7.2 * S;
+        var fpH = 7.5 * S;
+        var fpR = 1.6 * S;
+        /* metallic gradient face plate */
+        var fpG = c.createLinearGradient(0, fpY, 0, fpY + fpH);
+        fpG.addColorStop(0,   '#cbd5e1');
+        fpG.addColorStop(0.35, '#64748b');
+        fpG.addColorStop(0.65, '#334155');
+        fpG.addColorStop(1,   '#0f172a');
+        c.fillStyle = fpG;
+        c.beginPath();
+        /* rounded-rect path */
+        c.moveTo(fpX + fpR, fpY);
+        c.lineTo(fpX + fpW - fpR, fpY);
+        c.quadraticCurveTo(fpX + fpW, fpY, fpX + fpW, fpY + fpR);
+        c.lineTo(fpX + fpW, fpY + fpH - fpR);
+        c.quadraticCurveTo(fpX + fpW, fpY + fpH, fpX + fpW - fpR, fpY + fpH);
+        c.lineTo(fpX + fpR, fpY + fpH);
+        c.quadraticCurveTo(fpX, fpY + fpH, fpX, fpY + fpH - fpR);
+        c.lineTo(fpX, fpY + fpR);
+        c.quadraticCurveTo(fpX, fpY, fpX + fpR, fpY);
+        c.closePath();
+        c.fill();
+        /* dark seam outline */
+        c.strokeStyle = '#0a0a0a';
+        c.lineWidth = 0.8;
+        c.stroke();
+        /* horizontal helmet seam */
+        c.strokeStyle = 'rgba(0,0,0,0.5)';
+        c.lineWidth = 0.5;
+        c.beginPath();
+        c.moveTo(fpX, fpY + fpH * 0.32);
+        c.lineTo(fpX + fpW, fpY + fpH * 0.32);
+        c.stroke();
+        /* CHIN GRILLE — three short vertical vent lines below the
+           visor area, suggesting the bot's intake / speaker grille. */
+        c.strokeStyle = '#0a0a0a';
+        c.lineWidth = 0.55;
+        for (var gv = -1; gv <= 1; gv++){
+            var gvx = gv * 1.0 * S;
+            c.beginPath();
+            c.moveTo(gvx, fpY + fpH * 0.62);
+            c.lineTo(gvx, fpY + fpH * 0.82);
+            c.stroke();
+        }
+        /* SIDE TEMPLE BOLTS — small dark dots near the helmet edges */
+        c.fillStyle = '#0a0a0a';
+        c.beginPath();
+        c.arc(fpX + 0.4 * S, fpY + fpH * 0.18, 0.3 * S, 0, Math.PI * 2);
+        c.fill();
+        c.beginPath();
+        c.arc(fpX + fpW - 0.4 * S, fpY + fpH * 0.18, 0.3 * S, 0, Math.PI * 2);
+        c.fill();
+
+        /* EYE VISOR — single luminescent horizontal bar across the
+           face plate. With the face plate covering the original side
+           eyes, the visor is the only "face feature" the bot has. */
+        var visorY = -19.5 * S;
+        var visorX = -2.6 * S;
+        var visorW = 5.2 * S;
+        var visorH = 0.9 * S;
+        c.fillStyle = '#0a0a0a';
+        c.fillRect(visorX - 0.2, visorY - 0.2, visorW + 0.4, visorH + 0.4);
+        var vG = c.createLinearGradient(visorX, visorY, visorX + visorW, visorY);
+        vG.addColorStop(0,   cols.accent);
+        vG.addColorStop(0.5, '#ffffff');
+        vG.addColorStop(1,   cols.accent);
+        c.fillStyle = vG;
+        c.fillRect(visorX, visorY, visorW, visorH);
+        /* visor glow */
+        c.fillStyle = 'rgba(255,255,255,' + (0.3 + 0.2 * pulse) + ')';
+        c.fillRect(visorX, visorY + visorH * 0.3, visorW, visorH * 0.3);
+        /* soft outer halo around the visor */
+        var vHaloG = c.createRadialGradient(0, visorY + visorH/2, 0,
+                                            0, visorY + visorH/2, visorW * 0.7);
+        vHaloG.addColorStop(0, 'rgba(255,255,255,' + (0.35 * pulse) + ')');
+        vHaloG.addColorStop(0.6, cols.accent);
+        vHaloG.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = vHaloG;
+        c.beginPath();
+        c.ellipse(0, visorY + visorH/2, visorW * 0.7, visorH * 1.8,
+                  0, 0, Math.PI * 2);
+        c.fill();
+
+        /* TORSO PLATE SEAMS — vertical & horizontal lines suggesting
+           welded metal plates. */
+        c.strokeStyle = 'rgba(0,0,0,0.42)';
+        c.lineWidth = 0.6;
+        c.beginPath();
+        /* central spine */
+        c.moveTo(0, -13 * S); c.lineTo(0, ry - arcR);
+        c.moveTo(0, ry + arcR); c.lineTo(0, 4 * S);
+        /* shoulder seam */
+        c.moveTo(-5.5 * S, -13 * S); c.lineTo(5.5 * S, -13 * S);
+        /* waist seam */
+        c.moveTo(-5 * S, 1 * S); c.lineTo(5 * S, 1 * S);
+        c.stroke();
+        /* SHOULDER PADS — small metallic caps over the deltoid area. */
+        for (var sh = -1; sh <= 1; sh += 2){
+            var shx = sh * 5.5 * S;
+            var shy = -14 * S;
+            var shG = c.createLinearGradient(shx, shy - 1.6 * S, shx, shy + 1.6 * S);
+            shG.addColorStop(0,   '#e5e7eb');
+            shG.addColorStop(0.5, cols.primary);
+            shG.addColorStop(1,   cols.mask);
+            c.fillStyle = shG;
+            c.beginPath();
+            c.ellipse(shx, shy, 2.4 * S, 1.6 * S, 0, 0, Math.PI * 2);
+            c.fill();
+            c.strokeStyle = 'rgba(0,0,0,0.65)';
+            c.lineWidth = 0.6;
+            c.stroke();
+        }
+        /* SERVO PIVOTS — small dark circles at shoulder, elbow,
+           hip, knee joints. Highlight dot suggests metal sheen. */
+        var joints = [
+            { x: -5.5 * S, y: -13 * S, r: 0.9 * S },   /* L shoulder */
+            { x:  5.5 * S, y: -13 * S, r: 0.9 * S },   /* R shoulder */
+            { x: -7.0 * S, y:  -5 * S, r: 0.7 * S },   /* L elbow    */
+            { x:  7.0 * S, y:  -5 * S, r: 0.7 * S },   /* R elbow    */
+            { x: -3.0 * S, y:   3 * S, r: 0.8 * S },   /* L hip      */
+            { x:  3.0 * S, y:   3 * S, r: 0.8 * S },   /* R hip      */
+            { x: -3.2 * S, y:   8 * S, r: 0.7 * S },   /* L knee     */
+            { x:  3.2 * S, y:   8 * S, r: 0.7 * S }    /* R knee     */
+        ];
+        for (var ji = 0; ji < joints.length; ji++){
+            var jn = joints[ji];
+            c.fillStyle = '#0a0a0a';
+            c.beginPath();
+            c.arc(jn.x, jn.y, jn.r, 0, Math.PI * 2);
+            c.fill();
+            c.strokeStyle = '#9ca3af';
+            c.lineWidth = 0.4;
+            c.stroke();
+            /* highlight dot */
+            c.fillStyle = '#e5e7eb';
+            c.beginPath();
+            c.arc(jn.x - jn.r * 0.35, jn.y - jn.r * 0.35, jn.r * 0.30, 0, Math.PI * 2);
+            c.fill();
+        }
+        /* HEAD TOP ANTENNA — small status light blinking on top
+           of the head (Tesla-bot style). */
+        var anX = 0, anY = -25.5 * S;
+        c.strokeStyle = '#374151';
+        c.lineWidth = 0.6;
+        c.beginPath();
+        c.moveTo(0, -23 * S); c.lineTo(anX, anY);
+        c.stroke();
+        var blinkOn = (Math.floor(t * 1.2) % 2) === 0;
+        c.fillStyle = blinkOn ? cols.accent : 'rgba(0,0,0,0.4)';
+        c.beginPath();
+        c.arc(anX, anY, 0.55 * S, 0, Math.PI * 2);
+        c.fill();
+    }
+
     function drawHero(c, h){
         var cols = h.cols;
         var hurt = h.hurtT > 0 ? (h.hurtT/220) : 0;
@@ -22979,8 +24528,10 @@
         c.scale(fx, 1);
         /* ── SCALE — solo hero gets MUCH larger render so the
            detail reads clearly. Default 2.0 for legacy multi-hero
-           mode, 4.0 (2× larger) for the single hero pick. */
-        var S = h.solo ? 2.4 : 2.0;
+           mode, 2.4 for the single hero pick, 1.1 for mini-clones
+           spawned by Swarm Marshal so they read as smaller flying
+           sidekicks. */
+        var S = h.miniHero ? 1.1 : (h.solo ? 2.4 : 2.0);
         /* ── DYNAMIC POSE — the body, limbs, and legs animate
            differently depending on what the hero is doing right
            now: hovering, flying, charging at a target, attacking,
@@ -23430,6 +24981,756 @@
             var breath = Math.sin(h.flightT * 1.5) * 0.04;
             drawArm(shLX, shLY, 0.10 - breath, 0.10);
             drawArm(shRX, shRY, -0.10 + breath, 0.10);
+        }
+
+        /* ── TRIDENT — held in the Tide Lord's right hand at all
+           times. Tilts forward during attack so it reads as
+           thrusting the water out. Gold shaft, silver prongs,
+           cyan glow. */
+        if (h.power === 'trident'){
+            var trH_x = 6 * S;     /* right hand X */
+            var trH_y = 1.5 * S;   /* right hand Y */
+            /* Tilt forward when attacking, otherwise hold upright. */
+            var trAtkP = h.attackT > 0 ? Math.sin((1 - h.attackT/200) * Math.PI) : 0;
+            var trTilt = -0.5 - trAtkP * 0.8;  /* radians, leans forward */
+            c.save();
+            c.translate(trH_x, trH_y);
+            c.rotate(trTilt);
+            var trLen = 22 * S;
+            /* CYAN GLOW around the trident — pulses when about to fire */
+            var trGlowA = 0.30 + (h.attackT > 0 ? (h.attackT/200) * 0.55 : 0.18);
+            var trGl = c.createLinearGradient(0, 0, 0, -trLen);
+            trGl.addColorStop(0,   'rgba(56,189,248,' + (trGlowA*0.4) + ')');
+            trGl.addColorStop(0.7, 'rgba(186,230,253,' + trGlowA + ')');
+            trGl.addColorStop(1,   'rgba(255,255,255,' + (trGlowA*0.7) + ')');
+            c.fillStyle = trGl;
+            c.beginPath();
+            c.ellipse(0, -trLen * 0.55, 2.4*S, trLen*0.6, 0, 0, Math.PI*2);
+            c.fill();
+            /* SHAFT — gold haft with darker spine */
+            var shaftG = c.createLinearGradient(-0.8*S, 0, 0.8*S, 0);
+            shaftG.addColorStop(0, '#7c2d12');
+            shaftG.addColorStop(0.45, '#fbbf24');
+            shaftG.addColorStop(0.55, '#fde047');
+            shaftG.addColorStop(1, '#7c2d12');
+            c.fillStyle = shaftG;
+            c.fillRect(-0.8*S, -trLen + 4*S, 1.6*S, trLen - 4*S);
+            /* shaft seam */
+            c.strokeStyle = '#451a03';
+            c.lineWidth = 0.4;
+            c.beginPath();
+            c.moveTo(0, -trLen + 4*S);
+            c.lineTo(0, 0);
+            c.stroke();
+            /* SHAFT GRIP — leather wrap at the hand */
+            c.fillStyle = '#0c4a6e';
+            c.fillRect(-1.2*S, -1.5*S, 2.4*S, 4*S);
+            for (var grpi = 0; grpi < 4; grpi++){
+                c.strokeStyle = 'rgba(0,0,0,0.5)';
+                c.lineWidth = 0.35;
+                c.beginPath();
+                c.moveTo(-1.2*S, -1.0*S + grpi*0.9*S);
+                c.lineTo(1.2*S, -1.2*S + grpi*0.9*S);
+                c.stroke();
+            }
+            /* CROSSGUARD — small bar at the base of the prongs */
+            c.fillStyle = '#fde047';
+            c.fillRect(-2.4*S, -trLen + 3.5*S, 4.8*S, 1.2*S);
+            c.strokeStyle = '#451a03';
+            c.lineWidth = 0.5;
+            c.strokeRect(-2.4*S, -trLen + 3.5*S, 4.8*S, 1.2*S);
+            /* THREE PRONGS — silver/steel, slightly fanned outward */
+            var prongG = c.createLinearGradient(0, -trLen, 0, -trLen + 5*S);
+            prongG.addColorStop(0, '#ffffff');
+            prongG.addColorStop(0.5, '#cbd5e1');
+            prongG.addColorStop(1, '#475569');
+            c.fillStyle = prongG;
+            /* centre prong (straight, tallest) */
+            c.beginPath();
+            c.moveTo(-0.5*S, -trLen + 3.5*S);
+            c.lineTo(0.5*S, -trLen + 3.5*S);
+            c.lineTo(0.25*S, -trLen - 5*S);
+            c.lineTo(0, -trLen - 6*S);
+            c.lineTo(-0.25*S, -trLen - 5*S);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#1e293b';
+            c.lineWidth = 0.4;
+            c.stroke();
+            /* left prong (curves out, hooked) */
+            c.beginPath();
+            c.moveTo(-2.0*S, -trLen + 3.5*S);
+            c.lineTo(-1.0*S, -trLen + 3.5*S);
+            c.quadraticCurveTo(-1.5*S, -trLen - 2*S, -2.2*S, -trLen - 4.5*S);
+            c.lineTo(-2.6*S, -trLen - 3.5*S);
+            c.quadraticCurveTo(-2.4*S, -trLen - 1*S, -2.0*S, -trLen + 3.5*S);
+            c.closePath();
+            c.fill();
+            c.stroke();
+            /* right prong (mirror of left) */
+            c.beginPath();
+            c.moveTo(2.0*S, -trLen + 3.5*S);
+            c.lineTo(1.0*S, -trLen + 3.5*S);
+            c.quadraticCurveTo(1.5*S, -trLen - 2*S, 2.2*S, -trLen - 4.5*S);
+            c.lineTo(2.6*S, -trLen - 3.5*S);
+            c.quadraticCurveTo(2.4*S, -trLen - 1*S, 2.0*S, -trLen + 3.5*S);
+            c.closePath();
+            c.fill();
+            c.stroke();
+            /* PRONG TIP HIGHLIGHTS — bright dots when about to fire */
+            if (h.attackT > 0){
+                var trTipA = h.attackT / 200;
+                c.fillStyle = 'rgba(255,255,255,' + trTipA + ')';
+                c.beginPath();
+                c.arc(0, -trLen - 6*S, 0.9*S, 0, Math.PI*2); c.fill();
+                c.beginPath();
+                c.arc(-2.4*S, -trLen - 4*S, 0.7*S, 0, Math.PI*2); c.fill();
+                c.beginPath();
+                c.arc(2.4*S, -trLen - 4*S, 0.7*S, 0, Math.PI*2); c.fill();
+            }
+            c.restore();
+        }
+
+        /* ── PALADIN — long sword (right hand) + big kite shield
+           (left hand) drawn at all times. Heavily detailed:
+             • SHIELD — heraldic kite shape, blue field with a
+               gold cross emblem, polished steel rim, 8 rivets
+               around the border, beveled hand-grip on the back.
+             • SWORD — three-foot longsword with a fuller (centre
+               groove), gold crossguard with raised globes at the
+               ends, leather-wrapped grip with binding cord, and a
+               round gold pommel. Reflective edge highlight on
+               the blade.
+           On attack the sword swings forward and the shield raises
+           slightly into a guard position. */
+        if (h.power === 'swordshield'){
+            /* PALADIN ATTACK ANIMATION CURVE */
+            var pdAtkP = h.attackT > 0 ? Math.sin((1 - h.attackT/200) * Math.PI) : 0;
+
+            /* ╔═════════════════════ SHIELD (LEFT HAND) ═════════════════════╗ */
+            var shL_x = -7 * S;     /* left hand X */
+            var shL_y = 0.5 * S;    /* left hand Y */
+            var shLift = -pdAtkP * 1.5;    /* raises on guard */
+            c.save();
+            c.translate(shL_x, shL_y + shLift);
+            /* slight inward tilt so the shield faces forward */
+            c.rotate(-0.18 - pdAtkP * 0.20);
+
+            /* KITE SHIELD SHAPE — flat top, wide shoulders, tapers
+               to a point at the bottom. Heraldic Knights Templar
+               shape. */
+            var psW = 6.5 * S;       /* half-width at top */
+            var psTopY = -6 * S;
+            var psPointY = 9 * S;
+            /* shield BODY — deep blue field */
+            var psBodyG = c.createLinearGradient(-psW, psTopY, psW, psPointY);
+            psBodyG.addColorStop(0,   '#1e3a8a');
+            psBodyG.addColorStop(0.5, '#2563eb');
+            psBodyG.addColorStop(1,   '#1d4ed8');
+            c.fillStyle = psBodyG;
+            c.beginPath();
+            c.moveTo(-psW, psTopY);
+            c.lineTo( psW, psTopY);
+            c.quadraticCurveTo(psW * 1.1, psPointY * 0.55, 0, psPointY);
+            c.quadraticCurveTo(-psW * 1.1, psPointY * 0.55, -psW, psTopY);
+            c.closePath();
+            c.fill();
+
+            /* DARK INNER SHADOW on right side for 3D */
+            c.save();
+            c.globalAlpha = 0.30;
+            c.fillStyle = '#0a1b3d';
+            c.beginPath();
+            c.moveTo(0, psTopY);
+            c.lineTo(psW, psTopY);
+            c.quadraticCurveTo(psW * 1.1, psPointY * 0.55, 0, psPointY);
+            c.closePath();
+            c.fill();
+            c.restore();
+
+            /* GOLD HERALDIC CROSS — long vertical bar + horizontal */
+            c.fillStyle = '#facc15';
+            c.fillRect(-0.9 * S, psTopY + 1 * S, 1.8 * S, (psPointY - psTopY) - 3 * S);
+            c.fillRect(-3.5 * S, -0.5 * S, 7 * S, 1.6 * S);
+            /* cross highlight */
+            c.fillStyle = '#fde68a';
+            c.fillRect(-0.9 * S, psTopY + 1 * S, 0.5 * S, (psPointY - psTopY) - 3 * S);
+            c.fillRect(-3.5 * S, -0.5 * S, 7 * S, 0.4 * S);
+            /* cross outline */
+            c.strokeStyle = '#a16207';
+            c.lineWidth = 0.4;
+            c.strokeRect(-0.9 * S, psTopY + 1 * S, 1.8 * S, (psPointY - psTopY) - 3 * S);
+            c.strokeRect(-3.5 * S, -0.5 * S, 7 * S, 1.6 * S);
+
+            /* POLISHED STEEL RIM — thick outer border with bevel */
+            c.strokeStyle = '#e5e7eb';
+            c.lineWidth = 1.2;
+            c.beginPath();
+            c.moveTo(-psW, psTopY);
+            c.lineTo( psW, psTopY);
+            c.quadraticCurveTo(psW * 1.1, psPointY * 0.55, 0, psPointY);
+            c.quadraticCurveTo(-psW * 1.1, psPointY * 0.55, -psW, psTopY);
+            c.closePath();
+            c.stroke();
+            c.strokeStyle = '#475569';
+            c.lineWidth = 0.6;
+            c.stroke();
+
+            /* 8 RIVETS around the rim */
+            c.fillStyle = '#e5e7eb';
+            var rivPositions = [
+                [-psW * 0.65, psTopY + 0.4],
+                [ 0,          psTopY + 0.4],
+                [ psW * 0.65, psTopY + 0.4],
+                [ psW * 0.95, psPointY * 0.4],
+                [ psW * 0.55, psPointY * 0.75],
+                [ 0,          psPointY * 0.92],
+                [-psW * 0.55, psPointY * 0.75],
+                [-psW * 0.95, psPointY * 0.4]
+            ];
+            for (var prvi = 0; prvi < rivPositions.length; prvi++){
+                var prv = rivPositions[prvi];
+                c.beginPath();
+                c.arc(prv[0], prv[1], 0.45 * S, 0, Math.PI * 2);
+                c.fill();
+                c.fillStyle = '#475569';
+                c.beginPath();
+                c.arc(prv[0] - 0.2, prv[1] - 0.2, 0.18 * S, 0, Math.PI * 2);
+                c.fill();
+                c.fillStyle = '#e5e7eb';
+            }
+
+            /* TOP SHEEN — bright reflective highlight */
+            c.strokeStyle = 'rgba(255,255,255,0.65)';
+            c.lineWidth = 0.8;
+            c.beginPath();
+            c.moveTo(-psW * 0.7, psTopY + 1.5);
+            c.quadraticCurveTo(0, psTopY - 0.5, psW * 0.5, psTopY + 1.5);
+            c.stroke();
+
+            c.restore();
+
+            /* ╔══════════════════ LONGSWORD (RIGHT HAND) ══════════════════╗ */
+            var swR_x = 6 * S;
+            var swR_y = 1.5 * S;
+            /* The blade is modelled extending in the -Y (upward)
+               direction inside the local rotation frame. Positive
+               rotation values rotate it clockwise — toward +X,
+               which is the hero's FACING direction (everything is
+               scaled by h.face in the outer transform). So a
+               base rotation of ~1.35 rad points the blade
+               forward-and-slightly-up, the swing adds another
+               0.35 rad on top so peak-swing brings the tip to a
+               nearly horizontal forward strike. This way the
+               Paladin holds the sword OUT IN FRONT toward the
+               robots (instead of the previous over-the-shoulder
+               pose which looked like he was holding it backward). */
+            var swBase  =  1.35;
+            var swSwing =  0.35 * pdAtkP;
+            c.save();
+            c.translate(swR_x, swR_y);
+            c.rotate(swBase + swSwing);
+
+            /* ── LIGHTSABER BLADE ─────────────────────────────────
+               4 stacked stroked passes from soft outer halo down
+               to a white-hot core line. The blade grows on swing
+               (pdAtkP curve). Subtle hum-pulse on the brightness
+               using h.flightT so the blade reads as live energy. */
+            var blLen = (42 + pdAtkP * 80) * S;
+            var blW   = (1.6 + pdAtkP * 1.0) * S;     /* core width */
+            var hum   = 0.85 + 0.15 * Math.sin((h.flightT || 0) * 6);
+
+            /* Blade emits FROM the emitter at (0, -4*S) TO the tip
+               at (0, -blLen - 1.8*S). All passes use the same
+               start/end so the layers stack concentrically. */
+            var emitterY = -4 * S;
+            var tipY = -blLen - 1.8 * S;
+
+            c.save();
+            c.lineCap = 'round';
+
+            /* LAYER 1 — wide outer halo glow */
+            c.globalAlpha = 0.30 * hum;
+            c.strokeStyle = '#fde047';
+            c.lineWidth = blW * 5.8;
+            c.beginPath();
+            c.moveTo(0, emitterY);
+            c.lineTo(0, tipY);
+            c.stroke();
+            /* LAYER 2 — middle saturated gold */
+            c.globalAlpha = 0.55 * hum;
+            c.strokeStyle = '#fbbf24';
+            c.lineWidth = blW * 3.6;
+            c.beginPath();
+            c.moveTo(0, emitterY);
+            c.lineTo(0, tipY);
+            c.stroke();
+            /* LAYER 3 — bright inner accent */
+            c.globalAlpha = 0.85 * hum;
+            c.strokeStyle = '#fef3c7';
+            c.lineWidth = blW * 1.8;
+            c.beginPath();
+            c.moveTo(0, emitterY);
+            c.lineTo(0, tipY);
+            c.stroke();
+            /* LAYER 4 — white-hot core */
+            c.globalAlpha = 1.0;
+            c.strokeStyle = '#ffffff';
+            c.lineWidth = blW * 0.7;
+            c.beginPath();
+            c.moveTo(0, emitterY);
+            c.lineTo(0, tipY);
+            c.stroke();
+            c.restore();
+
+            /* TIP HALO — bright radial flare at the blade tip */
+            var tipG = c.createRadialGradient(0, tipY, 0, 0, tipY, blW * 4.2);
+            tipG.addColorStop(0,   'rgba(255,255,255,' + (0.95 * hum) + ')');
+            tipG.addColorStop(0.4, 'rgba(254,243,199,' + (0.65 * hum) + ')');
+            tipG.addColorStop(1,   'rgba(253,224,71,0)');
+            c.fillStyle = tipG;
+            c.beginPath();
+            c.arc(0, tipY, blW * 4.2, 0, Math.PI * 2);
+            c.fill();
+
+            /* EMITTER FLARE — bright burst at the base where the
+               energy ignites out of the hilt */
+            var emG = c.createRadialGradient(0, emitterY, 0, 0, emitterY, blW * 5);
+            emG.addColorStop(0,   'rgba(255,255,255,' + (0.95 * hum) + ')');
+            emG.addColorStop(0.3, 'rgba(253,224,71,' + (0.85 * hum) + ')');
+            emG.addColorStop(1,   'rgba(253,224,71,0)');
+            c.fillStyle = emG;
+            c.beginPath();
+            c.arc(0, emitterY, blW * 5, 0, Math.PI * 2);
+            c.fill();
+
+            /* SWING ARC — when attacking, paint a translucent
+               curved smear behind the blade following the swing
+               direction so the energy trail reads as motion. */
+            if (h.attackT > 0){
+                var arcA = h.attackT / 200;
+                c.save();
+                c.globalAlpha = 0.45 * arcA;
+                c.fillStyle = '#fde047';
+                c.beginPath();
+                c.moveTo(0, emitterY);
+                c.quadraticCurveTo(blLen * 0.4, tipY * 0.4, 0, tipY);
+                c.lineTo(blW * 0.5, tipY);
+                c.quadraticCurveTo(blLen * 0.5, tipY * 0.45, blW * 0.5, emitterY);
+                c.closePath();
+                c.fill();
+                /* second arc on the other side for symmetry */
+                c.fillStyle = '#fbbf24';
+                c.globalAlpha = 0.30 * arcA;
+                c.beginPath();
+                c.moveTo(0, emitterY);
+                c.quadraticCurveTo(blLen * 0.55, tipY * 0.45, 0, tipY);
+                c.lineTo(blW * 0.7, tipY);
+                c.quadraticCurveTo(blLen * 0.65, tipY * 0.5, blW * 0.7, emitterY);
+                c.closePath();
+                c.fill();
+                c.restore();
+            }
+
+            /* ── HILT ────────────────────────────────────────────
+               Chrome cylinder lightsaber handle with emitter ring,
+               activation button, banding, vents, and pommel cap. */
+            /* CROSSGUARD GUARD QUILLON — gold flanges that double
+               as a small parry guard on the lightsaber */
+            c.fillStyle = '#facc15';
+            c.fillRect(-3.6 * S, -4.6 * S, 7.2 * S, 0.8 * S);
+            c.strokeStyle = '#a16207';
+            c.lineWidth = 0.4;
+            c.strokeRect(-3.6 * S, -4.6 * S, 7.2 * S, 0.8 * S);
+            c.fillStyle = '#fde68a';
+            c.beginPath(); c.arc(-3.6 * S, -4.2 * S, 0.7 * S, 0, Math.PI * 2); c.fill();
+            c.beginPath(); c.arc( 3.6 * S, -4.2 * S, 0.7 * S, 0, Math.PI * 2); c.fill();
+            c.strokeStyle = '#a16207';
+            c.beginPath(); c.arc(-3.6 * S, -4.2 * S, 0.7 * S, 0, Math.PI * 2); c.stroke();
+            c.beginPath(); c.arc( 3.6 * S, -4.2 * S, 0.7 * S, 0, Math.PI * 2); c.stroke();
+
+            /* EMITTER RING — bright chrome ring at the blade base */
+            var emRX = 1.4 * S;
+            var emRY = -3.6 * S;
+            var emRG = c.createLinearGradient(-emRX, emRY, emRX, emRY);
+            emRG.addColorStop(0,    '#475569');
+            emRG.addColorStop(0.45, '#f1f5f9');
+            emRG.addColorStop(0.55, '#ffffff');
+            emRG.addColorStop(1,    '#0f172a');
+            c.fillStyle = emRG;
+            c.fillRect(-emRX, emRY, emRX * 2, 0.6 * S);
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.35;
+            c.strokeRect(-emRX, emRY, emRX * 2, 0.6 * S);
+
+            /* HILT BODY — chrome cylinder running down from the
+               emitter ring. Drawn as a gradient rect with a darker
+               vent band and a few bright reflective stripes. */
+            var hltX = 1.25 * S;
+            var hltTop = -3.0 * S;
+            var hltBot = 0.6 * S;
+            var hltH = hltBot - hltTop;
+            var hltG = c.createLinearGradient(-hltX, 0, hltX, 0);
+            hltG.addColorStop(0,    '#1f2937');
+            hltG.addColorStop(0.25, '#94a3b8');
+            hltG.addColorStop(0.5,  '#f1f5f9');
+            hltG.addColorStop(0.75, '#94a3b8');
+            hltG.addColorStop(1,    '#0f172a');
+            c.fillStyle = hltG;
+            c.fillRect(-hltX, hltTop, hltX * 2, hltH);
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.45;
+            c.strokeRect(-hltX, hltTop, hltX * 2, hltH);
+
+            /* VENT SLOTS — three dark horizontal slits across the
+               upper hilt for cooling vents (classic lightsaber bit) */
+            c.fillStyle = '#0a0a0a';
+            for (var vsi = 0; vsi < 3; vsi++){
+                c.fillRect(-hltX + 0.15 * S, hltTop + (0.5 + vsi * 0.25) * S,
+                           hltX * 2 - 0.3 * S, 0.15 * S);
+            }
+
+            /* GRIP BANDS — two raised black bands on the hilt with
+               a thin bright highlight on top */
+            c.fillStyle = '#0a0a0a';
+            c.fillRect(-hltX, hltTop + 1.6 * S, hltX * 2, 0.4 * S);
+            c.fillRect(-hltX, hltTop + 2.6 * S, hltX * 2, 0.4 * S);
+            c.strokeStyle = 'rgba(255,255,255,0.5)';
+            c.lineWidth = 0.25;
+            c.beginPath();
+            c.moveTo(-hltX, hltTop + 1.6 * S);
+            c.lineTo(hltX, hltTop + 1.6 * S);
+            c.moveTo(-hltX, hltTop + 2.6 * S);
+            c.lineTo(hltX, hltTop + 2.6 * S);
+            c.stroke();
+
+            /* ACTIVATION BUTTON — small red glowing button on the
+               front of the hilt */
+            c.fillStyle = '#0a0a0a';
+            c.fillRect(-0.5 * S, hltTop + 2.0 * S, 1.0 * S, 0.5 * S);
+            c.fillStyle = '#dc2626';
+            c.beginPath();
+            c.arc(0, hltTop + 2.25 * S, 0.32 * S, 0, Math.PI * 2);
+            c.fill();
+            /* button glow */
+            c.fillStyle = 'rgba(254,202,202,' + (0.5 + 0.5 * Math.sin((h.flightT||0) * 4)) + ')';
+            c.beginPath();
+            c.arc(0, hltTop + 2.25 * S, 0.16 * S, 0, Math.PI * 2);
+            c.fill();
+
+            /* CENTRAL CHROME STRIPE — bright reflective highlight */
+            c.strokeStyle = 'rgba(255,255,255,0.85)';
+            c.lineWidth = 0.35;
+            c.beginPath();
+            c.moveTo(-0.45 * S, hltTop);
+            c.lineTo(-0.45 * S, hltBot);
+            c.stroke();
+
+            /* POMMEL CAP — dark cap with a small accent jewel */
+            c.fillStyle = '#1f2937';
+            c.fillRect(-1.4 * S, hltBot, 2.8 * S, 0.7 * S);
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.4;
+            c.strokeRect(-1.4 * S, hltBot, 2.8 * S, 0.7 * S);
+            c.fillStyle = '#facc15';
+            c.beginPath();
+            c.arc(0, hltBot + 0.35 * S, 0.30 * S, 0, Math.PI * 2);
+            c.fill();
+            c.fillStyle = '#fffbeb';
+            c.beginPath();
+            c.arc(-0.1 * S, hltBot + 0.25 * S, 0.12 * S, 0, Math.PI * 2);
+            c.fill();
+
+            c.restore();
+        }
+
+        /* ── GUNSMITH ARSENAL ────────────────────────────────────
+           Heavy weaponry visibly mounted on the Gunsmith's body:
+             • Twin SHOULDER MINIGUNS — rotating multi-barrel pods
+             • CROSSED AMMO BELTS over the chest
+             • Right hand AK-style assault rifle (stock + mag + grip)
+             • Left hand shotgun (pump + double barrel)
+             • Back strap RPG launcher tube + sniper rifle
+             • Hip holsters with two pistols
+           Drawn at all times so the hero reads as a walking armoury. */
+        if (h.power === 'gunfire'){
+            var gT = (h.flightT || 0) * 4;
+            var gAtkP = h.attackT > 0 ? Math.sin((1 - h.attackT/200) * Math.PI) : 0;
+
+            /* ── BACK-STRAP WEAPONS — drawn FIRST so they sit
+               behind the body silhouette ── */
+            /* RPG LAUNCHER TUBE — long khaki tube angled across
+               the back, with a green warhead poking over the
+               left shoulder */
+            c.save();
+            c.translate(0, -10 * S);
+            c.rotate(-0.50);
+            /* tube */
+            c.fillStyle = '#3f3f46';
+            c.fillRect(-9 * S, -1 * S, 18 * S, 2 * S);
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.4;
+            c.strokeRect(-9 * S, -1 * S, 18 * S, 2 * S);
+            /* sight ring */
+            c.strokeStyle = '#71717a';
+            c.lineWidth = 0.5;
+            c.beginPath();
+            c.arc(0, -1.6 * S, 0.7 * S, 0, Math.PI * 2);
+            c.stroke();
+            /* warhead at one end */
+            c.fillStyle = '#16a34a';
+            c.beginPath();
+            c.moveTo(-9 * S, -1 * S);
+            c.lineTo(-12 * S, 0);
+            c.lineTo(-9 * S, 1 * S);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#14532d';
+            c.lineWidth = 0.3;
+            c.stroke();
+            /* warhead fins */
+            c.fillStyle = '#15803d';
+            c.fillRect(-9 * S, -2 * S, 1.4 * S, 1 * S);
+            c.fillRect(-9 * S, 1 * S, 1.4 * S, 1 * S);
+            c.restore();
+            /* SNIPER RIFLE on the right back */
+            c.save();
+            c.translate(2 * S, -10 * S);
+            c.rotate(0.55);
+            c.fillStyle = '#1f2937';
+            c.fillRect(-7 * S, -0.6 * S, 14 * S, 1.2 * S);
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.35;
+            c.strokeRect(-7 * S, -0.6 * S, 14 * S, 1.2 * S);
+            /* scope */
+            c.fillStyle = '#0a0a0a';
+            c.fillRect(-1.5 * S, -1.6 * S, 3 * S, 1 * S);
+            c.fillStyle = '#facc15';
+            c.beginPath();
+            c.arc(-1.5 * S, -1.1 * S, 0.35 * S, 0, Math.PI * 2);
+            c.fill();
+            /* sniper stock */
+            c.fillStyle = '#7c2d12';
+            c.fillRect(5 * S, -0.4 * S, 2.5 * S, 0.8 * S);
+            c.restore();
+
+            /* ── CROSSED AMMO BELTS over the chest ── */
+            for (var ab = 0; ab < 2; ab++){
+                var abDir = ab === 0 ? 1 : -1;
+                c.save();
+                c.translate(0, -8 * S);
+                c.rotate(abDir * 0.35);
+                /* belt strip */
+                c.fillStyle = '#3f3f46';
+                c.fillRect(-8 * S, -0.8 * S, 16 * S, 1.6 * S);
+                c.strokeStyle = '#0a0a0a';
+                c.lineWidth = 0.35;
+                c.strokeRect(-8 * S, -0.8 * S, 16 * S, 1.6 * S);
+                /* bullet rounds inside */
+                c.fillStyle = '#fbbf24';
+                for (var bi = 0; bi < 11; bi++){
+                    var bx = -7.2 * S + bi * 1.4 * S;
+                    /* casing */
+                    c.fillStyle = '#fbbf24';
+                    c.fillRect(bx, -0.6 * S, 0.8 * S, 1.2 * S);
+                    /* head */
+                    c.fillStyle = '#c2410c';
+                    c.beginPath();
+                    c.moveTo(bx, -0.6 * S);
+                    c.lineTo(bx + 0.4 * S, -1.2 * S);
+                    c.lineTo(bx + 0.8 * S, -0.6 * S);
+                    c.closePath();
+                    c.fill();
+                }
+                c.restore();
+            }
+
+            /* ── TWIN SHOULDER MINIGUNS ── */
+            for (var sm = -1; sm <= 1; sm += 2){
+                var smX = sm * 7 * S;
+                var smY = -14 * S;
+                /* MOUNT housing */
+                c.save();
+                c.translate(smX, smY);
+                /* base block */
+                c.fillStyle = '#0a0a0a';
+                c.fillRect(-2.2 * S, -1 * S, 4.4 * S, 3.5 * S);
+                var smG = c.createLinearGradient(-2 * S, 0, 2 * S, 0);
+                smG.addColorStop(0,   '#1f2937');
+                smG.addColorStop(0.5, '#9ca3af');
+                smG.addColorStop(1,   '#0f172a');
+                c.fillStyle = smG;
+                c.fillRect(-2 * S, -0.8 * S, 4 * S, 3 * S);
+                c.strokeStyle = '#0a0a0a';
+                c.lineWidth = 0.4;
+                c.strokeRect(-2 * S, -0.8 * S, 4 * S, 3 * S);
+                /* rotation hub centre */
+                c.save();
+                c.rotate(gT * (sm > 0 ? 1 : -1));    /* spinning */
+                /* 6 barrels arranged radially, with the front
+                   barrels pointing FORWARD toward the enemy */
+                for (var bri = 0; bri < 6; bri++){
+                    var brA = (bri / 6) * Math.PI * 2;
+                    var brOffX = Math.cos(brA) * 0.8 * S;
+                    var brOffY = Math.sin(brA) * 0.8 * S;
+                    c.fillStyle = '#1f2937';
+                    c.fillRect(brOffX - 0.3 * S, brOffY - 0.3 * S, 4 * S, 0.6 * S);
+                    c.strokeStyle = '#0a0a0a';
+                    c.lineWidth = 0.25;
+                    c.strokeRect(brOffX - 0.3 * S, brOffY - 0.3 * S, 4 * S, 0.6 * S);
+                }
+                c.restore();
+                /* central hub disc */
+                c.fillStyle = '#475569';
+                c.beginPath();
+                c.arc(0, 0.5 * S, 1 * S, 0, Math.PI * 2);
+                c.fill();
+                c.strokeStyle = '#0a0a0a';
+                c.lineWidth = 0.4;
+                c.stroke();
+                /* muzzle FLASH when attacking */
+                if (gAtkP > 0){
+                    var mfA = gAtkP;
+                    var mfG = c.createRadialGradient(3 * S, 0.5 * S, 0,
+                                                     3 * S, 0.5 * S, 4 * S);
+                    mfG.addColorStop(0, 'rgba(255,255,255,' + mfA + ')');
+                    mfG.addColorStop(0.5, 'rgba(253,224,71,' + (mfA*0.7) + ')');
+                    mfG.addColorStop(1, 'rgba(253,224,71,0)');
+                    c.fillStyle = mfG;
+                    c.beginPath();
+                    c.arc(3 * S, 0.5 * S, 4 * S, 0, Math.PI * 2);
+                    c.fill();
+                }
+                c.restore();
+            }
+
+            /* ── RIGHT-HAND ASSAULT RIFLE (AK-style) ── */
+            c.save();
+            c.translate(6 * S, 2 * S);
+            c.rotate(0.35);    /* angled forward */
+            /* upper receiver / barrel */
+            c.fillStyle = '#1f2937';
+            c.fillRect(-1 * S, -0.8 * S, 14 * S, 1.4 * S);
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.4;
+            c.strokeRect(-1 * S, -0.8 * S, 14 * S, 1.4 * S);
+            /* upper rail */
+            c.fillStyle = '#0a0a0a';
+            c.fillRect(-1 * S, -1.3 * S, 14 * S, 0.4 * S);
+            /* muzzle */
+            c.fillStyle = '#000';
+            c.fillRect(13 * S, -0.4 * S, 0.8 * S, 0.8 * S);
+            /* curved AK magazine */
+            c.fillStyle = '#7c2d12';
+            c.beginPath();
+            c.moveTo(3 * S, 0.6 * S);
+            c.lineTo(5 * S, 0.6 * S);
+            c.quadraticCurveTo(6 * S, 3 * S, 5 * S, 4 * S);
+            c.lineTo(3 * S, 4 * S);
+            c.quadraticCurveTo(2 * S, 3 * S, 3 * S, 0.6 * S);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#3b0a02';
+            c.lineWidth = 0.35;
+            c.stroke();
+            /* mag ribs */
+            for (var mri = 0; mri < 4; mri++){
+                c.beginPath();
+                c.moveTo(2.6 * S, 1 * S + mri * 0.8 * S);
+                c.lineTo(5.3 * S, 1 * S + mri * 0.8 * S);
+                c.stroke();
+            }
+            /* pistol grip */
+            c.fillStyle = '#7c2d12';
+            c.fillRect(-0.5 * S, 0.6 * S, 1.5 * S, 2.5 * S);
+            /* trigger guard */
+            c.strokeStyle = '#0a0a0a';
+            c.lineWidth = 0.4;
+            c.beginPath();
+            c.arc(1.5 * S, 1.6 * S, 0.8 * S, 0, Math.PI);
+            c.stroke();
+            /* stock */
+            c.fillStyle = '#a16207';
+            c.fillRect(-3.5 * S, -0.5 * S, 2.5 * S, 1.5 * S);
+            c.strokeStyle = '#3b0a02';
+            c.lineWidth = 0.3;
+            c.strokeRect(-3.5 * S, -0.5 * S, 2.5 * S, 1.5 * S);
+            /* MUZZLE FLASH on attack */
+            if (gAtkP > 0){
+                var rfA = gAtkP;
+                c.fillStyle = 'rgba(253,224,71,' + rfA + ')';
+                c.beginPath();
+                c.moveTo(13.5 * S, 0);
+                c.lineTo(17 * S, -1.5 * S);
+                c.lineTo(18 * S, 0);
+                c.lineTo(17 * S, 1.5 * S);
+                c.closePath();
+                c.fill();
+                c.fillStyle = 'rgba(255,255,255,' + (rfA*0.9) + ')';
+                c.beginPath();
+                c.arc(14 * S, 0, 1.2 * S, 0, Math.PI * 2);
+                c.fill();
+            }
+            c.restore();
+
+            /* ── LEFT-HAND SHOTGUN ── */
+            c.save();
+            c.translate(-7 * S, 2 * S);
+            c.rotate(-0.30);
+            /* twin barrels */
+            c.fillStyle = '#0a0a0a';
+            c.fillRect(0, -1.1 * S, -12 * S, 0.7 * S);
+            c.fillRect(0, -0.2 * S, -12 * S, 0.7 * S);
+            c.strokeStyle = '#374151';
+            c.lineWidth = 0.3;
+            c.strokeRect(0, -1.1 * S, -12 * S, 0.7 * S);
+            c.strokeRect(0, -0.2 * S, -12 * S, 0.7 * S);
+            /* receiver */
+            c.fillStyle = '#7c2d12';
+            c.fillRect(0, -1.4 * S, 3 * S, 2.6 * S);
+            c.strokeStyle = '#3b0a02';
+            c.lineWidth = 0.3;
+            c.strokeRect(0, -1.4 * S, 3 * S, 2.6 * S);
+            /* stock */
+            c.fillStyle = '#a16207';
+            c.fillRect(3 * S, -0.5 * S, 3 * S, 1.7 * S);
+            c.strokeRect(3 * S, -0.5 * S, 3 * S, 1.7 * S);
+            /* pump */
+            c.fillStyle = '#374151';
+            c.fillRect(-7 * S, 0.6 * S, 3 * S, 1 * S);
+            /* muzzle flash */
+            if (gAtkP > 0){
+                c.fillStyle = 'rgba(251,146,60,' + gAtkP + ')';
+                c.beginPath();
+                c.moveTo(-12 * S, -0.4 * S);
+                c.lineTo(-18 * S, -2 * S);
+                c.lineTo(-19 * S, 0);
+                c.lineTo(-18 * S, 2 * S);
+                c.lineTo(-12 * S, 0.4 * S);
+                c.closePath();
+                c.fill();
+            }
+            c.restore();
+
+            /* ── HIP HOLSTERS — pistols on either side ── */
+            for (var hp = -1; hp <= 1; hp += 2){
+                var hpX = hp * 4 * S;
+                var hpY = 6 * S;
+                c.save();
+                c.translate(hpX, hpY);
+                /* holster body */
+                c.fillStyle = '#3b0a02';
+                c.fillRect(-1 * S, -1.5 * S, 2 * S, 3 * S);
+                c.strokeStyle = '#0a0a0a';
+                c.lineWidth = 0.3;
+                c.strokeRect(-1 * S, -1.5 * S, 2 * S, 3 * S);
+                /* pistol grip + slide poking out the top */
+                c.fillStyle = '#0a0a0a';
+                c.fillRect(-0.6 * S, -1.8 * S, 1.2 * S, 0.5 * S);
+                c.fillStyle = '#71717a';
+                c.fillRect(-0.4 * S, -2.4 * S, 0.8 * S, 0.6 * S);
+                c.restore();
+            }
         }
 
         /* ── HEAD — sculpted mask with proper shading ── */
@@ -24041,6 +26342,15 @@
             c.fillStyle = pcg2;
             c.beginPath(); c.arc(armX2 + 1*S, 1.5*S, 6*S, 0, Math.PI*2); c.fill();
         }
+
+        /* ── ROBOT SHELL OVERLAY (v1.6.0) — REMOVED.
+           Per user feedback the Tesla-bot face plate / visor /
+           servo joints obscured the heroes' original looks. The
+           `drawHeroRobotShell` function is kept defined below in
+           case we want to bring back individual mecha details
+           later, but it is no longer invoked here so each hero
+           renders with its original humanoid face, eyes, mouth,
+           and costume details only. */
 
         /* ── HURT FLASH overlay ── */
         if (hurt > 0){
@@ -25269,6 +27579,611 @@
             c.strokeStyle = 'rgba(255,255,255,0.9)';
             c.lineWidth = 0.7;
             c.stroke();
+            c.restore();
+        } else if (p.kind === 'trident'){
+            /* TIDE LORD — hurled WATER STREAM. Body is a multi-blob
+               liquid mass with frothy bright highlights, and a trail
+               of falling droplets streaming behind that arc under
+               gravity until they hit the ground.
+
+               Animation parts (per-frame):
+                 • DRIP TRAIL — every 1-2 frames spawn a new droplet
+                   at the tail of the stream, with a random downward
+                   gravity vector so it falls realistically.
+                 • WATER MASS — 5 stacked blobs of decreasing size
+                   trailing behind the head, giving the stream a
+                   tapered teardrop look.
+                 • FOAM HIGHLIGHTS — white-blue arcs on the upper
+                   surface of each blob suggesting churn / motion.
+                 • SHIMMER — small bright dots inside the body that
+                   pulse with the projectile's age for a sparkle. */
+            if (!p.drops) p.drops = [];
+            if (!p.bubbles) {
+                p.bubbles = [];
+                for (var bbi = 0; bbi < 8; bbi++){
+                    p.bubbles.push({
+                        ox: rng(-12, 6),
+                        oy: rng(-3, 3),
+                        r: rng(0.8, 2.2),
+                        ph: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+            /* spawn drip every other frame */
+            if ((p.age | 0) % 24 < 12){
+                p.drops.push({
+                    x: p.x + rng(-6, 2),
+                    y: p.y + rng(-2, 3),
+                    vx: p.vx * 0.25 + rng(-0.6, 0.6),
+                    vy: rng(0.4, 1.6),
+                    r: rng(1.2, 2.6),
+                    life: 0, max: rng(600, 1100)
+                });
+            }
+            /* update drips */
+            for (var dpi = p.drops.length - 1; dpi >= 0; dpi--){
+                var dp = p.drops[dpi];
+                dp.x += dp.vx;
+                dp.y += dp.vy;
+                dp.vy += 0.18;
+                dp.life += 16;
+                if (dp.life > dp.max || dp.y > GROUND + 6) p.drops.splice(dpi, 1);
+            }
+            /* draw drips first (behind the head) */
+            for (var dpd = 0; dpd < p.drops.length; dpd++){
+                var dd = p.drops[dpd];
+                var dfade = 1 - (dd.life / dd.max);
+                c.fillStyle = 'rgba(56,189,248,' + (dfade * 0.85) + ')';
+                c.beginPath();
+                c.ellipse(dd.x, dd.y, dd.r * 0.7, dd.r * 1.2, 0, 0, Math.PI * 2);
+                c.fill();
+                /* highlight */
+                c.fillStyle = 'rgba(255,255,255,' + (dfade * 0.7) + ')';
+                c.beginPath();
+                c.arc(dd.x - dd.r * 0.25, dd.y - dd.r * 0.45, dd.r * 0.35, 0, Math.PI * 2);
+                c.fill();
+            }
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.angle || 0);
+            /* outer water halo (glow) */
+            var thG = c.createRadialGradient(0, 0, 1, 0, 0, 20);
+            thG.addColorStop(0,   'rgba(186,230,253,0.65)');
+            thG.addColorStop(0.5, 'rgba(56,189,248,0.40)');
+            thG.addColorStop(1,   'rgba(14,165,233,0)');
+            c.fillStyle = thG;
+            c.beginPath();
+            c.ellipse(-2, 0, 20, 9, 0, 0, Math.PI * 2);
+            c.fill();
+            /* MULTI-BLOB BODY — 5 stacked ellipses, head largest,
+               tail smallest, giving a teardrop water-stream shape. */
+            var blobs = [
+                { x:  8, ry: 6.5, rx: 7.5 },
+                { x:  2, ry: 6.0, rx: 6.5 },
+                { x: -4, ry: 4.8, rx: 5.5 },
+                { x: -9, ry: 3.5, rx: 4.5 },
+                { x: -14, ry: 2.3, rx: 3.5 }
+            ];
+            for (var bli = 0; bli < blobs.length; bli++){
+                var bl = blobs[bli];
+                var bg = c.createRadialGradient(bl.x, -bl.ry * 0.3, 0, bl.x, 0, bl.rx);
+                bg.addColorStop(0,   '#e0f2fe');
+                bg.addColorStop(0.4, '#7dd3fc');
+                bg.addColorStop(1,   '#0284c7');
+                c.fillStyle = bg;
+                c.beginPath();
+                c.ellipse(bl.x, 0, bl.rx, bl.ry, 0, 0, Math.PI * 2);
+                c.fill();
+                /* foam top highlight */
+                c.strokeStyle = 'rgba(255,255,255,0.85)';
+                c.lineWidth = 0.9;
+                c.beginPath();
+                c.arc(bl.x, 0, bl.rx - 0.5, Math.PI * 1.1, Math.PI * 1.9);
+                c.stroke();
+            }
+            /* SHIMMER DOTS — bright sparkle highlights inside the
+               body that pulse with age for the "moving water" effect. */
+            for (var sbi = 0; sbi < p.bubbles.length; sbi++){
+                var sb = p.bubbles[sbi];
+                var spulse = 0.5 + 0.5 * Math.sin(p.age * 0.012 + sb.ph);
+                c.fillStyle = 'rgba(255,255,255,' + (0.75 * spulse) + ')';
+                c.beginPath();
+                c.arc(sb.ox, sb.oy, sb.r * (0.5 + spulse * 0.5), 0, Math.PI * 2);
+                c.fill();
+            }
+            /* MOTION CHEVRONS — speed lines behind the stream */
+            c.strokeStyle = 'rgba(255,255,255,0.55)';
+            c.lineWidth = 1.0;
+            for (var mc = 0; mc < 3; mc++){
+                var mcx = -18 - mc * 6;
+                c.beginPath();
+                c.moveTo(mcx - 2, -3);
+                c.lineTo(mcx + 1, 0);
+                c.lineTo(mcx - 2, 3);
+                c.stroke();
+            }
+            c.restore();
+        } else if (p.kind === 'minispawn'){
+            /* SWARM MARSHAL — small flying hero clone (dot body,
+               cape streak, tiny halo). Bobs along its flight path. */
+            p.bob = (p.bob || 0) + 0.15;
+            c.save();
+            c.translate(p.x, p.y + Math.sin(p.bob) * 1.5);
+            c.rotate(Math.atan2(p.vy, p.vx));
+            /* cape streak */
+            c.fillStyle = cols.cape;
+            c.beginPath();
+            c.moveTo(-10, -2); c.lineTo(-3, 0); c.lineTo(-10, 2); c.closePath();
+            c.fill();
+            /* tiny body */
+            c.fillStyle = cols.primary;
+            c.beginPath();
+            c.arc(0, 0, 3.2, 0, Math.PI*2);
+            c.fill();
+            /* visor accent */
+            c.fillStyle = cols.accent;
+            c.beginPath();
+            c.arc(1.4, -0.3, 1.0, 0, Math.PI*2);
+            c.fill();
+            /* halo glow */
+            var mhG = c.createRadialGradient(0, 0, 1, 0, 0, 10);
+            mhG.addColorStop(0, 'rgba(255,255,255,0.6)');
+            mhG.addColorStop(1, 'rgba(255,255,255,0)');
+            c.fillStyle = mhG;
+            c.beginPath();
+            c.arc(0, 0, 10, 0, Math.PI*2);
+            c.fill();
+            c.restore();
+        } else if (p.kind === 'missile'){
+            /* WARHEAD — sleek rocket with bright thruster + smoke trail. */
+            if (!p.trail) p.trail = [];
+            p.trail.push({ x: p.x, y: p.y, age: 0 });
+            if (p.trail.length > 14) p.trail.shift();
+            /* smoke trail */
+            for (var ti = 0; ti < p.trail.length; ti++){
+                var tt = p.trail[ti];
+                var tf = ti / p.trail.length;
+                c.fillStyle = 'rgba(180,180,180,' + (tf*0.7) + ')';
+                c.beginPath();
+                c.arc(tt.x, tt.y, 1.5 + tf*3, 0, Math.PI*2);
+                c.fill();
+            }
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.angle || 0);
+            /* exhaust flame behind */
+            var mflG = c.createLinearGradient(-12, 0, -4, 0);
+            mflG.addColorStop(0, 'rgba(255,255,255,0)');
+            mflG.addColorStop(0.5, '#fbbf24');
+            mflG.addColorStop(1, '#dc2626');
+            c.fillStyle = mflG;
+            c.beginPath();
+            c.moveTo(-12, 0);
+            c.lineTo(-4, -2.4);
+            c.lineTo(-4, 2.4);
+            c.closePath();
+            c.fill();
+            /* rocket body — metallic with red tip */
+            c.fillStyle = '#374151';
+            c.fillRect(-4, -2, 10, 4);
+            c.fillStyle = '#9ca3af';
+            c.fillRect(-4, -2, 10, 1);
+            c.fillStyle = '#dc2626';
+            c.beginPath();
+            c.moveTo(6, -2); c.lineTo(10, 0); c.lineTo(6, 2); c.closePath();
+            c.fill();
+            /* fins */
+            c.fillStyle = '#1f2937';
+            c.beginPath();
+            c.moveTo(-4, -2); c.lineTo(-6, -3.5); c.lineTo(-2, -2); c.closePath();
+            c.fill();
+            c.beginPath();
+            c.moveTo(-4, 2); c.lineTo(-6, 3.5); c.lineTo(-2, 2); c.closePath();
+            c.fill();
+            c.restore();
+        } else if (p.kind === 'magnet'){
+            /* MAGNETAR shrapnel — irregular jagged metal chunk torn
+               from the city. Every shard is unique: random vertex
+               count, random radii, random metal tint, random rust
+               patches, random rivets, random scratches, optional
+               hex bolt at centre, plus a satellite chunk for an
+               asymmetric "just-broken-off" silhouette. The data
+               lives on the projectile (see fireHeroPower magnet
+               branch) so the shape stays consistent across frames
+               while the whole piece spins through the air. */
+            p.spin = (p.spin || 0) + (p.spinV || 0.5);
+            c.save();
+            c.translate(p.x, p.y);
+
+            /* MAGNETIC AURA — drawn UNDER the chunk so it reads as
+               a halo. Colour-pulled from the tint so each shrapnel
+               carries a slightly different glow. */
+            var auraCol = (p.tint && p.tint.edge) || '#d1d5db';
+            c.strokeStyle = 'rgba(239,68,68,0.5)';
+            c.lineWidth = 0.8;
+            for (var mar = 0; mar < 3; mar++){
+                c.beginPath();
+                c.arc(0, 0, 11 + mar*3 + Math.sin(p.age*0.01 + mar)*1.2,
+                      0, Math.PI*2);
+                c.stroke();
+            }
+
+            c.rotate(p.spin);
+            var t = p.tint || { base:'#6b7280', edge:'#d1d5db', dark:'#1f2937' };
+            var vs = p.verts || [];
+
+            /* BASE FILL — metallic gradient using the shard's tint */
+            var mg = c.createLinearGradient(-9, -9, 9, 9);
+            mg.addColorStop(0,    t.edge);
+            mg.addColorStop(0.45, t.base);
+            mg.addColorStop(1,    t.dark);
+            c.fillStyle = mg;
+            c.beginPath();
+            if (vs.length){
+                c.moveTo(vs[0].x, vs[0].y);
+                for (var mvi = 1; mvi < vs.length; mvi++){
+                    c.lineTo(vs[mvi].x, vs[mvi].y);
+                }
+                c.closePath();
+            } else {
+                /* legacy fallback if no random data was attached */
+                c.moveTo(-6, -4); c.lineTo(4, -7); c.lineTo(9, -2);
+                c.lineTo(7, 4); c.lineTo(2, 8); c.lineTo(-5, 5);
+                c.lineTo(-8, 0); c.closePath();
+            }
+            c.fill();
+
+            /* DARK SHADOW UNDERSIDE — second pass on the bottom
+               half of the shape using a multiply tint */
+            c.save();
+            c.globalAlpha = 0.35;
+            c.fillStyle = t.dark;
+            c.beginPath();
+            if (vs.length){
+                c.moveTo(vs[0].x, vs[0].y);
+                for (var sdi = 1; sdi < vs.length; sdi++){
+                    var v = vs[sdi];
+                    c.lineTo(v.x, v.y + 0.6);
+                }
+                c.closePath();
+            }
+            c.fill();
+            c.restore();
+
+            /* EDGE HIGHLIGHT — bright on the upper-left side of the
+               polygon, suggesting a single light source. */
+            c.strokeStyle = t.edge;
+            c.lineWidth = 1.0;
+            c.beginPath();
+            if (vs.length){
+                c.moveTo(vs[0].x, vs[0].y);
+                for (var ehi = 1; ehi < vs.length; ehi++){
+                    c.lineTo(vs[ehi].x, vs[ehi].y);
+                }
+                c.closePath();
+            }
+            c.stroke();
+            /* very dark perimeter for sharper edge separation */
+            c.strokeStyle = 'rgba(0,0,0,0.65)';
+            c.lineWidth = 0.5;
+            c.stroke();
+
+            /* RUST PATCHES — irregular ellipses at random offsets */
+            if (p.rust){
+                for (var rpi = 0; rpi < p.rust.length; rpi++){
+                    var rp = p.rust[rpi];
+                    c.save();
+                    c.translate(rp.ox, rp.oy);
+                    c.rotate(rp.a);
+                    c.fillStyle = rp.col;
+                    c.beginPath();
+                    c.ellipse(0, 0, rp.rx, rp.ry, 0, 0, Math.PI*2);
+                    c.fill();
+                    c.restore();
+                }
+            }
+
+            /* SCRATCHES — short bright lines etched across the
+               surface */
+            if (p.scratches){
+                c.strokeStyle = 'rgba(255,255,255,0.45)';
+                for (var ssi = 0; ssi < p.scratches.length; ssi++){
+                    var sc = p.scratches[ssi];
+                    c.lineWidth = sc.w;
+                    c.beginPath();
+                    c.moveTo(sc.x1, sc.y1);
+                    c.lineTo(sc.x2, sc.y2);
+                    c.stroke();
+                }
+            }
+
+            /* RIVETS / BOLTS — small dark circles with a metallic
+               highlight pip on each */
+            if (p.rivets){
+                for (var rvj = 0; rvj < p.rivets.length; rvj++){
+                    var rv = p.rivets[rvj];
+                    c.fillStyle = t.dark;
+                    c.beginPath();
+                    c.arc(rv.ox, rv.oy, rv.r, 0, Math.PI*2);
+                    c.fill();
+                    c.fillStyle = t.edge;
+                    c.beginPath();
+                    c.arc(rv.ox - rv.r*0.35, rv.oy - rv.r*0.35,
+                          rv.r * 0.35, 0, Math.PI*2);
+                    c.fill();
+                }
+            }
+
+            /* CENTER HEX BOLT (50%) — bigger hex-headed bolt at
+               the geometric centre */
+            if (p.hasCenterBolt){
+                c.fillStyle = t.dark;
+                c.beginPath();
+                var cbR = 1.6;
+                for (var cbi = 0; cbi < 6; cbi++){
+                    var cbA = (cbi / 6) * Math.PI * 2;
+                    var cbx = Math.cos(cbA) * cbR;
+                    var cby = Math.sin(cbA) * cbR;
+                    if (cbi === 0) c.moveTo(cbx, cby);
+                    else c.lineTo(cbx, cby);
+                }
+                c.closePath();
+                c.fill();
+                c.strokeStyle = t.edge;
+                c.lineWidth = 0.4;
+                c.stroke();
+            }
+
+            /* SATELLITE CHUNK — smaller broken-off piece floating
+               attached at the side of the main shard */
+            if (p.chunkOff){
+                var co = p.chunkOff;
+                c.save();
+                c.translate(co.x, co.y);
+                c.rotate(co.a);
+                c.fillStyle = t.base;
+                c.beginPath();
+                c.moveTo(0, -co.r);
+                c.lineTo(co.r*0.9, -co.r*0.3);
+                c.lineTo(co.r*0.8, co.r*0.6);
+                c.lineTo(-co.r*0.4, co.r*0.9);
+                c.lineTo(-co.r*0.9, co.r*0.1);
+                c.closePath();
+                c.fill();
+                c.strokeStyle = t.edge;
+                c.lineWidth = 0.5;
+                c.stroke();
+                c.restore();
+            }
+
+            /* TUMBLING SPARKS — every few frames spawn a tiny spark
+               at the shrapnel position to suggest it's still red-hot
+               from being ripped out of the road */
+            if ((p.age | 0) % 3 === 0){
+                c.fillStyle = 'rgba(255,180,80,0.85)';
+                c.beginPath();
+                c.arc(rng(-5,5), rng(-5,5), 0.6, 0, Math.PI*2);
+                c.fill();
+            }
+            c.restore();
+        } else if (p.kind === 'gunfire'){
+            /* GUNSMITH — small bullet with muzzle streak, tinted per
+               weaponIdx (AK / AR / machinegun). */
+            if (p.delay && p.age < p.delay) return;
+            var weaponCol = ['#fde047', '#f97316', '#fafafa'][p.weaponIdx || 0] || '#fde047';
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.angle || 0);
+            /* tracer streak */
+            c.strokeStyle = weaponCol;
+            c.lineWidth = 1.6;
+            c.globalAlpha = 0.85;
+            c.beginPath();
+            c.moveTo(-10, 0);
+            c.lineTo(2, 0);
+            c.stroke();
+            c.globalAlpha = 1;
+            /* bullet head */
+            c.fillStyle = '#fef9c3';
+            c.beginPath();
+            c.moveTo(-2, -1.2); c.lineTo(3, 0); c.lineTo(-2, 1.2);
+            c.closePath();
+            c.fill();
+            /* casing */
+            c.fillStyle = '#a16207';
+            c.fillRect(-4, -0.8, 2, 1.6);
+            c.restore();
+        } else if (p.kind === 'dustform'){
+            /* DUST STORM — random solid (cube/star/hammer/spike)
+               surrounded by swirling dust motes. */
+            p.spin = (p.spin || 0) + (p.spinV || 0.25);
+            c.save();
+            c.translate(p.x, p.y);
+            /* dust motes orbiting */
+            if (p.dustParticles){
+                for (var dpi2 = 0; dpi2 < p.dustParticles.length; dpi2++){
+                    var dpt = p.dustParticles[dpi2];
+                    dpt.a += 0.06;
+                    var dpx = Math.cos(dpt.a) * dpt.r;
+                    var dpy = Math.sin(dpt.a) * dpt.r * 0.6;
+                    c.fillStyle = 'rgba(161,98,7,0.55)';
+                    c.beginPath();
+                    c.arc(dpt.ox + dpx*0.3, dpt.oy + dpy*0.3, 1.2, 0, Math.PI*2);
+                    c.fill();
+                }
+            }
+            c.rotate(p.spin);
+            c.fillStyle = '#a16207';
+            c.strokeStyle = '#451a03';
+            c.lineWidth = 1.4;
+            if (p.shape === 0){
+                /* cube */
+                c.fillRect(-8, -8, 16, 16);
+                c.strokeRect(-8, -8, 16, 16);
+                /* highlight */
+                c.fillStyle = 'rgba(254,243,199,0.45)';
+                c.fillRect(-7, -7, 14, 4);
+            } else if (p.shape === 1){
+                /* star */
+                c.beginPath();
+                for (var sj = 0; sj < 10; sj++){
+                    var sjA = (sj / 10) * Math.PI * 2;
+                    var sjR = (sj % 2 === 0) ? 11 : 5;
+                    var sjx = Math.cos(sjA) * sjR;
+                    var sjy = Math.sin(sjA) * sjR;
+                    if (sj === 0) c.moveTo(sjx, sjy);
+                    else c.lineTo(sjx, sjy);
+                }
+                c.closePath();
+                c.fill();
+                c.stroke();
+            } else if (p.shape === 2){
+                /* hammer — handle + head */
+                c.fillStyle = '#451a03';
+                c.fillRect(-1.5, -2, 18, 4);
+                c.fillStyle = '#a16207';
+                c.fillRect(-9, -7, 8, 14);
+                c.strokeRect(-9, -7, 8, 14);
+            } else {
+                /* spike */
+                c.beginPath();
+                c.moveTo(-2, -10);
+                c.lineTo(2, -10);
+                c.lineTo(4, 8);
+                c.lineTo(-4, 8);
+                c.closePath();
+                c.fill();
+                c.stroke();
+                c.beginPath();
+                c.moveTo(-4, 8); c.lineTo(0, 12); c.lineTo(4, 8);
+                c.closePath();
+                c.fill();
+                c.stroke();
+            }
+            c.restore();
+        } else if (p.kind === 'root'){
+            /* VERDANT SAGE root tendril — thick brown twisting root
+               with bark texture, knots, leaf sprouts, and thorny
+               protrusions. Snakes from the hand to the target. */
+            if (p.delay && p.age < p.delay) return;
+            /* record the trail so the tendril visibly grows from the
+               spawn point rather than appearing as a single moving
+               sprite */
+            if (!p.trail) p.trail = [];
+            p.trail.push({ x: p.x, y: p.y });
+            if (p.trail.length > 30) p.trail.shift();
+            if (p.trail.length < 2) return;
+            /* compute path with wobble for snaking motion */
+            c.save();
+            /* DRAW STEM — thick dark base + lighter wood interior */
+            c.lineCap = 'round';
+            c.lineJoin = 'round';
+            /* outer dark bark */
+            c.strokeStyle = '#1f2937';
+            c.lineWidth = 5;
+            c.beginPath();
+            c.moveTo(p.trail[0].x, p.trail[0].y);
+            for (var rti = 1; rti < p.trail.length; rti++){
+                var rwobble = Math.sin(rti * 0.5 + p.wobblePh) * p.wobbleAmp;
+                var rpx = p.trail[rti].x + Math.cos(p.angle + Math.PI/2) * rwobble;
+                var rpy = p.trail[rti].y + Math.sin(p.angle + Math.PI/2) * rwobble;
+                c.lineTo(rpx, rpy);
+            }
+            c.stroke();
+            /* mid brown */
+            c.strokeStyle = '#7c2d12';
+            c.lineWidth = 3.4;
+            c.beginPath();
+            c.moveTo(p.trail[0].x, p.trail[0].y);
+            for (var rti2 = 1; rti2 < p.trail.length; rti2++){
+                var rwo2 = Math.sin(rti2 * 0.5 + p.wobblePh) * p.wobbleAmp;
+                var rpx2 = p.trail[rti2].x + Math.cos(p.angle + Math.PI/2) * rwo2;
+                var rpy2 = p.trail[rti2].y + Math.sin(p.angle + Math.PI/2) * rwo2;
+                c.lineTo(rpx2, rpy2);
+            }
+            c.stroke();
+            /* inner highlight */
+            c.strokeStyle = '#a16207';
+            c.lineWidth = 1.4;
+            c.beginPath();
+            c.moveTo(p.trail[0].x, p.trail[0].y);
+            for (var rti3 = 1; rti3 < p.trail.length; rti3++){
+                var rwo3 = Math.sin(rti3 * 0.5 + p.wobblePh) * p.wobbleAmp;
+                var rpx3 = p.trail[rti3].x + Math.cos(p.angle + Math.PI/2) * rwo3;
+                var rpy3 = p.trail[rti3].y + Math.sin(p.angle + Math.PI/2) * rwo3;
+                c.lineTo(rpx3, rpy3);
+            }
+            c.stroke();
+            /* THORNS — short jagged points along the root */
+            c.strokeStyle = '#451a03';
+            c.lineWidth = 1.0;
+            var thornStep = Math.max(1, Math.floor(p.trail.length / (p.thornCount || 5)));
+            for (var thi = 0; thi < p.trail.length; thi += thornStep){
+                var thWobble = Math.sin(thi * 0.5 + p.wobblePh) * p.wobbleAmp;
+                var tcx = p.trail[thi].x + Math.cos(p.angle + Math.PI/2) * thWobble;
+                var tcy = p.trail[thi].y + Math.sin(p.angle + Math.PI/2) * thWobble;
+                var tha = p.angle + Math.PI/2 * (Math.sin(thi + (p.thornSeed||0)) > 0 ? 1 : -1);
+                c.beginPath();
+                c.moveTo(tcx, tcy);
+                c.lineTo(tcx + Math.cos(tha) * 4.5, tcy + Math.sin(tha) * 4.5);
+                c.stroke();
+            }
+            /* TIP — bright green leaf sprout at the head */
+            var leafG = c.createRadialGradient(p.x, p.y, 1, p.x, p.y, 6);
+            leafG.addColorStop(0, '#bbf7d0');
+            leafG.addColorStop(0.5, '#22c55e');
+            leafG.addColorStop(1, 'rgba(21,128,61,0)');
+            c.fillStyle = leafG;
+            c.beginPath();
+            c.arc(p.x, p.y, 6, 0, Math.PI * 2);
+            c.fill();
+            /* leaf petals */
+            c.fillStyle = '#16a34a';
+            for (var lf = 0; lf < 4; lf++){
+                var lfA = (lf / 4) * Math.PI * 2 + p.age * 0.005;
+                c.save();
+                c.translate(p.x + Math.cos(lfA) * 2.5, p.y + Math.sin(lfA) * 2.5);
+                c.rotate(lfA);
+                c.beginPath();
+                c.ellipse(0, 0, 2.2, 0.9, 0, 0, Math.PI * 2);
+                c.fill();
+                c.restore();
+            }
+            c.restore();
+        } else if (p.kind === 'swordshield'){
+            /* SWORD + SHIELD — visualized only briefly on attack;
+               the actual damage comes from the melee charge logic. */
+            c.save();
+            c.translate(p.x, p.y);
+            c.rotate(p.angle || 0);
+            /* shield disc */
+            c.fillStyle = '#1d4ed8';
+            c.beginPath();
+            c.arc(-6, 0, 6, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#facc15';
+            c.lineWidth = 1.5;
+            c.stroke();
+            c.fillStyle = '#facc15';
+            c.beginPath();
+            c.arc(-6, 0, 1.6, 0, Math.PI*2);
+            c.fill();
+            /* sword blade */
+            c.fillStyle = '#e5e7eb';
+            c.beginPath();
+            c.moveTo(2, -1.4);
+            c.lineTo(18, -1);
+            c.lineTo(20, 0);
+            c.lineTo(18, 1);
+            c.lineTo(2, 1.4);
+            c.closePath();
+            c.fill();
+            c.strokeStyle = '#9ca3af';
+            c.lineWidth = 0.6;
+            c.stroke();
+            /* hilt */
+            c.fillStyle = '#7c2d12';
+            c.fillRect(0, -2, 4, 4);
             c.restore();
         }
     }
