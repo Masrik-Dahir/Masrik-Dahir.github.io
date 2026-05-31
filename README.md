@@ -17,7 +17,8 @@
 
 <!-- Author Banner: calligraphy-ink-bloom -->
 <a href="https://www.masrikdahir.com">
-<img width="1267" height="629" alt="image" src="https://github.com/user-attachments/assets/6e35b18e-f9a5-4963-bf90-f4aca4e24afd" />
+     <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/calligraphy-ink-bloom.svg"
+     alt="Masrik Dahir — masrikdahir.com" width="800"/>
 </a>
 
 > A static portfolio, 290-region travel atlas, and 99-game retro arcade — zero build step, zero server
@@ -31,8 +32,7 @@
 </div>
 
 <p align="center">
-  <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.svg"
-       alt="masrikdahir.com — application screenshot" width="900"/>
+<img width="1267" height="629" alt="image" src="https://github.com/user-attachments/assets/6e35b18e-f9a5-4963-bf90-f4aca4e24afd" />
 </p>
 
 ## ⚡ TL;DR
