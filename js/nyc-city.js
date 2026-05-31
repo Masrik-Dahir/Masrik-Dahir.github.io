@@ -28982,5 +28982,1544 @@
         drawAbduction(dynC);
         /* Superhero battle — fighters + powers + FX on top */
         try { drawSuperhero(dynC); } catch (_sderr) {}
+        /* v1.7.0 — themed overlays (War / Holiday / Sport / Scene)
+           drawn after every other layer so they sit on top. Visual
+           Filter + Physics are applied separately (Filter via canvas
+           CSS filter, Physics via state read by integrators). */
+        try { drawV170Overlays(dynC); } catch (_v17err) {}
+    };
+
+    /* ═══════════════════════════════════════════════════════════════
+       v1.7.0 — Six new top-row widgets
+       ───────────────────────────────────────────────────────────────
+       War Mode (7) · Holiday Mode (14) · Sport Event (14) ·
+       Scene Mode (14) · Visual Filter Mode (14) · Physics Mode (14)
+
+       Each widget exposes window.set<X>Index, window.getAll<X>,
+       window.get<X>Index, window.get<X>Name, window.is<X>On, plus
+       a simple toggle. Per-chip visible effects are drawn by
+       drawV170Overlays(); Visual Filter is applied as a CSS filter
+       on the canvas element for authentic per-pixel rendering;
+       Physics rewrites the Physics global which integrators read.
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* ─── WAR MODE (14 chips — 2 prehistoric + 12 historic) ──────── */
+    var WAR_MODES = [
+        /* PREHISTORIC */
+        { id:'stoneage',   name:'Stone Age Tribal War (~50,000 BC)', icon:'fa-paw',     colorA:'#78350f', colorB:'#a16207',
+          sky0:'#a16207', sky1:'#78350f', banner:'#3b2a18', accent:'#fbbf24' },
+        { id:'bronzeage',  name:'Bronze Age / Kadesh (1274 BC)',     icon:'fa-cog',     colorA:'#a16207', colorB:'#fbbf24',
+          sky0:'#fbbf24', sky1:'#78350f', banner:'#b45309', accent:'#fde047' },
+        /* ANCIENT */
+        { id:'trojan',     name:'Trojan War (~1200 BC)',             icon:'fa-shield-alt', colorA:'#a16207', colorB:'#7c2d12',
+          sky0:'#f59e0b', sky1:'#7c2d12', banner:'#dc2626', accent:'#fde047' },
+        { id:'assyrian',   name:'Assyrian Empire (~700 BC)',         icon:'fa-chess-bishop', colorA:'#7c2d12', colorB:'#a16207',
+          sky0:'#a16207', sky1:'#451a03', banner:'#7c2d12', accent:'#fbbf24' },
+        { id:'thermopylae',name:'Thermopylae (480 BC)',              icon:'fa-mountain', colorA:'#0ea5e9', colorB:'#dc2626',
+          sky0:'#0ea5e9', sky1:'#1e40af', banner:'#dc2626', accent:'#fde047' },
+        { id:'alexander',  name:'Alexander / Gaugamela (331 BC)',    icon:'fa-star',     colorA:'#1e40af', colorB:'#fbbf24',
+          sky0:'#fbbf24', sky1:'#a16207', banner:'#1e40af', accent:'#fde047' },
+        { id:'punic',      name:'Rome vs Carthage (218 BC)',         icon:'fa-chess-rook', colorA:'#dc2626', colorB:'#fbbf24',
+          sky0:'#fbbf24', sky1:'#a16207', banner:'#dc2626', accent:'#fde047' },
+        /* MEDIEVAL */
+        { id:'viking',     name:'Viking Age (793-1066)',             icon:'fa-anchor',   colorA:'#1e3a8a', colorB:'#7c2d12',
+          sky0:'#374151', sky1:'#1f2937', banner:'#7c2d12', accent:'#fde047' },
+        { id:'crusades',   name:'Crusades (1095-1291)',              icon:'fa-cross',    colorA:'#ffffff', colorB:'#dc2626',
+          sky0:'#fbbf24', sky1:'#fde047', banner:'#dc2626', accent:'#ffffff' },
+        { id:'mongol',     name:'Mongol Invasions (1206-1227)',      icon:'fa-horse',    colorA:'#94a3b8', colorB:'#7c2d12',
+          sky0:'#94a3b8', sky1:'#525252', banner:'#3b82f6', accent:'#fde047' },
+        /* EARLY MODERN */
+        { id:'revwar',     name:'American Revolution (1775-83)',     icon:'fa-flag-usa', colorA:'#3b82f6', colorB:'#dc2626',
+          sky0:'#3b82f6', sky1:'#1e40af', banner:'#dc2626', accent:'#ffffff' },
+        { id:'napoleonic', name:'Napoleonic / Waterloo (1815)',      icon:'fa-crown',    colorA:'#4b5563', colorB:'#1e40af',
+          sky0:'#4b5563', sky1:'#1f2937', banner:'#1e40af', accent:'#dc2626' },
+        /* MODERN */
+        { id:'wwi',        name:'World War I (1914-18)',             icon:'fa-hard-hat', colorA:'#6b7280', colorB:'#65a30d',
+          sky0:'#6b7280', sky1:'#374151', banner:'#65a30d', accent:'#facc15' },
+        { id:'wwii',       name:'World War II (1939-45)',            icon:'fa-plane',    colorA:'#1f2937', colorB:'#dc2626',
+          sky0:'#374151', sky1:'#0a0a0a', banner:'#1f2937', accent:'#dc2626' }
+    ];
+    var warModeIdx = 0;
+    var warModeOn = false;
+
+    /* ─── HOLIDAY MODE (14 chips — Eid al-Fitr + 13 secular/UN) ──── */
+    var HOLIDAY_MODES = [
+        /* RELIGIOUS — only one kept per user request */
+        { id:'eidFitr',     name:'Eid al-Fitr',                 icon:'fa-moon',          colorA:'#fbbf24', colorB:'#16a34a' },
+        /* UN INTERNATIONAL DAYS / OBSERVANCES */
+        { id:'peace',       name:'Intl Peace Day (Sept 21)',    icon:'fa-dove',          colorA:'#ffffff', colorB:'#0ea5e9' },
+        { id:'un',          name:'UN Day (Oct 24)',             icon:'fa-globe',         colorA:'#3b82f6', colorB:'#ffffff' },
+        { id:'humanRights', name:'Human Rights Day (Dec 10)',   icon:'fa-balance-scale', colorA:'#3b82f6', colorB:'#fbbf24' },
+        { id:'humanitarian',name:'Humanitarian Day (Aug 19)',   icon:'fa-hands-helping', colorA:'#dc2626', colorB:'#ffffff' },
+        { id:'nonViolence', name:'Day of Non-Violence (Oct 2)', icon:'fa-hand-peace',    colorA:'#fbbf24', colorB:'#ffffff' },
+        { id:'tolerance',   name:'Day of Tolerance (Nov 16)',   icon:'fa-handshake',     colorA:'#a855f7', colorB:'#fbbf24' },
+        { id:'friendship',  name:'Day of Friendship (Jul 30)',  icon:'fa-user-friends',  colorA:'#16a34a', colorB:'#fbbf24' },
+        { id:'water',       name:'World Water Day (Mar 22)',    icon:'fa-tint',          colorA:'#0ea5e9', colorB:'#ffffff' },
+        { id:'food',        name:'World Food Day (Oct 16)',     icon:'fa-apple-alt',     colorA:'#dc2626', colorB:'#16a34a' },
+        { id:'solidarity',  name:'Solidarity Day (Dec 20)',     icon:'fa-hands',         colorA:'#a16207', colorB:'#fbbf24' },
+        /* SECULAR INTERNATIONAL */
+        { id:'earth',       name:'Earth Day (Apr 22)',          icon:'fa-globe-americas',colorA:'#16a34a', colorB:'#0ea5e9' },
+        { id:'labor',       name:'Labor Day (May 1)',           icon:'fa-hammer',        colorA:'#dc2626', colorB:'#fbbf24' },
+        { id:'olympic',     name:'Olympic Games',               icon:'fa-medal',         colorA:'#fbbf24', colorB:'#0ea5e9' }
+    ];
+    var holidayIdx = 0;
+    var holidayOn = false;
+
+    /* ─── SPORT EVENT (14 chips) ───────────────────────────────── */
+    var SPORT_EVENTS = [
+        { id:'basketball',name:'Basketball',  icon:'fa-basketball-ball', colorA:'#ea580c', colorB:'#000000' },
+        { id:'football',  name:'Football',    icon:'fa-football-ball',   colorA:'#78350f', colorB:'#ffffff' },
+        { id:'soccer',    name:'Soccer',      icon:'fa-futbol',          colorA:'#16a34a', colorB:'#ffffff' },
+        { id:'baseball',  name:'Baseball',    icon:'fa-baseball-ball',   colorA:'#dc2626', colorB:'#ffffff' },
+        { id:'tennis',    name:'Tennis',      icon:'fa-dot-circle',      colorA:'#facc15', colorB:'#16a34a' },
+        { id:'golf',      name:'Golf',        icon:'fa-golf-ball',       colorA:'#16a34a', colorB:'#ffffff' },
+        { id:'hockey',    name:'Hockey',      icon:'fa-hockey-puck',     colorA:'#0ea5e9', colorB:'#ffffff' },
+        { id:'skate',     name:'Skateboarding', icon:'fa-skating',       colorA:'#a855f7', colorB:'#fbbf24' },
+        { id:'cycling',   name:'Cycling',     icon:'fa-bicycle',         colorA:'#dc2626', colorB:'#fbbf24' },
+        { id:'marathon',  name:'Marathon',    icon:'fa-running',         colorA:'#16a34a', colorB:'#fbbf24' },
+        { id:'boxing',    name:'Boxing',      icon:'fa-fist-raised',     colorA:'#dc2626', colorB:'#fde047' },
+        { id:'parkour',   name:'Parkour',     icon:'fa-walking',         colorA:'#7c3aed', colorB:'#fbbf24' },
+        { id:'mma',       name:'MMA',         icon:'fa-hand-rock',       colorA:'#dc2626', colorB:'#000000' },
+        { id:'esports',   name:'Esports',     icon:'fa-gamepad',         colorA:'#7c3aed', colorB:'#0ea5e9' }
+    ];
+    var sportIdx = 0;
+    var sportOn = false;
+
+    /* ─── SCENE MODE (14 chips — peds+vehicles+sky bundles) ────── */
+    var SCENE_MODES = [
+        { id:'modern',    name:'Modern NYC',       icon:'fa-city',         colorA:'#facc15', colorB:'#0a0a0a',
+          sky0:'#7ba1c8', sky1:'#c8d0d8', ground:null, label:'NYC' },
+        { id:'1920s',     name:'1920s Jazz Age',   icon:'fa-hat-cowboy',   colorA:'#7c2d12', colorB:'#fde047',
+          sky0:'#d4a574', sky1:'#f5deb3', ground:'#3a2a1a', label:'1920s' },
+        { id:'1950s',     name:'1950s Americana',  icon:'fa-ice-cream',    colorA:'#ec4899', colorB:'#0ea5e9',
+          sky0:'#87ceeb', sky1:'#f0e68c', ground:null, label:'1950s' },
+        { id:'1980s',     name:'1980s Neon',       icon:'fa-headphones',   colorA:'#ec4899', colorB:'#a855f7',
+          sky0:'#581c87', sky1:'#ec4899', ground:'#1e0a4a', label:'1980s' },
+        { id:'cyber',     name:'Cyberpunk 2099',   icon:'fa-robot',        colorA:'#06b6d4', colorB:'#ec4899',
+          sky0:'#0c0a1e', sky1:'#581c87', ground:'#0a0a14', label:'2099' },
+        { id:'postapoc',  name:'Post-Apocalypse',  icon:'fa-radiation',    colorA:'#78716c', colorB:'#a16207',
+          sky0:'#a16207', sky1:'#78350f', ground:'#3d2914', label:'WASTELAND' },
+        { id:'west',      name:'Wild West',        icon:'fa-hat-cowboy-side', colorA:'#a16207', colorB:'#fbbf24',
+          sky0:'#d4a574', sky1:'#f4d28b', ground:'#8b6914', label:'WEST' },
+        { id:'medieval',  name:'Medieval Kingdom', icon:'fa-chess-king',   colorA:'#7c2d12', colorB:'#fbbf24',
+          sky0:'#9ca3af', sky1:'#d4d4d8', ground:'#404040', label:'MEDIEVAL' },
+        { id:'wedding',   name:'Wedding Day',      icon:'fa-ring',         colorA:'#ffffff', colorB:'#fbbf24',
+          sky0:'#fce7f3', sky1:'#ffffff', ground:null, label:'WEDDING' },
+        { id:'tourist',   name:'Tourist Season',   icon:'fa-camera',       colorA:'#0ea5e9', colorB:'#fbbf24',
+          sky0:'#7dd3fc', sky1:'#fef9c3', ground:null, label:'TOURISTS' },
+        { id:'carnival',  name:'Mardi Gras',       icon:'fa-mask',         colorA:'#a855f7', colorB:'#fbbf24',
+          sky0:'#581c87', sky1:'#facc15', ground:null, label:'CARNIVAL' },
+        { id:'zombie',    name:'Zombie Outbreak',  icon:'fa-skull',        colorA:'#65a30d', colorB:'#dc2626',
+          sky0:'#1f2937', sky1:'#7c2d12', ground:'#1a1a1a', label:'OUTBREAK' },
+        { id:'aquarium',  name:'Underwater',       icon:'fa-fish',         colorA:'#06b6d4', colorB:'#0284c7',
+          sky0:'#0c4a6e', sky1:'#0ea5e9', ground:'#082f49', label:'UNDERWATER' },
+        { id:'space',     name:'Space Colony',     icon:'fa-user-astronaut', colorA:'#1e1b4b', colorB:'#fbbf24',
+          sky0:'#000000', sky1:'#1e1b4b', ground:'#3a2a1a', label:'SPACE' }
+    ];
+    var sceneIdx = 0;
+    var sceneOn = false;
+
+    /* ─── VISUAL FILTER MODE (14 chips) ────────────────────────── */
+    /* Implemented as a CSS filter on the canvas element — fast,
+       authentic per-pixel pass without the cost of getImageData. */
+    var VISUAL_FILTERS = [
+        { id:'sepia',     name:'Sepia',          icon:'fa-image',          colorA:'#a16207', colorB:'#78350f', css:'sepia(1) saturate(1.4)' },
+        { id:'noir',      name:'Film Noir',      icon:'fa-film',           colorA:'#000000', colorB:'#ffffff', css:'grayscale(1) contrast(1.6) brightness(0.9)' },
+        { id:'oil',       name:'Oil Painting',   icon:'fa-palette',        colorA:'#dc2626', colorB:'#7c3aed', css:'saturate(1.8) contrast(1.2) blur(0.3px)' },
+        { id:'watercolor',name:'Watercolour',    icon:'fa-tint',           colorA:'#7dd3fc', colorB:'#fce7f3', css:'saturate(0.7) blur(1px) brightness(1.1)' },
+        { id:'pixel',     name:'Pixel Art',      icon:'fa-gamepad',        colorA:'#16a34a', colorB:'#000000', css:'contrast(1.4) saturate(1.5)', extra:'pixel' },
+        { id:'ascii',     name:'ASCII',          icon:'fa-keyboard',       colorA:'#16a34a', colorB:'#000000', css:'grayscale(1) contrast(1.8) brightness(0.9) hue-rotate(90deg) saturate(3)' },
+        { id:'comic',     name:'Comic Book',     icon:'fa-comment-dots',   colorA:'#dc2626', colorB:'#facc15', css:'saturate(1.6) contrast(1.5)' },
+        { id:'anime',     name:'Cel-Shaded',     icon:'fa-fan',            colorA:'#ec4899', colorB:'#0ea5e9', css:'saturate(1.8) contrast(1.3)' },
+        { id:'vapor',     name:'Vaporwave',      icon:'fa-water',          colorA:'#ec4899', colorB:'#06b6d4', css:'hue-rotate(290deg) saturate(1.8) contrast(1.1)' },
+        { id:'thermal',   name:'Thermal Vision', icon:'fa-temperature-high', colorA:'#dc2626', colorB:'#facc15', css:'hue-rotate(180deg) saturate(3) contrast(1.4) brightness(1.1)' },
+        { id:'night',     name:'Night Vision',   icon:'fa-eye',            colorA:'#16a34a', colorB:'#000000', css:'hue-rotate(80deg) saturate(2) brightness(0.7) contrast(1.5)' },
+        { id:'lowpoly',   name:'Low-Poly',       icon:'fa-dice-d20',       colorA:'#a855f7', colorB:'#fbbf24', css:'contrast(1.3) saturate(1.4)' },
+        { id:'glitch',    name:'Glitch',         icon:'fa-wave-square',    colorA:'#dc2626', colorB:'#06b6d4', css:'hue-rotate(15deg) saturate(1.8) contrast(1.3)' },
+        { id:'xray',      name:'X-Ray',          icon:'fa-x-ray',          colorA:'#06b6d4', colorB:'#000000', css:'invert(1) hue-rotate(180deg) brightness(1.2)' }
+    ];
+    var filterIdx = 0;
+    var filterOn = false;
+
+    /* ─── PHYSICS MODE (14 chips) ──────────────────────────────── */
+    var PHYSICS_MODES = [
+        { id:'moon',      name:'Moon Gravity',    icon:'fa-moon',         colorA:'#9ca3af', colorB:'#000000', gravity:0.17, timeScale:1.0, friction:1.0, restitution:0.6, windX:0,  windY:0,  label:'⅙ G' },
+        { id:'super',     name:'Super Gravity',   icon:'fa-weight-hanging', colorA:'#dc2626', colorB:'#000000', gravity:3.0,  timeScale:1.0, friction:1.0, restitution:0.1, windX:0,  windY:0,  label:'3× G' },
+        { id:'zero',      name:'Zero Gravity',    icon:'fa-feather',      colorA:'#0ea5e9', colorB:'#ffffff', gravity:0.0,  timeScale:1.0, friction:1.0, restitution:0.4, windX:0,  windY:0,  label:'0 G' },
+        { id:'bouncy',    name:'Bouncy World',    icon:'fa-volleyball-ball', colorA:'#ec4899', colorB:'#fbbf24', gravity:1.0,  timeScale:1.0, friction:1.0, restitution:0.95, windX:0, windY:0, label:'BOUNCE' },
+        { id:'sticky',    name:'Sticky World',    icon:'fa-flask',        colorA:'#a16207', colorB:'#fbbf24', gravity:1.0,  timeScale:0.6, friction:5.0, restitution:0.0, windX:0,  windY:0,  label:'HONEY' },
+        { id:'ice',       name:'Ice Rink',        icon:'fa-snowflake',    colorA:'#7dd3fc', colorB:'#ffffff', gravity:1.0,  timeScale:1.0, friction:0.0, restitution:0.6, windX:0,  windY:0,  label:'ICE' },
+        { id:'slow',      name:'Slow Motion',     icon:'fa-clock',        colorA:'#7c3aed', colorB:'#ffffff', gravity:1.0,  timeScale:0.25, friction:1.0, restitution:0.4, windX:0, windY:0,  label:'0.25×' },
+        { id:'fast',      name:'Fast Forward',    icon:'fa-fast-forward', colorA:'#dc2626', colorB:'#fbbf24', gravity:1.0,  timeScale:4.0,  friction:1.0, restitution:0.4, windX:0, windY:0,  label:'4×' },
+        { id:'reverse',   name:'Reverse Time',    icon:'fa-backward',     colorA:'#7c3aed', colorB:'#06b6d4', gravity:1.0,  timeScale:-1.0, friction:1.0, restitution:0.4, windX:0, windY:0,  label:'REVERSE' },
+        { id:'magnet',    name:'Magnetic Attract',icon:'fa-magnet',       colorA:'#dc2626', colorB:'#0ea5e9', gravity:1.0,  timeScale:1.0, friction:1.0, restitution:0.4, windX:0,  windY:0,  magneticAttract:1, label:'MAGNET' },
+        { id:'magnetRep', name:'Magnetic Repel',  icon:'fa-sync',         colorA:'#0ea5e9', colorB:'#dc2626', gravity:1.0,  timeScale:1.0, friction:1.0, restitution:0.4, windX:0,  windY:0,  magneticAttract:-1, label:'REPEL' },
+        { id:'wind',      name:'Wind Tunnel',     icon:'fa-wind',         colorA:'#0ea5e9', colorB:'#ffffff', gravity:1.0,  timeScale:1.0, friction:1.0, restitution:0.4, windX:8,  windY:0,  label:'WIND →' },
+        { id:'bubble',    name:'Bubble World',    icon:'fa-circle',       colorA:'#fce7f3', colorB:'#7dd3fc', gravity:-0.3, timeScale:1.0, friction:1.0, restitution:0.7, windX:0,  windY:0,  label:'BUBBLES' },
+        { id:'mirror',    name:'Mirror World',    icon:'fa-arrows-alt-h', colorA:'#a855f7', colorB:'#06b6d4', gravity:1.0, timeScale:1.0, friction:1.0, restitution:0.4, windX:0, windY:0, mirrorX:1, label:'MIRROR' }
+    ];
+    var physicsIdx = 0;
+    var physicsOn = false;
+
+    /* Shared Physics state — integrators across the file can read
+       these globals if they want to participate in Physics Mode. */
+    window.Physics = {
+        gravity:1.0, timeScale:1.0, friction:1.0,
+        restitution:0.4, windX:0, windY:0,
+        magneticAttract:0, mirrorX:0
+    };
+
+    function applyPhysicsPreset(p){
+        var P = window.Physics;
+        P.gravity         = p.gravity;
+        P.timeScale       = p.timeScale;
+        P.friction        = p.friction;
+        P.restitution     = p.restitution;
+        P.windX           = p.windX;
+        P.windY           = p.windY;
+        P.magneticAttract = p.magneticAttract || 0;
+        P.mirrorX         = p.mirrorX || 0;
+    }
+    function resetPhysics(){
+        var P = window.Physics;
+        P.gravity=1.0; P.timeScale=1.0; P.friction=1.0;
+        P.restitution=0.4; P.windX=0; P.windY=0;
+        P.magneticAttract=0; P.mirrorX=0;
+    }
+
+    /* ─── Visual-filter activator: apply CSS filter to canvas ─── */
+    function applyVisualFilter(){
+        if (!canvas) return;
+        if (!filterOn){
+            canvas.style.filter = '';
+            return;
+        }
+        var f = VISUAL_FILTERS[filterIdx];
+        canvas.style.filter = f.css;
+        if (f.extra === 'pixel'){
+            canvas.style.imageRendering = 'pixelated';
+        } else {
+            canvas.style.imageRendering = '';
+        }
+    }
+
+    /* ═══ THEMED OVERLAYS — visible per-chip effects ══════════════ */
+    function drawV170Overlays(c){
+        if (warModeOn)  drawWarOverlay(c);
+        if (holidayOn)  drawHolidayOverlay(c);
+        if (sportOn)    drawSportOverlay(c);
+        if (sceneOn)    drawSceneOverlay(c);
+        if (physicsOn)  drawPhysicsBadge(c);
+        if (filterOn)   drawFilterBadge(c);
+    }
+
+    function tintSky(c, color, alpha){
+        c.save();
+        c.globalCompositeOperation = 'source-over';
+        c.fillStyle = color;
+        c.globalAlpha = alpha;
+        c.fillRect(0, 0, W, GROUND);
+        c.restore();
+    }
+    function tintGround(c, color, alpha){
+        c.save();
+        c.fillStyle = color;
+        c.globalAlpha = alpha;
+        c.fillRect(0, GROUND, W, H - GROUND);
+        c.restore();
+    }
+    function drawBadge(c, text, bg, fg, x, y){
+        c.save();
+        c.font = 'bold 11px Arial, sans-serif';
+        var pad = 8;
+        var w = c.measureText(text).width + pad*2;
+        var h = 20;
+        c.fillStyle = bg;
+        c.globalAlpha = 0.85;
+        c.fillRect(x, y, w, h);
+        c.globalAlpha = 1;
+        c.strokeStyle = 'rgba(255,255,255,0.5)';
+        c.lineWidth = 1;
+        c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+        c.fillStyle = fg;
+        c.textBaseline = 'middle';
+        c.fillText(text, x + pad, y + h/2 + 1);
+        c.restore();
+    }
+
+    function drawWarOverlay(c){
+        var w = WAR_MODES[warModeIdx];
+        var t = (Date.now() / 1000) % 60;
+        /* sky tint */
+        tintSky(c, w.sky0, 0.14);
+        /* banner across top */
+        c.save();
+        c.fillStyle = w.banner;
+        c.globalAlpha = 0.85;
+        c.fillRect(0, 0, W, 4);
+        c.fillRect(0, GROUND - 6, W, 2);
+        c.restore();
+        /* per-chip era flavour */
+        if (w.id === 'stoneage'){
+            /* Stone Age — mammoth silhouette + tribal spears + cave drawings */
+            /* mammoth crossing the horizon */
+            var msx = (t * 25) % (W + 80) - 40;
+            c.save();
+            c.fillStyle = '#3b2a18';
+            /* body */
+            c.beginPath();
+            c.ellipse(msx, GROUND - 38, 30, 18, 0, 0, Math.PI*2);
+            c.fill();
+            /* head + trunk */
+            c.beginPath();
+            c.arc(msx - 26, GROUND - 36, 12, 0, Math.PI*2);
+            c.fill();
+            c.fillRect(msx - 40, GROUND - 28, 4, 16);
+            /* tusks */
+            c.strokeStyle = '#fbe7c2'; c.lineWidth = 2;
+            c.beginPath();
+            c.moveTo(msx - 32, GROUND - 26);
+            c.quadraticCurveTo(msx - 42, GROUND - 18, msx - 38, GROUND - 12);
+            c.stroke();
+            /* shaggy hair */
+            c.fillStyle = '#1a1108';
+            for (var sh=0; sh<8; sh++){
+                c.fillRect(msx - 20 + sh*5, GROUND - 56, 2, 8);
+            }
+            /* 4 legs */
+            c.fillStyle = '#3b2a18';
+            c.fillRect(msx - 18, GROUND - 22, 6, 18);
+            c.fillRect(msx -  4, GROUND - 22, 6, 18);
+            c.fillRect(msx + 10, GROUND - 22, 6, 18);
+            c.fillRect(msx + 22, GROUND - 22, 6, 18);
+            c.restore();
+            /* tribal stone spears stuck in the ground */
+            for (var sp=0; sp<8; sp++){
+                var spx = 30 + sp * (W/8) + (sp%2)*8;
+                c.save();
+                c.strokeStyle = '#5a3818'; c.lineWidth = 1.5;
+                c.beginPath();
+                c.moveTo(spx, GROUND - 14);
+                c.lineTo(spx, GROUND - 2);
+                c.stroke();
+                c.fillStyle = '#6b6b6b';
+                c.beginPath();
+                c.moveTo(spx - 2, GROUND - 14);
+                c.lineTo(spx + 2, GROUND - 14);
+                c.lineTo(spx, GROUND - 20);
+                c.closePath();
+                c.fill();
+                c.restore();
+            }
+            /* cave-painting hand silhouettes scrawled on the first building face */
+            c.save();
+            c.fillStyle = 'rgba(180,60,30,0.55)';
+            for (var hp=0; hp<3; hp++){
+                var hpx = 70 + hp * 24;
+                c.beginPath();
+                c.arc(hpx, 100 + hp*8, 5, 0, Math.PI*2);
+                c.fill();
+                for (var fg=0; fg<5; fg++){
+                    var fga = -Math.PI*0.5 + (fg-2)*0.3;
+                    c.fillRect(hpx + Math.cos(fga)*4 - 1, 100 + hp*8 + Math.sin(fga)*4 - 1, 2, 6);
+                }
+            }
+            c.restore();
+        } else if (w.id === 'bronzeage'){
+            /* Bronze Age — chariot crossing + bronze sun-disc icon on building */
+            var chx = (t * 80) % (W + 80) - 40;
+            c.save();
+            /* two horses */
+            c.fillStyle = '#7c2d12';
+            c.fillRect(chx, GROUND - 26, 14, 14);
+            c.fillRect(chx + 16, GROUND - 26, 14, 14);
+            /* heads */
+            c.fillRect(chx + 12, GROUND - 30, 4, 8);
+            c.fillRect(chx + 28, GROUND - 30, 4, 8);
+            /* chariot box */
+            c.fillStyle = '#a16207';
+            c.fillRect(chx - 18, GROUND - 22, 18, 12);
+            /* wheel */
+            c.strokeStyle = '#a16207'; c.lineWidth = 2;
+            c.beginPath();
+            c.arc(chx - 9, GROUND - 6, 7, 0, Math.PI*2);
+            c.stroke();
+            /* charioteer with bow */
+            c.fillStyle = '#fbbf24';
+            c.fillRect(chx - 10, GROUND - 36, 4, 12);
+            /* dust trail */
+            c.fillStyle = 'rgba(160,120,60,0.6)';
+            for (var dt=0; dt<5; dt++){
+                c.beginPath();
+                c.arc(chx - 24 - dt*8, GROUND - 6, 4 + dt, 0, Math.PI*2);
+                c.fill();
+            }
+            c.restore();
+            /* bronze winged sun-disc on tallest building face (Hittite/Egyptian motif) */
+            c.save();
+            c.fillStyle = '#fde047';
+            c.beginPath();
+            c.arc(W*0.5, 70, 12, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#fbbf24';
+            for (var fw=0; fw<6; fw++){
+                var fwa = fw * Math.PI/3;
+                c.beginPath();
+                c.ellipse(W*0.5 + Math.cos(fwa)*16, 70 + Math.sin(fwa)*4, 14, 4, fwa, 0, Math.PI*2);
+                c.fill();
+            }
+            c.restore();
+        } else if (w.id === 'trojan'){
+            /* arrow volleys arcing across the sky */
+            for (var i=0; i<6; i++){
+                var aT = (t * 0.5 + i * 0.6) % 3;
+                var ax = (i / 6) * W + aT * 60;
+                var ay = 80 + Math.sin(aT * Math.PI) * -60 + aT * 40;
+                c.save();
+                c.strokeStyle = '#7c2d12';
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.moveTo(ax, ay);
+                c.lineTo(ax - 8, ay - 3);
+                c.stroke();
+                c.restore();
+            }
+        } else if (w.id === 'assyrian'){
+            /* Assyrian — winged lamassu bull on tallest building + siege tower */
+            c.save();
+            /* lamassu — human-headed winged bull */
+            var lcx = W*0.5, lcy = 100;
+            c.fillStyle = '#7c2d12';
+            c.fillRect(lcx - 20, lcy, 30, 12);
+            c.fillRect(lcx - 18, lcy + 12, 4, 8);
+            c.fillRect(lcx - 4,  lcy + 12, 4, 8);
+            c.fillRect(lcx + 12, lcy + 12, 4, 8);
+            /* human head with beard */
+            c.fillStyle = '#a16207';
+            c.beginPath(); c.arc(lcx + 14, lcy - 4, 7, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#3b2a18';
+            c.fillRect(lcx + 10, lcy + 2, 8, 6);
+            /* wings */
+            c.fillStyle = '#fbbf24';
+            c.beginPath();
+            c.moveTo(lcx + 4, lcy);
+            c.quadraticCurveTo(lcx - 4, lcy - 18, lcx - 16, lcy - 8);
+            c.lineTo(lcx + 4, lcy - 2);
+            c.closePath(); c.fill();
+            c.restore();
+            /* siege tower advancing */
+            var stx = (t * 12) % (W + 80) - 40;
+            c.save();
+            c.fillStyle = '#3b2a18';
+            c.fillRect(stx, GROUND - 60, 30, 55);
+            c.fillStyle = '#5a3818';
+            for (var sd=0; sd<5; sd++){
+                c.fillRect(stx + 4, GROUND - 56 + sd*11, 22, 2);
+            }
+            /* archer at top */
+            c.fillStyle = '#a16207';
+            c.fillRect(stx + 12, GROUND - 70, 6, 10);
+            /* wheels */
+            c.fillStyle = '#1a1108';
+            c.beginPath(); c.arc(stx + 6,  GROUND - 4, 4, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(stx + 24, GROUND - 4, 4, 0, Math.PI*2); c.fill();
+            c.restore();
+        } else if (w.id === 'thermopylae'){
+            /* spartan shield wall icons along the ground */
+            for (var s=0; s<10; s++){
+                var sx = 40 + s * (W/10);
+                var sy = GROUND - 14;
+                c.save();
+                c.fillStyle = '#a16207';
+                c.beginPath(); c.arc(sx, sy, 7, 0, Math.PI*2); c.fill();
+                c.strokeStyle = '#fde047'; c.lineWidth = 1;
+                c.beginPath(); c.arc(sx, sy, 7, 0, Math.PI*2); c.stroke();
+                c.fillStyle = '#fde047';
+                c.font = 'bold 9px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
+                c.fillText('Λ', sx, sy + 0.5);
+                c.restore();
+            }
+        } else if (w.id === 'alexander'){
+            /* Alexander — Macedonian phalanx with 18-ft sarissas in tight formation */
+            for (var sa=0; sa<12; sa++){
+                var sax = 30 + sa * (W/12);
+                var say = GROUND - 14;
+                c.save();
+                /* soldier helmet */
+                c.fillStyle = '#3b82f6';
+                c.beginPath(); c.arc(sax, say, 4, 0, Math.PI*2); c.fill();
+                /* 18-ft sarissa pointing forward at steep upward angle */
+                c.strokeStyle = '#a16207'; c.lineWidth = 1.5;
+                c.beginPath();
+                c.moveTo(sax, say);
+                c.lineTo(sax + 40, say - 20);
+                c.stroke();
+                /* spear tip */
+                c.fillStyle = '#94a3b8';
+                c.beginPath();
+                c.moveTo(sax + 40, say - 20);
+                c.lineTo(sax + 44, say - 19);
+                c.lineTo(sax + 44, say - 21);
+                c.closePath(); c.fill();
+                c.restore();
+            }
+            /* Bucephalus (Alexander's horse) leading */
+            c.save();
+            c.fillStyle = '#1a1108';
+            c.fillRect(W*0.5 - 12, GROUND - 28, 22, 12);
+            c.fillRect(W*0.5 - 14, GROUND - 32, 6, 8);
+            /* Alexander on top with crown plume */
+            c.fillStyle = '#fbbf24';
+            c.fillRect(W*0.5 - 4, GROUND - 42, 4, 14);
+            c.beginPath();
+            c.moveTo(W*0.5 - 4, GROUND - 42);
+            c.lineTo(W*0.5,     GROUND - 50);
+            c.lineTo(W*0.5,     GROUND - 42);
+            c.closePath(); c.fill();
+            c.restore();
+        } else if (w.id === 'punic'){
+            /* SPQR vexilla on rooftops */
+            for (var r=0; r<5; r++){
+                var rx = 60 + r * (W/5);
+                c.save();
+                c.fillStyle = '#dc2626';
+                c.fillRect(rx, 30, 18, 22);
+                c.fillStyle = '#fde047';
+                c.font = 'bold 7px Arial';
+                c.textAlign = 'center';
+                c.fillText('SPQR', rx + 9, 44);
+                c.restore();
+            }
+        } else if (w.id === 'viking'){
+            /* Viking longship in foreground + crossed-axes on building */
+            var vsx = (t * 30) % (W + 120) - 60;
+            c.save();
+            /* longship hull */
+            c.fillStyle = '#7c2d12';
+            c.beginPath();
+            c.moveTo(vsx,       GROUND - 4);
+            c.quadraticCurveTo(vsx + 30, GROUND + 12, vsx + 60, GROUND - 4);
+            c.lineTo(vsx + 56, GROUND - 12);
+            c.lineTo(vsx + 4,  GROUND - 12);
+            c.closePath(); c.fill();
+            /* dragon prow */
+            c.fillStyle = '#3b2a18';
+            c.beginPath();
+            c.moveTo(vsx, GROUND - 12);
+            c.lineTo(vsx - 10, GROUND - 22);
+            c.lineTo(vsx - 4,  GROUND - 22);
+            c.lineTo(vsx + 4,  GROUND - 12);
+            c.closePath(); c.fill();
+            /* square sail with red stripes */
+            c.fillStyle = '#fef2f2';
+            c.fillRect(vsx + 18, GROUND - 42, 24, 30);
+            c.fillStyle = '#dc2626';
+            c.fillRect(vsx + 18, GROUND - 36, 24, 4);
+            c.fillRect(vsx + 18, GROUND - 24, 24, 4);
+            /* mast */
+            c.strokeStyle = '#3b2a18'; c.lineWidth = 1.5;
+            c.beginPath();
+            c.moveTo(vsx + 30, GROUND - 12);
+            c.lineTo(vsx + 30, GROUND - 44);
+            c.stroke();
+            /* shields hung on the side */
+            for (var sh=0; sh<5; sh++){
+                c.fillStyle = sh%2 ? '#dc2626' : '#fde047';
+                c.beginPath();
+                c.arc(vsx + 10 + sh*9, GROUND - 8, 3, 0, Math.PI*2);
+                c.fill();
+            }
+            c.restore();
+            /* crossed-axes emblem on tallest building */
+            c.save();
+            c.strokeStyle = '#94a3b8'; c.lineWidth = 4;
+            c.beginPath();
+            c.moveTo(W*0.5 - 14, 60); c.lineTo(W*0.5 + 14, 88);
+            c.moveTo(W*0.5 + 14, 60); c.lineTo(W*0.5 - 14, 88);
+            c.stroke();
+            c.fillStyle = '#7c2d12';
+            c.beginPath(); c.arc(W*0.5 - 14, 60, 6, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(W*0.5 + 14, 60, 6, 0, Math.PI*2); c.fill();
+            c.restore();
+        } else if (w.id === 'crusades'){
+            /* Templar red cross + Saracen scimitar duel */
+            /* templar shields lined up */
+            for (var tsh=0; tsh<8; tsh++){
+                var tshx = 30 + tsh * (W/8);
+                c.save();
+                c.fillStyle = '#ffffff';
+                c.beginPath();
+                c.moveTo(tshx - 7, GROUND - 18);
+                c.lineTo(tshx + 7, GROUND - 18);
+                c.lineTo(tshx + 7, GROUND - 6);
+                c.lineTo(tshx,     GROUND);
+                c.lineTo(tshx - 7, GROUND - 6);
+                c.closePath(); c.fill();
+                c.fillStyle = '#dc2626';
+                /* red cross */
+                c.fillRect(tshx - 1, GROUND - 16, 2, 12);
+                c.fillRect(tshx - 4, GROUND - 12, 8, 2);
+                c.restore();
+            }
+            /* crescent moon + scimitar (Saracen) */
+            c.save();
+            c.fillStyle = '#16a34a';
+            c.beginPath();
+            c.arc(W - 50, 50, 14, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#fbbf24';
+            c.beginPath();
+            c.arc(W - 44, 46, 12, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#fbbf24';
+            /* crescent */
+            c.beginPath();
+            c.arc(W - 50, 50, 14, -Math.PI*0.7, Math.PI*0.7);
+            c.arc(W - 46, 50, 12, Math.PI*0.7, -Math.PI*0.7, true);
+            c.fill();
+            c.restore();
+            /* big red cross banner */
+            c.save();
+            c.fillStyle = '#ffffff';
+            c.fillRect(30, 30, 30, 36);
+            c.fillStyle = '#dc2626';
+            c.fillRect(42, 32, 6, 32);
+            c.fillRect(32, 44, 26, 6);
+            c.restore();
+        } else if (w.id === 'mongol'){
+            /* arrow swarm across the entire canvas */
+            for (var m=0; m<20; m++){
+                var mt = (t * 1.2 + m * 0.3) % 4;
+                var mx = (m * 73) % W + mt * 30;
+                var my = 50 + (m * 47) % (GROUND - 100) + Math.sin(mt) * 10;
+                c.save();
+                c.strokeStyle = '#3b2a18';
+                c.lineWidth = 1;
+                c.beginPath();
+                c.moveTo(mx, my);
+                c.lineTo(mx - 6, my);
+                c.stroke();
+                c.restore();
+            }
+        } else if (w.id === 'revwar'){
+            /* 13-star flag on tallest building */
+            c.save();
+            c.fillStyle = '#dc2626';
+            for (var stp=0; stp<7; stp++){
+                c.fillRect(W*0.5 - 30, 20 + stp*4, 60, 2);
+            }
+            c.fillStyle = '#1e40af';
+            c.fillRect(W*0.5 - 30, 20, 24, 14);
+            c.fillStyle = '#ffffff';
+            for (var st=0; st<13; st++){
+                var sang = (st / 13) * Math.PI * 2;
+                c.beginPath();
+                c.arc(W*0.5 - 18 + Math.cos(sang)*5, 27 + Math.sin(sang)*4, 0.8, 0, Math.PI*2);
+                c.fill();
+            }
+            c.restore();
+        } else if (w.id === 'napoleonic'){
+            /* cannon smoke clouds along the ground */
+            for (var k=0; k<5; k++){
+                var kt = (t * 0.3 + k * 0.6) % 2;
+                var kx = 80 + k * (W/5);
+                var ky = GROUND - 20;
+                c.save();
+                c.fillStyle = 'rgba(180,180,180,' + (0.6 - kt*0.3) + ')';
+                c.beginPath();
+                c.arc(kx, ky - kt * 8, 12 + kt * 10, 0, Math.PI*2);
+                c.fill();
+                c.restore();
+            }
+        } else if (w.id === 'wwii'){
+            /* WWII — Sherman/Panzer tank + B-17 bomber formation + spotlight */
+            var tkx = (t * 35) % (W + 100) - 50;
+            c.save();
+            /* tank body */
+            c.fillStyle = '#3a4a2a';
+            c.fillRect(tkx, GROUND - 22, 38, 12);
+            /* turret */
+            c.fillRect(tkx + 10, GROUND - 30, 18, 8);
+            /* barrel */
+            c.fillRect(tkx + 26, GROUND - 28, 14, 3);
+            /* tracks (treads) */
+            c.fillStyle = '#1a1108';
+            c.fillRect(tkx, GROUND - 10, 38, 4);
+            for (var tr=0; tr<10; tr++){
+                c.fillStyle = '#525252';
+                c.fillRect(tkx + tr*4, GROUND - 10, 2, 4);
+            }
+            /* star insignia on turret */
+            c.fillStyle = '#fbbf24';
+            c.font = 'bold 8px Arial'; c.textAlign = 'center';
+            c.fillText('★', tkx + 19, GROUND - 23);
+            c.restore();
+            /* B-17 bomber formation overhead */
+            for (var bm=0; bm<4; bm++){
+                var bmt = (t * 0.15 + bm * 0.08) % 1;
+                var bmx = bmt * (W + 100) - 50;
+                var bmy = 70 + bm * 8;
+                c.save();
+                c.fillStyle = '#374151';
+                /* fuselage */
+                c.fillRect(bmx, bmy, 22, 3);
+                /* wings */
+                c.fillRect(bmx - 4, bmy + 1, 30, 1.5);
+                /* tail */
+                c.fillRect(bmx, bmy - 3, 3, 4);
+                /* four engines */
+                for (var en=0; en<4; en++){
+                    c.fillStyle = '#1f2937';
+                    c.fillRect(bmx + 2 + en*6, bmy + 1, 2, 2);
+                }
+                c.restore();
+            }
+            /* searchlight beam from rooftop */
+            var slt = (t * 0.3) % (Math.PI*2);
+            c.save();
+            var slx = W * 0.2, sly = GROUND - 100;
+            var sla = -Math.PI*0.5 + Math.sin(slt) * 0.6;
+            var grad2 = c.createLinearGradient(slx, sly, slx + Math.cos(sla)*200, sly + Math.sin(sla)*200);
+            grad2.addColorStop(0, 'rgba(254,240,138,0.7)');
+            grad2.addColorStop(1, 'rgba(254,240,138,0)');
+            c.fillStyle = grad2;
+            c.beginPath();
+            c.moveTo(slx, sly);
+            c.lineTo(slx + Math.cos(sla - 0.08)*220, sly + Math.sin(sla - 0.08)*220);
+            c.lineTo(slx + Math.cos(sla + 0.08)*220, sly + Math.sin(sla + 0.08)*220);
+            c.closePath(); c.fill();
+            c.restore();
+        } else if (w.id === 'wwi'){
+            /* trench line + mustard gas cloud rolling across */
+            c.save();
+            c.fillStyle = 'rgba(100,80,40,0.5)';
+            c.fillRect(0, GROUND - 8, W, 8);
+            /* barbed-wire zigzag */
+            c.strokeStyle = '#525252';
+            c.lineWidth = 1;
+            c.beginPath();
+            for (var b=0; b<W; b+=10){
+                c.moveTo(b, GROUND - 18);
+                c.lineTo(b + 5, GROUND - 13);
+                c.lineTo(b + 10, GROUND - 18);
+            }
+            c.stroke();
+            /* gas cloud */
+            var gT = (t * 0.05) % 1;
+            c.fillStyle = 'rgba(250,204,21,0.35)';
+            c.beginPath();
+            c.ellipse(gT * (W + 200) - 100, GROUND - 30, 80, 24, 0, 0, Math.PI*2);
+            c.fill();
+            c.restore();
+        }
+        drawBadge(c, 'WAR: ' + w.name.toUpperCase(), w.banner, '#ffffff', 8, 8);
+    }
+
+    function drawHolidayOverlay(c){
+        var h = HOLIDAY_MODES[holidayIdx];
+        var t = (Date.now() / 1000) % 60;
+        if (h.id === 'eidFitr'){
+            tintSky(c, '#1e1b4b', 0.20);
+            /* crescent moon + lanterns */
+            c.save();
+            c.fillStyle = '#fbbf24';
+            c.beginPath();
+            c.arc(W - 60, 60, 18, 0, Math.PI*2);
+            c.fill();
+            c.fillStyle = '#1e1b4b';
+            c.beginPath();
+            c.arc(W - 54, 56, 16, 0, Math.PI*2);
+            c.fill();
+            /* lanterns strung along facades */
+            for (var ln=0; ln<14; ln++){
+                var lx = 30 + ln * (W/14);
+                var ly = 50 + Math.sin(t + ln) * 4;
+                c.fillStyle = h.colorA;
+                c.beginPath();
+                c.arc(lx, ly, 5, 0, Math.PI*2); c.fill();
+                c.strokeStyle = h.colorB;
+                c.lineWidth = 1;
+                c.beginPath();
+                c.moveTo(lx, ly - 5); c.lineTo(lx, 30);
+                c.stroke();
+            }
+            c.restore();
+        } else if (h.id === 'humanRights'){
+            /* scales of justice on tallest building + UDHR text fragments */
+            c.save();
+            tintSky(c, '#1e3a8a', 0.10);
+            /* scales */
+            var cx = W*0.5;
+            c.strokeStyle = '#fbbf24'; c.lineWidth = 2;
+            c.beginPath();
+            c.moveTo(cx, 50); c.lineTo(cx, 110); c.stroke();
+            c.beginPath();
+            c.moveTo(cx - 30, 70); c.lineTo(cx + 30, 70); c.stroke();
+            /* left and right pans */
+            c.fillStyle = '#fbbf24';
+            c.beginPath();
+            c.arc(cx - 30, 80, 8, 0, Math.PI); c.fill();
+            c.beginPath();
+            c.arc(cx + 30, 80, 8, 0, Math.PI); c.fill();
+            /* "EQUAL" floating phrases */
+            c.font = 'bold 10px Arial'; c.fillStyle = 'rgba(255,255,255,0.7)';
+            c.textAlign = 'center';
+            c.fillText('EQUAL · DIGNITY · RIGHTS', cx, 130);
+            c.restore();
+        } else if (h.id === 'humanitarian'){
+            /* red cross/crescent + helping hands */
+            c.save();
+            c.fillStyle = '#dc2626';
+            c.fillRect(W*0.5 - 4, 40, 8, 30);
+            c.fillRect(W*0.5 - 15, 51, 30, 8);
+            c.fillStyle = 'rgba(255,255,255,0.5)';
+            for (var hh=0; hh<8; hh++){
+                var hhx = 40 + hh * (W/8);
+                /* hand silhouettes reaching up */
+                c.beginPath();
+                c.arc(hhx, GROUND - 24, 5, 0, Math.PI*2);
+                c.fill();
+                for (var fi=0; fi<5; fi++){
+                    c.fillRect(hhx - 4 + fi*2, GROUND - 32, 1.5, 8);
+                }
+            }
+            c.restore();
+        } else if (h.id === 'nonViolence'){
+            /* peace symbol + Gandhi spinning-wheel charkha */
+            c.save();
+            c.strokeStyle = '#ffffff'; c.lineWidth = 3;
+            c.beginPath();
+            c.arc(W*0.5, 70, 24, 0, Math.PI*2); c.stroke();
+            c.beginPath();
+            c.moveTo(W*0.5, 46); c.lineTo(W*0.5, 94); c.stroke();
+            c.beginPath();
+            c.moveTo(W*0.5, 70); c.lineTo(W*0.5 - 17, 87); c.stroke();
+            c.beginPath();
+            c.moveTo(W*0.5, 70); c.lineTo(W*0.5 + 17, 87); c.stroke();
+            /* charkha spinning wheel rotating */
+            c.translate(W - 60, 70);
+            c.rotate(t * 0.5);
+            c.strokeStyle = '#fbbf24'; c.lineWidth = 1.5;
+            c.beginPath(); c.arc(0, 0, 14, 0, Math.PI*2); c.stroke();
+            for (var sk=0; sk<8; sk++){
+                var ska = (sk/8) * Math.PI*2;
+                c.beginPath();
+                c.moveTo(0, 0);
+                c.lineTo(Math.cos(ska)*14, Math.sin(ska)*14);
+                c.stroke();
+            }
+            c.restore();
+        } else if (h.id === 'tolerance'){
+            /* interlocking hands forming a chain across the canvas */
+            c.save();
+            tintSky(c, '#a855f7', 0.10);
+            for (var th=0; th<8; th++){
+                var thx = 40 + th * (W/8);
+                /* alternating hand colors representing different cultures */
+                c.fillStyle = ['#7c2d12','#fbbf24','#0ea5e9','#16a34a','#a855f7','#ec4899','#ffffff','#525252'][th];
+                c.beginPath();
+                c.arc(thx, 60, 7, 0, Math.PI*2); c.fill();
+                /* link to next hand */
+                if (th < 7){
+                    c.strokeStyle = c.fillStyle; c.lineWidth = 2;
+                    c.beginPath();
+                    c.moveTo(thx + 7, 60); c.lineTo(thx + W/8 - 7, 60);
+                    c.stroke();
+                }
+            }
+            c.restore();
+        } else if (h.id === 'friendship'){
+            /* hearts + multi-color flag streamers */
+            c.save();
+            for (var hr=0; hr<6; hr++){
+                var hrx = 60 + hr * (W/6) + Math.sin(t + hr)*8;
+                var hry = 60 + Math.cos(t + hr*0.7)*10;
+                c.fillStyle = ['#dc2626','#fbbf24','#16a34a','#0ea5e9','#a855f7','#ec4899'][hr];
+                /* heart shape */
+                c.beginPath();
+                c.arc(hrx - 4, hry, 4, 0, Math.PI*2);
+                c.arc(hrx + 4, hry, 4, 0, Math.PI*2);
+                c.moveTo(hrx - 8, hry + 2);
+                c.lineTo(hrx, hry + 12);
+                c.lineTo(hrx + 8, hry + 2);
+                c.closePath(); c.fill();
+            }
+            /* streamers */
+            for (var st=0; st<W; st += 30){
+                c.fillStyle = 'hsl(' + ((st + t*30)%360) + ',80%,55%)';
+                c.fillRect(st, 28, 4, 14);
+            }
+            c.restore();
+        } else if (h.id === 'water'){
+            /* falling water droplets across the canvas + wave at ground */
+            c.save();
+            for (var dr=0; dr<40; dr++){
+                var drt = (t * 1.5 + dr * 0.1) % 1;
+                var drx = (dr * 47) % W;
+                var dry = drt * GROUND;
+                c.fillStyle = 'rgba(14,165,233,0.7)';
+                c.beginPath();
+                c.moveTo(drx, dry);
+                c.quadraticCurveTo(drx - 3, dry - 6, drx, dry - 9);
+                c.quadraticCurveTo(drx + 3, dry - 6, drx, dry);
+                c.fill();
+            }
+            /* wave at the ground */
+            c.fillStyle = 'rgba(14,165,233,0.5)';
+            c.beginPath();
+            c.moveTo(0, GROUND);
+            for (var wp=0; wp<=W; wp += 10){
+                c.lineTo(wp, GROUND - 4 + Math.sin(t*2 + wp*0.05)*3);
+            }
+            c.lineTo(W, GROUND); c.closePath(); c.fill();
+            c.restore();
+        } else if (h.id === 'food'){
+            /* basket of fruit + grain wheat sheaves */
+            c.save();
+            /* fruits scattered */
+            var fruits = ['#dc2626','#ea580c','#fbbf24','#16a34a','#a855f7','#7c2d12'];
+            for (var fr=0; fr<14; fr++){
+                var frx = 30 + fr * (W/14);
+                var fry = GROUND - 14;
+                c.fillStyle = fruits[fr % fruits.length];
+                c.beginPath();
+                c.arc(frx, fry, 5, 0, Math.PI*2); c.fill();
+                /* stem */
+                c.fillStyle = '#16a34a';
+                c.fillRect(frx - 0.5, fry - 7, 1, 3);
+            }
+            /* wheat sheaves */
+            for (var wh=0; wh<5; wh++){
+                var whx = 60 + wh * (W/5);
+                c.save();
+                c.translate(whx, GROUND - 30);
+                c.strokeStyle = '#fbbf24'; c.lineWidth = 1.5;
+                for (var ws=0; ws<5; ws++){
+                    c.beginPath();
+                    c.moveTo(0, 0);
+                    c.lineTo((ws-2)*3, -16 + Math.abs(ws-2)*2);
+                    c.stroke();
+                }
+                c.restore();
+            }
+            c.restore();
+        } else if (h.id === 'solidarity'){
+            /* concentric ring of clasped-hand silhouettes */
+            c.save();
+            tintSky(c, '#a16207', 0.12);
+            var ccx = W*0.5, ccy = 80;
+            for (var sl=0; sl<14; sl++){
+                var sla = (sl/14) * Math.PI*2 + t*0.2;
+                var slx = ccx + Math.cos(sla) * 60;
+                var sly = ccy + Math.sin(sla) * 30;
+                c.fillStyle = 'hsl(' + (sl * 360/14) + ',60%,55%)';
+                c.beginPath();
+                c.arc(slx, sly, 4, 0, Math.PI*2); c.fill();
+            }
+            /* central unity emblem */
+            c.strokeStyle = '#fbbf24'; c.lineWidth = 2;
+            c.beginPath();
+            c.arc(ccx, ccy, 20, 0, Math.PI*2); c.stroke();
+            c.font = 'bold 14px Arial'; c.fillStyle = '#fbbf24'; c.textAlign = 'center';
+            c.fillText('☉', ccx, ccy + 5);
+            c.restore();
+        } else if (h.id === 'earth'){
+            /* big earth balloon */
+            c.save();
+            c.fillStyle = '#16a34a';
+            c.beginPath(); c.arc(W*0.5, 80, 30, 0, Math.PI*2); c.fill();
+            c.fillStyle = '#0ea5e9';
+            c.beginPath(); c.arc(W*0.5 - 8, 75, 12, 0, Math.PI*2); c.fill();
+            c.beginPath(); c.arc(W*0.5 + 10, 85, 8, 0, Math.PI*2); c.fill();
+            c.strokeStyle = 'rgba(255,255,255,0.6)'; c.lineWidth = 1;
+            c.beginPath(); c.moveTo(W*0.5, 110); c.lineTo(W*0.5, 200); c.stroke();
+            c.restore();
+        } else if (h.id === 'labor'){
+            /* red flags on rooftops */
+            for (var rf=0; rf<6; rf++){
+                var rfx = 60 + rf * (W/6);
+                c.save();
+                c.fillStyle = '#dc2626';
+                c.fillRect(rfx, 30, 24, 16);
+                c.fillStyle = '#fbbf24';
+                c.font = 'bold 11px Arial'; c.textAlign = 'center';
+                c.fillText('☭', rfx + 12, 42);
+                c.restore();
+            }
+        } else if (h.id === 'peace'){
+            /* doves circling */
+            for (var dv=0; dv<8; dv++){
+                var dvt = t + dv * 0.7;
+                var dvx = W*0.5 + Math.cos(dvt) * (100 + dv*15);
+                var dvy = 100 + Math.sin(dvt * 0.8) * 30;
+                c.save();
+                c.fillStyle = '#ffffff';
+                c.beginPath();
+                c.ellipse(dvx, dvy, 4, 2, 0, 0, Math.PI*2);
+                c.fill();
+                c.restore();
+            }
+        } else if (h.id === 'un'){
+            /* light beams up from rooftops */
+            c.save();
+            for (var lb=0; lb<7; lb++){
+                var lbx = 60 + lb * (W/7);
+                var grad = c.createLinearGradient(lbx, GROUND*0.6, lbx, 0);
+                grad.addColorStop(0, 'rgba(59,130,246,0.5)');
+                grad.addColorStop(1, 'rgba(59,130,246,0)');
+                c.fillStyle = grad;
+                c.fillRect(lbx - 6, 0, 12, GROUND*0.6);
+            }
+            c.restore();
+        } else if (h.id === 'olympic'){
+            /* 5 olympic rings projected on tallest building */
+            var ringColors = ['#0ea5e9','#000000','#dc2626','#fbbf24','#16a34a'];
+            for (var rg=0; rg<5; rg++){
+                var rgx = W*0.5 - 60 + rg * 30;
+                var rgy = 80 + (rg % 2) * 12;
+                c.save();
+                c.strokeStyle = ringColors[rg];
+                c.lineWidth = 3;
+                c.beginPath();
+                c.arc(rgx, rgy, 12, 0, Math.PI*2);
+                c.stroke();
+                c.restore();
+            }
+            /* torch runner */
+            var trx = (t * 30) % (W + 60) - 30;
+            c.save();
+            c.fillStyle = '#a16207';
+            c.fillRect(trx, GROUND - 12, 3, 8);
+            c.fillStyle = '#ea580c';
+            c.beginPath();
+            c.arc(trx + 1.5, GROUND - 14, 4 + Math.sin(t*8)*1, 0, Math.PI*2);
+            c.fill();
+            c.fillStyle = '#fde047';
+            c.beginPath();
+            c.arc(trx + 1.5, GROUND - 15, 2 + Math.sin(t*8)*0.5, 0, Math.PI*2);
+            c.fill();
+            c.restore();
+        }
+        drawBadge(c, 'HOLIDAY: ' + h.name.toUpperCase(), h.colorA, h.colorB || '#ffffff', 8, 32);
+    }
+
+    function drawSportOverlay(c){
+        var s = SPORT_EVENTS[sportIdx];
+        var t = (Date.now() / 1000) % 60;
+        c.save();
+        /* paint court lines on the ground */
+        c.strokeStyle = '#ffffff';
+        c.lineWidth = 2;
+        if (s.id === 'basketball' || s.id === 'tennis'){
+            c.strokeRect(40, GROUND + 6, W - 80, H - GROUND - 12);
+            c.beginPath();
+            c.moveTo(W*0.5, GROUND + 6);
+            c.lineTo(W*0.5, H - 6);
+            c.stroke();
+            c.beginPath();
+            c.arc(W*0.5, (GROUND + H)*0.5, 18, 0, Math.PI*2);
+            c.stroke();
+        } else if (s.id === 'soccer' || s.id === 'football'){
+            c.strokeRect(20, GROUND + 6, W - 40, H - GROUND - 12);
+            c.beginPath();
+            c.moveTo(W*0.5, GROUND + 6);
+            c.lineTo(W*0.5, H - 6);
+            c.stroke();
+            c.beginPath();
+            c.arc(W*0.5, (GROUND + H)*0.5, 24, 0, Math.PI*2);
+            c.stroke();
+            /* goals */
+            c.strokeRect(15, (GROUND + H)*0.5 - 16, 8, 32);
+            c.strokeRect(W - 23, (GROUND + H)*0.5 - 16, 8, 32);
+        } else if (s.id === 'baseball'){
+            c.strokeStyle = '#fde047';
+            c.beginPath();
+            var bcx = W*0.5, bcy = (GROUND + H)*0.5;
+            c.moveTo(bcx, bcy + 18);
+            c.lineTo(bcx + 18, bcy);
+            c.lineTo(bcx, bcy - 18);
+            c.lineTo(bcx - 18, bcy);
+            c.closePath();
+            c.stroke();
+        } else if (s.id === 'hockey'){
+            c.strokeRect(40, GROUND + 6, W - 80, H - GROUND - 12);
+            c.save();
+            c.fillStyle = 'rgba(173,216,230,0.30)';
+            c.fillRect(40, GROUND + 6, W - 80, H - GROUND - 12);
+            c.restore();
+        } else if (s.id === 'marathon' || s.id === 'cycling'){
+            /* finish line ribbon */
+            c.fillStyle = '#dc2626';
+            c.fillRect(W - 80, GROUND + 4, 4, H - GROUND - 8);
+            for (var bk=0; bk<8; bk++){
+                c.fillStyle = bk%2 ? '#ffffff' : '#000000';
+                c.fillRect(W - 100, GROUND + 4 + bk * 6, 16, 6);
+            }
+        } else if (s.id === 'boxing' || s.id === 'mma'){
+            /* ring or octagon in center */
+            c.strokeStyle = '#dc2626';
+            c.lineWidth = 3;
+            if (s.id === 'boxing'){
+                c.strokeRect(W*0.5 - 60, GROUND + 10, 120, H - GROUND - 20);
+            } else {
+                c.beginPath();
+                for (var o=0; o<8; o++){
+                    var oa = (o/8) * Math.PI*2;
+                    var ox = W*0.5 + Math.cos(oa) * 50;
+                    var oy = (GROUND + H)*0.5 + Math.sin(oa) * 30;
+                    if (o === 0) c.moveTo(ox, oy); else c.lineTo(ox, oy);
+                }
+                c.closePath();
+                c.stroke();
+            }
+        } else if (s.id === 'golf'){
+            /* flag in hole */
+            c.fillStyle = '#16a34a';
+            c.fillRect(0, GROUND + 2, W, H - GROUND - 2);
+            c.fillStyle = '#000000';
+            c.beginPath();
+            c.arc(W*0.7, (GROUND + H)*0.5, 4, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#a16207'; c.lineWidth = 2;
+            c.beginPath();
+            c.moveTo(W*0.7, (GROUND + H)*0.5);
+            c.lineTo(W*0.7, (GROUND + H)*0.5 - 30);
+            c.stroke();
+            c.fillStyle = '#dc2626';
+            c.beginPath();
+            c.moveTo(W*0.7, (GROUND + H)*0.5 - 30);
+            c.lineTo(W*0.7 + 12, (GROUND + H)*0.5 - 26);
+            c.lineTo(W*0.7, (GROUND + H)*0.5 - 22);
+            c.closePath();
+            c.fill();
+        } else if (s.id === 'skate' || s.id === 'parkour'){
+            /* ramps */
+            c.fillStyle = '#525252';
+            c.beginPath();
+            c.moveTo(60, H - 6);
+            c.lineTo(140, H - 6);
+            c.lineTo(60, GROUND + 14);
+            c.closePath();
+            c.fill();
+            c.beginPath();
+            c.moveTo(W - 60, H - 6);
+            c.lineTo(W - 140, H - 6);
+            c.lineTo(W - 60, GROUND + 14);
+            c.closePath();
+            c.fill();
+        } else if (s.id === 'esports'){
+            /* LED screen */
+            c.save();
+            c.fillStyle = '#0c0a1e';
+            c.fillRect(W*0.5 - 80, GROUND + 8, 160, 40);
+            c.fillStyle = '#06b6d4';
+            c.font = 'bold 24px monospace';
+            c.textAlign = 'center';
+            c.fillText('GG!', W*0.5, GROUND + 36);
+            c.restore();
+        }
+        c.restore();
+        drawBadge(c, 'SPORT: ' + s.name.toUpperCase(), s.colorA, s.colorB || '#ffffff', 8, 56);
+    }
+
+    function drawSceneOverlay(c){
+        var s = SCENE_MODES[sceneIdx];
+        var t = (Date.now() / 1000) % 60;
+        if (s.sky0) tintSky(c, s.sky0, 0.20);
+        if (s.sky1) tintSky(c, s.sky1, 0.10);
+        if (s.ground) tintGround(c, s.ground, 0.30);
+        /* per-chip signature element */
+        if (s.id === '1920s'){
+            /* art-deco biplanes */
+            for (var bp=0; bp<3; bp++){
+                var bpt = (t * 0.4 + bp * 0.5) % 1;
+                var bpx = bpt * W;
+                var bpy = 60 + bp * 30;
+                c.save();
+                c.fillStyle = '#7c2d12';
+                c.fillRect(bpx, bpy, 16, 3);
+                c.fillRect(bpx + 4, bpy - 4, 8, 2);
+                c.fillRect(bpx + 4, bpy + 4, 8, 2);
+                c.restore();
+            }
+        } else if (s.id === '1980s'){
+            /* neon grid floor */
+            c.save();
+            c.strokeStyle = 'rgba(236,72,153,0.5)';
+            c.lineWidth = 1;
+            for (var ng=0; ng<10; ng++){
+                c.beginPath();
+                c.moveTo(0, GROUND + ng*4);
+                c.lineTo(W, GROUND + ng*4);
+                c.stroke();
+            }
+            for (var ngc=0; ngc<20; ngc++){
+                var ngx = ngc * (W/20);
+                c.beginPath();
+                c.moveTo(ngx, GROUND);
+                c.lineTo(ngx, H);
+                c.stroke();
+            }
+            c.restore();
+        } else if (s.id === 'cyber'){
+            /* drone swarm forming a pattern */
+            for (var dr=0; dr<20; dr++){
+                var dra = (dr/20) * Math.PI*2 + t * 0.5;
+                var drx = W*0.5 + Math.cos(dra) * 80;
+                var dry = 100 + Math.sin(dra) * 40;
+                c.save();
+                c.fillStyle = '#06b6d4';
+                c.shadowColor = '#06b6d4';
+                c.shadowBlur = 6;
+                c.beginPath();
+                c.arc(drx, dry, 2, 0, Math.PI*2);
+                c.fill();
+                c.restore();
+            }
+        } else if (s.id === 'postapoc'){
+            /* circling vultures */
+            for (var vt=0; vt<5; vt++){
+                var vtt = t * 0.3 + vt * 1.2;
+                var vtx = W*0.5 + Math.cos(vtt) * (80 + vt*20);
+                var vty = 90 + Math.sin(vtt) * 30;
+                c.save();
+                c.strokeStyle = '#1f2937';
+                c.lineWidth = 1.5;
+                c.beginPath();
+                c.moveTo(vtx - 6, vty);
+                c.quadraticCurveTo(vtx, vty - 3, vtx + 6, vty);
+                c.stroke();
+                c.restore();
+            }
+        } else if (s.id === 'west'){
+            /* tumbleweed rolling */
+            var twx = (t * 60) % (W + 40) - 20;
+            c.save();
+            c.strokeStyle = '#78350f';
+            c.lineWidth = 1;
+            for (var tw=0; tw<8; tw++){
+                var twa = (tw/8) * Math.PI*2 + t*4;
+                c.beginPath();
+                c.moveTo(twx, GROUND - 10);
+                c.lineTo(twx + Math.cos(twa)*7, GROUND - 10 + Math.sin(twa)*7);
+                c.stroke();
+            }
+            c.restore();
+        } else if (s.id === 'medieval'){
+            /* dragon silhouette circling */
+            var dgt = t * 0.2;
+            var dgx = W*0.5 + Math.cos(dgt) * 200;
+            var dgy = 90 + Math.sin(dgt) * 30;
+            c.save();
+            c.fillStyle = '#1a1a1a';
+            c.beginPath();
+            c.ellipse(dgx, dgy, 22, 6, 0, 0, Math.PI*2);
+            c.fill();
+            c.beginPath();
+            c.moveTo(dgx - 22, dgy);
+            c.lineTo(dgx - 30, dgy - 8);
+            c.lineTo(dgx - 18, dgy - 2);
+            c.closePath();
+            c.fill();
+            c.restore();
+        } else if (s.id === 'wedding'){
+            /* sky lanterns drifting up */
+            for (var sl=0; sl<10; sl++){
+                var slt = (t * 0.1 + sl * 0.13) % 1;
+                var slx = (sl * 73) % W;
+                var sly = GROUND - slt * GROUND;
+                c.save();
+                c.fillStyle = '#fbbf24';
+                c.shadowColor = '#fbbf24'; c.shadowBlur = 8;
+                c.beginPath();
+                c.arc(slx, sly, 4, 0, Math.PI*2);
+                c.fill();
+                c.restore();
+            }
+        } else if (s.id === 'tourist'){
+            /* hot-air balloons */
+            for (var hb=0; hb<5; hb++){
+                var hbx = 60 + hb * (W/5) + Math.sin(t + hb)*8;
+                var hby = 80 + (hb % 2) * 30;
+                c.save();
+                c.fillStyle = ['#dc2626','#fbbf24','#16a34a','#0ea5e9','#a855f7'][hb];
+                c.beginPath();
+                c.arc(hbx, hby, 14, 0, Math.PI*2);
+                c.fill();
+                c.fillStyle = '#78350f';
+                c.fillRect(hbx - 4, hby + 14, 8, 6);
+                c.restore();
+            }
+        } else if (s.id === 'carnival'){
+            /* confetti drifting */
+            for (var cf=0; cf<60; cf++){
+                var cft = (t * 0.5 + cf * 0.07) % 1;
+                var cfx = (cf * 79) % W + Math.sin(t + cf)*10;
+                var cfy = cft * GROUND;
+                c.save();
+                c.fillStyle = 'hsl(' + (cf * 17 % 360) + ',90%,60%)';
+                c.fillRect(cfx, cfy, 3, 4);
+                c.restore();
+            }
+        } else if (s.id === 'zombie'){
+            /* blood-red moon + bat silhouettes */
+            c.save();
+            c.fillStyle = '#dc2626';
+            c.shadowColor = '#dc2626'; c.shadowBlur = 12;
+            c.beginPath();
+            c.arc(W - 50, 50, 16, 0, Math.PI*2);
+            c.fill();
+            c.restore();
+            for (var bt=0; bt<8; bt++){
+                var btt = t * 1.5 + bt;
+                var btx = W*0.5 + Math.cos(btt) * (100 + bt*8) + Math.sin(btt*2)*20;
+                var bty = 80 + Math.sin(btt*0.7) * 30;
+                c.save();
+                c.fillStyle = '#000000';
+                c.beginPath();
+                c.moveTo(btx, bty);
+                c.lineTo(btx - 6, bty - 3);
+                c.lineTo(btx - 4, bty);
+                c.lineTo(btx + 4, bty);
+                c.lineTo(btx + 6, bty - 3);
+                c.closePath();
+                c.fill();
+                c.restore();
+            }
+        } else if (s.id === 'aquarium'){
+            /* bubbles + fish schools */
+            for (var bub=0; bub<30; bub++){
+                var bubt = (t * 0.3 + bub * 0.1) % 1;
+                var bubx = (bub * 41) % W;
+                var buby = (1 - bubt) * H;
+                c.save();
+                c.strokeStyle = 'rgba(255,255,255,0.6)';
+                c.lineWidth = 1;
+                c.beginPath();
+                c.arc(bubx, buby, 2 + (bub%3), 0, Math.PI*2);
+                c.stroke();
+                c.restore();
+            }
+            for (var fs=0; fs<5; fs++){
+                var fst = (t * 0.4 + fs * 0.5) % 1;
+                var fsx = fst * W;
+                var fsy = 100 + fs * 40 + Math.sin(t*2 + fs)*10;
+                c.save();
+                c.fillStyle = '#fbbf24';
+                c.beginPath();
+                c.ellipse(fsx, fsy, 6, 3, 0, 0, Math.PI*2);
+                c.fill();
+                c.beginPath();
+                c.moveTo(fsx - 6, fsy);
+                c.lineTo(fsx - 10, fsy - 2);
+                c.lineTo(fsx - 10, fsy + 2);
+                c.closePath();
+                c.fill();
+                c.restore();
+            }
+        } else if (s.id === 'space'){
+            /* starfield + planet */
+            for (var stx=0; stx<200; stx++){
+                var stxx = (stx * 137) % W;
+                var styy = (stx * 211) % GROUND;
+                c.save();
+                c.fillStyle = 'rgba(255,255,255,' + (0.3 + (stx%5)*0.15) + ')';
+                c.fillRect(stxx, styy, 1, 1);
+                c.restore();
+            }
+            /* saturn-like planet */
+            c.save();
+            c.fillStyle = '#fbbf24';
+            c.beginPath();
+            c.arc(W - 80, 80, 24, 0, Math.PI*2);
+            c.fill();
+            c.strokeStyle = '#a16207'; c.lineWidth = 2;
+            c.beginPath();
+            c.ellipse(W - 80, 80, 38, 8, -0.3, 0, Math.PI*2);
+            c.stroke();
+            c.restore();
+        } else if (s.id === 'modern'){
+            /* contrails across upper sky */
+            for (var ct=0; ct<3; ct++){
+                var ctx2 = ((t * 0.15 + ct * 0.33) % 1) * (W + 100) - 50;
+                c.save();
+                c.fillStyle = 'rgba(255,255,255,0.6)';
+                c.beginPath();
+                c.arc(ctx2, 60 + ct*20, 3, 0, Math.PI*2);
+                c.fill();
+                c.fillStyle = 'rgba(255,255,255,0.2)';
+                c.fillRect(ctx2 - 80, 59 + ct*20, 80, 2);
+                c.restore();
+            }
+        } else if (s.id === '1950s'){
+            /* pastel cumulus + DC-3 */
+            for (var cl=0; cl<4; cl++){
+                var clx = 60 + cl * (W/4);
+                var cly = 90;
+                c.save();
+                c.fillStyle = 'rgba(255,255,255,0.8)';
+                c.beginPath();
+                c.arc(clx, cly, 14, 0, Math.PI*2); c.fill();
+                c.beginPath();
+                c.arc(clx + 12, cly, 12, 0, Math.PI*2); c.fill();
+                c.beginPath();
+                c.arc(clx - 10, cly + 2, 10, 0, Math.PI*2); c.fill();
+                c.restore();
+            }
+        }
+        drawBadge(c, 'SCENE: ' + (s.label || s.name).toUpperCase(), s.colorA, s.colorB || '#ffffff', 8, 80);
+    }
+
+    function drawPhysicsBadge(c){
+        var p = PHYSICS_MODES[physicsIdx];
+        drawBadge(c, 'PHYS: ' + (p.label || p.name).toUpperCase(), p.colorA, p.colorB || '#ffffff', 8, 104);
+        /* visible particle hint for some chips */
+        if (p.id === 'wind'){
+            var t = (Date.now() / 1000) % 60;
+            c.save();
+            c.strokeStyle = 'rgba(255,255,255,0.4)';
+            c.lineWidth = 1;
+            for (var w=0; w<20; w++){
+                var wt = (t * 1.5 + w * 0.2) % 1;
+                var wx = wt * W;
+                var wy = (w * 23) % GROUND;
+                c.beginPath();
+                c.moveTo(wx, wy); c.lineTo(wx - 20, wy);
+                c.stroke();
+            }
+            c.restore();
+        }
+    }
+    function drawFilterBadge(c){
+        var f = VISUAL_FILTERS[filterIdx];
+        drawBadge(c, 'FILTER: ' + f.name.toUpperCase(), f.colorA, f.colorB || '#ffffff', 8, 128);
+    }
+
+    /* ═══ PUBLIC API — WAR MODE ════════════════════════════════════ */
+    window.getAllWarModes = function(){
+        return WAR_MODES.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon, colorA:m.colorA, colorB:m.colorB };
+        });
+    };
+    window.getWarModeIndex = function(){ return warModeIdx; };
+    window.getWarModeName  = function(){ return WAR_MODES[warModeIdx].name; };
+    window.setWarModeIndex = function(i){
+        var n = WAR_MODES.length;
+        if (typeof i !== 'number') return;
+        warModeIdx = ((i%n)+n)%n;
+        warModeOn = true;
+    };
+    window.isWarModeOn     = function(){ return warModeOn; };
+    window.toggleWarMode   = function(){
+        warModeOn = !warModeOn;
+        return warModeOn;
+    };
+    window.stopWarMode     = function(){ warModeOn = false; };
+
+    /* ═══ PUBLIC API — HOLIDAY MODE ════════════════════════════════ */
+    window.getAllHolidayModes = function(){
+        return HOLIDAY_MODES.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon, colorA:m.colorA, colorB:m.colorB };
+        });
+    };
+    window.getHolidayModeIndex = function(){ return holidayIdx; };
+    window.getHolidayModeName  = function(){ return HOLIDAY_MODES[holidayIdx].name; };
+    window.setHolidayModeIndex = function(i){
+        var n = HOLIDAY_MODES.length;
+        if (typeof i !== 'number') return;
+        holidayIdx = ((i%n)+n)%n;
+        holidayOn = true;
+    };
+    window.isHolidayModeOn   = function(){ return holidayOn; };
+    window.toggleHolidayMode = function(){ holidayOn = !holidayOn; return holidayOn; };
+    window.stopHolidayMode   = function(){ holidayOn = false; };
+
+    /* ═══ PUBLIC API — SPORT EVENT ═════════════════════════════════ */
+    window.getAllSportEvents = function(){
+        return SPORT_EVENTS.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon, colorA:m.colorA, colorB:m.colorB };
+        });
+    };
+    window.getSportEventIndex = function(){ return sportIdx; };
+    window.getSportEventName  = function(){ return SPORT_EVENTS[sportIdx].name; };
+    window.setSportEventIndex = function(i){
+        var n = SPORT_EVENTS.length;
+        if (typeof i !== 'number') return;
+        sportIdx = ((i%n)+n)%n;
+        sportOn = true;
+    };
+    window.isSportEventOn   = function(){ return sportOn; };
+    window.toggleSportEvent = function(){ sportOn = !sportOn; return sportOn; };
+    window.stopSportEvent   = function(){ sportOn = false; };
+
+    /* ═══ PUBLIC API — SCENE MODE ══════════════════════════════════ */
+    window.getAllSceneModes = function(){
+        return SCENE_MODES.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon, colorA:m.colorA, colorB:m.colorB };
+        });
+    };
+    window.getSceneModeIndex = function(){ return sceneIdx; };
+    window.getSceneModeName  = function(){ return SCENE_MODES[sceneIdx].name; };
+    window.setSceneModeIndex = function(i){
+        var n = SCENE_MODES.length;
+        if (typeof i !== 'number') return;
+        sceneIdx = ((i%n)+n)%n;
+        sceneOn = true;
+    };
+    window.isSceneModeOn   = function(){ return sceneOn; };
+    window.toggleSceneMode = function(){ sceneOn = !sceneOn; return sceneOn; };
+    window.stopSceneMode   = function(){ sceneOn = false; };
+
+    /* ═══ PUBLIC API — VISUAL FILTER ═══════════════════════════════ */
+    window.getAllVisualFilters = function(){
+        return VISUAL_FILTERS.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon, colorA:m.colorA, colorB:m.colorB };
+        });
+    };
+    window.getVisualFilterIndex = function(){ return filterIdx; };
+    window.getVisualFilterName  = function(){ return VISUAL_FILTERS[filterIdx].name; };
+    window.setVisualFilterIndex = function(i){
+        var n = VISUAL_FILTERS.length;
+        if (typeof i !== 'number') return;
+        filterIdx = ((i%n)+n)%n;
+        filterOn = true;
+        applyVisualFilter();
+    };
+    window.isVisualFilterOn   = function(){ return filterOn; };
+    window.toggleVisualFilter = function(){
+        filterOn = !filterOn;
+        applyVisualFilter();
+        return filterOn;
+    };
+    window.stopVisualFilter   = function(){
+        filterOn = false;
+        applyVisualFilter();
+    };
+
+    /* ═══ PUBLIC API — PHYSICS MODE ════════════════════════════════ */
+    window.getAllPhysicsModes = function(){
+        return PHYSICS_MODES.map(function(m,i){
+            return { index:i, id:m.id, name:m.name, icon:m.icon, colorA:m.colorA, colorB:m.colorB };
+        });
+    };
+    window.getPhysicsModeIndex = function(){ return physicsIdx; };
+    window.getPhysicsModeName  = function(){ return PHYSICS_MODES[physicsIdx].name; };
+    window.setPhysicsModeIndex = function(i){
+        var n = PHYSICS_MODES.length;
+        if (typeof i !== 'number') return;
+        physicsIdx = ((i%n)+n)%n;
+        physicsOn = true;
+        applyPhysicsPreset(PHYSICS_MODES[physicsIdx]);
+    };
+    window.isPhysicsModeOn   = function(){ return physicsOn; };
+    window.togglePhysicsMode = function(){
+        physicsOn = !physicsOn;
+        if (physicsOn){
+            applyPhysicsPreset(PHYSICS_MODES[physicsIdx]);
+        } else {
+            resetPhysics();
+        }
+        return physicsOn;
+    };
+    window.stopPhysicsMode   = function(){
+        physicsOn = false;
+        resetPhysics();
     };
 })();

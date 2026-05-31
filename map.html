@@ -340,6 +340,16 @@
             }
         }
 
+        /* ── Mobile: show only the first 5 country tiles UNDER THE SEARCH BAR.
+           Scoped to .top-tile-strip ONLY — the per-SVG state/province/country
+           tile-strips inside the regional .w3-card sections render every
+           item as before. Underlying page logic (pageSize 10) is untouched. */
+        @media only screen and (max-width: 640px) {
+            .top-tile-strip > div:nth-child(n+6) {
+                display: none !important;
+            }
+        }
+
         /* ── PERF: defer rendering of inline country / region SVG maps ─────
            The page contains 23 large inline SVG sections — without help,
            the browser pays the full layout cost of every one on first paint
@@ -446,7 +456,7 @@
                 </div>
                 <div style="display: inline-block; overflow: hidden; width: 100%;">
                     <div style="display: flex; flex-wrap: wrap; margin-left: 10px; justify-content: flex-start;">
-                        <div v-if="resources.length" v-cloak class="table" style="display: flex; flex-wrap: wrap;">
+                        <div v-if="resources.length" v-cloak class="table top-tile-strip" style="display: flex; flex-wrap: wrap;">
                             <div v-for="(item, index) in pagedResults" :key="item.abv" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
                                 <div data-toggle="tooltip" data-html="true" :title="item.title" style="margin: auto">
                                     <center>
