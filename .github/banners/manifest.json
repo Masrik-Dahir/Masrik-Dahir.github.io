@@ -47,6 +47,22 @@
       "created": "2026-04-14",
       "project": "Masrik-Dahir.github.io",
       "type": "project"
+    },
+    {
+      "slug": "manhattan-skyline-pulse",
+      "description": "Animated Manhattan skyline silhouette with twinkling building windows lighting in waves, yellow taxi crossing the foreground, moon arcing across deep-blue night sky with star twinkles and river reflections",
+      "file": ".github/banners/manhattan-skyline-pulse.svg",
+      "created": "2026-05-31",
+      "project": "Masrik-Dahir.github.io",
+      "type": "project"
+    },
+    {
+      "slug": "calligraphy-ink-bloom",
+      "description": "Fountain pen nib releasing falling ink drop that blooms outward across washi paper, with emerging calligraphic brush-stroke flourishes, gold-leaf accent dots, and a signature underline drawn left-to-right",
+      "file": ".github/banners/calligraphy-ink-bloom.svg",
+      "created": "2026-05-31",
+      "project": "Masrik-Dahir.github.io",
+      "type": "author"
     }
   ]
 }
