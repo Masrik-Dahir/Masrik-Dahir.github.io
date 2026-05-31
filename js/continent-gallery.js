@@ -48,13 +48,18 @@ var CONTINENT_DATA = {
     northamerica: {
         regions: [
             { id: "usa", name: "United States", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/usa.webp", svgFile: "usa.svg", vueMount: "app_pic", cardId: "scroll_USA" },
-            { id: "canada", name: "Canada", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/CAN.svg.png", svgFile: "canada.svg", vueMount: "app_pic_can", cardId: "scroll_CAN" }
+            { id: "canada", name: "Canada", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/CAN.svg.png", svgFile: "canada.svg", vueMount: "app_pic_can", cardId: "scroll_CAN" },
+            /* Mexico is part of the Central America Vue mount (its tiles
+               are listed alongside the other 7 Central American countries
+               in app_pic_central_america). Reclassifying centralamerica +
+               caribbeanamerica from South America to North America moves
+               Mexico with it. */
+            { id: "centralamerica", name: "Central America (incl. Mexico)", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/central_america.svg.png", svgFile: "centralamerica.svg", vueMount: "app_pic_central_america" },
+            { id: "caribbeanamerica", name: "Caribbean Islands", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/caribbean_america.svg.png", svgFile: "caribbeanamerica.svg", vueMount: "app_pic_caribbean_america" }
         ]
     },
     southamerica: {
         regions: [
-            { id: "centralamerica", name: "Central America", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/central_america.svg.png", svgFile: "centralamerica.svg", vueMount: "app_pic_central_america" },
-            { id: "caribbeanamerica", name: "Caribbean Islands", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/caribbean_america.svg.png", svgFile: "caribbeanamerica.svg", vueMount: "app_pic_caribbean_america" },
             { id: "southamerica", name: "South America", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/south_america.svg.png", svgFile: "southamerica.svg", vueMount: "app_pic_south_america" }
         ]
     }
@@ -145,6 +150,128 @@ function buildRegionCard(region, isFirst) {
     '<hr>';
 }
 
+function buildContinentSearchBar(continentLabel) {
+    /* Search input that filters every country tile across every region
+       card on this continent page. Same look as the map.html search bar
+       (.search-wrapper / .search_searchbar) so behavior + styling are
+       consistent across the site. */
+    return '<div class="continent-search-host" style="margin: 15px 0 10px 0;">' +
+        '<div class="row" style="margin: 0;">' +
+            '<div class="form-control search-wrapper panel-heading" style="display: flex; align-items: center; width: 100%; min-width: 250px;">' +
+                '<div class="search_bar" style="display: flex; align-items: center; width: 100%;">' +
+                    '<img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px; margin-right: 8px;" alt="Search"/>' +
+                    '<div style="display: flex; align-items: center; width: 100%; margin-right: 8px;">' +
+                        '<input class="search_searchbar continent-search-input" type="text" title="Search" placeholder="Search ' + continentLabel + '..." style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;"/>' +
+                        '<button class="search-cross-btn continent-search-clear" aria-label="Clear search" type="button">' +
+                            '<i class="fa fa-times"></i>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="continent-search-status" style="margin: 6px 4px 0; color: #475569; font-style: italic; font-size: 13px; min-height: 18px;"></div>' +
+    '</div>';
+}
+
+function setupContinentSearch(continentId) {
+    var input = document.querySelector('.continent-search-input');
+    var clearBtn = document.querySelector('.continent-search-clear');
+    var status = document.querySelector('.continent-search-status');
+    if (!input) return;
+
+    function getAllTiles() {
+        /* Each region card has a Vue app inside that renders tile divs
+           inside a .table flex container. We filter the direct children
+           of every .table on the page (the per-country wrapper divs). */
+        var tiles = [];
+        document.querySelectorAll('.continent-gallery-content .table > div').forEach(function (tile) {
+            tiles.push(tile);
+        });
+        return tiles;
+    }
+
+    function tileText(tile) {
+        /* Tile contains the country thumbnail + the ABV label.
+           Search matches against the ABV text + the tooltip title. */
+        var abv = (tile.textContent || '').trim();
+        var titleEl = tile.querySelector('[title], [data-original-title]');
+        var title = '';
+        if (titleEl) {
+            title = titleEl.getAttribute('title') ||
+                    titleEl.getAttribute('data-original-title') || '';
+        }
+        return (abv + ' ' + title).toLowerCase();
+    }
+
+    function applyFilter() {
+        var q = (input.value || '').trim().toLowerCase();
+        var tiles = getAllTiles();
+        var firstMatch = null;
+        var matchCount = 0;
+        tiles.forEach(function (tile) {
+            if (!q) {
+                tile.style.display = '';
+                return;
+            }
+            var hay = tileText(tile);
+            var hit = q.split(/\s+/).every(function (term) {
+                return hay.indexOf(term) !== -1;
+            });
+            tile.style.display = hit ? '' : 'none';
+            if (hit) {
+                matchCount++;
+                if (!firstMatch) firstMatch = tile;
+            }
+        });
+        if (status) {
+            if (!q) {
+                status.textContent = '';
+            } else if (matchCount === 0) {
+                status.textContent = 'No matches in this continent.';
+            } else {
+                status.textContent = matchCount + ' match' + (matchCount === 1 ? '' : 'es');
+            }
+        }
+        /* If the search has narrowed to one match, scroll it into view
+           inside its region card. */
+        if (q && firstMatch) {
+            var card = firstMatch.closest('.w3-card');
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                /* brief outline highlight on the matched tile */
+                firstMatch.classList.add('continent-search-flash');
+                setTimeout(function () {
+                    firstMatch.classList.remove('continent-search-flash');
+                }, 1400);
+            }
+        }
+    }
+
+    input.addEventListener('input', applyFilter);
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            input.value = '';
+            applyFilter();
+            input.focus();
+        });
+    }
+
+    /* Re-poll after Vue mounts tiles — the .table children may not exist
+       at first paint. Run the empty-filter pass every 500 ms for the
+       first few seconds so styles are correct as tiles appear. */
+    var pollCount = 0;
+    var poll = setInterval(function () {
+        pollCount++;
+        if (pollCount > 8 || (input.value || '').trim()) {
+            clearInterval(poll);
+            return;
+        }
+        if (getAllTiles().length > 0) {
+            applyFilter();
+        }
+    }, 500);
+}
+
 function renderContinentGallery(containerId) {
     var continentId = window.CONTINENT_ID;
     if (!continentId || !CONTINENT_DATA[continentId]) return;
@@ -159,14 +286,43 @@ function renderContinentGallery(containerId) {
     if (!container) return;
 
     var data = CONTINENT_DATA[continentId];
-    var html = "";
+    /* Resolve the continent's display label from CONTINENT_NAV for the
+       search placeholder text. */
+    var contLabel = continentId;
+    for (var ci = 0; ci < CONTINENT_NAV.length; ci++) {
+        if (CONTINENT_NAV[ci].id === continentId) {
+            contLabel = CONTINENT_NAV[ci].label;
+            break;
+        }
+    }
 
+    var html = buildContinentSearchBar(contLabel);
+    html += '<div class="continent-gallery-content">';
     data.regions.forEach(function (region, i) {
         html += buildRegionCard(region, i === 0);
     });
-
+    html += '</div>';
     html += '<div id="details-box"></div>';
     container.innerHTML = html;
+
+    /* Inject the search-flash highlight style once (no separate CSS file
+       needed — keeps continent-gallery a single-file drop-in). */
+    if (!document.getElementById('continent-search-flash-css')) {
+        var style = document.createElement('style');
+        style.id = 'continent-search-flash-css';
+        style.textContent =
+            '.continent-search-flash { outline: 3px solid #facc15; ' +
+            'outline-offset: 2px; box-shadow: 0 0 0 4px rgba(250,204,21,0.35); ' +
+            'transition: outline-color 0.5s ease, box-shadow 0.5s ease; ' +
+            'border-radius: 4px; }' +
+            '.continent-search-clear { background: transparent; border: none; ' +
+            'cursor: pointer; color: #94a3b8; padding: 4px 8px; }' +
+            '.continent-search-clear:hover { color: #475569; }';
+        document.head.appendChild(style);
+    }
+
+    /* Wire the search-bar filter once tiles start appearing. */
+    setupContinentSearch(continentId);
 
     // Resolve SVG base path relative to the page
     var basePath = "svg/";

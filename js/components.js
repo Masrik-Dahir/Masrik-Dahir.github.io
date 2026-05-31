@@ -362,4 +362,65 @@
             });
         });
     });
+
+    /* ── MOBILE TAP-OUTSIDE-TO-CLOSE for tooltips (site-wide) ──────────
+       On touch-only devices, Bootstrap 3 tooltips (data-toggle="tooltip")
+       and our v1.7.0 widget tooltips (.widget-tooltip + .tt-mobile-open)
+       can "stick" after a tap and only dismiss on a second well-placed
+       tap. This handler closes them whenever the user taps anywhere
+       that isn't a tooltip trigger or a visible tooltip body. Gated to
+       touch-primary devices so desktop hover behavior is untouched.
+       Runs on every page that loads components.js (map.html, games.html,
+       all sub-pages, etc.). */
+    (function setupGlobalMobileTooltipDismiss(){
+        var isTouch = window.matchMedia &&
+                      window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+        if (!isTouch) return;
+
+        function closeBootstrapTooltips(){
+            if (typeof window.jQuery === 'undefined') return;
+            try {
+                window.jQuery('[data-toggle="tooltip"]').tooltip('hide');
+            } catch (_) { /* tooltip not initialized — ignore */ }
+            // Also remove any orphan .tooltip elements Bootstrap appended to body
+            document.querySelectorAll('body > .tooltip').forEach(function (n) {
+                n.classList.remove('in');
+                n.style.opacity = '0';
+            });
+        }
+        function closeWidgetTooltips(){
+            document.querySelectorAll('.tt-mobile-open').forEach(function (el) {
+                el.classList.remove('tt-mobile-open');
+            });
+        }
+
+        document.addEventListener('click', function (ev) {
+            var t = ev.target;
+            // If the tap is inside a tooltip trigger, let that element's
+            // own handler (Bootstrap or our index.html widget script) run.
+            if (t.closest && (
+                t.closest('[data-toggle="tooltip"]') ||
+                t.closest('.widget-tooltip') ||
+                t.closest('.flight-wrap') ||
+                t.closest('.weather-widget') ||
+                t.closest('.missile-btn') ||
+                t.closest('.defence-btn') ||
+                t.closest('.reconstruct-btn') ||
+                t.closest('.strategy-btn') ||
+                t.closest('.parade-btn') ||
+                t.closest('.abduction-btn') ||
+                t.closest('.superhero-btn') ||
+                t.closest('.warmode-btn') ||
+                t.closest('.holiday-btn') ||
+                t.closest('.sport-btn') ||
+                t.closest('.scene-btn') ||
+                t.closest('.filter-btn') ||
+                t.closest('.physics-btn') ||
+                t.closest('.tooltip')
+            )) return;
+            // Otherwise — tap is "outside" — dismiss every kind of tooltip
+            closeBootstrapTooltips();
+            closeWidgetTooltips();
+        }, true);
+    })();
 })();
