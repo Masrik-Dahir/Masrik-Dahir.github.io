@@ -63,7 +63,7 @@
             '  position: relative;' +
             '  isolation: isolate;' +
             '  overflow: hidden;' +
-            '  border-radius: 22px;' +
+            '  border-radius: 12px;' +
             '  --hex-size: 8px;' +
             '  --mmb-edge-angle: 0deg;' +
             '  cursor: pointer;' +

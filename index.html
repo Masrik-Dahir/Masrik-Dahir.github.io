@@ -2026,6 +2026,170 @@
                     <div class="tt-hint">Auto: heroes fight each other to one winner • Manual: CLICK any hero — everyone targets them</div>
                 </div>
             </div>
+
+            <!-- ══════════════════════════════════════════════════════════
+                 v1.7.0 — 6 NEW WIDGETS
+                 War · Holiday · Sport · Scene · Visual Filter · Physics
+                 Each follows the icon-only widget-host pattern with
+                 tooltip + chip grid. Builder IIFEs live below the
+                 superhero builder in this file.
+                 ══════════════════════════════════════════════════════════ -->
+
+            <!-- WAR MODE — 7 chips -->
+            <div id="warBtn" class="warmode-btn icon-only">
+                <button class="war-core" onclick="
+                    if(window.toggleWarMode){
+                        var on = window.toggleWarMode();
+                        var wrap = document.getElementById('warBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-shield-alt war-icon" id="warIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-warmode" role="tooltip">
+                    <div class="tt-title tt-title-warmode">War Mode</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Battle</span>
+                        <span class="tt-value tt-war-status" id="ttWarName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttWarHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-war-status" id="ttWarHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-war" id="ttWarGrid"></div>
+                    <div class="tt-hint">Pick a historical battlefield — the city transforms</div>
+                </div>
+            </div>
+
+            <!-- HOLIDAY MODE — 14 chips -->
+            <div id="holidayBtn" class="holiday-btn icon-only">
+                <button class="hol-core" onclick="
+                    if(window.toggleHolidayMode){
+                        var on = window.toggleHolidayMode();
+                        var wrap = document.getElementById('holidayBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-moon hol-icon" id="holIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-holiday" role="tooltip">
+                    <div class="tt-title tt-title-holiday">Holiday Mode</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Holiday</span>
+                        <span class="tt-value tt-hol-status" id="ttHolName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttHolHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-hol-status" id="ttHolHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-holiday" id="ttHolidayGrid"></div>
+                    <div class="tt-hint">Dress the city for a holiday — Muslim + secular world holidays</div>
+                </div>
+            </div>
+
+            <!-- SPORT EVENT — 14 chips -->
+            <div id="sportBtn" class="sport-btn icon-only">
+                <button class="spt-core" onclick="
+                    if(window.toggleSportEvent){
+                        var on = window.toggleSportEvent();
+                        var wrap = document.getElementById('sportBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-basketball-ball spt-icon" id="sptIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-sport" role="tooltip">
+                    <div class="tt-title tt-title-sport">Sport Event</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Sport</span>
+                        <span class="tt-value tt-spt-status" id="ttSptName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttSptHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-spt-status" id="ttSptHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-sport" id="ttSportGrid"></div>
+                    <div class="tt-hint">Turn the street into a venue for any sport</div>
+                </div>
+            </div>
+
+            <!-- SCENE MODE — 14 chips (peds+vehicles+sky bundles) -->
+            <div id="sceneBtn" class="scene-btn icon-only">
+                <button class="scn-core" onclick="
+                    if(window.toggleSceneMode){
+                        var on = window.toggleSceneMode();
+                        var wrap = document.getElementById('sceneBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-city scn-icon" id="scnIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-scene" role="tooltip">
+                    <div class="tt-title tt-title-scene">Scene Mode</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Scene</span>
+                        <span class="tt-value tt-scn-status" id="ttScnName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttScnHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-scn-status" id="ttScnHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-scene" id="ttSceneGrid"></div>
+                    <div class="tt-hint">Era-cohesive presets: peds + vehicles + sky always match</div>
+                </div>
+            </div>
+
+            <!-- VISUAL FILTER — 14 chips -->
+            <div id="filterBtn" class="filter-btn icon-only">
+                <button class="flt-core" onclick="
+                    if(window.toggleVisualFilter){
+                        var on = window.toggleVisualFilter();
+                        var wrap = document.getElementById('filterBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-image flt-icon" id="fltIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-filter" role="tooltip">
+                    <div class="tt-title tt-title-filter">Visual Filter</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Filter</span>
+                        <span class="tt-value tt-flt-status" id="ttFltName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttFltHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-flt-status" id="ttFltHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-filter" id="ttFilterGrid"></div>
+                    <div class="tt-hint">Post-process pass — sepia, noir, thermal, X-ray, more</div>
+                </div>
+            </div>
+
+            <!-- PHYSICS MODE — 14 chips -->
+            <div id="physicsBtn" class="physics-btn icon-only">
+                <button class="phy-core" onclick="
+                    if(window.togglePhysicsMode){
+                        var on = window.togglePhysicsMode();
+                        var wrap = document.getElementById('physicsBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-feather phy-icon" id="phyIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-physics" role="tooltip">
+                    <div class="tt-title tt-title-physics">Physics Mode</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Rule</span>
+                        <span class="tt-value tt-phy-status" id="ttPhyName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttPhyHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-phy-status" id="ttPhyHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-physics" id="ttPhysicsGrid"></div>
+                    <div class="tt-hint">Rewrites the rules of motion — moon gravity, slow-mo, magnetic, more</div>
+                </div>
+            </div>
         </div>
 
         <style>
@@ -2034,6 +2198,7 @@
                 gap: 10px;
                 align-items: stretch;
                 flex-wrap: wrap;
+                justify-content: center;
             }
             /* icon-only mode — hide all text labels on the widgets */
             .city-switch-btn.icon-only .csb-label,
@@ -2058,6 +2223,12 @@
             .city-switcher-wrap > .parade-btn,
             .city-switcher-wrap > .abduction-btn,
             .city-switcher-wrap > .superhero-btn,
+            .city-switcher-wrap > .warmode-btn,
+            .city-switcher-wrap > .holiday-btn,
+            .city-switcher-wrap > .sport-btn,
+            .city-switcher-wrap > .scene-btn,
+            .city-switcher-wrap > .filter-btn,
+            .city-switcher-wrap > .physics-btn,
             .city-switcher-wrap > .flight-wrap {
                 height: 44px;
                 box-sizing: border-box;
@@ -3429,6 +3600,319 @@
             .tt-toggle-abduction.on  { background: linear-gradient(135deg,#a855f7,#7c3aed); border-color:#5b21b6; }
             .tt-toggle-superhero.on  { background: linear-gradient(135deg,#fbbf24,#f59e0b); border-color:#b45309; }
 
+            /* ══════════════════════════════════════════════════════════
+               v1.7.0 — 6 NEW WIDGET STYLES
+               Each follows the icon-only superhero-btn pattern with a
+               per-widget colour theme.
+               ══════════════════════════════════════════════════════════ */
+
+            /* shared base for all 6 new widgets */
+            .warmode-btn, .holiday-btn, .sport-btn, .scene-btn, .filter-btn, .physics-btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                padding: 0;
+                width: 44px;
+                box-sizing: border-box;
+                flex: 0 0 auto;
+                background: linear-gradient(135deg,
+                    rgba(255,255,255,0.12) 0%,
+                    rgba(255,255,255,0.05) 100%);
+                backdrop-filter: blur(20px) saturate(180%);
+                -webkit-backdrop-filter: blur(20px) saturate(180%);
+                border: 1px solid rgba(255,255,255,0.35);
+                border-bottom-color: rgba(255,255,255,0.12);
+                border-radius: 50px;
+                color: rgba(10,10,25,0.90);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.70) inset,
+                    0 4px 18px rgba(0,0,0,0.10),
+                    0 1px 4px rgba(0,0,0,0.06);
+                transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.14s ease, color 0.22s ease;
+                position: relative;
+                overflow: visible;
+                user-select: none;
+                cursor: pointer;
+            }
+            /* highlight gradient ::before — same as superhero pattern */
+            .warmode-btn::before, .holiday-btn::before, .sport-btn::before,
+            .scene-btn::before, .filter-btn::before, .physics-btn::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-radius: 50px;
+                background: linear-gradient(175deg,
+                    rgba(255,255,255,0.38) 0%,
+                    rgba(255,255,255,0.06) 30%,
+                    transparent 55%);
+                pointer-events: none;
+            }
+            /* rainbow halo ::after — appears on hover, same as other widgets */
+            .warmode-btn::after, .holiday-btn::after, .sport-btn::after,
+            .scene-btn::after, .filter-btn::after, .physics-btn::after {
+                content: '';
+                position: absolute;
+                inset: -2px;
+                border-radius: 52px;
+                background: linear-gradient(45deg,#ff6b6b,#ffd93d,#6bcb77,#4d96ff,#c77dff,#ff6b6b);
+                background-size: 300%;
+                z-index: -1;
+                opacity: 0;
+                filter: blur(4px);
+                animation: csb-glow 4s linear infinite;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            .warmode-btn:hover, .holiday-btn:hover, .sport-btn:hover,
+            .scene-btn:hover, .filter-btn:hover, .physics-btn:hover {
+                transform: translateY(-1px);
+                box-shadow:
+                    0 1px 0 rgba(255,255,255,0.90) inset,
+                    0 8px 28px rgba(0,0,0,0.16),
+                    0 1px 4px rgba(0,0,0,0.08);
+            }
+            .warmode-btn:hover::after, .holiday-btn:hover::after, .sport-btn:hover::after,
+            .scene-btn:hover::after, .filter-btn:hover::after, .physics-btn:hover::after {
+                opacity: 1;
+            }
+            .warmode-btn:active, .holiday-btn:active, .sport-btn:active,
+            .scene-btn:active, .filter-btn:active, .physics-btn:active {
+                transform: translateY(0) scale(0.97);
+            }
+            /* inner core must allow ::before/::after through — same as superhero */
+            .warmode-btn .war-core::before, .warmode-btn .war-core::after,
+            .holiday-btn .hol-core::before, .holiday-btn .hol-core::after,
+            .sport-btn   .spt-core::before, .sport-btn   .spt-core::after,
+            .scene-btn   .scn-core::before, .scene-btn   .scn-core::after,
+            .filter-btn  .flt-core::before, .filter-btn  .flt-core::after,
+            .physics-btn .phy-core::before, .physics-btn .phy-core::after {
+                content: none !important;
+                display: none !important;
+                background: none !important;
+                animation: none !important;
+                opacity: 0 !important;
+            }
+            /* icon rotates + scales on hover — matches superhero pattern */
+            .warmode-btn .war-core:hover .war-icon,
+            .holiday-btn .hol-core:hover .hol-icon,
+            .sport-btn   .spt-core:hover .spt-icon,
+            .scene-btn   .scn-core:hover .scn-icon,
+            .filter-btn  .flt-core:hover .flt-icon,
+            .physics-btn .phy-core:hover .phy-icon {
+                transform: rotate(-10deg) scale(1.1);
+            }
+            .warmode-btn .war-core, .holiday-btn .hol-core, .sport-btn .spt-core,
+            .scene-btn .scn-core, .filter-btn .flt-core, .physics-btn .phy-core {
+                width: 100%; height: 100%;
+                border: none !important;
+                border-radius: 50px !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+            }
+            .warmode-btn .war-icon, .holiday-btn .hol-icon, .sport-btn .spt-icon,
+            .scene-btn .scn-icon, .filter-btn .flt-icon, .physics-btn .phy-icon {
+                font-size: 18px;
+                color: rgba(10,10,25,0.90);
+                transition: color 0.22s ease, text-shadow 0.22s ease, transform 0.22s ease;
+            }
+            /* per-widget active-state colours */
+            .warmode-btn.active .war-icon { color:#dc2626; text-shadow:0 0 12px rgba(220,38,38,0.85); }
+            .holiday-btn.active .hol-icon { color:#fbbf24; text-shadow:0 0 12px rgba(251,191,36,0.85); }
+            .sport-btn.active .spt-icon   { color:#ea580c; text-shadow:0 0 12px rgba(234,88,12,0.85); }
+            .scene-btn.active .scn-icon   { color:#06b6d4; text-shadow:0 0 12px rgba(6,182,212,0.85); }
+            .filter-btn.active .flt-icon  { color:#a855f7; text-shadow:0 0 12px rgba(168,85,247,0.85); }
+            .physics-btn.active .phy-icon { color:#16a34a; text-shadow:0 0 12px rgba(22,163,74,0.85); }
+
+            /* tooltip titles + status colours */
+            .widget-tooltip .tt-title-warmode { color:#dc2626; }
+            .widget-tooltip .tt-war-status    { color:#dc2626; }
+            .widget-tooltip .tt-title-holiday { color:#fbbf24; }
+            .widget-tooltip .tt-hol-status    { color:#a16207; }
+            .widget-tooltip .tt-title-sport   { color:#ea580c; }
+            .widget-tooltip .tt-spt-status    { color:#ea580c; }
+            .widget-tooltip .tt-title-scene   { color:#06b6d4; }
+            .widget-tooltip .tt-scn-status    { color:#0284c7; }
+            .widget-tooltip .tt-title-filter  { color:#a855f7; }
+            .widget-tooltip .tt-flt-status    { color:#a855f7; }
+            .widget-tooltip .tt-title-physics { color:#16a34a; }
+            .widget-tooltip .tt-phy-status    { color:#16a34a; }
+
+            /* tooltip widths + chip grids
+               14 chips × 32px + 13 × 4px gap = 500px → 520px tooltip width. */
+            .tt-warmode { width: 520px; }
+            .tt-warmode .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(14, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-warmode .tt-chip.active   { background: linear-gradient(135deg,#fca5a5,#dc2626); border-color:#7f1d1d; }
+
+            .tt-holiday { width: 520px; }
+            .tt-holiday .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(14, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-holiday .tt-chip.active   { background: linear-gradient(135deg,#fde68a,#fbbf24); border-color:#a16207; }
+
+            .tt-sport { width: 520px; }
+            .tt-sport .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(14, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-sport .tt-chip.active     { background: linear-gradient(135deg,#fed7aa,#ea580c); border-color:#7c2d12; }
+
+            .tt-scene { width: 520px; }
+            .tt-scene .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(14, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-scene .tt-chip.active     { background: linear-gradient(135deg,#a5f3fc,#06b6d4); border-color:#0e7490; }
+
+            .tt-filter { width: 520px; }
+            .tt-filter .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(14, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-filter .tt-chip.active    { background: linear-gradient(135deg,#d8b4fe,#a855f7); border-color:#6b21a8; }
+
+            .tt-physics { width: 520px; }
+            .tt-physics .tt-grid.tt-grid-icons {
+                display: grid;
+                grid-template-columns: repeat(14, 32px);
+                justify-content: center;
+                gap: 4px;
+            }
+            .tt-physics .tt-chip.active   { background: linear-gradient(135deg,#bbf7d0,#16a34a); border-color:#14532d; }
+
+            /* chip sizing for all 6 new widgets */
+            .tt-warmode .tt-grid.tt-grid-icons .tt-chip,
+            .tt-holiday .tt-grid.tt-grid-icons .tt-chip,
+            .tt-sport   .tt-grid.tt-grid-icons .tt-chip,
+            .tt-scene   .tt-grid.tt-grid-icons .tt-chip,
+            .tt-filter  .tt-grid.tt-grid-icons .tt-chip,
+            .tt-physics .tt-grid.tt-grid-icons .tt-chip {
+                width: 32px;
+                height: 32px;
+                box-sizing: border-box !important;
+            }
+
+            /* unify height for new widgets (add to existing flex row) */
+            .city-switcher-wrap > .warmode-btn,
+            .city-switcher-wrap > .holiday-btn,
+            .city-switcher-wrap > .sport-btn,
+            .city-switcher-wrap > .scene-btn,
+            .city-switcher-wrap > .filter-btn,
+            .city-switcher-wrap > .physics-btn {
+                height: 44px;
+            }
+
+            /* ── PER-WIDGET ACTIVE-HOVER GRADIENTS ───────────────────────
+               Active chips use the widget's own color family on hover,
+               not the generic rainbow. Less intense shimmer than other
+               widgets so the active state reads as muted-glistening. */
+
+            /* WAR — RED family */
+            body.polish .widget-tooltip.tt-warmode .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #7f1d1d 0%, #b91c1c 14%, #dc2626 28%, #ef4444 42%,
+                    #5b0e0e 56%, #a01818 70%, #c92121 85%, #7f1d1d 100%
+                ) !important;
+            }
+
+            /* HOLIDAY — GOLD family */
+            body.polish .widget-tooltip.tt-holiday .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #a16207 0%, #ca8a04 14%, #eab308 28%, #facc15 42%,
+                    #78350f 56%, #b45309 70%, #d97706 85%, #a16207 100%
+                ) !important;
+            }
+
+            /* SPORT — ORANGE family */
+            body.polish .widget-tooltip.tt-sport .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #7c2d12 0%, #c2410c 14%, #ea580c 28%, #f97316 42%,
+                    #4a1a08 56%, #9a3010 70%, #d04a0a 85%, #7c2d12 100%
+                ) !important;
+            }
+
+            /* SCENE — CYAN family */
+            body.polish .widget-tooltip.tt-scene .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #0e7490 0%, #0891b2 14%, #06b6d4 28%, #22d3ee 42%,
+                    #083344 56%, #0c5e76 70%, #0a8aa0 85%, #0e7490 100%
+                ) !important;
+            }
+
+            /* VISUAL FILTER — PURPLE family */
+            body.polish .widget-tooltip.tt-filter .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #6b21a8 0%, #7e22ce 14%, #9333ea 28%, #a855f7 42%,
+                    #3b0764 56%, #5b1a8c 70%, #8228d6 85%, #6b21a8 100%
+                ) !important;
+            }
+
+            /* PHYSICS — GREEN family */
+            body.polish .widget-tooltip.tt-physics .tt-chip.active:hover::before {
+                background: linear-gradient(90deg,
+                    #14532d 0%, #15803d 14%, #16a34a 28%, #22c55e 42%,
+                    #052e16 56%, #14532d 70%, #138a3e 85%, #14532d 100%
+                ) !important;
+            }
+
+            /* Active-hover GLISTENING for the 6 new widgets — uses the
+               SAME tt-active-shimmer animation as Attack Control / Flight /
+               Superhero so the glisten feels identical to the existing
+               widgets. Per-widget gradients above supply the color
+               family; this rule supplies the punchy animation curve. */
+            body.polish .widget-tooltip.tt-warmode .tt-chip.active:hover::before,
+            body.polish .widget-tooltip.tt-holiday .tt-chip.active:hover::before,
+            body.polish .widget-tooltip.tt-sport   .tt-chip.active:hover::before,
+            body.polish .widget-tooltip.tt-scene   .tt-chip.active:hover::before,
+            body.polish .widget-tooltip.tt-filter  .tt-chip.active:hover::before,
+            body.polish .widget-tooltip.tt-physics .tt-chip.active:hover::before {
+                opacity: 1 !important;
+                background-size: 300% 100% !important;
+                background-position: 0% 50% !important;
+                mix-blend-mode: normal !important;
+                animation:
+                    tt-hex-sweep      1.6s linear infinite,
+                    tt-active-shimmer 1.4s ease-in-out infinite !important;
+            }
+            /* Keep icon glyph clearly visible during the shimmer:
+               lift it above the ::before layer with a strong drop-shadow
+               so it reads against any frame of the animated gradient
+               (lights, darks, both). The icon keeps its native color so
+               it still feels "themed" per widget. */
+            body.polish .widget-tooltip.tt-warmode .tt-chip.active > i,
+            body.polish .widget-tooltip.tt-holiday .tt-chip.active > i,
+            body.polish .widget-tooltip.tt-sport   .tt-chip.active > i,
+            body.polish .widget-tooltip.tt-scene   .tt-chip.active > i,
+            body.polish .widget-tooltip.tt-filter  .tt-chip.active > i,
+            body.polish .widget-tooltip.tt-physics .tt-chip.active > i {
+                position: relative;
+                z-index: 2;
+                color: #ffffff !important;
+                text-shadow:
+                    0 0 1px rgba(0,0,0,0.85),
+                    0 1px 2px rgba(0,0,0,0.65),
+                    0 0 6px rgba(0,0,0,0.35);
+            }
+
             .tt-slider-rcn::-webkit-slider-thumb {
                 -webkit-appearance: none;
                 appearance: none;
@@ -4321,6 +4805,12 @@
             .parade-btn:hover .widget-tooltip,
             .abduction-btn:hover .widget-tooltip,
             .superhero-btn:hover .widget-tooltip,
+            .warmode-btn:hover .widget-tooltip,
+            .holiday-btn:hover .widget-tooltip,
+            .sport-btn:hover .widget-tooltip,
+            .scene-btn:hover .widget-tooltip,
+            .filter-btn:hover .widget-tooltip,
+            .physics-btn:hover .widget-tooltip,
             .widget-host:hover .widget-tooltip,
             .widget-tooltip:hover {
                 opacity: 1;
@@ -5396,6 +5886,45 @@
             });
             host._built = true;
         }
+        /* ── v1.7.0 generic chip-builder for the 6 new widgets ── */
+        function buildV170Grid(hostId, hoverRowId, hoverValId, getter, setter){
+            var host = document.getElementById(hostId);
+            if(!host || host._built) return;
+            if(!window[getter]) return;
+            var items = window[getter]();
+            host.innerHTML = '';
+            items.forEach(function(it){
+                var b = document.createElement('button');
+                b.className = 'tt-chip';
+                b.dataset.idx = it.index;
+                if(it.colorA) b.style.setProperty('--diamond-a', it.colorA);
+                if(it.colorB) b.style.setProperty('--diamond-b', it.colorB);
+                b.innerHTML = '<i class="fa ' + it.icon + '"></i>';
+                b.addEventListener('mouseenter', function(){
+                    var row = document.getElementById(hoverRowId);
+                    var val = document.getElementById(hoverValId);
+                    if(val) val.textContent = it.name;
+                    if(row) row.classList.add('active');
+                });
+                b.addEventListener('mouseleave', function(){
+                    var row = document.getElementById(hoverRowId);
+                    if(row) row.classList.remove('active');
+                });
+                b.addEventListener('click', function(ev){
+                    ev.stopPropagation();
+                    if(window[setter]) window[setter](it.index);
+                });
+                host.appendChild(b);
+            });
+            host._built = true;
+        }
+        function buildWarGrid()    { buildV170Grid('ttWarGrid',     'ttWarHoverRow', 'ttWarHover', 'getAllWarModes',       'setWarModeIndex'); }
+        function buildHolidayGrid(){ buildV170Grid('ttHolidayGrid', 'ttHolHoverRow', 'ttHolHover', 'getAllHolidayModes',   'setHolidayModeIndex'); }
+        function buildSportGrid()  { buildV170Grid('ttSportGrid',   'ttSptHoverRow', 'ttSptHover', 'getAllSportEvents',    'setSportEventIndex'); }
+        function buildSceneGrid()  { buildV170Grid('ttSceneGrid',   'ttScnHoverRow', 'ttScnHover', 'getAllSceneModes',     'setSceneModeIndex'); }
+        function buildFilterGrid() { buildV170Grid('ttFilterGrid',  'ttFltHoverRow', 'ttFltHover', 'getAllVisualFilters',  'setVisualFilterIndex'); }
+        function buildPhysicsGrid(){ buildV170Grid('ttPhysicsGrid', 'ttPhyHoverRow', 'ttPhyHover', 'getAllPhysicsModes',   'setPhysicsModeIndex'); }
+
         function buildSuperheroGrid(){
             var host = document.getElementById('ttSuperheroGrid');
             if(!host || host._built) return;
@@ -5504,6 +6033,9 @@
             buildCityGrid(); buildWeatherGrid(); buildMissileGrid(); buildDefenceGrid();
             buildParadeGrid(); buildAbductionGrid(); buildAbductionMissileGrid();
             buildSuperheroGrid();
+            /* v1.7.0 builders */
+            buildWarGrid(); buildHolidayGrid(); buildSportGrid();
+            buildSceneGrid(); buildFilterGrid(); buildPhysicsGrid();
             /* ── FLIGHT widget ── */
             if(window.getCityName)     setText('ttCityFrom', window.getCityName());
             if(window.getNextCityName) setText('ttCityTo',   window.getNextCityName());
@@ -5626,6 +6158,60 @@
             }
             if(window.getSuperheroUniverseName)  setText('ttSupUniverse', window.getSuperheroUniverseName());
             if(window.getSuperheroUniverseIndex) syncActive('ttSuperheroGrid', window.getSuperheroUniverseIndex());
+
+            /* ── v1.7.0 WAR MODE polling ── */
+            if(window.isWarModeOn){
+                var warOn = window.isWarModeOn();
+                var warWrap = document.getElementById('warBtn');
+                if(warWrap) warWrap.classList.toggle('active', warOn);
+            }
+            if(window.getWarModeName)  setText('ttWarName', window.getWarModeName());
+            if(window.getWarModeIndex) syncActive('ttWarGrid', window.getWarModeIndex());
+
+            /* ── v1.7.0 HOLIDAY MODE polling ── */
+            if(window.isHolidayModeOn){
+                var holOn = window.isHolidayModeOn();
+                var holWrap = document.getElementById('holidayBtn');
+                if(holWrap) holWrap.classList.toggle('active', holOn);
+            }
+            if(window.getHolidayModeName)  setText('ttHolName', window.getHolidayModeName());
+            if(window.getHolidayModeIndex) syncActive('ttHolidayGrid', window.getHolidayModeIndex());
+
+            /* ── v1.7.0 SPORT EVENT polling ── */
+            if(window.isSportEventOn){
+                var sptOn = window.isSportEventOn();
+                var sptWrap = document.getElementById('sportBtn');
+                if(sptWrap) sptWrap.classList.toggle('active', sptOn);
+            }
+            if(window.getSportEventName)  setText('ttSptName', window.getSportEventName());
+            if(window.getSportEventIndex) syncActive('ttSportGrid', window.getSportEventIndex());
+
+            /* ── v1.7.0 SCENE MODE polling ── */
+            if(window.isSceneModeOn){
+                var scnOn = window.isSceneModeOn();
+                var scnWrap = document.getElementById('sceneBtn');
+                if(scnWrap) scnWrap.classList.toggle('active', scnOn);
+            }
+            if(window.getSceneModeName)  setText('ttScnName', window.getSceneModeName());
+            if(window.getSceneModeIndex) syncActive('ttSceneGrid', window.getSceneModeIndex());
+
+            /* ── v1.7.0 VISUAL FILTER polling ── */
+            if(window.isVisualFilterOn){
+                var fltOn = window.isVisualFilterOn();
+                var fltWrap = document.getElementById('filterBtn');
+                if(fltWrap) fltWrap.classList.toggle('active', fltOn);
+            }
+            if(window.getVisualFilterName)  setText('ttFltName', window.getVisualFilterName());
+            if(window.getVisualFilterIndex) syncActive('ttFilterGrid', window.getVisualFilterIndex());
+
+            /* ── v1.7.0 PHYSICS MODE polling ── */
+            if(window.isPhysicsModeOn){
+                var phyOn = window.isPhysicsModeOn();
+                var phyWrap = document.getElementById('physicsBtn');
+                if(phyWrap) phyWrap.classList.toggle('active', phyOn);
+            }
+            if(window.getPhysicsModeName)  setText('ttPhyName', window.getPhysicsModeName());
+            if(window.getPhysicsModeIndex) syncActive('ttPhysicsGrid', window.getPhysicsModeIndex());
 
             /* ── RECONSTRUCTION widget polling ── */
             if(window.isReconstructing){

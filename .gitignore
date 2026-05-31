@@ -10,3 +10,7 @@ CLAUDE.md
 /node_modules/
 /.claude/
 /test-results/
+CHANGELOG.md
+.tmp-*.png
+skills
+.gitmodules
