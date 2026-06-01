@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="../css/new.css">
     <link rel="stylesheet" href="../css/if.css">
     <link rel="stylesheet" href="../css/popup.css?v=4">
-    <link rel="stylesheet" href="../css/search.css">
+    <link rel="stylesheet" href="../css/search.css?v=18">
     <link rel="stylesheet" href="../css/vendor/bootstrap-grid.css"/>
     <link rel="stylesheet" href="../css/vintage.css">
 
@@ -58,7 +58,7 @@
     <!--  Custom  -->
     <link rel="stylesheet" href="../css/map-page.css">
     <link rel="stylesheet" href="../css/map-symbols.css?v=10">
-    <link rel="stylesheet" href="../css/search-cross.css?v=5">
+    <link rel="stylesheet" href="../css/search-cross.css?v=6">
     <script src="../js/map-enhancer.js" defer></script>
     <script src="../js/components.js" defer></script>
     <script src="../js/hover-symbols-engine.js?v=2" defer></script>
@@ -347,7 +347,7 @@
            item as before. Underlying page logic (pageSize 10) is untouched. */
         /* Tile-strip visible cap: 10 desktop, 5 mobile. Pager logic unchanged. */
         .top-tile-strip > div:nth-child(n+11) { display: none !important; }
-        @media only screen and (max-width: 640px) {
+        @media only screen and (max-width: 1026px) {
             .top-tile-strip > div:nth-child(n+6) { display: none !important; }
         }
 
@@ -406,22 +406,28 @@
 
         <!-- pager-right-of-search injected -->
         <style id="pager-right-of-search-css">
-            /* Search row: search bar left (flex-grow), pager hugged right (no box). */
+            /* Search row: search bar left (flex-grow), pager hugged right (no box).
+               Margin 0 31px aligns the row with the .w3-card content edges below
+               (the parent .row has -15px side margins, and .w3-container adds 16px
+               padding — 15+16=31). */
             .search-row-with-pager {
                 display: flex;
                 gap: 12px;
                 align-items: center;
-                width: 100%;
+                width: calc(100% - 8px);
                 flex-wrap: nowrap;
+                margin: 0 4px;
             }
             .search-row-with-pager > .search-wrapper {
                 flex: 1 1 auto;
                 min-width: 200px;
             }
-            /* Pager: NO background, NO border, NO shadow. Pure buttons. */
+            /* Pager: NO background, NO border, NO shadow. Pure buttons.
+               Right margin aligns the pager's right edge with the
+               w3-card content below (27px = bootstrap row -15 + w3-container 16 - 4 page gutter). */
             .search-row-with-pager > #country-pager {
                 flex: 0 0 auto;
-                margin: 0 !important;
+                margin: 0 27px 0 0 !important;
                 padding: 0 !important;
                 background: transparent !important;
                 backdrop-filter: none !important;
@@ -517,7 +523,7 @@
                     </div>
                 </div>
                 <div style="display: inline-block; overflow: hidden; width: 100%;">
-                    <div style="display: flex; flex-wrap: wrap; margin-left: 10px; justify-content: flex-start;">
+                    <div style="display: flex; flex-wrap: wrap; margin: auto; justify-content: flex-start;">
                         <div v-if="resources.length" v-cloak class="table top-tile-strip" style="display: flex; flex-wrap: wrap;">
                             <div v-for="(item, index) in pagedResults" :key="item.abv" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
                                 <div data-toggle="tooltip" data-html="true" :title="item.title" style="margin: auto">
