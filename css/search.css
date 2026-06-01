@@ -88,3 +88,124 @@
     padding: 9px 19px;
 }
 
+/* ── Mobile: compact search bar height (consistent across software.html,
+   games.html, map.html, and all continent pages). Inline styles set
+   min-height:40px / max-height:60px on .search_searchbar — these
+   overrides shrink the bar on narrower viewports so it feels compact
+   and matches the rest of the mobile UI. */
+@media only screen and (max-width: 1026px) {
+    /* Input sized smaller than the wrapper so the wrapper's rounded
+       border stays fully visible — no overlap with the white input
+       background. */
+    .search_searchbar {
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 42px !important;
+        font-size: 14px !important;
+        line-height: 40px !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        background: transparent !important;
+    }
+    /* Wrapper hosts input + icons. Border lives here.
+       Bumped to ~56px so the bar visually matches the pager button
+       size (md-pager-btn is also forced to ~52px below).
+       max-width + margin-left:auto on mobile shifts the bar to the
+       right side so the left gutter feels more spacious. */
+    .search-wrapper {
+        padding: 6px 10px !important;
+        min-height: 56px !important;
+        height: 56px !important;
+        max-height: 58px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    .search_bar {
+        min-height: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    /* Match pager buttons to the search bar's visual size so they read
+       as a matched control group. */
+    .md-pager-btn {
+        min-height: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        padding: 0 12px !important;
+        font-size: 16px !important;
+    }
+    /* Search row left-aligned on mobile with a tiny 4px gutter. */
+    .search-row-with-pager {
+        justify-content: flex-start !important;
+        margin: 0 4px !important;
+        width: calc(100% - 8px) !important;
+    }
+    .search-row-with-pager > .search-wrapper {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    /* Pager (when stacked below the search bar) also left-aligns. */
+    .search-row-with-pager > #country-pager {
+        margin-left: 0 !important;
+        margin-right: auto !important;
+    }
+    /* Compact magnifier icon, with breathing room from the wrapper's
+       left border. */
+    .search_bar > img {
+        width: 14px !important;
+        height: 14px !important;
+        margin-left: 14px !important;
+        margin-right: 8px !important;
+    }
+    /* Compact cross button — small but tappable. Lock the inner <i>
+       element's box dimensions explicitly because search-cross.css
+       sets the button font-size to 18px and FA5's .fa class can
+       compute the glyph's line-box from font-size + line-height. */
+    body.polish .search-cross-btn,
+    .search-cross-btn {
+        font-size: 14px !important;
+        line-height: 1 !important;
+        padding: 0 4px !important;
+        margin: 0 0 0 4px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 22px !important;
+        height: 22px !important;
+        min-width: 22px !important;
+        min-height: 22px !important;
+    }
+    .search-cross-btn i.fa,
+    .search-cross-btn i.fas,
+    .search-cross-btn i {
+        font-size: 14px !important;
+        line-height: 1 !important;
+        width: 14px !important;
+        height: 14px !important;
+        display: inline-block !important;
+    }
+}
+
+/* ── Align search bar left+right edges with the content container
+   (.w3-content's inner padding) below it. The Bootstrap `.row` parent
+   has -15px side margins that push the search bar outside the content
+   area; nudge the .search-wrapper back in by 15px each side so its
+   edges line up with the grid / SVG cards below.
+
+   Exception: on map.html and continent pages, the .search-wrapper sits
+   inside .search-row-with-pager which already handles its own margins,
+   so explicitly zero this rule out for that case. */
+.search-wrapper {
+    margin-left: 15px !important;
+    margin-right: 15px !important;
+}
+.search-row-with-pager .search-wrapper,
+.search-row-with-pager > .search-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
