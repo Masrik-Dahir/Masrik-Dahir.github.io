@@ -17,7 +17,7 @@
 
 <!-- Author Banner: calligraphy-ink-bloom -->
 <a href="https://www.masrikdahir.com">
-<img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/calligraphy-ink-bloom.svg"
+     <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/banners/calligraphy-ink-bloom.svg"
      alt="Masrik Dahir — masrikdahir.com" width="800"/>
 </a>
 
@@ -32,8 +32,7 @@
 </div>
 
 <p align="center">
-  <img src="https://github.com/Masrik-Dahir/Masrik-Dahir.github.io/raw/master/.github/screenshots/hero.svg"
-       alt="masrikdahir.com — application screenshot" width="900"/>
+<img width="920" height="422" alt="Recording 2026-05-31 102920" src="https://github.com/user-attachments/assets/6beca6c5-eec7-4d51-b190-223dfe6151ed" />
 </p>
 
 ## ⚡ TL;DR
