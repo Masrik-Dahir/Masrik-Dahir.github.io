@@ -20,17 +20,19 @@
        resources have finished. Don't gate on window.load. */
     var MIN_VISIBLE_MS = 280;
     var AUTO_HIDE_MS   = 280;
-    /* ── Mobile hard-cap ───────────────────────────────────────────
-       On phones the loader must only flash for a brief moment and then
-       get out of the way — even if the (often heavy) page hasn't
-       finished loading yet. Unlike desktop, EVERY show() on mobile
-       (including link-triggered shows during navigation) is force-hidden
-       after MOBILE_MAX_MS so the animation can never linger. */
+    /* ── Hard-cap (both mobile AND desktop) ────────────────────────
+       The loader must only flash for a brief moment and then get out of
+       the way — even if the (often heavy) page hasn't finished loading
+       yet. On BOTH mobile and desktop, EVERY show() (including
+       link-triggered shows during navigation) is force-hidden after a
+       fixed time so the animation can never linger regardless of page
+       readiness. Mobile uses a tighter cap than desktop. */
     var IS_MOBILE = (function () {
         try { return window.matchMedia("(max-width: 640px)").matches; }
         catch (e) { return (window.innerWidth || 9999) <= 640; }
     })();
-    var MOBILE_MAX_MS = 300;
+    var MOBILE_MAX_MS  = 300;
+    var DESKTOP_MAX_MS = 600;
     var shownAt = 0;
     var rootEl = null;
     var hideTimer = null;
@@ -917,12 +919,11 @@
             hideTimer = null;
         }
         shownAt = Date.now();
-        /* Mobile: guarantee the loader is torn down shortly after it
-           appears, regardless of page readiness or navigation state. */
-        if (IS_MOBILE) {
-            if (maxTimer) clearTimeout(maxTimer);
-            maxTimer = setTimeout(hide, MOBILE_MAX_MS);
-        }
+        /* Guarantee the loader is torn down shortly after it appears,
+           regardless of page readiness or navigation state — on BOTH
+           mobile and desktop. Mobile gets a tighter cap. */
+        if (maxTimer) clearTimeout(maxTimer);
+        maxTimer = setTimeout(hide, IS_MOBILE ? MOBILE_MAX_MS : DESKTOP_MAX_MS);
         if (typeof console !== "undefined" && console.debug) {
             console.debug("[eagle-loader] show");
         }
