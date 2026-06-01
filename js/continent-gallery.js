@@ -48,13 +48,18 @@ var CONTINENT_DATA = {
     northamerica: {
         regions: [
             { id: "usa", name: "United States", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/usa.webp", svgFile: "usa.svg", vueMount: "app_pic", cardId: "scroll_USA" },
-            { id: "canada", name: "Canada", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/CAN.svg.png", svgFile: "canada.svg", vueMount: "app_pic_can", cardId: "scroll_CAN" }
+            { id: "canada", name: "Canada", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/CAN.svg.png", svgFile: "canada.svg", vueMount: "app_pic_can", cardId: "scroll_CAN" },
+            /* Mexico is part of the Central America Vue mount (its tiles
+               are listed alongside the other 7 Central American countries
+               in app_pic_central_america). Reclassifying centralamerica +
+               caribbeanamerica from South America to North America moves
+               Mexico with it. */
+            { id: "centralamerica", name: "Central America (incl. Mexico)", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/central_america.svg.png", svgFile: "centralamerica.svg", vueMount: "app_pic_central_america" },
+            { id: "caribbeanamerica", name: "Caribbean Islands", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/caribbean_america.svg.png", svgFile: "caribbeanamerica.svg", vueMount: "app_pic_caribbean_america" }
         ]
     },
     southamerica: {
         regions: [
-            { id: "centralamerica", name: "Central America", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/central_america.svg.png", svgFile: "centralamerica.svg", vueMount: "app_pic_central_america" },
-            { id: "caribbeanamerica", name: "Caribbean Islands", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/caribbean_america.svg.png", svgFile: "caribbeanamerica.svg", vueMount: "app_pic_caribbean_america" },
             { id: "southamerica", name: "South America", thumbnail: "https://d3dw5jtb3w1kgy.cloudfront.net/south_america.svg.png", svgFile: "southamerica.svg", vueMount: "app_pic_south_america" }
         ]
     }
@@ -145,6 +150,245 @@ function buildRegionCard(region, isFirst) {
     '<hr>';
 }
 
+function buildContinentSearchBar(continentLabel) {
+    /* Search input that filters every country tile across every region
+       card on this continent page. Same look as the map.html search bar
+       (.search-wrapper / .search_searchbar) so behavior + styling are
+       consistent across the site. */
+    return '<div class="continent-search-host" style="margin: 15px 0 10px 0;">' +
+        '<div class="row" style="margin: 0;">' +
+            '<div class="form-control search-wrapper panel-heading" style="display: flex; align-items: center; width: 100%; min-width: 250px;">' +
+                '<div class="search_bar" style="display: flex; align-items: center; width: 100%;">' +
+                    '<img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px; margin-right: 8px;" alt="Search"/>' +
+                    '<div style="display: flex; align-items: center; width: 100%; margin-right: 8px;">' +
+                        '<input class="search_searchbar continent-search-input" type="text" title="Search" placeholder="Search ' + continentLabel + '..." style="flex-grow: 1; width: 100%; height: calc(1vw + 25px); min-height: 40px; max-height: 60px; padding-right: 40px;"/>' +
+                        '<button class="search-cross-btn continent-search-clear" aria-label="Clear search" type="button">' +
+                            '<i class="fa fa-times"></i>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        /* Top tile strip — mirrors map.html's .top-tile-strip layout.
+           Populated after region Vue apps mount and we walk the DOM
+           to collect every country tile. */
+        '<div class="continent-top-strip-host" style="margin-top: 10px;">' +
+            '<div style="display: inline-block; overflow: hidden; width: 100%;">' +
+                '<div style="display: flex; flex-wrap: wrap; margin-left: 10px; justify-content: flex-start;">' +
+                    '<div class="table continent-top-tile-strip" style="display: flex; flex-wrap: wrap;"></div>' +
+                '</div>' +
+                '<div class="continent-empty-msg" style="display:none; margin: 12px; color: #475569; font-style: italic;">No countries match your search.</div>' +
+                '<div class="continent-pager md-pager" style="margin-top:10px;"></div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="continent-search-status" style="margin: 6px 4px 0; color: #475569; font-style: italic; font-size: 13px; min-height: 18px;"></div>' +
+    '</div>';
+}
+
+function setupContinentSearch(continentId) {
+    var input = document.querySelector('.continent-search-input');
+    var clearBtn = document.querySelector('.continent-search-clear');
+    var status = document.querySelector('.continent-search-status');
+    var topStrip = document.querySelector('.continent-top-tile-strip');
+    var pagerEl = document.querySelector('.continent-pager');
+    var emptyMsg = document.querySelector('.continent-empty-msg');
+    if (!input) return;
+
+    var continentCountries = [];     // [{abv, title, image, url, regionTileEl, regionCardEl}]
+    var regionCards = [];            // .w3-card elements (one per SVG region)
+    var currentPage = 1;             // 1-based country page (mirrors map.html app_country.currentPage)
+    function pageSize() {
+        /* Same breakpoints as map.html app_country.pageSize:
+           desktop 20, mobile 10. */
+        return (window.innerWidth <= 640) ? 10 : 20;
+    }
+
+    function collectFromDOM() {
+        var list = [];
+        document.querySelectorAll('.continent-gallery-content .table > div').forEach(function (tile) {
+            var img = tile.querySelector('img');
+            var link = tile.querySelector('a');
+            var titleEl = tile.querySelector('[title], [data-original-title]');
+            var abv = (tile.textContent || '').trim();
+            var title = '';
+            if (titleEl) {
+                title = titleEl.getAttribute('title') ||
+                        titleEl.getAttribute('data-original-title') || '';
+            }
+            if (!img || !link) return;
+            list.push({
+                abv: abv,
+                title: title || abv,
+                image: img.src,
+                url: link.href,
+                regionTileEl: tile,
+                regionCardEl: tile.closest('.w3-card')
+            });
+        });
+        return list;
+    }
+
+    function collectRegionCards() {
+        var cards = [];
+        document.querySelectorAll('.continent-gallery-content > .w3-card').forEach(function (c) {
+            cards.push(c);
+        });
+        return cards;
+    }
+
+    function filtered() {
+        var q = (input.value || '').trim().toLowerCase();
+        if (!q) return continentCountries.slice();
+        return continentCountries.filter(function (c) {
+            var hay = (c.abv + ' ' + c.title).toLowerCase();
+            return q.split(/\s+/).every(function (term) {
+                return hay.indexOf(term) !== -1;
+            });
+        });
+    }
+
+    function renderTopStrip() {
+        /* Paginated top tile strip — 20 desktop / 10 mobile per page —
+           same as map.html app_country.pagedResults. */
+        if (!topStrip) return;
+        var matches = filtered();
+        var total = matches.length;
+        var totalPages = Math.max(1, Math.ceil(total / pageSize()));
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+        var start = (currentPage - 1) * pageSize();
+        var pageItems = matches.slice(start, start + pageSize());
+
+        topStrip.innerHTML = '';
+        pageItems.forEach(function (c) {
+            var wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;margin:0 15px;';
+            wrap.setAttribute('data-toggle', 'tooltip');
+            wrap.setAttribute('data-html', 'true');
+            wrap.setAttribute('title', c.title);
+            var center = document.createElement('center');
+            var btn = document.createElement('button');
+            btn.className = 'pop-up-button';
+            btn.type = 'button';
+            btn.style.cssText = 'background-color:transparent;border:1px solid black;margin-top:5px;cursor:pointer;width:50px;height:50px;display:flex;justify-content:center;align-items:center;';
+            var im = document.createElement('img');
+            im.src = c.image;
+            im.alt = c.title;
+            im.style.cssText = 'width:50px;height:100%;object-fit:contain;padding:2px;';
+            btn.appendChild(im);
+            var label = document.createElement('div');
+            label.textContent = c.abv;
+            label.style.cssText = 'color:black;text-align:center;width:50px;';
+            btn.addEventListener('click', function (ev) {
+                ev.stopPropagation();
+                if (c.regionTileEl && c.regionCardEl) {
+                    c.regionCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    c.regionTileEl.classList.add('continent-search-flash');
+                    setTimeout(function () {
+                        c.regionTileEl.classList.remove('continent-search-flash');
+                    }, 1600);
+                }
+            });
+            center.appendChild(btn);
+            center.appendChild(label);
+            wrap.appendChild(center);
+            topStrip.appendChild(wrap);
+        });
+
+        if (emptyMsg) emptyMsg.style.display = total === 0 ? '' : 'none';
+        if (status) {
+            var q = (input.value || '').trim();
+            if (!q) {
+                status.textContent = continentCountries.length + ' countries';
+            } else if (total === 0) {
+                status.textContent = 'No matches in this continent.';
+            } else {
+                status.textContent = total + ' match' + (total === 1 ? '' : 'es');
+            }
+        }
+
+        syncRegionCardsToPage();
+        renderPager(total);
+    }
+
+    function syncRegionCardsToPage() {
+        /* Distribute the region SVG cards proportionally across pager
+           pages so every page shows at least one — same algorithm as
+           map.html syncContentSectionsToPage. */
+        if (regionCards.length === 0) return;
+        var totalSections = regionCards.length;
+        var matches = filtered();
+        var totalPages = Math.max(1, Math.ceil(matches.length / pageSize()));
+        var startIdx = Math.floor((currentPage - 1) * totalSections / totalPages);
+        var endIdx   = Math.floor(currentPage * totalSections / totalPages);
+
+        regionCards.forEach(function (card, i) {
+            var visible = (i >= startIdx && i < endIdx);
+            card.style.display = visible ? '' : 'none';
+            var next = card.nextElementSibling;
+            if (next && next.tagName === 'HR') {
+                next.style.display = visible ? '' : 'none';
+            }
+        });
+    }
+
+    function renderPager(totalItems) {
+        if (!pagerEl) return;
+        var totalPages = Math.max(1, Math.ceil(totalItems / pageSize()));
+        /* Hide the pager when only 1 page is needed — same rule as
+           map.html (MDPager.render does this internally too). */
+        if (totalPages <= 1) {
+            pagerEl.innerHTML = '';
+            pagerEl.style.display = 'none';
+            return;
+        }
+        pagerEl.style.display = '';
+        if (!window.MDPager) return;
+        window.MDPager.render(pagerEl, {
+            totalItems: totalItems,
+            pageSize: pageSize(),
+            currentPage: currentPage,
+            onChange: function (p) {
+                currentPage = p;
+                renderTopStrip();
+            }
+        });
+    }
+
+    function refreshFromDOM() {
+        continentCountries = collectFromDOM();
+        regionCards = collectRegionCards();
+        renderTopStrip();
+    }
+
+    input.addEventListener('input', function () {
+        currentPage = 1;
+        renderTopStrip();
+    });
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            input.value = '';
+            currentPage = 1;
+            renderTopStrip();
+            input.focus();
+        });
+    }
+    window.addEventListener('resize', function () { renderTopStrip(); });
+
+    /* Poll for region tiles appearing — Vue mounts asynchronously. */
+    var pollCount = 0;
+    var lastCount = 0;
+    var poll = setInterval(function () {
+        pollCount++;
+        var current = document.querySelectorAll('.continent-gallery-content .table > div').length;
+        if (current !== lastCount) {
+            lastCount = current;
+            refreshFromDOM();
+        }
+        if (pollCount > 16) clearInterval(poll);
+    }, 400);
+}
+
 function renderContinentGallery(containerId) {
     var continentId = window.CONTINENT_ID;
     if (!continentId || !CONTINENT_DATA[continentId]) return;
@@ -159,14 +403,43 @@ function renderContinentGallery(containerId) {
     if (!container) return;
 
     var data = CONTINENT_DATA[continentId];
-    var html = "";
+    /* Resolve the continent's display label from CONTINENT_NAV for the
+       search placeholder text. */
+    var contLabel = continentId;
+    for (var ci = 0; ci < CONTINENT_NAV.length; ci++) {
+        if (CONTINENT_NAV[ci].id === continentId) {
+            contLabel = CONTINENT_NAV[ci].label;
+            break;
+        }
+    }
 
+    var html = buildContinentSearchBar(contLabel);
+    html += '<div class="continent-gallery-content">';
     data.regions.forEach(function (region, i) {
         html += buildRegionCard(region, i === 0);
     });
-
+    html += '</div>';
     html += '<div id="details-box"></div>';
     container.innerHTML = html;
+
+    /* Inject the search-flash highlight style once (no separate CSS file
+       needed — keeps continent-gallery a single-file drop-in). */
+    if (!document.getElementById('continent-search-flash-css')) {
+        var style = document.createElement('style');
+        style.id = 'continent-search-flash-css';
+        style.textContent =
+            '.continent-search-flash { outline: 3px solid #facc15; ' +
+            'outline-offset: 2px; box-shadow: 0 0 0 4px rgba(250,204,21,0.35); ' +
+            'transition: outline-color 0.5s ease, box-shadow 0.5s ease; ' +
+            'border-radius: 4px; }' +
+            '.continent-search-clear { background: transparent; border: none; ' +
+            'cursor: pointer; color: #94a3b8; padding: 4px 8px; }' +
+            '.continent-search-clear:hover { color: #475569; }';
+        document.head.appendChild(style);
+    }
+
+    /* Wire the search-bar filter once tiles start appearing. */
+    setupContinentSearch(continentId);
 
     // Resolve SVG base path relative to the page
     var basePath = "svg/";

@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="css/new.css">
     <link rel="stylesheet" href="css/if.css">
     <link rel="stylesheet" href="css/popup.css?v=4">
-    <link rel="stylesheet" href="css/search.css">
+    <link rel="stylesheet" href="css/search.css?v=18">
     <link rel="stylesheet" href="css/vendor/bootstrap-grid.css"/>
     <link rel="stylesheet" href="css/vintage.css">
 
@@ -57,7 +57,7 @@
     <!--  Custom  -->
     <link rel="stylesheet" href="css/map-page.css">
     <link rel="stylesheet" href="css/map-symbols.css?v=10">
-    <link rel="stylesheet" href="css/search-cross.css?v=5">
+    <link rel="stylesheet" href="css/search-cross.css?v=6">
     <script src="js/map-enhancer.js" defer></script>
     <script src="js/components.js" defer></script>
     <script src="js/hover-symbols-engine.js?v=2" defer></script>
@@ -344,10 +344,10 @@
            Scoped to .top-tile-strip ONLY — the per-SVG state/province/country
            tile-strips inside the regional .w3-card sections render every
            item as before. Underlying page logic (pageSize 10) is untouched. */
-        @media only screen and (max-width: 640px) {
-            .top-tile-strip > div:nth-child(n+6) {
-                display: none !important;
-            }
+        /* Tile-strip visible cap: 10 desktop, 5 mobile. Pager logic unchanged. */
+        .top-tile-strip > div:nth-child(n+11) { display: none !important; }
+        @media only screen and (max-width: 1026px) {
+            .top-tile-strip > div:nth-child(n+6) { display: none !important; }
         }
 
         /* ── PERF: defer rendering of inline country / region SVG maps ─────
@@ -402,6 +402,72 @@
     </style>
 
 
+
+        <!-- pager-right-of-search injected -->
+        <style id="pager-right-of-search-css">
+            /* Search row: search bar left (flex-grow), pager hugged right (no box).
+               Margin 0 31px aligns the row with the .w3-card content edges below
+               (the parent .row has -15px side margins, and .w3-container adds 16px
+               padding — 15+16=31). */
+            .search-row-with-pager {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                width: calc(100% - 8px);
+                flex-wrap: nowrap;
+                margin: 0 4px;
+            }
+            .search-row-with-pager > .search-wrapper {
+                flex: 1 1 auto;
+                min-width: 200px;
+            }
+            /* Pager: NO background, NO border, NO shadow. Pure buttons.
+               Right margin aligns the pager's right edge with the
+               w3-card content below (27px = bootstrap row -15 + w3-container 16 - 4 page gutter). */
+            .search-row-with-pager > #country-pager {
+                flex: 0 0 auto;
+                margin: 0 27px 0 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            /* Hide the pager when it has no rendered buttons at all
+               (single-page case — MDPager.render returns empty). */
+            .search-row-with-pager > #country-pager:not(:has(button)) {
+                display: none;
+            }
+            @media (max-width: 640px) {
+                .search-row-with-pager {
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+                .search-row-with-pager > .search-wrapper {
+                    flex: 1 1 100%;
+                }
+                .search-row-with-pager > #country-pager {
+                    flex: 1 1 100%;
+                    justify-content: center;
+                }
+            }
+            /* Force FontAwesome 5 SOLID weight on the cross icon so the X
+               glyph renders. `<i class="fa fa-times">` is FA4-style;
+               under FA5 it defaults to weight 400 (regular) which lacks
+               the X glyph in the Free font subset. Setting weight 900
+               picks the Solid file where fa-times lives. */
+            .search-cross-btn i.fa.fa-times,
+            .search-cross-btn i.fa-times {
+                font-family: "Font Awesome 5 Free", FontAwesome, sans-serif !important;
+                font-weight: 900 !important;
+                font-style: normal !important;
+            }
+        </style>
 </head>
 <body class="w3-white polish" data-page-graphics="world-dots">
 <div id="nav-placeholder"></div>
@@ -440,7 +506,7 @@
         <div class="">
             <div class="">
                 <div class="row" style="margin-bottom: 10px; margin-top: 15px">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div class="search-row-with-pager">
                         <div class="form-control search-wrapper panel-heading" style="flex-grow: 1; display: flex; align-items: center; width: 100%; min-width: 250px">
                             <div class="search_bar" style="display: flex; align-items: center; width: 100%;">
                                 <img src="https://d3dw5jtb3w1kgy.cloudfront.net/Search.png" width="25" style="margin-left: 8px;margin-right: 8px">
@@ -452,10 +518,11 @@
                                 </div>
                             </div>
                         </div>
+                        <div id="country-pager" class="md-pager"></div>
                     </div>
                 </div>
                 <div style="display: inline-block; overflow: hidden; width: 100%;">
-                    <div style="display: flex; flex-wrap: wrap; margin-left: 10px; justify-content: flex-start;">
+                    <div style="display: flex; flex-wrap: wrap; margin: auto; justify-content: flex-start;">
                         <div v-if="resources.length" v-cloak class="table top-tile-strip" style="display: flex; flex-wrap: wrap;">
                             <div v-for="(item, index) in pagedResults" :key="item.abv" style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
                                 <div data-toggle="tooltip" data-html="true" :title="item.title" style="margin: auto">
@@ -470,7 +537,6 @@
                         </div>
                     </div>
                     <div v-cloak v-if="resultQuery.length === 0" style="margin: 12px; color: #475569; font-style: italic;">No countries match your search.</div>
-                    <div id="country-pager" class="md-pager"></div>
                 </div>
 
 

@@ -144,3 +144,48 @@ body.polish .search-cross-btn:hover,
     width: 50px !important;
     margin: 5px 2px !important;
 }
+
+/* ── Mobile compact cross icon ─────────────────────────────────
+   Default is 50px wide with a 30px glyph — too large for the
+   mobile search bar. Shrink to 16px glyph in a 24px box. */
+@media only screen and (max-width: 1026px) {
+    body.polish .search-cross-btn,
+    .search-cross-btn {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        min-height: 24px !important;
+        font-size: 16px !important;
+        padding: 0 !important;
+        margin: 0 0 0 4px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    body.polish .search-cross-btn i.fa,
+    body.polish .search-cross-btn i.fas,
+    body.polish .search-cross-btn i.far,
+    body.polish .search-cross-btn i.fab,
+    body.polish .search-cross-btn .cross-glyph,
+    .search-cross-btn i.fa,
+    .search-cross-btn i.fas,
+    .search-cross-btn i.far,
+    .search-cross-btn i.fab,
+    .search-cross-btn .cross-glyph {
+        font-size: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+    body.polish .search-cross-btn:hover i.fa,
+    body.polish .search-cross-btn:hover i.fas,
+    .search-cross-btn:hover i.fa,
+    .search-cross-btn:hover i.fas {
+        font-size: 16px !important;
+        width: 16px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
