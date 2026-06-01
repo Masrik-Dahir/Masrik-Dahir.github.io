@@ -973,6 +973,58 @@ const app_map = {
     }
 }
 
+/* ──────────────────────────────────────────────────────────────
+   Country-button → SVG locator helpers (shared by map.html and the
+   six continent pages). When a country tile under the search bar is
+   clicked we want to jump to the pager page + scroll to the regional
+   SVG map where that country's <path> is drawn (and flash it), NOT
+   navigate away to the country's travel-photo gallery page.
+
+   Matching is by country NAME: the tile carries a human title
+   ("Afghanistan", "Laos", …) and each SVG path carries a
+   data-name ("Afghanistan", "Lao People's Democratic Republic", …).
+   normCountryName() folds case, strips diacritics and punctuation so
+   "Côte d'Ivoire" → "cotedivoire". COUNTRY_NAME_ALIASES bridges the
+   cases where the tile title and the map's data-name differ in wording.
+   ────────────────────────────────────────────────────────────── */
+function normCountryName(s) {
+    return String(s || '')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '') // drop accents
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+}
+
+// Keyed by normalized TILE title → array of normalized SVG data-names
+// it should also be considered equal to.
+const COUNTRY_NAME_ALIASES = {
+    ivorycoast:                ['cotedivoire'],
+    laos:                      ['laopeoplesdemocraticrepublic'],
+    brunei:                    ['bruneidarussalam'],
+    micronesia:                ['federatedstatesofmicronesia'],
+    northmacedonia:            ['macedonia'],
+    bosniaherzegovina:         ['bosniaandherzegovina'],
+    easttimor:                 ['timorleste'],
+    timorleste:                ['timorleste'],
+    burkina:                   ['burkinafaso'],
+    congo:                     ['republicofcongo'],
+    democraticrepublicofcongo: ['democraticrepublicofthecongo'],
+    antiguadeps:               ['antiguaandbarbuda'],
+    capeverde:                 ['caboverde'],
+    swaziland:                 ['eswatini'],
+    eswatini:                  ['swaziland'],
+    russia:                    ['russianfederation'],
+    syria:                     ['syrianarabrepublic'],
+    iran:                      ['islamicrepublicofiran'],
+    southkorea:                ['republicofkorea'],
+    northkorea:                ['democraticpeoplesrepublicofkorea'],
+    moldova:                   ['republicofmoldova'],
+    tanzania:                  ['unitedrepublicoftanzania'],
+    bolivia:                   ['plurinationalstateofbolivia'],
+    venezuela:                 ['bolivarianrepublicofvenezuela'],
+    vietnam:                   ['vietnamsocialistrepublic'],
+    vaticancity:               ['holysee']
+};
+
 const app_country = {
     data() {
         return {
@@ -1472,29 +1524,113 @@ const app_country = {
                 node.classList.toggle('section-collapsed', !(prevVisible && nextVisible));
             }
         },
-        // Find which page contains a given section id (e.g. "scroll_ZWE")
-        pageOf(sectionId) {
-            const idx = this.resultQuery.findIndex(r => r.id === sectionId);
+        // Which pager page reveals a given inline content section
+        // (.w3-card). Mirrors the proportional distribution used by
+        // syncContentSectionsToPage() so the page we jump to actually
+        // shows the section, instead of guessing from the country's
+        // index in the tile list (which is a DIFFERENT ordering).
+        pageOfSection(section) {
+            const container = document.querySelector('.w3-container.w3-margin-top');
+            if (!container || !section) return null;
+            const all = Array.from(container.querySelectorAll(':scope > .w3-card'));
+            const idx = all.indexOf(section);
             if (idx < 0) return null;
-            return Math.floor(idx / this.pageSize) + 1;
-        },
-        scrollToSection(sectionId, fallbackUrl) {
-            // If the target isn't currently in the active page, jump to its page first.
-            const targetPage = this.pageOf(sectionId);
-            if (targetPage && targetPage !== this.currentPage) {
-                this.currentPage = targetPage;
+            const total = all.length;
+            const pages = Math.max(1, this.totalPages);
+            // When there are more pager pages than sections, every section
+            // is shown on every page — current page already reveals it.
+            if (pages > total) return this.currentPage;
+            for (let p = 1; p <= pages; p++) {
+                const start = Math.floor((p - 1) * total / pages);
+                const end = Math.floor(p * total / pages);
+                if (idx >= start && idx < end) return p;
             }
-            // After Vue reacts to the page change (which triggers syncSectionsToPage),
-            // give the browser a tick to lay out, then scroll.
+            return this.currentPage;
+        },
+        // All SVG <path> elements on the page whose data-name matches the
+        // given country title (with alias + accent folding). A country can
+        // be a multi-part path, so we return every match.
+        findCountryPaths(title) {
+            const want = normCountryName(title);
+            if (!want) return [];
+            const candidates = new Set([want]);
+            (COUNTRY_NAME_ALIASES[want] || []).forEach(a => candidates.add(a));
+            const out = [];
+            const paths = document.querySelectorAll('svg path[data-name]');
+            for (let i = 0; i < paths.length; i++) {
+                if (candidates.has(normCountryName(paths[i].getAttribute('data-name')))) {
+                    out.push(paths[i]);
+                }
+            }
+            return out;
+        },
+        // Briefly pulse the matched country path(s) so the user can spot
+        // exactly which region the tile referred to.
+        flashCountryPaths(paths) {
+            if (!paths || !paths.length) return;
+            this.ensureFlashStyles();
+            paths.forEach(p => {
+                p.classList.remove('md-country-flash');
+                // force reflow so re-adding the class restarts the animation
+                void p.getBoundingClientRect();
+                p.classList.add('md-country-flash');
+                setTimeout(() => p.classList.remove('md-country-flash'), 2400);
+            });
+        },
+        ensureFlashStyles() {
+            if (document.getElementById('md-country-flash-styles')) return;
+            const s = document.createElement('style');
+            s.id = 'md-country-flash-styles';
+            s.textContent =
+                '@keyframes mdCountryFlash {' +
+                '  0%,100% { fill:#ff3b30 !important; stroke:#b71c1c; stroke-width:2.4; }' +
+                '  50%     { fill:#ffd400 !important; stroke:#ff3b30; stroke-width:3.2; }' +
+                '}' +
+                '.md-country-flash {' +
+                '  animation: mdCountryFlash 0.6s ease-in-out 4;' +
+                '  filter: drop-shadow(0 0 4px rgba(255,59,48,0.9));' +
+                '}';
+            document.head.appendChild(s);
+        },
+        // Click handler for the country tiles under the search bar.
+        // Resolves the tile to (a) its inline detail section if one exists
+        // (USA/Canada/Bangladesh), or (b) the regional SVG map that draws
+        // the country — jumps to the right pager page and scrolls there,
+        // flashing the country. If the country isn't drawn on any SVG and
+        // has no detail section, do nothing (no navigation to the photo
+        // gallery). fallbackUrl is kept for signature compatibility.
+        scrollToSection(sectionId, fallbackUrl) {
+            const res = (this.resources || []).find(r => r.id === sectionId);
+            const title = res ? res.title : '';
+
+            // (a) Inline detail section (its own country SVG lives here).
+            const detail = document.getElementById(sectionId);
+            const hasDetail = !!(detail && detail.classList && detail.classList.contains('w3-card'));
+
+            // (b) Regional SVG path(s) for this country.
+            const paths = hasDetail ? [] : this.findCountryPaths(title);
+            const pathSection = paths.length ? paths[0].closest('.w3-card') : null;
+
+            const targetSection = hasDetail ? detail : pathSection;
+            if (!targetSection) return; // not on any SVG → do nothing
+
+            // Reveal its pager page (no-op in search mode, handled below).
+            if (!this.searchQuery) {
+                const page = this.pageOfSection(targetSection);
+                if (page && page !== this.currentPage) this.currentPage = page;
+            }
+
+            // After Vue re-renders / syncContentSectionsToPage runs, force
+            // the section visible (covers search mode, where regional cards
+            // would otherwise stay collapsed), then scroll + flash.
             this.$nextTick(() => {
                 setTimeout(() => {
-                    const element = document.getElementById(sectionId);
-                    if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                    } else if (fallbackUrl) {
-                        window.location.href = fallbackUrl;
+                    targetSection.classList.remove('section-collapsed');
+                    if (targetSection.scrollIntoView) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                }, 30);
+                    if (paths.length) this.flashCountryPaths(paths);
+                }, 60);
             });
         },
         onResize() {
