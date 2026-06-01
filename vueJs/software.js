@@ -1431,8 +1431,19 @@ const app_country = {
                 // every page has content.
                 const total = allSections.length;
                 const pages = Math.max(1, this.totalPages);
-                const start = Math.floor((this.currentPage - 1) * total / pages);
-                const end = Math.floor(this.currentPage * total / pages);
+                /* When pager pages > section count (e.g. Europe mobile:
+                   5 pages, 4 region cards), the floor()-based slice
+                   leaves page 1 empty (start=floor(0*4/5)=0,
+                   end=floor(1*4/5)=0). Detect that case and show every
+                   section on every page so no page renders empty. */
+                let start, end;
+                if (pages > total) {
+                    start = 0;
+                    end = total;
+                } else {
+                    start = Math.floor((this.currentPage - 1) * total / pages);
+                    end = Math.floor(this.currentPage * total / pages);
+                }
                 for (let i = 0; i < total; i++) {
                     visible[i] = (i >= start && i < end);
                 }
