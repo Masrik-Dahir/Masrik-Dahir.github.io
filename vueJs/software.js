@@ -1227,6 +1227,21 @@ const app_country = {
         }
     },
     mounted() {
+        /* Continent-page filter: if the page set window.MAP_FILTER_ABVS
+           (e.g. southamerica.html sets it to ['ARG','BRA','CHL',...]),
+           prune the 190-country resources down to just those countries.
+           Each continent page that copies map.html should set this global
+           in <head> BEFORE software.js runs. */
+        if (Array.isArray(window.MAP_FILTER_ABVS) && window.MAP_FILTER_ABVS.length) {
+            var keep = {};
+            for (var i = 0; i < window.MAP_FILTER_ABVS.length; i++) {
+                keep[window.MAP_FILTER_ABVS[i]] = true;
+            }
+            this.resources = this.resources.filter(function (r) {
+                return keep[r.abv];
+            });
+            this.currentPage = 1;
+        }
         this.$nextTick(() => {
             window.addEventListener('resize', this.onResize);
             this.renderPager();
