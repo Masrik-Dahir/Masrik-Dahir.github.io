@@ -2029,167 +2029,47 @@
 
             <!-- ══════════════════════════════════════════════════════════
                  v1.7.0 — 6 NEW WIDGETS
-                 War · Holiday · Sport · Scene · Visual Filter · Physics
+                 War · Sport · Scene · Visual Filter · Physics
                  Each follows the icon-only widget-host pattern with
                  tooltip + chip grid. Builder IIFEs live below the
                  superhero builder in this file.
                  ══════════════════════════════════════════════════════════ -->
 
             <!-- WAR MODE — 7 chips -->
-<!--            <div id="warBtn" class="warmode-btn icon-only">-->
-<!--                <button class="war-core" onclick="-->
-<!--                    if(window.toggleWarMode){-->
-<!--                        var on = window.toggleWarMode();-->
-<!--                        var wrap = document.getElementById('warBtn');-->
-<!--                        if(wrap) wrap.classList.toggle('active', on);-->
-<!--                    }-->
-<!--                ">-->
-<!--                    <i class="fa fa-shield-alt war-icon" id="warIcon" aria-hidden="true"></i>-->
-<!--                </button>-->
-<!--                <div class="widget-tooltip tt-warmode" role="tooltip">-->
-<!--                    <div class="tt-title tt-title-warmode">War Mode</div>-->
-<!--                    <div class="tt-row">-->
-<!--                        <span class="tt-label">Battle</span>-->
-<!--                        <span class="tt-value tt-war-status" id="ttWarName">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-row tt-row-hover" id="ttWarHoverRow">-->
-<!--                        <span class="tt-label">Hover</span>-->
-<!--                        <span class="tt-value tt-war-status" id="ttWarHover">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-grid tt-grid-icons tt-grid-war" id="ttWarGrid"></div>-->
-<!--                    <div class="tt-hint">Pick a historical battlefield — the city transforms</div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-            <!-- HOLIDAY MODE — 14 chips -->
-<!--            <div id="holidayBtn" class="holiday-btn icon-only">-->
-<!--                <button class="hol-core" onclick="-->
-<!--                    if(window.toggleHolidayMode){-->
-<!--                        var on = window.toggleHolidayMode();-->
-<!--                        var wrap = document.getElementById('holidayBtn');-->
-<!--                        if(wrap) wrap.classList.toggle('active', on);-->
-<!--                    }-->
-<!--                ">-->
-<!--                    <i class="fa fa-moon hol-icon" id="holIcon" aria-hidden="true"></i>-->
-<!--                </button>-->
-<!--                <div class="widget-tooltip tt-holiday" role="tooltip">-->
-<!--                    <div class="tt-title tt-title-holiday">Holiday Mode</div>-->
-<!--                    <div class="tt-row">-->
-<!--                        <span class="tt-label">Holiday</span>-->
-<!--                        <span class="tt-value tt-hol-status" id="ttHolName">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-row tt-row-hover" id="ttHolHoverRow">-->
-<!--                        <span class="tt-label">Hover</span>-->
-<!--                        <span class="tt-value tt-hol-status" id="ttHolHover">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-grid tt-grid-icons tt-grid-holiday" id="ttHolidayGrid"></div>-->
-<!--                    <div class="tt-hint">Dress the city for a holiday — Muslim + secular world holidays</div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-            <!-- SPORT EVENT — 14 chips -->
-<!--            <div id="sportBtn" class="sport-btn icon-only">-->
-<!--                <button class="spt-core" onclick="-->
-<!--                    if(window.toggleSportEvent){-->
-<!--                        var on = window.toggleSportEvent();-->
-<!--                        var wrap = document.getElementById('sportBtn');-->
-<!--                        if(wrap) wrap.classList.toggle('active', on);-->
-<!--                    }-->
-<!--                ">-->
-<!--                    <i class="fa fa-basketball-ball spt-icon" id="sptIcon" aria-hidden="true"></i>-->
-<!--                </button>-->
-<!--                <div class="widget-tooltip tt-sport" role="tooltip">-->
-<!--                    <div class="tt-title tt-title-sport">Sport Event</div>-->
-<!--                    <div class="tt-row">-->
-<!--                        <span class="tt-label">Sport</span>-->
-<!--                        <span class="tt-value tt-spt-status" id="ttSptName">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-row tt-row-hover" id="ttSptHoverRow">-->
-<!--                        <span class="tt-label">Hover</span>-->
-<!--                        <span class="tt-value tt-spt-status" id="ttSptHover">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-grid tt-grid-icons tt-grid-sport" id="ttSportGrid"></div>-->
-<!--                    <div class="tt-hint">Turn the street into a venue for any sport</div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-            <!-- SCENE MODE — 14 chips (peds+vehicles+sky bundles) -->
-<!--            <div id="sceneBtn" class="scene-btn icon-only">-->
-<!--                <button class="scn-core" onclick="-->
-<!--                    if(window.toggleSceneMode){-->
-<!--                        var on = window.toggleSceneMode();-->
-<!--                        var wrap = document.getElementById('sceneBtn');-->
-<!--                        if(wrap) wrap.classList.toggle('active', on);-->
-<!--                    }-->
-<!--                ">-->
-<!--                    <i class="fa fa-city scn-icon" id="scnIcon" aria-hidden="true"></i>-->
-<!--                </button>-->
-<!--                <div class="widget-tooltip tt-scene" role="tooltip">-->
-<!--                    <div class="tt-title tt-title-scene">Scene Mode</div>-->
-<!--                    <div class="tt-row">-->
-<!--                        <span class="tt-label">Scene</span>-->
-<!--                        <span class="tt-value tt-scn-status" id="ttScnName">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-row tt-row-hover" id="ttScnHoverRow">-->
-<!--                        <span class="tt-label">Hover</span>-->
-<!--                        <span class="tt-value tt-scn-status" id="ttScnHover">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-grid tt-grid-icons tt-grid-scene" id="ttSceneGrid"></div>-->
-<!--                    <div class="tt-hint">Era-cohesive presets: peds + vehicles + sky always match</div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-            <!-- VISUAL FILTER — 14 chips -->
-<!--            <div id="filterBtn" class="filter-btn icon-only">-->
-<!--                <button class="flt-core" onclick="-->
-<!--                    if(window.toggleVisualFilter){-->
-<!--                        var on = window.toggleVisualFilter();-->
-<!--                        var wrap = document.getElementById('filterBtn');-->
-<!--                        if(wrap) wrap.classList.toggle('active', on);-->
-<!--                    }-->
-<!--                ">-->
-<!--                    <i class="fa fa-image flt-icon" id="fltIcon" aria-hidden="true"></i>-->
-<!--                </button>-->
-<!--                <div class="widget-tooltip tt-filter" role="tooltip">-->
-<!--                    <div class="tt-title tt-title-filter">Visual Filter</div>-->
-<!--                    <div class="tt-row">-->
-<!--                        <span class="tt-label">Filter</span>-->
-<!--                        <span class="tt-value tt-flt-status" id="ttFltName">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-row tt-row-hover" id="ttFltHoverRow">-->
-<!--                        <span class="tt-label">Hover</span>-->
-<!--                        <span class="tt-value tt-flt-status" id="ttFltHover">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-grid tt-grid-icons tt-grid-filter" id="ttFilterGrid"></div>-->
-<!--                    <div class="tt-hint">Post-process pass — sepia, noir, thermal, X-ray, more</div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-            <!-- PHYSICS MODE — 14 chips -->
-<!--            <div id="physicsBtn" class="physics-btn icon-only">-->
-<!--                <button class="phy-core" onclick="-->
-<!--                    if(window.togglePhysicsMode){-->
-<!--                        var on = window.togglePhysicsMode();-->
-<!--                        var wrap = document.getElementById('physicsBtn');-->
-<!--                        if(wrap) wrap.classList.toggle('active', on);-->
-<!--                    }-->
-<!--                ">-->
-<!--                    <i class="fa fa-feather phy-icon" id="phyIcon" aria-hidden="true"></i>-->
-<!--                </button>-->
-<!--                <div class="widget-tooltip tt-physics" role="tooltip">-->
-<!--                    <div class="tt-title tt-title-physics">Physics Mode</div>-->
-<!--                    <div class="tt-row">-->
-<!--                        <span class="tt-label">Rule</span>-->
-<!--                        <span class="tt-value tt-phy-status" id="ttPhyName">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-row tt-row-hover" id="ttPhyHoverRow">-->
-<!--                        <span class="tt-label">Hover</span>-->
-<!--                        <span class="tt-value tt-phy-status" id="ttPhyHover">—</span>-->
-<!--                    </div>-->
-<!--                    <div class="tt-grid tt-grid-icons tt-grid-physics" id="ttPhysicsGrid"></div>-->
-<!--                    <div class="tt-hint">Rewrites the rules of motion — moon gravity, slow-mo, magnetic, more</div>-->
-<!--                </div>-->
-<!--            </div>-->
+            <div id="warBtn" class="warmode-btn icon-only">
+                <button class="war-core" onclick="
+                    if(window.toggleWarMode){
+                        var on = window.toggleWarMode();
+                        var wrap = document.getElementById('warBtn');
+                        if(wrap) wrap.classList.toggle('active', on);
+                    }
+                ">
+                    <i class="fa fa-shield-alt war-icon" id="warIcon" aria-hidden="true"></i>
+                </button>
+                <div class="widget-tooltip tt-warmode" role="tooltip">
+                    <div class="tt-title tt-title-warmode">War Mode</div>
+                    <div class="tt-row">
+                        <span class="tt-label">Battle</span>
+                        <span class="tt-value tt-war-status" id="ttWarName">—</span>
+                    </div>
+                    <div class="tt-row tt-row-hover" id="ttWarHoverRow">
+                        <span class="tt-label">Hover</span>
+                        <span class="tt-value tt-war-status" id="ttWarHover">—</span>
+                    </div>
+                    <div class="tt-grid tt-grid-icons tt-grid-war" id="ttWarGrid"></div>
+                    <div class="tt-toggle-row">
+                        <span class="tt-toggle-label tt-toggle-label-warmode">Auto</span>
+                        <button type="button" class="tt-toggle tt-toggle-warmode" id="ttWarAutoBtn" aria-pressed="false"
+                                onclick="
+                                    if(event){event.stopPropagation();}
+                                    var on = window.toggleWarAuto ? window.toggleWarAuto() : false;
+                                    this.setAttribute('aria-pressed', on ? 'true' : 'false');
+                                    this.classList.toggle('on', on);
+                                ">Auto</button>
+                    </div>
+                    <div class="tt-hint">Pick a battlefield — or flip <b>Auto</b>: every war fights itself, the victor plants a flag, then on to the next</div>
+                </div>
+            </div>
         </div>
 
         <style>
@@ -3753,6 +3633,9 @@
                 gap: 4px;
             }
             .tt-warmode .tt-chip.active   { background: linear-gradient(135deg,#fca5a5,#dc2626); border-color:#7f1d1d; }
+            /* WAR-mode Auto toggle — matches the Attack/Defence title-bar Auto
+               pill (relocated to the top-right of the title by the IIFE). */
+            .tt-toggle-warmode.on { background: linear-gradient(135deg,#fca5a5,#dc2626); border-color:#7f1d1d; color:#fff; }
 
             .tt-holiday { width: 520px; }
             .tt-holiday .tt-grid.tt-grid-icons {
@@ -5924,7 +5807,6 @@
             host._built = true;
         }
         function buildWarGrid()    { buildV170Grid('ttWarGrid',     'ttWarHoverRow', 'ttWarHover', 'getAllWarModes',       'setWarModeIndex'); }
-        function buildHolidayGrid(){ buildV170Grid('ttHolidayGrid', 'ttHolHoverRow', 'ttHolHover', 'getAllHolidayModes',   'setHolidayModeIndex'); }
         function buildSportGrid()  { buildV170Grid('ttSportGrid',   'ttSptHoverRow', 'ttSptHover', 'getAllSportEvents',    'setSportEventIndex'); }
         function buildSceneGrid()  { buildV170Grid('ttSceneGrid',   'ttScnHoverRow', 'ttScnHover', 'getAllSceneModes',     'setSceneModeIndex'); }
         function buildFilterGrid() { buildV170Grid('ttFilterGrid',  'ttFltHoverRow', 'ttFltHover', 'getAllVisualFilters',  'setVisualFilterIndex'); }
@@ -6039,7 +5921,7 @@
             buildParadeGrid(); buildAbductionGrid(); buildAbductionMissileGrid();
             buildSuperheroGrid();
             /* v1.7.0 builders */
-            buildWarGrid(); buildHolidayGrid(); buildSportGrid();
+            buildWarGrid(); buildSportGrid();
             buildSceneGrid(); buildFilterGrid(); buildPhysicsGrid();
             /* ── FLIGHT widget ── */
             if(window.getCityName)     setText('ttCityFrom', window.getCityName());
@@ -6173,15 +6055,6 @@
             if(window.getWarModeName)  setText('ttWarName', window.getWarModeName());
             if(window.getWarModeIndex) syncActive('ttWarGrid', window.getWarModeIndex());
 
-            /* ── v1.7.0 HOLIDAY MODE polling ── */
-            if(window.isHolidayModeOn){
-                var holOn = window.isHolidayModeOn();
-                var holWrap = document.getElementById('holidayBtn');
-                if(holWrap) holWrap.classList.toggle('active', holOn);
-            }
-            if(window.getHolidayModeName)  setText('ttHolName', window.getHolidayModeName());
-            if(window.getHolidayModeIndex) syncActive('ttHolidayGrid', window.getHolidayModeIndex());
-
             /* ── v1.7.0 SPORT EVENT polling ── */
             if(window.isSportEventOn){
                 var sptOn = window.isSportEventOn();
@@ -6251,7 +6124,7 @@
             var WIDGET_SELECTOR =
                 '.flight-wrap, .weather-widget, .missile-btn, .defence-btn, ' +
                 '.reconstruct-btn, .strategy-btn, .parade-btn, .abduction-btn, ' +
-                '.superhero-btn, .warmode-btn, .holiday-btn, .sport-btn, ' +
+                '.superhero-btn, .warmode-btn, .sport-btn, ' +
                 '.scene-btn, .filter-btn, .physics-btn';
 
             function closestWidget(node){

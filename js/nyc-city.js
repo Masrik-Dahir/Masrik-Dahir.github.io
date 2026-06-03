@@ -21359,10 +21359,11 @@
           colorA:'#facc15', colorB:'#3b82f6',
           primary:'#facc15', cape:'#1d4ed8', accent:'#ffffff', mask:'#1e3a8a',
           style:'patriot',  emblem:'cross', face:'masked',
-          /* speed cranked 13 → 28, damage 34 → 9999 (one-shot any
-             dragon the longsword reaches), fireRate 340 → 200 ms
-             so the Paladin closes in fast and slashes constantly. */
-          stats:{ hp:280, speed:28, range:60, atkR:34, dmg:9999,
+          /* speed drastically reduced 28 → 7 so the Paladin advances
+             slowly; damage 34 → 9999 (one-shot any dragon the longsword
+             reaches), fireRate 340 → 200 ms so it still slashes constantly
+             once it finally closes in. */
+          stats:{ hp:280, speed:7, range:60, atkR:34, dmg:9999,
                   fireRate:200, maxTgts:1, autoTarget:false,
                   role:'Sword + shield melee', flavor:'Charges fast; long sword one-shots robots, shield parries return fire.' } },
         { id:'gunsmith',   name:'Gunsmith',           icon:'fa-crosshairs',
@@ -22783,7 +22784,15 @@
             h.alive = false;
             h.phase = 'dead';
             h.phaseT = 0;
-            spawnDustDeath(h);
+            /* If this kill came from the Paladin's lightsaber, play the
+               SLICE death (body cleaved in two) instead of the default
+               dust dissolution. The angle was tagged by the sword code. */
+            if (typeof h.sliceDeath === 'number'){
+                spawnSliceDeath(h, h.sliceDeath);
+                h.sliceDeath = null;
+            } else {
+                spawnDustDeath(h);
+            }
         }
     }
 
@@ -22940,6 +22949,71 @@
         }
     }
 
+    /* ── LIGHTSABER SLICE DEATH ──
+       Reserved for kills by the Paladin's longsword/lightsaber. The
+       body is cleaved into TWO halves along the blade's travel line:
+       each half keeps its costume colours, carries a white-hot seared
+       cut edge, and slides apart perpendicular to the cut while
+       tumbling and falling under gravity. A bright energy flash runs
+       along the cut, molten sparks spray from the wound, and a thin
+       gold after-glow lingers. `angle` is the world-space direction of
+       the blade stroke. */
+    function spawnSliceDeath(h, angle){
+        var cols = h.cols || {};
+        var bodyCol = cols.primary || cols.cape || '#7a6450';
+        var accent  = cols.accent  || cols.cape || '#d6a36b';
+        var cx = h.x;
+        var cy = h.y - 12;
+        var bw = 16, bh = 34, headR = 7;
+        var headCy = -bh * 0.55;              /* head centre, relative to body */
+        /* separation axis = perpendicular to the cut line */
+        var nx = -Math.sin(angle), ny = Math.cos(angle);
+        var dx = Math.cos(angle),  dy = Math.sin(angle);
+
+        /* bright energy flash sweeping along the cut (one quick pulse) */
+        superheroFX.push({
+            kind:'sliceGlow', x:cx, y:cy, angle:angle,
+            len: 40, age:0, max:260
+        });
+
+        /* the TWO body halves */
+        for (var s = -1; s <= 1; s += 2){
+            superheroFX.push({
+                kind:'sliceHalf',
+                x: cx, y: cy,
+                vx: nx * s * 1.7 + rng(-0.25, 0.25),
+                vy: ny * s * 1.7 - 0.7,        /* slight pop-up, then gravity */
+                grav: 0.055,
+                rot: 0, rotV: s * rng(0.012, 0.032),
+                cut: angle, side: s,
+                col: bodyCol, accent: accent,
+                w: bw, h: bh, headR: headR, headCy: headCy,
+                age: 0, max: 1500
+            });
+        }
+
+        /* molten sparks spraying out of the wound, biased along the cut */
+        for (var k = 0; k < 22; k++){
+            var t = rng(-1, 1);
+            superheroFX.push({
+                kind:'spark',
+                x: cx + dx * t * 22,
+                y: cy + dy * t * 22,
+                vx: nx * rng(-2.4, 2.4) + dx * rng(-1.2, 1.2),
+                vy: ny * rng(-2.4, 2.4) + dy * rng(-1.2, 1.2) - 0.6,
+                age: 0, max: rng(450, 900),
+                hue: 48 + rng(-12, 22)
+            });
+        }
+
+        /* hot core flash + lingering gold after-glow ring at the wound */
+        superheroFX.push({ kind:'flash', x:cx, y:cy, age:0, max:170, r:11 });
+        superheroFX.push({
+            kind:'impactRing', x:cx, y:cy, age:0, max:420,
+            hue:48, col:'#fde047', r:3, maxR:24
+        });
+    }
+
     function updateSuperhero(dt){
         if (!superheroOn) return;
         var k = dt / 16;
@@ -22993,41 +23067,53 @@
                     }
                 }
 
-                /* ── PALADIN PASSIVE SWORD AURA ────────────────────
-                   Any robot within the Paladin's sword reach (180 px)
-                   is INSTANTLY killed every frame — the lightsaber
-                   is so deadly that simply being inside its arc is
-                   fatal, even before the Paladin actually swings.
-                   Each kill spawns a gold impact ring + sparks so
-                   the death reads as a passive sweep. */
+                /* ── PALADIN SWORD BLADE — kills on CONTACT ────────
+                   No more circular aura. We reconstruct the actual
+                   longsword/lightsaber blade as a line segment in
+                   world space (matching exactly how it is drawn in
+                   drawHero: translate(h.x,h.y) → scale(h.face,1) →
+                   translate(6*S,1.5*S) → rotate(1.35+0.35*pdAtkP),
+                   blade running from the emitter to the tip). Any
+                   robot the blade segment touches is instantly slain;
+                   robots NOT under the blade are safe even if they
+                   stand right next to him. The blade extends on swing
+                   (pdAtkP), so a slash sweeps a longer reach. */
                 if (h.swordshield && h.alive && superheroVillains.length){
-                    var auraR = 180;
+                    var pbS    = h.miniHero ? 1.1 : (h.solo ? 2.4 : 2.0);
+                    var pbAtkP = h.attackT > 0 ? Math.sin((1 - h.attackT/200) * Math.PI) : 0;
+                    var pbTh   = 1.35 + 0.35 * pbAtkP;
+                    var pbLen  = (42 + pbAtkP * 80) * pbS;
+                    var pbSwX  = 6 * pbS, pbSwY = 1.5 * pbS;
+                    var pbEmY  = -4 * pbS;
+                    var pbTipY = -pbLen - 1.8 * pbS;
+                    var pbSin  = Math.sin(pbTh), pbCos = Math.cos(pbTh);
+                    /* blade endpoints in hero-local space (pre face/translate) */
+                    var pbELx = pbSwX - pbEmY  * pbSin, pbELy = pbSwY + pbEmY  * pbCos;
+                    var pbTLx = pbSwX - pbTipY * pbSin, pbTLy = pbSwY + pbTipY * pbCos;
+                    /* world-space blade segment A→B */
+                    var pbAx = h.x + h.face * pbELx, pbAy = h.y + pbELy;
+                    var pbBx = h.x + h.face * pbTLx, pbBy = h.y + pbTLy;
+                    var pbSegX = pbBx - pbAx, pbSegY = pbBy - pbAy;
+                    var pbSegLen2 = pbSegX*pbSegX + pbSegY*pbSegY || 1;
+                    /* hit thickness — the glowing blade plus a small
+                       robot-radius margin so a clear touch registers. */
+                    var pbHit = (3.0 + pbAtkP * 1.5) * pbS + 12;
                     for (var pavi = 0; pavi < superheroVillains.length; pavi++){
                         var pav = superheroVillains[pavi];
                         if (!pav.alive) continue;
-                        var padx = pav.x - h.x;
-                        var pady = (pav.y - 16) - h.y;
-                        if (padx*padx + pady*pady < auraR*auraR){
+                        var prx = pav.x, pry = pav.y - 16;
+                        /* closest point on the blade segment to the robot */
+                        var pbT = ((prx - pbAx) * pbSegX + (pry - pbAy) * pbSegY) / pbSegLen2;
+                        if (pbT < 0) pbT = 0; else if (pbT > 1) pbT = 1;
+                        var pbCX = pbAx + pbSegX * pbT, pbCY = pbAy + pbSegY * pbT;
+                        var pbDX = prx - pbCX, pbDY = pry - pbCY;
+                        if (pbDX*pbDX + pbDY*pbDY < pbHit*pbHit){
+                            /* tag the robot so its death plays the
+                               lightsaber-SLICE animation: it splits in
+                               two along the blade's travel direction.
+                               The angle is the world-space blade line. */
+                            pav.sliceDeath = Math.atan2(pbSegY, pbSegX);
                             damageHero(pav, 99999, h.x, h.y);
-                            /* sparkle ring at the victim */
-                            superheroFX.push({
-                                kind:'impactRing',
-                                x: pav.x, y: pav.y - 12,
-                                age: 0, max: 460,
-                                hue: 48, col: '#fde047',
-                                r: 4, maxR: 28
-                            });
-                            for (var pak = 0; pak < 6; pak++){
-                                var paA = rng(0, Math.PI*2);
-                                superheroFX.push({
-                                    kind: 'spark',
-                                    x: pav.x, y: pav.y - 12,
-                                    vx: Math.cos(paA) * rng(1.5, 4.0),
-                                    vy: Math.sin(paA) * rng(1.5, 4.0),
-                                    age: 0, max: rng(500, 900),
-                                    hue: 48 + rng(-10, 15)
-                                });
-                            }
                         }
                     }
                 }
@@ -23239,13 +23325,13 @@
                         var cdx = h.chargeTarget.x - h.x;
                         var cdy = h.chargeTarget.y - h.y;
                         var clen = Math.sqrt(cdx*cdx + cdy*cdy) || 1;
-                        /* Paladin Sentinel charges twice as fast as a
-                           regular fighter (his blade reaches further
-                           and he closes in like a knight on horseback);
-                           mini-heroes drift at 5.0, regular fighters
-                           dash at 8.5. */
+                        /* Paladin Sentinel now charges SLOWLY — drastically
+                           reduced from 17.0 to 4.0 so he plods toward his
+                           target like a heavily-armoured knight on foot
+                           (slower even than a regular fighter's 8.5 dash);
+                           mini-heroes drift at 5.0. */
                         var chargeSpd = h.miniHero ? 5.0
-                                      : (h.swordshield ? 17.0 : 8.5);
+                                      : (h.swordshield ? 4.0 : 8.5);
                         h.vx = (cdx/clen) * chargeSpd;
                         h.vy = (cdy/clen) * chargeSpd;
                         h.x += h.vx * k;
@@ -23265,6 +23351,10 @@
                                 var slashDmg = h.miniHero
                                     ? Math.max(1, Math.ceil((slashTarget.maxHp || 90) / 50))
                                     : (h.swordshield ? 99999 : heroDmg(18));
+                                /* Paladin slash → lightsaber SLICE death */
+                                if (h.swordshield){
+                                    slashTarget.sliceDeath = Math.atan2(cdy, cdx);
+                                }
                                 damageHero(slashTarget, slashDmg, h.x, h.y);
                                 /* slash arc FX */
                                 superheroFX.push({
@@ -23287,28 +23377,15 @@
                                    Paladin's centre, and 24 sparks
                                    fanning out radially. */
                                 if (h.swordshield){
-                                    /* shockwave radius matches the
-                                       fully-extended longsword reach */
+                                    /* shockwave radius — purely COSMETIC now.
+                                       The shield bash no longer deals AoE
+                                       damage: only the sword BLADE itself
+                                       kills (see the blade-contact slice
+                                       above), so robots merely standing near
+                                       the Paladin are no longer harmed. The
+                                       expanding rings/flash below are kept as
+                                       a flourish on each successful slash. */
                                     var swR = 180;
-                                    var swSplash = 99999;       /* per-robot damage */
-                                    for (var swvi = 0; swvi < superheroVillains.length; swvi++){
-                                        var swv = superheroVillains[swvi];
-                                        if (!swv.alive || swv === slashTarget) continue;
-                                        var swvdx = swv.x - h.x;
-                                        var swvdy = (swv.y - 16) - h.y;
-                                        if (swvdx*swvdx + swvdy*swvdy < swR*swR){
-                                            damageHero(swv, swSplash, h.x, h.y);
-                                            /* per-victim impact ring so the
-                                               wave is clearly hitting them */
-                                            superheroFX.push({
-                                                kind:'impactRing',
-                                                x:swv.x, y:swv.y - 12,
-                                                age:0, max:520,
-                                                hue: 48, col:'#facc15',
-                                                r:4, maxR:30
-                                            });
-                                        }
-                                    }
                                     /* THREE EXPANDING GOLD RINGS at the
                                        Paladin centre — staggered max-radii
                                        so they read as a triple shockwave
@@ -28394,6 +28471,66 @@
                 c.arc(0, 0, 22, -Math.PI*0.45, Math.PI*0.45);
                 c.stroke();
                 c.restore();
+            } else if (fx.kind === 'sliceGlow'){
+                /* bright energy line flashing along the lightsaber cut */
+                var sgA = Math.pow(ff, 0.7);
+                c.save();
+                c.translate(fx.x, fx.y);
+                c.rotate(fx.angle);
+                c.lineCap = 'round';
+                /* outer gold halo */
+                c.strokeStyle = 'rgba(253,224,71,' + (0.45 * sgA) + ')';
+                c.lineWidth = 8;
+                c.beginPath(); c.moveTo(-fx.len, 0); c.lineTo(fx.len, 0); c.stroke();
+                /* white-hot core */
+                c.strokeStyle = 'rgba(255,255,255,' + sgA + ')';
+                c.lineWidth = 2.2;
+                c.beginPath(); c.moveTo(-fx.len, 0); c.lineTo(fx.len, 0); c.stroke();
+                c.restore();
+            } else if (fx.kind === 'sliceHalf'){
+                /* one cleaved body half: slide apart + tumble + fall */
+                fx.x += fx.vx;
+                fx.y += fx.vy;
+                fx.vy += fx.grav;
+                fx.vx *= 0.992;
+                fx.rot += fx.rotV;
+                var shA = Math.pow(ff, 1.1);
+                var shDx = Math.cos(fx.cut), shDy = Math.sin(fx.cut);
+                var shNx = -Math.sin(fx.cut) * fx.side, shNy = Math.cos(fx.cut) * fx.side;
+                var shL = 90, shW = 130;
+                c.save();
+                c.translate(fx.x, fx.y);
+                c.rotate(fx.rot);
+                /* clip to the half-plane on this side of the cut line */
+                c.beginPath();
+                c.moveTo( shDx * shL,  shDy * shL);
+                c.lineTo(-shDx * shL, -shDy * shL);
+                c.lineTo(-shDx * shL + shNx * shW, -shDy * shL + shNy * shW);
+                c.lineTo( shDx * shL + shNx * shW,  shDy * shL + shNy * shW);
+                c.closePath();
+                c.clip();
+                /* body silhouette (torso + head), clipped to this half */
+                c.globalAlpha = shA;
+                c.fillStyle = fx.col;
+                c.fillRect(-fx.w * 0.5, -fx.h * 0.45, fx.w, fx.h * 0.9);
+                c.beginPath();
+                c.arc(0, fx.headCy, fx.headR, 0, Math.PI * 2);
+                c.fill();
+                /* costume accent rim */
+                c.globalAlpha = shA * 0.7;
+                c.strokeStyle = fx.accent;
+                c.lineWidth = 1.4;
+                c.strokeRect(-fx.w * 0.5, -fx.h * 0.45, fx.w, fx.h * 0.9);
+                /* seared, glowing cut edge along the slice boundary */
+                c.globalAlpha = shA;
+                c.strokeStyle = 'rgba(253,224,71,' + (shA * 0.7) + ')';
+                c.lineWidth = 5;
+                c.beginPath(); c.moveTo(shDx * shL, shDy * shL); c.lineTo(-shDx * shL, -shDy * shL); c.stroke();
+                c.strokeStyle = 'rgba(255,248,210,' + shA + ')';
+                c.lineWidth = 1.8;
+                c.beginPath(); c.moveTo(shDx * shL, shDy * shL); c.lineTo(-shDx * shL, -shDy * shL); c.stroke();
+                c.restore();
+                c.globalAlpha = 1;
             } else if (fx.kind === 'cityRing'){
                 /* expanding shockwave on the street */
                 var crP = fx.age / fx.max;
@@ -28928,6 +29065,7 @@
            the frame still renders, the simulation continues. */
         try { updateAbduction(dt); } catch (_aerr) {}
         try { updateSuperhero(dt); } catch (_serr) {}
+        try { updateStoneAgeWar(dt); } catch (_saerr) {}
     };
     /* Offscreen buffer used to composite the reconstruction layer
        BEHIND the existing dynamic content. _origDrw clears dynC at
@@ -29024,8 +29162,8 @@
         /* MEDIEVAL */
         { id:'viking',     name:'Viking Age (793-1066)',             icon:'fa-anchor',   colorA:'#1e3a8a', colorB:'#7c2d12',
           sky0:'#374151', sky1:'#1f2937', banner:'#7c2d12', accent:'#fde047' },
-        { id:'crusades',   name:'Crusades (1095-1291)',              icon:'fa-cross',    colorA:'#ffffff', colorB:'#dc2626',
-          sky0:'#fbbf24', sky1:'#fde047', banner:'#dc2626', accent:'#ffffff' },
+        { id:'crusades',   name:'Frankish Invasion (1095-1291)',     icon:'fa-moon',     colorA:'#ffffff', colorB:'#16a34a',
+          sky0:'#fbbf24', sky1:'#fde047', banner:'#16a34a', accent:'#ffffff' },
         { id:'mongol',     name:'Mongol Invasions (1206-1227)',      icon:'fa-horse',    colorA:'#94a3b8', colorB:'#7c2d12',
           sky0:'#94a3b8', sky1:'#525252', banner:'#3b82f6', accent:'#fde047' },
         /* EARLY MODERN */
@@ -29247,8 +29385,3856 @@
         c.restore();
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       STONE AGE TRIBAL WAR — full scene takeover (SPEC v1.8.0)
+       ───────────────────────────────────────────────────────────────
+       When the 'stoneage' war chip is active the modern NYC scene is
+       fully REPLACED by a Paleolithic battlefield. We never edit the
+       building / vehicle / pedestrian code: drawStoneAgeWar() runs in
+       the overlay phase (drawV170Overlays → last on dynC) and its first
+       pass (drawSaEnvironment) paints OPAQUE over 0,0,W,H, so the city,
+       cars and people are simply covered. Two visually-distinct tribes
+       fight in a historically-grounded Paleolithic SKIRMISH (loose
+       lines, thrown stones/javelins, ambush & flanking — NOT the rigid
+       phalanx ranks that only appear from the Bronze Age onward).
+       ═══════════════════════════════════════════════════════════════ */
+
+    /* ════════════════════════════════════════════════════════════════
+       ERA-DRIVEN WAR ENGINE
+       ───────────────────────────────────────────────────────────────
+       Every war era is now a full strategy game. WAR_ERAS holds a data
+       pack per era (two historically-grounded factions, a unit roster
+       with rock-paper-scissors counters, a scene "kit", and an intro
+       briefing). The active era's data is copied into the SA_* working
+       variables by setWarEra(); the whole Stone-Age engine (War Council,
+       deployment, battle, result) then runs unchanged for any era. */
+    function U(id,name,icon,hp,dmg,spd,reach,ranged,range,strong,render,col,rangedDef){
+        return { id:id,name:name,icon:icon,hp:hp,dmg:dmg,speed:spd,reach:reach,
+                 ranged:ranged,range:range,strong:strong,render:render,col:col,
+                 rangedDef:(rangedDef||1) };
+    }
+    /* faction palette — the soldier renderer reads these as skin / clothing /
+       facing-colour / shield. `style` selects the era body silhouette. */
+    function FA(id,name,face,style,skin,coat,coatDk,hair,hairStyle,paint,paintAlt,shield,shieldRim,shieldShape,motif,motifCol){
+        return { id:id,name:name,face:face,style:style,skin:skin,hide:coat,hideDark:coatDk,
+                 hair:hair,hairStyle:hairStyle,paint:paint,paintAlt:paintAlt,
+                 shield:shield,shieldRim:shieldRim,shieldShape:shieldShape,motif:motif,motifCol:motifCol };
+    }
+
+    var WAR_ERAS = {
+      stoneage:{ scene:'paleo', title:'STONE AGE TRIBAL WAR', era:'c. 50,000 BC · Upper Paleolithic',
+        brief:'Two clans clash over the river hunting grounds — wooden spears, flint, slung stone and fire. A Paleolithic skirmish of loose lines, ambush and flanking.',
+        factions:[ FA('ochre','River Clan',1,'tribal','#8a5a3b','#a87f4e','#6b4f2f','#1a1008','topknot','#c2410c','#ea580c','#9a3412','#5a2410','oval','hand','#fde68a'),
+                   FA('ash','Cliff Clan',-1,'tribal','#a07b5c','#8c8378','#57534e','#3f3f46','matted','#e7e5e4','#9ca3af','#d6d3d1','#78716c','round','chevron','#3f3f46') ],
+        roster:{ A:['r_spear','r_sling','r_club','r_harp','r_rider','r_wall','r_stalk','r_totem'], B:['c_warrior','c_bow','c_axe','c_boulder','c_hound','c_wall','c_zerk','c_high'] },
+        units:[ U('r_spear','River Spearman','fa-grip-lines-vertical',120,9,1.0,24,false,0,['c_hound','c_zerk','c_axe'],'spear','#fbbf24'),
+          U('r_sling','Reed Slinger','fa-bullseye',68,15,1.05,13,true,225,['c_wall','c_high','c_zerk'],'sling','#84cc16'),
+          U('r_club','Bog Clubman','fa-gavel',135,14,0.9,16,false,0,['c_wall','c_warrior'],'club','#a16207'),
+          U('r_harp','Harpooner','fa-fish',82,18,1.0,14,true,245,['c_hound','c_wall','c_high'],'sling','#06b6d4'),
+          U('r_rider','Beast Rider','fa-paw',185,16,1.6,18,false,0,['c_bow','c_boulder','c_axe'],'rider','#a855f7'),
+          U('r_wall','Mud-Shield','fa-shield-alt',225,6,0.7,16,false,0,['c_bow','c_boulder'],'wall','#14b8a6',0.40),
+          U('r_stalk','Marsh Stalker','fa-running',88,15,1.85,15,false,0,['c_bow','c_boulder'],'axe','#65a30d'),
+          U('r_totem','Totem Bearer','fa-monument',160,13,0.85,20,false,0,['c_zerk','c_axe'],'spear','#f59e0b'),
+          U('c_warrior','Cliff Warrior','fa-fist-raised',118,10,1.0,20,false,0,['r_rider','r_stalk'],'spear','#cbd5e1'),
+          U('c_bow','Cliff Bowman','fa-location-arrow',62,20,0.95,12,true,315,['r_wall','r_totem','r_club'],'bow','#22c55e'),
+          U('c_axe','Axe Raider','fa-hammer',92,15,1.75,15,false,0,['r_sling','r_harp'],'axe','#ef4444'),
+          U('c_boulder','Boulder Hurler','fa-meteor',96,22,0.8,14,true,205,['r_wall','r_totem'],'sling','#78716c'),
+          U('c_hound','Hound Pack','fa-dog',92,13,1.95,14,false,0,['r_sling','r_harp'],'rider','#e11d48'),
+          U('c_wall','Stone Wall','fa-border-all',230,6,0.68,16,false,0,['r_sling','r_harp'],'wall','#94a3b8',0.38),
+          U('c_zerk','Berserker','fa-fire',78,23,1.5,14,false,0,['r_wall','r_club'],'zerk','#dc2626'),
+          U('c_high','Highlander','fa-mountain',155,16,0.9,18,false,0,['r_spear','r_stalk'],'club','#b45309') ] }
+    };
+    /* ── era-builder: turns a compact faction spec into a full data pack ──
+       Each faction is six unit LABELS; the builder maps each label to a
+       combat KIND (stats + render + counter set) so every era gets a
+       balanced rock-paper-scissors roster with period flavour. */
+    var SA_STYLE_PAL = {
+        tribal:{skin:'#8a5a3b',coatDk:'#5a3a1e',hair:'#1a1008',hairStyle:'topknot',trim:'#fde68a',shield:'#9a3412',shieldRim:'#5a2410',shieldShape:'oval',motif:'hand',motifCol:'#fde68a'},
+        bronze:{skin:'#b98a5e',coatDk:'#7a5a2a',hair:'#2a1a0e',hairStyle:'helm',trim:'#fde047',shield:'#b08d57',shieldRim:'#7c5a1e',shieldShape:'round',motif:'star',motifCol:'#fde047'},
+        iron:{skin:'#b08a64',coatDk:'#57534e',hair:'#2a2420',hairStyle:'helm',trim:'#e5e7eb',shield:'#9ca3af',shieldRim:'#52525b',shieldShape:'round',motif:'cross',motifCol:'#e5e7eb'},
+        mail:{skin:'#caa074',coatDk:'#64748b',hair:'#3a2a1a',hairStyle:'helm',trim:'#cbd5e1',shield:'#94a3b8',shieldRim:'#475569',shieldShape:'kite',motif:'cross',motifCol:'#e5e7eb'},
+        cloth:{skin:'#b88a5a',coatDk:'#7c5a8a',hair:'#1a120a',hairStyle:'cap',trim:'#fcd34d',shield:'#a78bfa',shieldRim:'#5b21b6',shieldShape:'round',motif:'sun',motifCol:'#fcd34d'},
+        coat:{skin:'#d6b08a',coatDk:'#1f2937',hair:'#2a1a0e',hairStyle:'tricorne',trim:'#f8fafc',shield:'#475569',shieldRim:'#1f2937',shieldShape:'round',motif:'none',motifCol:'#f8fafc'},
+        field:{skin:'#cba07a',coatDk:'#3f3f46',hair:'#1a1a1a',hairStyle:'helm',trim:'#a3a3a3',shield:'#3f3f46',shieldRim:'#27272a',shieldShape:'round',motif:'none',motifCol:'#a3a3a3'}
+    };
+    var SA_KIND_TPL = {
+        spear:    { render:'spear',  hp:120, dmg:10, spd:1.0,  reach:22, ranged:false, range:0,   icon:'fa-grip-lines-vertical', col:'#fbbf24', counters:['cav','fast','elephant'] },
+        gunline:  { render:'gun',    hp:96,  dmg:18, spd:1.0,  reach:16, ranged:true,  range:245, icon:'fa-bullseye',            col:'#84cc16', counters:['heavy','spear','tankunit'] },
+        ranged:   { render:'bow',    hp:70,  dmg:18, spd:1.0,  reach:13, ranged:true,  range:290, icon:'fa-location-arrow',      col:'#22c55e', counters:['heavy','tankunit','elephant'] },
+        cav:      { render:'rider',  hp:178, dmg:16, spd:1.7,  reach:18, ranged:false, range:0,   icon:'fa-horse',               col:'#a855f7', counters:['ranged','gunline','arty'] },
+        tankunit: { render:'wall',   hp:228, dmg:7,  spd:0.72, reach:16, ranged:false, range:0,   icon:'fa-shield-alt',          col:'#94a3b8', counters:['ranged','gunline'], rangedDef:0.4 },
+        heavy:    { render:'sword',  hp:120, dmg:20, spd:1.25, reach:15, ranged:false, range:0,   icon:'fa-gavel',               col:'#ef4444', counters:['tankunit','spear'] },
+        fast:     { render:'axe',    hp:90,  dmg:15, spd:1.85, reach:15, ranged:false, range:0,   icon:'fa-running',             col:'#65a30d', counters:['ranged','gunline'] },
+        elephant: { render:'elephant',hp:320,dmg:22, spd:1.0,  reach:22, ranged:false, range:0,   icon:'fa-paw',                 col:'#78716c', counters:['gunline','spear','tankunit'] },
+        tank:     { render:'tank',   hp:430, dmg:26, spd:0.9,  reach:24, ranged:true,  range:265, icon:'fa-truck-monster',       col:'#3f3f46', counters:['gunline','spear','mg','tankunit'] },
+        arty:     { render:'cannon', hp:92,  dmg:30, spd:0.55, reach:14, ranged:true,  range:345, icon:'fa-bomb',                col:'#f97316', counters:['tankunit','heavy','spear'] },
+        mg:       { render:'mg',     hp:82,  dmg:14, spd:0.85, reach:13, ranged:true,  range:235, icon:'fa-crosshairs',          col:'#06b6d4', counters:['gunline','spear','heavy'] },
+        at:       { render:'gun',    hp:78,  dmg:24, spd:1.0,  reach:14, ranged:true,  range:205, icon:'fa-bomb',                col:'#eab308', counters:['tank','elephant','cav'] }
+    };
+    function saKind(label){
+        var l=label.toLowerCase();
+        if (/panzer|sherman|tank|mark iv|a7v|abrams|t-?90|leopard|challenger|merkava|mbt/.test(l)) return 'tank';
+        if (/bazooka|panzerfaust|naffatun|javelin|rpg|atgm|anti-?tank|at team/.test(l)) return 'at';
+        if (/cannon|artillery|mortar|howitzer/.test(l)) return 'arty';
+        if (/machine gun|machinegun|saw|lmg|gpmg/.test(l)) return 'mg';
+        if (/elephant/.test(l)) return 'elephant';
+        if (/chariot|cavalry|cuirassier|knight|horse archer|dragoon|lancer|scots grey|companion|keshik|numidian|mangudai|light cav/.test(l)) return 'cav';
+        if (/archer|bow|crossbow|slinger|rifles|sniper|peltast|agrianian|skirmisher/.test(l)) return 'ranged';
+        if (/rifleman|musket|line infantry|redcoat|grenadier|stormtrooper|paratroop|fallschirm|light inf|kalashnikov|ak-?47|ak rifle|carbine|marine|infantry squad/.test(l)) return 'gunline';
+        if (/shield|wall|triarii|sergeant|standard/.test(l)) return 'tankunit';
+        if (/raider|stalker|scout|hound|light/.test(l)) return 'fast';
+        if (/champion|berserker|guard|swordsman|khopesh|axeman|hypaspist|highlander|thegn|immortal|ghulam|militia|prussian|spartan|huscarl|principes|grey|skirmish/.test(l)) return 'heavy';
+        return 'spear';
+    }
+    function saMakeEra(id, scene, title, era, brief, nameA, colA, styleA, unitsA, nameB, colB, styleB, unitsB){
+        function fac(fid,name,face,style,col){
+            var p=SA_STYLE_PAL[style]||SA_STYLE_PAL.iron;
+            return { id:fid,name:name,face:face,style:style,skin:p.skin,hide:col,hideDark:p.coatDk,
+                hair:p.hair,hairStyle:p.hairStyle,paint:col,paintAlt:p.trim,
+                shield:p.shield,shieldRim:p.shieldRim,shieldShape:p.shieldShape,motif:p.motif,motifCol:p.motifCol };
+        }
+        var facA=fac(id+'A',nameA,1,styleA,colA), facB=fac(id+'B',nameB,-1,styleB,colB);
+        var units=[], rosterA=[], rosterB=[];
+        function build(side, labels, roster){
+            for (var i=0;i<labels.length;i++){
+                var k=saKind(labels[i]), t=SA_KIND_TPL[k], uid=id+'_'+side+'_'+i;
+                units.push({ id:uid, name:labels[i], icon:t.icon, hp:t.hp, dmg:t.dmg, speed:t.spd,
+                    reach:t.reach, ranged:t.ranged, range:t.range, render:t.render, col:t.col,
+                    rangedDef:(t.rangedDef||1), kind:k, strong:[] });
+                roster.push(uid);
+            }
+        }
+        build('A', unitsA, rosterA); build('B', unitsB, rosterB);
+        /* cross-faction counters: a unit is STRONG vs enemy units whose kind
+           is in its template's counter set */
+        for (var u=0; u<units.length; u++){
+            var mine=units[u], cset=SA_KIND_TPL[mine.kind].counters, foeSide=(mine.id.indexOf('_A_')>=0?'_B_':'_A_');
+            for (var v=0; v<units.length; v++){
+                if (units[v].id.indexOf(foeSide)>=0 && cset.indexOf(units[v].kind)>=0) mine.strong.push(units[v].id);
+            }
+        }
+        return { scene:scene, title:title, era:era, brief:brief, factions:[facA,facB],
+                 roster:{A:rosterA,B:rosterB}, units:units };
+    }
+
+    WAR_ERAS.bronzeage = saMakeEra('bronzeage','desert','BRONZE AGE · BATTLE OF KADESH','1274 BC · Egypt vs the Hittite Empire',
+        'Pharaoh Ramesses II and King Muwatalli II clash on the Orontes — the largest chariot battle in history: khopesh, composite bow, and thundering chariots.',
+        'Egypt','#caa46a','iron', ['Spearman','Khopesh Guard','Archer','War Chariot','Axeman','Shieldbearer','Nubian Archer','Sherden Guard'],
+        'Hatti','#9a8866','iron', ['Spearman','Heavy Chariot','Swordsman','Slinger','Axeman','Shieldbearer','Hittite Archer','Royal Guard']);
+    WAR_ERAS.trojan = saMakeEra('trojan','classical','THE TROJAN WAR','c. 1200 BC · Achaeans vs Troy',
+        'Ten years before the walls of Ilium — bronze-clad spearmen, hero champions, and chariots, as Achilles and Hector decide the fate of Troy.',
+        'Achaeans','#c2410c','bronze',['Spearman','Champion','Archer','Charioteer','Swordsman','Shieldbearer','Myrmidon','Cretan Slinger'],
+        'Trojans','#a16207','bronze',['Spearman','Champion','Archer','Slinger','Swordsman','Shieldbearer','Lycian Archer','Dardan Rider']);
+    WAR_ERAS.assyrian = saMakeEra('assyrian','desert','ASSYRIAN EMPIRE','c. 700 BC · Assyria vs Elam',
+        'The first true war machine — paired archers behind wicker shields, siege rams, and chariots crush the cities of Mesopotamia.',
+        'Assyria','#7c2d12','iron',['Spearman','Archer Pair','Siege Ram','War Chariot','Cavalry','Slinger','Royal Guard','Auxiliary Spear'],
+        'Elam','#a16207','iron',['Spearman','Archer','Axeman','Slinger','Cavalry','Shieldbearer','Elamite Chariot','Elite Guard']);
+    WAR_ERAS.thermopylae = saMakeEra('thermopylae','pass','THERMOPYLAE','480 BC · Greeks vs Persia',
+        'In the narrow pass, 300 Spartans and their allies hold the bronze phalanx against the endless host of Xerxes.',
+        'Greeks','#dc2626','bronze',['Hoplite','Spartan','Archer','Peltast','Champion','Shieldbearer','Thespian Spear','Cretan Archer'],
+        'Persians','#7c3aed','cloth',['Sparabara','Immortal','Archer','Cavalry','Skirmisher','Shieldbearer','Persian Lancer','Sagaris Guard']);
+    WAR_ERAS.alexander = saMakeEra('alexander','desert','GAUGAMELA','331 BC · Macedon vs Persia',
+        'Alexander’s sarissa phalanx and Companion cavalry shatter Darius’ scythed chariots and war elephants on the dusty plain.',
+        'Macedon','#1e40af','bronze',['Phalangite','Hypaspist','Companion','Peltast','Archer','Agrianian','Thessalian Cav','Cretan Archer'],
+        'Persia','#fbbf24','cloth',['Immortal','Scythed Chariot','War Elephant','Cavalry','Archer','Spearman','Kardakes','Persian Slinger']);
+    WAR_ERAS.punic = saMakeEra('punic','classical','ROME vs CARTHAGE','218 BC · Second Punic War',
+        'Hannibal crosses the Alps with war elephants to face the manipular legions of Rome in the crucible of the Punic Wars.',
+        'Rome','#dc2626','iron',['Hastati','Principes','Triarii','Velites','Equites','Standard','Roman Cavalry','Auxiliary Archer'],
+        'Carthage','#7c3aed','iron',['Libyan Spear','Iberian Sword','War Elephant','Numidian Cav','Slinger','Spearman','Sacred Band Guard','Balearic Slinger']);
+    WAR_ERAS.viking = saMakeEra('viking','north','VIKING AGE','793–1066 · Norse vs Saxons',
+        'From the longships come the Northmen — shield walls, Dane-axes, and howling berserkers crash against the Saxon fyrd.',
+        'Norse','#1e3a8a','mail',['Bondi','Huscarl','Berserker','Archer','Raider','Shieldman','Dane Axeman','Spearman'],
+        'Saxons','#7c2d12','mail',['Fyrd','Huscarl','Spearman','Archer','Thegn','Shieldman','Saxon Axeman','Slinger']);
+    WAR_ERAS.crusades = saMakeEra('crusades','desert','THE FRANKISH INVASION','1095–1291 · Franks vs the Ummah',
+        'Mailed Frankish knights and crossbows meet the swift horse-archers and lances of Saladin under the desert sun.',
+        'Franks','#e5e7eb','mail',['Knight','Man-at-Arms','Crossbow','Spearman','Templar','Sergeant','Mounted Knight','Longbow Archer'],
+        'Ummah','#16a34a','cloth',['Horse Archer','Spearman','Light Cav','Naffatun','Archer','Ghulam','Mamluk Cavalry','Bedouin Skirmisher']);
+    WAR_ERAS.mongol = saMakeEra('mongol','steppe','MONGOL INVASIONS','1206–1227 · Mongols vs Khwarazm',
+        'Genghis Khan’s horse-archers ride the steppe — the tulughma encirclement and feigned retreat break every army they meet.',
+        'Mongols','#94a3b8','cloth',['Horse Archer','Heavy Lancer','Mangudai','Keshik','Scout','Spearman','Light Cavalry','Camel Archer'],
+        'Khwarazm','#7c2d12','mail',['Heavy Cavalry','Spearman','Crossbow','Ghulam','Archer','Shieldman','Turkic Lancer','Slinger']);
+    WAR_ERAS.revwar = saMakeEra('revwar','colonial','AMERICAN REVOLUTION','1775–83 · Patriots vs Britain',
+        'Line and column, musket and long rifle — the Continental Army and its riflemen take on the redcoats and Hessians for independence.',
+        'Continentals','#1d4ed8','coat',['Line Infantry','Rifleman','Militia','Dragoon','Cannon','Officer','Grenadier','Light Dragoon'],
+        'British','#dc2626','coat',['Redcoat','Grenadier','Light Inf','Hessian','Dragoon','Cannon','Highlander','Rifle Sniper']);
+    WAR_ERAS.napoleonic = saMakeEra('napoleonic','field','WATERLOO','1815 · France vs the Coalition',
+        'Napoleon’s Grande Armée and the Imperial Guard against Wellington’s thin red line and the Prussians — squares, cuirassiers, and cannon.',
+        'France','#1e40af','coat',['Line Infantry','Old Guard','Cuirassier','Voltigeur','Cannon','Lancer','Grenadier','Horse Artillery'],
+        'Coalition','#dc2626','coat',['Redcoat','Highlander','Scots Grey','Rifles','Cannon','Prussian','Light Infantry','Hussar']);
+    WAR_ERAS.wwi = saMakeEra('wwi','trench','WORLD WAR I','1914–18 · Allies vs Central Powers',
+        'Over the top into no-man’s-land — rifle, machine-gun, and the first tanks grind through barbed wire and the mud of the trenches.',
+        'Allies','#3f6212','field',['Rifleman','Machine Gun','Grenadier','Sniper','Mark IV Tank','Artillery','Light Machine Gun','Trench Raider'],
+        'Central','#52525b','field',['Rifleman','Machine Gun','Stormtrooper','Sniper','A7V Tank','Artillery','Trench Mortar','Jäger Sniper']);
+    WAR_ERAS.wwii = saMakeEra('wwii','town','WORLD WAR II','1939–45 · Allies vs Axis',
+        'Combined arms and blitzkrieg — riflemen, machine-gun teams, anti-tank guns, and the steel of Sherman and Panzer decide the field.',
+        'Allies','#3f6212','field',['Rifleman','Machine Gun','Sherman Tank','Bazooka','Mortar','Paratrooper','Anti-Tank Gun','Sniper'],
+        'Axis','#3f3f46','field',['Rifleman','Machine Gun','Panzer Tank','Panzerfaust','Mortar','Fallschirm','PaK Anti-Tank','Jäger Sniper']);
+    WAR_ERAS.modern = saMakeEra('modern','urban','MODERN WARFARE','Present Day · NATO vs OPFOR',
+        'Combined-arms urban war — M4 carbines and the AK-47, belt-fed machine guns, Javelin and RPG anti-tank teams, mortars, and the Abrams and T-90 main battle tanks under the cover of fast jets.',
+        'NATO','#3f6212','field',['Rifleman','Machine Gun','Abrams Tank','Javelin AT','Mortar','Marine'],
+        'OPFOR','#52525b','field',['AK-47 Rifleman','Machine Gun','T-90 Tank','RPG Team','Mortar','Sniper']);
+
+    function warEra(){ return WAR_ERAS[WAR_MODES[warModeIdx].id] || WAR_ERAS.stoneage; }
+
+    /* the live working data — repointed by setWarEra() to the active era */
+    var SA_TRIBE_A, SA_TRIBE_B, SA_UNIT_TYPES, SA_ROSTER, SA_WAR_TITLE, SA_WAR_ERA, SA_WAR_BRIEF, SA_SCENE_KIT;
+    var _saEraId=null;
+    function setWarEra(){
+        var id=WAR_MODES[warModeIdx].id, e=WAR_ERAS[id]||WAR_ERAS.stoneage;
+        SA_TRIBE_A=e.factions[0]; SA_TRIBE_B=e.factions[1];
+        SA_UNIT_TYPES=e.units; SA_ROSTER=e.roster;
+        SA_WAR_TITLE=e.title; SA_WAR_ERA=e.era; SA_WAR_BRIEF=e.brief; SA_SCENE_KIT=e.scene;
+        if (id!==_saEraId){
+            _saEraId=id;
+            if (typeof saWar!=='undefined' && saWar){ saWar.userComp={}; saWar.userPos={}; saWar.inited=false; }
+        }
+    }
+    setWarEra();
+    var SA_VICTORY_MS = 4200;   /* how long the result holds before returning to setup */
+
+    function saTypeById(id){ for (var i=0;i<SA_UNIT_TYPES.length;i++){ if (SA_UNIT_TYPES[i].id===id) return SA_UNIT_TYPES[i]; } return SA_UNIT_TYPES[0]; }
+    function saRosterFor(side){ return SA_ROSTER[side] || SA_ROSTER.A; }
+
+    /* ── STRATEGY GAME: formations ──
+       Each applies side-wide combat modifiers AND a placement shape. */
+    /* Formation modifiers are DECISIVE — picking the right shape for your army
+       (and to counter the enemy's) can swing the whole battle. Rock-paper-
+       scissors: Wedge crushes Line in melee but is shredded by arrows; Shield
+       Wall turns aside ranged armies but is slow and weak on the attack;
+       Skirmish is a ranged powerhouse that folds in a melee. */
+    var SA_FORMATIONS = [
+        { id:'line',       name:'Battle Line', icon:'fa-grip-lines',    desc:'Balanced wide front — no weakness, no edge.',              dmgMul:1.00, spdMul:1.00, rangedDefMul:1.00, rangedDmgMul:1.00 },
+        { id:'wedge',      name:'Wedge',       icon:'fa-play',          desc:'Devastating charge: big melee & speed, but arrow-bait.',    dmgMul:1.55, spdMul:1.22, rangedDefMul:0.55, rangedDmgMul:0.95 },
+        { id:'shieldwall', name:'Shield Wall', icon:'fa-shield-alt',    desc:'Turns aside arrows & shells — but slow and weak attacking.', dmgMul:0.80, spdMul:0.66, rangedDefMul:2.60, rangedDmgMul:0.85 },
+        { id:'skirmish',   name:'Skirmish',    icon:'fa-wind',          desc:'Ranged powerhouse, fast — but crumbles in close combat.',   dmgMul:0.70, spdMul:1.34, rangedDefMul:0.85, rangedDmgMul:1.85 },
+        { id:'horns',      name:'Horns',       icon:'fa-arrows-alt-h',  desc:'Wings envelop the flanks for a strong all-round edge.',     dmgMul:1.28, spdMul:1.12, rangedDefMul:0.92, rangedDmgMul:1.20 }
+    ];
+    function saFormById(id){ for (var i=0;i<SA_FORMATIONS.length;i++){ if (SA_FORMATIONS[i].id===id) return SA_FORMATIONS[i]; } return SA_FORMATIONS[0]; }
+
+    /* Deployment positions — the user decides which TYPE stands where. */
+    var SA_POSITIONS = [
+        { id:'front',  name:'Front',      short:'Front',  icon:'fa-shield-alt' },
+        { id:'center', name:'Center',     short:'Center', icon:'fa-bullseye' },
+        { id:'rear',   name:'Rear',       short:'Rear',   icon:'fa-feather' },
+        { id:'left',   name:'Left Wing',  short:'Left',   icon:'fa-arrow-up' },
+        { id:'right',  name:'Right Wing', short:'Right',  icon:'fa-arrow-down' }
+    ];
+    function saPosName(id){ for (var i=0;i<SA_POSITIONS.length;i++){ if (SA_POSITIONS[i].id===id) return SA_POSITIONS[i].name; } return 'Center'; }
+    function saPosShort(id){ for (var i=0;i<SA_POSITIONS.length;i++){ if (SA_POSITIONS[i].id===id) return SA_POSITIONS[i].short; } return 'Center'; }
+    function saPosIcon(id){ for (var i=0;i<SA_POSITIONS.length;i++){ if (SA_POSITIONS[i].id===id) return SA_POSITIONS[i].icon; } return 'fa-bullseye'; }
+    function saDefaultPos(ty){
+        if (ty.ranged) return 'rear';
+        if (ty.render==='wall') return 'front';
+        if (ty.speed>=1.7) return 'left';
+        return 'center';
+    }
+    /* current position for a type (user override or sensible default) */
+    function saPosOf(id){ return saWar.userPos[id] || saDefaultPos(saTypeById(id)); }
+
+    /* Random enemy deployment — each type gets a randomly chosen zone, lightly
+       biased by role so it's plausible but UNPREDICTABLE every battle. */
+    function saRandomDeploy(roster){
+        var map={};
+        for (var i=0;i<roster.length;i++){
+            var ty=saTypeById(roster[i]), bag;
+            if (ty.ranged)            bag=['rear','rear','left','right','center'];
+            else if (ty.render==='wall') bag=['front','front','center','left','right'];
+            else if (ty.speed>=1.6)   bag=['left','right','front','center','rear'];
+            else                      bag=['center','front','left','right','rear'];
+            map[ty.id]=bag[rngI(0,bag.length)];
+        }
+        return map;
+    }
+
+    var SA_MIN_N = 50;          /* per-side army minimum */
+    var SA_MAX_N = 150;         /* per-side army cap (epic mass battles) */
+    var SA_MAX_PER_TYPE = 10;   /* HARD CAP: no more than 10 of any one unit type */
+
+    var saWar = {
+        inited:false, A:[], B:[], projectiles:[], fx:[], t:0, scene:null,
+        /* strategy state machine: 'setup' (panel open) → 'battle' → 'result' */
+        phase:'setup', userSide:'A',
+        N:50, userComp:{}, userPos:{}, userForm:'line',
+        enemyComp:{}, enemyForm:'line',
+        result:null, resultT:0, simple:false,
+        terr:0.5, flagT:0, winner:null, planes:[], planeT:0,
+        fired:{bullet:0,shell:0,arrow:0,rock:0}, auto:false, fervor:1,
+        panel:null, panelStep:1
+    };
+
+    /* every war era is now a strategy game — active for ANY era pack */
+    function stoneAgeWarActive(){
+        return !!(warModeOn && WAR_MODES[warModeIdx] && WAR_ERAS[WAR_MODES[warModeIdx].id]);
+    }
+    function saUserTribe(){ return saWar.userSide==='A' ? SA_TRIBE_A : SA_TRIBE_B; }
+    function saEnemyTribe(){ return saWar.userSide==='A' ? SA_TRIBE_B : SA_TRIBE_A; }
+    function saCompTotal(comp){ var n=0; for (var k in comp){ if (comp.hasOwnProperty(k)) n+=comp[k]; } return n; }
+
+    function resetStoneAgeWar(){
+        saWar.inited = false; saWar.A = []; saWar.B = [];
+        saWar.projectiles = []; saWar.fx = []; saWar.scene = null;
+        saWar.phase = 'setup'; saWar.result = null; saWar.resultT = 0;
+        saWar.winner = null; saWar.terr = 0.5; saWar.flagT = 0;
+    }
+
+    /* Build the scene + reset to the SETUP phase (army-builder panel).
+       The battle itself is not spawned until the user clicks "Battle". */
+    function initStoneAgeWar(){
+        setWarEra();
+        if (saWar.inited) return;
+        saWar.scene = buildSaScene();
+        saWar.env = buildSaEnv();        /* terrain + period scenery for this kit */
+        saWar.A = []; saWar.B = [];
+        saWar.projectiles = []; saWar.fx = [];
+        saWar.phase = 'setup'; saWar.result = null; saWar.resultT = 0;
+        saWar.winner = null; saWar.t = 0; saWar.terr = 0.5; saWar.flagT = 0;
+        if (!saCompTotal(saWar.userComp)) saWar.userComp = saDefaultComp(saWar.N, saRosterFor(saWar.userSide));
+        saWar.inited = true;
+    }
+
+    function saAliveCount(arr){
+        var n=0; for (var i=0;i<arr.length;i++){ if (arr[i].phase!=='down') n++; } return n;
+    }
+
+    /* A sensible starting army (drawn only from the clan's own roster).
+       Each unit type is capped at SA_MAX_PER_TYPE (10). */
+    function saDefaultComp(N, roster){
+        var c={}, cap=SA_MAX_PER_TYPE;
+        var want=Math.min(N, roster.length*cap);                 /* can't exceed capacity */
+        var per=Math.min(cap, Math.floor(want/roster.length));
+        for (var i=0;i<roster.length;i++) c[roster[i]]=per;
+        var rem=want-per*roster.length;
+        for (var j=0;j<roster.length && rem>0;j++){              /* spread the remainder, still ≤ cap */
+            var add=Math.min(cap-c[roster[j]], rem); c[roster[j]]+=add; rem-=add;
+        }
+        return c;
+    }
+
+    /* Enemy AI picks an army that sums to N from ITS OWN roster and a
+       formation, biased toward units that COUNTER the player's biggest
+       stack — so the player's composition genuinely matters. */
+    function saEnemyPlan(N, userComp, enemyRoster){
+        var topId=null, topN=-1;
+        for (var k in userComp){ if (userComp.hasOwnProperty(k) && userComp[k]>topN){ topN=userComp[k]; topId=k; } }
+        /* counter types that EXIST in the enemy roster */
+        var counters=[];
+        for (var i=0;i<enemyRoster.length;i++){
+            var ty=saTypeById(enemyRoster[i]);
+            if (topId && ty.strong.indexOf(topId)>=0) counters.push(ty.id);
+        }
+        var cap=SA_MAX_PER_TYPE;
+        var comp={}, nLeft=Math.min(N, enemyRoster.length*cap), cBudget=Math.round(N*0.45);
+        for (var ci=0; ci<counters.length && cBudget>0; ci++){
+            var give=Math.max(1, Math.round(cBudget/(counters.length-ci)));
+            give=Math.min(give, nLeft, cap-(comp[counters[ci]]||0));
+            if (give<=0) continue;
+            comp[counters[ci]]=(comp[counters[ci]]||0)+give; nLeft-=give; cBudget-=give;
+        }
+        var guard=0;
+        while (nLeft>0 && guard++<2000){
+            /* only pick types that still have room under the per-type cap */
+            var avail=[]; for (var ai=0; ai<enemyRoster.length; ai++){ if ((comp[enemyRoster[ai]]||0)<cap) avail.push(enemyRoster[ai]); }
+            if (!avail.length) break;
+            var pick=avail[rngI(0,avail.length)];
+            var add=Math.min(nLeft, rngI(1,4), cap-(comp[pick]||0));
+            comp[pick]=(comp[pick]||0)+add; nLeft-=add;
+        }
+        return { comp:comp, form:SA_FORMATIONS[rngI(0,SA_FORMATIONS.length)].id };
+    }
+
+    /* Spawn BOTH armies from the chosen compositions + formations and
+       enter the battle phase. */
+    function saStartBattle(){
+        if (!saWar.inited) initStoneAgeWar();
+        if (saCompTotal(saWar.userComp)<1) return;
+        var enemySide = (saWar.userSide==='A') ? 'B' : 'A';
+        var plan = saEnemyPlan(saCompTotal(saWar.userComp), saWar.userComp, saRosterFor(enemySide));
+        /* RANDOM enemy formation AND random deployment — recomputed every
+           battle so the player can never predict how the enemy will array. */
+        saWar.enemyComp = plan.comp;
+        saWar.enemyForm = SA_FORMATIONS[rngI(0,SA_FORMATIONS.length)].id;
+        var enemyPos = saRandomDeploy(saRosterFor(enemySide));
+        var userFormDef  = saFormById(saWar.userForm);
+        var enemyFormDef = saFormById(saWar.enemyForm);
+        /* user's chosen deployment vs enemy's RANDOM deployment */
+        var userPosFn  = function(id){ return saPosOf(id); };
+        var enemyPosFn = function(id){ return enemyPos[id] || saDefaultPos(saTypeById(id)); };
+        var aComp, aForm, bComp, bForm, aPos, bPos;
+        if (saWar.userSide==='A'){ aComp=saWar.userComp; aForm=userFormDef; aPos=userPosFn; bComp=saWar.enemyComp; bForm=enemyFormDef; bPos=enemyPosFn; }
+        else                     { aComp=saWar.enemyComp; aForm=enemyFormDef; aPos=enemyPosFn; bComp=saWar.userComp; bForm=userFormDef; bPos=userPosFn; }
+        saWar.A = buildSaArmy(SA_TRIBE_A, aComp, aForm, +1, aPos);
+        saWar.B = buildSaArmy(SA_TRIBE_B, bComp, bForm, -1, bPos);
+        saWar.projectiles=[]; saWar.fx=[]; saWar.planes=[]; saWar.planeT=2000;
+        saWar.fired={bullet:0,shell:0,arrow:0,rock:0};   /* cumulative shot tally */
+        saWar.fervor=1;                                   /* escalating damage so battles always resolve */
+        saWar.phase='battle'; saWar.t=0; saWar.terr=0.5; saWar.flagT=0;
+        saWar.winner=null; saWar.result=null; saWar.resultT=0;
+        /* big hosts switch to a lightweight per-soldier render to stay smooth */
+        saWar.simple = (saWar.A.length + saWar.B.length) > 110;
+        saMarkChiefs(saWar.A); saMarkChiefs(saWar.B);
+        saMarkBearer(saWar.A); saMarkBearer(saWar.B);
+        saCloseSetup();
+    }
+    /* one soldier per side carries the faction standard into battle */
+    function saMarkBearer(arr){
+        var best=null;
+        for (var i=0;i<arr.length;i++){ var u=arr[i]; if (u.chief) continue; if (!best || u.maxHp>best.maxHp) best=u; }
+        if (!best && arr.length) best=arr[0];
+        if (best) best.bearer=true;
+    }
+    /* if the colour-bearer falls, the standard is taken up by a fresh soldier */
+    function saEnsureBearer(arr){
+        var alive=null, hasB=false;
+        for (var i=0;i<arr.length;i++){ var u=arr[i]; if (u.phase==='down') continue;
+            if (u.bearer){ hasB=true; break; }
+            if (!alive || u.maxHp>alive.maxHp) alive=u; }
+        if (!hasB && alive) alive.bearer=true;
+    }
+
+    /* ── AUTO CAMPAIGN ──────────────────────────────────────────────
+       Watch every war fight itself: each battle auto-resolves, the victor
+       plants a huge flag on the loser's ground, then it rolls on to the next
+       era and loops forever. Both armies are randomised each war for variety. */
+    var SA_AUTO_HOLD = 4200;        /* ms the result/flag holds before the next war */
+    function saRandomArmy(roster){
+        /* smaller, varied armies so the auto campaign reads as clear, spread-out
+           duels rather than a crowded blob */
+        var c={};
+        for (var i=0;i<roster.length;i++) c[roster[i]] = rngI(2, 6);   /* 2..5 each */
+        return c;
+    }
+    function saAutoNextBattle(advance){
+        if (advance){ warModeIdx = (warModeIdx+1) % WAR_MODES.length; }
+        setWarEra();
+        saWar.inited=false; initStoneAgeWar();                 /* rebuild scene + terrain + scenery */
+        saWar.userSide = (Math.random()<0.5)?'A':'B';
+        saWar.userComp = saRandomArmy(saRosterFor(saWar.userSide));
+        saWar.userForm = SA_FORMATIONS[rngI(0,SA_FORMATIONS.length)].id;
+        saWar.userPos  = saRandomDeploy(saRosterFor(saWar.userSide));
+        saStartBattle();
+    }
+
+    /* Pick the toughest soldier in an army as its CHIEF (speech bubbles). */
+    function saMarkChiefs(arr){
+        var best=null;
+        for (var i=0;i<arr.length;i++){ if (!best || arr[i].maxHp>best.maxHp) best=arr[i]; }
+        if (best){ best.chief=true; best.sayT=900+rng(0,1200); }
+    }
+
+    /* Zone anchors (x = fraction outer→inner, y = offset fraction of band)
+       — these realise the player's "what type stands where" deployment. */
+    var SA_ZONE = {
+        front:  { fx:0.86, fy: 0.00 },
+        center: { fx:0.55, fy: 0.00 },
+        rear:   { fx:0.20, fy: 0.00 },
+        left:   { fx:0.66, fy:-0.34 },
+        right:  { fx:0.66, fy: 0.34 }
+    };
+
+    /* ── Build one army from a composition + formation + deployment ──
+       `posFor(id)` returns the zone a TYPE is assigned to. Units cluster in
+       their zone, then the chosen formation skews the whole host. */
+    function buildSaArmy(tribe, comp, form, face, posFor){
+        /* group unit instances by their deployment zone */
+        var zones={ front:[], center:[], rear:[], left:[], right:[] };
+        var total=0;
+        for (var k in comp){
+            if (!comp.hasOwnProperty(k) || comp[k]<=0) continue;
+            var ty=saTypeById(k);
+            var z=posFor(k); if (!zones[z]) z='center';
+            for (var n=0;n<comp[k];n++){ zones[z].push(ty); total++; }
+        }
+        if (!total) return [];
+        var Hs = Math.max(0.42, Math.min(1.18, (H/740) * Math.sqrt(44/Math.max(36,total))));
+        var baseY = GROUND + (H-GROUND)*0.50;
+        var bandH = (H-GROUND)*1.02;                       /* tall band → wide vertical spread */
+        var innerX = (face>0) ? W*0.44 : W*0.56;           /* armies reach near the centre line */
+        var outerX = (face>0) ? W*0.015 : W*0.985;         /* …and back to the very edge */
+        var span = innerX - outerX;
+        var cell = Math.max(22, 38*Hs);                    /* big spacing → sparse, readable ranks */
+        var arr=[];
+        var zid; var zlist=['front','center','rear','left','right'];
+        for (var zi=0; zi<zlist.length; zi++){
+            zid=zlist[zi];
+            var list=zones[zid]; if (!list.length) continue;
+            var Z=SA_ZONE[zid];
+            var ax = outerX + span*Z.fx;
+            var ay = baseY + bandH*Z.fy;
+            var cnt=list.length;
+            var cols=Math.max(2, Math.round(Math.sqrt(cnt)*1.25));
+            var rows=Math.ceil(cnt/cols);
+            for (var i=0;i<cnt;i++){
+                var col=i%cols, row=Math.floor(i/cols);
+                var ux = ax - face*(col-(cols-1)/2)*cell;     /* depth toward back */
+                var uy = ay + (row-(rows-1)/2)*cell;
+                /* formation skew on top of zone layout */
+                if (form.id==='wedge')      ux += face*Math.abs(row-(rows-1)/2)*cell*0.7;
+                else if (form.id==='skirmish'){ ux+=rng(-cell*0.5,cell*0.5); uy+=rng(-cell*0.5,cell*0.5); }
+                else if (form.id==='shieldwall') ux = ax - face*(col-(cols-1)/2)*cell*0.7;
+                else if (form.id==='horns')  uy += (row<rows/2?-1:1)*bandH*0.10;
+                arr.push(makeSaSoldier(tribe, list[i], ux, uy, Hs, face, form));
+            }
+        }
+        return arr;
+    }
+
+    function makeSaSoldier(tribe, ty, hx, ly, Hs, face, form){
+        var scl = Hs * (ty.id==='shield'?1.08 : ty.id==='rider'?1.15 : ty.id==='berserker'?0.98 : 1.0);
+        return {
+            tribe:tribe, type:ty, role:ty.render, face:face,
+            x:hx, homeX:hx, y:ly, homeY:ly, scale:scl,
+            hp:ty.hp, maxHp:ty.hp,
+            phase:(ty.ranged ? 'advance' : 'advance'),
+            anim:rng(0,6.28), seed:rng(0,6.28), aim:rng(0,6.28), throwPulse:0,
+            throwT:rng(300,1400), strikeCd:rng(0,400), strikePose:0,
+            speed: ty.speed * form.spdMul * (0.9+0.2*Math.random()),
+            reach: ty.reach, dmg: ty.dmg, ranged: ty.ranged, range: ty.range,
+            dmgMul: form.dmgMul, rangedDmgMul: form.rangedDmgMul, rangedDefMul: form.rangedDefMul,
+            strong: ty.strong, rangedDef: ty.rangedDef||1,
+            downT:0, hurtT:0, fallDir:1, chief:false, sayT:0, sayText:'', sayHold:0,
+            target:null, retargetT:rng(0,300), atkCount:0
+        };
+    }
+
+    /* ── Deterministic camp scene (built once; stable positions) ── */
+    function buildSaScene(){
+        var s = { huts:[], boulders:[], grass:[], herd:[], trees:[], fire:null,
+                  cliff:null, megalith:null, volcano:null, river:0, totem:0, drum:0, rack:0 };
+        s.volcano  = { x: W*0.12, h: GROUND*0.34 };
+        s.megalith = { x: W*0.30 };
+        s.cliff    = { x: W*0.87 };
+        /* camp pushed to the LEFT flank so the centre stays clear for the clash */
+        s.fire   = { x: W*0.16, y: GROUND + (H-GROUND)*0.26 };
+        s.totem  = W*0.08;
+        s.drum   = W*0.235;
+        s.rack   = W*0.105;
+        s.river  = GROUND + (H-GROUND)*0.16;   /* thin amber river band, mid-ground */
+        var hutXs = [W*0.20, W*0.74, W*0.81];
+        for (var i=0;i<hutXs.length;i++){
+            s.huts.push({ x:hutXs[i], y:GROUND + (H-GROUND)*0.20, scl: rng(0.85,1.2), kind:(i%2) });
+        }
+        for (var b=0;b<14;b++){
+            s.boulders.push({ x: rng(0,W), y: GROUND + (H-GROUND)*rng(0.32,0.78), r: rng(5,17) });
+        }
+        for (var g=0;g<70;g++){
+            s.grass.push({ x: rng(0,W), y: GROUND + (H-GROUND)*rng(0.22,0.95), h: rng(4,13) });
+        }
+        /* distant grazing herd silhouettes on the hill line */
+        for (var h2=0; h2<4; h2++){
+            s.herd.push({ x: W*(0.30+h2*0.13)+rng(-20,20), y: GROUND*0.80, s: rng(0.7,1.1), kind:(h2%2) });
+        }
+        /* scrubby trees at the edges */
+        for (var tr2=0; tr2<5; tr2++){
+            s.trees.push({ x: (tr2<3? rng(0,W*0.18): rng(W*0.9,W)), y: GROUND + (H-GROUND)*rng(0.30,0.55), s: rng(0.8,1.4) });
+        }
+        return s;
+    }
+
+    function saNearestFoe(w, foes){
+        /* TRUE 2D nearest-foe (y weighted a touch lighter so units still favour
+           the foe on their own line, but a closer one off-axis is never ignored).
+           This is what guarantees that — even at the very end of a battle, when a
+           handful of survivors are scattered far apart — every soldier locks onto
+           a reachable enemy instead of stalling out of range. */
+        var best=null, bd=1e18;
+        for (var i=0;i<foes.length;i++){
+            var f=foes[i];
+            if (f.phase==='down') continue;
+            var dx=f.x-w.x, dy=(f.y-w.y)*0.7;
+            var d=dx*dx+dy*dy;
+            if (d<bd){ bd=d; best=f; }
+        }
+        return best;
+    }
+
+    /* Claim-aware foe finder: prefer the nearest enemy that isn't already being
+       dog-piled, so attackers spread out into one-on-one duels. Melee fighters
+       want a private duel (cap 1); ranged can share a target (cap 3). Falls back
+       to the plain nearest enemy when everything is already claimed. */
+    function saAcquireFoe(w, foes){
+        var cap = w.ranged ? 3 : 1;
+        var best=null, bd=1e18, any=null, ad=1e18;
+        for (var i=0;i<foes.length;i++){
+            var f=foes[i];
+            if (f.phase==='down') continue;
+            var dx=f.x-w.x, dy=(f.y-w.y)*0.8, d=dx*dx+dy*dy;
+            if (d<ad){ ad=d; any=f; }
+            if ((f.atkCount||0)<cap && d<bd){ bd=d; best=f; }
+        }
+        return best || any;
+    }
+
+    function saDown(w){
+        if (w.phase==='down') return;
+        if (w.target){ w.target.atkCount=Math.max(0,(w.target.atkCount||0)-1); w.target=null; }
+        w.phase='down'; w.downT=0; w.fallDir=(Math.random()<0.5?-1:1);
+        pushSaFx(w.x, w.y-24*w.scale, 'blood', w.tribe.paint);
+        pushSaFx(w.x, w.y-24*w.scale, 'blood', w.tribe.paint);
+        pushSaFx(w.x, w.y-10*w.scale, 'dust', '#7c4a23');
+    }
+
+    /* counter bonus: attacker deals ×1.6 if the defender's type is in its
+       `strong` list — this is the rock-paper-scissors core of the strategy. */
+    function saCounterMul(attacker, defender){
+        return (attacker.strong && defender.type && defender.type.id && attacker.strong.indexOf(defender.type.id)>=0) ? 1.6 : 1.0;
+    }
+
+    /* CLASH — the metal-on-metal moment when two melee fighters connect: a
+       hot white spark-star plus a quick radial shower of embers. Gives every
+       sword/axe/spear strike a readable, cinematic point of impact. */
+    function saClashSpark(x, y){
+        if (saWar.fx.length>320) return;
+        saWar.fx.push({x:x,y:y,vx:0,vy:0,r:2,life:150,max:150,kind:'clash',col:'#fff7d6'});
+        var n=5+rngI(0,4);
+        for (var s=0;s<n;s++){ var a=rng(0,Math.PI*2), sp=rng(2.2,5.5);
+            saWar.fx.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-0.8,r:rng(0.8,1.9),
+                life:rng(160,360),max:360,kind:'spark',col:(s%2?'#ffd884':'#fff2c0')}); }
+    }
+
+    /* One side's soldiers take a turn. RANGED units hold at standoff and
+       shoot; MELEE units advance to contact and strike. Damage scales by
+       the unit's dmg × formation dmgMul × type counter. Ranged units that
+       get caught in melee fight (weakly) instead of fleeing, so the battle
+       always resolves. */
+    function saStep(arr, friends, foes, dt){
+        var k = dt/16;
+        for (var i=0;i<arr.length;i++){
+            var w = arr[i];
+            if (w.phase==='down') continue;
+            /* TARGET CACHE — re-acquire the nearest foe only periodically (or
+               when the current one dies), so big armies don't pay an O(n²)
+               nearest-foe scan every single frame. */
+            w.retargetT -= dt;
+            var foe = w.target;
+            /* DUEL PAIRING — keep the current foe until it dies; only then pick a
+               new one. Each foe can be claimed by a limited number of attackers
+               so soldiers PAIR OFF into spread-out one-on-one fights instead of
+               swarming a single point. */
+            if (!foe || foe.phase==='down'){
+                if (foe){ foe.atkCount=Math.max(0,(foe.atkCount||0)-1); }
+                foe = saAcquireFoe(w, foes); w.target = foe;
+                if (foe) foe.atkCount=(foe.atkCount||0)+1;
+                w.retargetT = 260 + rng(0,200);
+            } else if (w.retargetT<=0){
+                /* periodic sanity re-check (cheap) — only switch to a MUCH closer
+                   free foe so duels don't constantly reshuffle */
+                var alt=saAcquireFoe(w, foes);
+                if (alt && alt!==foe){
+                    var dcur=(foe.x-w.x)*(foe.x-w.x)+(foe.y-w.y)*(foe.y-w.y);
+                    var dalt=(alt.x-w.x)*(alt.x-w.x)+(alt.y-w.y)*(alt.y-w.y);
+                    if (dalt < dcur*0.5){ foe.atkCount=Math.max(0,(foe.atkCount||0)-1); foe=alt; w.target=foe; foe.atkCount=(foe.atkCount||0)+1; }
+                }
+                w.retargetT = 260 + rng(0,200);
+            }
+            if (!foe){
+                /* no enemy left — hold position (victory) */
+                w.phase='advance'; w.anim += dt*0.011; continue;
+            }
+            var dyy = foe.y - w.y, ady = Math.abs(dyy);
+            var dx = foe.x - w.x, adx = Math.abs(dx);
+            var dist2 = Math.sqrt(adx*adx + ady*ady);   /* true range to the foe */
+
+            if (w.ranged && dist2 > w.reach+6){
+                /* RANGED DUEL: close to a reliable firing distance on its claimed
+                   foe (closer than max range so shots actually connect), then hold
+                   and shoot. Closing in both axes keeps every foe reachable. */
+                var standoff = Math.min(w.range*0.66, 200);
+                if (dist2 > standoff){
+                    w.phase='advance';
+                    var inv0 = 1/(dist2||1);
+                    w.x += dx*inv0*w.speed*k;
+                    if (ady>4) w.y += (dyy>0?1:-1)*Math.min(w.speed*0.3*k, ady);   /* mostly hold lane */
+                    w.anim += dt*0.012;
+                } else {
+                    w.phase='aim';                                              /* hold for a steady, accurate shot */
+                    if (ady>8) w.y += (dyy>0?1:-1)*Math.min(w.speed*0.3*k, ady-8);
+                }
+                w.face = (dx>=0?1:-1);
+                w.aim += dt*0.004;
+                if (w.throwPulse>0) w.throwPulse = Math.max(0, w.throwPulse - dt/280);
+                w.throwT -= dt;
+                if (w.throwT<=0 && dist2 <= w.range){
+                    spawnSaProjectile(w, foe); w.throwPulse=1;
+                    /* automatic weapons hammer; field guns & tanks reload slow */
+                    var ti = (w.role==='mg')?120 : (w.role==='gun')?280 :
+                             (w.role==='tank')?1300 : (w.role==='cannon')?1800 :
+                             (w.type.id==='archer')?620 : 820;
+                    var tj = (w.role==='mg')?140 : (w.role==='gun')?220 :
+                             (w.role==='tank'||w.role==='cannon')?800 : 620;
+                    w.throwT = ti + rng(0, tj);
+                }
+                continue;
+            }
+
+            if (dist2 > w.reach){
+                w.phase='advance';
+                var inv = 1/(dist2||1);
+                /* CHARGE — fast units & cavalry pour on the speed as they close,
+                   leaning into the run; everyone converges in 2D so no survivor
+                   is ever stranded out of contact. */
+                var chg = (dist2<170 && (w.speed>=1.4 || w.role==='rider')) ? 1.5 : 1.0;
+                w.charge = chg>1 ? Math.min(1,(w.charge||0)+dt/260) : Math.max(0,(w.charge||0)-dt/300);
+                w.x += dx*inv*w.speed*chg*k;
+                w.y += dyy*inv*w.speed*chg*0.32*k;     /* hold lane → duels spread along the front, not a blob */
+                w.face = (dx>=0?1:-1);
+                w.anim += dt*0.012*chg;
+                if (Math.random()<(chg>1?0.10:0.03)) pushSaFx(w.x-w.face*6, w.y-2, 'dust', '#7c4a23');
+            } else {
+                w.phase='melee'; w.charge=Math.max(0,(w.charge||0)-dt/200);
+                w.face = (dx>=0?1:-1);
+                w.strikePose = 0.5 + 0.5*Math.sin(saWar.t*0.02 + w.seed);
+                w.strikeCd -= dt;
+                if (w.strikeCd<=0){
+                    w.strikeCd = 300 + rng(0,220);
+                    /* BRUTAL melee — heavier hits, counter bonus, blood + clash spark */
+                    var dmg = (w.dmg*1.25 + rng(0,5)) * (w.dmgMul||1) * saCounterMul(w, foe) * (saWar.fervor||1);
+                    foe.hp -= dmg;
+                    foe.hurtT = 220; foe.fallDir=(dx>=0?1:-1);
+                    var cmx=(w.x+foe.x)/2, cmy=(foe.y-22*foe.scale + w.y-22*w.scale)/2;
+                    saClashSpark(cmx, cmy);                                  /* CLANG flash + sparks */
+                    pushSaFx(foe.x, foe.y-22*foe.scale, 'blood', foe.tribe.paint);
+                    if (foe.hp<=0){
+                        pushSaFx(foe.x, foe.y-20*foe.scale, 'blood', '#7f1d1d');
+                        saDown(foe);
+                    }
+                }
+            }
+        }
+    }
+
+    function saTallyShot(kind){ if (saWar.fired) saWar.fired[kind]=(saWar.fired[kind]||0)+1; }
+    function spawnSaProjectile(w, tgt){
+        var r=w.role, fervor=(saWar.fervor||1);
+        var foeArr=(w.tribe===SA_TRIBE_A ? saWar.B : saWar.A);
+        var muzzle = (r==='tank')?34 : (r==='cannon')?22 : (r==='mg')?20 : 12;
+        var muzY   = (r==='tank')?18 : (r==='cannon')?11 : 30*w.scale;
+        var sx = w.x + w.face*muzzle, sy = w.y - muzY;
+        var tx = tgt.x, ty = tgt.y - 20*tgt.scale;
+
+        /* ── FIREARMS: flat, fast tracer rounds that punch through flesh ── */
+        if (r==='gun' || r==='mg'){
+            var dx=tx-sx, dy=ty-sy, d=Math.sqrt(dx*dx+dy*dy)||1;
+            var spread=(r==='mg'?0.05:0.025);
+            var spd=20 + (r==='mg'?2:0);
+            var ang=Math.atan2(dy,dx)+rng(-spread,spread);
+            saWar.projectiles.push({
+                x:sx, y:sy, vx:Math.cos(ang)*spd, vy:Math.sin(ang)*spd, g:0.012,
+                rot:ang, rotV:0, kind:'bullet', spin:false, shooter:w, foeArr:foeArr,
+                dmg:(w.dmg*1.9)*(w.rangedDmgMul||1)*fervor, life:560, tracer:(Math.random()<0.6)
+            });
+            saTallyShot('bullet');
+            pushSaFx(sx, sy, 'spark', '#ffd884');               /* muzzle flash */
+            pushSaFx(sx+w.face*4, sy, 'spark', '#fff6d0');      /* hot core */
+            return;
+        }
+        /* ── TANK / ARTILLERY: lobbed high-explosive shell, bursts on impact ── */
+        if (r==='tank' || r==='cannon'){
+            var g2=(r==='cannon')?0.20:0.13;
+            var flight=(r==='cannon')? 30+Math.abs(tx-sx)*0.07 : 20+Math.abs(tx-sx)*0.045;
+            var vx2=(tx-sx)/flight, vy2=(ty-sy)/flight - 0.5*g2*flight;
+            saWar.projectiles.push({
+                x:sx, y:sy, vx:vx2, vy:vy2, g:g2, rot:Math.atan2(vy2,vx2), rotV:0,
+                kind:'shell', spin:false, shooter:w, foeArr:foeArr,
+                dmg:(w.dmg*1.7)*(w.rangedDmgMul||1)*fervor, splash:(r==='cannon'?40:32),
+                splashDmg:(r==='cannon'?60:48)*fervor, life:3200, smokeT:0
+            });
+            saTallyShot('shell');
+            pushSaFx(sx, sy, 'spark', '#fff1c0');
+            pushSaFx(sx, sy, 'dust', '#6b665e');                /* gun smoke */
+            return;
+        }
+        /* ── ANCIENT MISSILES: arrows (bow) and slung/thrown stone ── */
+        var g=0.16, isArrow=(r==='bow');
+        var flight0=24 + Math.abs(tx-sx)*0.085;
+        var vx0=(tx-sx)/flight0, vy0=(ty-sy)/flight0 - 0.5*g*flight0;
+        saWar.projectiles.push({
+            x:sx, y:sy, vx:vx0, vy:vy0, g:g, rot:Math.atan2(vy0,vx0), rotV:isArrow?0:rng(-0.32,0.32),
+            kind:(isArrow?'arrow':'rock'), spin:!isArrow,
+            shooter:w, foeArr:foeArr,
+            dmg:(w.dmg*1.4)*(w.rangedDmgMul||1)*fervor, life:2600
+        });
+        saTallyShot(isArrow?'arrow':'rock');
+    }
+
+    /* high-explosive burst — damages BOTH sides in radius (war is brutal) */
+    function saShellBurst(x, y, dmg, radius){
+        radius = radius||34;
+        saWar.fx.push({x:x,y:y,vx:0,vy:0,r:2,life:400,max:400,kind:'blast',col:'#fff'});
+        for (var s=0;s<14;s++){ var a=rng(0,Math.PI*2),sp=rng(2,6.5);
+            saWar.fx.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2.4,r:rng(1,3),
+                life:rng(420,950),max:950,kind:'spark',col:(s%2?'#fb923c':'#fde68a')}); }
+        pushSaFx(x,y,'dust','#3a322a'); pushSaFx(x,y,'dust','#4a4038');
+        function blast(arr){ for (var j=0;j<arr.length;j++){ var u=arr[j];
+            if (u.phase==='down') continue;
+            var dxx=u.x-x, dyy=(u.y-12*u.scale)-y;
+            if (dxx*dxx+dyy*dyy < radius*radius){
+                u.hp -= dmg*(0.6+0.4*(1-Math.min(1,Math.sqrt(dxx*dxx+dyy*dyy)/radius)));
+                u.hurtT=240; u.fallDir=(u.x<x?-1:1);
+                pushSaFx(u.x, u.y-22*u.scale, 'blood', u.tribe.paint);
+                if (u.hp<=0) saDown(u);
+            } } }
+        blast(saWar.A); blast(saWar.B);
+    }
+
+    function updateSaProjectiles(dt){
+        var k = dt/16;
+        var groundY = GROUND + (H-GROUND)*0.50;
+        for (var i=saWar.projectiles.length-1;i>=0;i--){
+            var p = saWar.projectiles[i];
+            var px0=p.x, py0=p.y;                    /* previous position (for sweep) */
+            p.vy += p.g*k; p.x += p.vx*k; p.y += p.vy*k; p.life -= dt;
+            if (p.spin) p.rot += p.rotV*k; else p.rot = Math.atan2(p.vy, p.vx);
+            if (p.kind==='shell'){ p.smokeT-=dt; if (p.smokeT<=0){ p.smokeT=42; pushSaFx(p.x,p.y,'dust','#8a857c'); } }
+            /* SWEPT hit test: check distance from each foe to the segment the
+               projectile travelled this frame, so fast arrows/rocks can never
+               tunnel through a target without dealing damage. */
+            var hit=false;
+            var sx=p.x-px0, sy=p.y-py0, seg=sx*sx+sy*sy || 1;
+            for (var j=0;j<p.foeArr.length;j++){
+                var f=p.foeArr[j];
+                if (f.phase==='down') continue;
+                var fx=f.x, fy=f.y-22*f.scale;
+                var tt=((fx-px0)*sx+(fy-py0)*sy)/seg; if (tt<0) tt=0; else if (tt>1) tt=1;
+                var cx=px0+sx*tt, cy=py0+sy*tt;
+                var ddx=fx-cx, ddy=fy-cy;
+                /* big machines & beasts present a much larger target so rifles,
+                   AT teams, bazookas and shells can actually KNOCK THEM OUT —
+                   tanks, field guns, war elephants and cavalry are all easier to
+                   hit than a lone infantryman. */
+                var hitR = 16;
+                if (f.role==='tank') hitR = 32;
+                else if (f.role==='cannon' || f.role==='elephant') hitR = 24;
+                else if (f.role==='wall') hitR = 19;
+                else if (f.role==='rider') hitR = 19;
+                if (ddx*ddx+ddy*ddy < hitR*hitR){
+                    if (p.kind==='shell'){            /* HE shell — burst, AoE both sides */
+                        saShellBurst(cx, cy, p.splashDmg||48, p.splash||34);
+                        hit=true; break;
+                    }
+                    /* shieldbearers + shield-wall reduce incoming ranged damage */
+                    var dmg = p.dmg * (f.rangedDef||1) * (f.rangedDefMul||1) * saCounterMul(p.shooter, f);
+                    f.hp -= dmg;
+                    f.hurtT = 220;
+                    if (p.kind==='bullet'){            /* brutal: blood spray + knockback + gib chance */
+                        f.fallDir = (p.vx>=0?1:-1);
+                        pushSaFx(p.x, p.y, 'blood', f.tribe.paint);
+                        pushSaFx(p.x, p.y, 'blood', '#7f1d1d');
+                        if (f.hp<=0){ pushSaFx(f.x, f.y-22*f.scale, 'blood', '#991b1b'); pushSaFx(f.x, f.y-20*f.scale, 'blood', f.tribe.paint); }
+                    } else {
+                        pushSaFx(p.x, p.y, 'blood', f.tribe.paint);
+                        pushSaFx(p.x, p.y, 'spark', '#fde68a');
+                    }
+                    if (f.hp<=0) saDown(f);
+                    hit=true; break;
+                }
+            }
+            if (hit || p.y>groundY || p.life<=0){
+                if (p.kind==='shell' && (!hit)){      /* shell that reached the dirt still detonates */
+                    saShellBurst(p.x, Math.min(p.y,groundY), p.splashDmg||48, p.splash||34);
+                } else if (!hit){
+                    pushSaFx(p.x, Math.min(p.y,groundY), p.kind==='bullet'?'spark':'dust', p.kind==='bullet'?'#fde68a':'#7c4a23');
+                }
+                saWar.projectiles.splice(i,1);
+            }
+        }
+    }
+
+    function pushSaFx(x,y,kind,col){
+        if (saWar.fx.length>300) return;
+        var n = (kind==='blood')?10 : (kind==='dust')?8 : (kind==='spark')?5 : 1;
+        for (var i=0;i<n;i++){
+            var a=Math.random()*Math.PI*2, sp=rng(0.4,2.4);
+            saWar.fx.push({
+                x:x, y:y, vx:Math.cos(a)*sp,
+                vy:(kind==='ember') ? rng(-1.7,-0.6) : Math.sin(a)*sp - 0.6,
+                r:rng(0.8,2.3), life:rng(360,820), max:820, kind:kind, col:col||'#c2410c'
+            });
+        }
+    }
+    function updateSaFx(dt){
+        var k = dt/16;
+        for (var i=saWar.fx.length-1;i>=0;i--){
+            var f=saWar.fx[i];
+            f.x += f.vx*k; f.y += f.vy*k;
+            f.vy += (f.kind==='ember' ? -0.01 : 0.05)*k;
+            f.life -= dt;
+            if (f.life<=0) saWar.fx.splice(i,1);
+        }
+    }
+
+    /* Chief battle-cries — Paleolithic talking points: hunting grounds,
+       the river, ancestors/spirits, the hunt, fire, stone & bone. */
+    var SA_CRIES_A = [   /* River Clan */
+        'The river is OURS!', 'For the hunting grounds!', 'Ancestors, give us strength!',
+        'Drive them to the water!', 'Our spears taste blood!', 'Protect the fires!',
+        'The herd feeds OUR children!', 'No cliff-dweller crosses here!'
+    ];
+    var SA_CRIES_B = [   /* Cliff Clan */
+        'Down from the cliffs!', 'Stone and bone!', 'The high ground is ours!',
+        'Take their river!', 'The spirits hunger!', 'Crush the river-dogs!',
+        'For the cave and the kill!', 'Our slings darken the sky!'
+    ];
+
+    function saUpdateChief(arr, dt){
+        var cries = (arr===saWar.A) ? SA_CRIES_A : SA_CRIES_B;
+        for (var i=0;i<arr.length;i++){
+            var w=arr[i];
+            if (!w.chief) continue;
+            if (w.sayHold>0){ w.sayHold-=dt; }
+            w.sayT-=dt;
+            if (w.sayT<=0 && w.phase!=='down'){
+                w.sayText = cries[rngI(0,cries.length)];
+                w.sayHold = 2600; w.sayT = 4200 + rng(0,3200);
+            }
+        }
+    }
+
+    function updateStoneAgeWar(dt){
+        if (!stoneAgeWarActive()){ if (saWar.inited){ resetStoneAgeWar(); saCloseSetup(); } return; }
+        initStoneAgeWar();
+        saWar.t += dt;
+
+        /* hurt-flash decay */
+        var all = saWar.A.concat(saWar.B);
+        for (var hi=0; hi<all.length; hi++){ if (all[hi].hurtT>0) all[hi].hurtT-=dt; }
+
+        /* ── SETUP: panel open, battlefield idle (campfire embers only) ── */
+        if (saWar.phase==='setup'){ updateSaFx(dt); return; }
+
+        /* ── RESULT: hold the outcome, plant the flag, sweep territory ── */
+        if (saWar.phase==='result'){
+            saWar.resultT += dt;
+            saWar.flagT = Math.min(1, saWar.flagT + dt/1400);
+            var tgt = (saWar.winner===SA_TRIBE_A) ? 1 : 0;
+            saWar.terr += (tgt - saWar.terr) * Math.min(1, dt/600);
+            updateSaProjectiles(dt); updateSaFx(dt);
+            /* AUTO CAMPAIGN: after the victor plants the flag, roll on to the
+               next war and keep looping through every era. */
+            if (saWar.auto && saWar.resultT > SA_AUTO_HOLD){ saAutoNextBattle(true); }
+            return;   /* otherwise stays until the user starts a new battle */
+        }
+
+        /* ── BATTLE ──
+           ESCALATION: a slow global damage ramp guarantees every duel resolves
+           in reasonable time WITHOUT herding everyone into one central blob —
+           soldiers stay spread out and fight one-on-one. */
+        saWar.fervor = 1 + Math.max(0, (saWar.t - 9000))/11000;
+        saStep(saWar.A, saWar.A, saWar.B, dt);
+        saStep(saWar.B, saWar.B, saWar.A, dt);
+        saEnsureBearer(saWar.A); saEnsureBearer(saWar.B);
+        /* EXHAUSTION BACKSTOP — if a fight somehow drags past ~22s (e.g. two
+           stubborn ranged lines trading misses), a growing attrition wears every
+           soldier down so the battle always reaches a clean conclusion. Scales
+           with each unit's own toughness so tanks fall last. No clumping. */
+        if (saWar.t > 22000){
+            var wear = ((saWar.t-22000)/16000) * (dt/16);    /* fraction of maxHp per frame, ramps */
+            var bleed=function(a){ for (var i=0;i<a.length;i++){ var u=a[i]; if (u.phase==='down') continue;
+                u.hp -= u.maxHp*0.012*wear; if (u.hp<=0) saDown(u); } };
+            bleed(saWar.A); bleed(saWar.B);
+        }
+        saUpdateChief(saWar.A, dt); saUpdateChief(saWar.B, dt);
+        /* WW1/WW2/MODERN: a relentless off-map artillery barrage walks across
+           no-man's-land — constant explosions, geysers of earth and casualties */
+        if (SA_SCENE_KIT==='trench'||SA_SCENE_KIT==='town'||SA_SCENE_KIT==='urban'){
+            saWar.barrageT=(saWar.barrageT||0)-dt;
+            if (saWar.barrageT<=0){ saWar.barrageT=rng(360,1100);
+                var nshell=1+rngI(0,2);
+                for (var bsh=0; bsh<nshell; bsh++){
+                    var bxp=rng(W*0.16,W*0.84), byp=GROUND+(H-GROUND)*rng(0.42,0.72);
+                    saWar.fx.push({x:bxp,y:byp-90,vx:0,vy:0,r:1,life:1,max:1,kind:'spark',col:'#fff'}); /* faint incoming */
+                    saShellBurst(bxp, byp, rng(26,46), rng(30,42));
+                    pushSaFx(bxp, byp, 'dust', '#5a5048');
+                }
+            }
+        }
+        updateSaProjectiles(dt);
+        updateSaPlanes(dt);
+        updateSaFx(dt);
+        if (SA_SCENE_KIT==='paleo' && saWar.scene && Math.random()<0.30){
+            var fr=saWar.scene.fire; pushSaFx(fr.x+rng(-3,3), fr.y-7, 'ember', '#fbbf24');
+        }
+
+        var aliveA = saAliveCount(saWar.A);
+        var aliveB = saAliveCount(saWar.B);
+        var total = aliveA + aliveB;
+        var tFrac = total ? aliveA/total : 0.5;
+        saWar.terr += (tFrac - saWar.terr) * Math.min(1, dt/900);
+        if (aliveA===0 || aliveB===0){
+            saWar.winner = (aliveB===0) ? SA_TRIBE_A : SA_TRIBE_B;
+            var userWon = (saWar.winner === saUserTribe());
+            saWar.result = userWon ? 'win' : 'lose';
+            saWar.phase = 'result'; saWar.resultT = 0; saWar.flagT = 0;
+            for (var vb=0; vb<12; vb++) pushSaFx(rng(W*0.3,W*0.7), GROUND+(H-GROUND)*rng(0.3,0.5), 'spark', '#fde68a');
+            if (!saWar.auto) saShowResultPanel();      /* auto campaign just plants the flag & rolls on */
+        }
+    }
+
+    /* ───────────────── RENDER ───────────────── */
+
+    function saRoundRect(c,x,y,w,h,r){
+        c.beginPath();
+        c.moveTo(x+r,y); c.lineTo(x+w-r,y); c.quadraticCurveTo(x+w,y,x+w,y+r);
+        c.lineTo(x+w,y+h-r); c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        c.lineTo(x+r,y+h); c.quadraticCurveTo(x,y+h,x,y+h-r);
+        c.lineTo(x,y+r); c.quadraticCurveTo(x,y,x+r,y); c.closePath();
+    }
+
+    function drawSaEnvironment(c){
+        var s=saWar.scene;
+        /* OPAQUE sky — this is what replaces the modern scene */
+        var sky=c.createLinearGradient(0,0,0,GROUND);
+        sky.addColorStop(0,'#fde68a'); sky.addColorStop(0.32,'#fbbf24');
+        sky.addColorStop(0.62,'#f59e0b'); sky.addColorStop(1,'#7c2d12');
+        c.fillStyle=sky; c.fillRect(0,0,W,GROUND);
+        /* low hazy sun + crepuscular rays */
+        var sx=W*0.72, sy=GROUND*0.34;
+        c.save();
+        c.globalAlpha=0.10; c.fillStyle='#fff3c4';
+        for (var ry=0; ry<11; ry++){
+            var ra=(-Math.PI*0.5)+(ry-5)*0.16;
+            c.beginPath(); c.moveTo(sx,sy);
+            c.lineTo(sx+Math.cos(ra-0.05)*GROUND, sy+Math.sin(ra-0.05)*GROUND);
+            c.lineTo(sx+Math.cos(ra+0.05)*GROUND, sy+Math.sin(ra+0.05)*GROUND);
+            c.closePath(); c.fill();
+        }
+        c.restore();
+        var sg=c.createRadialGradient(sx,sy,2,sx,sy,130);
+        sg.addColorStop(0,'rgba(255,250,220,0.98)');
+        sg.addColorStop(0.42,'rgba(252,211,77,0.6)');
+        sg.addColorStop(1,'rgba(251,191,36,0)');
+        c.fillStyle=sg; c.fillRect(sx-160,sy-160,320,320);
+        c.fillStyle='#fffae0'; c.beginPath(); c.arc(sx,sy,30,0,Math.PI*2); c.fill();
+        /* drifting birds (V-marks) */
+        c.strokeStyle='rgba(50,30,18,0.5)'; c.lineWidth=1.4;
+        for (var bd=0; bd<6; bd++){
+            var bx=((saWar.t*0.012 + bd*120) % (W+60))-30;
+            var by=GROUND*0.20 + bd*10 + Math.sin(saWar.t*0.001+bd)*4;
+            c.beginPath(); c.moveTo(bx-4,by); c.lineTo(bx,by-2.4); c.lineTo(bx+4,by); c.stroke();
+        }
+        /* layered parallax hills */
+        saHillBand(c, GROUND*0.74, GROUND, '#8a4a1c', 0.5, 46);
+        saHillBand(c, GROUND*0.83, GROUND, '#6b3717', 1.3, 32);
+        /* distant grazing herd on the hill line */
+        for (var hd=0; hd<s.herd.length; hd++){ drawSaHerd(c, s.herd[hd]); }
+        /* smoking volcano */
+        var v=s.volcano, vy=GROUND;
+        c.fillStyle='#3f2410';
+        c.beginPath(); c.moveTo(v.x-80,vy); c.lineTo(v.x,vy-v.h); c.lineTo(v.x+80,vy); c.closePath(); c.fill();
+        c.fillStyle='rgba(0,0,0,0.18)';
+        c.beginPath(); c.moveTo(v.x,vy-v.h); c.lineTo(v.x+80,vy); c.lineTo(v.x+24,vy); c.closePath(); c.fill();
+        /* glowing lava cap + runnels */
+        c.fillStyle='#f97316';
+        c.beginPath(); c.moveTo(v.x-14,vy-v.h+5); c.lineTo(v.x,vy-v.h-12); c.lineTo(v.x+14,vy-v.h+5); c.closePath(); c.fill();
+        c.strokeStyle='#dc2626'; c.lineWidth=2;
+        c.beginPath(); c.moveTo(v.x-4,vy-v.h+4); c.lineTo(v.x-14,vy-v.h*0.5); c.stroke();
+        c.fillStyle='rgba(120,90,70,0.5)';
+        for (var sm=0; sm<5; sm++){
+            var syy=vy-v.h-16-sm*18 - (saWar.t*0.012 % 18);
+            c.beginPath(); c.arc(v.x+Math.sin(sm+saWar.t*0.0006)*12, syy, 9+sm*3.5, 0, Math.PI*2); c.fill();
+        }
+        /* OPAQUE earth foreground */
+        var gnd=c.createLinearGradient(0,GROUND,0,H);
+        gnd.addColorStop(0,'#9a6233'); gnd.addColorStop(0.5,'#6b3f1d'); gnd.addColorStop(1,'#3b2410');
+        c.fillStyle=gnd; c.fillRect(0,GROUND,W,H-GROUND);
+        /* meandering river band reflecting the amber sky */
+        var rv=s.river;
+        var rg=c.createLinearGradient(0,rv-6,0,rv+10);
+        rg.addColorStop(0,'rgba(253,224,71,0.0)'); rg.addColorStop(0.5,'rgba(251,191,36,0.55)'); rg.addColorStop(1,'rgba(180,83,9,0.0)');
+        c.fillStyle=rg;
+        c.beginPath(); c.moveTo(0,rv-5);
+        for (var rx=0;rx<=W;rx+=18){ c.lineTo(rx, rv + Math.sin(rx*0.02+saWar.t*0.0008)*3); }
+        c.lineTo(W,rv+9); c.lineTo(0,rv+9); c.closePath(); c.fill();
+        /* trampled-earth battle clearing (subtle darker oval centre) */
+        c.fillStyle='rgba(50,28,12,0.35)';
+        c.beginPath(); c.ellipse(W*0.5, GROUND+(H-GROUND)*0.55, W*0.30, (H-GROUND)*0.22, 0, 0, Math.PI*2); c.fill();
+        /* scrub trees */
+        for (var tt=0; tt<s.trees.length; tt++){ drawSaTree(c, s.trees[tt]); }
+        /* dry grass + boulders */
+        c.strokeStyle='#9a7636'; c.lineWidth=1;
+        for (var gi=0;gi<s.grass.length;gi++){
+            var gr=s.grass[gi];
+            c.beginPath(); c.moveTo(gr.x,gr.y); c.lineTo(gr.x-2,gr.y-gr.h); c.moveTo(gr.x,gr.y); c.lineTo(gr.x+2,gr.y-gr.h*0.8); c.moveTo(gr.x,gr.y); c.lineTo(gr.x+0.4,gr.y-gr.h); c.stroke();
+        }
+        for (var bi=0;bi<s.boulders.length;bi++){
+            var bo=s.boulders[bi];
+            c.fillStyle='#6b5236'; c.beginPath(); c.ellipse(bo.x,bo.y,bo.r,bo.r*0.7,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(255,235,190,0.18)'; c.beginPath(); c.ellipse(bo.x-bo.r*0.3,bo.y-bo.r*0.3,bo.r*0.4,bo.r*0.28,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(0,0,0,0.20)'; c.beginPath(); c.ellipse(bo.x+bo.r*0.4,bo.y+bo.r*0.3,bo.r*0.5,bo.r*0.3,0,0,Math.PI*2); c.fill();
+        }
+        /* low dust haze across the battlefield */
+        var hz=c.createLinearGradient(0,GROUND+(H-GROUND)*0.3,0,H);
+        hz.addColorStop(0,'rgba(190,140,80,0.0)'); hz.addColorStop(1,'rgba(150,100,55,0.22)');
+        c.fillStyle=hz; c.fillRect(0,GROUND+(H-GROUND)*0.3,W,(H-GROUND)*0.7);
+    }
+
+    function drawSaHerd(c, h){
+        c.save(); c.translate(h.x, h.y); c.scale(h.s, h.s);
+        c.fillStyle='#42291a';
+        if (h.kind){ /* mammoth */
+            c.beginPath(); c.ellipse(0,-6,12,8,0,0,Math.PI*2); c.fill();
+            c.beginPath(); c.arc(-11,-7,5,0,Math.PI*2); c.fill();
+            c.fillRect(-16,-7,4,7);                       /* trunk */
+            c.strokeStyle='#e8d5a8'; c.lineWidth=1.4;
+            c.beginPath(); c.moveTo(-13,-3); c.quadraticCurveTo(-18,2,-15,4); c.stroke();
+            c.fillStyle='#42291a';
+            c.fillRect(-8,0,2.5,6); c.fillRect(-2,0,2.5,6); c.fillRect(4,0,2.5,6); c.fillRect(8,0,2.5,6);
+        } else { /* aurochs / deer */
+            c.beginPath(); c.ellipse(0,-4,10,5,0,0,Math.PI*2); c.fill();
+            c.beginPath(); c.arc(9,-7,3,0,Math.PI*2); c.fill();
+            c.strokeStyle='#42291a'; c.lineWidth=1.2;
+            c.beginPath(); c.moveTo(10,-9); c.lineTo(13,-13); c.moveTo(8,-9); c.lineTo(6,-13); c.stroke();
+            c.fillRect(-6,0,1.8,5); c.fillRect(-1,0,1.8,5); c.fillRect(5,0,1.8,5);
+        }
+        c.restore();
+    }
+
+    function drawSaTree(c, t){
+        c.save(); c.translate(t.x, t.y); c.scale(t.s, t.s);
+        c.strokeStyle='#3b2410'; c.lineWidth=3; c.lineCap='round';
+        c.beginPath(); c.moveTo(0,0); c.lineTo(-1,-22); c.stroke();
+        c.beginPath(); c.moveTo(-1,-12); c.lineTo(-8,-18); c.moveTo(-1,-15); c.lineTo(7,-20); c.stroke();
+        c.fillStyle='#4d6a2a';
+        c.beginPath(); c.ellipse(-1,-24,11,8,0,0,Math.PI*2); c.fill();
+        c.beginPath(); c.ellipse(-9,-19,6,5,0,0,Math.PI*2); c.fill();
+        c.beginPath(); c.ellipse(7,-21,6,5,0,0,Math.PI*2); c.fill();
+        c.fillStyle='rgba(0,0,0,0.18)'; c.beginPath(); c.ellipse(2,-22,5,4,0,0,Math.PI*2); c.fill();
+        c.restore();
+    }
+
+    function saHillBand(c, topY, baseY, col, freq, amp){
+        c.fillStyle=col; c.beginPath(); c.moveTo(0,baseY);
+        for (var x=0;x<=W;x+=14){
+            var y=topY + Math.sin(x*0.004*freq+freq)*amp - amp;
+            c.lineTo(x,y);
+        }
+        c.lineTo(W,baseY); c.closePath(); c.fill();
+    }
+
+    function drawSaArchitecture(c, s){
+        /* standing-stone trilithon (megalith) */
+        var mx=s.megalith.x, my=GROUND + (H-GROUND)*0.16, mh=Math.max(30,(H-GROUND)*0.34);
+        c.fillStyle='#857a6a';
+        c.fillRect(mx-26,my-mh,12,mh); c.fillRect(mx+14,my-mh,12,mh);
+        c.fillRect(mx-30,my-mh-10,60,12);
+        c.fillStyle='rgba(0,0,0,0.18)'; c.fillRect(mx-26,my-mh,4,mh); c.fillRect(mx+14,my-mh,4,mh);
+        /* huts */
+        for (var i=0;i<s.huts.length;i++) drawSaHut(c, s.huts[i]);
+        /* cliff + cave on the right */
+        var cx=s.cliff.x;
+        c.fillStyle='#6b4a2c';
+        c.beginPath();
+        c.moveTo(cx-30,GROUND); c.lineTo(cx-50,GROUND+(H-GROUND)*0.55);
+        c.lineTo(W,GROUND+(H-GROUND)*0.55); c.lineTo(W,GROUND-10); c.closePath(); c.fill();
+        c.fillStyle='#241710';
+        c.beginPath();
+        c.ellipse(cx+6,GROUND+(H-GROUND)*0.26, 26, 34, 0, Math.PI, Math.PI*2); c.fill();
+        c.fillRect(cx-20,GROUND+(H-GROUND)*0.26,52,40);
+        /* cave hand-prints (Paleolithic cave art) */
+        c.fillStyle='rgba(200,70,40,0.6)';
+        for (var hp=0; hp<3; hp++){
+            var hx=cx-12+hp*16, hy=GROUND+(H-GROUND)*0.18;
+            c.beginPath(); c.arc(hx,hy,4,0,Math.PI*2); c.fill();
+            for (var fgr=0;fgr<5;fgr++){
+                var fa=-Math.PI*0.5+(fgr-2)*0.3;
+                c.fillRect(hx+Math.cos(fa)*3-1, hy+Math.sin(fa)*3-4, 1.6, 5);
+            }
+        }
+        /* totem pole with skull + war drum + drying-hide rack + bone pile */
+        drawSaTotem(c, s.totem, GROUND + (H-GROUND)*0.30);
+        drawSaRack(c, s.rack, GROUND + (H-GROUND)*0.30);
+        drawSaDrum(c, s.drum, GROUND + (H-GROUND)*0.34);
+        /* campfire (animated) */
+        drawSaCampfire(c, s.fire);
+    }
+
+    function drawSaTotem(c, x, gy){
+        var h=Math.max(34,(H-GROUND)*0.40);
+        c.fillStyle='#5a3a1e'; c.fillRect(x-5, gy-h, 10, h);
+        c.strokeStyle='rgba(0,0,0,0.25)'; c.lineWidth=1; c.strokeRect(x-5,gy-h,10,h);
+        /* carved faces */
+        c.fillStyle='#caa46a';
+        for (var f=0; f<3; f++){
+            var fy=gy-h+8+f*(h*0.30);
+            c.fillRect(x-4,fy,8,h*0.22);
+            c.fillStyle='#3b2410'; c.fillRect(x-3,fy+2,2,2); c.fillRect(x+1,fy+2,2,2);
+            c.fillRect(x-2,fy+5,4,1.4); c.fillStyle='#caa46a';
+        }
+        /* animal skull on top */
+        c.fillStyle='#e8dcc0'; c.beginPath(); c.arc(x,gy-h-4,6,0,Math.PI*2); c.fill();
+        c.strokeStyle='#e8dcc0'; c.lineWidth=2;
+        c.beginPath(); c.moveTo(x-5,gy-h-6); c.lineTo(x-12,gy-h-12); c.moveTo(x+5,gy-h-6); c.lineTo(x+12,gy-h-12); c.stroke();
+        c.fillStyle='#2a1a0e'; c.fillRect(x-3,gy-h-5,2,2.4); c.fillRect(x+1,gy-h-5,2,2.4);
+    }
+
+    function drawSaRack(c, x, gy){
+        /* A-frame drying rack with a stretched hide */
+        c.strokeStyle='#3b2410'; c.lineWidth=2.4; c.lineCap='round';
+        c.beginPath(); c.moveTo(x-14,gy); c.lineTo(x-4,gy-22); c.moveTo(x+14,gy); c.lineTo(x+4,gy-22);
+        c.moveTo(x-4,gy-22); c.lineTo(x+4,gy-22); c.stroke();
+        c.fillStyle='#9a7048';
+        c.beginPath(); c.moveTo(x-10,gy-20); c.lineTo(x+10,gy-20); c.lineTo(x+8,gy-4); c.lineTo(x-8,gy-4); c.closePath(); c.fill();
+        c.strokeStyle='rgba(40,26,14,0.4)'; c.lineWidth=0.8; c.stroke();
+    }
+
+    function drawSaDrum(c, x, gy){
+        c.fillStyle='#6b4423'; c.beginPath(); c.ellipse(x,gy,11,7,0,0,Math.PI*2); c.fill();
+        c.fillStyle='#caa46a'; c.beginPath(); c.ellipse(x,gy-5,11,5,0,0,Math.PI*2); c.fill();
+        c.strokeStyle='#3b2410'; c.lineWidth=1; c.stroke();
+        for (var l=0;l<6;l++){ var a=l/6*Math.PI*2; c.beginPath(); c.moveTo(x+Math.cos(a)*9,gy-5+Math.sin(a)*4); c.lineTo(x+Math.cos(a)*10,gy+5); c.stroke(); }
+    }
+
+    function drawSaHut(c, h){
+        var w=44*h.scl, hh=30*h.scl, x=h.x, y=h.y;
+        /* hide dome */
+        c.fillStyle = h.kind ? '#8a6038' : '#7a5232';
+        c.beginPath(); c.ellipse(x, y, w/2, hh, 0, Math.PI, Math.PI*2); c.fill();
+        c.fillRect(x-w/2, y, w, hh*0.5);
+        /* lashing seams */
+        c.strokeStyle='rgba(40,26,14,0.5)'; c.lineWidth=1;
+        for (var s=1;s<4;s++){ c.beginPath(); c.moveTo(x-w/2+ s*w/4, y); c.lineTo(x-w/2+s*w/4, y-hh*0.8+Math.abs(s-2)*4); c.stroke(); }
+        /* bone arch doorway */
+        c.fillStyle='#1c120a';
+        c.beginPath(); c.ellipse(x, y+hh*0.5, w*0.16, hh*0.4, 0, Math.PI, Math.PI*2); c.fill();
+        c.fillRect(x-w*0.16, y+hh*0.1, w*0.32, hh*0.4);
+        c.strokeStyle='#e8dcc0'; c.lineWidth=2;
+        c.beginPath(); c.moveTo(x-w*0.18,y+hh*0.5); c.quadraticCurveTo(x,y-hh*0.2,x+w*0.18,y+hh*0.5); c.stroke();
+    }
+
+    function drawSaCampfire(c, f){
+        /* stone ring */
+        c.fillStyle='#5a5048';
+        for (var r=0;r<7;r++){ var a=r/7*Math.PI*2; c.beginPath(); c.arc(f.x+Math.cos(a)*12, f.y+Math.sin(a)*4, 3, 0, Math.PI*2); c.fill(); }
+        /* logs */
+        c.strokeStyle='#3b2410'; c.lineWidth=3;
+        c.beginPath(); c.moveTo(f.x-8,f.y+2); c.lineTo(f.x+8,f.y-2); c.moveTo(f.x-8,f.y-2); c.lineTo(f.x+8,f.y+2); c.stroke();
+        /* flame */
+        var fl=0.7+0.3*Math.sin(saWar.t*0.02);
+        var grd=c.createLinearGradient(f.x,f.y-26*fl,f.x,f.y);
+        grd.addColorStop(0,'rgba(254,240,138,0.95)');
+        grd.addColorStop(0.5,'rgba(251,146,60,0.9)');
+        grd.addColorStop(1,'rgba(220,38,38,0.7)');
+        c.fillStyle=grd;
+        c.beginPath();
+        c.moveTo(f.x-7,f.y);
+        c.quadraticCurveTo(f.x-9,f.y-14*fl, f.x-2,f.y-20*fl);
+        c.quadraticCurveTo(f.x,f.y-28*fl, f.x+2,f.y-20*fl);
+        c.quadraticCurveTo(f.x+9,f.y-14*fl, f.x+7,f.y);
+        c.closePath(); c.fill();
+        c.fillStyle='rgba(255,247,200,0.9)';
+        c.beginPath(); c.ellipse(f.x,f.y-8*fl,2.4,5*fl,0,0,Math.PI*2); c.fill();
+    }
+
+    function saLimb(c,x1,y1,x2,y2,wd,col){
+        c.strokeStyle=col; c.lineWidth=wd; c.lineCap='round';
+        c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2); c.stroke();
+    }
+
+    /* Lightweight soldier for massed battles (used when saWar.simple). ~12
+       canvas ops vs ~60 for the detailed body, so 300 fighters stay smooth. */
+    function drawSaSoldierCompact(c, w){
+        var tr=w.tribe, S=w.scale*1.5, ph=w.phase;
+        c.save(); c.translate(w.x, w.y);
+        c.fillStyle='rgba(0,0,0,0.22)';
+        c.beginPath(); c.ellipse(0,1.4*S,4*S,1.3*S,0,0,Math.PI*2); c.fill();
+        if (ph==='down'){
+            c.fillStyle='rgba(110,18,10,0.4)'; c.beginPath(); c.ellipse(0,0,7*S,2*S,0,0,Math.PI*2); c.fill();
+            c.strokeStyle=tr.skin; c.lineWidth=3*S; c.lineCap='round';
+            c.beginPath(); c.moveTo(-5*S,0); c.lineTo(4*S,-1*S); c.stroke();
+            c.restore(); return;
+        }
+        c.scale(w.face*S, S);
+        var sk=(w.hurtT>0)?'#d9603e':tr.skin;
+        var g=(ph==='advance')?Math.sin(w.anim)*3:0;
+        c.strokeStyle=sk; c.lineWidth=2.4; c.lineCap='round';
+        c.beginPath(); c.moveTo(0,-9); c.lineTo(g,0); c.moveTo(0,-9); c.lineTo(-g,0); c.stroke();   /* legs */
+        var st=tr.style||'tribal';
+        /* torso uses the faction coat colour for uniformed eras */
+        c.strokeStyle=(st==='tribal')?sk:tr.hide; c.lineWidth=3.8; c.beginPath(); c.moveTo(0,-9); c.lineTo(0,-20); c.stroke();
+        c.strokeStyle=w.type.col; c.lineWidth=1.6; c.beginPath(); c.moveTo(-2.4,-17); c.lineTo(2.4,-13); c.stroke(); /* type sash */
+        c.fillStyle=sk; c.beginPath(); c.arc(0,-23,3,0,Math.PI*2); c.fill();                          /* head */
+        /* helmet/headgear tint by era */
+        if (st==='tribal'){ c.fillStyle=tr.hair; c.fillRect(-3,-26.5,6,2.2); }
+        else if (st==='cloth'){ c.fillStyle=tr.paint; c.beginPath(); c.arc(0,-24,3.4,Math.PI,0); c.fill(); }
+        else { var hcol=(st==='coat')?'#1f2937':(st==='field')?'#3f4248':'#9aa6b2';
+               c.fillStyle=hcol; c.beginPath(); c.arc(0,-23.5,3.4,Math.PI,0); c.fill(); c.fillRect(-3.6,-23.5,7.2,1.4);
+               if (st==='bronze'){ c.fillStyle=tr.paint; c.fillRect(-1,-29,2,4); } }
+        c.strokeStyle=(st==='coat'||st==='field')?'#2a2a2a':'#6b4423'; c.lineWidth=1.6;
+        if (w.ranged){
+            if (st==='coat'||st==='field'){ c.beginPath(); c.moveTo(0,-15); c.lineTo(13,-15); c.stroke(); } /* gun barrel */
+            else { c.beginPath(); c.arc(5,-15,4.2,-1.1,1.1); c.stroke(); }                                  /* bow */
+        } else { var dn=(ph==='melee')?5:-3; c.beginPath(); c.moveTo(2,-15); c.lineTo(13,-15+dn); c.stroke();
+               c.fillStyle='#cbd5e1'; c.beginPath(); c.arc(13,-15+dn,1.5,0,Math.PI*2); c.fill(); }
+        if (w.chief){ c.fillStyle=tr.paint; c.beginPath(); c.moveTo(-3,-26); c.lineTo(0,-33); c.lineTo(3,-26); c.closePath(); c.fill(); }
+        c.restore();
+    }
+
+    /* period headgear — Corinthian/iron/mail/turban/tricorne/steel helm */
+    function drawSaHelm(c, tr, hy, hr){
+        var s=tr.style, plume=tr.paint, trim=tr.paintAlt;
+        if (s==='bronze'){
+            c.fillStyle='#c8a45a'; c.beginPath(); c.arc(0,hy-1,hr+1,Math.PI,0); c.fill(); c.fillRect(-hr-1,hy-1,(hr+1)*2,2);
+            c.fillStyle='#8a6a2a'; c.fillRect(-1.4,hy+1,2.8,hr-1);                     /* nasal */
+            c.fillStyle=plume;                                                          /* transverse crest */
+            c.beginPath(); c.moveTo(-2,hy-hr-1); c.quadraticCurveTo(0,hy-hr-8,4,hy-hr-1); c.quadraticCurveTo(1,hy-hr-3,-2,hy-hr-1); c.fill();
+        } else if (s==='iron'){
+            c.fillStyle='#a3aab5'; c.beginPath(); c.moveTo(-hr-0.5,hy); c.lineTo(0,hy-hr-3.5); c.lineTo(hr+0.5,hy); c.closePath(); c.fill();
+            c.strokeStyle='#52525b'; c.lineWidth=0.5; c.beginPath(); c.moveTo(0,hy-hr-3); c.lineTo(0,hy); c.stroke();
+        } else if (s==='mail'){
+            c.fillStyle='#9aa6b2'; c.beginPath(); c.arc(0,hy-0.5,hr+0.8,Math.PI,0); c.fill(); c.fillRect(-hr-0.8,hy-0.5,(hr+0.8)*2,1.6);
+            c.fillStyle='#64748b'; c.fillRect(-0.9,hy-0.5,1.8,hr+0.5);                  /* nasal */
+            c.fillStyle='#6b7686'; c.beginPath(); c.arc(0,hy+hr*0.45,hr+1.2,0.15,Math.PI-0.15); c.fill(); /* coif */
+        } else if (s==='cloth'){
+            c.fillStyle=tr.paint; c.beginPath(); c.arc(0,hy-1,hr+1.6,Math.PI,0); c.fill(); c.fillRect(-hr-1.6,hy-1,(hr+1.6)*2,2.6);
+            c.strokeStyle='rgba(0,0,0,0.25)'; c.lineWidth=0.5; c.beginPath(); c.moveTo(-hr,hy-1); c.lineTo(hr,hy-2); c.stroke();
+        } else if (s==='coat'){                                                         /* tricorne */
+            c.fillStyle='#1f2937'; c.beginPath(); c.moveTo(-hr-2.5,hy-1.5); c.lineTo(0,hy-hr-4.5); c.lineTo(hr+2.5,hy-1.5); c.closePath(); c.fill();
+            c.fillRect(-hr-2.5,hy-2.5,(hr+2.5)*2,1.8);
+            c.fillStyle=trim; c.fillRect(-0.8,hy-hr-6,1.6,3.5);                          /* plume */
+        } else if (s==='field'){                                                        /* steel helmet */
+            c.fillStyle='#3f4248'; c.beginPath(); c.arc(0,hy-0.2,hr+1.2,Math.PI*1.05,-0.05); c.fill();
+            c.fillRect(-hr-1.8,hy-0.4,(hr+1.8)*2,1.8);
+            c.fillStyle='rgba(255,255,255,0.12)'; c.fillRect(-hr,hy-hr*0.7,hr*1.2,1);
+        }
+    }
+
+    /* big war elephant for the 'elephant' unit — beneath the rider */
+    function drawSaElephant(c, tr){
+        c.save();
+        c.fillStyle='#7a6a5a';
+        c.beginPath(); c.ellipse(0,-12,20,12,0,0,Math.PI*2); c.fill();                  /* body */
+        c.beginPath(); c.arc(-19,-15,9,0,Math.PI*2); c.fill();                          /* head */
+        c.fillRect(-30,-13,12,5);                                                        /* trunk */
+        c.beginPath(); c.moveTo(-28,-9); c.quadraticCurveTo(-34,-4,-30,-1); c.stroke();
+        c.fillStyle='#e8dcc0';                                                            /* tusks */
+        c.beginPath(); c.moveTo(-24,-9); c.quadraticCurveTo(-30,-4,-27,-2); c.lineTo(-25,-3); c.quadraticCurveTo(-27,-6,-23,-9); c.fill();
+        c.fillStyle='#5a4a3a'; c.fillRect(-9,-3,5,9); c.fillRect(2,-3,5,9); c.fillRect(11,-3,5,9); /* legs */
+        c.fillStyle='#9a8a7a'; c.beginPath(); c.ellipse(-13,-17,6,5,0,0,Math.PI*2); c.fill(); /* ear */
+        /* ── war barding: armoured headplate, tusk caps, caparison + howdah ── */
+        c.fillStyle=tr.hide; c.beginPath(); c.moveTo(-19,-21); c.quadraticCurveTo(-26,-18,-25,-10); c.lineTo(-20,-11); c.lineTo(-16,-20); c.closePath(); c.fill(); /* head armour */
+        c.strokeStyle=tr.paintAlt; c.lineWidth=1; c.stroke();
+        c.fillStyle='#caa84a'; c.beginPath(); c.arc(-27,-2,1.6,0,Math.PI*2); c.fill();    /* gold tusk cap */
+        c.fillStyle=tr.paint;                                                             /* caparison with tassels */
+        c.beginPath(); c.moveTo(-18,-2); c.lineTo(18,-2); c.lineTo(17,3); c.lineTo(13,0); c.lineTo(10,4); c.lineTo(6,0); c.lineTo(2,4); c.lineTo(-2,0); c.lineTo(-6,4); c.lineTo(-10,0); c.lineTo(-14,3); c.closePath(); c.fill();
+        c.fillStyle=tr.motifCol; for (var es=0; es<4; es++) c.fillRect(-12+es*8,-1,2,2);
+        /* howdah tower with archer */
+        c.fillStyle='#5a3a1e'; c.fillRect(-7,-26,16,8);
+        c.strokeStyle=tr.paintAlt; c.lineWidth=1; for (var hb=0; hb<4; hb++) c.fillRect(-7+hb*5,-26,1.4,8);   /* palisade */
+        c.fillStyle=tr.paint; c.fillRect(-7,-28,16,2);
+        c.fillStyle='#3a2a18'; c.beginPath(); c.arc(2,-30,2.4,0,Math.PI*2); c.fill();     /* archer head */
+        c.restore();
+    }
+
+    function drawSaSoldierStyled(c, w){
+        var tr=w.tribe, S=w.scale, ph=w.phase;
+        c.save();
+        c.translate(w.x, w.y);
+        c.fillStyle='rgba(0,0,0,0.26)';
+        c.beginPath(); c.ellipse(0,1.5*S,(ph==='down'?22:12)*S,3*S,0,0,Math.PI*2); c.fill();
+        c.scale(w.face*S, S);
+        if (ph==='down'){ drawSaCorpse(c, tr, w); c.restore(); return; }
+        var rb=(ph==='advance')?Math.sin(w.anim):0, ride=0;
+        if (w.role==='rider'){ drawSaHorse(c, tr, w); ride=-15; }
+        else if (w.role==='elephant'){ drawSaElephant(c, tr); ride=-22; }
+        /* dynamic posture: lean into a charge, follow through on a melee swing
+           (pivots at the feet; mounts keep their own gallop so we skip them). */
+        if (w.role!=='rider' && w.role!=='elephant'){
+            var leanS=(w.charge||0)*0.20;
+            if (ph==='melee') leanS += Math.max(0, Math.sin((w.strikePose||0)*Math.PI))*0.12;
+            else if (ph==='advance') leanS += Math.abs(rb)*0.03;
+            if (leanS) c.rotate(leanS);
+        }
+        var hurt=w.hurtT>0;
+        var sk = hurt?'#d9603e':tr.skin, coat=hurt?'#c0584a':tr.hide, coatDk=tr.hideDark;
+        var bob=((ph==='advance')?-Math.abs(rb)*1.3:0)+ride;
+        var hipY=-19+bob, shY=-34+bob, neckY=-38+bob, headY=-43+bob, headR=4.8;
+        var fwd=(w.role==='rider'||w.role==='elephant')?0:rb*6;
+        /* ── KIT & GEAR (behind the body): flowing cloak, quiver, pack ── */
+        var billow=(ph==='advance')?-Math.abs(rb)*2.2:(ph==='melee'?-1.6:-0.4);
+        var wantCloak=(w.role==='sword'||w.role==='heavy'||w.role==='rider'||w.chief)&&(s==='bronze'||s==='iron'||s==='mail'||s==='cloth'||s==='coat');
+        if (wantCloak){
+            c.fillStyle=(s==='mail')?tr.hide:tr.paint;
+            c.beginPath(); c.moveTo(-4.5,shY+1); c.lineTo(-7+billow,hipY+9); c.quadraticCurveTo(-1+billow,hipY+11,3+billow,hipY+9); c.lineTo(4.5,shY+2); c.closePath(); c.fill();
+            c.fillStyle='rgba(0,0,0,0.20)'; c.beginPath(); c.moveTo(0,shY+2); c.lineTo(-1+billow,hipY+9); c.lineTo(3+billow,hipY+9); c.lineTo(3.5,shY+2); c.closePath(); c.fill();
+            c.fillStyle=tr.paintAlt; c.fillRect(-4.5,shY-0.5,9,1.8);                    /* clasp band */
+        }
+        if (w.role==='bow'){                                                            /* quiver of arrows */
+            c.save(); c.translate(-5.5,shY+5); c.rotate(-0.5);
+            c.fillStyle='#5a3a1e'; c.fillRect(-2,-2,4,12); c.fillStyle='#3b2410'; c.fillRect(-2,-2,4,2);
+            c.strokeStyle='#6b4423'; c.lineWidth=0.8; for (var q=0;q<4;q++){ c.beginPath(); c.moveTo(-1.5+q,-2); c.lineTo(-2.6+q,-8); c.stroke(); }
+            c.fillStyle='#e8dcc0'; for (var q2=0;q2<4;q2++){ c.beginPath(); c.moveTo(-2.6+q2,-8); c.lineTo(-3.4+q2,-8); c.lineTo(-3+q2,-9.5); c.closePath(); c.fill(); }
+            c.restore();
+        }
+        if (s==='field'||s==='coat'){                                                   /* backpack + bedroll */
+            c.fillStyle=coatDk; c.fillRect(-8,shY+4,3.6,9.5);
+            c.fillStyle=(s==='field')?'#3f4a2a':tr.paintAlt; c.beginPath(); c.ellipse(-8.2,shY+4.5,1.5,5,0,0,Math.PI*2); c.fill(); /* rolled blanket */
+            c.fillStyle='rgba(0,0,0,0.2)'; c.fillRect(-6.4,shY+7,3.6,1);
+        }
+        /* back arm + shield */
+        var hasShield=(w.role==='spear'||w.role==='wall'||w.role==='sword') && tr.shieldShape!=='none';
+        if (hasShield){ saLimb(c,-5,shY+2,-7,shY+9,3.2,sk); saLimb(c,-7,shY+9,-3,shY+13,2.8,sk); drawSaShield(c,tr,-2.5,shY+9,(w.role==='wall')?1.3:0.95); }
+        else saLimb(c,-5,shY+2,-8,shY+12,3.0,sk);
+        /* legs (trousers for gunpowder/modern, bare-ish for ancient) */
+        var trouser=(tr.style==='coat'||tr.style==='field'||tr.style==='cloth')?coatDk:sk;
+        var kf=-9+bob*0.2;
+        saLimb(c,0,hipY,-fwd*0.5,kf,4.8,trouser); saLimb(c,-fwd*0.5,kf,-fwd,0,3.9,trouser);
+        saLimb(c,0,hipY, fwd*0.5,kf,5.0,trouser); saLimb(c, fwd*0.5,kf, fwd,0,4.1,trouser);
+        c.fillStyle='#2a2018'; c.fillRect(fwd-3.5,-2.6,7,2.8); c.fillRect(-fwd-3.5,-2.6,7,2.8);  /* boots */
+        /* torso (coat / cuirass / tunic) */
+        c.fillStyle=coat;
+        c.beginPath(); c.moveTo(-5.5,hipY); c.lineTo(-7,shY+2); c.quadraticCurveTo(0,shY-2.5,7,shY+2); c.lineTo(5.5,hipY); c.closePath(); c.fill();
+        c.strokeStyle='rgba(0,0,0,0.22)'; c.lineWidth=0.7; c.stroke();
+        c.fillStyle='rgba(255,255,255,0.14)'; c.fillRect(-6,shY+2,2,hipY-shY-2);          /* rim light */
+        var s=tr.style;
+        if (s==='bronze' || s==='iron'){                                                  /* muscled cuirass */
+            c.strokeStyle='rgba(0,0,0,0.25)'; c.lineWidth=0.7;
+            c.beginPath(); c.moveTo(-4,shY+5); c.quadraticCurveTo(0,shY+7,4,shY+5); c.moveTo(0,shY+7); c.lineTo(0,hipY-4); c.stroke();
+            c.fillStyle=tr.paintAlt; c.fillRect(-6,hipY-5,12,2);                           /* pteruges belt */
+        } else if (s==='mail'){
+            c.fillStyle='rgba(255,255,255,0.11)'; for (var m=0;m<12;m++) c.fillRect(-5+(m%4)*2.6, shY+4+Math.floor(m/4)*3.5, 1,1);
+            c.strokeStyle=tr.motifCol; c.lineWidth=1; c.beginPath(); c.moveTo(0,shY+3); c.lineTo(0,hipY-2); c.moveTo(-3,shY+8); c.lineTo(3,shY+8); c.stroke(); /* surcoat cross */
+        } else if (s==='cloth'){
+            c.strokeStyle='rgba(0,0,0,0.22)'; c.lineWidth=0.7; c.beginPath(); c.moveTo(-3,shY+4); c.lineTo(-2,hipY); c.moveTo(3,shY+4); c.lineTo(2,hipY); c.stroke();
+            c.fillStyle=tr.paintAlt; c.fillRect(-5,hipY-3,10,1.5);
+        } else if (s==='coat'){                                                            /* lapels + cross-belts */
+            c.fillStyle=tr.paintAlt; c.fillRect(-6.5,shY+2,2,hipY-shY); c.fillRect(4.5,shY+2,2,hipY-shY);
+            c.strokeStyle='#f1f5f9'; c.lineWidth=1.2; c.beginPath(); c.moveTo(-5,shY+3); c.lineTo(5,hipY-3); c.moveTo(5,shY+3); c.lineTo(-5,hipY-3); c.stroke();
+            c.fillStyle=coatDk; c.fillRect(-6,shY+1,12,2);
+        } else if (s==='field'){                                                           /* webbing + buttons */
+            c.strokeStyle=coatDk; c.lineWidth=1; c.beginPath(); c.moveTo(-4,shY+3); c.lineTo(4,hipY-2); c.stroke();
+            c.fillStyle='#1f1f1f'; for (var bt=0;bt<3;bt++) c.fillRect(-0.6,shY+5+bt*4,1.2,1.2);
+            c.fillStyle=coatDk; c.fillRect(-6,hipY-4,12,2.4);                               /* ammo belt */
+        }
+        c.fillStyle=coatDk; c.fillRect(-6,hipY-1.6,12,1.8);                                 /* belt */
+        /* ── hip gear: scabbard, canteen, ammo pouch ── */
+        if (w.role==='sword'||w.role==='heavy'||w.chief){
+            c.strokeStyle='#3a2a18'; c.lineWidth=1.8; c.beginPath(); c.moveTo(-5,hipY-1); c.lineTo(-8.5,hipY+9); c.stroke();
+            c.fillStyle='#b8bcc4'; c.beginPath(); c.arc(-8.5,hipY+9.5,1.3,0,Math.PI*2); c.fill();      /* scabbard tip */
+            c.fillStyle=tr.paintAlt; c.fillRect(-5.5,hipY-2,2.4,2.4);                                  /* sword belt boss */
+        }
+        if (s==='field'||s==='coat'){
+            c.fillStyle='#2a2a2a'; c.beginPath(); c.arc(5.4,hipY+1.4,1.9,0,Math.PI*2); c.fill();       /* canteen */
+            c.fillStyle=coatDk; c.fillRect(2,hipY-0.8,3.4,3);                                          /* pouch */
+        }
+        /* neck + head + helmet */
+        saLimb(c,0,shY,0,neckY,3.6,sk);
+        c.fillStyle=sk; c.beginPath(); c.arc(0,headY,headR,0,Math.PI*2); c.fill();
+        c.fillStyle='rgba(0,0,0,0.1)'; c.beginPath(); c.arc(-1,headY+0.4,headR*0.7,0,Math.PI*2); c.fill();
+        c.fillStyle='#0a0a0a'; c.fillRect(1.5,headY-0.6,1.1,1.1);
+        if (s==='cloth'||s==='field'){ c.fillStyle=tr.hair; c.fillRect(-headR,headY+headR-1.5,headR*1.4,2); } /* beard hint */
+        drawSaHelm(c, tr, headY, headR);
+        /* standard-bearer / officer flag for chiefs */
+        if (w.chief){
+            c.strokeStyle='#5a3a1e'; c.lineWidth=1.4; c.beginPath(); c.moveTo(-6,shY+4); c.lineTo(-6,headY-headR-12); c.stroke();
+            c.fillStyle=tr.paint; c.fillRect(-6,headY-headR-12,10,7);
+            c.strokeStyle=tr.paintAlt; c.lineWidth=0.6; c.strokeRect(-6,headY-headR-12,10,7);
+        }
+        /* weapon arm + weapon */
+        var shy=shY+2, wph;
+        if (ph==='melee'){ var sp=w.strikePose; var aa=-1.3+sp*1.95; wph={x:Math.cos(aa)*14,y:shy+Math.sin(aa)*14}; }
+        else if (w.ranged){ wph={x:12,y:shy+1}; }
+        else { wph={x:11,y:shy+6}; }
+        var elbow={x:(5.5+wph.x)/2+1.5,y:(shy+wph.y)/2+1.5};
+        saLimb(c,5.5,shy,elbow.x,elbow.y,3.4,sk); saLimb(c,elbow.x,elbow.y,wph.x,wph.y,3.0,sk);
+        drawSaWeapon(c, w, wph, ph);
+        c.restore();
+    }
+
+    function drawSaWarrior(c, w){
+        /* armoured vehicles & artillery are machines, not people — render them
+           as standalone vehicles regardless of the simple/detailed body path */
+        if (w.role==='tank'){ drawSaTankVehicle(c, w); return; }
+        if (w.role==='cannon'){ drawSaFieldGun(c, w); return; }
+        /* mounts are few but instantly recognisable — keep them fully drawn even
+           in big-army "simple" mode so cavalry always reads as horse-riding and
+           never collapses into a stick figure that looks like it's walking. */
+        if (saWar.simple && w.role!=='rider' && w.role!=='elephant'){ drawSaSoldierCompact(c, w); return; }
+        /* non-Paleolithic eras get their own armoured/uniformed body */
+        if (w.tribe.style && w.tribe.style!=='tribal'){ drawSaSoldierStyled(c, w); return; }
+        var tr=w.tribe, S=w.scale, ph=w.phase;
+        c.save();
+        c.translate(w.x, w.y);
+        /* contact shadow */
+        c.fillStyle='rgba(0,0,0,0.26)';
+        c.beginPath(); c.ellipse(0,1.5*S,(ph==='down'?22:12)*S,3*S,0,0,Math.PI*2); c.fill();
+        c.scale(w.face*S, S);
+
+        if (ph==='down'){ drawSaCorpse(c, tr, w); c.restore(); return; }
+
+        var sk = (w.hurtT>0) ? '#d9603e' : tr.skin;          /* hurt flash */
+        var skD = (w.hurtT>0) ? '#a83a22' : tr.hideDark;
+        var rb=(ph==='advance')?Math.sin(w.anim):0;
+        var bob0=(ph==='advance')?-Math.abs(rb)*1.4:0;
+        /* BEAST RIDER — draw the dire-beast mount under the rider, lift the rider up */
+        var ride=0;
+        if (w.role==='rider'){ drawSaBeast(c, tr, w, rb); ride=-13; }
+        else {
+            var leanT=(w.charge||0)*0.20;
+            if (ph==='melee') leanT += Math.max(0, Math.sin((w.strikePose||0)*Math.PI))*0.12;
+            else if (ph==='advance') leanT += Math.abs(rb)*0.03;
+            if (leanT) c.rotate(leanT);
+        }
+        var g=rb, bob=bob0+ride;
+        var hipY=-20+bob, shY=-36+bob, neckY=-40+bob, headY=-46+bob, headR=5.2;
+        var fwd=(w.role==='rider')?0:g*7;        /* rider's legs straddle the beast */
+
+        /* ── BACK (shield) ARM + shield, drawn first so torso overlaps ── */
+        var shoBx=-5.5, shoBy=shY+2;
+        var hasShield = (w.role==='spear'||w.role==='club'||w.role==='wall');
+        if (hasShield){
+            saLimb(c, shoBx,shoBy, -7,shY+9, 3.4, sk);          /* upper arm */
+            saLimb(c, -7,shY+9, -3,shY+14, 3.0, sk);            /* forearm to grip */
+            drawSaShield(c, tr, -2.5, shY+9, (w.role==='wall')?1.35:0.95);
+        } else {
+            saLimb(c, shoBx,shoBy, -8,shY+12, 3.2, sk);
+        }
+
+        /* ── LEGS (thigh + shin + foot) ── */
+        var kf= -10+bob*0.2;
+        saLimb(c, 0,hipY, -fwd*0.5,kf, 5.0, sk);   saLimb(c, -fwd*0.5,kf, -fwd,0, 4.0, sk);
+        saLimb(c, 0,hipY,  fwd*0.5,kf, 5.2, sk);   saLimb(c,  fwd*0.5,kf,  fwd,0, 4.2, sk);
+        c.fillStyle=skD; c.fillRect(fwd-3.5,-2.6,7,2.8); c.fillRect(-fwd-3.5,-2.6,7,2.8);
+
+        /* ── HIDE LOINCLOTH with fur fringe ── */
+        c.fillStyle=tr.hide;
+        c.beginPath(); c.moveTo(-6.5,hipY-1); c.lineTo(6.5,hipY-1); c.lineTo(8,hipY+10); c.lineTo(-8,hipY+10); c.closePath(); c.fill();
+        c.strokeStyle=tr.hideDark; c.lineWidth=0.7; c.stroke();
+        c.fillStyle=tr.hideDark;
+        for (var fr=0; fr<6; fr++){ c.beginPath(); c.moveTo(-7+fr*2.6,hipY+10); c.lineTo(-6+fr*2.6,hipY+13); c.lineTo(-5+fr*2.6,hipY+10); c.closePath(); c.fill(); }
+        c.fillStyle=skD; c.fillRect(-8,hipY+1,16,1.6);          /* belt */
+
+        /* ── TORSO (muscled, tapered) ── */
+        c.fillStyle=sk;
+        c.beginPath();
+        c.moveTo(-5.5,hipY); c.lineTo(-7,shY+2);
+        c.quadraticCurveTo(0,shY-2.5, 7,shY+2); c.lineTo(5.5,hipY); c.closePath(); c.fill();
+        /* shading + pecs/abs */
+        c.strokeStyle='rgba(0,0,0,0.18)'; c.lineWidth=0.8;
+        c.beginPath(); c.moveTo(0,shY+1); c.lineTo(0,hipY-1);
+        c.moveTo(-4,shY+5); c.quadraticCurveTo(0,shY+7,4,shY+5);
+        c.moveTo(-3.5,hipY-7); c.lineTo(3.5,hipY-7); c.moveTo(-3.5,hipY-3); c.lineTo(3.5,hipY-3); c.stroke();
+        c.fillStyle='rgba(255,240,210,0.12)'; c.fillRect(-6,shY+2,2.4,hipY-shY-2);   /* rim light */
+
+        /* ── WAR PAINT (tribe-specific) ── */
+        if (tr.id==='ochre'){
+            c.strokeStyle=tr.paint; c.lineWidth=1.5;
+            c.beginPath(); c.moveTo(-4,shY+4); c.lineTo(4,shY+7); c.moveTo(-4,shY+8); c.lineTo(4,shY+11); c.stroke();
+            c.strokeStyle=tr.paintAlt; c.lineWidth=1.0;
+            c.beginPath(); c.moveTo(-5,hipY-6); c.lineTo(5,hipY-6); c.stroke();
+        } else {
+            c.fillStyle=tr.paint;                                  /* ash hand-print on chest */
+            c.beginPath(); c.arc(0,shY+7,2.2,0,Math.PI*2); c.fill();
+            for (var fp=0;fp<4;fp++) c.fillRect(-2.4+fp*1.5, shY+2.5, 0.9, 3);
+            c.strokeStyle=tr.paintAlt; c.lineWidth=1.0;
+            c.beginPath(); c.moveTo(-5,hipY-5); c.lineTo(0,hipY-7); c.lineTo(5,hipY-5); c.stroke();
+        }
+        /* bone necklace */
+        c.strokeStyle='#e8dcc0'; c.lineWidth=0.8;
+        c.beginPath(); c.moveTo(-3.5,shY+3); c.quadraticCurveTo(0,shY+6,3.5,shY+3); c.stroke();
+        c.fillStyle='#e8dcc0';
+        for (var nb=0;nb<3;nb++) c.beginPath(), c.arc(-2.4+nb*2.4, shY+5, 0.8, 0, Math.PI*2), c.fill();
+
+        /* ── NECK + HEAD ── */
+        saLimb(c,0,shY,0,neckY,4,sk);
+        c.fillStyle=sk; c.beginPath(); c.arc(0,headY,headR,0,Math.PI*2); c.fill();
+        /* jaw / brow shading */
+        c.fillStyle='rgba(0,0,0,0.12)'; c.beginPath(); c.arc(-1.2,headY+0.5,headR*0.7,0,Math.PI*2); c.fill();
+        /* nose + eye + mouth */
+        c.fillStyle=sk; c.beginPath(); c.moveTo(headR-0.5,headY); c.lineTo(headR+1.6,headY+0.6); c.lineTo(headR-0.5,headY+1.4); c.closePath(); c.fill();
+        c.fillStyle='#0a0a0a'; c.fillRect(1.6,headY-0.8,1.3,1.3);
+        c.strokeStyle='rgba(0,0,0,0.4)'; c.lineWidth=0.6; c.beginPath(); c.moveTo(1.2,headY+2.4); c.lineTo(3.4,headY+2.4); c.stroke();
+        /* face war paint */
+        c.fillStyle=tr.paintAlt; c.fillRect(-headR,headY-1.6,headR*2,1.8);
+        c.fillStyle=tr.paint; c.fillRect(0.5,headY+1.2,headR-0.5,1.2);
+        /* hair + ornaments */
+        c.fillStyle=tr.hair;
+        if (tr.hairStyle==='topknot'){
+            c.beginPath(); c.ellipse(0,headY-headR-0.5,headR*0.95,2,0,0,Math.PI*2); c.fill();
+            c.beginPath(); c.arc(-0.5,headY-headR-3,2.6,0,Math.PI*2); c.fill();
+            /* feather in the knot */
+            c.fillStyle=tr.paint; c.beginPath(); c.moveTo(-0.5,headY-headR-4); c.lineTo(-3,headY-headR-12); c.lineTo(1.5,headY-headR-10); c.closePath(); c.fill();
+            /* beard */
+            c.fillStyle=tr.hair; c.beginPath(); c.moveTo(-2.5,headY+headR-1); c.lineTo(0,headY+headR+3); c.lineTo(2.5,headY+headR-1); c.closePath(); c.fill();
+        } else {
+            for (var hs=0;hs<6;hs++){ c.fillRect(-headR-0.4+hs*1.9, headY-headR-0.5, 1.5, 5+((hs%2)?4:0)); }
+            /* bone through the hair */
+            c.fillStyle='#e8dcc0'; c.fillRect(-headR-3,headY-headR-1,headR+1,1.4);
+        }
+
+        /* ── WEAPON ARM + weapon (front) ── */
+        var shy=shY+2, wph;
+        if (ph==='melee'){
+            var sp=w.strikePose; var aa=-1.35 + sp*1.95;
+            wph={x:Math.cos(aa)*14, y:shy+Math.sin(aa)*14};
+        } else if (w.ranged){
+            var tp=0.5+0.5*Math.sin(w.aim*2.0); var pf=w.throwPulse||0;
+            var ta=-2.05 + tp*0.7 + pf*2.5;
+            if (w.role==='bow') ta=-0.15;            /* bow held level, aimed forward */
+            wph={x:Math.cos(ta)*13, y:shy+Math.sin(ta)*13};
+        } else {
+            wph={x:11, y:shy+6};
+        }
+        var elbow={x:(5.5+wph.x)/2 + 1.5, y:(shy+wph.y)/2 + 1.5};
+        saLimb(c, 5.5,shy, elbow.x,elbow.y, 3.6, sk);
+        saLimb(c, elbow.x,elbow.y, wph.x,wph.y, 3.2, sk);
+        drawSaWeapon(c, w, wph, ph);
+
+        /* CHIEF headdress — tall feather crown so leaders stand out */
+        if (w.chief){
+            c.fillStyle=tr.paint;
+            for (var ft=0; ft<3; ft++){
+                var fxo=(ft-1)*3;
+                c.beginPath();
+                c.moveTo(fxo, headY-headR-1);
+                c.lineTo(fxo-2, headY-headR-13);
+                c.lineTo(fxo+2, headY-headR-13);
+                c.closePath(); c.fill();
+            }
+            c.fillStyle='#3b2410'; c.fillRect(-headR,headY-headR-2,headR*2,2.4);
+        }
+
+        c.restore();
+    }
+
+    /* Dire-beast mount for Beast Riders — a big shaggy wolf/cat. */
+    function drawSaBeast(c, tr, w, rb){
+        var step=(w.phase==='advance')?Math.sin(w.anim*1.2)*2.5:0;
+        c.save();
+        c.fillStyle='#4a3322';
+        /* body */
+        c.beginPath(); c.ellipse(2,-9,12,6.5,0,0,Math.PI*2); c.fill();
+        /* head */
+        c.beginPath(); c.ellipse(13,-12,5,4,0,0,Math.PI*2); c.fill();
+        c.beginPath(); c.moveTo(15,-15); c.lineTo(17,-19); c.lineTo(18,-14); c.closePath(); c.fill(); /* ear */
+        /* legs */
+        c.strokeStyle='#3a2718'; c.lineWidth=2.6; c.lineCap='round';
+        c.beginPath(); c.moveTo(-6,-5); c.lineTo(-6+step,2); c.moveTo(-2,-5); c.lineTo(-2-step,2);
+        c.moveTo(8,-5); c.lineTo(8+step,2); c.moveTo(12,-5); c.lineTo(12-step,2); c.stroke();
+        /* tail + shaggy back */
+        c.strokeStyle='#4a3322'; c.lineWidth=2; c.beginPath(); c.moveTo(-10,-9); c.quadraticCurveTo(-16,-12,-15,-5); c.stroke();
+        c.fillStyle='#2f2016';
+        for (var sh=0; sh<5; sh++){ c.fillRect(-6+sh*4,-15,1.6,4); }
+        /* eye */
+        c.fillStyle='#fbbf24'; c.fillRect(13,-13,1.4,1.4);
+        c.restore();
+    }
+
+    /* ── WARHORSE for mounted cavalry (knights, companions, dragoons, keshik…)
+       Drawn in the rider's already face-scaled local frame, facing +x, with a
+       four-beat gallop cycle, flowing mane & tail, and a faction saddle-cloth.
+       (Previously drawSaHorse was *called* but never defined → cavalry crash.) */
+    function drawSaHorse(c, tr, w){
+        var moving=(w.phase==='advance'||w.phase==='melee');
+        var gp = moving ? w.anim*1.4 : 0;
+        var s1=Math.sin(gp), s2=Math.sin(gp+Math.PI), bob = moving?Math.abs(Math.sin(gp*2))*1.2:0;
+        var coat = (tr.style==='cloth') ? '#6e4a2c' : (tr.style==='mail'||tr.style==='coat') ? '#4a3320' : '#5b3d27';
+        var coatDk='#33220f', mane='#241509';
+        c.save(); c.translate(0,-bob);
+        /* ── far-side legs (drawn first, darker) ── */
+        c.strokeStyle=coatDk; c.lineWidth=2.6; c.lineCap='round';
+        c.beginPath(); c.moveTo(9,-10); c.lineTo(9+s2*6,1.5); c.stroke();      /* far fore */
+        c.beginPath(); c.moveTo(-11,-10); c.lineTo(-11+s1*6,1.5); c.stroke();  /* far hind */
+        /* ── tail ── */
+        c.strokeStyle=mane; c.lineWidth=3.2; c.lineCap='round';
+        c.beginPath(); c.moveTo(-18,-15); c.quadraticCurveTo(-27,-12+s1*2,-25,0); c.stroke();
+        /* ── barrel / quarters / chest ── */
+        c.fillStyle=coat;
+        c.beginPath(); c.ellipse(-2,-15,15,8,0,0,Math.PI*2); c.fill();
+        c.beginPath(); c.arc(-13,-15,8.5,0,Math.PI*2); c.fill();               /* hindquarters */
+        c.beginPath(); c.arc(11,-16,7,0,Math.PI*2); c.fill();                  /* chest */
+        c.fillStyle='rgba(0,0,0,0.16)'; c.beginPath(); c.ellipse(-2,-12,14,5,0,0,Math.PI*2); c.fill(); /* belly shade */
+        /* ── neck + head (reaching forward) ── */
+        c.fillStyle=coat;
+        c.beginPath(); c.moveTo(12,-21); c.lineTo(20,-33); c.lineTo(25,-31); c.lineTo(17,-15); c.closePath(); c.fill();
+        c.save(); c.translate(23,-32); c.rotate(-0.45);
+        c.fillStyle=coat; c.beginPath(); c.ellipse(2,0,7,3.4,0,0,Math.PI*2); c.fill();   /* muzzle */
+        c.beginPath(); c.moveTo(-3,-1); c.lineTo(-4,-6); c.lineTo(-1,-2); c.closePath(); c.fill(); /* ear */
+        c.fillStyle='#1a120a'; c.beginPath(); c.arc(1,-1.2,0.9,0,Math.PI*2); c.fill();   /* eye */
+        c.fillStyle='#0a0a0a'; c.beginPath(); c.arc(8,0.6,0.9,0,Math.PI*2); c.fill();    /* nostril */
+        c.restore();
+        /* ── mane along the crest ── */
+        c.strokeStyle=mane; c.lineWidth=1.6;
+        for (var m=0;m<6;m++){ var mt=m/6; c.beginPath();
+            c.moveTo(12+mt*9, -21-mt*11); c.lineTo(9+mt*9, -18-mt*11+s1); c.stroke(); }
+        /* ── saddle-cloth (faction colours) ── */
+        c.fillStyle=tr.hide; c.beginPath(); c.moveTo(-9,-22); c.lineTo(7,-22); c.lineTo(9,-14); c.lineTo(-11,-14); c.closePath(); c.fill();
+        c.strokeStyle=tr.paintAlt; c.lineWidth=1; c.stroke();
+        c.fillStyle=tr.hideDark; c.fillRect(-5,-23.5,9,2.2);                    /* saddle */
+        /* ── BARDING: a draped caparison + chamfron for armoured cavalry ── */
+        if (tr.style==='mail'||tr.style==='coat'||tr.style==='iron'){
+            c.fillStyle=tr.paint;                                               /* caparison skirt */
+            c.beginPath(); c.moveTo(-20,-13); c.lineTo(13,-13); c.lineTo(12,-3); c.lineTo(10,-6); c.lineTo(7,-2); c.lineTo(4,-6); c.lineTo(1,-2); c.lineTo(-2,-6); c.lineTo(-5,-2); c.lineTo(-8,-6); c.lineTo(-11,-2); c.lineTo(-14,-6); c.lineTo(-18,-3); c.closePath(); c.fill();
+            c.strokeStyle=tr.paintAlt; c.lineWidth=1; c.stroke();
+            c.fillStyle=tr.motifCol; for (var cz=0; cz<4; cz++){ c.fillRect(-14+cz*8,-11,2.4,2.4); }   /* heraldic studs */
+            c.fillStyle='#b8bcc4'; c.beginPath(); c.moveTo(23,-35); c.lineTo(28,-31); c.lineTo(23,-27); c.closePath(); c.fill(); /* chamfron face plate */
+            c.fillStyle=tr.paint; c.fillRect(20,-40,2,5); c.fillStyle=tr.paintAlt; c.fillRect(19.4,-44,3.2,4); /* head plume */
+        }
+        /* ── near-side legs (lighter, on top) ── */
+        c.strokeStyle=coat; c.lineWidth=3; c.lineCap='round';
+        c.beginPath(); c.moveTo(8,-10); c.lineTo(8+s1*6,2); c.stroke();         /* near fore */
+        c.beginPath(); c.moveTo(-10,-10); c.lineTo(-10+s2*6,2); c.stroke();     /* near hind */
+        c.fillStyle='#0d0907';                                                  /* hooves */
+        c.fillRect(8+s1*6-1.4,1,2.8,1.6); c.fillRect(-10+s2*6-1.4,1,2.8,1.6);
+        c.restore();
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       ARMOURED VEHICLES — tanks render as actual machines (hull, turret,
+       rolling tracks, recoiling gun) rather than a soldier carrying a toy.
+       Era decides the silhouette: WWI rhomboid → WWII turreted → modern MBT.
+       ════════════════════════════════════════════════════════════════ */
+    function saTrackLugs(c, x0, x1, y, roll){
+        c.strokeStyle='#0e0e10'; c.lineWidth=1.2;
+        var span=x1-x0, off=(roll % 6);
+        for (var lx=x0+off-6; lx<x1; lx+=6){ if (lx<x0) continue;
+            c.beginPath(); c.moveTo(lx,y-2.4); c.lineTo(lx,y+2.4); c.stroke(); }
+    }
+    function drawSaTankVehicle(c, w){
+        var tr=w.tribe, S=w.scale*1.55, kit=SA_SCENE_KIT;
+        var era = (kit==='trench')?'ww1' : (kit==='urban')?'modern' : 'ww2';
+        var moving=(w.phase!=='down');
+        var roll = moving ? (saWar.t*0.06) : 0;
+        var recoil = (w.throwPulse||0);                 /* 1 just after firing → 0 */
+        var base = tr.hide || '#4b5320', dark = tr.hideDark || '#26301a', lite='rgba(255,255,255,0.10)';
+        c.save(); c.translate(w.x, w.y);
+        /* contact shadow */
+        c.fillStyle='rgba(0,0,0,0.32)'; c.beginPath(); c.ellipse(0,3*S,34*S,5.5*S,0,0,Math.PI*2); c.fill();
+        c.scale(w.face*S, S);
+
+        if (era==='ww1'){
+            /* ── rhomboid Mark IV / A7V: lozenge track frame wrapping the hull ── */
+            c.fillStyle=dark;
+            c.beginPath();
+            c.moveTo(-30,-2); c.lineTo(-22,-15); c.lineTo(20,-17); c.lineTo(31,-4);
+            c.lineTo(31,4); c.lineTo(20,7); c.lineTo(-22,7); c.lineTo(-30,2); c.closePath(); c.fill();
+            c.strokeStyle='#0e0e10'; c.lineWidth=1.4; c.stroke();
+            /* all-around track lugs following the lozenge top & bottom */
+            c.strokeStyle='#0e0e10'; c.lineWidth=1.1;
+            var loff=(roll%6);
+            for (var t=-28+loff; t<30; t+=6){
+                var topY = -2 - Math.max(0, 13*(1-Math.abs(t)/30));
+                c.beginPath(); c.moveTo(t,topY); c.lineTo(t,topY-2.2); c.stroke();
+                c.beginPath(); c.moveTo(t,6); c.lineTo(t,8.2); c.stroke();
+            }
+            /* riveted hull body */
+            c.fillStyle=base; c.fillRect(-20,-12,38,16);
+            c.fillStyle=lite; c.fillRect(-20,-12,38,2);
+            c.fillStyle='rgba(0,0,0,0.25)'; for (var rv=0;rv<8;rv++) c.fillRect(-18+rv*4.6,-11,1,1);
+            /* side sponson gun */
+            c.fillStyle='#1f1f23'; c.fillRect(16-recoil*4,-6,16,4);
+            c.fillStyle='#3a3a40'; c.fillRect(12,-8,8,8);
+            /* commander cupola */
+            c.fillStyle=dark; c.fillRect(-6,-17,12,5);
+            if (recoil>0.55){ c.fillStyle='rgba(255,228,150,'+recoil+')'; c.beginPath(); c.arc(33-recoil*4,-4,3.4,0,Math.PI*2); c.fill(); }
+
+        } else if (era==='modern'){
+            /* ── modern MBT (Abrams / T-90): low sloped hull, side skirts,
+                  long smoothbore w/ thermal sleeve + muzzle brake, bustle rack ── */
+            /* tracks */
+            c.fillStyle='#15151a'; c.fillRect(-30,-1,60,8);
+            saTrackLugs(c,-30,30,3,roll);
+            c.fillStyle='#0c0c10';                                  /* road wheels */
+            for (var rw=0;rw<7;rw++){ c.beginPath(); c.arc(-26+rw*8.3,3,3.1,0,Math.PI*2); c.fill(); }
+            c.fillStyle='#1c1c22'; c.beginPath(); c.arc(-30,3,4,0,Math.PI*2); c.fill(); c.beginPath(); c.arc(30,3,4,0,Math.PI*2); c.fill();
+            /* side skirt */
+            c.fillStyle=base; c.fillRect(-29,-4,58,4);
+            /* sloped hull */
+            c.fillStyle=base; c.beginPath(); c.moveTo(-29,-4); c.lineTo(-22,-12); c.lineTo(20,-12); c.lineTo(30,-4); c.closePath(); c.fill();
+            c.fillStyle=lite; c.beginPath(); c.moveTo(-22,-12); c.lineTo(20,-12); c.lineTo(20,-10.5); c.lineTo(-22,-10.5); c.closePath(); c.fill();
+            c.fillStyle='rgba(0,0,0,0.2)'; c.fillRect(20,-9,9,4);    /* bustle / engine deck */
+            /* low wide turret */
+            c.fillStyle=base; c.beginPath(); c.moveTo(-14,-12); c.lineTo(-10,-21); c.lineTo(10,-21); c.lineTo(16,-12); c.closePath(); c.fill();
+            c.fillStyle=dark; c.fillRect(12,-20,8,7);               /* turret bustle rack */
+            c.strokeStyle='#1f1f23'; c.lineWidth=0.6; for (var br=0;br<4;br++){ c.beginPath(); c.moveTo(12,-19+br*1.7); c.lineTo(20,-19+br*1.7); c.stroke(); }
+            /* commander hatch + head */
+            c.fillStyle=dark; c.fillRect(-4,-24,8,4);
+            c.fillStyle=tr.skin; c.beginPath(); c.arc(0,-25,2.4,0,Math.PI*2); c.fill();
+            c.fillStyle='#2a2a2a'; c.beginPath(); c.arc(0,-26,2.6,Math.PI,0); c.fill(); /* CVC helmet */
+            /* long smoothbore gun + thermal sleeve + muzzle brake */
+            var gx=16-recoil*5;
+            c.fillStyle='#26262c'; c.fillRect(gx,-19,30,2.6);
+            c.fillStyle='#34343c'; c.fillRect(gx+6,-19.4,12,3.4);   /* thermal sleeve */
+            c.fillStyle='#15151a'; c.fillRect(gx+30,-19.6,4,3.4);   /* muzzle brake */
+            c.strokeStyle='#1c1c22'; c.lineWidth=1.4; c.beginPath(); c.moveTo(-12,-22); c.lineTo(-12,-30); c.stroke(); /* antenna */
+            if (recoil>0.55){ c.fillStyle='rgba(255,240,180,'+recoil+')'; c.beginPath(); c.arc(gx+36,-18,4.2*recoil+1.5,0,Math.PI*2); c.fill();
+                c.fillStyle='rgba(255,170,60,'+(recoil*0.7)+')'; c.beginPath(); c.arc(gx+40,-18,2.4,0,Math.PI*2); c.fill(); }
+
+        } else {
+            /* ── WWII turreted tank (Sherman / Panzer IV) ── */
+            c.fillStyle='#16161a'; c.fillRect(-28,-2,56,9);          /* track */
+            saTrackLugs(c,-28,28,3.5,roll);
+            c.fillStyle='#0c0c10';                                   /* road wheels */
+            for (var w2=0;w2<6;w2++){ c.beginPath(); c.arc(-23+w2*9,4,3.4,0,Math.PI*2); c.fill(); }
+            c.fillStyle='#1c1c22'; c.beginPath(); c.arc(-28,2,4.2,0,Math.PI*2); c.fill(); c.beginPath(); c.arc(28,4,4.6,0,Math.PI*2); c.fill(); /* sprocket+idler */
+            /* hull */
+            c.fillStyle=base; c.fillRect(-26,-9,52,9);
+            c.fillStyle=lite; c.fillRect(-26,-9,52,2);
+            c.fillStyle='rgba(0,0,0,0.22)'; c.fillRect(-26,-2,52,2);
+            c.fillStyle=base; c.beginPath(); c.moveTo(20,-9); c.lineTo(30,-6); c.lineTo(30,-1); c.lineTo(26,0); c.closePath(); c.fill(); /* glacis */
+            /* turret */
+            c.fillStyle=base; c.beginPath(); c.moveTo(-12,-9); c.lineTo(-9,-20); c.lineTo(9,-20); c.lineTo(13,-9); c.closePath(); c.fill();
+            c.fillStyle=lite; c.fillRect(-9,-20,18,2);
+            /* cupola + commander */
+            c.fillStyle=dark; c.fillRect(-3,-23,7,4);
+            c.fillStyle=tr.skin; c.beginPath(); c.arc(0,-24,2.3,0,Math.PI*2); c.fill();
+            c.fillStyle='#3a3a40'; c.beginPath(); c.arc(0,-25,2.5,Math.PI,0); c.fill();
+            /* main gun + mantlet + muzzle */
+            var gx2=13-recoil*5;
+            c.fillStyle='#3a3a40'; c.fillRect(10,-17,6,7);           /* mantlet */
+            c.fillStyle='#26262c'; c.fillRect(gx2,-15,26,2.6);
+            c.fillStyle='#15151a'; c.fillRect(gx2+26,-15.4,3,3.4);   /* muzzle */
+            /* hull MG */
+            c.fillStyle='#1f1f23'; c.fillRect(22,-6,7,1.6);
+            if (recoil>0.55){ c.fillStyle='rgba(255,236,160,'+recoil+')'; c.beginPath(); c.arc(gx2+31,-14,3.6*recoil+1.4,0,Math.PI*2); c.fill(); }
+        }
+        /* ── KNOCKED-OUT: scorch the hull, then flames + rolling smoke ── */
+        if (w.phase==='down'){
+            c.fillStyle='rgba(8,6,4,0.55)'; c.fillRect(-30,-22,62,30);   /* burn scorch */
+            var fl=saWar.t*0.018+w.seed;
+            for (var fm=0; fm<4; fm++){
+                var fx2=(fm-1.5)*7, fh=10+Math.sin(fl+fm)*5;
+                c.fillStyle='rgba(255,90,20,0.85)'; c.beginPath(); c.moveTo(fx2-3,-12); c.quadraticCurveTo(fx2,-12-fh,fx2+3,-12); c.fill();
+                c.fillStyle='rgba(255,190,60,0.85)'; c.beginPath(); c.moveTo(fx2-1.6,-12); c.quadraticCurveTo(fx2,-12-fh*0.6,fx2+1.6,-12); c.fill();
+            }
+            for (var sm=0; sm<3; sm++){ var sy=-22-sm*7-Math.sin(fl*0.7+sm)*3;
+                c.fillStyle='rgba(40,38,34,'+(0.5-sm*0.13)+')'; c.beginPath(); c.arc((sm-1)*4+Math.sin(fl+sm)*4, sy, 5+sm*2, 0, Math.PI*2); c.fill(); }
+        }
+        c.restore();
+    }
+
+    /* ── TOWED FIELD GUN / HOWITZER / MORTAR for the 'cannon' (artillery)
+       role — a real wheeled piece with a crewman, not a soldier holding a
+       miniature cannon. Era picks wooden carriage vs. shielded howitzer. */
+    function drawSaFieldGun(c, w){
+        var tr=w.tribe, S=w.scale*1.05, kit=SA_SCENE_KIT;
+        var modernGun = (kit==='trench'||kit==='town'||kit==='urban'||kit==='field');
+        var recoil=(w.throwPulse||0);
+        c.save(); c.translate(w.x, w.y);
+        c.fillStyle='rgba(0,0,0,0.30)'; c.beginPath(); c.ellipse(0,2.5*S,20*S,4*S,0,0,Math.PI*2); c.fill();
+        c.scale(w.face*S, S);
+        var elev = modernGun ? -0.62 : -0.30;           /* howitzers fire high */
+        if (modernGun){
+            /* split-trail howitzer with gun shield */
+            c.strokeStyle='#2c2c30'; c.lineWidth=2.4; c.lineCap='round';
+            c.beginPath(); c.moveTo(0,-4); c.lineTo(-20,5); c.moveTo(0,-4); c.lineTo(-12,6); c.stroke(); /* trails */
+            c.fillStyle='#0c0c10'; c.beginPath(); c.arc(-2,2,5,0,Math.PI*2); c.fill();                   /* wheel */
+            c.fillStyle='#26262c'; c.beginPath(); c.arc(-2,2,2,0,Math.PI*2); c.fill();
+            c.fillStyle='#4a4f44'; c.fillRect(-8,-12,11,12);                                             /* gun shield */
+            c.fillStyle='rgba(255,255,255,0.08)'; c.fillRect(-8,-12,11,2);
+            /* barrel (recoils along its axis) */
+            c.save(); c.translate(0,-7); c.rotate(elev);
+            c.fillStyle='#26262c'; c.fillRect(-recoil*5,-2,30,3.4);
+            c.fillStyle='#15151a'; c.fillRect(28,-2.4,3,4.2);                                            /* muzzle brake */
+            if (recoil>0.5){ c.fillStyle='rgba(255,240,170,'+recoil+')'; c.beginPath(); c.arc(33,0,4*recoil+1.4,0,Math.PI*2); c.fill(); }
+            c.restore();
+        } else {
+            /* Napoleonic / black-powder cannon on a wooden carriage */
+            c.fillStyle='#5a3a1e'; c.beginPath(); c.moveTo(-16,4); c.lineTo(2,-4); c.lineTo(2,2); c.lineTo(-14,8); c.closePath(); c.fill(); /* trail */
+            c.fillStyle='#3b2410'; c.beginPath(); c.arc(-4,3,6.5,0,Math.PI*2); c.fill();                 /* wheel */
+            c.strokeStyle='#6b4423'; c.lineWidth=1; for (var sp=0;sp<6;sp++){ var sa=sp/6*Math.PI*2; c.beginPath(); c.moveTo(-4,3); c.lineTo(-4+Math.cos(sa)*6,3+Math.sin(sa)*6); c.stroke(); }
+            c.fillStyle='#2a2a2a'; c.beginPath(); c.arc(-4,3,2,0,Math.PI*2); c.fill();
+            c.save(); c.translate(-2,-3); c.rotate(elev);
+            c.fillStyle='#3a3a40'; c.beginPath(); c.moveTo(-6,-3); c.lineTo(20,-2.2); c.lineTo(20,2.2); c.lineTo(-6,3); c.closePath(); c.fill(); /* bronze barrel */
+            c.fillStyle='#b08d57'; c.fillRect(16,-2.6,3,5.2);
+            if (recoil>0.5){ c.fillStyle='rgba(255,230,150,'+recoil+')'; c.beginPath(); c.arc(22,0,3.6*recoil+1.2,0,Math.PI*2); c.fill(); }
+            c.restore();
+        }
+        /* crewman kneeling at the breech */
+        var sk=tr.skin, ucol=tr.hide;
+        c.save(); c.translate(-12,0);
+        c.strokeStyle=ucol; c.lineWidth=3; c.lineCap='round';
+        c.beginPath(); c.moveTo(0,-1); c.lineTo(-3,-9); c.lineTo(2,-9); c.stroke();   /* crouched torso */
+        c.fillStyle=sk; c.beginPath(); c.arc(2,-12,2.6,0,Math.PI*2); c.fill();        /* head */
+        c.fillStyle=(modernGun?'#3f4248':'#1f2937'); c.beginPath(); c.arc(2,-12.6,2.8,Math.PI,0); c.fill(); /* helmet */
+        c.strokeStyle=sk; c.lineWidth=2; c.beginPath(); c.moveTo(0,-7); c.lineTo(6,-5); c.stroke(); /* arm to breech */
+        c.restore();
+        if (w.phase==='down'){                       /* destroyed gun — flames + smoke */
+            var gf=saWar.t*0.02+w.seed;
+            c.fillStyle='rgba(255,100,25,0.85)'; c.beginPath(); c.moveTo(-3,-6); c.quadraticCurveTo(0,-6-(8+Math.sin(gf)*4),3,-6); c.fill();
+            c.fillStyle='rgba(40,38,34,0.5)'; c.beginPath(); c.arc(Math.sin(gf)*3,-16,5,0,Math.PI*2); c.fill();
+        }
+        c.restore();
+    }
+
+    /* fallen warrior — lying on the ground in a blood pool with dropped gear */
+    function drawSaCorpse(c, tr, w){
+        c.fillStyle='rgba(110,18,10,0.45)';
+        c.beginPath(); c.ellipse(0,0,17,4,0,0,Math.PI*2); c.fill();
+        c.save(); c.translate(0,-3.5); c.rotate((w.fallDir||1)*0.06);
+        /* torso + legs laid flat */
+        c.strokeStyle=tr.skin; c.lineWidth=6.5; c.lineCap='round';
+        c.beginPath(); c.moveTo(-13,1); c.lineTo(9,-1); c.stroke();
+        /* hide */
+        c.strokeStyle=tr.hide; c.lineWidth=5; c.beginPath(); c.moveTo(-6,0.5); c.lineTo(2,-0.5); c.stroke();
+        /* splayed limbs */
+        c.strokeStyle=tr.skin; c.lineWidth=3;
+        c.beginPath(); c.moveTo(-2,0); c.lineTo(-7,5); c.moveTo(2,-0.5); c.lineTo(6,5); c.moveTo(-10,0.5); c.lineTo(-15,4); c.stroke();
+        /* head */
+        c.fillStyle=tr.skin; c.beginPath(); c.arc(12,-2,4.6,0,Math.PI*2); c.fill();
+        c.fillStyle=tr.hair; c.beginPath(); c.arc(14,-3.5,3.4,Math.PI*0.1,Math.PI*1.2); c.fill();
+        /* dropped weapon */
+        c.strokeStyle='#6b4423'; c.lineWidth=2; c.beginPath(); c.moveTo(-16,4); c.lineTo(-3,5); c.stroke();
+        c.fillStyle='#cbd5e1'; c.beginPath(); c.moveTo(-3,5); c.lineTo(-6,3.5); c.lineTo(-6,6.5); c.closePath(); c.fill();
+        c.restore();
+    }
+
+    function drawSaShield(c, tr, x, y, scl){
+        c.save(); c.translate(x,y); c.scale(scl,scl);
+        /* drop a touch of shadow under the rim */
+        c.fillStyle=tr.shield; c.strokeStyle=tr.shieldRim; c.lineWidth=2.0;
+        if (tr.shieldShape==='oval'){
+            c.beginPath(); c.ellipse(0,0,8,12,0,0,Math.PI*2); c.fill(); c.stroke();
+            /* hide-stretch ribs */
+            c.strokeStyle='rgba(0,0,0,0.18)'; c.lineWidth=0.8;
+            c.beginPath(); c.moveTo(0,-11); c.lineTo(0,11); c.moveTo(-6,-7); c.quadraticCurveTo(0,0,-6,7); c.moveTo(6,-7); c.quadraticCurveTo(0,0,6,7); c.stroke();
+        } else {
+            c.beginPath(); c.arc(0,0,10,0,Math.PI*2); c.fill(); c.stroke();
+            c.strokeStyle='rgba(0,0,0,0.16)'; c.lineWidth=0.8;
+            c.beginPath(); c.arc(0,0,6,0,Math.PI*2); c.arc(0,0,3,0,Math.PI*2); c.stroke();
+        }
+        /* rim studs */
+        c.fillStyle=tr.shieldRim;
+        for (var st=0; st<8; st++){ var sa=st/8*Math.PI*2; c.beginPath(); c.arc(Math.cos(sa)*(tr.shieldShape==='oval'?7:9), Math.sin(sa)*(tr.shieldShape==='oval'?10.5:9), 0.9,0,Math.PI*2); c.fill(); }
+        /* motif */
+        c.fillStyle=tr.motifCol; c.strokeStyle=tr.motifCol;
+        if (tr.motif==='hand'){
+            c.beginPath(); c.arc(0,1.5,2.6,0,Math.PI*2); c.fill();
+            for (var fgr=0;fgr<4;fgr++){ c.fillRect(-2.8+fgr*1.7, -4.5, 1.1, 3.6); }
+        } else {
+            c.lineWidth=1.6;
+            c.beginPath();
+            c.moveTo(-6,-4); c.lineTo(0,-1.5); c.lineTo(6,-4);
+            c.moveTo(-6,1); c.lineTo(0,3.5); c.lineTo(6,1);
+            c.moveTo(-6,5); c.lineTo(0,7.5); c.lineTo(6,5); c.stroke();
+        }
+        c.restore();
+    }
+
+    function drawSaWeapon(c, w, h, ph){
+        var down=(ph==='melee')?8:-1, r=w.role;
+        /* SWING SWOOSH — a bright motion arc that traces the blade/haft through
+           the strike, so every melee blow reads as a real swing, not a wiggle. */
+        if (ph==='melee' && (r==='sword'||r==='axe'||r==='club'||r==='spear'||r==='zerk'||r==='wall')){
+            var sw=Math.sin((w.strikePose||0)*Math.PI);
+            if (sw>0.15){
+                c.save();
+                c.strokeStyle='rgba(255,255,255,'+(sw*0.34)+')'; c.lineWidth=2.4; c.lineCap='round';
+                c.beginPath(); c.arc(2,h.y-4,15,-1.25,0.55); c.stroke();
+                c.strokeStyle='rgba(255,236,170,'+(sw*0.22)+')'; c.lineWidth=4.2;
+                c.beginPath(); c.arc(2,h.y-4,15,-1.05,0.30); c.stroke();
+                c.restore();
+            }
+        }
+        /* ── later-era weapons ── */
+        if (r==='gun' || r==='mg'){
+            /* era-accurate small arms: musket → bolt-action rifle → assault rifle */
+            var style=w.tribe.style, kit=SA_SCENE_KIT;
+            var ex=h.x+(r==='mg'?22:18), ey=h.y+1;
+            if (kit==='urban'){
+                /* ASSAULT RIFLE — AK-47 / M4 carbine: receiver, curved mag, pistol grip, stock */
+                c.strokeStyle='#2b2b2e'; c.lineWidth=2.2; c.lineCap='round';
+                c.beginPath(); c.moveTo(h.x-7,ey+1.5); c.lineTo(ex,ey-1); c.stroke();          /* receiver + barrel */
+                c.strokeStyle='#1a1a1c'; c.lineWidth=1.4; c.beginPath(); c.moveTo(h.x-10,ey+3.5); c.lineTo(h.x-4,ey+1); c.stroke(); /* stock */
+                c.fillStyle='#26262a';                                                          /* banana magazine */
+                c.beginPath(); c.moveTo(h.x+2,ey+1); c.quadraticCurveTo(h.x+5,ey+8,h.x+3,ey+10); c.lineTo(h.x,ey+10); c.quadraticCurveTo(h.x,ey+5,h.x-1,ey+1); c.closePath(); c.fill();
+                c.strokeStyle='#1a1a1c'; c.lineWidth=1.6; c.beginPath(); c.moveTo(h.x-1,ey+1); c.lineTo(h.x-2,ey+5); c.stroke(); /* pistol grip */
+                c.strokeStyle='#3a3a40'; c.lineWidth=0.8; c.beginPath(); c.moveTo(h.x+6,ey-1); c.lineTo(ex-2,ey-1); c.stroke(); /* gas tube */
+                c.fillStyle='#1a1a1c'; c.fillRect(ex-1,ey-2.4,2,2);                              /* front sight */
+                if (r==='mg'){ c.strokeStyle='#1a1a1c'; c.lineWidth=1; c.beginPath(); c.moveTo(ex-5,ey); c.lineTo(ex-7,ey+6); c.moveTo(ex-5,ey); c.lineTo(ex-2,ey+6); c.stroke(); } /* bipod */
+            } else if (style==='coat'){
+                /* FLINTLOCK MUSKET + bayonet (revolutionary / napoleonic) */
+                c.strokeStyle='#5a3a1e'; c.lineWidth=2.0; c.lineCap='round'; c.beginPath(); c.moveTo(h.x-9,ey+2.5); c.lineTo(ex,ey-1); c.stroke();
+                c.strokeStyle='#9ca3af'; c.lineWidth=1.1; c.beginPath(); c.moveTo(h.x+2,ey-0.4); c.lineTo(ex,ey-1); c.stroke(); /* barrel */
+                c.strokeStyle='#e5e7eb'; c.lineWidth=1; c.beginPath(); c.moveTo(ex,ey-1); c.lineTo(ex+9,ey-2.4); c.stroke(); /* bayonet */
+                c.fillStyle='#3b2a18'; c.fillRect(h.x-3,ey-2.4,3,1.8);                            /* lock + hammer */
+            } else {
+                /* BOLT-ACTION RIFLE + bayonet (WWI / WWII) */
+                c.strokeStyle='#4a3220'; c.lineWidth=2.0; c.lineCap='round'; c.beginPath(); c.moveTo(h.x-9,ey+2.5); c.lineTo(ex,ey-0.5); c.stroke();
+                c.strokeStyle='#6b7280'; c.lineWidth=1.2; c.beginPath(); c.moveTo(h.x+3,ey-0.5); c.lineTo(ex,ey-0.5); c.stroke(); /* barrel */
+                c.strokeStyle='#cbd5e1'; c.lineWidth=0.9; c.beginPath(); c.moveTo(ex,ey-0.5); c.lineTo(ex+10,ey-1.6); c.stroke(); /* bayonet */
+                c.fillStyle='#3a3a40'; c.fillRect(h.x+1,ey-2.6,2.2,2.2);                          /* bolt handle */
+                if (r==='mg'){ c.strokeStyle='#1a1a1c'; c.lineWidth=1; c.beginPath(); c.moveTo(ex-6,ey); c.lineTo(ex-8,ey+6); c.moveTo(ex-6,ey); c.lineTo(ex-3,ey+6); c.stroke(); } /* bipod */
+            }
+            if (ph==='melee' || (w.throwPulse||0)>0.6){ c.fillStyle='rgba(255,232,150,0.92)'; c.beginPath(); c.arc(ex+3,ey-1,2.6,0,Math.PI*2); c.fill();
+                c.fillStyle='rgba(255,180,70,0.8)'; c.beginPath(); c.arc(ex+5,ey-1,1.4,0,Math.PI*2); c.fill(); } /* muzzle flash */
+            return;
+        }
+        if (r==='cannon'){
+            c.fillStyle='#3f3f46'; c.fillRect(h.x-6,h.y-2,18,5);            /* barrel */
+            c.fillStyle='#6b4423'; c.beginPath(); c.arc(h.x-4,h.y+5,5,0,Math.PI*2); c.fill(); /* wheel */
+            c.strokeStyle='#27272a'; c.lineWidth=1; c.beginPath(); c.moveTo(h.x-8,h.y+1); c.lineTo(h.x-14,h.y+6); c.stroke();
+            return;
+        }
+        if (r==='tank'){
+            c.fillStyle='#3f3f46'; c.fillRect(h.x-16,h.y-6,34,14);          /* hull */
+            c.fillStyle='#52525b'; c.fillRect(h.x-4,h.y-12,14,8);           /* turret */
+            c.fillStyle='#27272a'; c.fillRect(h.x+8,h.y-10,20,3);           /* gun */
+            c.fillStyle='#1f1f23'; for (var tw=0;tw<5;tw++) c.beginPath(),c.arc(h.x-12+tw*7,h.y+8,3,0,Math.PI*2),c.fill(); /* wheels */
+            return;
+        }
+        if (r==='sword'){
+            var sx=h.x+ (ph==='melee'?14:8), sy=h.y+down;
+            saLimb(c, h.x-3,h.y, sx,sy, 1.6, '#3b2a18');
+            c.strokeStyle='#e5e7eb'; c.lineWidth=2; c.lineCap='round'; c.beginPath(); c.moveTo(sx,sy); c.lineTo(sx+10,sy-6); c.stroke(); /* blade */
+            c.strokeStyle='#a16207'; c.lineWidth=2.4; c.beginPath(); c.moveTo(sx-2,sy-2); c.lineTo(sx+2,sy+2); c.stroke();   /* crossguard */
+            return;
+        }
+        if (r==='elephant'){
+            /* mahout's goad — the beast itself is drawn by drawSaBeast */
+            saLimb(c, h.x-3,h.y, h.x+12,h.y+down, 1.6, '#6b4423'); return;
+        }
+        if (r==='spear' || r==='rider'){
+            var tipX=h.x+ (r==='rider'?28:25), tipY=h.y+down, buttX=h.x-11, buttY=h.y-down*0.5;
+            saLimb(c, buttX,buttY, tipX,tipY, 2.2, '#6b4423');
+            c.strokeStyle='#3b2410'; c.lineWidth=0.9;
+            for (var lb=0;lb<3;lb++){ var lt=0.74+lb*0.05; c.beginPath(); c.moveTo(buttX+(tipX-buttX)*lt-1.5,buttY+(tipY-buttY)*lt-1.5); c.lineTo(buttX+(tipX-buttX)*lt+1.5,buttY+(tipY-buttY)*lt+1.5); c.stroke(); }
+            var ang=Math.atan2(tipY-buttY,tipX-buttX);
+            c.save(); c.translate(tipX,tipY); c.rotate(ang);
+            c.fillStyle='#cbd5e1';
+            c.beginPath(); c.moveTo(2,0); c.lineTo(-7,-2.8); c.lineTo(-5,0); c.lineTo(-7,2.8); c.closePath(); c.fill();
+            c.strokeStyle='rgba(0,0,0,0.3)'; c.lineWidth=0.5; c.stroke();
+            c.restore();
+        } else if (r==='club' || r==='wall'){
+            var ex=h.x+13, ey=h.y+down;
+            saLimb(c, h.x-5,h.y-down*0.4, ex,ey, 2.8, '#6b4423');
+            c.fillStyle='#7a7066'; c.beginPath(); c.ellipse(ex+2,ey,6,4.6,0,0,Math.PI*2); c.fill();
+            c.strokeStyle='#4a443c'; c.lineWidth=0.8; c.stroke();
+            c.strokeStyle='#3b2410'; c.lineWidth=1; c.beginPath(); c.moveTo(ex-3,ey-2); c.lineTo(ex-1,ey+2); c.stroke();
+            c.fillStyle='rgba(255,255,255,0.20)'; c.beginPath(); c.ellipse(ex,ey-1.6,2.2,1.5,0,0,Math.PI*2); c.fill();
+        } else if (r==='axe'){
+            var ax=h.x+11, ay=h.y+down;
+            saLimb(c, h.x-4,h.y, ax,ay, 2.4, '#6b4423');
+            c.fillStyle='#9ca3af';
+            c.beginPath(); c.moveTo(ax,ay-6); c.lineTo(ax+7,ay-1); c.lineTo(ax,ay+4); c.closePath(); c.fill();
+            c.strokeStyle='#3b2410'; c.lineWidth=0.8; c.beginPath(); c.moveTo(ax-1,ay-4); c.lineTo(ax-1,ay+3); c.stroke();
+        } else if (r==='zerk'){
+            /* berserker — twin hand-axes */
+            for (var ha=-1; ha<=1; ha+=2){
+                var zx=h.x+ (ha>0?12:-6), zy=h.y+down*0.6+ha*2;
+                saLimb(c, h.x,h.y, zx,zy, 2.0, '#6b4423');
+                c.fillStyle='#b91c1c';
+                c.beginPath(); c.moveTo(zx,zy-4); c.lineTo(zx+ha*5,zy-1); c.lineTo(zx,zy+3); c.closePath(); c.fill();
+            }
+        } else if (r==='bow'){
+            /* bow drawn vertically in the hand, arrow nocked */
+            c.save(); c.translate(h.x+3, h.y);
+            c.strokeStyle='#5a3a1e'; c.lineWidth=1.8;
+            c.beginPath(); c.arc(-3,0,9,-1.1,1.1); c.stroke();
+            c.strokeStyle='#e8dcc0'; c.lineWidth=0.6;
+            c.beginPath(); c.moveTo(-3+9*Math.cos(-1.1), 9*Math.sin(-1.1)); c.lineTo(-3+9*Math.cos(1.1), 9*Math.sin(1.1)); c.stroke();
+            c.strokeStyle='#cbd5e1'; c.lineWidth=1; c.beginPath(); c.moveTo(-3,0); c.lineTo(10,0); c.stroke();
+            c.fillStyle='#cbd5e1'; c.beginPath(); c.moveTo(10,0); c.lineTo(7,-1.6); c.lineTo(7,1.6); c.closePath(); c.fill();
+            c.restore();
+        } else { /* sling (slinger) */
+            if (Math.sin(w.aim*2.0)>0){
+                c.fillStyle='#6b7280'; c.beginPath(); c.arc(h.x,h.y,3.0,0,Math.PI*2); c.fill();
+                c.fillStyle='#9ca3af'; c.beginPath(); c.arc(h.x-0.9,h.y-0.9,1.2,0,Math.PI*2); c.fill();
+            } else {
+                c.strokeStyle='#7a6248'; c.lineWidth=0.8;
+                c.beginPath(); c.moveTo(h.x,h.y); c.lineTo(h.x+7,h.y+6); c.moveTo(h.x,h.y); c.lineTo(h.x+9,h.y+2); c.stroke();
+                c.fillStyle='#6b7280'; c.beginPath(); c.arc(h.x+8,h.y+4,2.0,0,Math.PI*2); c.fill();
+            }
+        }
+    }
+
+    /* ── AIRCRAFT (modern eras): biplanes / fighters / bombers fly over
+       no-man's-land and the ruined town, dropping bombs that blast
+       soldiers of BOTH sides. */
+    function updateSaPlanes(dt){
+        var kit=SA_SCENE_KIT, modern=(kit==='trench'||kit==='town'||kit==='urban'), k=dt/16;
+        if (modern){
+            saWar.planeT-=dt;
+            var live=0; for (var c2=0;c2<saWar.planes.length;c2++){ if (!saWar.planes[c2].bomb) live++; }
+            if (saWar.planeT<=0 && live<3){
+                saWar.planeT=3200+rng(0,4200);
+                var dir=Math.random()<0.5?1:-1;
+                var kind=(kit==='trench')?'biplane':(kit==='urban')?'jet':(Math.random()<0.5?'fighter':'bomber');
+                var spd=(kind==='bomber')?2.0:(kind==='jet')?5.2:3.4;
+                saWar.planes.push({ x:dir>0?-60:W+60, y:GROUND*rng(0.16,0.42), vx:dir*spd,
+                    kind:kind, dir:dir, bombT:rng(500,1400), t:0,
+                    hp:(kind==='bomber'?4:kind==='jet'?2:3), crashing:false, flakT:rng(500,1300), smokeT:0, rot:0 });
+            }
+        }
+        var grY=GROUND+(H-GROUND)*0.42;
+        for (var i=saWar.planes.length-1;i>=0;i--){
+            var p=saWar.planes[i];
+            if (p.bomb){ p.vy+=0.12*k; p.y+=p.vy*k; p.x+=p.vx*k;
+                if (p.y>=grY){ saBombHit(p.x,grY); saWar.planes.splice(i,1); } continue; }
+            /* ── SHOT DOWN: a burning aircraft spirals into the ground and
+                  detonates, scattering both armies at the crash site ── */
+            if (p.crashing){
+                p.vy=(p.vy||0.5)+0.14*k; p.y+=p.vy*k; p.x+=p.vx*0.55*k; p.rot+=0.05*k;
+                p.smokeT-=dt; if (p.smokeT<=0){ p.smokeT=36;
+                    pushSaFx(p.x,p.y,'dust','#2a2826'); pushSaFx(p.x,p.y,'spark','#fb923c'); }
+                if (p.y>=grY){ saBombHit(p.x,grY); saShellBurst(p.x,grY,40,30); saWar.planes.splice(i,1); }
+                continue;
+            }
+            p.x+=p.vx*k; p.t+=dt; p.y+=Math.sin(p.t*0.002)*0.25;
+            /* ── ANTI-AIRCRAFT FIRE: the ground throws up flak; enough hits
+                  and the plane is shot down (modern eras only, where AA exists) ── */
+            if (modern && p.x>W*0.1 && p.x<W*0.9){
+                p.flakT-=dt;
+                if (p.flakT<=0){ p.flakT=rng(320,1000);
+                    var fxx=p.x+rng(-26,26), fxy=p.y+rng(-16,16);
+                    saWar.fx.push({x:fxx,y:fxy,vx:0,vy:0,r:2,life:380,max:380,kind:'blast',col:'#9aa'});
+                    pushSaFx(fxx,fxy,'dust','#3a3a3a');
+                    if (Math.random()<0.55 && (p.hp=(p.hp||1)-1)<=0){ p.crashing=true; p.vy=0.6; }
+                }
+            }
+            if (modern){ p.bombT-=dt; if (p.bombT<=0 && p.x>W*0.18 && p.x<W*0.82){ p.bombT=rng(600,1700);
+                saWar.planes.push({bomb:true,x:p.x,y:p.y+9,vx:p.vx*0.25,vy:0.6}); } }
+            if (p.x<-90||p.x>W+90) saWar.planes.splice(i,1);
+        }
+    }
+    function saBombHit(x,y){
+        saWar.fx.push({x:x,y:y,vx:0,vy:0,r:2,life:340,max:340,kind:'blast',col:'#fff'});
+        for (var s=0;s<16;s++){ var a=rng(0,Math.PI*2),sp=rng(2,6.5);
+            saWar.fx.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2.2,r:rng(1,3),life:rng(420,950),max:950,kind:'spark',col:(s%2?'#fb923c':'#fde68a')}); }
+        pushSaFx(x,y,'dust','#3a3028');
+        function blast(arr){ for (var j=0;j<arr.length;j++){ var u=arr[j]; if (u.phase==='down') continue;
+            if (Math.abs(u.x-x)<30 && Math.abs(u.y-y)<26){ u.hp-=70; u.hurtT=220; if (u.hp<=0) saDown(u); } } }
+        blast(saWar.A); blast(saWar.B);
+    }
+    function drawSaPlanes(c){
+        for (var i=0;i<saWar.planes.length;i++){
+            var p=saWar.planes[i];
+            if (p.bomb){ c.save(); c.translate(p.x,p.y); c.fillStyle='#2a2a2a';
+                c.beginPath(); c.ellipse(0,0,2,4.5,0,0,Math.PI*2); c.fill();
+                c.fillStyle='#52525b'; c.beginPath(); c.moveTo(-2.4,-4); c.lineTo(0,-7); c.lineTo(2.4,-4); c.closePath(); c.fill(); c.restore(); continue; }
+            c.save(); c.translate(p.x,p.y); c.scale(p.dir,1);
+            if (p.crashing){
+                c.rotate(p.rot||0);
+                var cf=saWar.t*0.04;                          /* trailing fire from the engine */
+                c.fillStyle='rgba(255,120,30,0.9)'; c.beginPath(); c.moveTo(-14,0); c.quadraticCurveTo(-26,Math.sin(cf)*3,-34,0); c.quadraticCurveTo(-26,-Math.sin(cf)*3-2,-14,0); c.fill();
+                c.fillStyle='rgba(255,210,90,0.9)'; c.beginPath(); c.arc(-16,0,3,0,Math.PI*2); c.fill();
+            }
+            if (p.kind==='jet'){
+                /* modern strike jet — sleek delta, twin tails, afterburner */
+                c.fillStyle='rgba(255,150,40,0.7)'; c.beginPath(); c.moveTo(-16,0); c.lineTo(-26,-1.6); c.lineTo(-26,1.6); c.closePath(); c.fill(); /* exhaust */
+                c.fillStyle='#3a4148'; c.fillRect(-16,-2,32,4);                                   /* fuselage */
+                c.beginPath(); c.moveTo(16,-2); c.lineTo(26,0); c.lineTo(16,2); c.closePath(); c.fill(); /* nose */
+                c.fillStyle='#2c333a'; c.beginPath(); c.moveTo(2,0); c.lineTo(-12,-10); c.lineTo(-2,-1); c.closePath(); c.fill();   /* delta wing top */
+                c.beginPath(); c.moveTo(2,0); c.lineTo(-12,10); c.lineTo(-2,1); c.closePath(); c.fill();   /* delta wing bottom */
+                c.beginPath(); c.moveTo(-12,0); c.lineTo(-18,-7); c.lineTo(-11,-1); c.closePath(); c.fill(); /* tail fin */
+                c.fillStyle='#9fd6ff'; c.fillRect(8,-1.6,5,1.8);                                  /* canopy */
+                c.fillStyle='#1a1a1c'; c.fillRect(-2,3,8,1.4); c.fillRect(-2,-4.4,8,1.4);          /* underwing stores */
+                c.restore(); continue;
+            }
+            var col=(p.kind==='biplane')?'#7a6a44':(p.kind==='bomber')?'#3f4248':'#46563a';
+            c.fillStyle=col;
+            c.fillRect(-15,-2.4,30,4.8);                                /* fuselage */
+            c.beginPath(); c.moveTo(15,-2.4); c.lineTo(22,0); c.lineTo(15,2.4); c.closePath(); c.fill(); /* nose */
+            c.beginPath(); c.moveTo(-15,0); c.lineTo(-20,-6); c.lineTo(-13,-1.5); c.closePath(); c.fill(); /* tail fin */
+            if (p.kind==='biplane'){ c.fillRect(-7,-9,18,2.2); c.fillRect(-7,4,18,2.2); c.fillStyle='#5a4a2a'; c.fillRect(-1,-9,1.6,14); }
+            else { c.beginPath(); c.moveTo(-5,0); c.lineTo(7,-11); c.lineTo(12,-11); c.lineTo(3,0); c.closePath(); c.fill();
+                   c.beginPath(); c.moveTo(-5,0); c.lineTo(7,11); c.lineTo(12,11); c.lineTo(3,0); c.closePath(); c.fill();
+                   c.fillStyle='#fbbf24'; c.beginPath(); c.arc(-17,0,1.6,0,Math.PI*2); c.fill(); }
+            if (p.kind==='bomber'){ c.fillStyle=col; c.beginPath(); c.moveTo(-3,0); c.lineTo(9,-11); c.lineTo(13,-11); c.lineTo(4,0); c.closePath(); c.fill(); } /* twin engine wing */
+            c.restore();
+        }
+    }
+
+    function drawSaProjectiles(c){
+        for (var i=0;i<saWar.projectiles.length;i++){
+            var p=saWar.projectiles[i];
+            c.save(); c.translate(p.x,p.y-saGroundRise(p.x)); c.rotate(p.rot);
+            if (p.kind==='arrow'){
+                c.strokeStyle='#6b4423'; c.lineWidth=1.4; c.lineCap='round';
+                c.beginPath(); c.moveTo(-9,0); c.lineTo(7,0); c.stroke();
+                c.fillStyle='#cbd5e1'; c.beginPath(); c.moveTo(9,0); c.lineTo(5,-1.8); c.lineTo(5,1.8); c.closePath(); c.fill();
+                c.strokeStyle='#e8dcc0'; c.lineWidth=0.8; c.beginPath(); c.moveTo(-9,0); c.lineTo(-7,-1.6); c.moveTo(-9,0); c.lineTo(-7,1.6); c.stroke(); /* fletching */
+            } else if (p.kind==='bullet'){
+                if (p.tracer){ c.strokeStyle='rgba(255,210,120,0.85)'; c.lineWidth=1.5; c.lineCap='round';
+                    c.beginPath(); c.moveTo(-9,0); c.lineTo(4,0); c.stroke(); }
+                c.fillStyle='#fff3c4'; c.beginPath(); c.arc(4,0,1.3,0,Math.PI*2); c.fill();
+            } else if (p.kind==='shell'){
+                c.fillStyle='#2a2a2e'; c.beginPath(); c.ellipse(0,0,4.2,2.3,0,0,Math.PI*2); c.fill();
+                c.fillStyle='#3f3f46'; c.beginPath(); c.moveTo(4,0); c.lineTo(0,-2.1); c.lineTo(0,2.1); c.closePath(); c.fill();
+                c.fillStyle='#facc15'; c.fillRect(-4.2,-0.6,1.4,1.2);   /* driving band */
+            } else {
+                c.fillStyle='#6b7280'; c.beginPath(); c.arc(0,0,2.7,0,Math.PI*2); c.fill();
+                c.fillStyle='#9ca3af'; c.beginPath(); c.arc(-0.8,-0.8,1.1,0,Math.PI*2); c.fill();
+            }
+            c.restore();
+        }
+    }
+
+    /* Chief speech bubble — a hide-parchment bubble with the battle cry,
+       drawn on top of everything so it never gets buried in the melee. */
+    function drawSaChiefBubbles(c){
+        var all=saWar.A.concat(saWar.B);
+        for (var i=0;i<all.length;i++){
+            var w=all[i];
+            if (!w.chief || w.phase==='down' || w.sayHold<=0 || !w.sayText) continue;
+            var a=Math.min(1, w.sayHold/300) * Math.min(1, (2600-w.sayHold)/200+0.2);
+            a=Math.max(0,Math.min(1,a));
+            c.save(); c.globalAlpha=a;
+            c.font='bold 12px Arial,sans-serif';
+            var tw=c.measureText(w.sayText).width;
+            var bw=tw+16, bh=20;
+            var bx=w.x-bw/2, by=w.y-58*w.scale;
+            if (bx<4) bx=4; if (bx+bw>W-4) bx=W-4-bw;
+            c.fillStyle='rgba(40,26,14,0.92)'; saRoundRect(c,bx,by,bw,bh,7); c.fill();
+            c.strokeStyle=(w.tribe===SA_TRIBE_A?'#fb923c':'#e5e7eb'); c.lineWidth=1.5; c.stroke();
+            /* tail pointing to the chief */
+            c.fillStyle='rgba(40,26,14,0.92)';
+            c.beginPath(); c.moveTo(w.x-4,by+bh); c.lineTo(w.x+4,by+bh); c.lineTo(w.x,by+bh+6); c.closePath(); c.fill();
+            c.fillStyle='#fde9c8'; c.textAlign='center'; c.textBaseline='middle';
+            c.fillText(w.sayText, bx+bw/2, by+bh/2+0.5);
+            c.restore();
+        }
+        c.textAlign='left'; c.textBaseline='alphabetic';
+    }
+
+    function drawSaFx(c){
+        for (var i=0;i<saWar.fx.length;i++){
+            var f=saWar.fx[i], a=Math.max(0,f.life/f.max);
+            var fy=f.y - saGroundRise(f.x);     /* ride the uneven ground */
+            if (f.kind==='blast'){
+                var bp=1-a, br=2+bp*30;                        /* expanding explosion ring + fireball */
+                c.globalAlpha=a; c.fillStyle='rgba(255,200,90,'+(a*0.5)+')';
+                c.beginPath(); c.arc(f.x,fy,br*0.7,0,Math.PI*2); c.fill();
+                c.strokeStyle='rgba(255,255,255,'+a+')'; c.lineWidth=2; c.beginPath(); c.arc(f.x,fy,br,0,Math.PI*2); c.stroke();
+                c.globalAlpha=1; continue;
+            }
+            if (f.kind==='clash'){
+                /* metal-on-metal: white core + four-point star flash */
+                var cs=(1-a)*7+3;
+                c.globalAlpha=a;
+                c.fillStyle='rgba(255,255,255,'+a+')'; c.beginPath(); c.arc(f.x,fy,2.4*a+0.8,0,Math.PI*2); c.fill();
+                c.strokeStyle='rgba(255,238,170,'+a+')'; c.lineWidth=1.4; c.lineCap='round';
+                c.beginPath();
+                c.moveTo(f.x-cs,fy); c.lineTo(f.x+cs,fy);
+                c.moveTo(f.x,fy-cs); c.lineTo(f.x,fy+cs);
+                c.moveTo(f.x-cs*0.6,fy-cs*0.6); c.lineTo(f.x+cs*0.6,fy+cs*0.6);
+                c.moveTo(f.x+cs*0.6,fy-cs*0.6); c.lineTo(f.x-cs*0.6,fy+cs*0.6);
+                c.stroke();
+                c.globalAlpha=1; continue;
+            }
+            if (f.kind==='ember'){ c.globalAlpha=a; c.fillStyle='#fbbf24'; }
+            else if (f.kind==='spark'){ c.globalAlpha=a; c.fillStyle=f.col||'#fde68a'; }
+            else if (f.kind==='blood'){ c.globalAlpha=a; c.fillStyle=f.col; }
+            else { c.globalAlpha=a*0.7; c.fillStyle=f.col; }
+            c.beginPath(); c.arc(f.x,fy,f.r,0,Math.PI*2); c.fill();
+        }
+        c.globalAlpha=1;
+    }
+
+    function saWrapLines(c, text, maxW){
+        var words=text.split(' '), lines=[], cur='';
+        for (var i=0;i<words.length;i++){
+            var test=cur?cur+' '+words[i]:words[i];
+            if (c.measureText(test).width>maxW && cur){ lines.push(cur); cur=words[i]; }
+            else cur=test;
+        }
+        if (cur) lines.push(cur);
+        return lines;
+    }
+
+    /* Clan emblem — River = flowing water lines; Cliff = mountain peaks. */
+    function drawSaClanEmblem(c, tribe, x, y, r){
+        if (tribe.id==='ochre'){
+            c.strokeStyle=tribe.motifCol; c.lineWidth=Math.max(1.2,r*0.18); c.lineCap='round';
+            for (var i=0;i<3;i++){
+                c.beginPath();
+                for (var xx=-r; xx<=r; xx+=2){
+                    var yy=y-r*0.5+i*r*0.5 + Math.sin((xx)*0.5)*r*0.18;
+                    (xx===-r)?c.moveTo(x+xx,yy):c.lineTo(x+xx,yy);
+                }
+                c.stroke();
+            }
+        } else {
+            c.fillStyle=tribe.motifCol;
+            c.beginPath();
+            c.moveTo(x-r,y+r*0.6); c.lineTo(x-r*0.35,y-r*0.55); c.lineTo(x+r*0.1,y+r*0.1);
+            c.lineTo(x+r*0.55,y-r*0.75); c.lineTo(x+r,y+r*0.6); c.closePath(); c.fill();
+            c.fillStyle='rgba(255,255,255,0.5)';
+            c.beginPath(); c.moveTo(x+r*0.55,y-r*0.75); c.lineTo(x+r*0.75,y-r*0.2); c.lineTo(x+r*0.35,y-r*0.2); c.closePath(); c.fill();
+        }
+    }
+
+    /* High-contrast clan label: dark rounded pill + outlined accent text,
+       so the rival names stay readable over any territory colour. */
+    function saMapLabel(c, text, x, y, align, accent){
+        c.save();
+        c.font='bold 13px "Arial Black",Arial,sans-serif'; c.textBaseline='middle'; c.textAlign=align;
+        var tw=c.measureText(text).width;
+        var px=(align==='left') ? x-5 : x-tw-5;
+        c.fillStyle='rgba(16,10,5,0.86)'; saRoundRect(c, px, y-10, tw+10, 20, 6); c.fill();
+        c.strokeStyle=accent; c.lineWidth=1; c.stroke();
+        c.lineJoin='round'; c.lineWidth=3; c.strokeStyle='rgba(0,0,0,0.85)'; c.strokeText(text, x, y);
+        c.fillStyle=accent; c.fillText(text, x, y);
+        c.restore();
+    }
+
+    /* Shared geometry for the top sky-map ribbon — the intro briefing
+       anchors directly underneath it so both read as one stacked HUD. */
+    function saSkyRibbon(){
+        var y0=Math.max(44, GROUND*0.075);
+        var y1=y0 + Math.max(34, GROUND*0.072);
+        return { y0:y0, y1:y1 };
+    }
+
+    /* ── SKY TERRITORY MAP ──
+       A war-map ribbon high in the sky shows each clan's territory and the
+       live standings. The frontier line tracks the balance of the battle;
+       when a clan wins, the frontier sweeps all the way across so the
+       victor's colour + emblem fill the WHOLE sky — they now own the
+       defeated land. */
+    /* ── FACTION STANDARDS — every side in every war flies an authentic-ish
+       emblem on its banner-bearer and on the war map. Keyed by era → [A,B]. */
+    var SA_EMBLEM = {
+        stoneage:['hand','chevron'], bronzeage:['ankh','eagle'], trojan:['spiral','horse'],
+        assyrian:['star','star'], thermopylae:['lambda','sun'], alexander:['sun','sun'],
+        punic:['eagle','tanit'], viking:['raven','horse'], crusades:['cross','crescent'],
+        mongol:['horsetail','crescent'], revwar:['stars','crossX'], napoleonic:['eagle','crossX'],
+        wwi:['roundel','ironcross'], wwii:['star','ironcross']
+    };
+    function saEmblemFor(tribe){
+        var e=SA_EMBLEM[WAR_MODES[warModeIdx].id]||['star','cross'];
+        return (tribe===SA_TRIBE_A)?e[0]:e[1];
+    }
+    /* draw an emblem centred at (0,0), fitting roughly within radius r */
+    function saDrawEmblem(c, key, col, r){
+        c.save(); c.fillStyle=col; c.strokeStyle=col; c.lineWidth=Math.max(1,r*0.16); c.lineJoin='round';
+        if (key==='cross'){ c.fillRect(-r*0.18,-r,r*0.36,r*2); c.fillRect(-r*0.7,-r*0.28,r*1.4,r*0.36); }
+        else if (key==='crossX'){ c.save(); c.rotate(0); c.fillRect(-r,-r*0.16,r*2,r*0.32); c.fillRect(-r*0.16,-r,r*0.32,r*2); /* + cross on field */ c.restore(); }
+        else if (key==='crescent'){ /* clean crescent moon (outer disc minus an offset disc) */
+            c.beginPath(); c.arc(0,0,r,0,Math.PI*2,false); c.arc(r*0.40,0,r*0.84,0,Math.PI*2,true); c.fill('evenodd'); }
+        else if (key==='star'){ saStarPath(c,0,0,5,r,r*0.45); c.fill(); }
+        else if (key==='stars'){ for (var i=0;i<8;i++){ var a=i/8*Math.PI*2; saStarPath(c,Math.cos(a)*r*0.6,Math.sin(a)*r*0.6,5,r*0.26,r*0.12); c.fill(); } }
+        else if (key==='sun'){ c.beginPath(); c.arc(0,0,r*0.42,0,Math.PI*2); c.fill(); for (var s=0;s<12;s++){ var sa=s/12*Math.PI*2; c.beginPath(); c.moveTo(Math.cos(sa)*r*0.5,Math.sin(sa)*r*0.5); c.lineTo(Math.cos(sa)*r,Math.sin(sa)*r); c.stroke(); } }
+        else if (key==='lambda'){ c.lineWidth=r*0.34; c.beginPath(); c.moveTo(-r*0.6,r*0.8); c.lineTo(0,-r*0.8); c.lineTo(r*0.6,r*0.8); c.stroke(); }
+        else if (key==='eagle'){ c.beginPath(); c.moveTo(0,-r*0.5); c.quadraticCurveTo(-r,-r*0.7,-r*0.2,-r*0.05); c.quadraticCurveTo(-r*0.7,r*0.1,-r*0.15,r*0.2); c.lineTo(0,r*0.7); c.lineTo(r*0.15,r*0.2); c.quadraticCurveTo(r*0.7,r*0.1,r*0.2,-r*0.05); c.quadraticCurveTo(r,-r*0.7,0,-r*0.5); c.fill(); c.beginPath(); c.arc(0,-r*0.55,r*0.16,0,Math.PI*2); c.fill(); }
+        else if (key==='raven'){ c.beginPath(); c.moveTo(-r,0); c.quadraticCurveTo(-r*0.3,-r*0.3,0,-r*0.2); c.quadraticCurveTo(r*0.3,-r*0.3,r,0); c.quadraticCurveTo(r*0.3,r*0.1,0,r*0.5); c.quadraticCurveTo(-r*0.3,r*0.1,-r,0); c.fill(); c.beginPath(); c.moveTo(r*0.7,-r*0.1); c.lineTo(r*1.1,-r*0.25); c.lineTo(r*0.8,r*0.05); c.fill(); }
+        else if (key==='horse'){ c.beginPath(); c.ellipse(-r*0.1,r*0.1,r*0.7,r*0.4,0,0,Math.PI*2); c.fill(); c.beginPath(); c.moveTo(r*0.4,-r*0.1); c.lineTo(r*0.9,-r*0.7); c.lineTo(r*1.05,-r*0.5); c.lineTo(r*0.6,r*0.1); c.fill(); c.lineWidth=r*0.18; c.beginPath(); c.moveTo(-r*0.5,r*0.4); c.lineTo(-r*0.5,r*0.9); c.moveTo(r*0.2,r*0.4); c.lineTo(r*0.2,r*0.9); c.stroke(); }
+        else if (key==='ankh'){ c.lineWidth=r*0.26; c.beginPath(); c.arc(0,-r*0.45,r*0.34,0,Math.PI*2); c.stroke(); c.beginPath(); c.moveTo(0,-r*0.12); c.lineTo(0,r); c.moveTo(-r*0.5,r*0.18); c.lineTo(r*0.5,r*0.18); c.stroke(); }
+        else if (key==='tanit'){ c.lineWidth=r*0.2; c.beginPath(); c.moveTo(-r*0.5,r*0.8); c.lineTo(r*0.5,r*0.8); c.lineTo(r*0.18,r*0.05); c.lineTo(-r*0.18,r*0.05); c.closePath(); c.fill(); c.beginPath(); c.moveTo(-r*0.6,-r*0.1); c.lineTo(r*0.6,-r*0.1); c.stroke(); c.beginPath(); c.arc(0,-r*0.5,r*0.28,0,Math.PI*2); c.fill(); }
+        else if (key==='horsetail'){ c.lineWidth=r*0.16; for (var t=0;t<7;t++){ var ta=Math.PI*0.5+(t-3)*0.18; c.beginPath(); c.moveTo(0,-r*0.5); c.lineTo(Math.cos(ta)*r,-r*0.5+Math.sin(ta)*r*1.2); c.stroke(); } c.beginPath(); c.arc(0,-r*0.5,r*0.18,0,Math.PI*2); c.fill(); }
+        else if (key==='roundel'){ c.beginPath(); c.arc(0,0,r,0,Math.PI*2); c.fill(); c.fillStyle='rgba(255,255,255,0.85)'; c.beginPath(); c.arc(0,0,r*0.62,0,Math.PI*2); c.fill(); c.fillStyle=col; c.beginPath(); c.arc(0,0,r*0.30,0,Math.PI*2); c.fill(); }
+        else if (key==='ironcross'){ for (var q=0;q<4;q++){ c.save(); c.rotate(q*Math.PI/2); c.beginPath(); c.moveTo(0,0); c.lineTo(-r*0.34,-r); c.lineTo(r*0.34,-r); c.closePath(); c.fill(); c.restore(); } }
+        else if (key==='spiral'){ c.lineWidth=r*0.2; c.beginPath(); for (var p=0;p<40;p++){ var pa=p*0.4, pr=r*p/40; var px=Math.cos(pa)*pr, py=Math.sin(pa)*pr; (p===0)?c.moveTo(px,py):c.lineTo(px,py); } c.stroke(); }
+        else if (key==='chevron'){ c.lineWidth=r*0.22; for (var v=0;v<3;v++){ c.beginPath(); c.moveTo(-r*0.6,-r*0.4+v*r*0.5); c.lineTo(0,r*0.1+v*r*0.5); c.lineTo(r*0.6,-r*0.4+v*r*0.5); c.stroke(); } }
+        else if (key==='hand'){ c.beginPath(); c.arc(0,r*0.2,r*0.5,0,Math.PI*2); c.fill(); for (var f=0;f<4;f++) c.fillRect(-r*0.45+f*r*0.3,-r*0.7,r*0.18,r*0.6); }
+        else { saStarPath(c,0,0,5,r,r*0.45); c.fill(); }
+        c.restore();
+    }
+    function saStarPath(c,cx,cy,pts,ro,ri){ c.beginPath(); for (var i=0;i<pts*2;i++){ var rr=(i%2?ri:ro), a=-Math.PI/2+i*Math.PI/pts; var x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr; (i===0)?c.moveTo(x,y):c.lineTo(x,y);} c.closePath(); }
+
+    /* a waving faction banner (field colour + emblem) on a pole — reused by the
+       battlefield standard-bearer, the victory flag, and the war-map ribbon. */
+    function drawSaFactionBanner(c, tribe, x, topY, bh, flip){
+        var em=saEmblemFor(tribe);
+        var field=tribe.paint||tribe.hide, rim=tribe.paintAlt||tribe.shieldRim, emCol=(tribe.motifCol||tribe.paintAlt||'#fff');
+        /* MUSLIM standard — a clean white crescent on an Islamic-green field */
+        if (em==='crescent'){ field='#157f3c'; rim='#0e5e2b'; emCol='#ffffff'; }
+        var bw=bh*1.35, dir=flip?-1:1;
+        c.save();
+        for (var seg=0; seg<10; seg++){
+            var u=seg/10, u2=(seg+1)/10;
+            var wv=Math.sin(saWar.t*0.006+u*3)*bh*0.10*u, wv2=Math.sin(saWar.t*0.006+u2*3)*bh*0.10*u2;
+            c.fillStyle=(seg%2)?field:shade(field,-18);
+            c.beginPath();
+            c.moveTo(x+dir*u*bw, topY+wv); c.lineTo(x+dir*u2*bw, topY+wv2);
+            c.lineTo(x+dir*u2*bw, topY+bh+wv2); c.lineTo(x+dir*u*bw, topY+bh+wv);
+            c.closePath(); c.fill();
+        }
+        c.strokeStyle=rim; c.lineWidth=1.4; c.strokeRect(x, topY, dir*bw, bh);
+        c.restore();
+        /* emblem sits on the middle of the flag (saDrawEmblem centres at 0,0) */
+        var wmid=Math.sin(saWar.t*0.006+0.5*3)*bh*0.10*0.5;
+        c.save(); c.translate(x+dir*bw*0.5, topY+bh*0.5+wmid);
+        saDrawEmblem(c, em, emCol, bh*0.34);
+        c.restore();
+    }
+    function shade(hex, amt){
+        if (!hex || hex[0]!=='#'||hex.length<7) return hex||'#888';
+        var r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);
+        r=Math.max(0,Math.min(255,r+amt)); g=Math.max(0,Math.min(255,g+amt)); b=Math.max(0,Math.min(255,b+amt));
+        return 'rgb('+r+','+g+','+b+')';
+    }
+
+    function drawSaSkyTerritory(c){
+        var rb=saSkyRibbon(), y0=rb.y0, y1=rb.y1, midY=(y0+y1)/2;
+        var aliveA=saAliveCount(saWar.A), aliveB=saAliveCount(saWar.B);
+        var bx=Math.max(2, Math.min(W-2, W*saWar.terr));
+        c.save();
+        /* hide/parchment backdrop ribbon */
+        c.fillStyle='rgba(26,16,9,0.55)'; c.fillRect(0,y0,W,y1-y0);
+        /* clan territories */
+        c.globalAlpha=0.42;
+        c.fillStyle=SA_TRIBE_A.paint;  c.fillRect(0,y0,bx,y1-y0);
+        c.fillStyle=SA_TRIBE_B.shield; c.fillRect(bx,y0,W-bx,y1-y0);
+        c.globalAlpha=1;
+        /* each side's authentic faction EMBLEM repeated across its territory */
+        var emA=(saEmblemFor(SA_TRIBE_A)==='crescent')?'#ffffff':(SA_TRIBE_A.paintAlt||'#fde68a');
+        var emB=(saEmblemFor(SA_TRIBE_B)==='crescent')?'#ffffff':(SA_TRIBE_B.motifCol||SA_TRIBE_B.paintAlt||'#e5e7eb');
+        for (var ax=185; ax<bx-16; ax+=70){ c.save(); c.translate(ax,midY); saDrawEmblem(c, saEmblemFor(SA_TRIBE_A), emA, 8); c.restore(); }
+        for (var bx2=bx+34; bx2<W-185; bx2+=70){ c.save(); c.translate(bx2,midY); saDrawEmblem(c, saEmblemFor(SA_TRIBE_B), emB, 8); c.restore(); }
+        /* a small faction flag flying beside each clan's name pill */
+        drawSaFactionBanner(c, SA_TRIBE_A, 150, midY-9, 16, false);
+        drawSaFactionBanner(c, SA_TRIBE_B, W-150, midY-9, 16, true);
+        /* frontier standard */
+        c.strokeStyle='#fde68a'; c.lineWidth=2.2;
+        c.beginPath(); c.moveTo(bx,y0-7); c.lineTo(bx,y1+5); c.stroke();
+        var pennCol=(saWar.terr>=0.5?SA_TRIBE_A.paint:SA_TRIBE_B.shield);
+        var pdir=(saWar.terr>=0.5?1:-1);
+        c.fillStyle=pennCol;
+        c.beginPath(); c.moveTo(bx,y0-7); c.lineTo(bx+pdir*13,y0-3); c.lineTo(bx,y0+1); c.closePath(); c.fill();
+        /* corner clan labels + live warrior count — drawn on a dark pill
+           with an outline so the names stay clearly legible over any
+           territory colour. */
+        saMapLabel(c, SA_TRIBE_A.name.toUpperCase()+'  ['+aliveA+']', 26,    midY, 'left',  '#fb923c');
+        saMapLabel(c, '['+aliveB+']  '+SA_TRIBE_B.name.toUpperCase(), W-26,  midY, 'right', '#e5e7eb');
+        /* frame */
+        c.strokeStyle='rgba(202,164,106,0.6)'; c.lineWidth=1; c.strokeRect(0.5,y0+0.5,W-1,y1-y0-1);
+        c.restore();
+        c.textAlign='left'; c.textBaseline='alphabetic';
+    }
+
+    /* The victor plants their standard in the DEFEATED clan's land to
+       signal the war is won — the pole rises out of the enemy soil. */
+    function drawSaFlag(c){
+        if (saWar.phase!=='result' || !saWar.winner) return;
+        var win=saWar.winner;
+        var fx = W*((win===SA_TRIBE_A) ? 0.80 : 0.20);   /* planted on the LOSER's ground */
+        var gy = GROUND + (H-GROUND)*0.46 - saGroundRise(fx);
+        var rise=saWar.flagT;
+        /* a TOWERING victory standard */
+        var poleH=Math.max(150,(H-GROUND)*1.05)*rise;
+        var win2=win.paint||win.shield, rim=win.paintAlt||win.shieldRim, cloth=win.hide||win.shield;
+        c.save();
+        /* triumphant glow behind the banner */
+        var top=gy-poleH+8;
+        if (rise>0.3){
+            var gl=c.createRadialGradient(fx+40,top+40,4,fx+40,top+40,140);
+            gl.addColorStop(0,'rgba(255,240,180,0.30)'); gl.addColorStop(1,'rgba(255,240,180,0)');
+            c.fillStyle=gl; c.fillRect(fx-100,top-60,300,260);
+        }
+        /* earth mound + rubble at the base */
+        c.fillStyle='#2a1c0e'; c.beginPath(); c.ellipse(fx,gy,22,7,0,0,Math.PI*2); c.fill();
+        c.fillStyle='#3b2410'; c.beginPath(); c.ellipse(fx,gy-2,14,5,0,0,Math.PI*2); c.fill();
+        /* thick pole */
+        c.strokeStyle='#4a3320'; c.lineWidth=6; c.lineCap='round';
+        c.beginPath(); c.moveTo(fx,gy); c.lineTo(fx,gy-poleH); c.stroke();
+        c.strokeStyle='rgba(255,255,255,0.18)'; c.lineWidth=2; c.beginPath(); c.moveTo(fx-1.5,gy); c.lineTo(fx-1.5,gy-poleH); c.stroke();
+        /* gilded finial */
+        c.fillStyle='#facc15'; c.beginPath(); c.arc(fx,gy-poleH,6,0,Math.PI*2); c.fill();
+        c.beginPath(); c.moveTo(fx,gy-poleH-14); c.lineTo(fx-4,gy-poleH-2); c.lineTo(fx+4,gy-poleH-2); c.closePath(); c.fill();
+        /* huge waving banner */
+        if (rise>0.25){
+            var bw=Math.min(160,W*0.13), bh=bw*0.62;
+            for (var seg=0; seg<=10; seg++){
+                var u=seg/10, wv=Math.sin(saWar.t*0.006 + u*3.2)*10*u;
+                /* draw the flag as vertical strips so it ripples like cloth */
+                if (seg<10){
+                    var u2=(seg+1)/10, wv2=Math.sin(saWar.t*0.006 + u2*3.2)*10*u2;
+                    c.fillStyle = (seg%2) ? cloth : win2;
+                    c.beginPath();
+                    c.moveTo(fx+u*bw,  top+wv);
+                    c.lineTo(fx+u2*bw, top+wv2);
+                    c.lineTo(fx+u2*bw, top+bh+wv2);
+                    c.lineTo(fx+u*bw,  top+bh+wv);
+                    c.closePath(); c.fill();
+                }
+            }
+            c.strokeStyle=rim; c.lineWidth=2;
+            c.beginPath(); c.moveTo(fx,top);
+            for (var sg=0; sg<=10; sg++){ var uu=sg/10, w3=Math.sin(saWar.t*0.006+uu*3.2)*10*uu; c.lineTo(fx+uu*bw, top+w3); }
+            c.stroke();
+            /* the victor's authentic faction emblem on the field */
+            var wmid=Math.sin(saWar.t*0.006 + 0.5*3.2)*10*0.5;
+            c.save(); c.translate(fx+bw*0.5, top+bh*0.5+wmid);
+            saDrawEmblem(c, saEmblemFor(win), (win.motifCol||win.paintAlt||'#fff'), bh*0.30);
+            c.restore();
+        }
+        /* VICTOR banner text */
+        if (rise>0.7){
+            c.globalAlpha=Math.min(1,(rise-0.7)/0.3);
+            c.fillStyle='#fde68a'; c.font='bold 13px "Arial Black",Arial,sans-serif'; c.textAlign='center';
+            c.lineWidth=3; c.strokeStyle='rgba(0,0,0,0.8)';
+            c.strokeText((win.name||'VICTOR').toUpperCase(), fx+30, gy+18);
+            c.fillText((win.name||'VICTOR').toUpperCase(), fx+30, gy+18);
+            c.textAlign='left'; c.globalAlpha=1;
+        }
+        c.restore();
+    }
+
+    /* Persistent compact header — war name + live clan standings, top-centre. */
+    function drawSaHeader(c){
+        var aliveA=saAliveCount(saWar.A), aliveB=saAliveCount(saWar.B);
+        var hw=Math.min(W*0.5,360), hx=W/2-hw/2, hy=6, hh=24;
+        c.save();
+        c.fillStyle='rgba(28,18,10,0.62)'; saRoundRect(c,hx,hy,hw,hh,6); c.fill();
+        c.strokeStyle='rgba(202,164,106,0.7)'; c.lineWidth=1; c.stroke();
+        c.textBaseline='middle'; c.textAlign='center';
+        c.fillStyle='#fde68a'; c.font='bold 12px "Arial Black",Arial,sans-serif';
+        c.fillText(SA_WAR_TITLE+'  ·  '+SA_WAR_ERA, W/2, hy+hh*0.5);
+        /* clan tallies left/right */
+        c.font='bold 11px Arial,sans-serif';
+        c.fillStyle=SA_TRIBE_A.paintAlt; c.textAlign='left';  c.fillText('River '+aliveA, hx+8, hy+hh*0.5);
+        c.fillStyle='#e5e7eb';            c.textAlign='right'; c.fillText(aliveB+' Cliff', hx+hw-8, hy+hh*0.5);
+        c.restore();
+        c.textAlign='left'; c.textBaseline='alphabetic';
+    }
+
+    /* Cinematic intro briefing — war name + era + one-line historical note,
+       fades in, holds, fades out over the first SA_INTRO_MS. */
+    function drawSaIntro(c){
+        var e=saWar.intro;
+        if (e>SA_INTRO_MS) return;
+        var a = (e<600) ? e/600 : (e>SA_INTRO_MS-1100 ? (SA_INTRO_MS-e)/1100 : 1);
+        a=Math.max(0,Math.min(1,a));
+        c.save(); c.globalAlpha=a;
+        /* Anchored directly UNDERNEATH the sky territory map at the top —
+           the two read as one stacked HUD: map on top, battle briefing
+           just below it. The box AUTO-SIZES to the wrapped briefing so the
+           text always fits fully inside, never clipped. */
+        var rb=saSkyRibbon();
+        var bw=Math.min(W*0.82,680), bx=W/2-bw/2, by=Math.round(rb.y1+8);
+        var padX=26;
+        /* measure the briefing first (font set before measuring) */
+        c.font='12px Arial,sans-serif';
+        var lines=saWrapLines(c, SA_WAR_BRIEF, bw-padX*2);
+        var nLines=Math.min(lines.length,3);
+        var textTop=58;                                   /* y of first brief line, relative to by */
+        var bh=textTop + nLines*15 + 12;                  /* fit title+era+lines+padding */
+        /* a slight pop-in scale as it fades up keeps it cinematic */
+        var sc=0.96 + 0.04*a;
+        c.translate(W/2, by+bh/2); c.scale(sc,sc); c.translate(-W/2, -(by+bh/2));
+        /* carved STONE TABLET themed to the era — bevelled rock with a
+           bone-white frame and ochre rope binding at the corners. */
+        var pg=c.createLinearGradient(0,by,0,by+bh);
+        pg.addColorStop(0,'rgba(74,58,42,0.95)'); pg.addColorStop(0.5,'rgba(52,38,24,0.95)'); pg.addColorStop(1,'rgba(34,24,14,0.96)');
+        c.fillStyle=pg; saRoundRect(c,bx,by,bw,bh,10); c.fill();
+        /* chiselled stone speckle */
+        c.fillStyle='rgba(0,0,0,0.10)';
+        for (var sp=0; sp<26; sp++){ c.fillRect(bx+8+Math.random()*(bw-16), by+8+Math.random()*(bh-16), 1.4, 1.4); }
+        /* bone-white frame + inner ochre line */
+        c.strokeStyle='#e8dcc0'; c.lineWidth=3; saRoundRect(c,bx,by,bw,bh,10); c.stroke();
+        c.strokeStyle='rgba(194,65,12,0.8)'; c.lineWidth=1.4; saRoundRect(c,bx+5,by+5,bw-10,bh-10,7); c.stroke();
+        /* crossed-spear motifs flanking the title (era theme) */
+        drawSaTabletSpears(c, bx+22, by+22, 1);
+        drawSaTabletSpears(c, bx+bw-22, by+22, -1);
+        c.textAlign='center'; c.textBaseline='alphabetic';
+        /* title */
+        c.fillStyle='#fde68a'; c.font='bold 24px "Arial Black",Arial,sans-serif';
+        c.fillText(SA_WAR_TITLE, W/2, by+30);
+        /* era / time period — emphasised since the briefing is themed to the TIME */
+        c.fillStyle='#e7c98a'; c.font='italic 13px Georgia,serif';
+        c.fillText(SA_WAR_ERA, W/2, by+48);
+        /* battle briefing (wrapped, fully inside the auto-sized box) */
+        c.fillStyle='#e3d3ae'; c.font='12px Arial,sans-serif';
+        for (var li=0; li<nLines; li++){ c.fillText(lines[li], W/2, by+textTop+li*15); }
+        c.restore();
+        c.textAlign='left';
+    }
+
+    function drawSaTabletSpears(c, x, y, dir){
+        c.save(); c.translate(x,y); c.scale(dir,1);
+        c.strokeStyle='#6b4423'; c.lineWidth=2; c.lineCap='round';
+        c.beginPath(); c.moveTo(-7,9); c.lineTo(7,-9); c.moveTo(-7,-9); c.lineTo(7,9); c.stroke();
+        c.fillStyle='#cbd5e1';
+        c.beginPath(); c.moveTo(7,-9); c.lineTo(4,-6); c.lineTo(9,-6); c.closePath(); c.fill();
+        c.beginPath(); c.moveTo(7,9); c.lineTo(4,6); c.lineTo(9,6); c.closePath(); c.fill();
+        c.restore();
+    }
+
+    /* Victory banner — declares the winning clan, then a rematch begins. */
+    function drawSaVictory(c){
+        if (saWar.state!=='victory' || !saWar.winner) return;
+        var a=Math.min(1, saWar.victoryT/400);
+        if (saWar.victoryT>SA_VICTORY_MS-700) a=Math.max(0,(SA_VICTORY_MS-saWar.victoryT)/700);
+        c.save(); c.globalAlpha=a;
+        var bw=Math.min(W*0.6,440), bx=W/2-bw/2, by=GROUND*0.30, bh=70;
+        c.fillStyle='rgba(20,12,6,0.85)'; saRoundRect(c,bx,by,bw,bh,12); c.fill();
+        c.strokeStyle=saWar.winner.paint; c.lineWidth=3; c.stroke();
+        c.textAlign='center'; c.textBaseline='alphabetic';
+        c.fillStyle='#fde68a'; c.font='bold 30px "Arial Black",Arial,sans-serif';
+        c.fillText('VICTORY', W/2, by+34);
+        c.font='bold 16px Arial,sans-serif';
+        c.fillStyle=(saWar.winner===SA_TRIBE_A?SA_TRIBE_A.paintAlt:'#e5e7eb');
+        c.fillText((saWar.winner===SA_TRIBE_A?'RIVER CLAN':'CLIFF CLAN')+' HOLDS THE HUNTING GROUNDS', W/2, by+56);
+        c.restore();
+        c.textAlign='left';
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       BATTLEFIELD TERRAIN + HISTORICAL SCENERY ENGINE
+       Every era now fights on a believable, period-correct landscape:
+       rolling hills / dunes / a mountain pass / a coast, with deterministic
+       (seeded) scatter and architecture so each battlefield is detailed and
+       consistent frame-to-frame but unique per era.
+       ════════════════════════════════════════════════════════════════ */
+    /* per-kit ground HEIGHT field — `saGroundRise(x)` returns how many px the
+       surface sits ABOVE the flat horizon at column x (always >=0, so hills
+       rise INTO the scene and never tear a hole in the sky). */
+    var SA_TERRAIN = {
+        pass:    { amp1:54, f1:1.2, ph1:0.4, amp2:22, f2:3.0, ph2:1.1, slope:28 }, /* Thermopylae — steep pass */
+        field:   { amp1:30, f1:0.9, ph1:0.2, amp2:12, f2:2.4, ph2:0.7, slope:20 }, /* Waterloo ridge */
+        colonial:{ amp1:24, f1:1.0, ph1:0.6, amp2:10, f2:2.6, ph2:1.4, slope:14 }, /* New England rolling */
+        steppe:  { amp1:20, f1:0.8, ph1:1.0, amp2:9,  f2:2.2, ph2:0.3, slope:8  }, /* open grassland swells */
+        desert:  { amp1:22, f1:0.7, ph1:0.9, amp2:11, f2:1.9, ph2:0.2, slope:6  }, /* dunes */
+        north:   { amp1:24, f1:0.9, ph1:0.5, amp2:10, f2:2.3, ph2:1.0, slope:16 }, /* coastal hills */
+        classical:{amp1:18, f1:0.8, ph1:0.3, amp2:8,  f2:2.1, ph2:0.8, slope:12 }, /* plain sloping to the shore */
+        trench:  { amp1:9,  f1:1.5, ph1:0.5, amp2:6,  f2:3.6, ph2:0.9, slope:0  }, /* churned, cratered mud */
+        town:    { amp1:6,  f1:1.3, ph1:0.4, amp2:4,  f2:3.0, ph2:0.2, slope:0  },
+        urban:   { amp1:4,  f1:1.2, ph1:0.2, amp2:3,  f2:2.8, ph2:0.6, slope:0  }
+    };
+    function saGroundRise(x){
+        var p = saWar.env && saWar.env.terrain;
+        if (!p || !p.amp1) return 0;
+        var u = x/W;
+        var r = (0.5+0.5*Math.sin(u*Math.PI*p.f1*2 + p.ph1))*p.amp1
+              + (0.5+0.5*Math.sin(u*Math.PI*p.f2*2 + p.ph2))*p.amp2;
+        if (p.slope) r += (p.slope>0 ? u : (1-u)) * Math.abs(p.slope);
+        return r;
+    }
+    /* seeded PRNG so a battlefield's scatter/architecture is fixed per era */
+    function saSeed(str){ var h=2166136261>>>0; for (var i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+    function saPRNG(seed){ var s=seed>>>0; return function(){ s=(Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; }; }
+
+    /* which kits border the sea (ocean + beach + ships) */
+    var SA_SEA = {
+        classical:{ side:'right', deep:'#1f5b78', shallow:'#3f8fae', ships:'beached' }, /* Trojan shore */
+        north:    { side:'left',  deep:'#2a4d63', shallow:'#3d7d96', ships:'longship' }, /* Viking fjord */
+        pass:     { side:'right', deep:'#22566f', shallow:'#3a86a2', ships:'none' }      /* sea beside the pass */
+    };
+
+    /* Build the deterministic scenery pack for the active era's kit. */
+    function buildSaEnv(){
+        var kit=SA_SCENE_KIT, R=saPRNG(saSeed('env9_'+kit));
+        function rr(a,b){ return a+(b-a)*R(); }
+        var rdH=H-GROUND;
+        var env={ kit:kit, terrain:SA_TERRAIN[kit]||null, sea:SA_SEA[kit]||null,
+                  clouds:[], scatter:[], trees:[], structs:[], ships:[], banners:[], birds:[], clutter:[] };
+        /* clouds / overcast puffs */
+        var nC=(kit==='trench'||kit==='town')?2:(kit==='desert')?2:4;
+        for (var i=0;i<nC;i++) env.clouds.push({ x:rr(0,W), y:GROUND*rr(0.08,0.42), s:rr(0.7,1.7), v:rr(0.003,0.009)*(R()<0.5?1:-1), a:rr(0.25,0.6) });
+        /* gulls over coasts */
+        if (env.sea) for (var b=0;b<5;b++) env.birds.push({ x:rr(0,W), y:GROUND*rr(0.16,0.4), ph:rr(0,6.28) });
+        /* low scatter: rocks, tufts, the odd bush/crater — spread across the field */
+        var bushP=(kit==='north'||kit==='colonial'||kit==='field'||kit==='steppe')?0.5:(kit==='desert'||kit==='trench'||kit==='town'||kit==='urban')?0.12:0.3;
+        var craterP=(kit==='trench')?0.4:(kit==='town'||kit==='urban')?0.22:0.04;
+        var nS=(kit==='urban'||kit==='town')?44:70;
+        for (var s=0;s<nS;s++){
+            var fy=rr(0.14,0.97), kind;
+            var d=R();
+            if (d<craterP) kind='crater'; else if (d<craterP+bushP*0.5) kind='bush'; else kind='rock';
+            env.scatter.push({ x:rr(0,W), fy:fy, r:rr(2,7)*(kind==='crater'?1.8:1), kind:kind, t:R() });
+        }
+        /* mid-ground trees, species by climate */
+        var treeKind = (kit==='north')?'conifer' : (kit==='colonial'||kit==='field')?'oak' :
+                       (kit==='classical')?'olive' : (kit==='steppe')?'none' :
+                       (kit==='desert')?'palm' : (kit==='pass')?'conifer' : 'none';
+        if (treeKind!=='none'){
+            var nT=(kit==='desert')?5:(kit==='classical')?6:9;
+            for (var t=0;t<nT;t++){
+                var tx=rr(0,W), edge=(tx<W*0.30||tx>W*0.70);
+                env.trees.push({ x:tx, fy:edge?rr(0.18,0.5):rr(0.55,0.92), s:rr(0.7,1.4)*(edge?0.9:1.2), kind:treeKind, t:R() });
+            }
+        }
+        buildKitStructures(env, kit, rr, R);
+        buildSaClutter(env, kit, rr, R);
+        return env;
+    }
+
+    /* Battlefield clutter — tents, standards, weapon racks, shield piles,
+       barrels, crates, carts, drums, campfires, bones, broken weapons, ammo
+       boxes… the small period objects that make a field look lived-in. Mostly
+       placed in the rear & along the edges so the clash centre stays readable. */
+    function buildSaClutter(env, kit, rr, R){
+        var era = WAR_MODES[warModeIdx].id;
+        var ancient = (kit==='desert'||kit==='classical'||kit==='pass'||kit==='north'||kit==='steppe');
+        var earlymod = (kit==='colonial'||kit==='field');
+        var modern   = (kit==='trench'||kit==='town'||kit==='urban');
+        var pool;
+        if (ancient)      pool=['tent','tent','campfire','standard','standard','weaponRack','shieldPile','barrel','cart','drum','bones','brokenWeapon','urn','torch'];
+        else if (earlymod)pool=['tent','campfire','barrel','crate','cart','drum','standard','cannonballs','fencePost','brokenWeapon','lantern'];
+        else              pool=['ammoBox','crate','barrel','oilDrum','sandbagNest','signpost','debris','debris','barbedCoil','jerrycan','helmetOnRifle','stretcher'];
+        env.acc = WAR_MODES[warModeIdx].accent || '#fde68a';
+        var n = modern?18:22;
+        for (var i=0;i<n;i++){
+            var t=pool[(R()*pool.length)|0];
+            /* keep big/back items in the rear bands, ground litter anywhere */
+            var rear = (t==='tent'||t==='standard'||t==='cart'||t==='campfire'||t==='cannonballs'||t==='sandbagNest');
+            var x, fy;
+            if (R()<0.5){ x = (R()<0.5)? W*rr(0.02,0.22) : W*rr(0.78,0.98); fy=rr(0.12,0.6); }   /* flanks */
+            else        { x = W*rr(0.1,0.9); fy = rear?rr(0.1,0.32):rr(0.5,0.95); }
+            env.clutter.push({ type:t, x:x, fy:fy, s:rr(0.8,1.25), t:R(),
+                col: (R()<0.5? (WAR_MODES[warModeIdx].colorA) : WAR_MODES[warModeIdx].colorB) });
+        }
+    }
+
+    /* Period architecture, placed (with jitter) toward the rear so the centre
+       stays clear for the clash. Era-AWARE: the same scene "kit" yields the
+       landmarks of the specific empire fighting (Troy's horse, Assyria's
+       lamassu, Alexander's Persepolis, the Crusader fort, and so on). */
+    function buildKitStructures(env, kit, rr, R){
+        var era = WAR_MODES[warModeIdx].id;
+        function add(type,x,fy,s,extra){ var o={type:type,x:x,fy:fy==null?0:fy,s:s||1}; if(extra) for(var k in extra) o[k]=extra[k]; env.structs.push(o); }
+        if (kit==='desert'){
+            /* shared desert backdrop, then empire-specific monuments */
+            add('duneRidge', W*0.5, 0, 1.0);
+            if (era==='bronzeage'){           /* Egypt vs Hatti at Kadesh */
+                add('pylon',  W*rr(0.10,0.18), 0, rr(1.0,1.25));   /* Egyptian temple pylon */
+                add('sphinx', W*rr(0.24,0.32), rr(0.04,0.12), rr(0.9,1.1));
+                add('obelisk',W*rr(0.36,0.42), 0, rr(0.85,1.1));
+                add('pyramid',W*rr(0.80,0.92), 0, rr(0.7,0.95));
+            } else if (era==='assyrian'){     /* Assyria vs Elam */
+                add('ishtarGate', W*rr(0.10,0.18), 0, rr(1.0,1.2));
+                add('lamassu', W*rr(0.24,0.30), rr(0.04,0.1), rr(0.95,1.15));
+                add('ziggurat',W*rr(0.74,0.88), 0, rr(0.9,1.15));
+                add('ram', W*rr(0.5,0.6), rr(0.25,0.4), rr(0.9,1.1));        /* the first siege engines */
+            } else if (era==='alexander'){    /* Gaugamela — Persia */
+                add('persepolis', W*rr(0.10,0.2), 0, rr(1.0,1.25));
+                add('lamassu', W*rr(0.78,0.86), rr(0.04,0.1), rr(0.9,1.1));
+                add('obelisk', W*rr(0.4,0.46), 0, rr(0.8,1.0));
+            } else {                          /* Crusades — desert holy land */
+                add('desertFort', W*rr(0.74,0.88), 0, rr(1.0,1.2));
+                add('minaret', W*rr(0.10,0.18), 0, rr(1.0,1.25));
+                add('dome', W*rr(0.2,0.28), rr(0.02,0.08), rr(0.9,1.1));
+                add('oasis', W*rr(0.42,0.5), rr(0.6,0.72), rr(0.9,1.1));
+                add('trebuchet', W*rr(0.3,0.38), rr(0.18,0.3), rr(0.95,1.15));   /* counterweight siege engine */
+                add('siegeTower', W*rr(0.6,0.68), rr(0.1,0.2), rr(0.95,1.15));   /* assault tower */
+            }
+        } else if (kit==='classical'){
+            if (era==='trojan'){
+                add('cityWall', W*rr(0.78,0.9), 0, rr(1.0,1.2));      /* the walls of Ilium */
+                add('trojanHorse', W*rr(0.6,0.7), rr(0.02,0.1), rr(1.0,1.25));
+                add('temple', W*rr(0.10,0.18), 0, rr(0.95,1.15));
+                add('column', W*rr(0.3,0.36), 0, rr(0.8,1.05));
+            } else {                          /* Rome vs Carthage */
+                add('temple', W*rr(0.10,0.18), 0, rr(0.95,1.2));
+                add('romanArch', W*rr(0.55,0.66), 0, rr(0.95,1.2));
+                add('cityWall', W*rr(0.78,0.9), 0, rr(0.9,1.1));      /* Carthage */
+                add('column', W*rr(0.3,0.36), 0, rr(0.8,1.05));
+                add('ballista', W*rr(0.4,0.46), rr(0.22,0.34), rr(0.9,1.1));   /* Roman artillery */
+                add('catapult', W*rr(0.62,0.7), rr(0.25,0.38), rr(0.9,1.1));   /* onager */
+            }
+        } else if (kit==='pass'){
+            add('mountain', W*0.10, 0, 1.0, {h:0.66});
+            add('mountain', W*0.30, 0, 1.0, {h:0.5});
+            add('mountain', W*0.88, 0, 1.0, {h:0.72});
+            add('stoneWall',W*0.5, 0.02, 1.05);                       /* the Phocian wall */
+            add('shrine', W*rr(0.6,0.68), rr(0.05,0.12), rr(0.9,1.1));/* roadside Greek shrine */
+        } else if (kit==='north'){
+            add('staveChurch', W*rr(0.7,0.82), rr(0.05,0.14), rr(1.0,1.2));
+            add('longhouse', W*rr(0.12,0.22), rr(0.12,0.2), rr(0.95,1.2));
+            add('runestone', W*rr(0.55,0.64), rr(0.5,0.7), rr(0.85,1.1));
+            add('runestone', W*rr(0.3,0.4), rr(0.55,0.75), rr(0.8,1.0));
+        } else if (kit==='steppe'){
+            for (var g=0;g<4;g++) add('yurt', W*rr(0.06+g*0.07,0.1+g*0.07), rr(0.12,0.24), rr(0.85,1.15));
+            add('ovoo', W*rr(0.6,0.7), rr(0.45,0.6), rr(0.9,1.15));   /* sacred stone cairn */
+            add('tugBanner', W*rr(0.48,0.56), 0.0, 1.05);            /* horse-tail standard */
+            add('tugBanner', W*rr(0.8,0.88), rr(0.05,0.12), 0.9);
+        } else if (kit==='colonial'){
+            add('colonialChurch', W*rr(0.10,0.18), 0, rr(1.0,1.25));  /* white steeple */
+            add('barn', W*rr(0.76,0.86), rr(0.12,0.2), rr(0.95,1.2));
+            add('coveredBridge', W*rr(0.5,0.6), rr(0.5,0.62), rr(0.9,1.1));
+            add('libertyPole', W*rr(0.4,0.46), 0, rr(0.95,1.1));
+            add('hedge', W*0.5, 0.04, 1.0);
+        } else if (kit==='field'){
+            add('farmhouse', W*rr(0.10,0.18), rr(0.1,0.18), rr(1.05,1.3)); /* Hougoumont */
+            add('barn',      W*rr(0.74,0.84), rr(0.12,0.2), rr(0.95,1.2)); /* La Haye Sainte */
+            add('windmill', W*rr(0.55,0.64), 0, rr(0.95,1.2));
+            add('hedge', W*0.5, 0.04, 1.0);
+        } else if (kit==='trench'){
+            add('cathedralRuin', W*rr(0.1,0.2), 0, rr(1.0,1.2));      /* shelled cathedral */
+            add('deadTree', W*rr(0.26,0.34), rr(0.1,0.2), rr(0.9,1.2));
+            add('deadTree', W*rr(0.8,0.9), rr(0.1,0.2), rr(0.8,1.1));
+            add('balloon', W*rr(0.6,0.74), 0, rr(0.9,1.2));           /* observation balloon */
+            add('aaGun', W*rr(0.42,0.5), rr(0.3,0.42), rr(0.95,1.1));  /* anti-aircraft gun */
+            add('ruin', W*rr(0.52,0.6), rr(0.05,0.12), rr(0.7,0.9));
+        } else if (kit==='town'){
+            add('cathedralRuin', W*rr(0.12,0.2), 0, rr(1.0,1.25));
+            for (var b=0;b<4;b++) add('ruin', W*rr(0.3+b*0.16,0.36+b*0.16), 0, rr(0.85,1.25));
+            add('wreck', W*rr(0.55,0.66), rr(0.4,0.55), rr(0.9,1.1));
+            add('roadSign', W*rr(0.46,0.54), rr(0.4,0.5), rr(0.9,1.05));
+            add('lamppost', W*rr(0.7,0.78), rr(0.35,0.45), rr(0.9,1.1));
+            add('aaGun', W*rr(0.28,0.36), rr(0.32,0.44), rr(0.95,1.1));   /* flak gun */
+        } else if (kit==='urban'){
+            add('skyscraper', W*rr(0.06,0.16), 0, rr(1.0,1.3));
+            add('skyscraper', W*rr(0.82,0.94), 0, rr(0.95,1.25));
+            for (var u=0;u<3;u++) add('tower', W*rr(0.24+u*0.18,0.3+u*0.18), 0, rr(0.85,1.15));
+            add('commsTower', W*rr(0.5,0.6), 0, rr(1.0,1.25));
+            add('billboard', W*rr(0.34,0.42), rr(0.3,0.4), rr(0.9,1.1));
+            add('wreck', W*rr(0.62,0.7), rr(0.42,0.55), rr(0.9,1.1));
+        }
+        /* coastal ships */
+        if (env.sea && env.sea.ships!=='none'){
+            var n=(env.sea.ships==='beached')?3:2;
+            for (var sH=0;sH<n;sH++){ env.ships.push({ x: env.sea.side==='right'? W*rr(0.7,0.95) : W*rr(0.05,0.3), fy:rr(0.05,0.22), s:rr(0.8,1.2), kind:env.sea.ships, t:R() }); }
+        }
+    }
+
+    /* ── GENERIC ERA SCENE — opaque period sky + ground + a few themed
+       silhouette structures, keyed off the era's scene kit + palette. */
+    var SA_GROUND_COL = {
+        desert:['#caa46a','#6b4a23'], classical:['#a98a55','#5e4524'], pass:['#7c6a4a','#3a2e1c'],
+        north:['#4a5a44','#26301e'], steppe:['#8a7440','#3a3018'], colonial:['#5a6a3a','#2e3a1e'],
+        field:['#586a3a','#2c3a1c'], trench:['#5a4a32','#241c10'], town:['#6b6b66','#2a2a28'],
+        urban:['#7a766e','#2e2c28']
+    };
+    function saSurfaceY(x){ return GROUND - saGroundRise(x); }
+    function drawWarSceneGeneric(c){
+        var wm=WAR_MODES[warModeIdx], kit=SA_SCENE_KIT, env=saWar.env||{}, rdH=H-GROUND;
+        /* ── OPAQUE sky ── */
+        var sky=c.createLinearGradient(0,0,0,GROUND);
+        sky.addColorStop(0, wm.sky0||'#9ca3af'); sky.addColorStop(1, wm.sky1||'#374151');
+        c.fillStyle=sky; c.fillRect(0,0,W,GROUND);
+        /* sun / overcast disc + soft glow */
+        var sx=W*0.74, sy=GROUND*0.30;
+        var sg=c.createRadialGradient(sx,sy,2,sx,sy,140);
+        sg.addColorStop(0,'rgba(255,250,225,0.92)'); sg.addColorStop(0.4,'rgba(255,248,210,0.5)'); sg.addColorStop(1,'rgba(255,250,225,0)');
+        c.fillStyle=sg; c.fillRect(sx-150,sy-150,300,300);
+        c.fillStyle='rgba(255,252,235,0.9)'; c.beginPath(); c.arc(sx,sy,(kit==='trench'||kit==='town')?16:24,0,Math.PI*2); c.fill();
+        /* drifting clouds */
+        if (env.clouds) for (var ci=0; ci<env.clouds.length; ci++){ var cl=env.clouds[ci];
+            var cx=((cl.x + saWar.t*cl.v) % (W+260))-130; drawSaCloud(c, cx, cl.y, cl.s, cl.a); }
+        /* gulls over the coast */
+        if (env.birds) { c.strokeStyle='rgba(40,40,50,0.55)'; c.lineWidth=1.3;
+            for (var gi=0; gi<env.birds.length; gi++){ var bg=env.birds[gi];
+                var bx=((bg.x + saWar.t*0.02) % (W+40))-20, by=bg.y+Math.sin(saWar.t*0.002+bg.ph)*5;
+                c.beginPath(); c.moveTo(bx-4,by); c.lineTo(bx,by-2.2); c.lineTo(bx+4,by); c.stroke(); } }
+        /* ── DISTANT BACKDROP: sea for coasts, layered ridges/forest inland ── */
+        if (env.sea) drawSaSea(c, env.sea, env.ships);
+        else {
+            var far = kit==='desert'?'#b89a66' : kit==='steppe'?'#9a8a54' : kit==='town'||kit==='urban'?'#5a5a58' : kit==='trench'?'#6a5c46' : '#5a6a4e';
+            saHillBand(c, GROUND*0.72, GROUND, far, 0.5, 44);
+            saHillBand(c, GROUND*0.82, GROUND, 'rgba(0,0,0,0.20)', 1.2, 30);
+            if (kit==='colonial'||kit==='field'||kit==='north'){ /* a distant treeline */
+                c.fillStyle='rgba(30,46,26,0.6)';
+                for (var tl=0; tl<W; tl+=12){ var th=GROUND*0.80 - (6+(tl*7%9)); c.beginPath(); c.arc(tl, th, 8, Math.PI, 0); c.fill(); }
+            }
+        }
+        /* ── WW1/WW2 ATMOSPHERE (behind troops): a horizon of artillery flashes
+           and towering smoke columns rising into the sky ── */
+        if (kit==='trench'||kit==='town'||kit==='urban') drawWarModernAtmosphere(c, kit, 'back');
+        /* ── BACKGROUND ARCHITECTURE (behind the troops) ── */
+        if (env.structs) for (var si=0; si<env.structs.length; si++){ var st=env.structs[si];
+            var byS = GROUND + rdH*st.fy - saGroundRise(st.x); drawSaStruct(c, st.type, st.x, byS, st.s, st); }
+        /* ── OPAQUE, UNEVEN GROUND following the terrain height field ── */
+        var gc=SA_GROUND_COL[kit]||['#8a6a40','#3a2c18'];
+        var gnd=c.createLinearGradient(0,GROUND-70,0,H);
+        gnd.addColorStop(0,gc[0]); gnd.addColorStop(1,gc[1]);
+        c.fillStyle=gnd; c.beginPath(); c.moveTo(0,saSurfaceY(0));
+        for (var gx=0; gx<=W; gx+=10) c.lineTo(gx, saSurfaceY(gx));
+        c.lineTo(W,H); c.lineTo(0,H); c.closePath(); c.fill();
+        /* sunny rim along the crest + soft form shadow just under it */
+        c.strokeStyle='rgba(255,250,225,0.22)'; c.lineWidth=2; c.beginPath();
+        for (var rx=0; rx<=W; rx+=10){ var ry=saSurfaceY(rx); (rx===0)?c.moveTo(rx,ry):c.lineTo(rx,ry); } c.stroke();
+        c.strokeStyle='rgba(0,0,0,0.12)'; c.lineWidth=6; c.beginPath();
+        for (var rx2=0; rx2<=W; rx2+=10){ var ry2=saSurfaceY(rx2)+5; (rx2===0)?c.moveTo(rx2,ry2):c.lineTo(rx2,ry2); } c.stroke();
+        /* trampled clearing in the centre */
+        c.fillStyle='rgba(40,28,12,0.28)';
+        c.beginPath(); c.ellipse(W*0.5, GROUND+rdH*0.55, W*0.32, rdH*0.20, 0, 0, Math.PI*2); c.fill();
+        /* ── GROUND TEXTURE: rocks, tufts, craters, then mid-ground trees ── */
+        if (env.scatter) for (var ti=0; ti<env.scatter.length; ti++){ var sc=env.scatter[ti];
+            var scy = GROUND + rdH*sc.fy - saGroundRise(sc.x); drawSaScatter(c, sc, scy); }
+        if (env.trees) for (var tri=0; tri<env.trees.length; tri++){ var tr=env.trees[tri];
+            var tyv = GROUND + rdH*tr.fy - saGroundRise(tr.x); drawSaSceneTree(c, tr.kind, tr.x, tyv, tr.s, tr.t); }
+        /* ── BATTLEFIELD CLUTTER: tents, standards, racks, barrels, bones… ── */
+        if (env.clutter){ env.clutter.sort(function(a,b){return a.fy-b.fy;});
+            for (var cti=0; cti<env.clutter.length; cti++){ var cu=env.clutter[cti];
+                var cuy = GROUND + rdH*cu.fy - saGroundRise(cu.x); drawSaClutter(c, cu, cuy); } }
+        /* kit-specific battlefield works that span the whole line */
+        if (kit==='trench') drawWarTrenchLine(c);
+        else if (kit==='urban') drawWarUrbanLine(c);
+        /* low haze for depth */
+        var hz=c.createLinearGradient(0,GROUND+rdH*0.3,0,H);
+        hz.addColorStop(0,'rgba(150,140,120,0)'); hz.addColorStop(1,'rgba(120,110,90,0.20)');
+        c.fillStyle=hz; c.fillRect(0,GROUND+rdH*0.3,W,rdH*0.7);
+        /* ── WW1/WW2 ATMOSPHERE (over the field): drifting gas/smoke + glow ── */
+        if (kit==='trench'||kit==='town'||kit==='urban') drawWarModernAtmosphere(c, kit, 'front');
+    }
+
+    /* ═══ WW1 / WW2 / MODERN ATMOSPHERE — the layer that makes the industrial
+       battlefields feel alive: a horizon lit by a rolling artillery barrage,
+       smoke columns climbing from burning ground, drifting poison gas (WW1) or
+       oily black smoke (WW2/urban), and flickering muzzle-light haze. All
+       procedural off saWar.t so it animates continuously. ═══ */
+    function drawWarModernAtmosphere(c, kit, layer){
+        var t=saWar.t, rdH=H-GROUND;
+        if (layer==='back'){
+            var hy=GROUND*0.70;
+            /* rolling barrage on the horizon — staggered flashes */
+            for (var i=0;i<9;i++){
+                var fx=W*(0.06+i*0.11), ph=((t*0.0007)+(i*0.7))%2.4;
+                if (ph<0.16){ var a=(0.16-ph)/0.16;
+                    var fg=c.createRadialGradient(fx,hy,1,fx,hy,26+a*22);
+                    fg.addColorStop(0,'rgba(255,236,170,'+(a*0.9)+')'); fg.addColorStop(0.5,'rgba(255,150,50,'+(a*0.4)+')'); fg.addColorStop(1,'rgba(255,150,50,0)');
+                    c.fillStyle=fg; c.beginPath(); c.arc(fx,hy,26+a*22,0,Math.PI*2); c.fill();
+                }
+            }
+            /* towering smoke columns from the back line */
+            for (var s=0;s<6;s++){
+                var sx=W*(0.10+s*0.16)+Math.sin(s*2.1)*20;
+                var hyc=GROUND*0.72;
+                for (var p=0;p<7;p++){
+                    var py=hyc - p*24 - ((t*0.012+s*30)% 24);
+                    var drift=Math.sin(t*0.0006+s+p*0.6)*(8+p*3);
+                    var sm=(kit==='town'||kit==='urban')?'30,28,26':'70,66,58';
+                    c.fillStyle='rgba('+sm+','+(0.30-p*0.03)+')';
+                    c.beginPath(); c.arc(sx+drift, py, 9+p*4, 0, Math.PI*2); c.fill();
+                }
+            }
+        } else {
+            /* drifting low cloud over no-man's-land */
+            var gasCol = (kit==='trench') ? '160,176,90' : '40,38,34';   /* WW1 chlorine vs WW2 smoke */
+            var gasA   = (kit==='trench') ? 0.16 : 0.13;
+            for (var g=0; g<7; g++){
+                var gx=((t*0.018 + g*210) % (W+300)) - 150;
+                var gyv=GROUND + rdH*(0.55 + (g%3)*0.12) - saGroundRise(gx);
+                c.fillStyle='rgba('+gasCol+','+gasA+')';
+                c.beginPath(); c.ellipse(gx, gyv, 80, 20, 0, 0, Math.PI*2);
+                c.ellipse(gx+50, gyv-6, 56, 15, 0, 0, Math.PI*2); c.fill();
+            }
+            /* flickering battle-light haze low across the line */
+            var fl=0.04+0.03*Math.abs(Math.sin(t*0.02));
+            c.fillStyle='rgba(255,180,90,'+fl+')';
+            c.fillRect(0, GROUND+rdH*0.35, W, rdH*0.4);
+        }
+    }
+
+    /* soft cloud puff */
+    function drawSaCloud(c, x, y, s, a){
+        c.save(); c.globalAlpha=a||0.4; c.fillStyle='#ffffff';
+        c.beginPath();
+        c.ellipse(x, y, 34*s, 13*s, 0, 0, Math.PI*2);
+        c.ellipse(x-22*s, y+4*s, 20*s, 9*s, 0, 0, Math.PI*2);
+        c.ellipse(x+24*s, y+5*s, 22*s, 10*s, 0, 0, Math.PI*2);
+        c.ellipse(x+4*s, y-9*s, 18*s, 11*s, 0, 0, Math.PI*2);
+        c.fill(); c.restore();
+    }
+
+    /* OCEAN + BEACH backdrop: deep→shallow water, animated swell, foam line,
+       distant ships. Fills the horizon band behind the coastal battlefield. */
+    function drawSaSea(c, sea, ships){
+        var yH=GROUND*0.60, yB=GROUND;            /* horizon → shoreline */
+        var sg=c.createLinearGradient(0,yH,0,yB);
+        sg.addColorStop(0, sea.deep); sg.addColorStop(1, sea.shallow);
+        c.fillStyle=sg; c.fillRect(0,yH,W,yB-yH);
+        /* rolling swell lines */
+        c.strokeStyle='rgba(255,255,255,0.16)'; c.lineWidth=1.2;
+        for (var r=0;r<7;r++){ var wy=yH+8+r*((yB-yH-8)/7);
+            c.beginPath();
+            for (var x=0;x<=W;x+=16){ var yy=wy+Math.sin(x*0.03 + saWar.t*0.0016 + r)*1.6; (x===0)?c.moveTo(x,yy):c.lineTo(x,yy); }
+            c.stroke();
+        }
+        /* sun glitter path */
+        c.fillStyle='rgba(255,250,220,0.25)';
+        for (var gg=0; gg<26; gg++){ var gx=W*0.74+Math.sin(gg*1.7)*60, gy=yH+10+gg*((yB-yH)/26);
+            c.fillRect(gx+Math.sin(saWar.t*0.004+gg)*8, gy, 10, 1.4); }
+        /* distant ships on the water */
+        if (ships) for (var s=0;s<ships.length;s++){ var sh=ships[s];
+            var shy=yH+(yB-yH)*(0.35+sh.fy); drawSaShip(c, sh.kind, sh.x, shy, sh.s); }
+        /* foam at the shoreline */
+        c.strokeStyle='rgba(255,255,255,0.5)'; c.lineWidth=2.4;
+        c.beginPath();
+        for (var fx=0;fx<=W;fx+=12){ var fy=yB-2+Math.sin(fx*0.05+saWar.t*0.003)*2.2; (fx===0)?c.moveTo(fx,fy):c.lineTo(fx,fy); }
+        c.stroke();
+    }
+    function drawSaShip(c, kind, x, y, s){
+        c.save(); c.translate(x,y); c.scale(s,s);
+        if (kind==='longship'){
+            c.fillStyle='#3a2a18'; c.beginPath(); c.moveTo(-26,0); c.quadraticCurveTo(0,9,26,0); c.quadraticCurveTo(0,3,-26,0); c.fill();
+            c.beginPath(); c.moveTo(-26,0); c.lineTo(-30,-9); c.lineTo(-24,-2); c.fill();          /* dragon prow */
+            c.beginPath(); c.moveTo(26,0); c.lineTo(30,-8); c.lineTo(24,-2); c.fill();
+            c.strokeStyle='#5a3a1e'; c.lineWidth=2; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-22); c.stroke();
+            c.fillStyle='#9a2a2a'; c.fillRect(-12,-22,24,15);                                       /* striped sail */
+            c.fillStyle='#e8e0d0'; for (var st=0; st<3; st++) c.fillRect(-12+st*8,-22,4,15);
+        } else { /* beached / Greek galley silhouette */
+            c.fillStyle='#3a2a18'; c.beginPath(); c.moveTo(-28,0); c.quadraticCurveTo(0,8,28,0); c.quadraticCurveTo(0,2,-28,0); c.fill();
+            c.strokeStyle='#5a3a1e'; c.lineWidth=2; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-24); c.stroke();
+            c.fillStyle='#d8cfb8'; c.beginPath(); c.moveTo(0,-24); c.lineTo(16,-6); c.lineTo(0,-6); c.fill(); /* furled sail */
+            c.strokeStyle='#2a1c10'; c.lineWidth=1; for (var o=0;o<6;o++){ c.beginPath(); c.moveTo(-22+o*8,2); c.lineTo(-24+o*8,7); c.stroke(); } /* oars */
+        }
+        c.restore();
+    }
+
+    /* one piece of ground scatter */
+    function drawSaScatter(c, sc, y){
+        if (sc.kind==='crater'){
+            c.fillStyle='rgba(0,0,0,0.26)'; c.beginPath(); c.ellipse(sc.x,y,sc.r*1.6,sc.r*0.7,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(255,255,255,0.06)'; c.beginPath(); c.ellipse(sc.x,y-1,sc.r*1.2,sc.r*0.45,0,0,Math.PI*2); c.fill();
+        } else if (sc.kind==='bush'){
+            c.fillStyle=(SA_SCENE_KIT==='desert')?'#7a7a3a':'#3c5a2a';
+            c.beginPath(); c.arc(sc.x,y-sc.r*0.5,sc.r,Math.PI,0); c.arc(sc.x-sc.r*0.6,y-sc.r*0.3,sc.r*0.7,Math.PI,0); c.arc(sc.x+sc.r*0.6,y-sc.r*0.3,sc.r*0.7,Math.PI,0); c.fill();
+        } else { /* rock */
+            c.fillStyle='#6b5e4a'; c.beginPath(); c.ellipse(sc.x,y,sc.r,sc.r*0.7,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(255,255,255,0.14)'; c.beginPath(); c.ellipse(sc.x-sc.r*0.3,y-sc.r*0.3,sc.r*0.4,sc.r*0.28,0,0,Math.PI*2); c.fill();
+        }
+        if (sc.t<0.5 && sc.kind!=='crater'){ /* a few grass tufts */
+            c.strokeStyle=(SA_SCENE_KIT==='desert')?'#b8a050':'#6e8a3a'; c.lineWidth=1;
+            c.beginPath(); c.moveTo(sc.x+5,y); c.lineTo(sc.x+4,y-5); c.moveTo(sc.x+7,y); c.lineTo(sc.x+8,y-4); c.stroke();
+        }
+    }
+
+    /* mid-ground tree species */
+    function drawSaSceneTree(c, kind, x, y, s, t){
+        c.save(); c.translate(x,y); c.scale(s,s);
+        if (kind==='conifer'){
+            c.fillStyle='#3a2616'; c.fillRect(-2,-6,4,8);
+            c.fillStyle='#26402a'; for (var l=0;l<3;l++){ var ly=-6-l*11, lw=18-l*5;
+                c.beginPath(); c.moveTo(-lw,ly); c.lineTo(0,ly-18); c.lineTo(lw,ly); c.closePath(); c.fill(); }
+        } else if (kind==='palm'){
+            c.strokeStyle='#6b4a26'; c.lineWidth=3; c.beginPath(); c.moveTo(0,2); c.quadraticCurveTo(3,-16,0,-32); c.stroke();
+            c.strokeStyle='#3f6a2a'; c.lineWidth=2.4;
+            for (var f=0;f<6;f++){ var a=-Math.PI/2 + (f-2.5)*0.5; c.beginPath(); c.moveTo(0,-32); c.quadraticCurveTo(Math.cos(a)*14,-34+Math.sin(a)*8,Math.cos(a)*26,-30+Math.sin(a)*14); c.stroke(); }
+        } else if (kind==='olive'){
+            c.fillStyle='#5a4326'; c.fillRect(-2.5,-10,5,12);
+            c.fillStyle='#6a7a4a'; c.beginPath(); c.arc(-6,-16,9,0,Math.PI*2); c.arc(7,-15,8,0,Math.PI*2); c.arc(0,-22,9,0,Math.PI*2); c.fill();
+        } else { /* oak / deciduous, autumn tint for colonial */
+            c.fillStyle='#4a3420'; c.fillRect(-3,-12,6,14);
+            var crown=(t>0.6)?'#a05a2a':(t>0.3)?'#3f6a2e':'#5a7a35';
+            c.fillStyle=crown; c.beginPath(); c.arc(-8,-20,12,0,Math.PI*2); c.arc(9,-18,11,0,Math.PI*2); c.arc(0,-28,13,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(0,0,0,0.12)'; c.beginPath(); c.arc(2,-16,9,0,Math.PI*2); c.fill();
+        }
+        c.restore();
+    }
+
+    /* ── PERIOD ARCHITECTURE dispatcher ── */
+    function drawSaStruct(c, type, x, gy, s, st){
+        s=s||1; c.save(); c.translate(x,gy);
+        if (type==='pyramid'){ var ph=GROUND*0.18*s; c.fillStyle='#b58a4e'; c.beginPath(); c.moveTo(-ph,0); c.lineTo(0,-ph); c.lineTo(ph,0); c.closePath(); c.fill();
+            c.fillStyle='rgba(0,0,0,0.22)'; c.beginPath(); c.moveTo(0,-ph); c.lineTo(ph,0); c.lineTo(ph*0.18,0); c.closePath(); c.fill();
+            c.fillStyle='rgba(255,240,200,0.16)'; c.beginPath(); c.moveTo(0,-ph); c.lineTo(-ph,0); c.lineTo(-ph*0.18,0); c.closePath(); c.fill(); }
+        else if (type==='ziggurat'){ var zw=70*s; c.fillStyle='#9a7a4a'; for (var t=0;t<4;t++){ var tw=zw-t*16, th=10*s; c.fillRect(-tw/2,-(t+1)*th,tw,th); } c.fillStyle='#7a5a2e'; c.fillRect(-6,-4*10*s-12*s,12,12*s); }
+        else if (type==='obelisk'){ var oh=GROUND*0.16*s; c.fillStyle='#c0a05a'; c.fillRect(-6*s,-oh,12*s,oh); c.beginPath(); c.moveTo(-6*s,-oh); c.lineTo(0,-oh-12*s); c.lineTo(6*s,-oh); c.fill(); c.fillStyle='rgba(0,0,0,0.18)'; c.fillRect(2*s,-oh,4*s,oh); }
+        else if (type==='temple'){ var tw2=150*s, th2=GROUND*0.24*s; c.fillStyle='#d8cfb0'; c.fillRect(-tw2/2,-th2,tw2,8*s);
+            c.beginPath(); c.moveTo(-tw2/2-8,-th2); c.lineTo(0,-th2-30*s); c.lineTo(tw2/2+8,-th2); c.closePath(); c.fill();
+            c.fillStyle='#c4b894'; for (var col=0;col<7;col++) c.fillRect(-tw2/2+10*s+col*((tw2-20*s)/6), -th2+8*s, 9*s, th2-8*s);
+            c.fillStyle='rgba(0,0,0,0.18)'; c.fillRect(-tw2/2,-8*s,tw2,8*s); }
+        else if (type==='column'){ var ch=GROUND*0.2*s; c.fillStyle='#cabfa0'; c.fillRect(-7*s,-ch,14*s,ch); c.fillRect(-10*s,-ch,20*s,5*s); c.fillRect(-10*s,-5*s,20*s,5*s);
+            c.strokeStyle='rgba(0,0,0,0.16)'; c.lineWidth=1; for (var fl=0;fl<3;fl++){ c.beginPath(); c.moveTo(-4*s+fl*4*s,-ch+5*s); c.lineTo(-4*s+fl*4*s,-5*s); c.stroke(); } }
+        else if (type==='cityWall'){ var ww=170*s, wh=GROUND*0.22*s; c.fillStyle='#9a8a6a'; c.fillRect(-ww/2,-wh,ww,wh);
+            c.fillStyle='#8a7a5c'; for (var cr=0;cr<Math.floor(ww/18);cr++) c.fillRect(-ww/2+cr*18,-wh-8*s,10*s,8*s);   /* crenellations */
+            c.fillStyle='rgba(0,0,0,0.2)'; c.fillRect(-12*s,-wh*0.6,24*s,wh*0.6);                                       /* gate */
+            c.fillStyle='#a89870'; c.fillRect(-ww/2-10*s,-wh*1.1,18*s,wh*1.1); c.fillRect(ww/2-8*s,-wh*1.1,18*s,wh*1.1); /* towers */ }
+        else if (type==='mountain'){ var mh=GROUND*(st&&st.h||0.6)*s; c.fillStyle='#4a4236'; c.beginPath(); c.moveTo(-mh*0.9,0); c.lineTo(-mh*0.2,-mh*0.8); c.lineTo(0,-mh); c.lineTo(mh*0.3,-mh*0.7); c.lineTo(mh*0.9,0); c.closePath(); c.fill();
+            c.fillStyle='#e8eef2'; c.beginPath(); c.moveTo(-mh*0.18,-mh*0.78); c.lineTo(0,-mh); c.lineTo(mh*0.28,-mh*0.68); c.lineTo(mh*0.08,-mh*0.74); c.lineTo(0,-mh*0.82); c.lineTo(-mh*0.08,-mh*0.74); c.closePath(); c.fill();
+            c.fillStyle='rgba(0,0,0,0.22)'; c.beginPath(); c.moveTo(0,-mh); c.lineTo(mh*0.3,-mh*0.7); c.lineTo(mh*0.9,0); c.lineTo(mh*0.2,0); c.closePath(); c.fill(); }
+        else if (type==='stoneWall'){ var sw=120*s, sh=22*s; c.fillStyle='#7a6e58'; c.fillRect(-sw/2,-sh,sw,sh);
+            c.strokeStyle='rgba(0,0,0,0.22)'; c.lineWidth=1; for (var b=0;b<6;b++){ c.beginPath(); c.moveTo(-sw/2,-sh+b*4*s); c.lineTo(sw/2,-sh+b*4*s); c.stroke(); }
+            c.fillStyle='#6a5e48'; for (var cn=0;cn<Math.floor(sw/16);cn++) c.fillRect(-sw/2+cn*16,-sh-6*s,9*s,6*s); }
+        else if (type==='longhouse'){ var lw=110*s, lh=GROUND*0.16*s; c.fillStyle='#5a3a1e'; c.fillRect(-lw/2,-lh,lw,lh);
+            c.fillStyle='#3a2410'; c.beginPath(); c.moveTo(-lw/2-8*s,-lh); c.lineTo(0,-lh-26*s); c.lineTo(lw/2+8*s,-lh); c.closePath(); c.fill();
+            c.fillStyle='#2a1a0c'; c.fillRect(-6*s,-lh*0.6,12*s,lh*0.6); }
+        else if (type==='runestone'){ c.fillStyle='#8a8a82'; c.beginPath(); c.moveTo(-12*s,0); c.lineTo(-10*s,-34*s); c.quadraticCurveTo(0,-44*s,10*s,-34*s); c.lineTo(12*s,0); c.closePath(); c.fill();
+            c.strokeStyle='#5a5a52'; c.lineWidth=1.4; c.beginPath(); c.arc(0,-20*s,7*s,0.3,Math.PI*1.7); c.moveTo(0,-30*s); c.lineTo(0,-10*s); c.stroke(); }
+        else if (type==='yurt'){ var yw=30*s; c.fillStyle='#d8cfb8'; c.beginPath(); c.ellipse(0,0,yw,18*s,0,Math.PI,Math.PI*2); c.fill(); c.fillRect(-yw,0,yw*2,7*s);
+            c.fillStyle='#b8a888'; c.beginPath(); c.moveTo(-yw,-15*s); c.lineTo(0,-26*s); c.lineTo(yw,-15*s); c.closePath(); c.fill();
+            c.fillStyle='#5a3a1e'; c.fillRect(-5*s,0,10*s,9*s); }
+        else if (type==='farmhouse'){ var fw=80*s, fh=GROUND*0.16*s; c.fillStyle='#c9b89a'; c.fillRect(-fw/2,-fh,fw,fh);
+            c.fillStyle='#7a2a18'; c.beginPath(); c.moveTo(-fw/2-6*s,-fh); c.lineTo(0,-fh-24*s); c.lineTo(fw/2+6*s,-fh); c.closePath(); c.fill();
+            c.fillStyle='#4a3320'; c.fillRect(-8*s,-fh*0.55,16*s,fh*0.55); c.fillStyle='#6aa0c0'; c.fillRect(fw*0.22,-fh*0.8,12*s,12*s); c.fillStyle='#3a2a18'; c.fillRect(-fw*0.34,-fh*0.8,12*s,12*s); }
+        else if (type==='barn'){ var bw=84*s, bh=GROUND*0.17*s; c.fillStyle='#8a2a1a'; c.fillRect(-bw/2,-bh,bw,bh);
+            c.fillStyle='#5a1a10'; c.beginPath(); c.moveTo(-bw/2-5*s,-bh); c.lineTo(0,-bh-26*s); c.lineTo(bw/2+5*s,-bh); c.closePath(); c.fill();
+            c.fillStyle='#e8e0d0'; c.fillRect(-10*s,-bh*0.6,20*s,bh*0.6); c.strokeStyle='#8a2a1a'; c.lineWidth=2; c.beginPath(); c.moveTo(0,-bh*0.6); c.lineTo(0,0); c.stroke(); }
+        else if (type==='windmill'){ var wt=GROUND*0.2*s; c.fillStyle='#cabfa0'; c.beginPath(); c.moveTo(-14*s,0); c.lineTo(-9*s,-wt); c.lineTo(9*s,-wt); c.lineTo(14*s,0); c.closePath(); c.fill();
+            c.fillStyle='#5a3a1e'; c.beginPath(); c.moveTo(-9*s,-wt); c.lineTo(0,-wt-10*s); c.lineTo(9*s,-wt); c.fill();
+            var ang=saWar.t*0.0012; c.strokeStyle='#4a3320'; c.lineWidth=3; c.save(); c.translate(0,-wt+2*s);
+            for (var bld=0;bld<4;bld++){ var a2=ang+bld*Math.PI/2; c.beginPath(); c.moveTo(0,0); c.lineTo(Math.cos(a2)*26*s,Math.sin(a2)*26*s); c.stroke(); } c.restore(); }
+        else if (type==='hedge'){ c.fillStyle='#2e4a22'; for (var hx=-W*0.5; hx<W*0.5; hx+=18*s){ c.beginPath(); c.arc(hx,0,11*s,Math.PI,0); c.fill(); } }
+        else if (type==='deadTree'){ c.strokeStyle='#2a2018'; c.lineWidth=4*s; c.lineCap='round'; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-40*s);
+            c.moveTo(0,-26*s); c.lineTo(-12*s,-36*s); c.moveTo(0,-30*s); c.lineTo(11*s,-42*s); c.moveTo(0,-18*s); c.lineTo(-9*s,-24*s); c.stroke(); }
+        else if (type==='ruin'){ var rw=70*s, rh=GROUND*(0.12+(st&&st.t||0.5)*0.12)*s; c.fillStyle='#5a564e'; c.fillRect(-rw/2,-rh,rw,rh);
+            c.fillStyle='rgba(0,0,0,0.32)'; for (var wy=-rh+8*s; wy<-8*s; wy+=16*s){ for (var wx=-rw/2+6*s; wx<rw/2-8*s; wx+=14*s){ c.fillRect(wx,wy,7*s,9*s); } }
+            c.fillStyle='#3a3630'; c.beginPath(); c.moveTo(-rw/2,-rh); c.lineTo(-rw*0.2,-rh-6*s); c.lineTo(rw*0.1,-rh+4*s); c.lineTo(rw/2,-rh-2*s); c.lineTo(rw/2,-rh); c.closePath(); c.fill(); /* broken top */ }
+        else if (type==='churchRuin'){ var cw=70*s, ch=GROUND*0.22*s; c.fillStyle='#6a655a'; c.fillRect(-cw/2,-ch,cw*0.5,ch);
+            c.fillRect(cw*0.1,-ch*1.4,cw*0.34,ch*1.4); c.fillStyle='#3a3630'; c.beginPath(); c.moveTo(cw*0.1,-ch*1.4); c.lineTo(cw*0.27,-ch*1.7); c.lineTo(cw*0.44,-ch*1.4); c.fill();
+            c.fillStyle='rgba(0,0,0,0.3)'; c.beginPath(); c.arc(-cw*0.05,-ch*0.5,7*s,Math.PI,0); c.fillRect(-cw*0.05-7*s,-ch*0.5,14*s,ch*0.5); c.fill(); }
+        else if (type==='tower'){ var uw=48*s, uh=GROUND*(0.4+(st&&st.t||0.5)*0.5)*s; c.fillStyle=((st&&st.t||0)>0.5)?'#6b6862':'#7c7a72'; c.fillRect(-uw/2,-uh,uw,uh);
+            c.fillStyle='rgba(0,0,0,0.3)'; for (var wy2=-uh+10*s; wy2<-10*s; wy2+=15*s){ for (var wx2=-uw/2+6*s; wx2<uw/2-8*s; wx2+=12*s){ if ((wx2+wy2)%3) c.fillRect(wx2,wy2,7*s,9*s); } }
+            c.fillStyle='rgba(20,18,14,0.5)'; c.fillRect(-uw*0.2,-uh*0.6,12*s,uh*0.6); }
+        else if (type==='wreck'){ c.fillStyle='#2e2a24'; c.fillRect(-22*s,-12*s,44*s,12*s); c.fillRect(-10*s,-20*s,18*s,9*s);
+            c.fillStyle='#15151a'; for (var ww2=0;ww2<5;ww2++){ c.beginPath(); c.arc(-16*s+ww2*8*s,0,4*s,0,Math.PI*2); c.fill(); }
+            c.fillStyle='#1a1a1c'; c.fillRect(6*s,-18*s,22*s,3*s);                       /* drooping gun */
+            var ff=saWar.t*0.02; c.fillStyle='rgba(60,55,50,0.5)'; for (var sm=0;sm<3;sm++){ c.beginPath(); c.arc(Math.sin(ff+sm)*4,-22*s-sm*8*s,5+sm*2,0,Math.PI*2); c.fill(); } }
+        else if (type==='banner'){ c.strokeStyle='#3b2410'; c.lineWidth=2; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-46*s); c.stroke();
+            var wv=Math.sin(saWar.t*0.004)*3; c.fillStyle=(WAR_MODES[warModeIdx].accent||'#fde047'); c.beginPath(); c.moveTo(0,-46*s); c.lineTo(22*s,-42*s+wv); c.lineTo(22*s,-30*s+wv); c.lineTo(0,-32*s); c.closePath(); c.fill(); }
+        /* ── empire-specific monuments ── */
+        else if (type==='duneRidge'){ c.fillStyle='rgba(206,176,116,0.5)';
+            for (var d=-6; d<=6; d++){ c.beginPath(); c.ellipse(d*W*0.085, -8-((d&1)?7:0), W*0.075, 30, 0, Math.PI, 0); c.fill(); } }
+        else if (type==='pylon'){ var ph2=GROUND*0.24*s, gap=14*s;     /* Egyptian temple pylon */
+            c.fillStyle='#c8a35a'; for (var sgn=-1; sgn<=1; sgn+=2){ c.beginPath(); c.moveTo(sgn*gap,0); c.lineTo(sgn*gap,-ph2); c.lineTo(sgn*(gap+34*s),-ph2+6*s); c.lineTo(sgn*(gap+40*s),0); c.closePath(); c.fill(); }
+            c.fillStyle='rgba(0,0,0,0.18)'; c.fillRect(-gap,-ph2*0.7,gap*2,ph2*0.7);
+            c.strokeStyle='#8a6a30'; c.lineWidth=1; for (var hl=1;hl<4;hl++){ c.beginPath(); c.moveTo(gap,-ph2*hl/4); c.lineTo(gap+34*s,-ph2*hl/4); c.stroke(); }
+            c.fillStyle='#9a7a3a'; c.fillRect(-gap-2*s,-ph2,4*s,ph2); }  /* central flagpole groove */
+        else if (type==='sphinx'){ var sb=44*s; c.fillStyle='#c2a061';   /* Great Sphinx */
+            c.beginPath(); c.ellipse(0,-9*s,sb,9*s,0,0,Math.PI*2); c.fill();             /* body */
+            c.beginPath(); c.moveTo(-sb,-2*s); c.lineTo(-sb-14*s,-2*s); c.lineTo(-sb-14*s,-10*s); c.lineTo(-sb,-12*s); c.closePath(); c.fill(); /* forepaws */
+            c.beginPath(); c.arc(sb*0.7,-26*s,11*s,0,Math.PI*2); c.fill();                /* head */
+            c.fillStyle='#b08a44'; c.beginPath(); c.moveTo(sb*0.7-12*s,-26*s); c.lineTo(sb*0.7-13*s,-12*s); c.lineTo(sb*0.7+12*s,-12*s); c.lineTo(sb*0.7+12*s,-26*s); c.closePath(); c.fill(); /* nemes headdress */
+            c.fillStyle='rgba(0,0,0,0.25)'; c.fillRect(sb*0.7+4*s,-30*s,3*s,8*s); }
+        else if (type==='ishtarGate'){ var gh=GROUND*0.24*s, gw=70*s;     /* blue glazed gate */
+            c.fillStyle='#2f5fa8'; c.fillRect(-gw/2,-gh,gw,gh);
+            c.fillStyle=(saWar.env&&'#274a86'); c.beginPath(); c.arc(0,-gh*0.5,gw*0.22,Math.PI,0); c.fillRect(-gw*0.22,-gh*0.5,gw*0.44,gh*0.5); c.fill();
+            c.fillStyle='#1f3a6a'; c.fillRect(-gw*0.18,-gh*0.5,gw*0.36,gh*0.5);          /* dark arch opening */
+            c.fillStyle='#3f6fc0'; for (var cr=0;cr<Math.floor(gw/14);cr++) c.fillRect(-gw/2+cr*14,-gh-8*s,8*s,8*s);
+            c.fillStyle='#d4b24a'; for (var rb=0;rb<3;rb++){ c.fillRect(-gw/2,-gh+rb*gh/3,gw,2*s); }   /* gold bands */ }
+        else if (type==='lamassu'){ var lb=30*s; c.fillStyle='#b9a47a';   /* winged bull guardian */
+            c.fillRect(-lb,-22*s,lb*2,22*s);                                              /* body */
+            c.beginPath(); c.moveTo(-lb,-22*s); c.lineTo(-lb-10*s,-2*s); c.lineTo(-lb-2*s,-2*s); c.lineTo(-lb+8*s,-22*s); c.fill(); /* legs */
+            c.beginPath(); c.arc(lb-2*s,-30*s,8*s,0,Math.PI*2); c.fill();                 /* head */
+            c.fillStyle='#9a8458'; c.beginPath(); c.moveTo(-lb,-22*s); c.quadraticCurveTo(-lb*0.2,-40*s,lb*0.6,-26*s); c.lineTo(0,-22*s); c.closePath(); c.fill(); /* wing */
+            c.fillStyle='#6a5838'; for (var bd=0;bd<4;bd++) c.fillRect(lb-8*s,-34*s+bd*2*s,8*s,1.2*s); /* beard curls */ }
+        else if (type==='persepolis'){ var ch3=GROUND*0.26*s;             /* Persian columns */
+            for (var pc=0; pc<5; pc++){ var cx2=(pc-2)*22*s; c.fillStyle='#d8cdaa'; c.fillRect(cx2-4*s,-ch3,8*s,ch3);
+                c.strokeStyle='rgba(0,0,0,0.16)'; c.lineWidth=0.8; for (var ff=0;ff<3;ff++){ c.beginPath(); c.moveTo(cx2-3*s+ff*3*s,-ch3+6*s); c.lineTo(cx2-3*s+ff*3*s,-4*s); c.stroke(); }
+                c.fillStyle='#a98a55'; c.fillRect(cx2-6*s,-ch3-6*s,12*s,6*s);             /* double-bull capital */
+                c.fillStyle='#8a6a3a'; c.fillRect(cx2-7*s,-ch3-9*s,3*s,4*s); c.fillRect(cx2+4*s,-ch3-9*s,3*s,4*s); } }
+        else if (type==='desertFort'){ var fw2=120*s, fh2=GROUND*0.2*s;   /* crusader/saracen fort */
+            c.fillStyle='#cbb483'; c.fillRect(-fw2/2,-fh2,fw2,fh2);
+            c.fillStyle='#bba072'; for (var cn2=0;cn2<Math.floor(fw2/16);cn2++) c.fillRect(-fw2/2+cn2*16,-fh2-7*s,9*s,7*s);
+            c.fillStyle='#c0a878'; c.fillRect(-fw2/2-8*s,-fh2*1.3,18*s,fh2*1.3); c.fillRect(fw2/2-10*s,-fh2*1.3,18*s,fh2*1.3); /* corner towers */
+            c.fillStyle='rgba(0,0,0,0.22)'; c.beginPath(); c.arc(0,-fh2*0.5,10*s,Math.PI,0); c.fillRect(-10*s,-fh2*0.5,20*s,fh2*0.5); c.fill(); }
+        else if (type==='minaret'){ var mh2=GROUND*0.3*s;                 /* minaret */
+            c.fillStyle='#e0d5b6'; c.fillRect(-6*s,-mh2,12*s,mh2);
+            c.fillStyle='#cdbf98'; c.fillRect(-9*s,-mh2*0.62,18*s,4*s);                   /* balcony */
+            c.fillStyle='#c0d0c8'; c.beginPath(); c.arc(0,-mh2,8*s,Math.PI,0); c.fill(); c.beginPath(); c.moveTo(0,-mh2-8*s); c.lineTo(-3*s,-mh2-2*s); c.lineTo(3*s,-mh2-2*s); c.fill();
+            c.strokeStyle='#caa84a'; c.lineWidth=1.4; c.beginPath(); c.arc(0,-mh2-14*s,4*s,Math.PI*0.4,Math.PI*1.7); c.stroke(); }   /* crescent */
+        else if (type==='dome'){ var dr=24*s; c.fillStyle='#cdbf98'; c.fillRect(-dr,-dr,dr*2,dr);
+            c.fillStyle='#7fa8b8'; c.beginPath(); c.arc(0,-dr,dr,Math.PI,0); c.fill();
+            c.strokeStyle='#caa84a'; c.lineWidth=1.2; c.beginPath(); c.arc(0,-dr*2-5*s,3.5*s,Math.PI*0.4,Math.PI*1.7); c.stroke(); }
+        else if (type==='oasis'){ c.fillStyle='#3f7fae'; c.beginPath(); c.ellipse(0,0,30*s,8*s,0,0,Math.PI*2); c.fill();
+            c.fillStyle='rgba(255,255,255,0.2)'; c.beginPath(); c.ellipse(-6*s,-1*s,12*s,2.5*s,0,0,Math.PI*2); c.fill();
+            c.strokeStyle='#4a6a2a'; c.lineWidth=2; for (var rd=0;rd<5;rd++){ c.beginPath(); c.moveTo(-20*s+rd*10*s,-2*s); c.lineTo(-22*s+rd*10*s,-12*s); c.stroke(); } }
+        else if (type==='trojanHorse'){ var th3=58*s;                     /* the Trojan Horse */
+            c.fillStyle='#7a5a32'; c.fillRect(-th3*0.55,-8*s,th3*1.1,8*s);                /* wheeled platform */
+            c.fillStyle='#3a2a18'; c.beginPath(); c.arc(-th3*0.4,0,6*s,0,Math.PI*2); c.arc(th3*0.4,0,6*s,0,Math.PI*2); c.fill(); /* wheels */
+            c.fillStyle='#8a6a3e'; c.beginPath(); c.ellipse(0,-30*s,th3*0.5,18*s,0,0,Math.PI*2); c.fill();   /* body */
+            c.fillStyle='#7a5a30'; for (var pl=0;pl<4;pl++){ c.fillRect(-th3*0.4+pl*th3*0.26,-16*s,5*s,12*s); }/* legs */
+            c.fillStyle='#9a7a4a'; c.beginPath(); c.moveTo(th3*0.35,-40*s); c.lineTo(th3*0.62,-58*s); c.lineTo(th3*0.72,-50*s); c.lineTo(th3*0.5,-34*s); c.closePath(); c.fill(); /* neck+head */
+            c.fillStyle='#5a3a1e'; c.beginPath(); c.moveTo(th3*0.6,-58*s); c.lineTo(th3*0.58,-64*s); c.lineTo(th3*0.66,-58*s); c.fill(); /* ear */
+            c.strokeStyle='#3a2a16'; c.lineWidth=1; for (var pk=0;pk<6;pk++){ c.beginPath(); c.moveTo(-th3*0.3+pk*9*s,-44*s); c.lineTo(-th3*0.3+pk*9*s,-18*s); c.stroke(); } }/* planks */
+        else if (type==='romanArch'){ var aw=70*s, ah=GROUND*0.24*s;      /* triumphal arch */
+            c.fillStyle='#d8cdb2'; c.fillRect(-aw/2,-ah,aw,ah);
+            c.fillStyle='#b8a886'; c.beginPath(); c.arc(0,-ah*0.45,aw*0.24,Math.PI,0); c.fillRect(-aw*0.24,-ah*0.45,aw*0.48,ah*0.45); c.fill();
+            c.fillStyle='#cfc3a4'; c.fillRect(-aw/2-4*s,-ah,aw+8*s,10*s);                 /* entablature */
+            c.fillStyle='#bfb392'; c.fillRect(-aw*0.4,-ah-16*s,aw*0.8,16*s);              /* attic */
+            c.fillStyle='#8a6a3a'; c.fillRect(-aw*0.18,-ah-30*s,aw*0.36,14*s);            /* quadriga base */ }
+        else if (type==='shrine'){ var sw2=34*s, sh2=GROUND*0.12*s; c.fillStyle='#d8cfb4'; c.fillRect(-sw2/2,-sh2,sw2,4*s);
+            c.beginPath(); c.moveTo(-sw2/2-3*s,-sh2); c.lineTo(0,-sh2-12*s); c.lineTo(sw2/2+3*s,-sh2); c.closePath(); c.fill();
+            for (var sc2=0;sc2<4;sc2++) c.fillRect(-sw2/2+4*s+sc2*((sw2-8*s)/3),-sh2+4*s,4*s,sh2-4*s);
+            c.fillStyle='#b0a070'; c.fillRect(-3*s,-sh2-2*s,6*s,sh2*0.6); }                 /* small idol */
+        else if (type==='staveChurch'){ var kh=GROUND*0.26*s;            /* Norwegian stave church */
+            c.fillStyle='#2a1c10'; for (var tr3=0;tr3<3;tr3++){ var twd=44*s-tr3*12*s, tyt=-tr3*16*s-18*s;
+                c.beginPath(); c.moveTo(-twd/2,tyt); c.lineTo(0,tyt-22*s); c.lineTo(twd/2,tyt); c.closePath(); c.fill(); }
+            c.fillStyle='#3a2818'; c.fillRect(-22*s,-18*s,44*s,18*s);
+            c.strokeStyle='#1a1009'; c.lineWidth=2; c.beginPath(); c.moveTo(0,-kh-2*s); c.lineTo(0,-kh-12*s); c.stroke();
+            c.fillStyle='#1a1009'; c.beginPath(); c.moveTo(-4*s,-kh-2*s); c.lineTo(-9*s,-kh-8*s); c.moveTo(4*s,-kh-2*s); c.lineTo(9*s,-kh-8*s); c.stroke(); } /* dragon finials */
+        else if (type==='ovoo'){ c.fillStyle='#8a8276';                  /* sacred stone cairn */
+            for (var oc=0;oc<9;oc++){ var oy=-oc*4.5*s, ow=(20-oc*2)*s; c.beginPath(); c.arc((oc%2?3:-3)*s,oy,Math.max(3,ow*0.3),0,Math.PI*2); c.fill(); }
+            c.strokeStyle='#6a5a3a'; c.lineWidth=1.4; c.beginPath(); c.moveTo(0,-40*s); c.lineTo(0,-58*s); c.stroke();
+            c.fillStyle='#7fa0c0'; var wv2=Math.sin(saWar.t*0.005)*2; c.fillRect(0,-58*s,16*s+wv2,4*s); c.fillStyle='#d8b048'; c.fillRect(0,-52*s,14*s+wv2,3*s); } /* prayer flags */
+        else if (type==='tugBanner'){ c.strokeStyle='#3b2410'; c.lineWidth=2.4; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-50*s); c.stroke();
+            c.fillStyle='#caa84a'; c.beginPath(); c.arc(0,-50*s,4*s,0,Math.PI*2); c.fill();
+            c.strokeStyle='#e8e0d0'; c.lineWidth=1; for (var tt2=0;tt2<10;tt2++){ var a3=Math.PI*0.5+(tt2-4.5)*0.12; c.beginPath(); c.moveTo(0,-46*s); c.lineTo(Math.cos(a3)*14*s,-46*s+Math.sin(a3)*16*s); c.stroke(); } } /* horse-tail */
+        else if (type==='colonialChurch'){ var cch=GROUND*0.18*s, ccw=56*s; c.fillStyle='#eae4d6'; c.fillRect(-ccw/2,-cch,ccw,cch);
+            c.fillStyle='#7a2a1a'; c.beginPath(); c.moveTo(-ccw/2-4*s,-cch); c.lineTo(0,-cch-16*s); c.lineTo(ccw/2+4*s,-cch); c.closePath(); c.fill();
+            c.fillStyle='#eae4d6'; c.fillRect(-8*s,-cch-30*s,16*s,30*s);                  /* steeple base */
+            c.fillStyle='#cfc8b8'; c.beginPath(); c.moveTo(-8*s,-cch-30*s); c.lineTo(0,-cch-52*s); c.lineTo(8*s,-cch-30*s); c.closePath(); c.fill();
+            c.strokeStyle='#3a2a18'; c.lineWidth=1.6; c.beginPath(); c.moveTo(0,-cch-52*s); c.lineTo(0,-cch-60*s); c.moveTo(-3*s,-cch-57*s); c.lineTo(3*s,-cch-57*s); c.stroke(); /* cross */
+            c.fillStyle='#3a2a18'; c.fillRect(-5*s,-cch*0.6,10*s,cch*0.6); }
+        else if (type==='coveredBridge'){ c.fillStyle='#8a2a1a'; c.fillRect(-40*s,-22*s,80*s,16*s);
+            c.fillStyle='#5a1a10'; c.beginPath(); c.moveTo(-44*s,-22*s); c.lineTo(0,-32*s); c.lineTo(44*s,-22*s); c.closePath(); c.fill();
+            c.fillStyle='#2a1a10'; c.fillRect(-34*s,-18*s,12*s,12*s); c.fillRect(22*s,-18*s,12*s,12*s);
+            c.strokeStyle='#5a3a1e'; c.lineWidth=2; c.beginPath(); c.moveTo(-40*s,-6*s); c.lineTo(40*s,-6*s); c.stroke(); }
+        else if (type==='libertyPole'){ c.strokeStyle='#5a3a1e'; c.lineWidth=3; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-58*s); c.stroke();
+            c.fillStyle='#b91c1c'; c.beginPath(); c.moveTo(0,-58*s); c.lineTo(-6*s,-64*s); c.lineTo(-2*s,-64*s); c.lineTo(-2*s,-70*s); c.lineTo(2*s,-70*s); c.lineTo(2*s,-64*s); c.lineTo(6*s,-64*s); c.closePath(); c.fill(); /* liberty cap */
+            var lw=Math.sin(saWar.t*0.004)*3; c.fillStyle='#1d4ed8'; c.fillRect(0,-54*s,20*s+lw,12*s); c.fillStyle='#fff'; c.fillRect(0,-54*s,8*s,6*s); }
+        else if (type==='cathedralRuin'){ var crh=GROUND*0.3*s, crw=80*s; c.fillStyle='#6a655a'; c.fillRect(-crw/2,-crh*0.7,crw*0.62,crh*0.7);
+            c.fillStyle='#5a564c'; c.fillRect(-crw/2,-crh,crw*0.2,crh);                    /* surviving tower */
+            c.fillStyle='#3a3630'; c.beginPath(); c.moveTo(-crw/2,-crh); c.lineTo(-crw*0.4,-crh-10*s); c.lineTo(-crw*0.3,-crh+4*s); c.fill(); /* broken top */
+            c.fillStyle='rgba(0,0,0,0.34)'; for (var gw2=-crw*0.4; gw2<crw*0.05; gw2+=16*s){ c.beginPath(); c.moveTo(gw2,-crh*0.55); c.quadraticCurveTo(gw2+5*s,-crh*0.72,gw2+10*s,-crh*0.55); c.lineTo(gw2+10*s,-8*s); c.lineTo(gw2,-8*s); c.closePath(); c.fill(); } /* gothic windows */
+            c.fillStyle='rgba(0,0,0,0.3)'; c.beginPath(); c.arc(-crw*0.2,-crh*0.4,9*s,0,Math.PI*2); c.fill(); } /* rose window */
+        else if (type==='balloon'){ var bh=GROUND*0.34*s; c.strokeStyle='#3a3630'; c.lineWidth=1; c.beginPath(); c.moveTo(0,0); c.lineTo(-5*s,-bh); c.moveTo(0,0); c.lineTo(5*s,-bh); c.stroke();
+            c.fillStyle='#9a8a5a'; c.beginPath(); c.ellipse(0,-bh-12*s,16*s,22*s,0,0,Math.PI*2); c.fill();
+            c.fillStyle='#7a6a3a'; c.beginPath(); c.ellipse(14*s,-bh-12*s,5*s,9*s,0,0,Math.PI*2); c.fill();   /* tail fin */
+            c.fillStyle='#3a3026'; c.fillRect(-4*s,-bh+2*s,8*s,5*s); }                     /* gondola */
+        else if (type==='roadSign'){ c.strokeStyle='#3a3630'; c.lineWidth=2.4; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-30*s); c.stroke();
+            c.fillStyle='#d8d2c4'; c.fillRect(-14*s,-30*s,28*s,7*s); c.fillRect(-10*s,-22*s,24*s,6*s);
+            c.fillStyle='#2a2a2a'; c.fillRect(-11*s,-28*s,18*s,1.4*s); c.fillRect(-7*s,-20*s,15*s,1.2*s); }
+        else if (type==='lamppost'){ c.strokeStyle='#2a2a2e'; c.lineWidth=3; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-44*s); c.quadraticCurveTo(0,-50*s,8*s,-50*s); c.stroke();
+            c.fillStyle='#3a3630'; c.beginPath(); c.ellipse(10*s,-49*s,4*s,3*s,0,0,Math.PI*2); c.fill(); }
+        else if (type==='skyscraper'){ var skh=GROUND*(0.55+(st&&st.t||0.5)*0.4)*s, skw=54*s; c.fillStyle='#5a6470'; c.fillRect(-skw/2,-skh,skw,skh);
+            c.fillStyle='#48515c'; c.fillRect(-skw/2,-skh,skw*0.4,skh);
+            c.fillStyle='rgba(150,200,235,0.5)'; for (var wy3=-skh+10*s; wy3<-8*s; wy3+=12*s){ for (var wx3=-skw/2+6*s; wx3<skw/2-8*s; wx3+=11*s){ if (((wx3+wy3)|0)%3) c.fillRect(wx3,wy3,7*s,8*s); } }
+            c.strokeStyle='#2a2e34'; c.lineWidth=2; c.beginPath(); c.moveTo(0,-skh); c.lineTo(0,-skh-16*s); c.stroke(); c.fillStyle='#dc2626'; c.beginPath(); c.arc(0,-skh-16*s,2*s,0,Math.PI*2); c.fill(); }
+        else if (type==='commsTower'){ var cth=GROUND*0.5*s; c.strokeStyle='#3a3e44'; c.lineWidth=2;
+            c.beginPath(); c.moveTo(-14*s,0); c.lineTo(-3*s,-cth); c.moveTo(14*s,0); c.lineTo(3*s,-cth); c.stroke();
+            for (var lt=0;lt<7;lt++){ var ly2=-lt*cth/7, lw2=14*s*(1-lt/8); c.beginPath(); c.moveTo(-lw2,ly2); c.lineTo(lw2,ly2-cth/14); c.moveTo(lw2,ly2); c.lineTo(-lw2,ly2-cth/14); c.stroke(); }
+            c.strokeStyle='#888'; c.lineWidth=1; c.beginPath(); c.arc(0,-cth,8*s,Math.PI*1.1,Math.PI*1.9); c.stroke(); c.fillStyle='#dc2626'; c.beginPath(); c.arc(0,-cth-2*s,2*s,0,Math.PI*2); c.fill(); }
+        else if (type==='billboard'){ c.strokeStyle='#3a3630'; c.lineWidth=3; c.beginPath(); c.moveTo(-12*s,0); c.lineTo(-12*s,-28*s); c.moveTo(12*s,0); c.lineTo(12*s,-28*s); c.stroke();
+            c.fillStyle='#e8e2d0'; c.fillRect(-22*s,-46*s,44*s,20*s); c.fillStyle=(st&&st.col)||'#3b82f6'; c.fillRect(-20*s,-44*s,18*s,16*s); c.fillStyle='#dc2626'; c.fillRect(2*s,-44*s,18*s,6*s); }
+        /* ── SIEGE ENGINES & MILITARY INNOVATIONS of the age ── */
+        else if (type==='ballista'){ c.fillStyle='#5a3a1e'; c.fillRect(-14*s,-6*s,28*s,5*s); c.beginPath(); c.arc(-8*s,0,5*s,0,Math.PI*2); c.arc(8*s,0,5*s,0,Math.PI*2); c.fill();
+            c.fillStyle='#3b2410'; c.fillRect(-2*s,-22*s,4*s,18*s); c.strokeStyle='#2a1c10'; c.lineWidth=2.4; c.beginPath(); c.moveTo(-14*s,-16*s); c.lineTo(14*s,-16*s); c.stroke();
+            c.strokeStyle='#7a6248'; c.lineWidth=1; c.beginPath(); c.moveTo(-14*s,-16*s); c.lineTo(0,-10*s); c.lineTo(14*s,-16*s); c.stroke(); /* bow + string */
+            c.fillStyle='#9aa0aa'; c.beginPath(); c.moveTo(0,-12*s); c.lineTo(18*s,-13*s); c.lineTo(0,-9*s); c.fill(); }   /* loaded bolt */
+        else if (type==='catapult'){ c.fillStyle='#5a3a1e'; c.fillRect(-16*s,-7*s,32*s,5*s); c.fillStyle='#3b2410'; c.beginPath(); c.arc(-10*s,-1*s,6*s,0,Math.PI*2); c.arc(10*s,-1*s,6*s,0,Math.PI*2); c.fill();
+            var ca=-0.7; c.save(); c.translate(-6*s,-7*s); c.rotate(ca); c.strokeStyle='#4a3320'; c.lineWidth=3.4; c.beginPath(); c.moveTo(0,0); c.lineTo(26*s,0); c.stroke();
+            c.fillStyle='#6b5236'; c.beginPath(); c.arc(26*s,0,4*s,0,Math.PI*2); c.fill(); c.restore();
+            c.fillStyle='#3b2410'; c.beginPath(); c.moveTo(-12*s,-7*s); c.lineTo(0,-22*s); c.lineTo(8*s,-7*s); c.fill(); }   /* A-frame */
+        else if (type==='ram'){ c.fillStyle='#5a3a1e'; c.fillRect(-22*s,-20*s,44*s,4*s); c.beginPath(); c.moveTo(-22*s,-16*s); c.lineTo(0,-30*s); c.lineTo(22*s,-16*s); c.closePath(); c.fill(); /* roof */
+            c.fillStyle='#3b2410'; for (var rw=0;rw<2;rw++){ c.beginPath(); c.arc(-12*s+rw*24*s,-2*s,6*s,0,Math.PI*2); c.fill(); }
+            c.strokeStyle='#2a1c10'; c.lineWidth=4; c.beginPath(); c.moveTo(-18*s,-9*s); c.lineTo(20*s,-9*s); c.stroke(); c.fillStyle='#1a1a1c'; c.beginPath(); c.arc(22*s,-9*s,4*s,0,Math.PI*2); c.fill(); /* iron ram head */ }
+        else if (type==='trebuchet'){ var th4=GROUND*0.18*s; c.fillStyle='#4a3320'; c.fillRect(-16*s,-th4*0.5,5*s,th4*0.5); c.fillRect(11*s,-th4*0.5,5*s,th4*0.5);
+            c.fillStyle='#3b2410'; c.beginPath(); c.moveTo(-16*s,0); c.lineTo(0,-th4); c.lineTo(16*s,0); c.closePath(); c.fill();
+            c.save(); c.translate(0,-th4); c.rotate(-0.6); c.strokeStyle='#5a3a1e'; c.lineWidth=3.4; c.beginPath(); c.moveTo(-22*s,0); c.lineTo(20*s,0); c.stroke();
+            c.fillStyle='#2a2a2e'; c.fillRect(-26*s,-4*s,8*s,10*s); c.restore(); /* counterweight */ }
+        else if (type==='siegeTower'){ var sth=GROUND*0.26*s, stw=34*s; c.fillStyle='#5a3a1e'; c.fillRect(-stw/2,-sth,stw,sth);
+            c.strokeStyle='#3b2410'; c.lineWidth=1.4; for (var b=0;b<5;b++){ c.beginPath(); c.moveTo(-stw/2,-sth+b*sth/5); c.lineTo(stw/2,-sth+b*sth/5); c.stroke(); }
+            c.fillStyle='#6b4a26'; for (var cb=0;cb<4;cb++) c.fillRect(-stw/2+cb*9*s,-sth-6*s,6*s,6*s); /* battlement */
+            c.fillStyle='#2a1c10'; c.fillRect(stw/2-3*s,-sth*0.5,7*s,sth*0.5); /* drawbridge */
+            c.fillStyle='#3b2410'; c.beginPath(); c.arc(-stw*0.3,0,5*s,0,Math.PI*2); c.arc(stw*0.3,0,5*s,0,Math.PI*2); c.fill(); }
+        else if (type==='aaGun'){ c.fillStyle='#3f4a2a'; c.fillRect(-12*s,-4*s,24*s,4*s); c.beginPath(); c.moveTo(-12*s,0); c.lineTo(-18*s,6*s); c.moveTo(12*s,0); c.lineTo(18*s,6*s); c.strokeStyle='#2e371f'; c.lineWidth=2.4; c.stroke();
+            c.save(); c.translate(0,-5*s); c.rotate(-0.95); c.fillStyle='#2a2e22'; c.fillRect(-2*s,-26*s,4.5*s,26*s); c.fillStyle='#15151a'; c.fillRect(-2.4*s,-28*s,5.3*s,3*s); c.restore(); /* barrels up */
+            c.fillStyle='#4a4f44'; c.fillRect(-6*s,-9*s,12*s,6*s); }   /* gun shield */
+        c.restore();
+    }
+
+    /* ── BATTLEFIELD CLUTTER dispatcher (small period objects) ── */
+    function drawSaClutter(c, cu, gy){
+        var t=cu.type, s=cu.s, col=cu.col||'#9a3412', acc=(saWar.env&&saWar.env.acc)||'#fde68a';
+        c.save(); c.translate(cu.x, gy);
+        if (t==='tent'){ c.fillStyle=col; c.beginPath(); c.moveTo(-18*s,0); c.lineTo(0,-22*s); c.lineTo(18*s,0); c.closePath(); c.fill();
+            c.fillStyle='rgba(0,0,0,0.22)'; c.beginPath(); c.moveTo(0,-22*s); c.lineTo(18*s,0); c.lineTo(6*s,0); c.closePath(); c.fill();
+            c.fillStyle='#1a120a'; c.beginPath(); c.moveTo(-4*s,0); c.lineTo(0,-12*s); c.lineTo(4*s,0); c.closePath(); c.fill();
+            c.strokeStyle='#3b2410'; c.lineWidth=1; c.beginPath(); c.moveTo(0,-22*s); c.lineTo(0,-26*s); c.stroke(); c.fillStyle=acc; c.fillRect(0,-26*s,7*s,4*s); }
+        else if (t==='campfire'){ c.fillStyle='#3a2a18'; for (var lg=0;lg<3;lg++) c.fillRect(-7*s+lg*5*s,-2*s,3*s,4*s);
+            var fl=saWar.t*0.02+cu.t*6; c.fillStyle='rgba(255,120,30,0.9)'; c.beginPath(); c.moveTo(-5*s,-2*s); c.quadraticCurveTo(0,-14*s-Math.sin(fl)*3,5*s,-2*s); c.fill();
+            c.fillStyle='rgba(255,210,90,0.9)'; c.beginPath(); c.moveTo(-2.5*s,-2*s); c.quadraticCurveTo(0,-9*s-Math.sin(fl*1.3)*2,2.5*s,-2*s); c.fill(); }
+        else if (t==='standard'){ c.strokeStyle='#3b2410'; c.lineWidth=2.4; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-44*s); c.stroke();
+            c.fillStyle=col; var wv=Math.sin(saWar.t*0.004+cu.t)*3; c.beginPath(); c.moveTo(0,-44*s); c.lineTo(18*s,-40*s+wv); c.lineTo(14*s,-34*s+wv); c.lineTo(18*s,-28*s+wv); c.lineTo(0,-30*s); c.closePath(); c.fill();
+            c.fillStyle=acc; c.beginPath(); c.arc(0,-45*s,3*s,0,Math.PI*2); c.fill(); }
+        else if (t==='weaponRack'){ c.strokeStyle='#5a3a1e'; c.lineWidth=2; c.beginPath(); c.moveTo(-12*s,0); c.lineTo(-9*s,-12*s); c.moveTo(12*s,0); c.lineTo(9*s,-12*s); c.moveTo(-11*s,-9*s); c.lineTo(11*s,-9*s); c.stroke();
+            c.strokeStyle='#6b4423'; c.lineWidth=1.4; for (var sp=0;sp<5;sp++){ var sxp=-9*s+sp*4.5*s; c.beginPath(); c.moveTo(sxp,-9*s); c.lineTo(sxp+2*s,-30*s); c.stroke(); c.fillStyle='#cbd5e1'; c.beginPath(); c.moveTo(sxp+2*s,-32*s); c.lineTo(sxp,-28*s); c.lineTo(sxp+4*s,-28*s); c.fill(); } }
+        else if (t==='shieldPile'){ for (var sp2=0;sp2<3;sp2++){ c.fillStyle=(sp2%2?col:'#7a6a4a'); c.beginPath(); c.arc(-6*s+sp2*6*s,-4*s,7*s,0,Math.PI*2); c.fill(); c.strokeStyle='rgba(0,0,0,0.3)'; c.lineWidth=1; c.stroke(); c.fillStyle=acc; c.beginPath(); c.arc(-6*s+sp2*6*s,-4*s,2*s,0,Math.PI*2); c.fill(); } }
+        else if (t==='barrel'){ c.fillStyle='#6b4a26'; c.fillRect(-6*s,-14*s,12*s,14*s); c.fillStyle='#5a3a1e'; c.fillRect(-6*s,-12*s,12*s,2*s); c.fillRect(-6*s,-5*s,12*s,2*s);
+            c.fillStyle='rgba(255,255,255,0.12)'; c.fillRect(-5*s,-14*s,2*s,14*s); }
+        else if (t==='crate'){ c.fillStyle='#7a5a32'; c.fillRect(-8*s,-13*s,16*s,13*s); c.strokeStyle='#4a3318'; c.lineWidth=1.4; c.strokeRect(-8*s,-13*s,16*s,13*s); c.beginPath(); c.moveTo(-8*s,-13*s); c.lineTo(8*s,0); c.moveTo(8*s,-13*s); c.lineTo(-8*s,0); c.stroke(); }
+        else if (t==='cart'){ c.fillStyle='#5a3a1e'; c.fillRect(-20*s,-14*s,40*s,8*s);
+            c.fillStyle='#3b2410'; c.beginPath(); c.arc(-12*s,-2*s,7*s,0,Math.PI*2); c.arc(12*s,-2*s,7*s,0,Math.PI*2); c.fill();
+            c.strokeStyle='#6b4423'; c.lineWidth=1; for (var sk=0;sk<6;sk++){ var sa=sk/6*Math.PI*2; c.beginPath(); c.moveTo(-12*s,-2*s); c.lineTo(-12*s+Math.cos(sa)*7*s,-2*s+Math.sin(sa)*7*s); c.moveTo(12*s,-2*s); c.lineTo(12*s+Math.cos(sa)*7*s,-2*s+Math.sin(sa)*7*s); c.stroke(); }
+            c.fillStyle='#7a5a32'; c.fillRect(-18*s,-22*s,16*s,8*s); }
+        else if (t==='drum'){ c.fillStyle=col; c.fillRect(-7*s,-12*s,14*s,12*s); c.fillStyle='#e8e0d0'; c.beginPath(); c.ellipse(0,-12*s,7*s,2.4*s,0,0,Math.PI*2); c.fill(); c.strokeStyle=acc; c.lineWidth=1; c.beginPath(); c.moveTo(-7*s,-9*s); c.lineTo(7*s,-3*s); c.moveTo(7*s,-9*s); c.lineTo(-7*s,-3*s); c.stroke(); }
+        else if (t==='ladder'){ c.strokeStyle='#6b4423'; c.lineWidth=1.8; c.beginPath(); c.moveTo(-4*s,0); c.lineTo(-2*s,-30*s); c.moveTo(4*s,0); c.lineTo(2*s,-30*s); for (var rn=0;rn<5;rn++){ c.moveTo(-4*s+rn*0.4*s,-rn*6*s); c.lineTo(4*s-rn*0.4*s,-rn*6*s); } c.stroke(); }
+        else if (t==='bones'){ c.fillStyle='#e8e0cc'; c.beginPath(); c.arc(0,-2*s,4*s,0,Math.PI*2); c.fill(); c.fillRect(-2*s,-3*s,4*s,2*s); /* skull */
+            c.strokeStyle='#d8d0bc'; c.lineWidth=2; c.beginPath(); c.moveTo(-10*s,0); c.lineTo(-2*s,-1*s); c.moveTo(4*s,-1*s); c.lineTo(11*s,1*s); c.stroke();
+            c.fillStyle='#1a1208'; c.fillRect(-2*s,-3*s,1.4*s,1.4*s); c.fillRect(0.6*s,-3*s,1.4*s,1.4*s); }
+        else if (t==='brokenWeapon'){ c.strokeStyle='#6b4423'; c.lineWidth=2; c.beginPath(); c.moveTo(-9*s,1*s); c.lineTo(6*s,-6*s); c.stroke(); c.fillStyle='#9aa0aa'; c.beginPath(); c.moveTo(6*s,-6*s); c.lineTo(12*s,-10*s); c.lineTo(8*s,-4*s); c.fill(); /* snapped spear/sword */ }
+        else if (t==='urn'){ c.fillStyle='#a86a3a'; c.beginPath(); c.ellipse(0,-8*s,7*s,9*s,0,0,Math.PI*2); c.fill(); c.fillRect(-4*s,-18*s,8*s,5*s); c.strokeStyle='#7a4a24'; c.lineWidth=1; c.beginPath(); c.moveTo(-7*s,-9*s); c.lineTo(7*s,-9*s); c.stroke(); }
+        else if (t==='torch'){ c.strokeStyle='#3b2410'; c.lineWidth=2; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-22*s); c.stroke(); var fl2=saWar.t*0.03+cu.t*6; c.fillStyle='rgba(255,150,40,0.9)'; c.beginPath(); c.moveTo(-3*s,-22*s); c.quadraticCurveTo(0,-32*s-Math.sin(fl2)*3,3*s,-22*s); c.fill(); }
+        else if (t==='lantern'){ c.strokeStyle='#3b2410'; c.lineWidth=1.6; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-20*s); c.stroke(); c.fillStyle='rgba(255,210,90,0.85)'; c.fillRect(-3*s,-18*s,6*s,7*s); c.strokeStyle='#2a2a2a'; c.strokeRect(-3*s,-18*s,6*s,7*s); }
+        else if (t==='cannonballs'){ c.fillStyle='#2a2a2e'; var rows=3; for (var rrw=0;rrw<rows;rrw++){ for (var cb=0;cb<rows-rrw;cb++){ c.beginPath(); c.arc(-(rows-rrw-1)*3*s+cb*6*s,-2*s-rrw*5*s,3*s,0,Math.PI*2); c.fill(); } } }
+        else if (t==='fencePost'){ c.strokeStyle='#5a3a1e'; c.lineWidth=2.4; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-16*s); c.stroke(); c.lineWidth=1.6; c.beginPath(); c.moveTo(-12*s,-6*s); c.lineTo(12*s,-10*s); c.moveTo(-12*s,-11*s); c.lineTo(12*s,-15*s); c.stroke(); }
+        else if (t==='ammoBox'){ c.fillStyle='#3f4a2a'; c.fillRect(-9*s,-9*s,18*s,9*s); c.fillStyle='#2e371f'; c.fillRect(-9*s,-9*s,18*s,2.4*s); c.fillStyle='#caa84a'; c.fillRect(-6*s,-6*s,12*s,1.4*s); }
+        else if (t==='oilDrum'){ c.fillStyle=(cu.t<0.5?'#7a3a1a':'#3a5a3a'); c.fillRect(-6*s,-16*s,12*s,16*s); c.fillStyle='rgba(0,0,0,0.25)'; c.fillRect(-6*s,-13*s,12*s,1.6*s); c.fillRect(-6*s,-6*s,12*s,1.6*s); c.fillStyle='rgba(255,255,255,0.12)'; c.fillRect(-5*s,-16*s,2*s,16*s); }
+        else if (t==='jerrycan'){ c.fillStyle='#3f4a2a'; c.fillRect(-5*s,-12*s,10*s,12*s); c.fillStyle='#2e371f'; c.fillRect(-5*s,-12*s,3*s,12*s); c.fillRect(1*s,-12*s,3*s,12*s); c.fillStyle='#2a2a2a'; c.fillRect(-2*s,-14*s,4*s,2*s); }
+        else if (t==='sandbagNest'){ for (var sbn=0;sbn<5;sbn++){ c.fillStyle=(sbn%2?'#9a8c66':'#857a58'); c.beginPath(); c.ellipse(-12*s+sbn*6*s,-4*s,8*s,5*s,0,Math.PI,Math.PI*2); c.fill(); }
+            for (var sbn2=0;sbn2<4;sbn2++){ c.fillStyle=(sbn2%2?'#857a58':'#9a8c66'); c.beginPath(); c.ellipse(-9*s+sbn2*6*s,-12*s,8*s,5*s,0,Math.PI,Math.PI*2); c.fill(); } }
+        else if (t==='signpost'){ c.strokeStyle='#4a4a4a'; c.lineWidth=2.4; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-26*s); c.stroke(); c.fillStyle='#b8b0a0'; c.save(); c.translate(0,-24*s); c.rotate(0.12); c.fillRect(-2*s,-2*s,20*s,7*s); c.restore(); }
+        else if (t==='debris'){ c.fillStyle='#54504a'; c.beginPath(); c.moveTo(-9*s,0); c.lineTo(-3*s,-7*s); c.lineTo(5*s,-4*s); c.lineTo(10*s,-9*s); c.lineTo(11*s,0); c.closePath(); c.fill();
+            c.strokeStyle='#3a3630'; c.lineWidth=1; for (var rbr=0;rbr<3;rbr++){ c.beginPath(); c.moveTo(-7*s+rbr*6*s,0); c.lineTo(-5*s+rbr*6*s,-5*s); c.stroke(); } }
+        else if (t==='barbedCoil'){ c.strokeStyle='#3a3630'; c.lineWidth=1.2; for (var bc=0;bc<3;bc++){ c.beginPath(); c.arc(-8*s+bc*8*s,-5*s,5*s,0,Math.PI*2); c.stroke(); } }
+        else if (t==='helmetOnRifle'){ c.strokeStyle='#3a3630'; c.lineWidth=2; c.beginPath(); c.moveTo(0,0); c.lineTo(0,-22*s); c.stroke(); c.fillStyle='#3f4248'; c.beginPath(); c.arc(0,-22*s,6*s,Math.PI,0); c.fill(); c.fillRect(-6*s,-22*s,12*s,1.6*s); }
+        else if (t==='stretcher'){ c.fillStyle='#5a4a36'; c.fillRect(-16*s,-3*s,32*s,4*s); c.fillStyle='#8a7c64'; c.fillRect(-13*s,-5*s,26*s,3*s); c.fillStyle='#7a1d1d'; c.fillRect(-6*s,-6*s,12*s,2*s); }
+        c.restore();
+    }
+
+    /* WWI no-man's-land: parallel trench berms, sandbags, barbed wire, craters,
+       all riding the terrain so they hug the churned ground. */
+    function drawWarTrenchLine(c){
+        var rdH=H-GROUND;
+        for (var side=0; side<2; side++){
+            var fy=(side===0)?0.16:0.40;
+            c.fillStyle=(side===0)?'rgba(40,30,16,0.55)':'rgba(30,22,12,0.6)';
+            c.beginPath(); c.moveTo(0, GROUND+rdH*fy - saGroundRise(0));
+            for (var x=0;x<=W;x+=14) c.lineTo(x, GROUND+rdH*fy - saGroundRise(x));
+            for (var x2=W;x2>=0;x2-=14) c.lineTo(x2, GROUND+rdH*fy+9 - saGroundRise(x2));
+            c.closePath(); c.fill();
+            /* sandbags on the parapet */
+            for (var sb=0; sb<W; sb+=24){ var sy=GROUND+rdH*fy - saGroundRise(sb) - 4;
+                c.fillStyle='#8a7c54'; c.beginPath(); c.ellipse(sb,sy,8,5,0,Math.PI,Math.PI*2); c.fill();
+                c.fillStyle='#7a6c48'; c.beginPath(); c.ellipse(sb+12,sy-3,8,5,0,Math.PI,Math.PI*2); c.fill(); }
+        }
+        /* barbed wire strung across the middle */
+        var wy=GROUND+rdH*0.28;
+        c.strokeStyle='#3a3028'; c.lineWidth=1;
+        for (var bx=0;bx<W;bx+=22){ var b0=wy-saGroundRise(bx); c.beginPath(); c.moveTo(bx,b0-9); c.lineTo(bx+11,b0-2); c.lineTo(bx+22,b0-9); c.stroke();
+            c.beginPath(); c.arc(bx+11,b0-6,2.2,0,Math.PI*2); c.stroke(); }
+    }
+    /* Modern urban front line: Jersey barriers, sandbag nests, razor-wire coils */
+    function drawWarUrbanLine(c){
+        var rdH=H-GROUND, yl=GROUND+rdH*0.16;
+        for (var jb=0; jb<W; jb+=120){ var y=yl-saGroundRise(jb+30);
+            c.fillStyle='#9a958c'; c.beginPath(); c.moveTo(jb,y); c.lineTo(jb+8,y-16); c.lineTo(jb+34,y-16); c.lineTo(jb+42,y); c.closePath(); c.fill();
+            c.fillStyle='rgba(0,0,0,0.18)'; c.fillRect(jb+8,y-10,26,3); }
+        for (var sb=0; sb<W; sb+=26){ var sy=yl-saGroundRise(sb)+2;
+            c.fillStyle='#9a8c66'; c.beginPath(); c.ellipse(sb,sy,9,5,0,Math.PI,Math.PI*2); c.fill();
+            c.fillStyle='#857a58'; c.beginPath(); c.ellipse(sb+13,sy-4,9,5,0,Math.PI,Math.PI*2); c.fill(); }
+        c.strokeStyle='#3a3630'; c.lineWidth=1;
+        for (var rw=0; rw<W; rw+=30){ var ry=yl-saGroundRise(rw)-9; c.beginPath(); c.arc(rw+15,ry,5,0,Math.PI*2); c.stroke(); }
+    }
+
+    function drawStoneAgeWar(c){
+        if (!saWar.inited) initStoneAgeWar();
+        if (SA_SCENE_KIT==='paleo'){
+            drawSaEnvironment(c);
+            drawSaSkyTerritory(c);        /* war-map ribbon high in the sky */
+            drawSaArchitecture(c, saWar.scene);
+        } else {
+            drawWarSceneGeneric(c);
+            drawSaSkyTerritory(c);
+        }
+        var all = saWar.A.concat(saWar.B);
+        /* draw the DOWNED first (they lie on the ground), then standing
+           warriors back-to-front so the living overlap the fallen. */
+        all.sort(function(p,q){
+            if ((p.phase==='down')!==(q.phase==='down')) return p.phase==='down'?-1:1;
+            return p.y - q.y;
+        });
+        var userTribe = saUserTribe();
+        for (var i=0;i<all.length;i++){
+            var w=all[i], rise=saGroundRise(w.x);   /* sit the soldier on the hill */
+            if (rise){ c.save(); c.translate(0,-rise); }
+            drawSaWarrior(c, w);
+            /* BANNER-BEARER carries the faction standard aloft */
+            if (w.bearer && w.phase!=='down'){
+                var bx0=w.x - w.face*3, bgY=w.y-30*w.scale;
+                c.strokeStyle='#4a3320'; c.lineWidth=2.4; c.lineCap='round';
+                c.beginPath(); c.moveTo(bx0, w.y-2*w.scale); c.lineTo(bx0, bgY-44); c.stroke();
+                c.fillStyle='#facc15'; c.beginPath(); c.arc(bx0,bgY-44,3,0,Math.PI*2); c.fill();
+                drawSaFactionBanner(c, w.tribe, bx0+1, bgY-44, 26, w.face<0);
+            }
+            /* GREEN marker over YOUR warriors so you can tell them apart */
+            if (w.tribe===userTribe && w.phase!=='down'){
+                var my=w.y - 54*w.scale;
+                c.fillStyle='#22c55e';
+                c.beginPath(); c.arc(w.x, my, 2.6, 0, Math.PI*2); c.fill();
+                c.fillStyle='rgba(34,197,94,0.35)';
+                c.beginPath(); c.arc(w.x, my, 4.6, 0, Math.PI*2); c.fill();
+                c.fillStyle='#bbf7d0';
+                c.beginPath(); c.arc(w.x-0.7, my-0.7, 0.9, 0, Math.PI*2); c.fill();
+            }
+            if (rise) c.restore();
+        }
+        drawSaProjectiles(c);
+        drawSaFx(c);
+        drawSaPlanes(c);                  /* aircraft over the modern battlefield */
+        drawSaFlag(c);                    /* victor's standard in the defeated land */
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       STRATEGY SETUP PANEL — DOM overlay (army builder)
+       Pick side → army size N → allocate soldier types → formation →
+       Give Battle. The enemy auto-composes a counter-army. Result is
+       shown back in this same panel (Victory / Defeat).
+       ═══════════════════════════════════════════════════════════════ */
+    function saEnsurePanel(){
+        if (saWar.panel && document.body && document.body.contains(saWar.panel)) return saWar.panel;
+        if (typeof document==='undefined' || !document.body) return null;
+        if (!document.getElementById('sa-strat-css')){
+            var st=document.createElement('style'); st.id='sa-strat-css';
+            st.textContent = [
+                /* ── GENERIC LIQUID-GLASS popup (frosted, modern, not war-themed) ── */
+                '.sa-strat{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1180px,96vw);max-height:88vh;overflow-y:auto;z-index:99999;',
+                  'background:linear-gradient(135deg,rgba(46,50,72,0.55),rgba(22,24,38,0.6));',
+                  '-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);',
+                  'border:1px solid rgba(255,255,255,0.18);border-radius:24px;',
+                  'box-shadow:0 30px 80px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.28);',
+                  'color:#eef2ff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;padding:18px;}',
+                '.sa-strat::-webkit-scrollbar{width:8px;}.sa-strat::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.22);border-radius:8px;}',
+                '.sa-strat h2{margin:0;font-weight:700;font-size:21px;letter-spacing:.3px;text-align:center;color:#fff;text-shadow:0 2px 18px rgba(120,160,255,0.45);}',
+                '.sa-sub{text-align:center;color:rgba(238,242,255,0.58);font-size:12px;margin:4px 0 14px;}',
+                '.sa-lab{font-size:11px;font-weight:700;color:rgba(190,205,255,0.85);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:7px;}',
+                /* row 1 — clan cards */
+                '.sa-clans{display:flex;gap:12px;margin-bottom:12px;}',
+                '.sa-side{flex:1;cursor:pointer;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);border-radius:16px;padding:12px 14px;transition:all .18s;}',
+                '.sa-side:hover{background:rgba(255,255,255,0.11);}',
+                '.sa-side.sel{border-color:rgba(140,175,255,0.9);background:rgba(120,150,255,0.2);box-shadow:0 0 0 1px rgba(140,175,255,0.55),0 10px 28px rgba(90,120,255,0.28);}',
+                '.sa-side .cl-name{font-size:16px;font-weight:800;color:#fff;}',
+                '.sa-side .cl-tag{font-size:11px;color:rgba(228,232,255,0.62);margin-top:2px;}',
+                /* row 2 — army + formation */
+                '.sa-ctrl{display:flex;gap:14px;align-items:stretch;margin-bottom:14px;}',
+                '.sa-army{flex:0 0 130px;}',
+                '.sa-fixed{display:flex;align-items:center;justify-content:center;gap:9px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:16px;padding:8px 12px;height:48px;}',
+                '.sa-fixed b{font-size:30px;font-weight:800;color:#fff;line-height:1;text-shadow:0 2px 14px rgba(120,160,255,0.4);}',
+                '.sa-fixed span{font-size:10px;color:rgba(238,242,255,0.62);text-align:left;line-height:1.25;}',
+                '.sa-formcol{flex:1 1 auto;min-width:0;}',
+                '.sa-forms{display:flex;flex-wrap:wrap;gap:7px;}',
+                '.sa-form{display:inline-flex;align-items:center;gap:7px;cursor:pointer;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.06);border-radius:12px;padding:9px 14px;font-weight:600;font-size:12px;color:#eef;white-space:nowrap;line-height:1;transition:all .15s;}',
+                '.sa-form i{font-size:12px;opacity:.85;}',
+                '.sa-form:hover{background:rgba(255,255,255,0.13);}',
+                '.sa-form.sel{border-color:rgba(140,175,255,0.9);background:rgba(120,150,255,0.22);color:#fff;box-shadow:0 8px 20px rgba(90,120,255,0.3);}',
+                '.sa-fdesc{font-size:11px;color:rgba(220,228,255,0.62);margin-top:7px;line-height:1.35;}',
+                /* row 3 — body: muster on top, deployment row below */
+                '.sa-body{display:flex;flex-direction:column;gap:14px;margin-bottom:6px;}',
+                '.sa-cM{width:100%;}',
+                '.sa-deprow{display:flex;gap:16px;align-items:flex-start;}',
+                '.dep-left{flex:0 0 300px;}.dep-right{flex:1 1 auto;min-width:0;}',
+                '.sa-tot{font-weight:700;color:#fff;background:rgba(255,255,255,0.1);border-radius:8px;padding:1px 8px;margin-left:4px;letter-spacing:0;}',
+                '.sa-hint{font-weight:400;font-size:9.5px;color:rgba(200,210,255,0.45);text-transform:none;letter-spacing:0;margin-left:8px;}',
+                /* HEXAGON unit cards — STRETCH edge-to-edge across the popup */
+                '.sa-units{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px;}',
+                '.hx{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 8px 9px;border-radius:15px;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.1);transition:transform .15s,background .15s,border-color .15s;}',
+                '.hx:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px);}',
+                '.hx.on{background:rgba(120,150,255,0.14);border-color:rgba(140,175,255,0.45);box-shadow:0 6px 18px rgba(90,120,255,0.2);}',
+                '.hx-num{position:absolute;top:6px;right:8px;min-width:20px;height:20px;border-radius:11px;background:#fff;color:#16182a;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px;z-index:3;box-shadow:0 2px 6px rgba(0,0,0,0.45);}',
+                '.hx.on .hx-num{background:linear-gradient(135deg,#8fb0ff,#b69bff);color:#11132a;}',
+                /* medallion — small hexagon, lots of cards still fit across */
+                '.hx-medal{width:40px;height:46px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;',
+                  'background:linear-gradient(155deg,var(--uc,#8890b8),rgba(0,0,0,0.42));',
+                  'clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);',
+                  'box-shadow:0 4px 12px rgba(0,0,0,0.42);transition:transform .18s cubic-bezier(.34,1.4,.64,1),filter .18s;}',
+                '.hx-medal i{filter:drop-shadow(0 1px 2px rgba(0,0,0,0.55));line-height:1;}',
+                '.hx:hover .hx-medal{transform:scale(1.1) rotate(-3deg);filter:brightness(1.16) saturate(1.15);}',
+                '.hx-name{font-size:10.5px;font-weight:700;color:#fff;text-align:center;line-height:1.15;min-height:24px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:3px;}',
+                '.hx-name em{display:inline;font-style:normal;font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:#10131f;background:#9fd6ff;border-radius:4px;padding:1px 4px;}',
+                '.hx-ctl{display:flex;align-items:center;gap:10px;justify-content:center;}',
+                '.hx-mini{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,0.22);background:rgba(255,255,255,0.1);color:#fff;font-size:15px;line-height:1;cursor:pointer;font-weight:800;display:flex;align-items:center;justify-content:center;transition:all .14s;flex:none;}',
+                '.hx-mini:hover{background:rgba(255,255,255,0.26);transform:scale(1.12);}',
+                '.hx-mini:active{transform:scale(.88);}',
+                '.hx-plus{background:rgba(120,150,255,0.3);border-color:rgba(150,180,255,0.5);}',
+                /* ── DRAG-AND-DROP DEPLOYMENT BOARD (mini battlefield) ── */
+                '.sa-depwrap{width:100%;}',
+                '.dep-board{position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto auto;gap:9px;padding:16px;border-radius:18px;border:1px solid rgba(255,255,255,0.12);background:radial-gradient(120% 120% at 80% 50%,rgba(80,60,120,0.28),rgba(20,22,36,0.55)),linear-gradient(120deg,rgba(40,44,66,0.5),rgba(18,20,32,0.55));min-height:236px;}',
+                '.dep-board--empty{display:flex;align-items:center;justify-content:center;}',
+                '.dep-noempty{color:rgba(220,228,255,0.5);font-size:12px;}',
+                '.dz-left{grid-column:2;grid-row:1;}.dz-rear{grid-column:1;grid-row:2;}.dz-center{grid-column:2;grid-row:2;}.dz-front{grid-column:3;grid-row:2;}.dz-right{grid-column:2;grid-row:3;}',
+                '.dz{border:1.5px dashed rgba(255,255,255,0.18);border-radius:14px;padding:8px;background:rgba(255,255,255,0.035);transition:all .15s;}',
+                '.dz-over{border-color:rgba(150,180,255,0.95);border-style:solid;background:rgba(120,150,255,0.18);box-shadow:0 0 0 2px rgba(150,180,255,0.45) inset,0 8px 24px rgba(90,120,255,0.3);}',
+                '.dz-hd{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:rgba(206,216,255,0.82);margin-bottom:7px;display:flex;align-items:center;gap:5px;}',
+                '.dz-hd i{font-size:10px;}','.dz-hd span{flex:0 0 auto;}',
+                '.dz-hd b{margin-left:auto;color:#fff;background:rgba(255,255,255,0.12);border-radius:7px;padding:0 7px;font-size:10px;}',
+                '.dz-front .dz-hd{color:#bbf7d0;}.dz-center .dz-hd{color:#fde68a;}.dz-rear .dz-hd{color:#bae6fd;}.dz-left .dz-hd{color:#e9d5ff;}.dz-right .dz-hd{color:#fbcfe8;}',
+                '.dz-slot{display:flex;flex-wrap:wrap;gap:8px;min-height:46px;align-content:flex-start;}',
+                '.dz-empty{font-size:9.5px;color:rgba(200,210,255,0.32);margin:auto;}',
+                '.tk{cursor:grab;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform .12s;user-select:none;}',
+                '.tk:hover{transform:translateY(-3px) scale(1.06);}',
+                '.tk:active{cursor:grabbing;}','.tk.dragging{opacity:.35;transform:scale(.9);}',
+                '.tk-medal{width:28px;height:32px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;pointer-events:none;',
+                  'background:linear-gradient(155deg,var(--uc,#8890b8),rgba(0,0,0,0.42));clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);box-shadow:0 3px 9px rgba(0,0,0,0.45);}',
+                '.tk-x{font-size:8.5px;font-weight:800;color:#fff;background:rgba(0,0,0,0.42);border-radius:6px;padding:0 4px;pointer-events:none;}',
+                '.dep-camp{grid-column:1;grid-row:1;align-self:start;font-size:9.5px;font-weight:700;color:rgba(186,206,255,0.6);}',
+                '.dep-enemy{grid-column:3;grid-row:1;align-self:start;justify-self:end;font-size:9.5px;font-weight:700;color:rgba(248,180,180,0.72);}',
+                '.dep-fmtag{grid-column:1;grid-row:3;align-self:end;justify-self:start;font-size:9.5px;font-weight:800;letter-spacing:.4px;color:#cbd5ff;background:rgba(120,150,255,0.22);border:1px solid rgba(150,180,255,0.5);border-radius:8px;padding:3px 9px;display:inline-flex;align-items:center;gap:5px;}',
+                '.dep-board .dz{transition:transform .28s cubic-bezier(.34,1.3,.64,1),border-color .2s,background .2s;}',
+                /* FORMATION-SPECIFIC board shapes */
+                '.fm-wedge .dz-front{transform:translateX(16px) scale(1.06);}',
+                '.fm-wedge .dz-center{transform:translateX(4px);}',
+                '.fm-wedge .dz-left{transform:translate(8px,6px);}.fm-wedge .dz-right{transform:translate(8px,-6px);}',
+                '.fm-wedge .dz-rear{transform:translateX(-10px) scale(.95);}',
+                '.fm-shieldwall .dz-front{transform:scaleX(1.16);border-style:solid;border-color:rgba(34,197,94,0.55);}',
+                '.fm-shieldwall .dz-center{transform:scale(.96);}',
+                '.fm-shieldwall .dz-left{transform:translateY(8px) scale(.9);}.fm-shieldwall .dz-right{transform:translateY(-8px) scale(.9);}',
+                '.fm-shieldwall .dz-rear{transform:scale(.92);}',
+                '.fm-skirmish .dz{border-style:dashed;}',
+                '.fm-skirmish .dz-left{transform:translate(-10px,-4px) rotate(-3deg);}.fm-skirmish .dz-right{transform:translate(12px,4px) rotate(3deg);}',
+                '.fm-skirmish .dz-front{transform:translate(10px,-6px) rotate(2deg);}.fm-skirmish .dz-rear{transform:translate(-12px,6px) rotate(-2deg);}',
+                '.fm-skirmish .dz-center{transform:rotate(-1deg) scale(.97);}',
+                '.fm-horns .dz-left{transform:translate(20px,10px) scale(1.04);}.fm-horns .dz-right{transform:translate(20px,-10px) scale(1.04);}',
+                '.fm-horns .dz-center{transform:scale(.84);}',
+                '.fm-horns .dz-front{transform:translateX(6px);}.fm-horns .dz-rear{transform:translateX(-6px);}',
+                '.sa-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:14px;padding:12px 16px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);position:sticky;bottom:0;-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);}',
+                '.sa-count{font-size:12.5px;color:rgba(228,232,255,0.78);padding-left:2px;}',
+                '.sa-count b{color:#fff;font-size:14px;}',
+                '.sa-go{display:inline-flex;align-items:center;justify-content:center;gap:9px;background:linear-gradient(135deg,#6d83ff,#9061f9)!important;border:1px solid rgba(255,255,255,0.32)!important;color:#fff!important;font-size:15px;font-weight:700;padding:11px 28px;border-radius:15px!important;cursor:pointer;letter-spacing:.4px;box-shadow:0 12px 34px rgba(110,90,255,0.5),inset 0 1px 0 rgba(255,255,255,0.45);transition:all .15s;white-space:nowrap;text-transform:none;}',
+                '.sa-go .sa-go-ic{display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:transform .2s;}',
+                '.sa-go .sa-go-ic svg{display:block;}',
+                '.sa-go .sa-go-tx{line-height:1;}',
+                '.sa-go:hover{filter:brightness(1.1);transform:translateY(-1px);}',
+                '.sa-go:hover .sa-go-ic{transform:rotate(-12deg) scale(1.12);}',
+                '.sa-go:active{transform:translateY(0);}',
+                '.sa-go:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;}',
+                /* no hexagon hover pattern on the popup buttons */
+                '.sa-x::before,.sa-go::before,.res-quit::before{display:none!important;}',
+                /* ── result mode: compact centred VICTORY / DEFEAT card ── */
+                '.sa-rmode{width:min(440px,92vw)!important;padding:0!important;overflow:hidden!important;}',
+                '.sa-res{position:relative;text-align:center;padding:30px 26px 24px;}',
+                '.sa-res .res-glow{position:absolute;left:50%;top:-40%;width:260px;height:260px;transform:translateX(-50%);border-radius:50%;filter:blur(50px);opacity:.55;z-index:0;}',
+                '.sa-res.win .res-glow{background:radial-gradient(circle,#34d399,transparent 70%);}',
+                '.sa-res.lose .res-glow{background:radial-gradient(circle,#f87171,transparent 70%);}',
+                '.sa-res>*{position:relative;z-index:1;}',
+                '.res-emblem{font-size:48px;line-height:0;margin-bottom:8px;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.5));animation:saPop .5s cubic-bezier(.34,1.56,.64,1);display:flex;justify-content:center;}',
+                '.sa-res.win .res-emblem{color:#34d399;}',
+                '.sa-res.lose .res-emblem{color:#f87171;}',
+                '.res-big{font-weight:800;font-size:46px;letter-spacing:3px;line-height:1;animation:saPop .55s cubic-bezier(.34,1.56,.64,1);}',
+                '.sa-res.win .res-big{color:#34d399;text-shadow:0 4px 26px rgba(52,211,153,0.5);}',
+                '.sa-res.lose .res-big{color:#f87171;text-shadow:0 4px 26px rgba(248,113,113,0.5);}',
+                '.res-sub{color:rgba(232,236,255,0.82);font-size:13.5px;margin:10px 0 16px;}',
+                '.res-sub b{color:#fff;}',
+                '.res-stats{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:20px;}',
+                '.res-stat{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:10px 18px;min-width:96px;}',
+                '.res-stat .rs-n{font-size:28px;font-weight:800;line-height:1;}',
+                '.res-stat .rs-l{font-size:9.5px;color:rgba(220,228,255,0.6);text-transform:uppercase;letter-spacing:.8px;margin-top:4px;}',
+                '.res-vs{font-size:12px;font-weight:700;color:rgba(200,210,255,0.5);}',
+                '.res-actions{display:flex;gap:10px;justify-content:center;}',
+                '.res-again{background:linear-gradient(135deg,#34d399,#10b981)!important;box-shadow:0 12px 30px rgba(16,185,129,0.45)!important;}',
+                '.res-quit{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#dfe5ff;font-size:14px;font-weight:600;padding:11px 22px;border-radius:15px;cursor:pointer;transition:all .15s;}',
+                '.res-quit:hover{background:rgba(255,255,255,0.16);}',
+                '@keyframes saPop{0%{transform:scale(.5);opacity:0;}100%{transform:scale(1);opacity:1;}}',
+                '.sa-x{position:absolute;left:14px;top:14px;cursor:pointer;color:rgba(255,255,255,0.72);font-size:18px;font-weight:700;border:none;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:11px;z-index:4;transition:all .15s;display:flex!important;align-items:center;justify-content:center;padding:0!important;line-height:1!important;}',
+                '.sa-x:hover{background:rgba(255,255,255,0.2);color:#fff;}',
+                /* ── custom glass tooltip (replaces the OS title bubble) ── */
+                '.sa-tip{position:fixed;z-index:2147483647;pointer-events:none;max-width:236px;text-align:center;'
+                  +'font:600 11.5px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#eef2ff;'
+                  +'background:linear-gradient(135deg,rgba(48,52,76,0.97),rgba(22,24,38,0.97));'
+                  +'-webkit-backdrop-filter:blur(12px) saturate(160%);backdrop-filter:blur(12px) saturate(160%);'
+                  +'border:1px solid rgba(150,175,255,0.32);border-radius:11px;padding:8px 12px;'
+                  +'box-shadow:0 14px 36px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.18);'
+                  +'opacity:0;transform:translate(-50%,-100%) translateY(6px);transition:opacity .13s ease,transform .13s ease;}',
+                '.sa-tip.show{opacity:1;transform:translate(-50%,-100%) translateY(0);}',
+                '.sa-tip.below{transform:translate(-50%,0) translateY(-6px);}',
+                '.sa-tip.below.show{transform:translate(-50%,0) translateY(0);}',
+                '.sa-tip::after{content:"";position:absolute;left:50%;margin-left:-7px;bottom:-12px;border:7px solid transparent;border-top-color:rgba(22,24,38,0.97);}',
+                '.sa-tip.below::after{bottom:auto;top:-12px;border-top-color:transparent;border-bottom-color:rgba(22,24,38,0.97);}',
+                '@media(max-width:760px){.sa-deprow{flex-wrap:wrap;}.dep-left{flex:1 1 100%;}.sa-ctrl{flex-wrap:wrap;}.sa-clans{flex-wrap:wrap;}}'
+            ].join('');
+            document.head.appendChild(st);
+        }
+        var p=document.createElement('div');
+        p.className='sa-strat'; p.style.display='none';
+        document.body.appendChild(p);
+        saWar.panel=p;
+        return p;
+    }
+
+    function saIncUnit(id, d){
+        var cur=saWar.userComp[id]||0;
+        if (d>0 && cur>=SA_MAX_PER_TYPE) return;                 /* HARD CAP: ≤10 per type */
+        if (d>0 && saCompTotal(saWar.userComp)>=saWar.N) return;
+        saWar.userComp[id]=Math.min(SA_MAX_PER_TYPE, Math.max(0, cur+d));
+        saRenderSetup();
+    }
+    function saClampComp(){
+        /* enforce the per-type cap first, then the army-size cap */
+        for (var k0 in saWar.userComp){ if (saWar.userComp.hasOwnProperty(k0) && saWar.userComp[k0]>SA_MAX_PER_TYPE) saWar.userComp[k0]=SA_MAX_PER_TYPE; }
+        var over=saCompTotal(saWar.userComp)-saWar.N;
+        if (over<=0) return;
+        var keys=[]; for (var k in saWar.userComp){ if (saWar.userComp.hasOwnProperty(k)) keys.push(k); }
+        keys.sort(function(a,b){ return saWar.userComp[b]-saWar.userComp[a]; });
+        for (var i=0;i<keys.length && over>0;i++){
+            var take=Math.min(saWar.userComp[keys[i]], over);
+            saWar.userComp[keys[i]]-=take; over-=take;
+        }
+    }
+
+    /* Crossed-swords battle icon as inline SVG — renders identically on
+       every OS/font (unlike the ⚔ emoji which varies wildly). */
+    function saSwordsSvg(sz){
+        sz = sz || 18;
+        /* crossed swords, perfectly symmetric about x=12 and crossing at the
+           box centre (12,12) so the glyph sits dead-centre in any button. */
+        return '<svg class="sa-sw" width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" '
+            + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+            + '<path d="M5 19 L17.5 6.5"/><path d="M14.5 5 L19 5 L19 9.5"/><path d="M3.5 17.5 L7 21"/>'
+            + '<path d="M19 19 L6.5 6.5"/><path d="M9.5 5 L5 5 L5 9.5"/><path d="M20.5 17.5 L17 21"/>'
+            + '</svg>';
+    }
+
+    /* Build the drag-and-drop deployment board: a mini battlefield with the
+       five zones laid out spatially. Troop tokens live in their assigned
+       zone; drag a token to another zone to redeploy that type. */
+    function saDeployBoard(roster){
+        var byZone={ front:[], center:[], rear:[], left:[], right:[] };
+        var any=false;
+        for (var i=0;i<roster.length;i++){
+            var ty=saTypeById(roster[i]), cnt=saWar.userComp[ty.id]||0; if (cnt<=0) continue;
+            any=true; var z=saPosOf(ty.id); if (!byZone[z]) z='center';
+            byZone[z].push({ ty:ty, cnt:cnt });
+        }
+        function tokenH(item){
+            return '<div class="tk" draggable="true" data-tk="'+item.ty.id+'" data-pos="'+item.ty.id+'" style="--uc:'+item.ty.col+'" data-satip="'+item.ty.name+' ×'+item.cnt+' — drag to a zone, or tap to cycle">'
+                + '<div class="tk-medal"><i class="fa '+item.ty.icon+'"></i></div>'
+                + '<span class="tk-x">×'+item.cnt+'</span></div>';
+        }
+        function zoneH(zid){
+            var list=byZone[zid], n=0, toks='';
+            for (var j=0;j<list.length;j++){ n+=list[j].cnt; toks+=tokenH(list[j]); }
+            return '<div class="dz dz-'+zid+'" data-zone="'+zid+'">'
+                + '<div class="dz-hd"><i class="fa '+saPosIcon(zid)+'"></i><span>'+saPosName(zid)+'</span>'+(n?'<b>'+n+'</b>':'')+'</div>'
+                + '<div class="dz-slot">'+(toks||'<span class="dz-empty">drop here</span>')+'</div></div>';
+        }
+        if (!any){
+            return '<div class="dep-board dep-board--empty"><div class="dep-noempty">Add warriors above, then drag them into position here.</div></div>';
+        }
+        /* the board RESHAPES to the chosen formation (fm-<id>) so the
+           deployment map visibly matches how the army will actually fight. */
+        return '<div class="dep-board fm-'+saWar.userForm+'">'
+            + '<div class="dep-camp">◀ your camp</div>'
+            + '<div class="dep-enemy">enemy ▶</div>'
+            + '<div class="dep-fmtag"><i class="fa '+saFormById(saWar.userForm).icon+'"></i> '+saFormById(saWar.userForm).name+'</div>'
+            + zoneH('left') + zoneH('rear') + zoneH('center') + zoneH('front') + zoneH('right')
+            + '</div>';
+    }
+
+    function saRenderSetup(){
+        var p=saEnsurePanel(); if (!p) return;
+        var total=saCompTotal(saWar.userComp);
+        var scroll=p.scrollTop;
+        var roster=saRosterFor(saWar.userSide);
+        var clanName=(saWar.userSide==='A')?SA_TRIBE_A.name:SA_TRIBE_B.name;
+        var h='';
+        h+='<button class="sa-x" data-act="close" data-satip="Close">×</button>';
+        h+='<h2>'+SA_WAR_TITLE+' · War Council</h2>';
+        h+='<div class="sa-sub">'+SA_WAR_ERA+' — choose your side, muster '+saWar.N+' troops, set a formation, then give battle.</div>';
+
+        /* ── ROW 1: faction choice (two big cards) ── */
+        h+='<div class="sa-clans">';
+        h+='<div class="sa-side '+(saWar.userSide==='A'?'sel':'')+'" data-side="A"><div class="cl-name">'+SA_TRIBE_A.name+'</div><div class="cl-tag">Faction A · enters from the left</div></div>';
+        h+='<div class="sa-side '+(saWar.userSide==='B'?'sel':'')+'" data-side="B"><div class="cl-name">'+SA_TRIBE_B.name+'</div><div class="cl-tag">Faction B · enters from the right</div></div>';
+        h+='</div>';
+
+        /* ── ROW 2: army badge + formation ── */
+        h+='<div class="sa-ctrl">';
+        h+='<div class="sa-army"><div class="sa-lab">Army</div><div class="sa-fixed"><b>'+saWar.N+'</b><span>warriors<br>per side</span></div></div>';
+        h+='<div class="sa-formcol"><div class="sa-lab">Formation</div><div class="sa-forms">';
+        for (var f=0;f<SA_FORMATIONS.length;f++){
+            var fm=SA_FORMATIONS[f];
+            h+='<div class="sa-form '+(saWar.userForm===fm.id?'sel':'')+'" data-form="'+fm.id+'" data-satip="'+fm.desc+'"><i class="fa '+fm.icon+'"></i><span>'+fm.name+'</span></div>';
+        }
+        h+='</div><div class="sa-fdesc">'+saFormById(saWar.userForm).desc+'</div></div>';
+        h+='</div>';
+
+        /* ── ROW 3: muster grid + preview ── */
+        h+='<div class="sa-body">';
+        h+='<div class="sa-cM"><div class="sa-lab">Muster '+clanName+' Warriors <span class="sa-tot">'+total+'/'+saWar.N+'</span></div><div class="sa-units">';
+        for (var i=0;i<roster.length;i++){
+            var ty=saTypeById(roster[i]), cnt=saWar.userComp[ty.id]||0;
+            var sn=[]; for (var s=0;s<ty.strong.length;s++) sn.push(saTypeById(ty.strong[s]).name);
+            var roleTag = ty.ranged ? 'archer' : (ty.id==='r_spear'||ty.id==='c_warrior') ? 'soldier' : '';
+            var tip=ty.name+' — HP '+ty.hp+', DMG '+ty.dmg+', SPD '+ty.speed.toFixed(2)+' · strong vs '+sn.join(', ');
+            h+='<div class="hx'+(cnt>0?' on':'')+'" style="--uc:'+ty.col+'" data-satip="'+tip+'">'
+              +'<span class="hx-num">'+cnt+'</span>'
+              +'<div class="hx-medal"><i class="fa '+ty.icon+'"></i></div>'
+              +'<div class="hx-name">'+ty.name+(roleTag?' <em>'+roleTag+'</em>':'')+'</div>'
+              +'<div class="hx-ctl"><button class="hx-mini" data-dec="'+ty.id+'" data-satip="remove">−</button>'
+              +'<button class="hx-mini hx-plus" data-inc="'+ty.id+'"'+(cnt>=SA_MAX_PER_TYPE?' disabled':'')+' data-satip="max 10 per type">+</button></div></div>';
+        }
+        h+='</div></div>';
+        /* DEPLOYMENT BOARD — drag troop tokens onto battlefield zones. */
+        h+='<div class="sa-depwrap"><div class="sa-lab">Deployment <span class="sa-hint">drag a troop into a zone (or tap it to cycle)</span></div>';
+        h+= saDeployBoard(roster);
+        h+='</div>';
+        h+='</div>';
+
+        /* ── footer ── */
+        h+='<div class="sa-bar"><div class="sa-count"><b>'+total+'</b> / '+saWar.N+' warriors mustered · the rival clan fields '+total+' of its own</div>'
+          +'<button class="sa-go" data-act="battle"'+(total<1?' disabled':'')+' data-satip="Give Battle"><span class="sa-go-ic">'+saSwordsSvg(19)+'</span><span class="sa-go-tx">Give Battle</span></button></div>';
+        p.innerHTML=h;
+        p.scrollTop=scroll;
+        saWirePanel(p);
+        saDrawPreview();
+    }
+
+    /* Mini formation diagram — each soldier a colored dot placed by the
+       same formation logic used in battle, so you SEE your types & numbers
+       arranged in the chosen formation before committing. */
+    /* Deployment preview — dots placed in the SAME zones the battle uses,
+       so the player sees exactly where each type will stand. */
+    function saDrawPreview(){
+        var cv=(typeof document!=='undefined') ? document.getElementById('sa-prev') : null;
+        if (!cv || !cv.getContext) return;
+        var g=cv.getContext('2d'), Wp=cv.width, Hp=cv.height;
+        g.clearRect(0,0,Wp,Hp);
+        /* ground + facing label */
+        g.fillStyle='rgba(255,255,255,0.05)'; g.fillRect(0,0,Wp,Hp);
+        g.fillStyle='rgba(170,190,255,0.7)'; g.font='9px Arial'; g.textBaseline='alphabetic';
+        g.textAlign='right'; g.fillText('enemy ▶', Wp-5, 11);
+        g.textAlign='left';  g.fillText('◀ your camp', 5, 11);
+        var roster=saRosterFor(saWar.userSide);
+        var zones={ front:[], center:[], rear:[], left:[], right:[] }, total=0;
+        for (var ri=0;ri<roster.length;ri++){
+            var id=roster[ri], cnt=saWar.userComp[id]||0, ty=saTypeById(id);
+            var z=saPosOf(id); if (!zones[z]) z='center';
+            for (var n=0;n<cnt;n++){ zones[z].push(ty); total++; }
+        }
+        if (!total){ g.fillStyle='rgba(200,210,255,0.5)'; g.font='11px Arial'; g.textAlign='center'; g.fillText('add warriors to preview deployment', Wp/2, Hp/2); return; }
+        var x0=22, x1=Wp-30, span=x1-x0, cy=Hp*0.52, bandH=Hp*0.62;
+        var dotR=Math.max(1.4, Math.min(2.8, 80/Math.sqrt(total)/Math.sqrt(total)*Math.sqrt(total)));
+        dotR=Math.max(1.5, Math.min(2.6, 70/total*5));
+        var zl=['rear','center','front','left','right'];
+        for (var zi=0; zi<zl.length; zi++){
+            var zid=zl[zi], list=zones[zid]; if (!list.length) continue;
+            var Z=SA_ZONE[zid];
+            var ax=x0+span*Z.fx, ay=cy+bandH*Z.fy;
+            var cnt2=list.length, cols=Math.max(2, Math.round(Math.sqrt(cnt2)*1.25)), rows=Math.ceil(cnt2/cols);
+            var cell=Math.max(4, Math.min(8, 60/cols));
+            for (var i=0;i<cnt2;i++){
+                var col=i%cols, row=Math.floor(i/cols);
+                var ux=ax+(col-(cols-1)/2)*cell, uy=ay+(row-(rows-1)/2)*cell;
+                g.fillStyle=list[i].col;
+                g.beginPath(); g.arc(ux,uy,dotR,0,Math.PI*2); g.fill();
+            }
+            /* zone label */
+            g.fillStyle='rgba(255,255,255,0.28)'; g.font='8px Arial'; g.textAlign='center';
+            g.fillText(saPosName(zid), ax, ay - rows*cell*0.5 - 3);
+        }
+    }
+
+    function saWirePanel(p){
+        /* belt-and-suspenders: strip any stray native `title` (→ data-satip)
+           so the browser's own (white) tooltip can NEVER appear. */
+        var titled=p.querySelectorAll('[title]');
+        for (var ti=0; ti<titled.length; ti++){
+            titled[ti].setAttribute('data-satip', titled[ti].getAttribute('title'));
+            titled[ti].removeAttribute('title');
+        }
+        /* ── drag & drop: troop token → battlefield zone ── */
+        p.ondragstart=function(ev){
+            var t=ev.target.closest ? ev.target.closest('[data-tk]') : null;
+            if (!t) return;
+            saWar._drag=t.getAttribute('data-tk');
+            try{ ev.dataTransfer.setData('text/plain', saWar._drag); ev.dataTransfer.effectAllowed='move'; }catch(e){}
+            t.classList.add('dragging');
+        };
+        p.ondragend=function(ev){
+            var t=ev.target.closest ? ev.target.closest('[data-tk]') : null;
+            if (t) t.classList.remove('dragging');
+            var zs=p.querySelectorAll('.dz-over'); for (var i=0;i<zs.length;i++) zs[i].classList.remove('dz-over');
+        };
+        p.ondragover=function(ev){
+            var z=ev.target.closest ? ev.target.closest('[data-zone]') : null;
+            if (z){ ev.preventDefault(); try{ ev.dataTransfer.dropEffect='move'; }catch(e){} z.classList.add('dz-over'); }
+        };
+        p.ondragleave=function(ev){
+            var z=ev.target.closest ? ev.target.closest('[data-zone]') : null;
+            if (z && !z.contains(ev.relatedTarget)) z.classList.remove('dz-over');
+        };
+        p.ondrop=function(ev){
+            var z=ev.target.closest ? ev.target.closest('[data-zone]') : null;
+            if (!z) return;
+            ev.preventDefault();
+            var id=saWar._drag; try{ if(!id) id=ev.dataTransfer.getData('text/plain'); }catch(e){}
+            if (id){ saWar.userPos[id]=z.getAttribute('data-zone'); saWar._drag=null; saRenderSetup(); }
+        };
+        /* ── CUSTOM TOOLTIPS (replace the browser-default title bubble) ──
+           Any element in the panel carrying a `title` is intercepted: the
+           title is stripped (so the OS tooltip never appears) and a styled
+           glass tooltip is shown instead. */
+        p.onmouseover=function(ev){
+            var t=ev.target.closest ? ev.target.closest('[data-satip]') : null;
+            if (!t){ return; }
+            var txt=t.getAttribute('data-satip');
+            if (!txt){ return; }
+            if (t!==saWar._tipT){ saWar._tipT=t; saShowTip(t, txt); }
+        };
+        p.onmouseout=function(ev){
+            var t=ev.target.closest ? ev.target.closest('[data-satip]') : null;
+            if (!t || !t.contains(ev.relatedTarget)){ saWar._tipT=null; saHideTip(); }
+        };
+        p.oninput=function(ev){
+            var t=ev.target;
+            if (t && t.getAttribute && t.getAttribute('data-act')==='n'){
+                saWar.N=parseInt(t.value,10)||90; saClampComp();
+                var nv=document.getElementById('sa-nval'); if (nv) nv.textContent=saWar.N;
+            }
+        };
+        p.onchange=function(ev){
+            var t=ev.target;
+            if (t && t.getAttribute && t.getAttribute('data-act')==='n'){ saRenderSetup(); }
+        };
+        p.oncontextmenu=function(ev){
+            var t=ev.target.closest ? ev.target.closest('[data-inc]') : null;
+            if (t){ ev.preventDefault(); saIncUnit(t.getAttribute('data-inc'), -1); }
+        };
+        p.onclick=function(ev){
+            var t=ev.target.closest ? ev.target.closest('[data-side],[data-inc],[data-dec],[data-form],[data-pos],[data-act]') : null;
+            if (!t) return;
+            if (t.getAttribute('data-side')){
+                var ns=t.getAttribute('data-side');
+                if (ns!==saWar.userSide){ saWar.userSide=ns; saWar.userComp=saDefaultComp(saWar.N, saRosterFor(ns)); saWar.userPos={}; }
+                saRenderSetup(); return;
+            }
+            if (t.getAttribute('data-inc')){ saIncUnit(t.getAttribute('data-inc'), +1); return; }
+            if (t.getAttribute('data-dec')){ saIncUnit(t.getAttribute('data-dec'), -1); return; }
+            if (t.getAttribute('data-pos')){
+                var pid=t.getAttribute('data-pos'), cur=saPosOf(pid), idx=0;
+                for (var z=0;z<SA_POSITIONS.length;z++){ if (SA_POSITIONS[z].id===cur) idx=z; }
+                saWar.userPos[pid]=SA_POSITIONS[(idx+1)%SA_POSITIONS.length].id;
+                saRenderSetup(); return;
+            }
+            if (t.getAttribute('data-form')){ saWar.userForm=t.getAttribute('data-form'); saRenderSetup(); return; }
+            var a=t.getAttribute('data-act');
+            if (a==='battle'){ saStartBattle(); }
+            else if (a==='close'){ saQuitWar(); }
+            else if (a==='again'){ saWar.A=[]; saWar.B=[]; saWar.projectiles=[]; saWar.winner=null; saWar.result=null; saWar.terr=0.5; saOpenSetup(); }
+        };
+    }
+
+    /* custom glass tooltip — positioned above (or below) the hovered element */
+    function saShowTip(el, txt){
+        if (typeof document==='undefined') return;
+        var tip=saWar.tipEl;
+        if (!tip || !document.body.contains(tip)){
+            tip=document.createElement('div'); tip.className='sa-tip';
+            document.body.appendChild(tip); saWar.tipEl=tip;
+        }
+        tip.textContent=txt;
+        var r=el.getBoundingClientRect();
+        tip.classList.add('show');
+        var th=tip.offsetHeight, tw=tip.offsetWidth;
+        var below = (r.top - th - 14) < 4;
+        tip.classList.toggle('below', below);
+        var cx=r.left + r.width/2;
+        cx=Math.max(8+tw/2, Math.min(window.innerWidth-8-tw/2, cx));
+        tip.style.left = cx + 'px';
+        tip.style.top  = (below ? r.bottom + 10 : r.top - 10) + 'px';
+    }
+    function saHideTip(){ if (saWar.tipEl) saWar.tipEl.classList.remove('show'); }
+
+    function saOpenSetup(){
+        if (!saWar.inited) initStoneAgeWar();
+        saWar.phase='setup';
+        var p=saEnsurePanel(); if (!p) return;
+        p.classList.remove('sa-rmode');
+        saRenderSetup();
+        p.style.display='block';
+    }
+    function saCloseSetup(){ if (saWar.panel) saWar.panel.style.display='none'; saWar._tipT=null; saHideTip(); }
+    function saQuitWar(){
+        warModeOn=false; saCloseSetup();
+        var wb=(typeof document!=='undefined') ? document.getElementById('warBtn') : null;
+        if (wb) wb.classList.remove('active');
+    }
+
+    function saShowResultPanel(){
+        var p=saEnsurePanel(); if (!p) return;
+        var win=(saWar.result==='win');
+        var youSurv=saAliveCount(saWar.userSide==='A'?saWar.A:saWar.B);
+        var foeSurv=saAliveCount(saWar.userSide==='A'?saWar.B:saWar.A);
+        var youName=saUserTribe().name, foeName=saEnemyTribe().name;
+        p.classList.add('sa-rmode');
+        var h='<button class="sa-x" data-act="close" data-satip="Close">×</button>';
+        h+='<div class="sa-res '+(win?'win':'lose')+'">';
+        h+='  <div class="res-glow"></div>';
+        h+='  <div class="res-emblem">'+(win?saSwordsSvg(52):'<i class="fa fa-skull-crossbones"></i>')+'</div>';
+        h+='  <div class="res-big">'+(win?'VICTORY':'DEFEAT')+'</div>';
+        h+='  <div class="res-sub">'+(win
+            ? 'Your <b>'+youName+'</b> hold the field.'
+            : 'The <b>'+foeName+'</b> have broken your army.')+'</div>';
+        h+='  <div class="res-stats">';
+        h+='    <div class="res-stat"><span class="rs-n" style="color:#86efac">'+youSurv+'</span><span class="rs-l">your survivors</span></div>';
+        h+='    <div class="res-vs">vs</div>';
+        h+='    <div class="res-stat"><span class="rs-n" style="color:#fca5a5">'+foeSurv+'</span><span class="rs-l">enemy survivors</span></div>';
+        h+='  </div>';
+        h+='  <div class="res-actions">';
+        h+='    <button class="sa-go res-again" data-act="again"><span class="sa-go-ic">'+saSwordsSvg(18)+'</span><span>New Battle</span></button>';
+        h+='    <button class="res-quit" data-act="close">Leave Field</button>';
+        h+='  </div>';
+        h+='</div>';
+        p.innerHTML=h;
+        saWirePanel(p);
+        p.style.display='block';
+    }
+
     function drawWarOverlay(c){
         var w = WAR_MODES[warModeIdx];
+        /* EVERY era with a data pack is a full strategy game → take over. */
+        if (WAR_ERAS[w.id]){ drawStoneAgeWar(c); return; }
         var t = (Date.now() / 1000) % 60;
         /* sky tint */
         tintSky(c, w.sky0, 0.14);
@@ -30403,15 +34389,72 @@
     window.setWarModeIndex = function(i){
         var n = WAR_MODES.length;
         if (typeof i !== 'number') return;
+        /* Selecting a war from the tooltip ONLY chooses the type — it does
+           NOT start the war. The user must click the War Mode button to
+           begin. If the war is already running, switch to the new pick:
+           for Stone Age that means (re)opening the strategy War Council. */
         warModeIdx = ((i%n)+n)%n;
-        warModeOn = true;
+        if (warModeOn){
+            resetStoneAgeWar();
+            if (stoneAgeWarActive()) saOpenSetup(); else saCloseSetup();
+        }
     };
     window.isWarModeOn     = function(){ return warModeOn; };
     window.toggleWarMode   = function(){
         warModeOn = !warModeOn;
+        if (!warModeOn) saWar.auto=false;       /* leaving war mode stops the auto campaign */
+        /* Stone Age is a strategy game: turning it on opens the army-builder
+           War Council (the battle itself starts from the panel's Battle
+           button), not an immediate fight. */
+        if (warModeOn && stoneAgeWarActive()){ initStoneAgeWar(); saOpenSetup(); }
+        else { saCloseSetup(); }
         return warModeOn;
     };
-    window.stopWarMode     = function(){ warModeOn = false; };
+    window.stopWarMode     = function(){ warModeOn = false; saWar.auto=false; saCloseSetup(); };
+    /* AUTO CAMPAIGN toggle — runs every war back-to-back, looping forever. */
+    window.isWarAutoOn     = function(){ return !!saWar.auto; };
+    window.toggleWarAuto   = function(){
+        saWar.auto = !saWar.auto;
+        if (saWar.auto){
+            if (!warModeOn){ warModeOn = true; }
+            saCloseSetup();                 /* no army-builder panel in auto mode */
+            saAutoNextBattle(false);        /* kick off the current era immediately */
+        }
+        return saWar.auto;
+    };
+    /* test hook — start the battle directly (no DOM-button click race) */
+    window.startWarBattle = function(){ if (stoneAgeWarActive()){ initStoneAgeWar(); saStartBattle(); } return saWar.phase; };
+    /* test/diagnostic hook — advance the battle sim deterministically, without
+       waiting on requestAnimationFrame. Lets tests resolve a fight quickly and
+       reliably regardless of how loaded the machine is. */
+    window.stepWarBattle = function(ms, n){
+        n = n||1; ms = ms||33;
+        for (var i=0;i<n;i++){ if (stoneAgeWarActive()) updateStoneAgeWar(ms); }
+        return saWar.phase;
+    };
+    /* test/diagnostic hook — live battle telemetry (casualties, projectiles) */
+    window.getWarBattleState = function(){
+        var all=saWar.A.concat(saWar.B);
+        var vehTotal=0, vehDown=0, downedRoles={};
+        for (var i=0;i<all.length;i++){
+            var u=all[i], isVeh=(u.role==='tank'||u.role==='cannon');
+            if (isVeh) vehTotal++;
+            if (u.phase==='down'){
+                downedRoles[u.role]=(downedRoles[u.role]||0)+1;
+                if (isVeh) vehDown++;
+            }
+        }
+        return { phase:saWar.phase, kit:SA_SCENE_KIT,
+                 totalA:saWar.A.length, totalB:saWar.B.length,
+                 aliveA:saAliveCount(saWar.A), aliveB:saAliveCount(saWar.B),
+                 downed:(saWar.A.length+saWar.B.length)-(saAliveCount(saWar.A)+saAliveCount(saWar.B)),
+                 vehiclesTotal:vehTotal, vehiclesDestroyed:vehDown, downedRoles:downedRoles,
+                 planes:saWar.planes.length,
+                 projectiles:saWar.projectiles.length,
+                 fired:{ bullet:(saWar.fired&&saWar.fired.bullet)||0, shell:(saWar.fired&&saWar.fired.shell)||0,
+                         arrow:(saWar.fired&&saWar.fired.arrow)||0, rock:(saWar.fired&&saWar.fired.rock)||0 },
+                 kinds:saWar.projectiles.map(function(p){return p.kind;}) };
+    };
 
     /* ═══ PUBLIC API — HOLIDAY MODE ════════════════════════════════ */
     window.getAllHolidayModes = function(){
