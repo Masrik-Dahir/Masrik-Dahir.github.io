@@ -1725,6 +1725,8 @@
             <div id="missileBtn" class="missile-btn icon-only">
                 <button class="msl-core"
                     onclick="
+                        var _A=document.getElementById('ttAttackAutoBtn'),_W=document.getElementById('missileBtn');
+                        if(_A && _A.getAttribute('aria-pressed')==='true'){ _A.click(); if(_W&&_W.classList.contains('armed')&&window.armMissile)window.armMissile(); if(_W)_W.classList.remove('armed'); return; }
                         if(window.armMissile){
                             var armed=window.armMissile();
                             var wrap=document.getElementById('missileBtn');
@@ -1770,6 +1772,7 @@
                                     this.classList.toggle('on', on);
                                     this.textContent = on ? 'ON' : 'OFF';
                                     if(window.setAutoAttackEnabled) window.setAutoAttackEnabled(on);
+                                    var _w=document.getElementById('missileBtn'); if(_w){ if(on)_w.classList.add('armed'); else _w.classList.remove('armed'); }
                                 ">OFF</button>
                     </div>
                     <div class="tt-hint">Auto: cycles all missile types • Difficulty scales intercept rate</div>
@@ -1778,6 +1781,8 @@
 
             <div id="defenceBtn" class="defence-btn icon-only offline">
                 <button class="dfn-core" onclick="
+                    var _A=document.getElementById('ttDefenceAutoBtn'),_W=document.getElementById('defenceBtn');
+                    if(_A && _A.getAttribute('aria-pressed')==='true'){ _A.click(); if(_W&&!_W.classList.contains('offline')&&window.toggleDefenceMode)window.toggleDefenceMode(); if(_W)_W.classList.add('offline'); return; }
                     if(window.toggleDefenceMode){
                         var dm=window.toggleDefenceMode();
                         var wrap=document.getElementById('defenceBtn');
@@ -1822,6 +1827,7 @@
                                     this.classList.toggle('on', on);
                                     this.textContent = on ? 'ON' : 'OFF';
                                     if(window.setAutoDefenceEnabled) window.setAutoDefenceEnabled(on);
+                                    var _w=document.getElementById('defenceBtn'); if(_w){ if(on)_w.classList.remove('offline'); else _w.classList.add('offline'); }
                                 ">OFF</button>
                     </div>
                     <div class="tt-hint">Auto: cycles all interceptor types • Difficulty scales AI fire rate</div>
@@ -1915,6 +1921,8 @@
                  rejoin the crowd as ordinary humans. -->
             <div id="abductionBtn" class="abduction-btn icon-only">
                 <button class="abd-core" onclick="
+                    var _A=document.getElementById('ttAbductionAutoBtn'),_W=document.getElementById('abductionBtn');
+                    if(_A && _A.getAttribute('aria-pressed')==='true'){ _A.click(); if(_W&&_W.classList.contains('active')&&window.toggleAbduction)window.toggleAbduction(); if(_W)_W.classList.remove('active'); return; }
                     if(window.toggleAbduction){
                         var on = window.toggleAbduction();
                         var wrap = document.getElementById('abductionBtn');
@@ -1965,6 +1973,7 @@
                                     this.classList.toggle('on', on);
                                     this.textContent = on ? 'ON' : 'OFF';
                                     if(window.setAbductionAutoFire) window.setAbductionAutoFire(on);
+                                    var _w=document.getElementById('abductionBtn'); if(_w) _w.classList.toggle('active', on);
                                 ">OFF</button>
                     </div>
                     <div class="tt-hint">Missiles auto-fire based on Difficulty • Auto: 100% hit rate • Click any saucer for bonus shot</div>
@@ -1978,6 +1987,8 @@
                  damage on buildings / cars / peds) gang up on them. -->
             <div id="superheroBtn" class="superhero-btn icon-only">
                 <button class="sup-core" onclick="
+                    var _A=document.getElementById('ttSuperheroAutoBtn'),_W=document.getElementById('superheroBtn');
+                    if(_A && _A.getAttribute('aria-pressed')==='true'){ _A.click(); if(_W&&_W.classList.contains('active')&&window.toggleSuperhero)window.toggleSuperhero(); if(_W)_W.classList.remove('active'); return; }
                     if(window.toggleSuperhero){
                         var on = window.toggleSuperhero();
                         var wrap = document.getElementById('superheroBtn');
@@ -2021,6 +2032,7 @@
                                     this.classList.toggle('on', on);
                                     this.textContent = on ? 'ON' : 'OFF';
                                     if(window.setSuperheroAutoFight) window.setSuperheroAutoFight(on);
+                                    var _w=document.getElementById('superheroBtn'); if(_w) _w.classList.toggle('active', on);
                                 ">OFF</button>
                     </div>
                     <div class="tt-hint">Auto: heroes fight each other to one winner • Manual: CLICK any hero — everyone targets them</div>
@@ -2038,6 +2050,8 @@
             <!-- WAR MODE — 7 chips -->
             <div id="warBtn" class="warmode-btn icon-only">
                 <button class="war-core" onclick="
+                    var _A=document.getElementById('ttWarAutoBtn');
+                    if(_A && _A.getAttribute('aria-pressed')==='true'){ _A.click(); if(window.stopWarMode)window.stopWarMode(); var _w=document.getElementById('warBtn'); if(_w)_w.classList.remove('active'); return; }
                     if(window.toggleWarMode){
                         var on = window.toggleWarMode();
                         var wrap = document.getElementById('warBtn');
@@ -2065,6 +2079,7 @@
                                     var on = window.toggleWarAuto ? window.toggleWarAuto() : false;
                                     this.setAttribute('aria-pressed', on ? 'true' : 'false');
                                     this.classList.toggle('on', on);
+                                    var _w=document.getElementById('warBtn'); if(_w) _w.classList.toggle('active', on);
                                 ">Auto</button>
                     </div>
                     <div class="tt-hint">Pick a battlefield — or flip <b>Auto</b>: every war fights itself, the victor plants a flag, then on to the next</div>
