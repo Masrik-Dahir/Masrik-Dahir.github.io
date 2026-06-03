@@ -29649,6 +29649,9 @@
     var SA_MIN_N = 50;          /* per-side army minimum */
     var SA_MAX_N = 150;         /* per-side army cap (epic mass battles) */
     var SA_MAX_PER_TYPE = 10;   /* HARD CAP: no more than 10 of any one unit type */
+    var SA_AUTO_PER_SIDE = 50;  /* AUTO CAMPAIGN: fixed troop count fielded by EACH side */
+    var SA_AUTO_SIZE_REF = 25;  /* AUTO CAMPAIGN: size/space units as if this many per side
+                                   (keeps the full-size "25-per-side" look despite 100 troops) */
 
     var saWar = {
         inited:false, A:[], B:[], projectiles:[], fx:[], t:0, scene:null,
@@ -29722,7 +29725,9 @@
             var ty=saTypeById(enemyRoster[i]);
             if (topId && ty.strong.indexOf(topId)>=0) counters.push(ty.id);
         }
-        var cap=SA_MAX_PER_TYPE;
+        /* per-type cap must be loose enough that the enemy can actually field N
+           across its roster (e.g. 100 over 8 types needs a cap above 10). */
+        var cap=Math.max(SA_MAX_PER_TYPE, Math.ceil(N/Math.max(1,enemyRoster.length)));
         var comp={}, nLeft=Math.min(N, enemyRoster.length*cap), cBudget=Math.round(N*0.45);
         for (var ci=0; ci<counters.length && cBudget>0; ci++){
             var give=Math.max(1, Math.round(cBudget/(counters.length-ci)));
@@ -29769,8 +29774,10 @@
         saWar.fervor=1;                                   /* escalating damage so battles always resolve */
         saWar.phase='battle'; saWar.t=0; saWar.terr=0.5; saWar.flagT=0;
         saWar.winner=null; saWar.result=null; saWar.resultT=0;
-        /* big hosts switch to a lightweight per-soldier render to stay smooth */
-        saWar.simple = (saWar.A.length + saWar.B.length) > 110;
+        /* big hosts switch to a lightweight per-soldier render to stay smooth,
+           but the AUTO campaign keeps the full-detail soldiers it always used
+           (it now fields 100/side, which would otherwise trip the simple render). */
+        saWar.simple = !saWar.auto && (saWar.A.length + saWar.B.length) > 110;
         saMarkChiefs(saWar.A); saMarkChiefs(saWar.B);
         saMarkBearer(saWar.A); saMarkBearer(saWar.B);
         saCloseSetup();
@@ -29797,10 +29804,12 @@
        era and loops forever. Both armies are randomised each war for variety. */
     var SA_AUTO_HOLD = 4200;        /* ms the result/flag holds before the next war */
     function saRandomArmy(roster){
-        /* smaller, varied armies so the auto campaign reads as clear, spread-out
-           duels rather than a crowded blob */
-        var c={};
-        for (var i=0;i<roster.length;i++) c[roster[i]] = rngI(2, 6);   /* 2..5 each */
+        /* AUTO CAMPAIGN: each side fields exactly SA_AUTO_PER_SIDE troops,
+           distributed as evenly as possible across the era's unit roster. */
+        var c={}, n=roster.length;
+        if (!n) return c;
+        var per=Math.floor(SA_AUTO_PER_SIDE/n), rem=SA_AUTO_PER_SIDE-per*n;
+        for (var i=0;i<n;i++) c[roster[i]] = per + (i<rem ? 1 : 0);
         return c;
     }
     function saAutoNextBattle(advance){
@@ -29808,6 +29817,7 @@
         setWarEra();
         saWar.inited=false; initStoneAgeWar();                 /* rebuild scene + terrain + scenery */
         saWar.userSide = (Math.random()<0.5)?'A':'B';
+        saWar.N = SA_AUTO_PER_SIDE;                             /* enemy plan matches this per-side count */
         saWar.userComp = saRandomArmy(saRosterFor(saWar.userSide));
         saWar.userForm = SA_FORMATIONS[rngI(0,SA_FORMATIONS.length)].id;
         saWar.userPos  = saRandomDeploy(saRosterFor(saWar.userSide));
@@ -29845,7 +29855,11 @@
             for (var n=0;n<comp[k];n++){ zones[z].push(ty); total++; }
         }
         if (!total) return [];
-        var Hs = Math.max(0.42, Math.min(1.18, (H/740) * Math.sqrt(44/Math.max(36,total))));
+        /* In the auto campaign each side now fields 100 troops, but the user wants
+           the SAME unit size/spacing as the old ~25-per-side battles. Drive the
+           scale off a fixed reference count instead of the real (larger) total. */
+        var sizeTotal = saWar.auto ? SA_AUTO_SIZE_REF : total;
+        var Hs = Math.max(0.42, Math.min(1.18, (H/740) * Math.sqrt(44/Math.max(36,sizeTotal))));
         var baseY = GROUND + (H-GROUND)*0.50;
         var bandH = (H-GROUND)*1.02;                       /* tall band → wide vertical spread */
         var innerX = (face>0) ? W*0.44 : W*0.56;           /* armies reach near the centre line */
@@ -34444,7 +34458,7 @@
                 if (isVeh) vehDown++;
             }
         }
-        return { phase:saWar.phase, kit:SA_SCENE_KIT,
+        return { phase:saWar.phase, kit:SA_SCENE_KIT, simple:saWar.simple, auto:saWar.auto,
                  totalA:saWar.A.length, totalB:saWar.B.length,
                  aliveA:saAliveCount(saWar.A), aliveB:saAliveCount(saWar.B),
                  downed:(saWar.A.length+saWar.B.length)-(saAliveCount(saWar.A)+saAliveCount(saWar.B)),
