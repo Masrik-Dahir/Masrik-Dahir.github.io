@@ -29,13 +29,12 @@ var app_academia = Vue.createApp({
                 {
                     title: "Master of Science",
                     id: "vcu_master_of_science",
-                    date: "May 2025",
+                    date: "May 2026",
                     imageUrl: "https://d3dw5jtb3w1kgy.cloudfront.net/vcu_eng.png",
                     credentialUrl: "https://egr.vcu.edu/",
                     details: [
                         "<b>Institution:</b> Virginia Commonwealth University",
                         "<b>Area:</b> Software Engineering",
-                        "<b>Cumulative GPA:</b> 4.0/4.0"
                     ]
                 }
             ],
