@@ -120,3 +120,13 @@ html .lb-tip {
 
 /* Bootstrap tooltips (fade in to 90 % by default) */
 html .tooltip.in { opacity: 1 !important; }
+
+/* ── Search bars: solid white field ─────────────────────────────
+   The rounded .search_bar frame had no fill, so the wallpaper showed
+   around the white <input> (Software, Travel, Games, map pages). */
+html .search_bar {
+    background-color: #fff !important;
+}
+html .search_bar .search_searchbar {
+    background-color: transparent !important;
+}
