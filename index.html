@@ -60,6 +60,7 @@
 
     <link rel="stylesheet" href="css/index.css">
 
+    <link rel="stylesheet" href="css/site-background.css?v=2">
 </head>
 
 <body class="polish" data-page-graphics="none" style="background: white">
@@ -4726,6 +4727,72 @@
                 display: inline-flex;
                 align-items: stretch;
             }
+
+            /* ── Same composition on every desktop size ──────────────────────
+               js/nyc-city.js renders the city at 1920×1080 reference scale
+               on smaller desktop windows and publishes the factor as
+               --nyc-scale; the name card + widget row (the hero .show that
+               holds .glass-panel) scale with it so laptops look exactly like
+               a full-size desktop. */
+            @media (min-width: 1027px) {
+                /* zoom the two hero rows, not their .show wrapper — the
+                   fixed #canv lives in that wrapper and must stay 1:1 */
+                body > .show > .city-switcher-wrap,
+                body > .show > .container2.glass-panel { zoom: var(--nyc-scale, 1); }
+            }
+
+            /* ── Viewport-aware placement (see the placement script near the
+               end of <body>) ──────────────────────────────────────────────
+               .tt-below   panel flipped under its button (no room above)
+               .tt-capped  no room either way: panel scrolls internally,
+                           height from --tt-max-h
+               --tt-shift  horizontal nudge keeping the panel on-screen; the
+                           caret stays pinned over the button */
+            .widget-tooltip { margin-left: var(--tt-shift, 0px); }
+            .widget-tooltip::after { left: calc(50% - var(--tt-shift, 0px)); }
+            .widget-tooltip.tt-below {
+                bottom: auto;
+                top: calc(100% + 12px);
+                transform: translate(-50%, -8px);
+            }
+            .city-switch-btn:hover .widget-tooltip.tt-below,
+            .weather-widget:hover .widget-tooltip.tt-below,
+            .missile-btn:hover .widget-tooltip.tt-below,
+            .defence-btn:hover .widget-tooltip.tt-below,
+            .reconstruct-btn:hover .widget-tooltip.tt-below,
+            .strategy-btn:hover .widget-tooltip.tt-below,
+            .parade-btn:hover .widget-tooltip.tt-below,
+            .abduction-btn:hover .widget-tooltip.tt-below,
+            .superhero-btn:hover .widget-tooltip.tt-below,
+            .warmode-btn:hover .widget-tooltip.tt-below,
+            .holiday-btn:hover .widget-tooltip.tt-below,
+            .sport-btn:hover .widget-tooltip.tt-below,
+            .scene-btn:hover .widget-tooltip.tt-below,
+            .filter-btn:hover .widget-tooltip.tt-below,
+            .physics-btn:hover .widget-tooltip.tt-below,
+            .widget-host:hover .widget-tooltip.tt-below,
+            .widget-tooltip.tt-below:hover,
+            .city-switcher-wrap > .tt-mobile-open > .widget-tooltip.tt-below,
+            .widget-host.tt-mobile-open > .widget-tooltip.tt-below {
+                transform: translate(-50%, 0);
+            }
+            .widget-tooltip.tt-below::before { top: auto; bottom: 100%; height: 14px; }
+            .widget-tooltip.tt-below::after {
+                bottom: auto;
+                top: -6px;
+                transform: translateX(-50%) rotate(225deg);
+            }
+            .widget-tooltip.tt-capped {
+                max-height: var(--tt-max-h, 70vh);
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                scrollbar-width: thin;
+            }
+            .widget-tooltip.tt-capped::after { display: none; }
+            /* overflow clips the invisible hover bridge, so close the gap */
+            .widget-tooltip.tt-capped:not(.tt-below) { bottom: calc(100% + 4px); }
+            .widget-tooltip.tt-capped.tt-below { top: calc(100% + 4px); }
+
             .flight-wrap {
                 height: 44px;
                 box-sizing: border-box;
@@ -6205,6 +6272,107 @@
            mutation, no transient class. The chip simply turns red /
            green / blue (whichever theme) and that's the whole
            click feedback. */
+    })();
+
+    /* ═══════════════════════════════════════════════════════════
+       VIEWPORT-AWARE TOOLTIP PLACEMENT
+       ───────────────────────────────────────────────────────────
+       Every widget tooltip is anchored ABOVE its button by CSS. On
+       short screens (13–14" laptops, ≤ 800px tall) the panels are
+       taller than the gap between the fixed top nav and the button
+       row, so their tops slid under the nav. Just before a panel
+       opens (pointer enters the host / tap on touch) we measure the
+       room above and below and pick a placement:
+
+         • fits above            → default (no class)
+         • fits below            → .tt-below   (flipped, caret on top)
+         • fits neither          → whichever side is roomier, with
+                                   .tt-capped + --tt-max-h so the
+                                   panel scrolls internally
+       Horizontally, --tt-shift nudges the panel back inside the
+       viewport (the caret stays pinned over the button).
+       ═══════════════════════════════════════════════════════════ */
+    (function () {
+        var GAP = 14;     // distance between button and panel
+        var EDGE = 10;    // breathing room at viewport edges
+        var GROW = 30;    // .tt-row-hover expands ~26px on chip hover
+
+        function topChromeBottom() {
+            var bottom = 0;
+            document.querySelectorAll('.navbar-fixed-top, .lang-bar').forEach(function (el) {
+                var r = el.getBoundingClientRect();
+                if (!r.height || r.top > 8) return;
+                if (getComputedStyle(el).position !== 'fixed') return;
+                bottom = Math.max(bottom, r.bottom);
+            });
+            return bottom;
+        }
+
+        function place(host) {
+            var tip = host && host.querySelector(':scope > .widget-tooltip');
+            if (!tip) return;
+            tip.classList.remove('tt-below', 'tt-capped');
+            tip.style.removeProperty('--tt-max-h');
+            tip.style.setProperty('--tt-shift', '0px');
+
+            var hr = host.getBoundingClientRect();
+            // Decide using the tallest panel in this button row so the
+            // whole row opens the same way (no up/down mix between
+            // neighbouring buttons).
+            // Measure on-screen sizes; the hero may be CSS-zoomed by
+            // --nyc-scale, so CSS-px values written back are divided by z.
+            var z = host.offsetWidth ? hr.width / host.offsetWidth : 1;
+            if (!z || !isFinite(z)) z = 1;
+            var tallest = tip.getBoundingClientRect().height;
+            document.querySelectorAll('.widget-tooltip').forEach(function (t) {
+                if (t === tip || !t.parentElement) return;
+                var r = t.parentElement.getBoundingClientRect();
+                if (r.height && Math.abs(r.top - hr.top) < 24) tallest = Math.max(tallest, t.getBoundingClientRect().height);
+            });
+            var grow = GROW * z;   // the hover row grows in CSS px, so it scales too
+            var need = tallest + grow;
+            var above = hr.top - topChromeBottom() - GAP - EDGE;
+            var below = window.innerHeight - hr.bottom - GAP - EDGE;
+
+            if (need > above) {
+                if (need <= below || below > above) tip.classList.add('tt-below');
+                var room = Math.max(above, below);
+                if (need > room) {
+                    tip.classList.add('tt-capped');
+                    tip.style.setProperty('--tt-max-h', Math.max(140, room - grow) / z + 'px');
+                }
+            }
+
+            // Horizontal clamp — the panel is centred on the host.
+            var w = tip.getBoundingClientRect().width;
+            var left = hr.left + hr.width / 2 - w / 2;
+            var shift = 0;
+            if (left < EDGE) shift = EDGE - left;
+            else if (left + w > window.innerWidth - EDGE) shift = window.innerWidth - EDGE - (left + w);
+            tip.style.setProperty('--tt-shift', Math.round(shift / z) + 'px');
+        }
+
+        function hostFrom(target) {
+            for (var n = target; n && n !== document.body; n = n.parentElement) {
+                if (n.classList && n.classList.contains('widget-tooltip')) return null; // inside an open panel
+                if (n.querySelector && n.querySelector(':scope > .widget-tooltip')) return n;
+            }
+            return null;
+        }
+
+        var last = null;
+        document.addEventListener('pointerover', function (e) {
+            var host = hostFrom(e.target);
+            if (host && host !== last) { last = host; place(host); }
+            else if (!host && !(e.target.closest && e.target.closest('.widget-tooltip'))) last = null;
+        }, true);
+        // Touch: the tap handler above toggles .tt-mobile-open in the
+        // capture phase; place on the same tap before the panel fades in.
+        document.addEventListener('click', function (e) {
+            var host = hostFrom(e.target);
+            if (host) place(host);
+        }, true);
+        window.addEventListener('resize', function () { last = null; });
     })();
     </script>
 

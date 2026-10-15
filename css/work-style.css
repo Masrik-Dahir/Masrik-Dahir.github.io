@@ -1,0 +1,250 @@
+/**
+ * work-style.css — carries the Career page's look (work.html +
+ * css/work-symbols.css) to every other page, so the whole site matches
+ * Home and Career. Not loaded on index.html or work.html themselves.
+ *
+ * The Career card chrome:
+ *   white card · 16px radius · 1px #e5e7eb border · amber halo
+ *   (-3px -3px 16px top-left, 3px 3px 14px bottom-right) · white inner rim
+ *   catch-light · faint amber counter-reflection in the bottom-right
+ *   corner · springy 5px lift on hover with a stronger halo.
+ * Plus: black headings, red/crimson accents, and no rainbow hex / conic
+ * layers on surfaces. Font family and size are never changed.
+ *
+ * Load LAST in <head> (after the page's own stylesheets).
+ */
+
+:root {
+    --ws-c:  245, 158, 11;   /* amber-500 — the Career halo channel */
+    --ws-c2: 251, 191, 36;   /* amber-400 */
+    --ws-border: #e5e7eb;
+    --ws-radius: 16px;
+    --ws-accent: #dc143c;    /* crimson — Career's dates / "Present" badge */
+    --ws-card-bg:
+        radial-gradient(ellipse 42% 42% at 100% 100%,
+            rgba(var(--ws-c), 0.10) 0%, rgba(var(--ws-c2), 0.04) 40%, transparent 78%),
+        #fff;
+    --ws-card-bg-hover:
+        radial-gradient(ellipse 52% 52% at 100% 100%,
+            rgba(var(--ws-c), 0.14) 0%, rgba(var(--ws-c2), 0.06) 42%, transparent 82%),
+        #fff;
+    --ws-rim:
+        inset  0   1px  0     rgba(255, 255, 255, 0.82),
+        inset  1px 0    0     rgba(255, 255, 255, 0.67),
+        inset  0  -1px  0     rgba(255, 255, 255, 0.30),
+        inset -1px 0    0     rgba(255, 255, 255, 0.30),
+        inset  0   0    0 1px rgba(var(--ws-c), 0.06),
+        inset  0   2px  6px   rgba(255, 255, 255, 0.22);
+    --ws-shadow:
+        -3px -3px 16px -4px rgba(var(--ws-c), 0.18),
+         3px  3px 14px -6px rgba(var(--ws-c), 0.06),
+         0    1px  3px       rgba(15, 23, 42, 0.05),
+        var(--ws-rim),
+        inset 0 -6px 14px rgba(var(--ws-c), 0.055);
+    --ws-shadow-hover:
+        -4px -4px 22px -4px rgba(var(--ws-c), 0.28),
+         4px  4px 18px -6px rgba(var(--ws-c), 0.10),
+         0    2px  6px       rgba(15, 23, 42, 0.07),
+        var(--ws-rim),
+        inset 0 -6px 14px rgba(var(--ws-c), 0.077);
+    --ws-spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   1. CARDS — every content card gets the Career chrome
+   ════════════════════════════════════════════════════════════════ */
+
+html body .w3-card,
+html body .w3-card-2,
+html body .w3-card-4,
+html body.polish .w3-card,
+html body .button-55.milestone-btn,
+html body.polish .button-55.milestone-btn,
+html body .rg-card,
+html body .sdoc-feature,
+html body .sdoc-tech,
+html body .sdoc-info,
+html body .fa-card,
+html body .lang-card,
+html body .feat {
+    background: var(--ws-card-bg) !important;
+    border: 1px solid var(--ws-border) !important;
+    border-radius: var(--ws-radius) !important;
+    box-shadow: var(--ws-shadow) !important;
+    transition:
+        transform    0.35s var(--ws-spring),
+        border-color 0.35s ease,
+        box-shadow   0.4s  cubic-bezier(.22, 1, .36, 1) !important;
+}
+html body .w3-card:hover,
+html body .w3-card-2:hover,
+html body .w3-card-4:hover,
+html body.polish .w3-card:hover,
+html body .button-55.milestone-btn:hover,
+html body.polish .button-55.milestone-btn:hover,
+html body .rg-card:hover,
+html body .sdoc-feature:hover,
+html body .sdoc-tech:hover,
+html body .lang-card:hover,
+html body .feat:hover {
+    background: var(--ws-card-bg-hover) !important;
+    border-color: rgba(var(--ws-c), 0.30) !important;
+    box-shadow: var(--ws-shadow-hover) !important;
+    transform: translateY(-5px);
+    filter: none !important;
+}
+/* Large form / map cards lift less — they hold inputs or a map */
+html body .fa-card:hover,
+html body .w3-card[id^="scroll_"]:hover {
+    transform: translateY(-2px);
+    background: var(--ws-card-bg-hover) !important;
+    border-color: rgba(var(--ws-c), 0.30) !important;
+    box-shadow: var(--ws-shadow-hover) !important;
+}
+
+/* Retire the rainbow hex sweep / rotating conic ring / icon-outline
+   glisten that polish.css and the per-page *-symbols.css paint on
+   surfaces — exactly as work-symbols.css does on the Career page. The
+   pseudo-elements stay (w3.css clearfix) but paint nothing. */
+html body.polish .w3-card::before,
+html body.polish .w3-card::after,
+html body.polish .w3-card-2::before,
+html body.polish .w3-card-2::after,
+html body.polish .w3-card-4::before,
+html body.polish .w3-card-4::after,
+html body.polish .button-55.milestone-btn::before,
+html body.polish .button-55.milestone-btn::after,
+html body.polish .game-card::before,
+html body.polish .pretty::before,
+html body.polish .pretty::after {
+    background: none !important;
+    -webkit-mask-image: none !important;
+            mask-image: none !important;
+    -webkit-mask: none !important;
+            mask: none !important;
+    box-shadow: none !important;
+    filter: none !important;
+    opacity: 0 !important;
+    animation: none !important;
+}
+
+/* Sibling card systems already share the Career token model — only the
+   halo channel differs. Point them at the Career amber. */
+html body .sw-card,
+html body .sw-card[data-cat="library"],
+html body .sw-card[data-cat="app"],
+html body.polish .game-card,
+html body.polish #app_academia .w3-card {
+    --c-r: 245; --c-g: 158; --c-b: 11;
+    --c-r2: 251; --c-g2: 191; --c-b2: 36;
+    --sw-glow: rgba(245, 158, 11, .07);
+}
+html body .sw-card[data-cat="library"]:hover .sw-card-title,
+html body .sw-card[data-cat="app"]:hover .sw-card-title { color: #000; }
+
+/* Inner strips inside cards stay quiet white */
+html body .card-footer,
+html body .sw-card-footer { background: #fafafa !important; border-top: 1px solid #f1f1f1 !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   2. HEROES → Career-style white header cards
+   ════════════════════════════════════════════════════════════════ */
+
+/* Software detail pages (software/*.html) — was a saturated gradient
+   banner with white text. */
+html body .sdoc-hero {
+    max-width: min(1100px, 95%);
+    margin: 24px auto 8px !important;
+    padding: 44px 32px 38px !important;
+    color: #000 !important;
+    background: var(--ws-card-bg) !important;
+    border: 1px solid var(--ws-border);
+    border-radius: var(--ws-radius);
+    box-shadow: var(--ws-shadow);
+}
+html body .sdoc-hero::before { display: none !important; }
+html body .sdoc-back { color: #555 !important; }
+html body .sdoc-back:hover { color: var(--ws-accent) !important; }
+html body .sdoc-badge {
+    background: rgba(var(--ws-c), 0.12) !important;
+    color: #92400e !important;
+    border: 1px solid rgba(var(--ws-c), 0.35);
+    -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+}
+html body .sdoc-subtitle { color: #444 !important; }
+html body .sdoc-btn { border-radius: 12px !important; }
+html body .sdoc-btn-primary {
+    background: var(--ws-accent) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 14px rgba(220, 20, 60, 0.28) !important;
+}
+html body .sdoc-btn-primary:hover { box-shadow: 0 8px 22px rgba(220, 20, 60, 0.36) !important; }
+html body .sdoc-btn-secondary {
+    background: #fff !important;
+    color: #000 !important;
+    border: 1px solid var(--ws-border) !important;
+    box-shadow: -2px -2px 10px -4px rgba(var(--ws-c), 0.25), 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+}
+html body .sdoc-btn-secondary:hover { border-color: rgba(var(--ws-c), 0.45) !important; }
+
+/* AwsUtil library home — was a dark animated navy hero. */
+html body .hero {
+    max-width: min(1300px, 95%);
+    margin: 24px auto 0 !important;
+    min-height: 0 !important;
+    padding: 72px 24px 60px !important;
+    background: var(--ws-card-bg) !important;
+    animation: none !important;
+    border: 1px solid var(--ws-border);
+    border-radius: var(--ws-radius);
+    box-shadow: var(--ws-shadow);
+}
+html body .hero::before,
+html body .hero::after { display: none !important; }
+html body .hero h1 { text-shadow: none !important; }
+html body .hero h1 .accent-dot { background: var(--ws-accent) !important; }
+html body .hero .subtitle { color: #444 !important; }
+html body .hero-badge {
+    background: rgba(var(--ws-c), 0.12) !important;
+    border-color: rgba(var(--ws-c), 0.35) !important;
+    color: #92400e !important;
+    -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+}
+html body .hero-tagline { color: #6b7280 !important; border-right-color: #9ca3af !important; }
+html body .stat-num {
+    background: none !important;
+    -webkit-text-fill-color: #111 !important;
+    color: #111 !important;
+}
+html body .stat-label { color: #6b7280 !important; }
+html body .stat + .stat::before { background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.14), transparent) !important; }
+html body .orbiter { background: #fff !important; border-color: var(--ws-border) !important; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08); }
+html body .hero .particle { background: radial-gradient(circle, rgba(var(--ws-c), 0.10), rgba(var(--ws-c), 0.02)) !important; }
+html body .hero .morph-blob { background: linear-gradient(135deg, rgba(var(--ws-c), 0.10), rgba(var(--ws-c2), 0.06)) !important; }
+html body .lang-card::before { opacity: .85; }
+
+/* State / region gallery header band (map/*.html) — was a navy strip
+   with a gold italic title. */
+html body .rg-shell .tag {
+    background: var(--ws-card-bg) !important;
+    border: 1px solid var(--ws-border) !important;
+    border-radius: var(--ws-radius) !important;
+    box-shadow: var(--ws-shadow) !important;
+}
+html body .rg-shell .tag .it {
+    color: #000 !important;
+}
+/* photo tiles: neutral placeholder instead of lavender, amber focus ring */
+html body .rg-card,
+html body .rg-card-img { background: #f9fafb !important; }
+html body .rg-card.rg-card-active { outline-color: rgba(var(--ws-c), 0.85) !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   3. ACCENTS — red / crimson like Career, not blue / indigo
+   ════════════════════════════════════════════════════════════════ */
+
+html body .fa-hero h1::after { background: #000 !important; }
+html body .fa-section-heading::before { background: linear-gradient(180deg, rgb(var(--ws-c)), rgb(var(--ws-c2))) !important; }
+html body .fa-section-heading::after { background: linear-gradient(90deg, rgba(var(--ws-c), 0.35), transparent) !important; }

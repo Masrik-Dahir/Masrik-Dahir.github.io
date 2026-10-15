@@ -107,9 +107,30 @@
     function rng(a,b)  { return Math.random()*(b-a)+a; }
     function rngI(a,b) { return Math.floor(rng(a,b)); }
 
+    /* The scene is drawn in fixed pixels (floors × px, landmark sizes), so a
+       smaller desktop window — e.g. a 1920×1080 laptop at 125–150 % display
+       scaling (1536×864 / 1280×720 CSS px) — used to show a zoomed-in slice
+       of the city. On desktop viewports below the 1920×1080 reference the
+       scene is rendered at reference scale and the canvas is CSS-scaled to
+       fit, so every desktop size shows the same composition. index.html
+       scales the name card + widget row with the same factor (--nyc-scale).
+       Pointer handlers already map client → canvas coords via the canvas's
+       bounding rect, so they keep working. Phones/tablets are unchanged. */
+    var REF_W = 1920, REF_H = 1080;
+    function sceneScale() {
+        var vw = window.innerWidth, vh = window.innerHeight;
+        if (vw < 1027) return 1;
+        return Math.min(1, vw / REF_W, vh / REF_H);
+    }
+
     function resize() {
-        W = canvas.width  = bgCvs.width  = cityCvs.width  = dynCvs.width  = window.innerWidth;
-        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = window.innerHeight;
+        var s = sceneScale();
+        var vw = window.innerWidth, vh = window.innerHeight;
+        W = canvas.width  = bgCvs.width  = cityCvs.width  = dynCvs.width  = Math.round(vw / s);
+        H = canvas.height = bgCvs.height = cityCvs.height = dynCvs.height = Math.round(vh / s);
+        canvas.style.width  = vw + 'px';
+        canvas.style.height = vh + 'px';
+        document.documentElement.style.setProperty('--nyc-scale', String(s));
         GROUND = Math.floor(H * 0.78);
         ctx.lineCap = bgC.lineCap = cityC.lineCap = dynC.lineCap = 'round';
     }

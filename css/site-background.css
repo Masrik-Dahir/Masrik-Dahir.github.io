@@ -1,0 +1,122 @@
+/**
+ * site-background.css — the soft ambient wallpaper shared by every page.
+ *
+ * A fixed blend of pastel blue / pink / mint / peach light pools behind
+ * the content. The legacy white page shells are made transparent so the
+ * wallpaper shows through; cards, nav bars and other surfaces keep their
+ * own backgrounds. Changes background colour only — never fonts.
+ *
+ * Load LAST in <head>.
+ */
+
+html {
+    background-color: #e9edf5;
+    background-image:
+        radial-gradient(1200px 820px at 8% -6%,   rgba(129, 180, 255, 0.55), transparent 62%),
+        radial-gradient(1000px 760px at 96% 4%,   rgba(255, 170, 214, 0.42), transparent 60%),
+        radial-gradient(1100px 900px at 78% 104%, rgba(140, 236, 214, 0.42), transparent 62%),
+        radial-gradient(900px 700px at 12% 96%,   rgba(255, 214, 150, 0.40), transparent 60%),
+        linear-gradient(180deg, #f3f5fa 0%, #e6ebf4 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100%;
+}
+
+html body,
+html body.w3-white {
+    background-color: transparent !important;
+}
+
+/* White page shells (content wrappers, not cards) let the wallpaper through */
+html .w3-content[style*="background"]:not(.w3-card),
+html .w3-content.w3-white:not(.w3-card),
+html .w3-container.w3-white:not(.w3-card):not(.w3-card-2):not(.w3-card-4),
+html .w3-row-padding.w3-white,
+html .show[style*="background"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* ── Nav bars: frosted glass over the wallpaper ─────────────────
+   Top nav (desktop + mobile bar) and the secondary breadcrumb bar.
+   Only the background changes; borders, fonts and layout stay. */
+html .topnav.navbar-fixed-top,
+html .topnav-2.navbar-fixed-top,
+html .lang-bar {
+    background: rgba(250, 250, 252, 0.62) !important;
+    background-color: rgba(250, 250, 252, 0.62) !important;
+    -webkit-backdrop-filter: blur(34px) saturate(200%);
+            backdrop-filter: blur(34px) saturate(200%);
+}
+/* Each nav link sits on a white plate (glowing.css / default.css ::after)
+   so the red hover glow reads as a ring. On a frosted bar that plate
+   shows as a white box — keep it hidden at rest, back on hover. */
+html .topnav .glow-on-hover-nav::after,
+html .topnav-2 .glow-on-hover-nav::after,
+html .lang-bar .glow-on-hover-nav::after,
+html .lang-bar .glow-sm::after {
+    background: transparent !important;
+    transition: background-color .3s ease-in-out;
+}
+html .topnav .glow-on-hover-nav:hover::after,
+html .topnav-2 .glow-on-hover-nav:hover::after,
+html .lang-bar .glow-sm:hover::after {
+    background: white !important;
+}
+/* awsutil-docs.css paints an opaque white sheet behind the breadcrumb bar */
+html .lang-bar::after { display: none !important; }
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html .topnav.navbar-fixed-top,
+    html .topnav-2.navbar-fixed-top,
+    html .lang-bar { background: rgba(250, 250, 252, 0.96) !important; }
+}
+
+/* ── Button popups: fully opaque ────────────────────────────────
+   Every hover / tap popup in the app keeps its own colours but is
+   solid — no see-through fill, no backdrop blur. */
+
+/* Home widget panels (flight, weather, attack, defence, …) */
+html .widget-tooltip {
+    background: linear-gradient(135deg, #ffffff 0%, #e1eeff 100%) !important;
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+    border-color: #d6e3f5 !important;
+}
+html .widget-tooltip::after {
+    background: linear-gradient(135deg, #ffffff 0%, #e1eeff 100%) !important;
+    border-right-color: #d6e3f5 !important;
+    border-bottom-color: #d6e3f5 !important;
+}
+
+/* Generic [data-tip] bubbles (home social buttons and any data-tip host) */
+html [data-tip]::before {
+    background: linear-gradient(135deg, #ffffff 0%, #d2e6ff 100%) !important;
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+    border-color: #d6e3f5 !important;
+}
+html [data-tip]::after {
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+}
+html [data-tip]:not(.social-host)::after {
+    background: linear-gradient(135deg, #ffffff 0%, #c8dcff 100%) !important;
+    border-left-color: #d6e3f5 !important;
+    border-top-color: #d6e3f5 !important;
+}
+
+/* Home scene-control tips and travel breadcrumb control tips */
+html .sa-tip {
+    background: linear-gradient(135deg, #30344c, #161826) !important;
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+}
+html .lb-tip {
+    background: #0f172a !important;
+    -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+}
+
+/* Bootstrap tooltips (fade in to 90 % by default) */
+html .tooltip.in { opacity: 1 !important; }
